@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -46,7 +47,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -176,9 +176,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
                 .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
 
-        attributes.add(InterfaceName.AccountId.name());
-        attributes.add(InterfaceName.SalesforceAccountID.name());
-
         if (!StringUtils.isNotEmpty(accountID)) {
             throw new LedpException(LedpCode.LEDP_39001, new String[] { accountID, customerSpace });
         }
@@ -187,12 +184,15 @@ public class DataLakeServiceImpl implements DataLakeService {
                 .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
                 .eq(accountID) //
                 .build();
+        Restriction restriction = accRestriction;
 
-        Restriction sfdcRestriction = Restriction.builder() //
-                .let(BusinessEntity.Account, InterfaceName.SalesforceAccountID.name()) //
-                .eq(accountID) //
-                .build();
-        Restriction restriction = Restriction.builder().or(Arrays.asList(accRestriction, sfdcRestriction)).build();
+        if (attributes.contains(InterfaceName.SalesforceAccountID.name())) {
+            Restriction sfdcRestriction = Restriction.builder() //
+                    .let(BusinessEntity.Account, InterfaceName.SalesforceAccountID.name()) //
+                    .eq(accountID) //
+                    .build();
+            restriction = Restriction.builder().or(Arrays.asList(accRestriction, sfdcRestriction)).build();
+        }
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));

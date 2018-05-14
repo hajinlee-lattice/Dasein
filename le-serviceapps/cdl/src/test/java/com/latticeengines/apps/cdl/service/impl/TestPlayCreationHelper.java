@@ -92,9 +92,8 @@ public class TestPlayCreationHelper {
 
     public void setupTenantAndCreatePlay() throws Exception {
         setupTenantAndPopuldateData();
+        playResourceDeploymentTestNG.useExistingtenant(true, tenant);
 
-        playResourceDeploymentTestNG.setShouldSkipAutoTenantCreation(true);
-        playResourceDeploymentTestNG.setTenant(tenant);
 
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();

@@ -35,6 +35,18 @@ public class JsonUtils {
         return writer.toString();
     }
 
+    public static <T> String serialize(T object, Class<?> viewClass) {
+        if (object == null) {
+            return null;
+        }
+        ObjectMapper objectMapper = getObjectMapper();
+        try {
+            return objectMapper.writerWithView(viewClass).writeValueAsString(object);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public static <T> void serialize(T object, OutputStream outputStream) {
         if (object == null) {
             return;

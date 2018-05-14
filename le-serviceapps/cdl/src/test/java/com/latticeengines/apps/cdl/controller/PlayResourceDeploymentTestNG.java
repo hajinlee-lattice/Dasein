@@ -48,7 +48,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     private String name;
     private PlayLaunch playLaunch;
 
-    private Tenant tenant;
+    private static boolean USE_EXISTING_TENANT = true;
+    private static String EXISTING_TENANT = "JLM1526244443808";
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -71,26 +72,18 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Inject
     private PlayProxy playProxy;
 
-    private boolean shouldSkipAutoTenantCreation = false;
-
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        if (shouldSkipAutoTenantCreation) {
-            tenant = mainTestTenant;
+        if (USE_EXISTING_TENANT) {
+            setupTestEnvironment(EXISTING_TENANT);
         } else {
             setupTestEnvironment();
-            tenant = testBed.getMainTestTenant();
+            cdlTestDataService.populateData(mainTestTenant.getId());
         }
-
-        cdlTestDataService.populateData(tenant.getId());
 
         MetadataSegment retrievedSegment = createSegment();
 
         createRatingEngine(retrievedSegment, new RatingRule());
-    }
-
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
     }
 
     public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
@@ -100,20 +93,22 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         ratingEngine1.setStatus(RatingEngineStatus.ACTIVE);
 
-        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
+        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(),
+                ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
+        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), createdRatingEngine.getId(), null);
         ratingEngine1.setId(createdRatingEngine.getId());
 
-        List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());
+        List<RatingModel> models = ratingEngineProxy.getRatingModels(mainTestTenant.getId(), ratingEngine1.getId());
         for (RatingModel model : models) {
             if (model instanceof RuleBasedModel) {
                 ((RuleBasedModel) model).setRatingRule(ratingRule);
-                ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngine1.getId(), model.getId(), model);
+                ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), ratingEngine1.getId(), model.getId(),
+                        model);
             }
         }
 
-        ratingEngine1 = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngine1.getId());
+        ratingEngine1 = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), ratingEngine1.getId());
         return ratingEngine1;
     }
 
@@ -127,23 +122,23 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         segment.setContactRestriction(contactRestriction);
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentService
-                .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(tenant.getId()).toString(),
-                createdSegment.getName());
+                .createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(), segment);
+        MetadataSegment retrievedSegment = segmentService
+                .findByName(CustomerSpace.parse(mainTestTenant.getId()).toString(), createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         return retrievedSegment;
     }
 
     @Test(groups = "deployment")
     public void getCrud() {
-        List<Play> playList = playProxy.getPlays(tenant.getId(), null, null);
+        List<Play> playList = playProxy.getPlays(mainTestTenant.getId(), null, null);
         int existingPlays = playList == null ? 0 : playList.size();
-        Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
+        Play createdPlay1 = playProxy.createOrUpdatePlay(mainTestTenant.getId(), createDefaultPlay());
         name = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
         Map<RatingEngineDependencyType, List<String>> dependencies = ratingEngineProxy
-                .getRatingEngineDependencies(tenant.getId(), ratingEngine1.getId());
+                .getRatingEngineDependencies(mainTestTenant.getId(), ratingEngine1.getId());
         Assert.assertNotNull(dependencies);
         Assert.assertEquals(dependencies.size(), 1);
         Assert.assertNotNull(dependencies.get(RatingEngineDependencyType.Play));
@@ -152,27 +147,27 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(name);
         List<TalkingPointDTO> createTPResponse = talkingPointProxy.createOrUpdate(tps,
-                CustomerSpace.parse(tenant.getId()).toString());
+                CustomerSpace.parse(mainTestTenant.getId()).toString());
         Assert.assertNotNull(createTPResponse);
 
-        Play createdPlay2 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
+        Play createdPlay2 = playProxy.createOrUpdatePlay(mainTestTenant.getId(), createDefaultPlay());
         Assert.assertNotNull(createdPlay2);
 
-        dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine1.getId());
+        dependencies = ratingEngineProxy.getRatingEngineDependencies(mainTestTenant.getId(), ratingEngine1.getId());
         Assert.assertNotNull(dependencies);
         Assert.assertEquals(dependencies.size(), 1);
         Assert.assertNotNull(dependencies.get(RatingEngineDependencyType.Play));
         Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).size(), 2);
 
-        playList = playProxy.getPlays(tenant.getId(), null, null);
+        playList = playProxy.getPlays(mainTestTenant.getId(), null, null);
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), existingPlays + 2);
 
-        playList = playProxy.getPlays(tenant.getId(), null, ratingEngine1.getId());
+        playList = playProxy.getPlays(mainTestTenant.getId(), null, ratingEngine1.getId());
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 2);
 
-        Play retrievedPlay = playProxy.getPlay(tenant.getId(), name);
+        Play retrievedPlay = playProxy.getPlay(mainTestTenant.getId(), name);
         Assert.assertEquals(retrievedPlay.getTalkingPoints().size(), 2);
 
         String jsonValue = JsonUtils.serialize(retrievedPlay);
@@ -182,44 +177,44 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
     public void createPlayLaunch() {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), name, createDefaultPlayLaunch(), false);
+        playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(), name, createDefaultPlayLaunch(), false);
         assertPlayLaunch(playLaunch, false);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
     private void searchPlayLaunch() {
-        List<PlayLaunch> launchList = playProxy.getPlayLaunches(tenant.getId(), name,
+        List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name,
                 Arrays.asList(LaunchState.Failed));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
-        playProxy.updatePlayLaunch(tenant.getId(), name, playLaunch.getLaunchId(), LaunchState.Launched);
-        playProxy.updatePlayLaunchProgress(tenant.getId(), name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L, 0L,
-                2L);
+        playProxy.updatePlayLaunch(mainTestTenant.getId(), name, playLaunch.getLaunchId(), LaunchState.Launched);
+        playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L,
+                0L, 2L);
 
-        launchList = playProxy.getPlayLaunches(tenant.getId(), name,
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name,
                 Arrays.asList(LaunchState.Canceled, LaunchState.Failed, LaunchState.Launched));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
-        launchList = playProxy.getPlayLaunches(tenant.getId(), name, Arrays.asList(LaunchState.Launched));
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name, Arrays.asList(LaunchState.Launched));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
-        launchList = playProxy.getPlayLaunches(tenant.getId(), name, null);
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name, null);
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
-        launchList = playProxy.getPlayLaunches(tenant.getId(), name, Arrays.asList(LaunchState.Launching));
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name, Arrays.asList(LaunchState.Launching));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
-        PlayLaunch retrievedLaunch = playProxy.getPlayLaunch(tenant.getId(), name, playLaunch.getLaunchId());
+        PlayLaunch retrievedLaunch = playProxy.getPlayLaunch(mainTestTenant.getId(), name, playLaunch.getLaunchId());
 
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
@@ -237,7 +232,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "searchPlayLaunch" })
     private void testGetFullPlays() {
-        Play retrievedFullPlay = playProxy.getPlay(tenant.getId(), name);
+        Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), name);
         Assert.assertNotNull(retrievedFullPlay);
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getPlayLaunch());
@@ -248,17 +243,17 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         // Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getNewContactsNum());
         System.out.println("retrievedPlayOverview is " + retrievedFullPlay);
 
-        List<Play> retrievedFullPlayList = playProxy.getPlays(tenant.getId(), null, null);
+        List<Play> retrievedFullPlayList = playProxy.getPlays(mainTestTenant.getId(), null, null);
         Assert.assertNotNull(retrievedFullPlayList);
         Assert.assertEquals(retrievedFullPlayList.size(), 2);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetFullPlays" })
     private void testIdempotentCreateOrUpdatePlays() {
-        Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), play);
+        Play createdPlay1 = playProxy.createOrUpdatePlay(mainTestTenant.getId(), play);
         Assert.assertNotNull(createdPlay1.getTalkingPoints());
 
-        List<Play> retrievedFullPlayList = playProxy.getPlays(tenant.getId(), null, null);
+        List<Play> retrievedFullPlayList = playProxy.getPlays(mainTestTenant.getId(), null, null);
         Assert.assertNotNull(retrievedFullPlayList);
         Assert.assertEquals(retrievedFullPlayList.size(), 2);
     }
@@ -267,7 +262,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     public void testDeletePlayLaunch() {
         deletePlayLaunch(name, playLaunch.getLaunchId());
 
-        List<PlayLaunch> launchList = playProxy.getPlayLaunches(tenant.getId(), name,
+        List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name,
                 Arrays.asList(LaunchState.Launched));
 
         Assert.assertNotNull(launchList);
@@ -280,19 +275,19 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         List<Play> playList;
         Play retrievedPlay;
         deletePlay(name);
-        retrievedPlay = playProxy.getPlay(tenant.getId(), name);
+        retrievedPlay = playProxy.getPlay(mainTestTenant.getId(), name);
         Assert.assertNull(retrievedPlay);
-        playList = playProxy.getPlays(tenant.getId(), null, null);
+        playList = playProxy.getPlays(mainTestTenant.getId(), null, null);
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
     }
 
     public void deletePlay(String playName) {
-        playProxy.deletePlay(tenant.getId(), playName);
+        playProxy.deletePlay(mainTestTenant.getId(), playName);
     }
 
     public void deletePlayLaunch(String playName, String playLaunchId) {
-        playProxy.deletePlayLaunch(tenant.getId(), playName, playLaunchId);
+        playProxy.deletePlayLaunch(mainTestTenant.getId(), playName, playLaunchId);
     }
 
     private void assertPlayLaunch(PlayLaunch playLaunch, boolean isDryRunMode) {
@@ -372,8 +367,9 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         return playLaunch;
     }
 
-    public void setShouldSkipAutoTenantCreation(boolean shouldSkipAutoTenantCreation) {
-        this.shouldSkipAutoTenantCreation = shouldSkipAutoTenantCreation;
+    public void useExistingtenant(boolean shouldSkipAutoTenantCreation, Tenant tenant) {
+        USE_EXISTING_TENANT = shouldSkipAutoTenantCreation;
+        EXISTING_TENANT = tenant.getId();
     }
 
     public RatingEngine getRatingEngine() {

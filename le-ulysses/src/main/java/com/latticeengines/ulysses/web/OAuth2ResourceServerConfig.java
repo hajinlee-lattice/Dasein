@@ -14,9 +14,9 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
-import com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
+import com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager;
 
 @Configuration
 @EnableResourceServer
@@ -71,7 +71,10 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/ulysses/datacollection/attributes/**", //
                         "/ulysses/datacollection/accounts/**", //
                         "/ulysses/recommendations/**", //
-                        "/ulysses/talkingpoints/**", "/ulysses/api-gateway/**") //
+                        "/ulysses/talkingpoints/**", //
+                        "/ulysses/api-gateway/**", //
+                        "/ulysses/producthierarchy/**", //
+                        "/ulysses/purchasehistory/**") //
                 .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))")
                 .antMatchers("/ulysses/**").denyAll();
 
