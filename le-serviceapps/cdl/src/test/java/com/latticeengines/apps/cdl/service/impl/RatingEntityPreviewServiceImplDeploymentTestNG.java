@@ -147,7 +147,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         Assert.assertTrue(accIds2.size() > 0);
 
         AtomicInteger overlappingCount = new AtomicInteger();
-        accIds1.stream().forEach(id -> {
+        accIds1.forEach(id -> {
             if (accIds2.contains(id)) {
                 overlappingCount.incrementAndGet();
             }

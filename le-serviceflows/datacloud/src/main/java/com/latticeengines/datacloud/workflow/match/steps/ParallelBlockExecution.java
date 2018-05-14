@@ -66,6 +66,9 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     @Value("${datacloud.match.max.num.blocks}")
     private Integer maxNumBlocks;
 
+    @Value("${datacloud.match.block.interval.sec}")
+    private int blockRampingRate;
+
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
@@ -138,6 +141,12 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             matchCommandService.startBlock(matchCommand, appId, jobConfiguration.getBlockOperationUid(),
                     jobConfiguration.getBlockSize());
             log.info("Submit a match block to application id " + appId);
+            try {
+                log.info("Sleep for " + blockRampingRate + " seconds before submitting next block.");
+                Thread.sleep(blockRampingRate * 1000);
+            } catch (InterruptedException e) {
+                log.warn("Waiting between block submissions was interrupted.", e);
+            }
         }
     }
 

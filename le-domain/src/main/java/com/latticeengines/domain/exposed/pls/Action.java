@@ -50,11 +50,11 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     private ActionType type;
 
     @JsonProperty("ownerId")
-    @Column(name = "OWNER_ID", nullable = true)
+    @Column(name = "OWNER_ID")
     private Long ownerId;
 
     @JsonProperty("trackingId")
-    @Column(name = "TRACKING_ID", nullable = true)
+    @Column(name = "TRACKING_ID")
     private Long trackingId;
 
     @JsonProperty("actionInitiator")

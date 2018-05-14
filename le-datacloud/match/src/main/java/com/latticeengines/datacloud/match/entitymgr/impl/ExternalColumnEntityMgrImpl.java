@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.datacloud.match.dao.ExternalColumnDao;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
-import com.latticeengines.datacloud.match.repository.ExternalColumnRepository;
+import com.latticeengines.datacloud.match.repository.reader.ExternalColumnReaderRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -34,7 +34,7 @@ public class ExternalColumnEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ext
     private ExternalColumnDao externalColumnDao;
 
     @Inject
-    private ExternalColumnRepository repository;
+    private ExternalColumnReaderRepository repository;
 
     @Override
     public BaseDao<ExternalColumn> getDao() {

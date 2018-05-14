@@ -12,14 +12,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.datacloud.match.dao.AccountMasterColumnDao;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
-import com.latticeengines.datacloud.match.repository.AccountMasterColumnRepository;
+import com.latticeengines.datacloud.match.repository.reader.AccountMasterColumnReaderRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,7 +39,7 @@ public class AccountMasterColumnEntityMgrImpl
     private AccountMasterColumnDao accountMasterColumnDao;
 
     @Inject
-    private AccountMasterColumnRepository repository;
+    private AccountMasterColumnReaderRepository repository;
 
     @Override
     public BaseDao<AccountMasterColumn> getDao() {

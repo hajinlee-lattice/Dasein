@@ -21,6 +21,7 @@ import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,6 +147,9 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             }
         }
         String accountTblName = dataCollectionProxy.getTableName(tenantId, TableRoleInCollection.BucketedAccount);
+        if (StringUtils.isBlank(accountTblName)) {
+            throw new IllegalStateException("Cannot find BucketedAccount table for tenant " + tenantId);
+        }
         String ratingTableName = NamingUtils.timestamp(tenantId + "_Rating");
         List<Pair<String, Class<?>>> columns = createRatingTable(ratingTableName, engineIds);
         Long maxCount;

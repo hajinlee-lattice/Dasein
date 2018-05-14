@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <bean id="propDataManage" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
         <property name="driverClass" value="${datacloud.manage.driver}"/>
@@ -49,10 +49,44 @@
         <qualifier value="propDataManage"/>
     </bean>
 
-    <jpa:repositories base-package="com.latticeengines.datacloud.core.repository"
-                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
-                      entity-manager-factory-ref="entityManagerFactoryPropDataManage"
-                      transaction-manager-ref="transactionManagerPropDataManage"  />
+    <bean id="propDataManageReader" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
+        <property name="driverClass" value="${datacloud.manage.driver}"/>
+        <property name="jdbcUrl" value="${datacloud.manage.reader.url}"/>
+        <property name="user" value="${datacloud.manage.user}" />
+        <property name="password" value="${datacloud.manage.password.encrypted}" />
+        <property name="writerConnection" value="true"/>
+        <property name="maxPoolSize" value="${datacloud.manage.poolsize.max}" />
+        <property name="maxPoolSizeForWebApp" value="${datacloud.manage.poolsize.max.webapp}"/>
+        <property name="maxPoolSizeForAppMaster" value="${datacloud.manage.poolsize.max.appmaster}"/>
+    </bean>
+
+   <!-- Entity manager factory -->
+    <bean id="entityManagerFactoryPropDataManageReader"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="propDataManage" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage, com.latticeengines.domain.exposed.datacloud.customer" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <!-- property name="prepareConnection" value="false"/-->
+            </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">${datacloud.manage.dialect}</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+                <prop key="hibernate.id.new_generator_mappings">true</prop>
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+                <prop key="hibernate.allow_refresh_detached_entity">true</prop>
+                <!-- prop key="hibernate.connection.release_mode">on_close</prop-->
+                <!-- prop key="hibernate.connection.handling_mode">DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION</prop-->
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManagerPropDataManageReader" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactoryPropDataManageReader"/>
+    </bean>
 
     <tx:annotation-driven transaction-manager="transactionManagerPropDataManage" />
 

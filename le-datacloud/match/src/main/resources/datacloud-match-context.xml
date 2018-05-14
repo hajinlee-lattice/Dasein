@@ -20,10 +20,15 @@
 
     <task:scheduler id="dnbBatchScheduler" pool-size="3"/>
 
-    <jpa:repositories base-package="com.latticeengines.datacloud.match.repository"
+    <jpa:repositories base-package="com.latticeengines.datacloud.match.repository.writer"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactoryPropDataManage"
                       transaction-manager-ref="transactionManagerPropDataManage"  />
+
+    <jpa:repositories base-package="com.latticeengines.datacloud.match.repository.reader"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="entityManagerFactoryPropDataManageReader"
+                      transaction-manager-ref="transactionManagerPropDataManageReader"  />
 
     <bean id="externalColumnDao" class="com.latticeengines.datacloud.match.dao.impl.ExternalColumnDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
