@@ -18,15 +18,18 @@ import com.latticeengines.apps.lp.entitymgr.BucketedScoreSummaryEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
 @Service("bucketedScoreService")
 public class BucketedScoreServiceImpl implements BucketedScoreService {
@@ -49,7 +52,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     private ActionService actionService;
 
     @Inject
-    private TenantEntityMgr tenantEntityMgr;
+    private RatingEngineProxy ratingEngineProxy;
 
     @Override
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
@@ -91,6 +94,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         }
         if (StringUtils.isNotBlank(request.getRatingEngineId())) {
             registerAction(request);
+            activateRatingEngine(request);
         }
     }
 
@@ -101,7 +105,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid,
-                                                            BucketedScoreSummary bucketedScoreSummary) {
+            BucketedScoreSummary bucketedScoreSummary) {
         ModelSummary modelSummary = modelSummaryRepository.findById(modelGuid);
         bucketedScoreSummary.setModelSummary(modelSummary);
         BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.getByModelGuid(modelGuid);
@@ -145,6 +149,13 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         action.setDescription(action.getActionConfiguration().serialize());
         log.debug(String.format("Registering action %s", action));
         actionService.create(action);
+    }
+
+    private void activateRatingEngine(CreateBucketMetadataRequest request) {
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+        ratingEngine.setId(request.getRatingEngineId());
+        ratingEngineProxy.createOrUpdateRatingEngine(MultiTenantContext.getCustomerSpace().toString(), ratingEngine);
     }
 
 }
