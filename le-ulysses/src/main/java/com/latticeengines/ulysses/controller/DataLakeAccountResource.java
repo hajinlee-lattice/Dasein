@@ -2,6 +2,8 @@ package com.latticeengines.ulysses.controller;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/datacollection/accounts")
 public class DataLakeAccountResource {
-
+    private static final Logger log = LoggerFactory.getLogger(DataLakeAccountResource.class);
     private final DataLakeService dataLakeService;
 
     @Inject
@@ -57,8 +59,10 @@ public class DataLakeAccountResource {
             }
             return new FrontEndResponse<>(accountDanteFormatter.format(accountRawData.getData().get(0)));
         } catch (LedpException le) {
+            log.error("Failed to get account data for account id: " + accountId, le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
+            log.error("Failed to get account data for account id: " + accountId, e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }

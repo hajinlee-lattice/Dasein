@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
@@ -26,6 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/talkingpoints")
 public class TalkingPointResource {
+    private static final Logger log = LoggerFactory.getLogger(TalkingPointResource.class);
 
     @Inject
     private TalkingPointProxy talkingPointProxy;
@@ -55,8 +59,10 @@ public class TalkingPointResource {
         try {
             return new FrontEndResponse<>(talkingPointDanteFormatter.format(getTalkingPointById(talkingPointId)));
         } catch (LedpException le) {
+            log.error("Failed to get talking point data", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
+            log.error("Failed to get talking point data", e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }
@@ -66,10 +72,13 @@ public class TalkingPointResource {
     @ApiOperation(value = "Get published talking points for the given play")
     public FrontEndResponse<List<String>> getTalkingPointByPlayIdInDanteFormat(@PathVariable String playId) {
         try {
-            return new FrontEndResponse<>(talkingPointDanteFormatter.format(getTalkingPointByPlayId(playId)));
+            return new FrontEndResponse<>(talkingPointDanteFormatter
+                    .format(JsonUtils.convertList(getTalkingPointByPlayId(playId), TalkingPointDTO.class)));
         } catch (LedpException le) {
+            log.error("Failed to get talking point data", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
+            log.error("Failed to get talking point data", e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }

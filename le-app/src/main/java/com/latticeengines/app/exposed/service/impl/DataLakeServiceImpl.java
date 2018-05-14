@@ -170,26 +170,27 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    public DataPage getAccountById(String accountID, ColumnSelection.Predefined predefined) {
+    public DataPage getAccountById(String accountId, ColumnSelection.Predefined predefined) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
 
         List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
                 .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
 
-        if (!StringUtils.isNotEmpty(accountID)) {
-            throw new LedpException(LedpCode.LEDP_39001, new String[] { accountID, customerSpace });
+        if (!StringUtils.isNotEmpty(accountId)) {
+            throw new LedpException(LedpCode.LEDP_39001, new String[] { accountId, customerSpace });
         }
 
+        attributes.add(InterfaceName.AccountId.name());
         Restriction accRestriction = Restriction.builder() //
                 .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
-                .eq(accountID) //
+                .eq(accountId) //
                 .build();
         Restriction restriction = accRestriction;
 
         if (attributes.contains(InterfaceName.SalesforceAccountID.name())) {
             Restriction sfdcRestriction = Restriction.builder() //
                     .let(BusinessEntity.Account, InterfaceName.SalesforceAccountID.name()) //
-                    .eq(accountID) //
+                    .eq(accountId) //
                     .build();
             restriction = Restriction.builder().or(Arrays.asList(accRestriction, sfdcRestriction)).build();
         }

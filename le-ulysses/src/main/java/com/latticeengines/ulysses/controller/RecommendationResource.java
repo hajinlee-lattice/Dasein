@@ -2,6 +2,8 @@ package com.latticeengines.ulysses.controller;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/recommendations")
 public class RecommendationResource {
+    private static final Logger log = LoggerFactory.getLogger(TalkingPointResource.class);
 
     @Inject
     private LpiPMRecommendation lpiPMRecommendation;
@@ -46,8 +49,10 @@ public class RecommendationResource {
         try {
             return new FrontEndResponse<>(recommendationDanteFormatter.format(getRecommendationById(recommendationId)));
         } catch (LedpException le) {
+            log.error("Failed to get recommendation data", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
+            log.error("Failed to get recommendation data", e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }

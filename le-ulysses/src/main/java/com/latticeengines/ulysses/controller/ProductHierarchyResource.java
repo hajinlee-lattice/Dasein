@@ -2,6 +2,8 @@ package com.latticeengines.ulysses.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -9,11 +11,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.inject.Inject;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
+import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 import com.latticeengines.ulysses.utils.ProductHierarchyDanteFormatter;
@@ -25,6 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/producthierarchy")
 public class ProductHierarchyResource {
+    private static final Logger log = LoggerFactory.getLogger(ProductHierarchyResource.class);
 
     @Inject
     private PeriodTransactionProxy periodTransactionProxy;
@@ -38,15 +43,21 @@ public class ProductHierarchyResource {
 
     @RequestMapping(value = "/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get the purchase history data for the given account")
+    @ApiOperation(value = "Get the product hierarchy data for the given account")
     public FrontEndResponse<List<String>> getProductHierarchy() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         try {
-            return new FrontEndResponse<>(productHierarchyDanteFormatter.format(periodTransactionProxy
-                    .getProductHierarchy(customerSpace, dataCollectionProxy.getActiveVersion(customerSpace))));
+            return new FrontEndResponse<>(
+                    productHierarchyDanteFormatter
+                            .format(JsonUtils.convertList(
+                                    periodTransactionProxy.getProductHierarchy(customerSpace, //
+                                            dataCollectionProxy.getActiveVersion(customerSpace)),
+                                    ProductHierarchy.class)));
         } catch (LedpException le) {
+            log.error("Failed to get the product hierarchy data", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
+            log.error("Failed to get the product hierarchy data", e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }

@@ -60,15 +60,15 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenant();
+        setupTestEnvironmentWithExistingTenant("JLM1526244443808");
         MultiTenantContext.setTenant(mainTestTenant);
         segment = new MetadataSegment();
         segment.setAccountFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentProxy
                 .createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentProxy
-                .getMetadataSegmentByName(CustomerSpace.parse(mainTestTenant.getId()).toString(), createdSegment.getName());
+        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(
+                CustomerSpace.parse(mainTestTenant.getId()).toString(), createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
 
         ratingEngine1 = new RatingEngine();
