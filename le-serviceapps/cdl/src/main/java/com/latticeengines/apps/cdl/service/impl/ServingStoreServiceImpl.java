@@ -11,6 +11,7 @@ import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
@@ -43,6 +44,22 @@ public class ServingStoreServiceImpl implements ServingStoreService {
 
             if (Boolean.TRUE.equals(cm.getShouldDeprecate()) && !AttrState.Inactive.equals(cm.getAttrState())) {
                 cm.setAttrState(AttrState.Deprecated);
+            }
+
+            if (AttrState.Inactive.equals(cm.getAttrState())) {
+                // disable these useages if it is inactive attribute.
+                cm.disableGroup(ColumnSelection.Predefined.Segment);
+                cm.disableGroup(ColumnSelection.Predefined.Enrichment);
+                cm.disableGroup(ColumnSelection.Predefined.TalkingPoint);
+                cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
+                cm.disableGroup(ColumnSelection.Predefined.Model);
+            }
+
+            if (AttrState.Deprecated.equals(cm.getAttrState())) {
+                // disable these useages if it is deprecated attribute.
+                cm.disableGroup(ColumnSelection.Predefined.Enrichment);
+                cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
+                cm.disableGroup(ColumnSelection.Predefined.Model);
             }
 
             return cm;
