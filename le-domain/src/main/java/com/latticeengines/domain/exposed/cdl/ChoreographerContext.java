@@ -27,6 +27,9 @@ public class ChoreographerContext {
     @JsonProperty
     private List<String> actionImpactedRuleRatingEngines;
 
+    @JsonProperty
+    private boolean hasAttrActivation;
+
 
     public Set<BusinessEntity> getJobImpactedEntities() {
         return jobImpactedEntities;
@@ -58,5 +61,13 @@ public class ChoreographerContext {
 
     public void setActionImpactedRuleRatingEngines(List<String> actionImpactedRuleRatingEngines) {
         this.actionImpactedRuleRatingEngines = actionImpactedRuleRatingEngines;
+    }
+
+    public boolean isHasAttrActivation() {
+        return hasAttrActivation;
+    }
+
+    public void setHasAttrActivation(boolean hasAttrActivation) {
+        this.hasAttrActivation = hasAttrActivation;
     }
 }

@@ -164,10 +164,18 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         grapherContext.setDataCloudChanged(checkDataCloudChange());
         Set<BusinessEntity> impactedEntities = getImpactedEntities();
         grapherContext.setJobImpactedEntities(impactedEntities);
-        List<Action> actions = getRatingRelatedActions();
-        List<String> segments = getActionImpactedSegmentNames(actions);
-        grapherContext.setActionImpactedAIRatingEngines(getActionImpactedAIEngineIds(actions, segments));
-        grapherContext.setActionImpactedRuleRatingEngines(getActionImpactedRuleEngineIds(actions, segments));
+        List<Action> actions = getActions();
+
+        // TODO: separate out actions by entity
+        List<Action> attrMgmtActions = getAttrManagementActions(actions);
+        grapherContext.setHasAttrActivation(CollectionUtils.isNotEmpty(attrMgmtActions));
+
+        // FIXME: not really working before persisting action configuration
+        List<Action> ratingActions = getRatingRelatedActions(actions);
+        List<String> segments = getActionImpactedSegmentNames(ratingActions);
+        grapherContext.setActionImpactedAIRatingEngines(getActionImpactedAIEngineIds(ratingActions, segments));
+        grapherContext.setActionImpactedRuleRatingEngines(getActionImpactedRuleEngineIds(ratingActions, segments));
+
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }
 
@@ -199,20 +207,22 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         return hasBatchStore;
     }
 
-    protected List<Action> getAttrManagementActions() {
-        return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds()).stream()
-                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
+    protected List<Action> getActions() {
+        List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds());
+        if (actions == null) {
+            actions = Collections.emptyList();
+        }
+        return actions;
+    }
+
+    protected List<Action> getAttrManagementActions(List<Action> actions) {
+        return actions.stream().filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
                 .collect(Collectors.toList());
     }
 
-    protected List<Action> getRatingRelatedActions() {
-        List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds());
-        if (actions != null) {
-            return actions.stream().filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
-                    .collect(Collectors.toList());
-        } else {
-            return Collections.emptyList();
-        }
+    protected List<Action> getRatingRelatedActions(List<Action> actions) {
+        return actions.stream().filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
+                .collect(Collectors.toList());
     }
 
     protected List<String> getActionImpactedSegmentNames(List<Action> actions) {

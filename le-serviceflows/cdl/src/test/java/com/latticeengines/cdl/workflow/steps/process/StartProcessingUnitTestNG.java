@@ -49,7 +49,8 @@ public class StartProcessingUnitTestNG {
         StartProcessing spy = spy(startProcessing);
         doReturn(null).when(spy).getImpactedEntities();
         doReturn(true).when(spy).hasAccountBatchStore();
-        doReturn(null).when(spy).getRatingRelatedActions();
+        doReturn(Collections.emptyList()).when(spy).getActions();
+        doReturn(Collections.emptyList()).when(spy).getRatingRelatedActions(any());
         doReturn(null).when(spy).getActionImpactedSegmentNames(any());
         doReturn(null).when(spy).getActionImpactedAIEngineIds(any(), any());
         doReturn(null).when(spy).getActionImpactedRuleEngineIds(any(), any());
