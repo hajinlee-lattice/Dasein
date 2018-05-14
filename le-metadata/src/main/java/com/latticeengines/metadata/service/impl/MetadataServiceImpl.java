@@ -96,40 +96,24 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public Long getTableAttributeCount(CustomerSpace customerSpace, String tableName) {
         Long tablePid = getPidByTableName(customerSpace, tableName);
-        Long count = attributeRepository.countByTable_Pid(tablePid);
-        if (count == 0) {
-            log.info("Could not find table attributes in reader. Checking in writer: {}", tableName);
-            // Check it from writer to avoid the lag issue
-            count = tableEntityMgr.countAttributesByTable_Pid(tablePid);
-        }
+        Long count = tableEntityMgr.countAttributesByTable_Pid(tablePid);
         return count;
     }
 
     private Long getPidByTableName(CustomerSpace customerSpace, String tableName) {
-        Long tablePid = tableRepository.findPidByTenantIdAndName(customerSpace.toString(), tableName);
-        if (tablePid == null) {
-            // if it is realtime query, check for the data in writer instance
-            log.info("Could not find table in reader. Checking in writer: {}", tableName);
-            Table table = tableEntityMgr.findByName(tableName, false);
-            if (table == null)
-                throw new LedpException(LedpCode.LEDP_11008, new String[] {tableName, customerSpace.toString()});
-            tablePid = table.getPid();
-        }
-        return tablePid;
+        Table table = tableEntityMgr.findByName(tableName, false);
+        if (table == null)
+            throw new LedpException(LedpCode.LEDP_11008, new String[] {tableName, customerSpace.toString()});
+        return table.getPid();
     }
 
     @Override
     public List<Attribute> getTableAttributes(CustomerSpace customerSpace, String tableName, Pageable pageable) {
         Long tablePid = getPidByTableName(customerSpace, tableName);
-        List<Attribute> attributes = attributeRepository.findByTable_Pid(tablePid, pageable);
-        if (attributes == null || attributes.isEmpty()) {
-            log.info("Could not find table attributes list in reader. Checking in writer: {}", tableName);
-            attributes = tableEntityMgr.findAttributesByTable_Pid(tablePid, pageable);
-        }
+        List<Attribute> attributes = tableEntityMgr.findAttributesByTable_Pid(tablePid, pageable);
         if (attributes == null) {
             return Collections.emptyList();
         }
-        
         return attributes;
     }
 

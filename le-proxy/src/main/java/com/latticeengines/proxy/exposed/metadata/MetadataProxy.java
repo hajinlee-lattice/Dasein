@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,7 +18,6 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.Artifact;
@@ -44,12 +42,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     private static final Logger log = LoggerFactory.getLogger(MetadataProxy.class);
     
     private static final Integer ATTRIBUTE_BATCH_SIZE = 5000;
-    private ForkJoinPool mdProxyPool;
 
     @PostConstruct
     public void init() {
-        mdProxyPool = ThreadPoolUtils.getForkJoinThreadPool("md-proxy-pool", 10);
-        log.info("Created Pool for MetadataProxy parallelism" + mdProxyPool.getParallelism());
+        
     }
     
     public MetadataProxy() {
@@ -243,10 +239,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         long attributeCount = columnCount == null ? getTableAttributeCount(customerSpace, tableName) : columnCount;
         List<Attribute> attributeLst = Collections.synchronizedList(new ArrayList<>());
         
-        mdProxyPool.submit(() -> IntStream.range(0, (int) (Math.ceil((double)attributeCount/ATTRIBUTE_BATCH_SIZE))).parallel().forEach(page -> {
+        IntStream.range(0, (int) (Math.ceil((double)attributeCount/ATTRIBUTE_BATCH_SIZE))).forEach(page -> {
             List<Attribute> attributePage = getTableAttributes(customerSpace, tableName, page+1, ATTRIBUTE_BATCH_SIZE);
             attributeLst.addAll(attributePage);
-        })).join();
+        });
         return attributeLst;
     }
     
