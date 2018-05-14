@@ -118,7 +118,7 @@
 	</form>
 
 	<form novalidate name="fieldMappingForm">
-		<div class="row field-mapping-form" ng-if="vm.initialized && vm.showAdditionalFieldsCDL">
+		<div class="row field-mapping-form" ng-if="(!vm.cdlEnabled && vm.initialized) || (vm.cdlEnabled && vm.showAdditionalFieldsCDL)">
 			<div class="ten columns" ng-class="{'offset-one box-outline': !vm.cdlEnabled}">
 				<div class="section-header">
 					<h4 ng-class="{'silent': !vm.NextClicked}">{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MAP_FIELDS_ADDITIONAL_TITLE')}}<span class="default" ng-if="!vm.NextClicked"> - Step 2</span></h4>
@@ -207,6 +207,15 @@
 						</tr>
 					</tbody>
 				</table>
+				<div class="container section-actions">
+					<div class="section-validation pull-left" ng-if="vm.showAdditionalFieldsCDL && fieldMappingForm.$invalid">
+						<div class="has-error">
+							<div class="help-block">
+								* One or more of your columns is unmapped or is using a reserved name
+							</div>
+						</div>
+					</div>
+				</div>
 
 				<div class="container section-actions" ng-if="vm.NextClicked">
 					<div class="pull-left">

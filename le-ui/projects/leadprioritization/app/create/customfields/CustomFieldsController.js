@@ -38,7 +38,7 @@ angular
         UnmappedFieldsMap: {},
         standardFieldMappings: {},
         AvailableFields: [],
-        showAdditionalFieldsCDL: true
+        showAdditionalFieldsCDL: false
     });
 
     vm.init = function() {
@@ -272,6 +272,10 @@ angular
 
         vm.validateIsReserved(name, mapping);
         vm.validateIsDuplicate(name, mapping);
+
+        if (RatingsEngineStore.getCustomEventModelingType()) {
+            RatingsEngineStore.setValidation('mapping', vm.FormValidated && $scope.fieldMappingForm.$valid);
+        }
     };
 
     vm.validateIsReserved = function(name, mapping) {
@@ -342,8 +346,9 @@ angular
 
         if (!vm.NextClicked) {
             vm.validateRequiredFields();
-        } else {
-            // make sure there are no empty drop-down selection
+        } 
+
+        if (vm.NextClicked || RatingsEngineStore.getCustomEventModelingType() == 'LPI') {
             vm.fieldMappings.forEach(function(fieldMapping) {
                 if (!fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
                     vm.FormValidated = false;
