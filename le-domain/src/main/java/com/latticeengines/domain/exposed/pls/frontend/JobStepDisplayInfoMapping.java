@@ -337,8 +337,6 @@ public final class JobStepDisplayInfoMapping {
             "load_data", //
             "load_data", //
             "load_data", //
-            "load_data", //
-            "load_data", //
             "match_data", //
             "match_data", //
             "match_data", //
@@ -351,10 +349,6 @@ public final class JobStepDisplayInfoMapping {
             "match_data", //
             "match_data", //
             "match_data", //
-            "match_data", //
-            "match_data", //
-            "match_data", //
-            "match_data", //
             "create_global_model", //
             "create_global_model", //
             "create_global_model", //
@@ -363,23 +357,29 @@ public final class JobStepDisplayInfoMapping {
             "create_global_model", //
             "create_global_model", //
             "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
-            "create_global_model", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
             "score_training_set", //
             "score_training_set", //
             "score_training_set", //
