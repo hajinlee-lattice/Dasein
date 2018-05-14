@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class MatchResource {
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         matchMonitorService.precheck(input.getDataCloudVersion());
-        if (input.getKeyMap().containsKey(MatchKey.LookupId) //
+        if (MapUtils.isNotEmpty(input.getKeyMap()) && input.getKeyMap().containsKey(MatchKey.LookupId) //
                 && !"AccountId".equals(input.getKeyMap().get(MatchKey.LookupId).get(0))) {
             input = mockForCDLLookup(input);
         }
