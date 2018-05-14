@@ -216,7 +216,7 @@ angular.module('lp.configureattributes.configure', [])
             }
             
             if(form) {
-                form.$setPristine();
+                //form.$setPristine(); //PLS-8321
             }
         }
 
