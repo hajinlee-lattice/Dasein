@@ -1,13 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -16,61 +11,41 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.service.impl.TestPlayCreationHelper;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
-import com.latticeengines.domain.exposed.pls.RatingEngineType;
-import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
-import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    private static final String SEGMENT_NAME = "segment";
-    private static final String CREATED_BY = "lattice@lattice-engines.com";
     private Play play;
-    private String name;
+    private String playName;
     private PlayLaunch playLaunch;
 
-    private static boolean USE_EXISTING_TENANT = true;
+    private static boolean USE_EXISTING_TENANT = false;
     private static String EXISTING_TENANT = "JLM1526244443808";
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
     @Inject
-    private SegmentService segmentService;
-
-    private RatingEngine ratingEngine1;
-    private MetadataSegment segment;
-
-    @Inject
     private CDLTestDataService cdlTestDataService;
 
     @Inject
-    private RatingEngineProxy ratingEngineProxy;
-
-    @Inject
-    private TalkingPointProxy talkingPointProxy;
-
-    @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private TestPlayCreationHelper playCreationHelper;
+
+    private RatingEngine ratingEngine;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -81,140 +56,62 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
             cdlTestDataService.populateData(mainTestTenant.getId());
         }
 
+        playCreationHelper.setTenant(mainTestTenant);
         MetadataSegment retrievedSegment = createSegment();
-
-        createRatingEngine(retrievedSegment, new RatingRule());
+        ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule());
     }
 
-    public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
-        ratingEngine1 = new RatingEngine();
-        ratingEngine1.setSegment(retrievedSegment);
-        ratingEngine1.setCreatedBy(CREATED_BY);
-        ratingEngine1.setType(RatingEngineType.RULE_BASED);
-        ratingEngine1.setStatus(RatingEngineStatus.ACTIVE);
-
-        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(),
-                ratingEngine1);
-        Assert.assertNotNull(createdRatingEngine);
-        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), createdRatingEngine.getId(), null);
-        ratingEngine1.setId(createdRatingEngine.getId());
-
-        List<RatingModel> models = ratingEngineProxy.getRatingModels(mainTestTenant.getId(), ratingEngine1.getId());
-        for (RatingModel model : models) {
-            if (model instanceof RuleBasedModel) {
-                ((RuleBasedModel) model).setRatingRule(ratingRule);
-                ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), ratingEngine1.getId(), model.getId(),
-                        model);
-            }
-        }
-
-        ratingEngine1 = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), ratingEngine1.getId());
-        return ratingEngine1;
-    }
-
-    MetadataSegment createSegment() {
-        return createSegment(null, null);
-    }
-
-    public MetadataSegment createSegment(Restriction accountRestriction, Restriction contactRestriction) {
-        segment = new MetadataSegment();
-        segment.setAccountRestriction(accountRestriction);
-        segment.setContactRestriction(contactRestriction);
-        segment.setDisplayName(SEGMENT_NAME);
-        MetadataSegment createdSegment = segmentService
-                .createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentService
-                .findByName(CustomerSpace.parse(mainTestTenant.getId()).toString(), createdSegment.getName());
-        Assert.assertNotNull(retrievedSegment);
-        return retrievedSegment;
+    private MetadataSegment createSegment() {
+        return playCreationHelper.createSegment(NamingUtils.timestamp("Segment"), null, null);
     }
 
     @Test(groups = "deployment")
     public void getCrud() {
-        List<Play> playList = playProxy.getPlays(mainTestTenant.getId(), null, null);
-        int existingPlays = playList == null ? 0 : playList.size();
-        Play createdPlay1 = playProxy.createOrUpdatePlay(mainTestTenant.getId(), createDefaultPlay());
-        name = createdPlay1.getName();
-        play = createdPlay1;
-        assertPlay(createdPlay1);
-        Map<RatingEngineDependencyType, List<String>> dependencies = ratingEngineProxy
-                .getRatingEngineDependencies(mainTestTenant.getId(), ratingEngine1.getId());
-        Assert.assertNotNull(dependencies);
-        Assert.assertEquals(dependencies.size(), 1);
-        Assert.assertNotNull(dependencies.get(RatingEngineDependencyType.Play));
-        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).size(), 1);
-        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).get(0), play.getDisplayName());
-
-        List<TalkingPointDTO> tps = getTestTalkingPoints(name);
-        List<TalkingPointDTO> createTPResponse = talkingPointProxy.createOrUpdate(tps,
-                CustomerSpace.parse(mainTestTenant.getId()).toString());
-        Assert.assertNotNull(createTPResponse);
-
-        Play createdPlay2 = playProxy.createOrUpdatePlay(mainTestTenant.getId(), createDefaultPlay());
-        Assert.assertNotNull(createdPlay2);
-
-        dependencies = ratingEngineProxy.getRatingEngineDependencies(mainTestTenant.getId(), ratingEngine1.getId());
-        Assert.assertNotNull(dependencies);
-        Assert.assertEquals(dependencies.size(), 1);
-        Assert.assertNotNull(dependencies.get(RatingEngineDependencyType.Play));
-        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).size(), 2);
-
-        playList = playProxy.getPlays(mainTestTenant.getId(), null, null);
-        Assert.assertNotNull(playList);
-        Assert.assertEquals(playList.size(), existingPlays + 2);
-
-        playList = playProxy.getPlays(mainTestTenant.getId(), null, ratingEngine1.getId());
-        Assert.assertNotNull(playList);
-        Assert.assertEquals(playList.size(), 2);
-
-        Play retrievedPlay = playProxy.getPlay(mainTestTenant.getId(), name);
-        Assert.assertEquals(retrievedPlay.getTalkingPoints().size(), 2);
-
-        String jsonValue = JsonUtils.serialize(retrievedPlay);
-        Assert.assertNotNull(jsonValue);
-        this.play = retrievedPlay;
+        playCreationHelper.getCrud();
+        playName = playCreationHelper.getPlayName();
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
     public void createPlayLaunch() {
-        playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(), name, createDefaultPlayLaunch(), false);
-        assertPlayLaunch(playLaunch, false);
+        playCreationHelper.createPlayLaunch();
+        play = playCreationHelper.getPlay();
+        playLaunch = playCreationHelper.getPlayLaunch();
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
     private void searchPlayLaunch() {
-        List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name,
-                Arrays.asList(LaunchState.Failed));
+        List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
+                Collections.singletonList(LaunchState.Failed));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
-        playProxy.updatePlayLaunch(mainTestTenant.getId(), name, playLaunch.getLaunchId(), LaunchState.Launched);
-        playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L,
+        playProxy.updatePlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), LaunchState.Launched);
+        playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L,
                 0L, 2L);
 
-        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name,
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Arrays.asList(LaunchState.Canceled, LaunchState.Failed, LaunchState.Launched));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
-        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name, Arrays.asList(LaunchState.Launched));
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName, Collections.singletonList(LaunchState.Launched));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
-        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name, null);
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName, null);
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
-        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name, Arrays.asList(LaunchState.Launching));
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName, Collections.singletonList(LaunchState.Launching));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
-        PlayLaunch retrievedLaunch = playProxy.getPlayLaunch(mainTestTenant.getId(), name, playLaunch.getLaunchId());
+        PlayLaunch retrievedLaunch = playProxy.getPlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId());
 
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
@@ -232,7 +129,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "searchPlayLaunch" })
     private void testGetFullPlays() {
-        Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), name);
+        Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), playName);
         Assert.assertNotNull(retrievedFullPlay);
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getPlayLaunch());
@@ -260,22 +157,21 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "testIdempotentCreateOrUpdatePlays" })
     public void testDeletePlayLaunch() {
-        deletePlayLaunch(name, playLaunch.getLaunchId());
+        deletePlayLaunch(playName, playLaunch.getLaunchId());
 
-        List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), name,
-                Arrays.asList(LaunchState.Launched));
+        List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
+                Collections.singletonList(LaunchState.Launched));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
-
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testDeletePlayLaunch" })
     private void testPlayDelete() {
         List<Play> playList;
         Play retrievedPlay;
-        deletePlay(name);
-        retrievedPlay = playProxy.getPlay(mainTestTenant.getId(), name);
+        deletePlay(playName);
+        retrievedPlay = playProxy.getPlay(mainTestTenant.getId(), playName);
         Assert.assertNull(retrievedPlay);
         playList = playProxy.getPlays(mainTestTenant.getId(), null, null);
         Assert.assertNotNull(playList);
@@ -290,89 +186,12 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         playProxy.deletePlayLaunch(mainTestTenant.getId(), playName, playLaunchId);
     }
 
-    private void assertPlayLaunch(PlayLaunch playLaunch, boolean isDryRunMode) {
-        Assert.assertNotNull(playLaunch);
-        Assert.assertNotNull(playLaunch.getLaunchId());
-        Assert.assertNotNull(playLaunch.getPid());
-        Assert.assertNotNull(playLaunch.getUpdated());
-        Assert.assertNotNull(playLaunch.getCreated());
-        if (isDryRunMode) {
-            Assert.assertNull(playLaunch.getApplicationId());
-        } else {
-            Assert.assertNotNull(playLaunch.getApplicationId());
-        }
-        Assert.assertNotNull(playLaunch.getLaunchState());
-        assertBucketsToLaunch(playLaunch.getBucketsToLaunch());
-        Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
-    }
-
-    private void assertBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
-        Assert.assertNotNull(playLaunch.getBucketsToLaunch());
-        Set<RatingBucketName> defaultBucketsToLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
-        Assert.assertEquals(bucketsToLaunch.size(), defaultBucketsToLaunch.size());
-        for (RatingBucketName bucket : bucketsToLaunch) {
-            Assert.assertTrue(defaultBucketsToLaunch.contains(bucket));
-        }
-    }
-
-    private Play createDefaultPlay() {
-        Play play = new Play();
-        play.setCreatedBy(CREATED_BY);
-        RatingEngine ratingEngine = new RatingEngine();
-        ratingEngine.setId(ratingEngine1.getId());
-        play.setRatingEngine(ratingEngine);
-        return play;
-    }
-
-    private List<TalkingPointDTO> getTestTalkingPoints(String playName) {
-        List<TalkingPointDTO> tps = new ArrayList<>();
-        TalkingPointDTO tp = new TalkingPointDTO();
-        tp.setName("plsTP1" + UUID.randomUUID());
-        tp.setPlayName(playName);
-        tp.setOffset(1);
-        tp.setTitle("Test TP Title");
-        tp.setContent("PLS Deployment Test Talking Point no 1");
-        tps.add(tp);
-
-        TalkingPointDTO tp1 = new TalkingPointDTO();
-
-        tp1.setName("plsTP2" + UUID.randomUUID());
-        tp1.setPlayName(playName);
-        tp1.setOffset(2);
-        tp1.setTitle("Test TP2 Title");
-        tp1.setContent("PLS Deployment Test Talking Point no 2");
-        tps.add(tp1);
-
-        return tps;
-    }
-
-    private void assertPlay(Play play) {
-        Assert.assertNotNull(play);
-        Assert.assertEquals(play.getName(), name);
-        Assert.assertNotNull(play.getRatingEngine());
-        Assert.assertEquals(play.getRatingEngine().getId(), ratingEngine1.getId());
-    }
-
-    public Play getPlay() {
-        return play;
-    }
-
-    public PlayLaunch getPlayLaunch() {
-        return playLaunch;
-    }
-
-    private PlayLaunch createDefaultPlayLaunch() {
-        PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())));
-        return playLaunch;
-    }
-
     public void useExistingtenant(boolean shouldSkipAutoTenantCreation, Tenant tenant) {
         USE_EXISTING_TENANT = shouldSkipAutoTenantCreation;
         EXISTING_TENANT = tenant.getId();
     }
 
     public RatingEngine getRatingEngine() {
-        return this.ratingEngine1;
+        return this.ratingEngine;
     }
 }

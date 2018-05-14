@@ -130,8 +130,8 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         Assert.assertTrue(accIds1.size() > 0);
         Assert.assertTrue(accIds2.size() > 0);
 
-        accIds1.stream().forEach(id -> Assert.assertFalse(accIds2.contains(id)));
-        accIds2.stream().forEach(id -> Assert.assertFalse(accIds1.contains(id)));
+        accIds1.forEach(id -> Assert.assertFalse(accIds2.contains(id)));
+        accIds2.forEach(id -> Assert.assertFalse(accIds1.contains(id)));
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewThirdTimeWithDifferentPages" })
