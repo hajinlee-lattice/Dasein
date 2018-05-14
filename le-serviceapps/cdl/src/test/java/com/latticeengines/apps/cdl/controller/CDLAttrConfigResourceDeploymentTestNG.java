@@ -5,7 +5,6 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -36,13 +35,11 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
-import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
-
 
 public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -58,10 +55,8 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
     @Inject
-    private ActionProxy actionProxy;
-    @Inject
     private MetadataProxy metadataProxy;
-    
+
     private RatingEngine re;
 
     @Inject
@@ -111,7 +106,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
             assertEquals(attributeCount.intValue(), table.getAttributes().size());
         });
     }
-    
+
     @Test(groups = "deployment")
     public void testPartialUpdate() throws InterruptedException {
         AttrConfigRequest request = new AttrConfigRequest();
@@ -161,13 +156,6 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         assertEquals(dateConfig.getAttrName(), "LastModifiedDate");
         assertEquals(dateConfig.getAttrProps().size(), 1);
         assertEquals(dateConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Segment.name()), false);
-        List<Action> actions = actionProxy.getActions(mainTestTenant.getId());
-        Assert.assertNotNull(actions);
-        Assert.assertTrue(actions.size() > 0);
-        List<Action> usageChangeActions = actions.stream()
-                .filter(action -> action.getType().equals(ActionType.USAGE_PROPERTY_CHANGE))
-                .collect(Collectors.toList());
-        Assert.assertTrue(usageChangeActions.size() > 0);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testPartialUpdate" })
@@ -254,6 +242,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         }
         return ratingEngine;
     }
+
     private void testRatingEngineNoteCreation(RatingEngine ratingEngine, boolean shouldHaveRatingEngineNote) {
         if (shouldHaveRatingEngineNote) {
             List<RatingEngineNote> ratingEngineNotes = ratingEngineProxy.getAllNotes(mainTestTenant.getId(),
