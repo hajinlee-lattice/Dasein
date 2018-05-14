@@ -109,7 +109,13 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     @BeforeClass(groups = "deployment")
     public void init() throws Exception {
         prepareCleanPod(POD_ID);
-        for (Object[] data : getIngestions()) {
+        Object[][] ingestionData = getIngestions();
+        for (Object[] data : ingestionData) {
+            Ingestion existing = ingestionEntityMgr.getIngestionByName((String) data[0]);
+            if (existing != null) {
+                ingestionEntityMgr.delete(existing);
+            }
+
             Ingestion ingestion = new Ingestion();
             ingestion.setIngestionName((String) data[0]);
             ingestion.setConfig((String) data[1]);
