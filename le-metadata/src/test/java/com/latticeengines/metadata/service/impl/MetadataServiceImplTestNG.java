@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.ldap.control.PagedResultsRequestControl;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -75,6 +76,11 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(colMetaList.size(), table.getAttributes().size());
         
         pageReq = PageRequest.of(0, 10);
+        colMetaList = mdService.getTableAttributes(CustomerSpace.parse(customerSpace1), TABLE1, pageReq);
+        assertNotNull(colMetaList);
+        assertEquals(colMetaList.size(), 10);
+        
+        pageReq = PageRequest.of(0, 10, Direction.ASC, "displayName");
         colMetaList = mdService.getTableAttributes(CustomerSpace.parse(customerSpace1), TABLE1, pageReq);
         assertNotNull(colMetaList);
         assertEquals(colMetaList.size(), 10);

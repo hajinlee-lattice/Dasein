@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.dao.impl;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -57,8 +58,9 @@ public class AttributeDaoImpl extends BaseDaoImpl<Attribute> implements Attribut
         
         org.springframework.data.domain.Sort pageSort = pageable.getSort();
         if (pageSort != null && pageSort.isSorted()) {
-            while(pageSort.iterator().hasNext()) {
-                org.springframework.data.domain.Sort.Order pageOrder = pageSort.iterator().next();
+            Iterator<org.springframework.data.domain.Sort.Order> sortOrderIter = pageSort.iterator();
+            while(sortOrderIter.hasNext()) {
+                org.springframework.data.domain.Sort.Order pageOrder = sortOrderIter.next();
                 criteria.addOrder(pageOrder.isAscending() ? Order.asc(pageOrder.getProperty()) : Order.desc(pageOrder.getProperty()));
             }
         }
