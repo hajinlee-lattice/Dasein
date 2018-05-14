@@ -3,20 +3,25 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.PeriodDataCleaner.TRANSFORMER_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PERIOD_DATA_CLEANER;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataCleanerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 
 @Component(TRANSFORMER_NAME)
@@ -32,15 +37,41 @@ public class PeriodDataCleaner
         PeriodDataCleanerConfig config = getConfiguration(step.getConfig());
 
         String periodDir = getSourceHdfsDir(step, 0);
-        String transactionDir = getSourceHdfsDir(step, 1);
-
-        Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir, config.getPeriodField());
-
-        for (Integer period : periods) {
-            log.info("Period to clean " + period);
+        if (StringUtils.isBlank(config.getPeriodField())) {
+            config.setPeriodField(InterfaceName.PeriodId.name());
+        }
+        if (StringUtils.isBlank(config.getPeriodNameField())) {
+            config.setPeriodNameField(InterfaceName.PeriodName.name());
         }
 
-        TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, transactionDir, periods);
+        if (!config.isMultiPeriod()) {
+            String transactionDir = getSourceHdfsDir(step, 1);
+
+            Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
+                    config.getPeriodField());
+
+            for (Integer period : periods) {
+                log.info("Period to clean " + period);
+            }
+
+            TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, transactionDir, periods);
+        } else {
+            if (MapUtils.isEmpty(config.getTransactionIdxes())) {
+                throw new RuntimeException(
+                        "Please provide period name to transaction idx mapping for multi-period mode");
+            }
+            Map<String, String> transactionDirs = new HashMap<>();
+            for (Map.Entry<String, Integer> ent : config.getTransactionIdxes().entrySet()) {
+                transactionDirs.put(ent.getKey(), getSourceHdfsDir(step, ent.getValue()));
+            }
+            Map<String, Set<Integer>> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
+                    config.getPeriodField(), config.getPeriodNameField());
+            for (String periodName : periods.keySet()) {
+                TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, transactionDirs.get(periodName),
+                        periods.get(periodName));
+            }
+        }
+
         try {
             List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, periodDir, ".*.avro$");
             for (String fileName : avroFiles) {

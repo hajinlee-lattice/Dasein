@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,38 +20,46 @@ import cascading.tuple.TupleEntry;
 public class ConsolidateAddPeriodColumnFunction extends BaseOperation implements Function {
     private Map<String, Integer> namePositionMap;
     private String trxDateColumn;
+    private int periodNameLoc;
+    private int periodIdLoc;
 
-    private PeriodBuilder periodBuilder;
-    private PeriodStrategy periodStrategy;
+    // PeriodStrategy name -> PeriodBuilder
+    private Map<String, PeriodBuilder> periodBuilders;
 
-    public ConsolidateAddPeriodColumnFunction(PeriodStrategy periodStrategy, String trxDateColumn, String targetField) {
-        super(new Fields(targetField));
+    public ConsolidateAddPeriodColumnFunction(Fields fieldDeclaration, List<PeriodStrategy> periodStrategies,
+            String trxDateColumn, String periodNameField, String periodIdField) {
+        super(fieldDeclaration);
+        this.namePositionMap = getPositionMap(fieldDeclaration);
         this.trxDateColumn = trxDateColumn;
-        this.periodStrategy = periodStrategy;
-        this.namePositionMap = getPositionMap(Arrays.asList(trxDateColumn));
+        this.periodNameLoc = this.namePositionMap.get(periodNameField);
+        this.periodIdLoc = this.namePositionMap.get(periodIdField);
+        periodBuilders = new HashMap<>();
+        for (PeriodStrategy strategy : periodStrategies) {
+            periodBuilders.put(strategy.getName(), PeriodBuilderFactory.build(strategy));
+        }
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        String trxDateStr = arguments.getString(namePositionMap.get(trxDateColumn));
+        String trxDateStr = arguments.getString(trxDateColumn);
 
-        Integer result = getPeriodBuilder().toPeriodId(trxDateStr);
-        functionCall.getOutputCollector().add(new Tuple(result));
-    }
+        for (Map.Entry<String, PeriodBuilder> ent : periodBuilders.entrySet()) {
+            Integer periodId = ent.getValue().toPeriodId(trxDateStr);
+            Tuple result = Tuple.size(getFieldDeclaration().size());
+            result.set(periodNameLoc, ent.getKey());
+            result.set(periodIdLoc, periodId);
+            functionCall.getOutputCollector().add(result);
 
-    private PeriodBuilder getPeriodBuilder() {
-        if (periodBuilder == null) {
-            periodBuilder = PeriodBuilderFactory.build(periodStrategy);
         }
-        return periodBuilder;
     }
 
-    private Map<String, Integer> getPositionMap(List<String> fields) {
+    private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
         Map<String, Integer> positionMap = new HashMap<>();
         int pos = 0;
-        for (String field : fields) {
-            positionMap.put(field, pos++);
+        for (Object field : fieldDeclaration) {
+            String fieldName = (String) field;
+            positionMap.put(fieldName, pos++);
         }
         return positionMap;
     }

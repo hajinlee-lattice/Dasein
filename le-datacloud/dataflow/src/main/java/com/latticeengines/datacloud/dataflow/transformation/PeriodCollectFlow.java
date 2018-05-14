@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -19,12 +23,18 @@ public class PeriodCollectFlow extends ConfigurableFlowBase<PeriodCollectorConfi
 
         PeriodCollectorConfig config = getTransformerConfig(parameters);
 
-        String periodField = config.getPeriodField();
         Node result = addSource(parameters.getBaseTables().get(0));
 
-        FieldList fieldList = new FieldList(periodField);
-        result = result.groupByAndLimit(fieldList, 1);
-        result = result.retain(periodField);
+        List<String> groupByFields = new ArrayList<>();
+        if (StringUtils.isNotBlank(config.getPeriodNameField())) {
+            groupByFields.add(config.getPeriodNameField());
+        }
+        if (StringUtils.isNotBlank(config.getPeriodField())) {
+            groupByFields.add(config.getPeriodField());
+        }
+
+        result = result.groupByAndLimit(new FieldList(groupByFields), 1);
+        result = result.retain(new FieldList(groupByFields));
         return result;
     }
 

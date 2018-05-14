@@ -32,8 +32,6 @@ public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggre
         Node result = null;
         for (String sourceName : parameters.getBaseTables()) {
             Node source = addSource(sourceName);
-            // TODO: temporary solution for missing cost field in daily transaction
-            // Should be handled at transaction standardization
             if (config.getSumFields().contains(InterfaceName.Cost.name())
                     && source.getSchema(InterfaceName.Cost.name()) == null) {
                 source = source.addColumnWithFixedValue(InterfaceName.Cost.name(), null, Long.class);
@@ -48,8 +46,9 @@ public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggre
         result = result.apply(new ConsolidateAddCompositeColumnFuction(config.getGroupByFields(), COMPOSITE_KEY),
                 new FieldList(config.getGroupByFields()), new FieldMetadata(COMPOSITE_KEY, String.class));
 
-        result = result.addColumnWithFixedValue(InterfaceName.PeriodName.name(),
-                config.getPeriodStrategy() == null ? null : config.getPeriodStrategy().getName(), String.class);
+        if (!result.getFieldNames().contains(InterfaceName.PeriodName.name())) {
+            result = result.addColumnWithFixedValue(InterfaceName.PeriodName.name(), null, String.class);
+        }
 
         return result;
     }

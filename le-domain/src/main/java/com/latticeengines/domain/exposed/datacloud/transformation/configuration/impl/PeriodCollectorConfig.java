@@ -7,6 +7,9 @@ public class PeriodCollectorConfig extends TransformerConfig {
     @JsonProperty("PeriodField")
     private String periodField;
 
+    @JsonProperty("PeriodNameField")
+    private String periodNameField;
+
     public String getPeriodField() {
         return periodField;
     }
@@ -14,4 +17,13 @@ public class PeriodCollectorConfig extends TransformerConfig {
     public void setPeriodField(String periodField) {
         this.periodField = periodField;
     }
+
+    public String getPeriodNameField() {
+        return periodNameField;
+    }
+
+    public void setPeriodNameField(String periodNameField) {
+        this.periodNameField = periodNameField;
+    }
+
 }

@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(MiniAMDomainDunsTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MultiPeriodSupportTestNG.class);
 
     private static final String BUSINESS = "Business";
 
@@ -45,7 +45,7 @@ public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
 
     String targetSourceName = source.getSourceName();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTransformation() {
         preparePeriodConverterInput();
         TransformationProgress progress = createNewProgress();
@@ -122,7 +122,6 @@ public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
         step.setBaseSources(baseSources);
         PeriodConvertorConfig config = new PeriodConvertorConfig();
         config.setTrxDateField(InterfaceName.TransactionDate.name());
-        config.setPeriodStrategy(periodStrategy);
         config.setPeriodField(InterfaceName.PeriodId.name());
         step.setConfiguration(JsonUtils.serialize(config));
         step.setTargetSource(prefix + periodStrategy.getName());

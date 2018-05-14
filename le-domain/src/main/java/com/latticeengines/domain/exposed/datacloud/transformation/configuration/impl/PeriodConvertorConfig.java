@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 
@@ -11,8 +13,8 @@ public class PeriodConvertorConfig extends TransformerConfig {
     @JsonProperty("PeriodField")
     private String periodField;
 
-    @JsonProperty("PeriodStrategy")
-    private PeriodStrategy periodStrategy;
+    @JsonProperty("PeriodStrategies")
+    private List<PeriodStrategy> periodStrategies;
 
     public void setTrxDateField(String trxDateField) {
         this.trxDateField = trxDateField;
@@ -30,11 +32,12 @@ public class PeriodConvertorConfig extends TransformerConfig {
         return trxDateField;
     }
 
-    public void setPeriodStrategy(PeriodStrategy periodStrategy) {
-        this.periodStrategy = periodStrategy;
+    public List<PeriodStrategy> getPeriodStrategies() {
+        return periodStrategies;
     }
 
-    public PeriodStrategy getPeriodStrategy() {
-        return periodStrategy;
+    public void setPeriodStrategies(List<PeriodStrategy> periodStrategies) {
+        this.periodStrategies = periodStrategies;
     }
+
 }

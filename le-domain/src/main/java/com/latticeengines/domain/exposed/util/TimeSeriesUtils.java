@@ -54,6 +54,30 @@ public class TimeSeriesUtils {
         return periodSet;
     }
 
+    public static Map<String, Set<Integer>> collectPeriods(Configuration yarnConfiguration, String avroDir,
+            String periodField, String periodNameField) {
+
+        avroDir = getPath(avroDir) + "/*.avro";
+        log.info("Collect " + periodField + " periods from " + avroDir);
+        Map<String, Set<Integer>> periods = new HashMap<>();
+        try {
+            Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, avroDir);
+            while (iter.hasNext()) {
+                GenericRecord record = iter.next();
+                Integer period = (Integer) record.get(periodField);
+                String periodName = record.get(periodNameField).toString();
+                if (!periods.containsKey(periodName)) {
+                    periods.put(periodName, new HashSet<>());
+                }
+                periods.get(periodName).add(period);
+            }
+        } catch (Exception e) {
+            log.error("Failed to collect periods for period table", e);
+        }
+
+        return periods;
+    }
+
     public static void cleanupPeriodData(YarnConfiguration yarnConfiguration, String avroDir, Set<Integer> periods) {
         cleanupPeriodData(yarnConfiguration, avroDir, periods, false);
     }
@@ -126,20 +150,15 @@ public class TimeSeriesUtils {
 
     public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir, String avroDir,
             Set<Integer> periods) {
-        collectPeriodData(yarnConfiguration, targetDir, avroDir, periods, null, null);
+        collectPeriodData(yarnConfiguration, targetDir, avroDir, periods, null);
 
     }
 
     public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir, String avroDir,
-            Set<Integer> periods, PeriodStrategy periodStrategy, String earliestTransaction) {
-        PeriodBuilder periodBuilder = null;
+            Set<Integer> periods, String earliestTransaction) {
         avroDir = getPath(avroDir);
         targetDir = getPath(targetDir);
         log.info("Collect period data from " + avroDir + " to " + targetDir);
-
-        if (periodStrategy != null) {
-            periodBuilder = getPeriodBuilder(periodStrategy, earliestTransaction);
-        }
 
         try {
             List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
@@ -151,12 +170,51 @@ public class TimeSeriesUtils {
                 if (period == null) {
                     continue;
                 }
-                if (periodBuilder != null) {
-                    period = periodBuilder.toPeriodId(DateTimeUtils.dayPeriodToDate(period));
-                }
                 if (periods.contains(period)) {
                     HdfsUtils.copyFiles(yarnConfiguration, fileName, targetDir);
                 }
+            }
+        } catch (Exception e) {
+            log.error("Failed to collect period data", e);
+        }
+    }
+
+    // periods: PeriodName -> PeriodIds
+    public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir, String avroDir,
+            Map<String, Set<Integer>> periods, List<PeriodStrategy> periodStrategies, String earliestTransaction) {
+        Map<String, PeriodBuilder> periodBuilders = new HashMap<>(); // PeriodName -> PeriodBuilder
+        avroDir = getPath(avroDir);
+        targetDir = getPath(targetDir);
+        log.info("Collect period data from " + avroDir + " to " + targetDir);
+
+        for (PeriodStrategy periodStrategy : periodStrategies) {
+            PeriodBuilder periodBuilder = getPeriodBuilder(periodStrategy, earliestTransaction);
+            periodBuilders.put(periodStrategy.getName(), periodBuilder);
+        }
+
+        try {
+            List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
+            Set<String> toCopy = new HashSet<>();
+            for (String fileName : avroFiles) {
+                String[] dirs = fileName.split("/");
+                String avroName = dirs[dirs.length - 1];
+                Integer dayPeriod = getPeriodFromFileName(avroName);
+                if (dayPeriod == null) {
+                    continue;
+                }
+
+                for (Map.Entry<String, PeriodBuilder> ent : periodBuilders.entrySet()) {
+                    String periodName = ent.getKey();
+                    PeriodBuilder periodBuilder = ent.getValue();
+                    String periodDate = DateTimeUtils.dayPeriodToDate(dayPeriod);
+                    Integer period = periodBuilder.toPeriodId(periodDate);
+                    if (periods.get(periodName).contains(period)) {
+                        toCopy.add(fileName);
+                    }
+                }
+            }
+            for (String fileName : toCopy) {
+                HdfsUtils.copyFiles(yarnConfiguration, fileName, targetDir);
             }
         } catch (Exception e) {
             log.error("Failed to collect period data", e);
@@ -209,9 +267,79 @@ public class TimeSeriesUtils {
         }
     }
 
-    private static Map<Integer, List<GenericRecord>> writeRecords(Configuration yarnConfiguration, ExecutorService executor,
-                                                           List<Future<Boolean>> pendingWrites, Schema schema,
-                                                           Map<Integer, String> periodFileMap, Map<Integer, List<GenericRecord>> dateRecordMap) {
+    // MultiPeriod mode
+    // targetDirs: PeriodName -> TargetDir
+    // periods: PeriodName -> Periods
+    public static boolean distributePeriodData(Configuration yarnConfiguration, String inputDir,
+            Map<String, String> targetDirs, Map<String, Set<Integer>> periods, String periodField,
+            String periodNameField) {
+        for (String targetDir : targetDirs.values()) {
+            verifySchemaCompatibility(yarnConfiguration, inputDir, targetDir);
+        }
+
+        inputDir = getPath(inputDir) + "/*.avro";
+        for (String periodName : targetDirs.keySet()) {
+            String targetDir = getPath(targetDirs.get(periodName));
+            log.info("Distribute period data from " + inputDir + " to " + targetDir);
+            targetDirs.put(periodName, targetDir);
+        }
+
+        // PeriodName -> (PeriodId -> PeriodFile)
+        Map<String, Map<Integer, String>> periodFileMap = new HashMap<>();
+        for (Map.Entry<String, Set<Integer>> ent : periods.entrySet()) {
+            String periodName = ent.getKey();
+            periodFileMap.put(periodName, new HashMap<>());
+            for (Integer period : ent.getValue()) {
+                periodFileMap.get(periodName).put(period,
+                        targetDirs.get(periodName) + "/" + getFileNameFromPeriod(period));
+                log.info("Add period " + period + " File" + targetDirs.get(periodName) + "/"
+                        + getFileNameFromPeriod(period));
+            }
+        }
+
+        try {
+            Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, inputDir);
+            Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, inputDir);
+            Map<String, Map<Integer, List<GenericRecord>>> dateRecordMap = new HashMap<>();
+            List<Future<Boolean>> pendingWrites = new ArrayList<>();
+            ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("periodDataDistributor", 16);
+
+            int totalRecords = 0;
+            int pendingRecords = 0;
+            while (iter.hasNext()) {
+                GenericRecord record = iter.next();
+                Integer period = (Integer) record.get(periodField);
+                String periodName = record.get(periodNameField).toString();
+                if (!dateRecordMap.containsKey(periodName)) {
+                    dateRecordMap.put(periodName, new HashMap<>());
+                }
+                if (!dateRecordMap.get(periodName).containsKey(period)) {
+                    dateRecordMap.get(periodName).put(period, new ArrayList<>());
+                }
+                dateRecordMap.get(periodName).get(period).add(record);
+                totalRecords++;
+                pendingRecords++;
+                if (pendingRecords > 2 * 128 * 1024) {
+                    log.info("Schedule " + pendingRecords + "records to write");
+                    dateRecordMap = writeRecordsMultiPeriod(yarnConfiguration, executor, pendingWrites, schema,
+                            periodFileMap, dateRecordMap);
+                    pendingRecords = 0;
+                }
+            }
+
+            log.info("Schedule the remaining " + pendingRecords + " out of " + totalRecords + " records to write");
+            writeRecordsMultiPeriod(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap);
+            syncWrites(pendingWrites);
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to distribute to period store", e);
+            return false;
+        }
+    }
+
+    private static Map<Integer, List<GenericRecord>> writeRecords(Configuration yarnConfiguration,
+            ExecutorService executor, List<Future<Boolean>> pendingWrites, Schema schema,
+            Map<Integer, String> periodFileMap, Map<Integer, List<GenericRecord>> dateRecordMap) {
         syncWrites(pendingWrites);
         for (Integer period : dateRecordMap.keySet()) {
            List<GenericRecord> records = dateRecordMap.get(period);
@@ -228,6 +356,35 @@ public class TimeSeriesUtils {
        }
 
        return new HashMap<>();
+    }
+
+    // periodFileMap: periodName -> (periodId -> periodFile)
+    // dateRecordMap: periodName -> (periodId -> records)
+    private static Map<String, Map<Integer, List<GenericRecord>>> writeRecordsMultiPeriod(
+            Configuration yarnConfiguration,
+            ExecutorService executor, List<Future<Boolean>> pendingWrites, Schema schema,
+            Map<String, Map<Integer, String>> periodFileMap,
+            Map<String, Map<Integer, List<GenericRecord>>> dateRecordMap) {
+        syncWrites(pendingWrites);
+        for (Map.Entry<String, Map<Integer, List<GenericRecord>>> ent : dateRecordMap.entrySet()) {
+            String periodName = ent.getKey();
+            for (Integer period : ent.getValue().keySet()) {
+                List<GenericRecord> records = ent.getValue().get(period);
+                String fileName = periodFileMap.get(periodName).get(period);
+                if (fileName == null) {
+                    log.info("Failed to find file for " + period);
+                    continue;
+                }
+                if ((records == null) || (records.size() == 0)) {
+                    continue;
+                }
+                PeriodDataCallable callable = new PeriodDataCallable(yarnConfiguration, schema, fileName, records);
+                pendingWrites.add(executor.submit(callable));
+            }
+        }
+
+
+        return new HashMap<>();
     }
 
     private static void syncWrites(List<Future<Boolean>> pendingWrites) {

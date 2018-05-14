@@ -1,8 +1,10 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -15,6 +17,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+
+import cascading.tuple.Fields;
 
 @Component("periodConvertFlow")
 public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig> {
@@ -39,14 +43,25 @@ public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig
         if (result.getSchema(InterfaceName.PeriodId.name()) != null) {
             result = result.discard(InterfaceName.PeriodId.name());
         }
-        if (config.getPeriodStrategy() == null) {
+        if (CollectionUtils.isEmpty(config.getPeriodStrategies())) {
             result = result.addColumnWithFixedValue(InterfaceName.PeriodId.name(), null, Integer.class);
         } else {
+            if (result.getSchema(InterfaceName.PeriodName.name()) != null) {
+                result = result.discard(InterfaceName.PeriodName.name());
+            }
+            List<FieldMetadata> fms = new ArrayList<>();
+            fms.add(new FieldMetadata(InterfaceName.PeriodName.name(), String.class));
+            fms.add(new FieldMetadata(InterfaceName.PeriodId.name(), Integer.class));
+            List<String> outputFields = result.getFieldNames();
+            outputFields.add(InterfaceName.PeriodName.name());
+            outputFields.add(InterfaceName.PeriodId.name());
+
             result = result.apply(
-                    new ConsolidateAddPeriodColumnFunction(config.getPeriodStrategy(), config.getTrxDateField(),
-                            config.getPeriodField()),
-                    new FieldList(config.getTrxDateField()),
-                    new FieldMetadata(InterfaceName.PeriodId.name(), Integer.class));
+                    new ConsolidateAddPeriodColumnFunction(
+                            new Fields(InterfaceName.PeriodName.name(), InterfaceName.PeriodId.name()),
+                            config.getPeriodStrategies(), config.getTrxDateField(),
+                            InterfaceName.PeriodName.name(), InterfaceName.PeriodId.name()),
+                    new FieldList(config.getTrxDateField()), fms, new FieldList(outputFields));
         }
         return result;
     }

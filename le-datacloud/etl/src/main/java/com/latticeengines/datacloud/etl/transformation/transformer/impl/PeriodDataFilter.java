@@ -4,8 +4,10 @@ import static com.latticeengines.datacloud.etl.transformation.transformer.impl.P
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PERIOD_DATA_FILTER;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +36,25 @@ public class PeriodDataFilter
         String periodDir = getSourceHdfsDir(step, 0);
         String transactionDir = getSourceHdfsDir(step, 1);
 
-        Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir, config.getPeriodField());
+        if (!config.isMultiPeriod()) {
+            Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
+                    config.getPeriodField());
 
-        for (Integer period : periods) {
-            log.info("Period to filter " + period);
+            for (Integer period : periods) {
+                log.info("Period to filter " + period);
+            }
+
+            TimeSeriesUtils.collectPeriodData(yarnConfiguration, workflowDir, transactionDir, periods,
+                    config.getEarliestTransactionDate());
+        } else {
+            if (CollectionUtils.isEmpty(config.getPeriodStrategies())) {
+                throw new RuntimeException("Please provide period strategies for multi-period mode");
+            }
+            Map<String, Set<Integer>> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
+                    config.getPeriodField(), config.getPeriodNameField());
+            TimeSeriesUtils.collectPeriodData(yarnConfiguration, workflowDir, transactionDir, periods,
+                    config.getPeriodStrategies(), config.getEarliestTransactionDate());
         }
-
-        TimeSeriesUtils.collectPeriodData(yarnConfiguration, workflowDir, transactionDir, periods,
-                                          config.getPeriodStrategy(), config.getEarliestTransactionDate());
 
         return true;
     }

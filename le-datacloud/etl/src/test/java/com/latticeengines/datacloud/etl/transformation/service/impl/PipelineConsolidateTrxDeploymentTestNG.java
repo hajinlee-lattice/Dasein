@@ -10,8 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.joda.time.DateTime;
@@ -32,7 +32,6 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.dataflow.transformation.ConsolidateDataFlow;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
@@ -47,7 +46,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProductMapperConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionStandardizerConfig;
-
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -482,7 +480,6 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         step2.setInputSteps(Collections.singletonList(productAgrStep));
         PeriodConvertorConfig config = new PeriodConvertorConfig();
         config.setTrxDateField(InterfaceName.TransactionDate.name());
-        config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
         config.setPeriodField(InterfaceName.PeriodId.name());
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
@@ -557,7 +554,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
         PeriodDataFilterConfig config = new PeriodDataFilterConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
-        config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
+        // config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
         config.setEarliestTransactionDate(earliestTransaction);
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
@@ -579,7 +576,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
         config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(), InterfaceName.PeriodId.name()));
-        config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
+        // config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
     }
@@ -641,7 +638,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionDate.name(), InterfaceName.PeriodId.name(),
                 InterfaceName.TransactionDayPeriod.name()));
-        config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
+        // config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
     }
