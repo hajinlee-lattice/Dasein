@@ -230,6 +230,11 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 vm.isValid = function () {
+                    if($scope.form.$valid === true){
+                        QueryStore.setPublicProperty('enableSaveSegmentButton', true);
+                    }else {
+                        QueryStore.setPublicProperty('enableSaveSegmentButton', false);
+                    }
                     return $scope.form.$valid;
                 }
 
