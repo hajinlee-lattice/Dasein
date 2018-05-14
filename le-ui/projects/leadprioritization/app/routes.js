@@ -1230,32 +1230,13 @@ angular
             },
             resolve: {
                 accountids: function($q, SfdcStore) {
-                    // var deferred = $q.defer();
+                    var deferred = $q.defer();
 
-                    // SfdcStore.getAccountIds().then(function (result) {
-                    //     deferred.resolve(result.CRM);
-                    // });
+                    SfdcStore.getAccountIds().then(function (result) {
+                        deferred.resolve(result.CRM);
+                    });
 
-                    // return deferred.promise;
-
-                    var dummyAccountIds = [
-                        {
-                            "fieldName": "CRM_Acc_Id_1",
-                            "fieldType": "String",
-                            "displayName": "Id CRM_Acc_Id_1"
-                        },
-                        {
-                            "fieldName": "CRM_Acc_Id_2",
-                            "fieldType": "String",
-                            "displayName": "Id CRM_Acc_Id_2"
-                        },
-                        {
-                            "fieldName": "CRM_Acc_Id_3",
-                            "fieldType": "String",
-                            "displayName": "Id CRM_Acc_Id_3"
-                        }
-                    ];
-                    return dummyAccountIds;
+                    return deferred.promise;
                 },
                 orgs: function($q, SfdcStore) {
                     var deferred = $q.defer();

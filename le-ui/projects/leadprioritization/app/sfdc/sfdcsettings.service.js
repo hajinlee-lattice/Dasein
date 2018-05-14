@@ -71,7 +71,7 @@ angular.module('lp.sfdc', [])
 
         $http({
             method: 'GET',
-            url: '/pls/lookup-id-mapping/available-lookup-ids'
+            url: '/pls/lookup-id-mapping/available-lookup-ids?externalSystemType=CRM'
         }).then(function(response){
             deferred.resolve(response.data);
         });

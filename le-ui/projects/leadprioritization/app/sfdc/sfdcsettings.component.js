@@ -42,7 +42,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         }
 
         vm.$onInit = function() {
-            // console.log(vm.orgs);
+            console.log(vm.orgs);
             // console.log(vm.accountids);
 
             vm.initModalWindow();
@@ -65,6 +65,8 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
                     deferred.resolve(true);
                 }
             }
+          } else {
+            deferred.resolve(true);
           }
           return deferred.promise;
         }
@@ -96,6 +98,8 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
                     }, 3000);
                 });
             });
+
+            vm.originalData = angular.copy(vm.orgs);
         };
 
         vm.closeStatusMessage = function() {

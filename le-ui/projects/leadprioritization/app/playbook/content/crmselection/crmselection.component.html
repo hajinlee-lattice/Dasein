@@ -30,7 +30,22 @@
                                 <label for="{{org.orgId}}">{{ org.orgId }}</label>
                             </td>
                             <td>{{ org.orgName }}</td>
-                            <td>{{ org.accountId }}</td>
+                            <td>
+                                <span ng-if="org.accountId !== null">{{ org.accountId }}</span>
+                                <span>
+                                <span ng-if="!org.isRegistered">
+                                    <span 
+                                        class="ico ico-warning _top"
+                                        data-stooltip="Register this SalesForce Org and map it to an Account ID to enable it for selection."></span>
+                                    Unregistered
+                                </span>
+                                <span ng-if="org.isRegistered && org.accountId === null">
+                                    <span 
+                                        class="ico ico-warning _top"
+                                        data-stooltip="Map this Account ID to SFDC ID in SalesForce settings page."></span>
+                                    Unmapped
+                                </span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

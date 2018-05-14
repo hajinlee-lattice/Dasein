@@ -92,10 +92,12 @@ angular.module('lp.ratingsengine.dashboard', [
             }else if(vm.config.dischargeaction === args.action){
                 vm.toggleModal();
             } else if(vm.config.confirmaction === args.action){
+
                 var modal = ModalStore.get(vm.config.name);
                 modal.waiting(true);
                 modal.disableDischargeButton(true);
                 vm.deactivateRating();
+            
             }
         }
         vm.toggleModal = function () {
@@ -125,8 +127,8 @@ angular.module('lp.ratingsengine.dashboard', [
         }
         RatingsEngineService.saveRating(newRating).then(function(data){
             vm.ratingEngine = data;
-            vm.status_toggle = vm.isActive(data.status);
-            vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
+            // vm.status_toggle = vm.isActive(data.status);
+            // vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.toggleModal();
         });
     }

@@ -24,6 +24,8 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     }
                 });
             }
+
+            vm.orgs[3].isRegistered = false;
         }
 
         vm.checkValid = function(form) {
