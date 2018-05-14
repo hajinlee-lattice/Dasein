@@ -359,13 +359,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step.setInputSteps(Collections.singletonList(inputStep));
-        
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(periodTablePrefix);
-        targetTable.setPrimaryKey(servingStorePrimaryKey);
-        targetTable.setExpandBucketedAttrs(false);
-        step.setTargetTable(targetTable);
 
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
@@ -511,6 +504,13 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(previousStep));
         step.setTransformer(TRANSFORMER_CONSOLIDATE_RETAIN);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(periodTablePrefix);
+        targetTable.setPrimaryKey(servingStorePrimaryKey);
+        targetTable.setExpandBucketedAttrs(false);
+        step.setTargetTable(targetTable);
 
         ConsolidateRetainFieldConfig config = new ConsolidateRetainFieldConfig();
         Table servingTable = dataCollectionProxy.getTable(customerSpace.toString(), role);
