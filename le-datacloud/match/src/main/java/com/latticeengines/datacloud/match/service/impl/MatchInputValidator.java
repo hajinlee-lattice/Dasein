@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,7 @@ public class MatchInputValidator {
             throw new IllegalArgumentException("Empty list of fields.");
         }
 
-        if (input.getKeyMap().containsKey(MatchKey.LookupId)) {
+        if (MapUtils.isNotEmpty(input.getKeyMap()) && input.getKeyMap().containsKey(MatchKey.LookupId)) {
             if (input.getKeyMap().get(MatchKey.LookupId).size() != 1) {
                 throw new IllegalArgumentException(
                         "Can only specify one field as lookup id: " + input.getKeyMap().get(MatchKey.LookupId));
