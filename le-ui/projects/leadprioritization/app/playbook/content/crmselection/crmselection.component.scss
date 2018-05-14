@@ -2,6 +2,14 @@
 	padding-left: 0;
 }
 .crm-selection {
+	form {
+		padding-bottom: 20px;
+		margin-bottom: 30px;
+		border-bottom: #ddd solid 1px;
+	}
+	strong {
+		font-weight: bold;
+	}
 	label {
 		display: inline;
 	}

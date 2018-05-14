@@ -1229,6 +1229,15 @@ angular
                 pageTitle: 'Salesforce Settings'
             },
             resolve: {
+                featureflags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
                 accountids: function($q, SfdcStore) {
                     var deferred = $q.defer();
 

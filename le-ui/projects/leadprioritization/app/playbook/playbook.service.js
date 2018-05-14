@@ -1,5 +1,5 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, QueryStore){
+.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, QueryStore, RatingsEngineStore){
     var PlaybookWizardStore = this;
     
     this.current = {
@@ -8,10 +8,10 @@ angular.module('lp.playbook')
 
     };
     this.checkLaunchState = {};
+    this.savedRating = null;
 
     this.init = function() {
         this.settings = {};
-        this.savedRating = null;
         this.savedSegment = null;
         this.currentPlay = this.currentPlay || null;
         this.playLaunches = null;
@@ -162,6 +162,11 @@ angular.module('lp.playbook')
                 changed = true;
             }
             if(changed) {
+
+                RatingsEngineStore.getRating(opts.ratingEngine.id).then(function(result){
+                    PlaybookWizardStore.setRating(result);
+                });
+
                 PlaybookWizardStore.savePlay(opts).then(function(play){
                     $state.go(nextState, {play_name: play.name});
                 });
@@ -628,7 +633,28 @@ angular.module('lp.playbook')
             url: this.host + '/ratingengines/coverage',
             data: {
                 ratingEngineIds: ratings,
-                restrictNotNullSalesforceId: noSalesForceId
+                restrictNotNullSalesforceId: noSalesForceId,
+
+            }
+        }).then(function(response) {
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.getLookupCounts = function(engineId, accountId) {
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: this.host + '/ratingengines/coverage',
+            data: {
+                ratingIdLookupColumnPairs:[
+                    {
+                        responseKeyId: accountId,
+                        ratingEngineId: engineId,
+                        lookupColumn: accountId
+                    }
+                ]
             }
         }).then(function(response) {
             deferred.resolve(response.data);

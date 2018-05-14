@@ -161,10 +161,10 @@ angular.module('common.datacloud.query.results', [
                 }
             };
 
+            console.log(vm.page);
             if (vm.page === 'Accounts'){
                 QueryStore.setAccounts(dataQuery).then(function(response) {
                     vm.accounts = response.data;
-                    console.log(vm.accounts);
                     vm.loading = false;
                 });
             } else if (vm.page === 'Contacts'){
@@ -178,7 +178,7 @@ angular.module('common.datacloud.query.results', [
                 vm.counts[vm.page.toLowerCase()].value = data[vm.page == 'Contacts' ? 'Contact' : 'Account'];
                 vm.counts[vm.page.toLowerCase()].loading = false;
 
-                if (vm.page == 'Accounts' && data['Account'] > 10) {
+                if (vm.page == 'Accounts' || vm.page === 'Playbook' && data['Account'] > 10) {
                     vm.showAccountPagination = true;
                     vm.showContactPagination = false;
                 }
@@ -214,7 +214,6 @@ angular.module('common.datacloud.query.results', [
                     PlaybookWizardStore.setTargetData(data.data);
                     vm.accounts = PlaybookWizardStore.getTargetData();
                 });
-
 
                 // -----------------------------------------
                 // Uncomment this when backend supports 
@@ -356,6 +355,9 @@ angular.module('common.datacloud.query.results', [
     vm.showNoResultsText = function(accounts, contacts) {
         switch (vm.page) {
             case 'Accounts': 
+                return accounts.length === 0;
+
+            case 'Playbook': 
                 return accounts.length === 0;
             
             case 'Contacts': 

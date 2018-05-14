@@ -6,12 +6,19 @@ angular.module('lp.playbook.wizard.crmselection', [])
     },
     controller: function(
         $scope, $state, $timeout, $stateParams,
-        ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, SfdcService
+        ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService, SfdcService
     ) {
-        var vm = this            
+        var vm = this;       
 
         vm.$onInit = function() {
+
+            vm.totalCount = 0;
+            vm.nonNullCount = 0;
+            vm.nullCount = 0;
+
             vm.stored = PlaybookWizardStore.crmselection_form;
+            vm.ratingEngine = PlaybookWizardStore.getSavedRating();
+
             // console.log(vm.orgs);
             PlaybookWizardStore.setValidation('crmselection', false);
             if($stateParams.play_name) {
@@ -28,7 +35,10 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.orgs[3].isRegistered = false;
         }
 
-        vm.checkValid = function(form) {
+        vm.checkValid = function(form, accountId) {
+
+            vm.loadingCoverageCounts = true;
+
             PlaybookWizardStore.setValidation('crmselection', form.$valid);
             if(vm.stored.crm_selection) {
                 PlaybookWizardStore.setSettings({
@@ -37,6 +47,25 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     destinationAccountId: vm.stored.crm_selection.accountId
                 });
             }
+
+
+            var accountId = accountId;
+
+            PlaybookWizardService.getRatingsCounts([vm.ratingEngine.id], false).then(function(result){
+                var engineId = vm.ratingEngine.id;
+                vm.totalCount = result.ratingEngineIdCoverageMap[engineId].accountCount;
+
+                PlaybookWizardService.getLookupCounts(vm.ratingEngine.id, accountId).then(function(result){
+                    vm.loadingCoverageCounts = false;
+                    vm.nonNullCount = result.ratingIdLookupColumnPairsCoverageMap[accountId].accountCount;
+
+                    vm.nullCount = (vm.totalCount - vm.nonNullCount);
+
+                });
+
+            });
+            
+
         }
 
     }

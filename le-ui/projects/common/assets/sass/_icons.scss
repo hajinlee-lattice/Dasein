@@ -215,6 +215,10 @@ Icons
 		-webkit-mask-image: url("/assets/images/ico-alerts.svg");
 		mask: url("/assets/images/ico-alerts.svg");
 	}
+	&.ico-warning {
+		background-color: transparent !important;
+		background: url("data:image/svg+xml;utf8,<svg width='16px' height='14px' viewBox='0 0 16 14' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><g id='3rd-iteration' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'><g id='create-play-copy-9' transform='translate(-1152.000000, -542.000000)' fill='%23F5A623'><path d='M1160.07496,554.185103 C1159.66016,554.185103 1159.32169,553.831981 1159.32169,553.424961 C1159.32169,553.004931 1159.66016,552.652738 1160.07496,552.652738 C1160.48976,552.652738 1160.83834,553.004931 1160.83834,553.424961 C1160.83834,553.831981 1160.48976,554.185103 1160.07496,554.185103 Z M1160.77304,546.723071 L1160.57622,551.825688 L1159.58382,551.825688 L1159.37688,546.723071 L1160.77304,546.723071 Z M1159.99954,542.5395 L1152.5,555.6645 L1167.5,555.6645 L1159.99954,542.5395 Z' id='Fill-16'></path></g></g></svg>") no-repeat 2px 3px; 
+	}
 	&.ico-scoring {
 		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-scoring.svg");

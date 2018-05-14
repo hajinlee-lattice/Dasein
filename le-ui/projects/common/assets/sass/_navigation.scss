@@ -303,7 +303,7 @@ nav.primary-nav {
                         span:not(.no-svg) {
                             background-color: rgba(255,255,255,0.2);
                             &.ico-ratings {
-                                background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 23 25'><g data-name='Layer 2'><g id='Content'><path fill='#5E5E5E' d='M13,11.05A4.95,4.95,0,1,0,18,16,5,5,0,0,0,13,11.05Zm2.13,8.22L13,17.73l-2.13,1.54.82-2.5L9.56,15.23h2.63l.81-2.5.81,2.5h2.63l-2.12,1.54Z'/><polygon fill='#5E5E5E' points='9 0 9 4 13 4 9 0'/><path fill='#5E5E5E' d='M13,9V5H8V0H0V16H6a7,7,0,0,1,7-7Z'/></g></g></svg>") no-repeat 4px 3px;
+                                background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 23 25'><g data-name='Layer 2'><g id='Content'><path fill='%235E5E5E' d='M13,11.05A4.95,4.95,0,1,0,18,16,5,5,0,0,0,13,11.05Zm2.13,8.22L13,17.73l-2.13,1.54.82-2.5L9.56,15.23h2.63l.81-2.5.81,2.5h2.63l-2.12,1.54Z'/><polygon fill='%235E5E5E' points='9 0 9 4 13 4 9 0'/><path fill='%235E5E5E' d='M13,9V5H8V0H0V16H6a7,7,0,0,1,7-7Z'/></g></g></svg>") no-repeat 4px 3px;
                             }
                         }
                     }
@@ -444,7 +444,7 @@ html:not(.no-cssmask) {
             .ico:not(.no-svg) {
                 background-color: rgba(255,255,255,0.2);
                 &.ico-ratings {
-                    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 23 25'><g data-name='Layer 2'><g id='Content'><path fill='#5E5E5E' d='M13,11.05A4.95,4.95,0,1,0,18,16,5,5,0,0,0,13,11.05Zm2.13,8.22L13,17.73l-2.13,1.54.82-2.5L9.56,15.23h2.63l.81-2.5.81,2.5h2.63l-2.12,1.54Z'/><polygon fill='#5E5E5E' points='9 0 9 4 13 4 9 0'/><path fill='#5E5E5E' d='M13,9V5H8V0H0V16H6a7,7,0,0,1,7-7Z'/></g></g></svg>") no-repeat 4px 3px; 
+                    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 23 25'><g data-name='Layer 2'><g id='Content'><path fill='%235E5E5E' d='M13,11.05A4.95,4.95,0,1,0,18,16,5,5,0,0,0,13,11.05Zm2.13,8.22L13,17.73l-2.13,1.54.82-2.5L9.56,15.23h2.63l.81-2.5.81,2.5h2.63l-2.12,1.54Z'/><polygon fill='%235E5E5E' points='9 0 9 4 13 4 9 0'/><path fill='%235E5E5E' d='M13,9V5H8V0H0V16H6a7,7,0,0,1,7-7Z'/></g></g></svg>") no-repeat 4px 3px; 
                 }
             }
         }

@@ -31,12 +31,12 @@
                 class="button orange-button" 
                 ng-click="$ctrl.generateAuthToken()"
                 ng-disabled="loading">
-                Email One-time Authentication Token
+                {{ $ctrl.generateAuthTokenButtonLabel }}
             </button>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" ng-if="$ctrl.cdlIsEnabled">
         <div class="twelve columns">
             <h2>SFDC Org ID to Account ID Mapping</h2>
             <p>This is accounted to ensure the right ID is used when launching plays in your SFDC instances. <br/>Note: Each time a new SFDC Org is authenticated, an ID will be listed here.</p>

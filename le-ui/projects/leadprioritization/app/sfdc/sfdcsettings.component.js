@@ -2,6 +2,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
 .component('salesforceSettings', {
     templateUrl: 'app/sfdc/sfdcsettings.component.html',
     bindings: {
+        featureflags: '<',
         orgs: '<',
         accountids: '<'
     },
@@ -44,6 +45,12 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         vm.$onInit = function() {
             console.log(vm.orgs);
             // console.log(vm.accountids);
+            // console.log(vm.featureflags);
+
+            vm.cdlIsEnabled = vm.featureflags.EnableCdl;
+            console.log(vm.cdlIsEnabled);
+
+            vm.generateAuthTokenButtonLabel = vm.cdlIsEnabled ? 'Email One-time Authentication Token' : 'Generate Salesforce Access Token';
 
             vm.initModalWindow();
         }
@@ -99,6 +106,9 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
                 });
             });
 
+            console.log(vm.orgs);
+
+            SfdcStore.setOrgs(vm.orgs);
             vm.originalData = angular.copy(vm.orgs);
         };
 
