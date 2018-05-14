@@ -62,7 +62,7 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public Table getTable(CustomerSpace customerSpace, String name, Boolean includeAttributes) {
         Table table = tableEntityMgr.findByName(name, true, includeAttributes);
-        if (!includeAttributes) {
+        if (table != null && !includeAttributes) {
             table.setAttributes(Collections.emptyList());
         }
         return table;
@@ -96,21 +96,30 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public Long getTableAttributeCount(CustomerSpace customerSpace, String tableName) {
         Long tablePid = getPidByTableName(customerSpace, tableName);
+        if (tablePid == null) {
+            return 0L;
+        }
         Long count = tableEntityMgr.countAttributesByTable_Pid(tablePid);
         return count;
     }
 
     private Long getPidByTableName(CustomerSpace customerSpace, String tableName) {
         Table table = tableEntityMgr.findByName(tableName, false);
+        /*
+        // For backward compatibility, we cannot throw the exception. So, returning null.
         if (table == null)
             throw new LedpException(LedpCode.LEDP_11008, new String[] {tableName, customerSpace.toString()});
-        return table.getPid();
+        */
+        return table != null ? table.getPid() : null;
     }
 
     @Override
     public List<Attribute> getTableAttributes(CustomerSpace customerSpace, String tableName, Pageable pageable) {
         Long tablePid = getPidByTableName(customerSpace, tableName);
-        List<Attribute> attributes = tableEntityMgr.findAttributesByTable_Pid(tablePid, pageable);
+        List<Attribute> attributes = null;
+        if (tablePid != null) {
+            attributes = tableEntityMgr.findAttributesByTable_Pid(tablePid, pageable);
+        }
         if (attributes == null) {
             return Collections.emptyList();
         }
