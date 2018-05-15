@@ -3,30 +3,36 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.io.IOException;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.entitymgr.MatchCommandEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandCleaner;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 
 @Component("matchCommandCleaner")
 public class MatchCommandCleanerImpl implements MatchCommandCleaner {
     private static final Logger log = LoggerFactory.getLogger(MatchCommandCleanerImpl.class);
 
-    @Value("${datacloud.match.retention.days:7}")
+    @Value("${datacloud.match.retention.days}")
     private int retentionDays;
 
-    @Autowired
+    @Inject
     private MatchCommandEntityMgr matchCommandEntityMgr;
 
-    @Autowired
-    protected Configuration yarnConfiguration;
+    @Inject
+    private Configuration yarnConfiguration;
+
+    @Inject
+    private HdfsPathBuilder hdfsPathBuilder;
 
     @Override
     public void clean() {
@@ -43,9 +49,19 @@ public class MatchCommandCleanerImpl implements MatchCommandCleaner {
     private void removeCommands(List<MatchCommand> commands) {
         for(MatchCommand command : commands) {
             log.debug("Remove command:" + command.getRootOperationUid());
+            List<MatchBlock> blocks = matchCommandEntityMgr.findBlocks(command.getRootOperationUid());
+            removeMatchBlocks(command.getRootOperationUid(), blocks);
             matchCommandEntityMgr.deleteCommand(command);
             String path = command.getResultLocation();
             removeHdfsPath(path);
+        }
+    }
+
+    private void removeMatchBlocks(String rootUid, List<MatchBlock> blocks) {
+        for (MatchBlock block: blocks) {
+            log.info("Removing match block " + block.getBlockOperationUid() + " belonging to " + rootUid + " from hdfs.");
+            String blockDir = hdfsPathBuilder.constructMatchBlockDir(rootUid, block.getBlockOperationUid()).toString();
+            removeHdfsPath(blockDir);
         }
     }
 
