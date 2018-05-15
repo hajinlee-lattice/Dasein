@@ -70,7 +70,9 @@ angular
 	        link = document.createElement('a');
 	        link.setAttribute('href', data);
 	        link.setAttribute('download', filename);
+	        document.body.appendChild(link);
 	        link.click();
+	        document.body.removeChild(link);
 	    });
 	}
 
