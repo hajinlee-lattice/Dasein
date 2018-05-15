@@ -241,37 +241,46 @@ if __name__ == "__main__":
     sys.argv[4] -- hdfsPort
     sys.argv[5] -- hdfsUser
     """
-    argNum = 0
-    for arg in sys.argv:
-        logger.info("Call Parameter " + str(argNum) + ": " + arg)
+    try:
+        argNum = 0
+        for arg in sys.argv:
+            logger.info("Call Parameter " + str(argNum) + ": " + arg)
 
-    if len(sys.argv) < 3:
-        propertiesFile = "/latticeengines.properties"
-    else:
-        propertiesFile = sys.argv[2]
+        if len(sys.argv) < 3:
+            propertiesFile = "/latticeengines.properties"
+        else:
+            propertiesFile = sys.argv[2]
 
-    if len(sys.argv) < 2:
-        hdfsUser = "bross"
-    else:
-        hdfsUser = sys.argv[1]
+        if len(sys.argv) < 2:
+            hdfsUser = "bross"
+        else:
+            hdfsUser = sys.argv[1]
 
-    properties = PropertiesFileReader(propertiesFile)
+        properties = PropertiesFileReader(propertiesFile)
 
-    runID = str(uuid.uuid4())
+        runID = str(uuid.uuid4())
 
-    configDir = "/app/dataplatform/config/datascience"
-    ModelingEnvironment.initialize(properties.getHDFSServer(),
-                                   properties.getHDFSPort(),
-                                   hdfsUser,
-                                   runID)
+        configDir = "/app/dataplatform/config/datascience"
+        ModelingEnvironment.initialize(properties.getHDFSServer(),
+                                       properties.getHDFSPort(),
+                                       hdfsUser,
+                                       runID)
 
-    # Will eventually pass this in to determine whether to loop indefinitely
-    numRepeats = -1
-    dsl = DataScienceLauncher(runID,
-                              properties.getZookeeperConnectionString(),
-                              properties.getHDFSServer(),
-                              properties.getHDFSPort(),
-                              hdfsUser)
+        # Will eventually pass this in to determine whether to loop indefinitely
+        numRepeats = -1
+        dsl = DataScienceLauncher(runID,
+                                  properties.getZookeeperConnectionString(),
+                                  properties.getHDFSServer(),
+                                  properties.getHDFSPort(),
+                                  hdfsUser)
 
-    dsl.main(numRepeats)
+        dsl.main(numRepeats)
+    except:
+        logger.error("Error Encountered, about to log")
+
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        logger.error( ''.join('!! ' + line for line in lines))
+
+
 
