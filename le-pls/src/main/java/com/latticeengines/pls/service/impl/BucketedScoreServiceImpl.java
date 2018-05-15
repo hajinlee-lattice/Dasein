@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
@@ -67,7 +68,8 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         return bucketedScoreSummary;
     }
 
-    private BucketedScoreSummary getBucketedScoreSummaryBasedOnModelSummary(ModelSummary modelSummary) throws Exception {
+    private BucketedScoreSummary getBucketedScoreSummaryBasedOnModelSummary(ModelSummary modelSummary)
+            throws Exception {
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
         String pivotAvroDirPath;
 
@@ -129,6 +131,8 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         request.setRatingEngineId(ratingEngineId);
         request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
         bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getTenantId(), request);
+        // Activate Rating Engine by default
+        activateRatingEngine(ratingEngineId);
     }
 
     @Override
@@ -168,6 +172,13 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             throw new LedpException(LedpCode.LEDP_18179, new String[] { modelId });
         }
         return new ImmutablePair<>(ratingEngine, modelSummary);
+    }
+
+    private void activateRatingEngine(String ratingEngineId) {
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+        ratingEngine.setId(ratingEngineId);
+        ratingEngineProxy.createOrUpdateRatingEngine(MultiTenantContext.getCustomerSpace().toString(), ratingEngine);
     }
 
 }
