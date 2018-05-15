@@ -21,6 +21,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("data_cloud_build_number")
     private String dataCloudBuildNumber;
 
+    @JsonProperty("ignore_data_cloud_change")
+    private Boolean ignoreDataCloudChange;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -51,5 +54,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setDataCloudBuildNumber(String dataCloudBuildNumber) {
         this.dataCloudBuildNumber = dataCloudBuildNumber;
+    }
+
+    public Boolean getIgnoreDataCloudChange() {
+        return ignoreDataCloudChange;
+    }
+
+    public void setIgnoreDataCloudChange(Boolean ignoreDataCloudChange) {
+        this.ignoreDataCloudChange = ignoreDataCloudChange;
     }
 }

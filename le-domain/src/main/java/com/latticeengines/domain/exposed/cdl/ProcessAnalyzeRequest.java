@@ -18,6 +18,9 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("RebuildEntities")
     private Set<BusinessEntity> rebuildEntities = new HashSet<>();
 
+    @JsonProperty("IgnoreDataCloudChange")
+    private Boolean ignoreDataCloudChange;
+
     @JsonProperty("UserId")
     private String userId;
 
@@ -46,5 +49,13 @@ public class ProcessAnalyzeRequest {
 
     public void setFailingStep(FailingStep failingStep) {
         this.failingStep = failingStep;
+    }
+
+    public Boolean getIgnoreDataCloudChange() {
+        return ignoreDataCloudChange;
+    }
+
+    public void setIgnoreDataCloudChange(Boolean ignoreDataCloudChange) {
+        this.ignoreDataCloudChange = ignoreDataCloudChange;
     }
 }

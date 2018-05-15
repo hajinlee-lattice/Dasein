@@ -185,17 +185,21 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private boolean checkDataCloudChange() {
         boolean changed = false;
-        String currentBuildNumber = configuration.getDataCloudBuildNumber();
-        DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
-        if (dataCollection != null
-                && (dataCollection.getDataCloudBuildNumber() == null
-                        || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))
-                && hasAccountBatchStore()) {
-            changed = true;
+        if (Boolean.TRUE.equals(configuration.getIgnoreDataCloudChange())) {
+            log.info("Specified to ignore data cloud change.");
+        } else {
+            String currentBuildNumber = configuration.getDataCloudBuildNumber();
+            DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
+            if (dataCollection != null
+                    && (dataCollection.getDataCloudBuildNumber() == null
+                    || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))
+                    && hasAccountBatchStore()) {
+                changed = true;
+            }
+            log.info("Data cloud changed?=" + changed + " current LDC build number=" + currentBuildNumber
+                    + ", the LDC builder number in data collection="
+                    + (dataCollection == null ? "" : dataCollection.getDataCloudBuildNumber()));
         }
-        log.info("Data cloud changed?=" + changed + " current LDC build number=" + currentBuildNumber
-                + ", the LDC builder number in data collection="
-                + (dataCollection == null ? "" : dataCollection.getDataCloudBuildNumber()));
         return changed;
     }
 
