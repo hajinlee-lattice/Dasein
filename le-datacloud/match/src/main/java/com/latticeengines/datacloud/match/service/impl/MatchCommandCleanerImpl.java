@@ -48,7 +48,7 @@ public class MatchCommandCleanerImpl implements MatchCommandCleaner {
 
     private void removeCommands(List<MatchCommand> commands) {
         for(MatchCommand command : commands) {
-            log.debug("Remove command:" + command.getRootOperationUid());
+            log.info("Remove command:" + command.getRootOperationUid());
             List<MatchBlock> blocks = matchCommandEntityMgr.findBlocks(command.getRootOperationUid());
             removeMatchBlocks(command.getRootOperationUid(), blocks);
             matchCommandEntityMgr.deleteCommand(command);
