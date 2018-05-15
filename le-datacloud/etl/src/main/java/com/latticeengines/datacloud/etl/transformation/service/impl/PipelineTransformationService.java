@@ -196,8 +196,13 @@ public class PipelineTransformationService extends AbstractTransformationService
         }
     }
 
-    private String getTempSourceName(String pipelineName, String version, int step) {
-        return PIPELINE + pipelineName + VERSION + version + STEP + step + SUFFIX;
+    private String getTempSourceName(String pipelineName, String version, int step, boolean keepTemp) {
+        if (keepTemp) {
+            return PIPELINE + pipelineName + VERSION + version + STEP + step;
+        } else {
+            return PIPELINE + pipelineName + VERSION + version + STEP + step + SUFFIX;
+        }
+
     }
 
     private boolean isTempSource(Source source) {
@@ -341,7 +346,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (targetTable != null) {
                 target = sourceService.createTableSource(targetTable, pipelineVersion);
             } else if (targetName == null) {
-                targetName = getTempSourceName(transConf.getName(), pipelineVersion, stepIdx);
+                targetName = getTempSourceName(transConf.getName(), pipelineVersion, stepIdx, transConf.getKeepTemp());
                 target = sourceService.createSource(targetName);
             } else {
                 target = sourceService.findOrCreateSource(targetName);
@@ -758,7 +763,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             } else {
                 sourceNames = new ArrayList<String>();
                 for (int i = 0; i < inputSteps.size(); i++) {
-                    sourceNames.add(getTempSourceName(pipelineName, version, i));
+                    sourceNames.add(getTempSourceName(pipelineName, version, i, request.getKeepTemp()));
                 }
                 if (baseSourceNames != null) {
                     for (String sourceName : baseSourceNames) {
