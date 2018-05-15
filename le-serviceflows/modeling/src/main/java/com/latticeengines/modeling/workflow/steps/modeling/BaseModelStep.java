@@ -76,9 +76,11 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         List<String> targets = new ArrayList<>();
 
         targets.add("Event: " + event.getName());
-
         if (configuration.isExpectedValue()) {
             targets.add("Revenue: " + InterfaceName.__Revenue.name());
+        }
+        if (configuration.isCdlModel()) {
+            return targets.toArray(new String[targets.size()]);
         }
 
         Attribute companyName = eventTable.getAttribute(InterfaceName.CompanyName);
