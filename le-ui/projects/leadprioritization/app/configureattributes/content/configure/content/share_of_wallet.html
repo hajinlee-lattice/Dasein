@@ -17,16 +17,17 @@
         <label for="options">% Share of Wallet in last</label>
         <select id="options"
             class="form-control"
-            required="true"
-            ng-class="{'required': true}"
+            ng-required="!vm.options['ShareOfWallet']['WITHIN']['Val']"
             ng-init="vm.initValue('ShareOfWallet.WITHIN.Val', vm.getVals('WITHIN', vm.steps[vm.step].data.ShareOfWallet))" 
             ng-model="vm.options['ShareOfWallet']['WITHIN']['Val']" 
             ng-change="vm.setOptions()"
+            ng-disabled="!(vm.options['ShareOfWallet']['WITHIN']['Period'])"
             ng-options="option for option in vm.newArray(vm.periods[vm.options['ShareOfWallet']['WITHIN']['Period']])">
                 <option value="" hidden disabled>Select</option>
             </select>
         <select id="options"
             class="form-control"
+            ng-required="!vm.options['ShareOfWallet']['WITHIN']['Period']"
             ng-init="vm.initValue('ShareOfWallet.WITHIN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.ShareOfWallet, null, 's'))" 
             ng-model="vm.options['ShareOfWallet']['WITHIN']['Period']" 
             ng-change="vm.setOptions()"

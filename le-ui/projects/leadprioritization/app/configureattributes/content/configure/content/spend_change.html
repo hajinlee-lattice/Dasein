@@ -4,7 +4,7 @@
         <!-- <input type="number" min=1 max=20 ng-model="vm.options['SpendChange']['WITHIN']['Val']" ng-value="vm.getVals('WITHIN', vm.steps[vm.step].data.SpendChange)"> / -->
         <select id="options"
             class="form-control"
-            ng-required="true"
+            ng-required="!vm.options['SpendChange']['WITHIN']['Val']"
             ng-init="vm.initValue('SpendChange.WITHIN.Val', vm.getVals('WITHIN', vm.steps[vm.step].data.SpendChange))" 
             ng-model="vm.options['SpendChange']['WITHIN']['Val']" 
             ng-change="vm.setOptions(form)"
@@ -14,7 +14,7 @@
             </select>
         <select id="options"
             class="form-control"
-            ng-required="true"
+            ng-required="!vm.options['SpendChange']['WITHIN']['Period']"
             ng-init="vm.initValue('SpendChange.WITHIN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.SpendChange, null, 's'))" 
             ng-model="vm.options['SpendChange']['WITHIN']['Period']" 
             ng-change="vm.setOptions(form); vm.options['SpendChange']['BETWEEN']['Period'] = vm.options['SpendChange']['WITHIN']['Period']"
@@ -26,7 +26,7 @@
         <label for="options">% Change Spend prior to</label>
         <select id="options"
             class="form-control"
-            ng-required="true"
+            ng-required="!vm.options['SpendChange']['BETWEEN']['Val']"
             ng-init="vm.initValue('SpendChange.BETWEEN.Val', vm.getVals('BETWEEN', vm.steps[vm.step].data.SpendChange))" 
             ng-model="vm.options['SpendChange']['BETWEEN']['Val']" 
             ng-change="vm.setOptions(form)"

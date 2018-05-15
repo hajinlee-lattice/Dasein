@@ -9,7 +9,7 @@
             </button>
             <select id="options"
                 class="form-control"
-                ng-required="true"
+                ng-required="!vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Val']"
                 ng-init="vm.initValue('TotalSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Val', vm.getVals(item.periods[0].Cmp, vm.steps[vm.step].data.TotalSpendOvertime, index))" 
                 ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Val']" 
                 ng-change="vm.setOptions(form)"
@@ -19,7 +19,7 @@
                 </select>
             <select id="options"
                 class="form-control"
-                ng-required="true"
+                ng-required="!vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Period']"
                 ng-init="vm.initValue('TotalSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Period', vm.getPeriod(item.periods[0].Cmp, vm.steps[vm.step].data.TotalSpendOvertime, index, 's'))" 
                 ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Period']" 
                 ng-change="vm.setOptions(form)"
@@ -44,7 +44,7 @@
             </button>
             <select id="options"
                 class="form-control"
-                ng-required="true"
+                ng-required="!vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Val']"
                 ng-init="vm.initValue('AvgSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Val', vm.getVals(item.periods[0].Cmp, vm.steps[vm.step].data.AvgSpendOvertime, index))" 
                 ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Val']" 
                 ng-change="vm.setOptions(form)"
@@ -55,7 +55,7 @@
             <input type="hidden" ng-model="vm.options['SpendChange']['BETWEEN']['Period']"  value="vm.getPeriod('BETWEEN', vm.steps[vm.step].data.SpendChange, null, 's')" />
             <select id="options"
                 class="form-control"
-                ng-required="true"
+                ng-required="!vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period']"
                 ng-init="vm.initValue('AvgSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Period', vm.getPeriod(item.periods[0].Cmp, vm.steps[vm.step].data.AvgSpendOvertime, index, 's'))" 
                 ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period']" 
                 ng-change="vm.setOptions(form)"
