@@ -145,6 +145,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         } catch (Exception exc) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            workflowJob.setErrorDetailsString(exc.getMessage());
+            workflowJobEntityMgr.updateErrorDetails(workflowJob);
             log.warn("Failed to submit job request to AWS batch. Setting status to FAILED for workflowJob, pid=" +
                     workflowJob.getPid() + "\n" + ExceptionUtils.getStackTrace(exc));
 

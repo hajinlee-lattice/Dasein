@@ -103,6 +103,8 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         } catch (Exception e) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            workflowJob.setErrorDetailsString(e.getMessage());
+            workflowJobEntityMgr.updateErrorDetails(workflowJob);
 
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
             jobUpdate.setLastUpdateTime(System.currentTimeMillis());
