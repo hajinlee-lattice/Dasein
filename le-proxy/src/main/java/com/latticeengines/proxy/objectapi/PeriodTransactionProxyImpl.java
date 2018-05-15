@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -27,15 +26,13 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
         super("/objectapi");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<PeriodTransaction> getPeriodTransactionByAccountId(String customerSpace, String accountId,
             String periodName, Version version, ProductType productType) {
         String url = constructGetPeriodTransactionByAccountId(customerSpace, accountId, periodName, version,
                 productType);
         log.info("getPeriodTransactionByAccountId url " + url);
-        List<Object> rawList = get("getPeriodTransactionByAccountId", url, List.class);
-        return JsonUtils.convertList(rawList, PeriodTransaction.class);
+        return getList("getPeriodTransactionByAccountId", url, PeriodTransaction.class);
     }
 
     @VisibleForTesting
@@ -60,7 +57,6 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
         return url;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<PeriodTransaction> getPeriodTransactionForSegmentAccount(String customerSpace, String accountId,
             String periodName) {
@@ -70,11 +66,9 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
             url += ("?periodname=" + periodName);
         }
         log.info("getPeriodTransactionForSegmentAccount url " + url);
-        List<Object> rawList = get("getPeriodTransactionForSegmentAccount", url, List.class);
-        return JsonUtils.convertList(rawList, PeriodTransaction.class);
+        return getList("getPeriodTransactionForSegmentAccount", url, PeriodTransaction.class);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<ProductHierarchy> getProductHierarchy(String customerSpace, DataCollection.Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/periodtransaction/producthierarchy",
@@ -83,7 +77,6 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
             url += ("?version=" + version);
         }
         log.info("getProductHierarchy url " + url);
-        List<Object> rawList = get("getProductHierarchy", url, List.class);
-        return JsonUtils.convertList(rawList, ProductHierarchy.class);
+        return getList("getProductHierarchy", url, ProductHierarchy.class);
     }
 }

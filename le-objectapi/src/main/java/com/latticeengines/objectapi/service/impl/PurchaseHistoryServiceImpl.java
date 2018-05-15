@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -45,11 +46,14 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         log.info(String.format(
                 "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s, version %s",
                 tableName, tenant.getId(), accountId, periodName, productType, version));
-        // TODO add productType to where clause to filter out bundle
-        // transactions
-        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(
-                "SELECT periodid, productid, totalamount, totalquantity, transactioncount FROM " + tableName
-                        + " where accountid = ? and periodname = ?",
+
+        // For BIS use case, the product type is ProductType.Spending
+        String query = String.format("SELECT %s, %s, %s, %s, %s FROM %s where %s = ? and %s = ? and %s = %s",
+                InterfaceName.PeriodId, InterfaceName.ProductId, InterfaceName.TotalAmount, InterfaceName.TotalQuantity,
+                InterfaceName.TransactionCount, tableName, InterfaceName.AccountId, InterfaceName.PeriodName,
+                InterfaceName.ProductType, ProductType.Spending.toString());
+        log.info(String.format("query for getPeriodTransactionByAccountId " + query));
+        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query,
                 new Object[] { accountId, periodName });
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
@@ -78,6 +82,9 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         String tableName = dataCollectionProxy.getTableName(tenant.getId(),
                 BusinessEntity.ProductHierarchy.getServingStore());
         log.info(String.format("Get product Hierarchy table %s for %s", tableName, tenant.getId()));
+        String query = String.format("SELECT %s, %s, %s, %s FROM %s", InterfaceName.ProductId,
+                InterfaceName.ProductLine, InterfaceName.ProductFamily, InterfaceName.ProductCategory, tableName);
+        log.info(String.format("query for getProductHierarchy " + query));
         List<Map<String, Object>> retList = redshiftJdbcTemplate
                 .queryForList("SELECT productid, productline, productfamily, productcategory FROM " + tableName);
         for (Map row : retList) {
