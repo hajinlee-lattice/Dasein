@@ -77,6 +77,20 @@ angular.module('lp.jobs.export', [])
 
         }
 
+        vm.getStatus = function(job) {
+            switch (job.jobStatus) {
+                case 'Failed':
+                    return 'Failed';
+                case 'Pending':
+                case 'Running':
+                    return 'In Progress';
+                case 'Completed':
+                    if (vm.isExpired(job)) {
+                        return 'Expired';
+                    }
+            }
+        }
+
         vm.hideDownloadMessage = function() {
             vm.showDownloadMessage = false;
         }

@@ -28,6 +28,9 @@ angular.module('common.wizard.controls', [])
         
         vm.toState = to;
         vm.item = vm.itemMap[to.name];
+    });
+
+    $transitions.onFinish({}, function() {
         vm.nextDisabled = false;
     });
 
