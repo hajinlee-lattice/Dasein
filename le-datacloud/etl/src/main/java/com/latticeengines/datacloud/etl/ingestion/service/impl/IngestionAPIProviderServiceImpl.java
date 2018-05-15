@@ -125,6 +125,7 @@ public class IngestionAPIProviderServiceImpl extends IngestionProviderServiceImp
             throw new RuntimeException(String.format("Failed to call api %s to get version", config.getVersionUrl()),
                     e);
         }
+        version = version.replace("\n", "").replace("\r", "");
         DateFormat df = new SimpleDateFormat(config.getVersionFormat());
         TimeZone timezone = TimeZone.getTimeZone("UTC");
         df.setTimeZone(timezone);
