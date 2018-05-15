@@ -158,12 +158,18 @@ angular.module('lp.segments.segments', [
         }
     };
 
+    vm.descriptionChanged = function(segment) {
+        var tileState = vm.tileStates[segment.name];
+        tileState.saveEnabled = segment.display_name && segment.display_name.trim().length != 0;
+    };
+
     vm.cancelEditSegmentClicked = function($event, segment) {
         if ($event) {
             $event.stopPropagation();
         }
 
         var tileState = vm.tileStates[segment.name];
+        tileState.saveEnabled = false;
         tileState.editSegment = !tileState.editSegment;
         segment.display_name = vm.inEditing.display_name || segment.display_name;
         segment.description = vm.inEditing.description || '';

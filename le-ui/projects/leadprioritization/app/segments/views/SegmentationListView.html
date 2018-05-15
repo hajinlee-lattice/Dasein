@@ -153,6 +153,7 @@
                                 maxlength="1000"
                                 ng-trim="false"
                                 ng-disabled="vm.saveInProgress"
+                                ng-change="vm.descriptionChanged(segment)"
                             ></textarea>
                             <span>{{1000 - segment.description.length}} characters remaining</span>
                         </div>
