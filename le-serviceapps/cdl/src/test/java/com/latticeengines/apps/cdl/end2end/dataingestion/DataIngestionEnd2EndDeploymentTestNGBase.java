@@ -79,6 +79,7 @@ import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -157,7 +158,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentTraining");
 
     static final long RATING_A_COUNT_1 = 6;
-    static final long RATING_D_COUNT_1 = 7;
+    static final long RATING_D_COUNT_1 = 5;
     static final long RATING_F_COUNT_1 = 1;
 
     static final long RATING_A_COUNT_2 = 20;
@@ -843,6 +844,15 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), modelId, model);
 
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
+    }
+
+    void activateRatingEngine(String engineId) {
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), engineId);
+        if (ratingEngine == null) {
+            throw new IllegalArgumentException("Cannot find the engine to be activated " + engineId);
+        }
+        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+        ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
     }
 
     private RuleBasedModel constructRuleModel(String modelId) {

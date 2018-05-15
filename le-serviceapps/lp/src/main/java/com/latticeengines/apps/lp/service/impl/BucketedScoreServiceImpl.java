@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
 @Service("bucketedScoreService")
 public class BucketedScoreServiceImpl implements BucketedScoreService {
@@ -47,9 +46,6 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Inject
     private ActionService actionService;
-
-    @Inject
-    private RatingEngineProxy ratingEngineProxy;
 
     @Override
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {

@@ -80,7 +80,6 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
                 ).peek(cm -> cm.setAttrState(AttrState.Active)).collect(Collectors.toList()));
         when(dataCollectionProxy.getAccountDynamo(anyString(), any())).thenReturn(TestCDLMatchUtils.mockCustomAccount());
 
-
         realTimeMatchPlanner.setZkConfigurationService(zkConfigurationService);
         cdlColumnSelectionService.setServingStoreProxy(servingStoreProxy);
         cdlColumnSelectionService.setDataCollectionProxy(dataCollectionProxy);

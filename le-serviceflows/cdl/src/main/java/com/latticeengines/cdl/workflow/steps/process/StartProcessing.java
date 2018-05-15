@@ -172,6 +172,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         // FIXME: not really working before persisting action configuration
         List<Action> ratingActions = getRatingRelatedActions(actions);
+        grapherContext.setHasRatingEngineChange(CollectionUtils.isNotEmpty(ratingActions));
         List<String> segments = getActionImpactedSegmentNames(ratingActions);
         grapherContext.setActionImpactedAIRatingEngines(getActionImpactedAIEngineIds(ratingActions, segments));
         grapherContext.setActionImpactedRuleRatingEngines(getActionImpactedRuleEngineIds(ratingActions, segments));
@@ -236,7 +237,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 if (ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) {
                     SegmentActionConfiguration configuration = (SegmentActionConfiguration) action
                             .getActionConfiguration();
-                    segmentNames.add(configuration.getSegmentName());
+                    if (configuration != null) {
+                        segmentNames.add(configuration.getSegmentName());
+                    }
                 }
             }
         }
@@ -261,19 +264,21 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 if (ActionType.RATING_ENGINE_CHANGE.equals(action.getType())) {
                     RatingEngineActionConfiguration configuration = (RatingEngineActionConfiguration) action
                             .getActionConfiguration();
-                    String engineId = configuration.getRatingEngineId();
-                    RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
-                    if (ratingEngine != null //
-                            && !Boolean.TRUE.equals(ratingEngine.getDeleted()) //
-                            && !Boolean.TRUE.equals(ratingEngine.getJustCreated())) {
-                        if (types.contains(ratingEngine.getType())
-                                || segments.contains(ratingEngine.getSegment().getName())) {
-                            String logMsg = String.format(
-                                    "Found a rating engine change action related to %s engine %s (%s): %s",
-                                    ratingEngine.getType().name(), ratingEngine.getId(), ratingEngine.getDisplayName(),
-                                    JsonUtils.serialize(action));
-                            log.info(logMsg);
-                            engineIds.add(ratingEngine.getId());
+                    if (configuration != null) {
+                        String engineId = configuration.getRatingEngineId();
+                        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
+                        if (ratingEngine != null //
+                                && !Boolean.TRUE.equals(ratingEngine.getDeleted()) //
+                                && !Boolean.TRUE.equals(ratingEngine.getJustCreated())) {
+                            if (types.contains(ratingEngine.getType())
+                                    || segments.contains(ratingEngine.getSegment().getName())) {
+                                String logMsg = String.format(
+                                        "Found a rating engine change action related to %s engine %s (%s): %s",
+                                        ratingEngine.getType().name(), ratingEngine.getId(), ratingEngine.getDisplayName(),
+                                        JsonUtils.serialize(action));
+                                log.info(logMsg);
+                                engineIds.add(ratingEngine.getId());
+                            }
                         }
                     }
                 }

@@ -43,7 +43,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
-    private static final boolean USE_EXISTING_TENANT = true;
+    private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "LETest1525384230782";
 
     @Inject
@@ -109,6 +109,8 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 createTestSegment2();
                 rule1 = createRuleBasedRatingEngine();
                 rule2 = createRuleBasedRatingEngine();
+                activateRatingEngine(rule1.getId());
+                activateRatingEngine(rule2.getId());
                 createAndDeleteRatingEngine();
             }).start();
             if (enableAIRatings) {
@@ -122,15 +124,18 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                         ai1.getId(), ai1.getActiveModel().getId(), ModelingQueryType.TARGET);
                 Assert.assertEquals(targetCount, 81);
+                activateRatingEngine(ai1.getId());
 
                 modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
                 ai2 = createCrossSellEngine(segment, modelSummary, PredictionType.PROPENSITY);
                 targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai2.getId(),
                         ai2.getActiveModel().getId(), ModelingQueryType.TARGET);
                 Assert.assertEquals(targetCount, 81);
+                activateRatingEngine(ai2.getId());
 
                 modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid3);
                 ai3 = createCustomEventEngine(segment, modelSummary);
+                activateRatingEngine(ai3.getId());
             }
         }
     }

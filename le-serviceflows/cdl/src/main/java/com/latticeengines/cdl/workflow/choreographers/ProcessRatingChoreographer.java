@@ -15,9 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.GenerateAIRatingWorkflow;
+import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.IngestRuleBasedRating;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
+import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
@@ -56,6 +58,12 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     @Inject
     private ProcessTransactionChoreographer transactionChoreographer;
 
+    @Inject
+    private CombineStatistics combineStatistics;
+
+    @Inject
+    private ResetRating resetRating;
+
     private boolean initialized;
     private boolean enforceRebuild = false;
     private boolean hasDataChange = false;
@@ -66,6 +74,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean hasCustomEventModels = false;
     private boolean hasRuleModels = false;
 
+    private boolean shouldReset = false;
     private boolean shouldProcessAI = false;
     private boolean shouldProcessRuleBased = false;
 
@@ -83,15 +92,20 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         log.info("Step namespace = " + getStepNamespace(seq) + " generateAIRatingWorkflow.name()="
                 + generateAIRatingWorkflow.name());
 
-        if (isAIWorkflow(seq)) {
-            return !shouldProcessAI;
+        boolean skip;
+        if (shouldReset) {
+            skip = !isResetRatingStep(step) && !isCombineStatisticsStep(step);
+        } else {
+            skip = false;
+            if (isResetRatingStep(step)) {
+                skip = true;
+            } else if (isAIWorkflow(seq)) {
+                skip = !shouldProcessAI;
+            } else if (isIngestRuleRatingStep(step)) {
+                skip = !shouldProcessRuleBased;
+            }
         }
-
-        if (isIngestRuleRatingStep(step)) {
-            return !shouldProcessRuleBased;
-        }
-
-        return !hasAIModels && !hasRuleModels;
+        return skip;
     }
 
     private void initialize(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -104,6 +118,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             hasCustomEventModels = hasCustomEventModels(containers);
             hasAIModels = hasCrossSellModels || hasCustomEventModels;
             hasRuleModels = hasRuleModels(containers);
+            shouldReset = shouldReset();
             shouldProcessAI = shouldProcessAI();
             shouldProcessRuleBased = shouldProcessRuleBased();
             String[] msgs = new String[] { //
@@ -115,6 +130,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                     " hasCustomEventModels=" + hasCustomEventModels, //
                     " hasAIModels=" + hasAIModels, //
                     " hasRuleModels=" + hasRuleModels, //
+                    " shouldReset=" + shouldReset, //
                     " shouldProcessAI=" + shouldProcessAI, //
                     " shouldProcessRuleBased=" + shouldProcessRuleBased, //
             };
@@ -138,6 +154,23 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean isAIWorkflow(int seq) {
         String namespace = getStepNamespace(seq);
         return namespace.contains(generateAIRatingWorkflow.name());
+    }
+
+    private boolean isResetRatingStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().equals(resetRating.name());
+    }
+
+    private boolean isCombineStatisticsStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().equals(combineStatistics.name());
+    }
+
+    private boolean shouldReset() {
+        boolean reset = false;
+        if (!hasCustomEventModels && !hasCrossSellModels && !hasRuleModels) {
+            log.info("Does not have any ready to score models, reset the Rating entity.");
+            reset = true;
+        }
+        return reset;
     }
 
     private boolean shouldProcessAI() {
@@ -194,8 +227,13 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private void checkActionImpactedEngines(AbstractStep<? extends BaseStepConfiguration> step) {
         ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
+
+        // TODO: change to check by engine type after DP-6275
         hasActionImpactedAIModels = CollectionUtils.isNotEmpty(grapherContext.getActionImpactedAIRatingEngines());
         hasActionImpactedRuleModels = CollectionUtils.isNotEmpty(grapherContext.getActionImpactedRuleRatingEngines());
+
+        hasActionImpactedAIModels = grapherContext.isHasRatingEngineChange();
+        hasActionImpactedRuleModels = grapherContext.isHasRatingEngineChange();
     }
 
 }
