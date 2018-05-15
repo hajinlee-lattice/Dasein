@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "start.sh:"
+echo "start.sh: datascienceapp v 0.9"
 
 if [ "${ANACONDA_HOME}" = "" ]; then
     ANACONDA_HOME=/opt/conda
