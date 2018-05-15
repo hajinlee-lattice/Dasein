@@ -283,7 +283,11 @@ angular
             case 'Failed' : {
                 if(inMap !== undefined){
                     JobsStore.data.subjobsRunning.splice(inMap, 1);
-                    delete JobsStore.subjobsRunnigMap[applicationidJob];
+                    JobsStore.subjobsRunnigMap = {};
+                    for(var i=0; i<JobsStore.data.subjobsRunning.length; i++){
+                        var appId = JobsStore.data.subjobsRunning[i].applicationId;
+                        JobsStore.subjobsRunnigMap[appId] = i;
+                    }
                 }
                 break;
             }
