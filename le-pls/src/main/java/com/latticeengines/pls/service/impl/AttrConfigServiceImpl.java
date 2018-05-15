@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.AttrConfigService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
@@ -180,7 +181,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Override
     public void updateActivationConfig(String categoryName, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getTenantId();
-        AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(request);
+        AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(categoryName, request);
         cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
         createUpdateActivationActions(categoryName, request);
     }
@@ -213,39 +214,41 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @VisibleForTesting
-    AttrConfigRequest generateAttrConfigRequestForActivation(AttrConfigSelectionRequest request) {
+    AttrConfigRequest generateAttrConfigRequestForActivation(String categoryName, AttrConfigSelectionRequest request) {
+        Category category = resolveCategory(categoryName);
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
         if (request.getSelect() != null) {
             for (String attr : request.getSelect()) {
-                updateAttrConfigsForState(attrConfigs, attr, ColumnMetadataKey.State, AttrState.Active);
+                updateAttrConfigsForState(category, attrConfigs, attr, ColumnMetadataKey.State, AttrState.Active);
             }
         }
         if (request.getDeselect() != null) {
             for (String attr : request.getDeselect()) {
-                updateAttrConfigsForState(attrConfigs, attr, ColumnMetadataKey.State, AttrState.Inactive);
+                updateAttrConfigsForState(category, attrConfigs, attr, ColumnMetadataKey.State, AttrState.Inactive);
             }
         }
         return attrConfigRequest;
     }
 
-    private void updateAttrConfigsForState(List<AttrConfig> attrConfigs, String attrName, String property,
+    @VisibleForTesting
+    void updateAttrConfigsForState(Category category, List<AttrConfig> attrConfigs, String attrName, String property,
             AttrState selectThisAttr) {
         AttrConfig config = new AttrConfig();
         config.setAttrName(attrName);
-        config.setEntity(BusinessEntity.Account);
+        config.setEntity(CategoryUtils.getEntity(category));
         AttrConfigProp<AttrState> enrichProp = new AttrConfigProp<>();
         enrichProp.setCustomValue(selectThisAttr);
         config.setAttrProps(ImmutableMap.of(property, enrichProp));
         attrConfigs.add(config);
     }
 
-    private void updateAttrConfigs(List<AttrConfig> attrConfigs, String attrName, String property,
+    private void updateAttrConfigs(Category category, List<AttrConfig> attrConfigs, String attrName, String property,
             Boolean selectThisAttr) {
         AttrConfig config = new AttrConfig();
         config.setAttrName(attrName);
-        config.setEntity(BusinessEntity.Account);
+        config.setEntity(CategoryUtils.getEntity(category));
         AttrConfigProp<Boolean> enrichProp = new AttrConfigProp<>();
         enrichProp.setCustomValue(selectThisAttr);
         config.setAttrProps(ImmutableMap.of(property, enrichProp));
@@ -255,24 +258,26 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Override
     public void updateUsageConfig(String categoryName, String usage, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getTenantId();
-        AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(usage, request);
+        AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
         cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
     }
 
     @VisibleForTesting
-    AttrConfigRequest generateAttrConfigRequestForUsage(String usage, AttrConfigSelectionRequest request) {
+    AttrConfigRequest generateAttrConfigRequestForUsage(String categoryName, String usage,
+            AttrConfigSelectionRequest request) {
+        Category category = resolveCategory(categoryName);
         String property = translateUsageToProperty(usage);
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
         if (request.getSelect() != null) {
             for (String attr : request.getSelect()) {
-                updateAttrConfigs(attrConfigs, attr, property, Boolean.TRUE);
+                updateAttrConfigs(category, attrConfigs, attr, property, Boolean.TRUE);
             }
         }
         if (request.getDeselect() != null) {
             for (String attr : request.getDeselect()) {
-                updateAttrConfigs(attrConfigs, attr, property, Boolean.FALSE);
+                updateAttrConfigs(category, attrConfigs, attr, property, Boolean.FALSE);
             }
         }
         return attrConfigRequest;
@@ -299,7 +304,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName) {
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
-        return generateSelectionDetails(attrConfigRequest, ColumnMetadataKey.State, false, false);
+        return generateSelectionDetails(categoryName, attrConfigRequest, ColumnMetadataKey.State, false, false);
     }
 
     @Override
@@ -307,18 +312,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         String property = translateUsageToProperty(usage);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
-        return generateSelectionDetails(attrConfigRequest, property, true, true);
-    }
-
-    @VisibleForTesting
-    AttrConfigSelectionDetail generateSelectionDetails(AttrConfigRequest attrConfigRequest, String property,
-            boolean applyActivationFilter) {
-        return generateSelectionDetails(attrConfigRequest, property, applyActivationFilter, false);
+        return generateSelectionDetails(categoryName, attrConfigRequest, property, true, true);
     }
 
     @SuppressWarnings("unchecked")
-    AttrConfigSelectionDetail generateSelectionDetails(AttrConfigRequest attrConfigRequest, String property,
-            boolean applyActivationFilter, boolean filterOutNonCustomizedAttrs) {
+    AttrConfigSelectionDetail generateSelectionDetails(String categoryName, AttrConfigRequest attrConfigRequest,
+            String property, boolean applyActivationFilter, boolean filterOutNonCustomizedAttrs) {
         AttrConfigSelectionDetail attrConfigSelectionDetail = new AttrConfigSelectionDetail();
         long totalAttrs = 0L;
         long selected = 0L;
@@ -437,7 +436,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         // attrConfigSelectionDetail.setLimit(500L);
         attrConfigSelectionDetail.setTotalAttrs(totalAttrs);
         attrConfigSelectionDetail.setSelected(selected);
-        attrConfigSelectionDetail.setEntity(BusinessEntity.Account);
+        BusinessEntity entity = CategoryUtils.getEntity(resolveCategory(categoryName));
+        attrConfigSelectionDetail.setEntity(entity);
         return attrConfigSelectionDetail;
     }
 

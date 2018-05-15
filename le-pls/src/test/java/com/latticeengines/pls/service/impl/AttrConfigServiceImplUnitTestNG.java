@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
@@ -194,7 +195,8 @@ public class AttrConfigServiceImplUnitTestNG {
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
         request.setDeselect(Arrays.asList(deselect));
         request.setSelect(Arrays.asList(select));
-        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForUsage(usage, request);
+        AttrConfigRequest attrConfigRequest = attrConfigService
+                .generateAttrConfigRequestForUsage(Category.INTENT.getName(), usage, request);
         List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
         Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
         for (AttrConfig attrConfig : attrConfigs) {
@@ -210,12 +212,13 @@ public class AttrConfigServiceImplUnitTestNG {
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
         request.setDeselect(Arrays.asList(deselect));
         request.setSelect(Arrays.asList(select));
-        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForActivation(request);
+        AttrConfigRequest attrConfigRequest = attrConfigService
+                .generateAttrConfigRequestForActivation(Category.CONTACT_ATTRIBUTES.getName(), request);
         List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
         Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
         for (AttrConfig attrConfig : attrConfigs) {
             Assert.assertNotNull(attrConfig.getAttrName());
-            Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Account);
+            Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Contact);
             Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.State));
             log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
         }
@@ -240,20 +243,21 @@ public class AttrConfigServiceImplUnitTestNG {
     @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
     public void testGetDetailAttrForActivation() {
         AttrConfigRequest request = new AttrConfigRequest();
-        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.TECHNOLOGY_PROFILE, true),
-                AttrConfigServiceImplTestUtils.getAttr2(Category.TECHNOLOGY_PROFILE, true), //
-                AttrConfigServiceImplTestUtils.getAttr3(Category.TECHNOLOGY_PROFILE, true), //
-                AttrConfigServiceImplTestUtils.getAttr4(Category.TECHNOLOGY_PROFILE, true), //
-                AttrConfigServiceImplTestUtils.getAttr5(Category.TECHNOLOGY_PROFILE, false), //
-                AttrConfigServiceImplTestUtils.getAttr6(Category.TECHNOLOGY_PROFILE, false), //
-                AttrConfigServiceImplTestUtils.getAttr7(Category.TECHNOLOGY_PROFILE, false), //
-                AttrConfigServiceImplTestUtils.getAttr8(Category.TECHNOLOGY_PROFILE, false), //
-                AttrConfigServiceImplTestUtils.getAttr9(Category.TECHNOLOGY_PROFILE, false)));
-        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName()))
+        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.CONTACT_ATTRIBUTES, true),
+                AttrConfigServiceImplTestUtils.getAttr2(Category.CONTACT_ATTRIBUTES, true), //
+                AttrConfigServiceImplTestUtils.getAttr3(Category.CONTACT_ATTRIBUTES, true), //
+                AttrConfigServiceImplTestUtils.getAttr4(Category.CONTACT_ATTRIBUTES, true), //
+                AttrConfigServiceImplTestUtils.getAttr5(Category.CONTACT_ATTRIBUTES, false), //
+                AttrConfigServiceImplTestUtils.getAttr6(Category.CONTACT_ATTRIBUTES, false), //
+                AttrConfigServiceImplTestUtils.getAttr7(Category.CONTACT_ATTRIBUTES, false), //
+                AttrConfigServiceImplTestUtils.getAttr8(Category.CONTACT_ATTRIBUTES, false), //
+                AttrConfigServiceImplTestUtils.getAttr9(Category.CONTACT_ATTRIBUTES, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.CONTACT_ATTRIBUTES.getName()))
                 .thenReturn(request);
         AttrConfigSelectionDetail activationDetail = attrConfigService
-                .getAttrConfigSelectionDetailForState(Category.TECHNOLOGY_PROFILE.getName());
+                .getAttrConfigSelectionDetailForState(Category.CONTACT_ATTRIBUTES.getName());
         log.info("testGetAttrConfigUsageOverview activationDetail is " + activationDetail);
+        Assert.assertEquals(activationDetail.getEntity(), CategoryUtils.getEntity(Category.CONTACT_ATTRIBUTES));
         Assert.assertEquals(activationDetail.getSelected() - 4L, 0);
         Assert.assertEquals(activationDetail.getTotalAttrs() - 9L, 0);
         Assert.assertEquals(activationDetail.getSubcategories().size(), 8);
