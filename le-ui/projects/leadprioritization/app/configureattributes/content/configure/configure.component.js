@@ -41,7 +41,7 @@ angular.module('lp.configureattributes.configure', [])
                 },
                 share_of_wallet: {
                     type: 'ShareOfWallet',
-                    label: 'Share of Wallet',
+                    label: '% Share of Wallet',
                     description: $sce.trustAsHtml('<p>This curated attribute is calculated by comparing spend ratio for a given product of a given account with that of other accounts in the same segment.</p><p>This insignts are useful to drive sales &amp; marketing campaigns for the accounts where the share of wallet is below the desired range.</p>'),
                 },
                 margin: {
@@ -54,8 +54,8 @@ angular.module('lp.configureattributes.configure', [])
             periods: {
                 Weeks: totalMonths * 4,
                 Months: totalMonths,
-                Years: totalMonths / 12,
-                Quarters: totalMonths / 3 // 3 quaters a month
+                Quarters: totalMonths / 3 ,// 3 quaters a month
+                Years: totalMonths / 12
             },
             options: ConfigureAttributesStore.getOptions() || {},
             completed: ConfigureAttributesStore.getSaved(),
