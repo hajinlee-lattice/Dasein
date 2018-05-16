@@ -119,7 +119,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "authentication":"S3AccessCreds"
                     },
                     "/etc/ledp/jmxtrans-agent-1.2.6.jar":{
-                        "source":"http://" + config.s3_endpoint() + "/" + appbucket + "/jmxtrans/jmxtrans-agent-1.2.6.jar",
+                        "source":"http://" + config.s3_endpoint() + "/" + appbucket + "/jmxtrans/jmxtrans-agent.jar",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
