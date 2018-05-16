@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -95,6 +96,9 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private final DataLakeServiceImpl _dataLakeService;
 
+    private final List<String> LOOKUP_FIELDS;
+    private final Map<MatchKey, List<String>> KEY_MAP;
+
     private LocalCacheManager<String, Map<String, StatsCube>> statsCubesCache;
     private LocalCacheManager<String, List<ColumnMetadata>> cmCache;
 
@@ -112,6 +116,10 @@ public class DataLakeServiceImpl implements DataLakeService {
             String customerSpace = tokens[0];
             return getServingMetadataForEntity(customerSpace, entity).collectList().block();
         }, 100); //
+
+        LOOKUP_FIELDS = Arrays.asList(InterfaceName.AccountId.name());
+        KEY_MAP = new HashMap<>();
+        KEY_MAP.put(MatchKey.LookupId, LOOKUP_FIELDS);
     }
 
     @PostConstruct
@@ -276,16 +284,16 @@ public class DataLakeServiceImpl implements DataLakeService {
         MatchInput matchInput = new MatchInput();
 
         List<List<Object>> data = new ArrayList<>();
-        List<String> fields = new ArrayList<>();
         List<Object> datum = new ArrayList<>();
-        fields.add(InterfaceName.AccountId.name());
+
         datum.add(internalAccountId);
         data.add(datum);
 
         Tenant tenant = new Tenant(customerSpace.toString());
         matchInput.setTenant(tenant);
-        matchInput.setFields(fields);
+        matchInput.setFields(LOOKUP_FIELDS);
         matchInput.setData(data);
+        matchInput.setKeyMap(KEY_MAP);
         matchInput.setPredefinedSelection(predefined);
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         matchInput.setUseRemoteDnB(false);
