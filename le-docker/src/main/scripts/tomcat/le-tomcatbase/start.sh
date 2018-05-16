@@ -31,7 +31,7 @@ if [ -f "/etc/ledp/jmxtrans-agent.jar" ]; then
     echo "Copying /etc/ledp/jmxtrans-agent.jar to /var/lib/jmxtrans-agent.jar"
     cp -f /etc/ledp/jmxtrans-agent.jar /var/lib/jmxtrans-agent.jar
     echo "Replacing AWS_INFLUXDB_ADDRESS token by ${AWS_INFLUXDB_ADDRESS}"
-    sed "s|{{AWS_INFLUXDB_ADDRESS}}|${AWS_INFLUXDB_ADDRESS}|g" /var/lib/jmxtrans-tomcat-query.xml > ${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml
+    sed "s|{{AWS_INFLUXDB_ADDRESS}}|${AWS_INFLUXDB_ADDRESS}|g" /etc/ledp/jmxtrans-tomcat-query.xml > ${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml
 fi
 
 # mail config
