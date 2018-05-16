@@ -114,6 +114,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Current_NumProductsInTotal"), 0);
         Assert.assertEquals(report.get("Current_NumProductIds"), 0);
         Assert.assertEquals(report.get("Current_NumProductBundles"), 0);
+        Assert.assertEquals(report.get("Current_NumProductHierarchies"), 0);
         Assert.assertEquals(report.get("Current_NumProductCategories"), 0);
         Assert.assertEquals(report.get("Current_NumProductAnalytics"), 0);
         Assert.assertEquals(report.get("Current_NumProductSpendings"), 0);
@@ -135,6 +136,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 3);
         Assert.assertEquals(report.get("Merged_NumProductIds"), 0);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 0);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 0);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 3);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 0);
@@ -171,6 +173,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 5);
         Assert.assertEquals(report.get("Merged_NumProductIds"), 2);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 2);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 0);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 0);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 2);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 0);
@@ -226,6 +229,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 9);
         Assert.assertEquals(report.get("Merged_NumProductIds"), 3);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 3);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 3);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
@@ -242,6 +246,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 5);
         Assert.assertEquals(report.get("Merged_NumProductIds"), 2);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 2);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 0);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 0);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 2);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 0);
@@ -300,6 +305,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 5);
         Assert.assertEquals(report.get("Merged_NumProductIds"), 2);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 2);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 0);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 0);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 2);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 0);
@@ -359,6 +365,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 7);
         Assert.assertEquals(report.get("Merged_NumProductIds"), 2);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 3);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 0);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 0);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 3);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 0);
@@ -375,6 +382,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 9);
         Assert.assertEquals(report.get("Merged_NumProductIds"), 3);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 3);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 3);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
@@ -436,6 +444,7 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductsInTotal"), 10);
         Assert.assertEquals(report.get("Merged_NumProductIds"), 3);
         Assert.assertEquals(report.get("Merged_NumProductBundles"), 0);
+        Assert.assertEquals(report.get("Merged_NumProductHierarchies"), 3);
         Assert.assertEquals(report.get("Merged_NumProductCategories"), 3);
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
