@@ -31,7 +31,7 @@ if [ -f "/etc/ledp/jmxtrans-agent.jar" ]; then
     echo "Copying /etc/ledp/jmxtrans-agent.jar to /var/lib/jmxtrans-agent.jar"
     cp -f /etc/ledp/jmxtrans-agent.jar /var/lib/jmxtrans-agent.jar
     echo "Replacing AWS_INFLUXDB_ADDRESS token by ${AWS_INFLUXDB_ADDRESS}"
-    sed 's|{{AWS_INFLUXDB_ADDRESS}}|${AWS_INFLUXDB_ADDRESS}|g' /var/lib/jmxtrans-tomcat-query.xml > ${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml
+    sed "s|{{AWS_INFLUXDB_ADDRESS}}|${AWS_INFLUXDB_ADDRESS}|g" /var/lib/jmxtrans-tomcat-query.xml > ${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml
 fi
 
 # mail config
@@ -69,8 +69,8 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
-if [ -f "/var/lib/jmxtrans-agent-${JMX_TRANS_VERSION}.jar" ]; then
-    echo "Found jmxtrans-agent-${JMX_TRANS_VERSION}.jar, setting its java agent"
+if [ -f "/var/lib/jmxtrans-agent.jar" ]; then
+    echo "Found jmxtrans-agent.jar, setting its java agent"
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
 fi
 
