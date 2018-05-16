@@ -299,6 +299,13 @@ angular
                 $state.go('home.ratingsengine.dashboard.segment.attributes.rules');
             }
 
+            vm.showAtributeAdmin = function(){
+                if(vm.section == 'insight' || vm.section == 'wizard.ratingsengine_segment'){
+                    return false;
+                }else {
+                    return true;
+                }
+            }
 
             vm.init_filters();
         }

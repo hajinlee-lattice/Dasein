@@ -35,7 +35,7 @@
             Import Data
         </button>
     </li>
-    <li class="configure" ng-if="vm.section != 'insights'">
+    <li class="configure" ng-if="vm.showAtributeAdmin() === true">
         <button class="button icon-button white-button" 
                 ui-sref="home.attributes">
             Attribute Admin
