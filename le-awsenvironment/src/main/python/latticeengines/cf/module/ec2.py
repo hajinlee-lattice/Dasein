@@ -16,7 +16,8 @@ def ec2_defn():
 def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
     config = AwsEnvironment(env)
     lerepo = config.le_repo()
-    bucket = config.cf_bucket()
+    appbucket = config.app_bucket()
+    cfbucket = config.cf_bucket()
     chefbucket= config.chef_bucket()
     ssh_group = config.iam_ssh_group()
     cert = "star.lattice.local"
@@ -111,7 +112,21 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "authentication":"S3AccessCreds"
                     },
                     "/etc/ledp/createSSHAccounts.sh":{
-                        "source":"http://" + config.s3_endpoint() + "/" + bucket + "/ssh/createAccounts.sh",
+                        "source":"http://" + config.s3_endpoint() + "/" + cfbucket + "/ssh/createAccounts.sh",
+                        "mode":"000777",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
+                    },
+                    "/etc/ledp/jmxtrans-agent-1.2.6.jar":{
+                        "source":"http://" + config.s3_endpoint() + "/" + appbucket + "/jmxtrans/jmxtrans-agent-1.2.6.jar",
+                        "mode":"000777",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
+                    },
+                    "/etc/ledp/jmxtrans-tomcat-query.xml":{
+                        "source":"http://" + config.s3_endpoint() + "/" + appbucket + "/jmxtrans/jmxtrans-tomcat-query.xml",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
@@ -139,7 +154,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "group": "root"
                     },
                     "/etc/telegraf/telegraf.conf":{
-                        "source":"http://" + config.s3_endpoint() + "/" + bucket + "/telegraf/telegraf.conf",
+                        "source":"http://" + config.s3_endpoint() + "/" + cfbucket + "/telegraf/telegraf.conf",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
