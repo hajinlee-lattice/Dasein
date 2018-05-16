@@ -144,6 +144,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             case TECHNOLOGY_PROFILE:
                 overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
                         MultiTenantContext.getTenantId(), DataLicense.HG));
+                break;
             case ACCOUNT_ATTRIBUTES:
                 overview.setLimit(DEFAULT_LIMIT);
                 break;
