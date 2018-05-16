@@ -171,54 +171,12 @@
 
 
                     </div><!-- End .tile-footer -->
-                    <form
-                        class="edit-form"
-                        name="editRatingForm"
-                        ng-if="vm.current.tileStates[rating.id].editRating"
-                        ng-click="$event.stopPropagation()">
-                        <div class="form-group">
-                            
-                            <label for="ratingDisplayName">Name
-                            <input
-                                autofocus
-                                type="text"
-                                id="display_name"
-                                name="display_name"
-                                data-ng-model="rating.displayName"
-                                ng-change="vm.nameChanged(rating)"
-                                maxlength="50"
-                                ng-trim="false"
-                                class="form-control" 
-                                ng-disabled="vm.saveInProgress"/>
-                            </label>
-                            <span>{{50 - rating.displayName.length}} characters remaining</span>
-
-                        </div>
-                        <div class="actions">
-
-                            <button
-                                type="button"
-                                class="button white-button pull-left"
-                                ng-click="vm.cancelEditRatingClicked($event, rating)"
-                                ng-disabled="vm.saveInProgress  ">
-                                Cancel</button>
-                            <button
-                                type="button"
-                                class="button blue-button pull-right"
-                                ng-disabled="vm.current.tileStates[rating.id].saveEnabled === false"
-                                ng-click="vm.saveRatingClicked($event, rating)"
-                                ng-if="!vm.saveInProgress">
-                                Save</button>
-                            <button
-                                type="button"
-                                class="button gray-button pull-right"
-                                ng-disabled="vm.saveInProgress"
-                                ng-if="vm.saveInProgress">
-                                Saving...</button>
-
-                        </div>
-                    </form>
-
+                        <edit-form ng-if="vm.current.tileStates[rating.id].editRating" 
+                                    config="vm.editConfig"
+                                    dataobj="rating" 
+                                    saving="vm.saveInProgress"
+                                    callback="vm.saveName(obj, newData)">
+                        </edit-form>
                 </li>
                 <li class="create-tile" ng-if="vm.current.ratings.length < 12">
                     <a

@@ -1,7 +1,8 @@
 angular.module('lp.segments.segments', [
-    'mainApp.segments.modals.DeleteSegmentModal'
+    'mainApp.segments.modals.DeleteSegmentModal',
+    'lp.tile.edit'
 ])
-.controller('SegmentationListController', function ($scope, $element, $state, $stateParams,
+.controller('SegmentationListController', function ($q, $scope, $element, $state, $stateParams,
     SegmentsList, Enrichments, Cube, DeleteSegmentModal, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
     DataCloudStore, LookupResponse, LookupStore
 ) {
@@ -19,7 +20,6 @@ angular.module('lp.segments.segments', [
         filteredItems: [],
         totalLength: SegmentsList.length,
         tileStates: {},
-        inEditing: {},
         query: '',
         currentPage: 1,
         lookupMode: (LookupResponse && LookupResponse.attributes !== null),
@@ -38,6 +38,13 @@ angular.module('lp.segments.segments', [
                     { label: 'Segment Name', icon: 'alpha', property: 'display_name' }
                 ]
             }
+        },
+        editConfig:{
+            data: {id: 'name'},
+            fields:{
+                name: {fieldname: 'display_name', visible: true, maxLength: 50},
+                description: {fieldname: 'description', visible: true, maxLength: 1000}
+          }
         }
     });
 
@@ -64,6 +71,31 @@ angular.module('lp.segments.segments', [
             tileState.saveEnabled = true;
             $stateParams.edit = null;
         }
+    }
+
+    /**
+     * 
+     * @param {*} obj segment object
+     * @param {*} newData object that containes the update values
+     */
+    vm.saveNameDescription = function(obj, newData){
+        if(!newData){
+            var tileState = vm.tileStates[obj.name];
+            tileState.editSegment = !tileState.editSegment;
+            vm.saveInProgress = false;
+            vm.showAddSegmentError = false;
+            console.log(vm.tileStates);
+        }else{
+            vm.saveInProgress = true;
+            createOrUpdateSegment(newData).then(function(result){
+                if(result.success === true){
+                    obj.display_name = newData.display_name;
+                    obj.description = newData.description;
+                }
+            });
+        }
+        
+        
     }
 
     vm.onInputFocus = function($event) {
@@ -142,7 +174,6 @@ angular.module('lp.segments.segments', [
 
     vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
-        vm.inEditing = angular.copy(segment);
         var tileState = vm.tileStates[segment.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editSegment = !tileState.editSegment;
@@ -156,33 +187,6 @@ angular.module('lp.segments.segments', [
         else{
             tileState.saveEnabled = !!(segment.display_name.length > 0);
         }
-    };
-
-    vm.descriptionChanged = function(segment) {
-        var tileState = vm.tileStates[segment.name];
-        tileState.saveEnabled = segment.display_name && segment.display_name.trim().length != 0;
-    };
-
-    vm.cancelEditSegmentClicked = function($event, segment) {
-        if ($event) {
-            $event.stopPropagation();
-        }
-
-        var tileState = vm.tileStates[segment.name];
-        tileState.saveEnabled = false;
-        tileState.editSegment = !tileState.editSegment;
-        segment.display_name = vm.inEditing.display_name || segment.display_name;
-        segment.description = vm.inEditing.description || '';
-        vm.inEditing = {};
-    };
-
-    vm.saveSegmentClicked = function($event, segment) {
-
-        $event.stopPropagation();
-
-        vm.saveInProgress = true;
-        createOrUpdateSegment(segment);
-        
     };
 
     vm.addSegment = function() {
@@ -278,6 +282,7 @@ angular.module('lp.segments.segments', [
     };
 
     function createOrUpdateSegment(segment) {
+        var deferred = $q.defer();
         SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
             var errorMsg = result.errorMsg;
             
@@ -287,20 +292,20 @@ angular.module('lp.segments.segments', [
                 if(tileState){
                     tileState.editSegment = !tileState.editSegment;
                     $state.go('home.segments', {edit: null}, {reload: false } );
+                    deferred.resolve({success: true});
                 } else {
                     $state.go('home.segments', {}, { reload: true } );
                 }
 
                 vm.saveInProgress = false;
                 vm.showAddSegmentError = false;
-                vm.inEditing = {};    
             } else {
                 vm.saveInProgress = false;
                 vm.addSegmentErrorMessage = errorMsg;
                 vm.showAddSegmentError = true;
             }
         });
-
+        return deferred.promise;
     }
 
     vm.init();

@@ -117,68 +117,13 @@
                         </div>                  
                     </div>
 
-
-                    <form
-                        class="edit-form"
-                        name="editSegmentForm"
-                        ng-if="vm.tileStates[segment.name].editSegment"
-                        ng-click="$event.stopPropagation()">
-                        <div class="form-group">
-                            <label for="segmentDisplayName">Name
-                            <input
-                                autofocus
-                                required
-                                type="text"
-                                id="display_name"
-                                name="display_name"
-                                data-ng-model="segment.display_name"
-                                ng-focus="vm.onInputFocus($event)"
-                                maxlength="50"
-                                ng-trim="false"
-                                class="form-control"
-                                ng-class="!vm.isValid(segment.display_name)? 'invalid-field' : ''"
-                                placeholder="Segment Name"
-                                ng-disabled="vm.saveInProgress"
-                                ng-change="vm.nameChanged(segment)" />
-                                </label>
-                            <span>{{50 - segment.display_name.length}} characters remaining</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="segmentDescription">Description</label>
-                            <textarea
-                                class="form-control"
-                                id="description"
-                                name="description"
-                                data-ng-model="segment.description"
-                                maxlength="1000"
-                                ng-trim="false"
-                                ng-disabled="vm.saveInProgress"
-                                ng-change="vm.descriptionChanged(segment)"
-                            ></textarea>
-                            <span>{{1000 - segment.description.length}} characters remaining</span>
-                        </div>
-                        <div class="actions">
-                            <button
-                                type="button"
-                                class="button white-button pull-left"
-                                ng-click="vm.cancelEditSegmentClicked($event, segment)">
-                                Cancel</button>
-                            <button
-                                type="button"
-                                class="button blue-button pull-right"
-                                ng-disabled="vm.saveInProgress || editSegmentForm.$invalid || vm.tileStates[segment.name].saveEnabled === false"
-                                ng-click="vm.saveSegmentClicked($event, segment)">
-                                {{vm.saveInProgress ? 'Saving...' : 'Save'}}</button>
-                                <!--ng-disabled="vm.tileStates[segment.name].saveEnabled === false"-->
-                        </div>
-                    </form>
-
-                    <!-- <div class="meta-data" ng-if="!vm.tileStates[segment.name].editSegment">
-                        <dl class="stats">
-                            <dt>Accounts</dt>
-                            <dd class="small" ng-if="segment.segment_properties">{{segment.segment_properties[0].metadataSegmentProperty.value | number}}</dd>
-                        </dl>
-                    </div> -->
+                    <edit-form ng-if="vm.tileStates[segment.name].editSegment" 
+                        config="vm.editConfig"
+                        dataobj="segment" 
+                        saving="vm.saveInProgress"
+                        callback="vm.saveNameDescription(obj, newData)">
+                    </edit-form>
+           
                 </li>
 
                 <li class="create-tile" ng-if="vm.segments.length < 12">

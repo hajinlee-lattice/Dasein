@@ -1,0 +1,13 @@
+.edit-form{
+    &>div{
+        padding: 0 13px 13px;
+    }
+    .form-control:required:not(.ng-dirty){
+        border-left-color:  #aaa;
+        border-left-width: 1px;
+    }
+    .form-control.ng-invalid-required:required{
+        border-left-color:  #EF6A30;
+        border-left-width: 5px;
+    }
+}
