@@ -43,6 +43,7 @@ var mainApp = angular.module('insightsApp', [
         this.Authorization = value;
     }
 })
+.service('RatingsEngineStore', function(){})
 .factory('authInterceptor', function ($q, AuthStore) {
     return {
         request: function(config) {
