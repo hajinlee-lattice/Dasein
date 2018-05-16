@@ -118,8 +118,8 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "group":"root",
                         "authentication":"S3AccessCreds"
                     },
-                    "/etc/ledp/jmxtrans-agent-1.2.6.jar":{
-                        "source":"http://" + config.s3_endpoint() + "/" + appbucket + "/jmxtrans/jmxtrans-agent.jar",
+                    "/etc/ledp/jmxtrans-agent.jar":{
+                        "source":"http://" + config.s3_endpoint() + "/" + appbucket + "/jmxtrans/jmxtrans-agent-1.2.6.jar",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
@@ -127,6 +127,13 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                     },
                     "/etc/ledp/jmxtrans-tomcat-query.xml":{
                         "source":"http://" + config.s3_endpoint() + "/" + appbucket + "/jmxtrans/jmxtrans-tomcat-query.xml",
+                        "mode":"000777",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
+                    },
+                    "/etc/telegraf/telegraf.conf":{
+                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/telegraf/telegraf.conf",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
@@ -152,13 +159,6 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "mode": "000755",
                         "owner": "root",
                         "group": "root"
-                    },
-                    "/etc/telegraf/telegraf.conf":{
-                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/telegraf/telegraf.conf",
-                        "mode":"000777",
-                        "owner":"root",
-                        "group":"root",
-                        "authentication":"S3AccessCreds"
                     },
                     "/tmp/mount_efs.sh": {
                         "content": {
