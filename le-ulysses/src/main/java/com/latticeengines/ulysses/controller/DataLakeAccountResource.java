@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,6 +18,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
+import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.ulysses.utils.AccountDanteFormatter;
 
 import io.swagger.annotations.Api;
@@ -28,10 +30,12 @@ import io.swagger.annotations.ApiOperation;
 public class DataLakeAccountResource {
     private static final Logger log = LoggerFactory.getLogger(DataLakeAccountResource.class);
     private final DataLakeService dataLakeService;
+    private final Oauth2RestApiProxy tenantProxy;
 
     @Inject
-    public DataLakeAccountResource(DataLakeService dataLakeService) {
+    public DataLakeAccountResource(DataLakeService dataLakeService, Oauth2RestApiProxy tenantProxy) {
         this.dataLakeService = dataLakeService;
+        this.tenantProxy = tenantProxy;
     }
 
     @Inject
@@ -41,18 +45,20 @@ public class DataLakeAccountResource {
     @RequestMapping(value = "/{accountId}/{attributeGroup}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
-    public DataPage getAccountById(@PathVariable String accountId, //
+    public DataPage getAccountById(RequestEntity<String> requestEntity, @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
-        return dataLakeService.getAccountById(accountId, attributeGroup);
+        return dataLakeService.getAccountById(accountId, attributeGroup,
+                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/{accountId}/{attributeGroup}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
-    public FrontEndResponse<String> getAccountByIdInDanteFormat(@PathVariable String accountId, //
+    public FrontEndResponse<String> getAccountByIdInDanteFormat(RequestEntity<String> requestEntity,
+            @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
         try {
-            DataPage accountRawData = getAccountById(accountId, attributeGroup);
+            DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup);
             if (accountRawData.getData().size() != 1) {
                 throw new LedpException(LedpCode.LEDP_39003,
                         new String[] { "Account", "" + accountRawData.getData().size() });

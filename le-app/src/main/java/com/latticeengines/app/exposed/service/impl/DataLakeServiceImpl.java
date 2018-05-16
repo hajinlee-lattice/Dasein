@@ -1,11 +1,14 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -22,6 +25,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
@@ -30,6 +34,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -39,16 +47,21 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 import reactor.core.publisher.Flux;
@@ -67,6 +80,15 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Inject
     private EntityProxy entityProxy;
+
+    @Inject
+    private MatchProxy matchProxy;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private LookupIdMappingProxy lookupIdMappingProxy;
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
@@ -170,30 +192,179 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    public DataPage getAccountById(String accountId, ColumnSelection.Predefined predefined) {
+    public DataPage getAccountById(String accountId, ColumnSelection.Predefined predefined,
+            Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-
-        List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
-                .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
 
         if (!StringUtils.isNotEmpty(accountId)) {
             throw new LedpException(LedpCode.LEDP_39001, new String[] { accountId, customerSpace });
         }
 
-        attributes.add(InterfaceName.AccountId.name());
+        String lookupIdColumn = findLookupIdColumn(orgInfo, customerSpace);
+
+        String internalAccountId = getInternalAccountIdViaObjectApi(customerSpace, accountId, lookupIdColumn);
+
+        DataPage dataPage = null;
+
+        if (StringUtils.isNotBlank(internalAccountId)) {
+            dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountId, predefined);
+
+            if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
+                // if we didn't get any data from matchapi then it may be
+                // because data is not published to dynamoDB for this tenant. So
+                // for fallback mechanism we'll use original logic to get data
+                // from redshift
+
+                log.info("Falling back to old logic for extracting account data from Redshift");
+
+                List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
+                        .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+                dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes);
+            }
+        } else {
+            dataPage = createEmptyDataPage();
+        }
+
+        return dataPage;
+    }
+
+    @VisibleForTesting
+    String findLookupIdColumn(Map<String, String> orgInfo, String customerSpace) {
+        String orgId = MapUtils.isNotEmpty(orgInfo) ? orgInfo.get(CDLConstants.ORG_ID) : null;
+        String externalSystemTypeStr = MapUtils.isNotEmpty(orgInfo) ? orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE)
+                : CDLExternalSystemType.CRM.name();
+        CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(externalSystemTypeStr);
+
+        String lookupIdColumn = null;
+        if ((StringUtils.isNotBlank(orgId) //
+                && externalSystemType != null)) {
+
+            Map<String, List<LookupIdMap>> lookupIdMappings = lookupIdMappingProxy.getLookupIdsMapping(customerSpace,
+                    externalSystemType, null, false);
+
+            if (MapUtils.isNotEmpty(lookupIdMappings)
+                    && CollectionUtils.isNotEmpty(lookupIdMappings.get(externalSystemType.name()))) {
+
+                LookupIdMap lookupIdMap = lookupIdMappings.get(externalSystemType.name()).stream() //
+                        .filter(l -> orgId.equals(l.getOrgId())) //
+                        .findAny() //
+                        .orElse(null);
+
+                if (lookupIdMap != null //
+                        && StringUtils.isNotBlank(lookupIdMap.getAccountId())) {
+                    lookupIdColumn = lookupIdMap.getAccountId();
+                }
+            }
+        }
+
+        if (StringUtils.isBlank(lookupIdColumn)) {
+            lookupIdColumn = InterfaceName.SalesforceAccountID.name();
+            log.info(String.format(
+                    "Didn't find any valid lookup id mapping for org = %s. Therefore using default column = %s as lookup id column",
+                    orgId, lookupIdColumn));
+        } else {
+            log.info(String.format(
+                    "Found a valid lookup id mapping for org = %s, therefore using column = %s as lookup id column",
+                    orgId, lookupIdColumn));
+        }
+        return lookupIdColumn;
+    }
+
+    private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId,
+            ColumnSelection.Predefined predefined) {
+
+        MatchInput matchInput = new MatchInput();
+
+        List<List<Object>> data = new ArrayList<>();
+        List<String> fields = new ArrayList<>();
+        List<Object> datum = new ArrayList<>();
+        fields.add(InterfaceName.AccountId.name());
+        datum.add(internalAccountId);
+        data.add(datum);
+
+        Tenant tenant = new Tenant(customerSpace.toString());
+        matchInput.setTenant(tenant);
+        matchInput.setFields(fields);
+        matchInput.setData(data);
+        matchInput.setPredefinedSelection(predefined);
+        String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        matchInput.setUseRemoteDnB(false);
+        matchInput.setDataCloudVersion(dataCloudVersion);
+
+        log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
+        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
+
+        return convertToDataPage(matchOutput);
+    }
+
+    private DataPage convertToDataPage(MatchOutput matchOutput) {
+        DataPage dataPage = createEmptyDataPage();
+        Map<String, Object> data = null;
+        if (matchOutput != null //
+                && CollectionUtils.isNotEmpty(matchOutput.getResult()) //
+                && matchOutput.getResult().get(0) != null) {
+
+            if (matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
+                log.info("Didn't find any match from lattice data cloud. "
+                        + "Still continue to process the result as we may "
+                        + "have found partial match in my data table.");
+            } else {
+                log.info("Found full match from lattice data cloud as well as from my data table.");
+            }
+
+            final Map<String, Object> tempDataRef = new HashMap<>();
+            List<String> fields = matchOutput.getOutputFields();
+            List<Object> values = matchOutput.getResult().get(0).getOutput();
+            IntStream.range(0, fields.size()) //
+                    .forEach(i -> {
+                        tempDataRef.put(fields.get(i), values.get(i));
+                    });
+            data = tempDataRef;
+
+        }
+
+        if (MapUtils.isNotEmpty(data)) {
+            dataPage.getData().add(data);
+        }
+        return dataPage;
+    }
+
+    private DataPage createEmptyDataPage() {
+        DataPage dataPage = new DataPage();
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        dataPage.setData(dataList);
+        return dataPage;
+    }
+
+    private String getInternalAccountIdViaObjectApi(String customerSpace, String accountId, String lookupIdColumn) {
+        List<String> attributes = Collections.singletonList(InterfaceName.AccountId.name());
+        DataPage dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes);
+        String internalAccountId = null;
+
+        if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
+            Object internalAccountIdObj = dataPage.getData().get(0).get(InterfaceName.AccountId.name());
+            if (internalAccountIdObj != null) {
+                internalAccountId = internalAccountIdObj.toString();
+            }
+        }
+
+        return internalAccountId;
+    }
+
+    private DataPage getAccountDataViaObjectApi(String customerSpace, String accountId, String lookupIdColumn,
+            List<String> attributes) {
+
         Restriction accRestriction = Restriction.builder() //
                 .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
                 .eq(accountId) //
                 .build();
-        Restriction restriction = accRestriction;
 
-        if (attributes.contains(InterfaceName.SalesforceAccountID.name())) {
-            Restriction sfdcRestriction = Restriction.builder() //
-                    .let(BusinessEntity.Account, InterfaceName.SalesforceAccountID.name()) //
-                    .eq(accountId) //
-                    .build();
-            restriction = Restriction.builder().or(Arrays.asList(accRestriction, sfdcRestriction)).build();
-        }
+        Restriction sfdcRestriction = Restriction.builder() //
+                .let(BusinessEntity.Account, lookupIdColumn) //
+                .eq(accountId) //
+                .build();
+
+        Restriction restriction = Restriction.builder().or(Arrays.asList(accRestriction, sfdcRestriction)).build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
@@ -281,5 +452,10 @@ public class DataLakeServiceImpl implements DataLakeService {
             }
         }
         return cms;
+    }
+
+    @VisibleForTesting
+    void setMatchProxy(MatchProxy matchProxy) {
+        this.matchProxy = matchProxy;
     }
 }

@@ -31,6 +31,6 @@ public interface DataLakeService {
 
     List<ColumnMetadata> getAttributesInPredefinedGroup(Predefined predefined);
 
-    DataPage getAccountById(String accountID, Predefined predefined);
+    DataPage getAccountById(String accountID, Predefined predefined, Map<String, String> orgInfo);
 
 }
