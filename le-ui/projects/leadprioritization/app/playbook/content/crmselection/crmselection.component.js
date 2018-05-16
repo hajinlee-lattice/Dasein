@@ -6,7 +6,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
     },
     controller: function(
         $scope, $state, $timeout, $stateParams,
-        ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService, SfdcService
+        ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService, SfdcService, QueryStore
     ) {
         var vm = this;       
 
@@ -19,7 +19,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.stored = PlaybookWizardStore.crmselection_form;
             vm.ratingEngine = PlaybookWizardStore.getSavedRating();
 
-            // console.log(vm.orgs);
+            console.log(vm.orgs);
             PlaybookWizardStore.setValidation('crmselection', false);
             if($stateParams.play_name) {
                 // PlaybookWizardStore.setValidation('settings', true);
@@ -32,7 +32,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 });
             }
 
-            vm.orgs[3].isRegistered = false;
         }
 
         vm.checkValid = function(form, accountId) {
@@ -41,11 +40,15 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
             PlaybookWizardStore.setValidation('crmselection', form.$valid);
             if(vm.stored.crm_selection) {
-                PlaybookWizardStore.setSettings({
-                    destinationOrgId: vm.stored.crm_selection.orgId,
-                    destinationSysType: vm.stored.crm_selection.externalSystemType,
-                    destinationAccountId: vm.stored.crm_selection.accountId
-                });
+                // PlaybookWizardStore.setSettings({
+                //     destinationOrgId: vm.stored.crm_selection.orgId,
+                //     destinationSysType: vm.stored.crm_selection.externalSystemType,
+                //     destinationAccountId: vm.stored.crm_selection.accountId
+                // });
+
+                QueryStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
+                QueryStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
+                QueryStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
             }
 
 

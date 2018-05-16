@@ -20,7 +20,7 @@
                     <button
                         class="button orange-button"
                         ng-if="!vm.isRulesBased"
-                        ng-click="vm.deactivateRating()"
+                        ng-click="vm.toggleModal()"
                         ng-disabled="vm.ratingEngine.status === 'INACTIVE' || !vm.dashboard.summary.bucketMetadata">
                         Deactivate Scoring
                     </button>

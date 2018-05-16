@@ -120,15 +120,22 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.deactivateRating = function(){
+
+        console.log(vm.isActive(vm.ratingEngine.status));
+
         var newStatus = (vm.isActive(vm.ratingEngine.status) ? 'INACTIVE' : 'ACTIVE'),
-        newRating = {
-            id: vm.ratingEngine.id,
-            status: newStatus
-        }
+            newRating = {
+                id: vm.ratingEngine.id,
+                status: newStatus
+            }
+
+        console.log(newStatus);
+
         RatingsEngineService.saveRating(newRating).then(function(data){
             vm.ratingEngine = data;
-            // vm.status_toggle = vm.isActive(data.status);
-            // vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
+            $rootScope.$broadcast('statusChange', { 
+                activeStatus: data.status
+            });
             vm.toggleModal();
         });
     }

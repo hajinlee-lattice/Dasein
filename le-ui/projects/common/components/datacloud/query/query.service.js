@@ -43,6 +43,9 @@ angular.module('common.datacloud.query')
         this.bucketsToLaunch = null;
         this.ratedTargetsLimit = null;
         this.selectedBucket = 'A';
+        this.destinationOrgId = null;
+        this.destinationSysType = null;
+        this.destinationAccountId = null;
 
         this.init = function() {
             this.initRestrictions();
@@ -134,6 +137,27 @@ angular.module('common.datacloud.query')
 
         this.getRatedTargetsLimit = function() {
             return this.ratedTargetsLimit;
+        }
+
+        this.setDestinationOrgId = function(destinationOrgId) {
+            this.destinationOrgId = destinationOrgId;
+        }
+        this.getDestinationOrgId = function() {
+            return this.destinationOrgId;
+        }
+
+        this.setDestinationSysType = function(destinationSysType) {
+            this.destinationSysType = destinationSysType;
+        }
+        this.getDestinationSysType = function() {
+            return this.destinationSysType;
+        }
+
+        this.setDestinationAccountId = function(destinationAccountId) {
+            this.destinationAccountId = destinationAccountId;
+        }
+        this.getDestinationAccountId = function() {
+            return this.destinationAccountId;
         }
 
         this.setPublicProperty = function(property, value) {
@@ -336,6 +360,8 @@ angular.module('common.datacloud.query')
                     attribute.attr,
                     (attribute.bkt ? attribute.bkt : null)
                 );
+
+            console.log(bucketRestriction);
             setBucketRestrictionUsed(bucketRestriction);
 
             if (QueryStore.mode == 'rules' || QueryStore.mode == 'dashboardrules') {

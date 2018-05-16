@@ -17,7 +17,7 @@
                     <tbody>
                         <tr 
                             ng-repeat="org in $ctrl.orgs"
-                            ng-class="{'disabled': org.accountId === null}">
+                            ng-class="{'disabled': org.accountId === null || !org.isRegistered}">
                             <td>
                                 <input  
                                     type="radio" 

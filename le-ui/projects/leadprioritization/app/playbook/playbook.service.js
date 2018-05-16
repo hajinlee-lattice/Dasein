@@ -143,6 +143,8 @@ angular.module('lp.playbook')
         var changed = false,
             opts = PlaybookWizardStore.settings;
 
+        console.log(opts);
+
         if(PlaybookWizardStore.currentPlay && PlaybookWizardStore.currentPlay.name) {
             opts.name = PlaybookWizardStore.currentPlay.name;
         }
@@ -163,9 +165,14 @@ angular.module('lp.playbook')
             }
             if(changed) {
 
-                RatingsEngineStore.getRating(opts.ratingEngine.id).then(function(result){
-                    PlaybookWizardStore.setRating(result);
-                });
+                if(opts.ratingEngine){
+                    RatingsEngineStore.getRating(opts.ratingEngine.id).then(function(result){
+                        PlaybookWizardStore.setRating(result);
+                    });
+                } else {
+                    var ratingEngine = PlaybookWizardStore.getSavedRating();
+                    opts.ratingEngine = ratingEngine;
+                }
 
                 PlaybookWizardStore.savePlay(opts).then(function(play){
                     $state.go(nextState, {play_name: play.name});
@@ -312,7 +319,9 @@ angular.module('lp.playbook')
         var deferred = $q.defer();
         var ClientSession = BrowserStorageUtility.getClientSession();
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
+
         PlaybookWizardService.savePlay(opts).then(function(data){
+            console.log(data);
             PlaybookWizardStore.setPlay(data);
             deferred.resolve(data);
         });
@@ -575,7 +584,10 @@ angular.module('lp.playbook')
         var deferred = $q.defer(),
             play_name = play.name,
             bucketsToLaunch = QueryStore.getBucketsToLaunch(),
-            ratedTargetsLimit = QueryStore.getRatedTargetsLimit();
+            ratedTargetsLimit = QueryStore.getRatedTargetsLimit(),
+            destinationOrgId = QueryStore.getDestinationOrgId()
+            destinationSysType = QueryStore.getDestinationSysType(),
+            destinationAccountId = QueryStore.getDestinationAccountId();
 
         // console.log(bucketsToLaunch);
         // console.log(ratedTargetsLimit);
@@ -586,7 +598,10 @@ angular.module('lp.playbook')
             data: {
                 launch_state: 'Launching',
                 bucketsToLaunch: bucketsToLaunch,
-                accountsSelected: ratedTargetsLimit
+                accountsSelected: ratedTargetsLimit,
+                destinationOrgId: destinationOrgId,
+                destinationSysType: destinationSysType,
+                destinationAccountId: destinationAccountId
             }
         }).then(function(response){
             deferred.resolve(response.data);
