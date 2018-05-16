@@ -88,6 +88,13 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         post("save field mapping", url, fieldMappingDocument, Void.class);
     }
 
+    public void saveFieldMappingDocument(String displayName, FieldMappingDocument fieldMappingDocument, String
+            entity, String source, String feedType) {
+        String urlPattern = "/fieldmappings?displayName={displayName}&entity={entity}&source={source}&feedType={feedType}";
+        String url = constructUrl(urlPattern, displayName, entity, source, feedType);
+        post("save field mapping", url, fieldMappingDocument, Void.class);
+    }
+
     @SuppressWarnings("unchecked")
     public SourceFile uploadDeleteFile(boolean compressed, String csvFileName,
             String schemaInterpretation, String cleanupOperationType,

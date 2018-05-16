@@ -45,6 +45,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -365,19 +366,43 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         SourceFile template = fileUploadProxy.uploadFile(s3FileName, false, s3FileName, entity.name(), csvResource);
         FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
+        if (BusinessEntity.Account.equals(entity)) {
+            setExternalSystem(fieldMappingDocument.getFieldMappings());
+        }
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
         }
-        fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
+        fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
+                SourceType.FILE.getName(),entity.name() + "Schema");
         logger.info("Modified field mapping document is saved, start importing ...");
         ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), entity.name() + "Schema",
                 template, template, INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         logger.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
+    }
+
+    private void setExternalSystem(List<FieldMapping> fieldMappings) {
+        for (FieldMapping fieldMapping : fieldMappings) {
+            if (fieldMapping.getUserField().equalsIgnoreCase("SalesforceAccountID")) {
+                fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+            if (fieldMapping.getUserField().equalsIgnoreCase("SalesforceSandboxAccountID")) {
+                fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+            if (fieldMapping.getUserField().equalsIgnoreCase("MarketoAccountID")) {
+                fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.ERP);
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
     }
 
     private ApplicationId submitImport(String customerSpace, String entity, String feedType,
