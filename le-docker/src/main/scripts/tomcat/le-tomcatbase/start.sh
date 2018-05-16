@@ -62,6 +62,9 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
+if [ "${LE_ENVIRONMENT}" = "prodcluster" ]; then
+fi
+
 if [ "${ENABLE_JACOCO}" == "true" ]; then
     JACOCO_DEST_FILE="/mnt/efs/jacoco/${HOSTNAME}.exec"
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:/var/lib/jacocoagent.jar=destfile=${JACOCO_DEST_FILE},append=true,includes=com.latticeengines.*,jmx=true"
