@@ -2,8 +2,6 @@
 echo "JAVA_HOME=${JAVA_HOME}"
 echo "CATALINA_HOME=${CATALINA_HOME}"
 
-JMX_TRANS_VERSION="1.2.6"
-
 if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
     echo "copying properties file for LE_ENVIRONMENT=${LE_ENVIRONMENT}"
     cp /tmp/conf/env/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp
@@ -29,9 +27,11 @@ if [ -f "/etc/ledp/lattice.pem" ]; then
 fi
 chmod 600 /etc/pki/tls/server.key
 
-if [ -f "/etc/ledp/jmxtrans-agent-${JMX_TRANS_VERSION}.jar" ]; then
-    echo "Copying /etc/ledp/jmxtrans-agent-${JMX_TRANS_VERSION}.jar to /var/lib/jmxtrans-agent-${JMX_TRANS_VERSION}.jar"
-    cp -f /etc/ledp/jmxtrans-agent-${JMX_TRANS_VERSION}.jar /var/lib/jmxtrans-agent-${JMX_TRANS_VERSION}.jar
+if [ -f "/etc/ledp/jmxtrans-agent.jar" ]; then
+    echo "Copying /etc/ledp/jmxtrans-agent.jar to /var/lib/jmxtrans-agent.jar"
+    cp -f /etc/ledp/jmxtrans-agent.jar /var/lib/jmxtrans-agent.jar
+    echo "Replacing AWS_INFLUXDB_ADDRESS token by ${AWS_INFLUXDB_ADDRESS}"
+    sed 's|{{AWS_INFLUXDB_ADDRESS}}|${AWS_INFLUXDB_ADDRESS}|g' /var/lib/jmxtrans-tomcat-query.xml > ${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml
 fi
 
 # mail config
@@ -71,6 +71,7 @@ export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
 if [ -f "/var/lib/jmxtrans-agent-${JMX_TRANS_VERSION}.jar" ]; then
     echo "Found jmxtrans-agent-${JMX_TRANS_VERSION}.jar, setting its java agent"
+    export JAVA_OPTS="${JAVA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
 fi
 
 if [ "${ENABLE_JACOCO}" == "true" ]; then
