@@ -2,6 +2,8 @@
 echo "JAVA_HOME=${JAVA_HOME}"
 echo "CATALINA_HOME=${CATALINA_HOME}"
 
+JMX_TRANS_VERSION="1.2.6"
+
 if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
     echo "copying properties file for LE_ENVIRONMENT=${LE_ENVIRONMENT}"
     cp /tmp/conf/env/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp
@@ -26,6 +28,11 @@ if [ -f "/etc/ledp/lattice.pem" ]; then
     cp -f /etc/ledp/lattice.pem /etc/pki/tls/server.key
 fi
 chmod 600 /etc/pki/tls/server.key
+
+if [ -f "/etc/ledp/jmxtrans-agent-${JMX_TRANS_VERSION}.jar" ]; then
+    echo "Copying /etc/ledp/jmxtrans-agent-${JMX_TRANS_VERSION}.jar to /var/lib/jmxtrans-agent-${JMX_TRANS_VERSION}.jar"
+    cp -f /etc/ledp/jmxtrans-agent-${JMX_TRANS_VERSION}.jar /var/lib/jmxtrans-agent-${JMX_TRANS_VERSION}.jar
+fi
 
 # mail config
 if [ "${LE_ENVIRONMENT}" = "prodcluster" ] && [ -f "/root/postfix/main.cf.production" ]; then
@@ -62,7 +69,8 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
-if [ "${LE_ENVIRONMENT}" = "prodcluster" ]; then
+if [ -f "/var/lib/jmxtrans-agent-${JMX_TRANS_VERSION}.jar" ]; then
+    echo "Found jmxtrans-agent-${JMX_TRANS_VERSION}.jar, setting its java agent"
 fi
 
 if [ "${ENABLE_JACOCO}" == "true" ]; then
