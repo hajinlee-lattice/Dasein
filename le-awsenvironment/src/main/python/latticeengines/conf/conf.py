@@ -116,6 +116,9 @@ class AwsEnvironment:
     def le_repo(self):
         return self._props['le.repo']
 
+    def app_bucket(self):
+        return self._props['s3.app.bucket']
+
     def cf_bucket(self):
         return self._props['s3.cf.bucket']
 
