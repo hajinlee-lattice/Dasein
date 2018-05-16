@@ -1,6 +1,6 @@
 FROM  latticeengines/python
 
-RUN conda create --name ledatascience --clone lattice
+RUN conda create --name ledatascience --clone lattice_20180301
 RUN source activate ledatascience
 
 RUN source activate ledatascience && pip install openpyxl==2.5.0
