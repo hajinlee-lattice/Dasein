@@ -17,7 +17,6 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
     config = AwsEnvironment(env)
     lerepo = config.le_repo()
     appbucket = config.app_bucket()
-    cfbucket = config.cf_bucket()
     chefbucket= config.chef_bucket()
     ssh_group = config.iam_ssh_group()
     cert = "star.lattice.local"

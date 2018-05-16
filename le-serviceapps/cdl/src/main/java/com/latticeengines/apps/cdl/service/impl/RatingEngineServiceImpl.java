@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.apps.cdl.service.impl.RatingModelServiceBase.getRatingModelService;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -8,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -49,12 +53,14 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -223,6 +229,85 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
+    public RatingEngine replicateRatingEngine(String id) {
+        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id, true);
+        if (ratingEngine != null) {
+            String ratingEngineId = ratingEngine.getId();
+            log.info(String.format("Replicating rating engine %s (%s)", ratingEngineId, ratingEngine.getDisplayName()));
+
+            RatingModel activeModel = ratingEngine.getActiveModel();
+            String tenantId = MultiTenantContext.getTenant().getId();
+
+            ratingEngine.setPid(null);
+            ratingEngine.setId(null);
+            ratingEngine.setActiveModel(null);
+            ratingEngine.setActiveModelPid(null);
+            String displayName = ratingEngine.getDisplayName();
+            ratingEngine.setDisplayName(generateReplicaName(displayName));
+            ratingEngine.setRatingEngineNotes(null);
+            RatingEngine replicatedEngine = createOrUpdate(ratingEngine, tenantId);
+            log.info("Replicated rating engine " + ratingEngineId + " to " + replicatedEngine.getId());
+
+            String existingActiveModelId = null;
+            RatingModel existingActiveModel = replicatedEngine.getActiveModel();
+            if (existingActiveModel != null) {
+                existingActiveModelId = existingActiveModel.getId();
+            }
+            if (activeModel != null) {
+                RatingModel replicatedModel = replicateRatingModel(replicatedEngine, activeModel);
+                replicatedEngine.setActiveModelPid(replicatedModel.getPid());
+                createOrUpdate(replicatedEngine, tenantId);
+            }
+            if (StringUtils.isNotBlank(existingActiveModelId)) {
+                RatingModelService<?> modelService = getRatingModelService(replicatedEngine.getType());
+                modelService.deleteById(existingActiveModelId);
+            }
+            return replicatedEngine;
+        } else {
+            return null;
+        }
+    }
+
+    private RatingModel replicateRatingModel(RatingEngine ratingEngine, RatingModel model) {
+        log.info("Replicating active model " + model.getId() + " for replicated engine " + ratingEngine.getId() + "("
+                + ratingEngine.getDisplayName() + ")");
+        RatingModel replicatedModel;
+        if (model instanceof RuleBasedModel) {
+            replicatedModel = replicateRuleBasedModel(ratingEngine, (RuleBasedModel) model);
+        } else {
+            replicatedModel = replicateAIModel(ratingEngine, (AIModel) model);
+        }
+        log.info("Replicated an active model " + replicatedModel.getId() + " in replicated engine " + ratingEngine.getId() + "("
+                + ratingEngine.getDisplayName() + ")");
+        return replicatedModel;
+    }
+
+    @SuppressWarnings("unchecked")
+    private AIModel replicateAIModel(RatingEngine ratingEngine, AIModel model) {
+        model.setPid(null);
+        model.setId(null);
+        model.setRatingEngine(ratingEngine);
+        model.setModelSummaryId(null);
+        RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
+                .getRatingModelService(ratingEngine.getType());
+        return ratingModelService.createOrUpdate(model, ratingEngine.getId());
+    }
+
+    @SuppressWarnings("unchecked")
+    private RuleBasedModel replicateRuleBasedModel(RatingEngine ratingEngine, RuleBasedModel model) {
+        model.setPid(null);
+        model.setId(null);
+        model.setRatingEngine(ratingEngine);
+        RatingModelService<RuleBasedModel> ratingModelService = RatingModelServiceBase
+                .getRatingModelService(ratingEngine.getType());
+        return ratingModelService.createOrUpdate(model, ratingEngine.getId());
+    }
+
+    private ModelSummary replicateModelSummary() {
+        return null;
+    }
+
+    @Override
     public void deleteById(String id) {
         deleteById(id, true);
     }
@@ -242,8 +327,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public List<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId) {
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
-        RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
-                .getRatingModelService(ratingEngine.getType());
+        RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
         return ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngineId);
     }
 
@@ -251,8 +335,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public RatingModel getRatingModel(String ratingEngineId, String ratingModelId) {
         RatingEngine ratingEngine = validateRatingEngine(ratingEngineId);
-        RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
-                .getRatingModelService(ratingEngine.getType());
+        RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
         return ratingModelService.geRatingModelById(ratingModelId);
     }
 
@@ -261,8 +344,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public RatingModel updateRatingModel(String ratingEngineId, String ratingModelId, RatingModel ratingModel) {
         log.info(String.format("Update ratingModel %s for Rating Engine %s", ratingModelId, ratingEngineId));
         RatingEngine ratingEngine = validateRatingEngine(ratingEngineId);
-        RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
-                .getRatingModelService(ratingEngine.getType());
+        RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
         ratingModel.setId(ratingModelId);
         RatingModel model = ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
         evictRatingMetadataCache();
@@ -300,8 +382,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL && ratingModel instanceof AIModel) {
-            AIModelService aiModelService = (AIModelService) RatingModelServiceBase
-                    .getRatingModelService(ratingEngine.getType());
+            AIModelService aiModelService = (AIModelService) getRatingModelService(ratingEngine.getType());
             if (version == null) {
                 version = dataCollectionService.getActiveVersion(customerSpace);
             }
@@ -508,8 +589,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId) {
         Set<AttributeLookup> attributes = new HashSet<>();
         RatingEngine ratingEngine = validateRatingEngine(ratingEngineId);
-        RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
-                .getRatingModelService(ratingEngine.getType());
+        RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
 
         List<RatingModel> ratingModels = ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngineId);
         if (ratingModels != null) {
@@ -527,8 +607,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public List<AttributeLookup> getDependentAttrsInActiveModel(String ratingEngineId) {
         Set<AttributeLookup> attributes = new HashSet<>();
         RatingEngine ratingEngine = validateRatingEngine_PopulateActiveModel(ratingEngineId);
-        RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
-                .getRatingModelService(ratingEngine.getType());
+        RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
 
         RatingModel activeRatingModel = ratingEngine.getActiveModel();
         if (activeRatingModel != null) {
@@ -547,7 +626,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingEngine> ratingEngines = getAllRatingEngines();
         if (ratingEngines != null) {
             for (RatingEngine ratingEngine : ratingEngines) {
-                ratingModelService = RatingModelServiceBase.getRatingModelService(ratingEngine.getType());
+                ratingModelService = getRatingModelService(ratingEngine.getType());
 
                 List<RatingModel> ratingModels = ratingModelService
                         .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
@@ -576,7 +655,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingEngine> ratingEngines = getAllRatingEngines();
         if (ratingEngines != null) {
             for (RatingEngine ratingEngine : ratingEngines) {
-                ratingModelService = RatingModelServiceBase.getRatingModelService(ratingEngine.getType());
+                ratingModelService = getRatingModelService(ratingEngine.getType());
 
                 List<RatingModel> ratingModels = ratingModelService
                         .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
@@ -603,4 +682,25 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
         return attribute;
     }
+
+    public static String generateReplicaName(String name) {
+        final String replica = "Replica";
+        String replicaName;
+        if (!name.startsWith(replica)) {
+            replicaName = replica + " " + name;
+        } else {
+            Pattern pattern = Pattern.compile("^" + replica + "-(\\d+) ");
+            Matcher matcher = pattern.matcher(name);
+            if (matcher.find()) {
+                String oldPrefix = matcher.group(0);
+                int idx = Integer.parseInt(matcher.group(1)) + 1;
+                String newPrefix = replica + "-" + String.valueOf(idx) + " ";
+                replicaName = name.replaceFirst(oldPrefix, newPrefix);
+            } else {
+                replicaName = name.replaceFirst(replica, replica + "-2");
+            }
+        }
+        return replicaName;
+    }
+
 }

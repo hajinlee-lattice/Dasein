@@ -276,6 +276,10 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             }
         }
 
+        if (ratingEngine.getActiveModelPid() != null) {
+            retrievedRatingEngine.setActiveModelPid(ratingEngine.getActiveModelPid());
+        }
+
         // PLS-7555 - allow segment to be reset to null for custom event rating
         if (unlinkSegment == Boolean.TRUE && !retrievedRatingEngine.getType().isTargetSegmentMandatory()) {
             retrievedRatingEngine.setSegment(null);

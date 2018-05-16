@@ -1,13 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +62,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     private Date updatedDate;
 
     @BeforeClass(groups = "deployment")
-    public void setup() throws KeyManagementException, NoSuchAlgorithmException, IOException {
+    public void setup() {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId());
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
@@ -282,10 +280,48 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdateRatingEngine" })
+    public void testReplicate() {
+        RatingEngine replicatedRule = ratingEngineService.replicateRatingEngine(rbRatingEngineId);
+        assertReplicatedEngine(replicatedRule, rbRatingEngine);
+
+        RatingEngine replicatedAI = ratingEngineService.replicateRatingEngine(aiRatingEngineId);
+        assertReplicatedEngine(replicatedAI, aiRatingEngine);
+
+        deactivateRatingEngine(replicatedRule.getId());
+        deactivateRatingEngine(replicatedAI.getId());
+        hardDeleteRatingEngine(replicatedRule.getId());
+        hardDeleteRatingEngine(replicatedAI.getId());
+    }
+
+    private void assertReplicatedEngine(RatingEngine replicated, RatingEngine original) {
+        Assert.assertNotNull(replicated);
+        Assert.assertNotNull(original);
+
+        if (original.getActiveModel() != null) {
+            Assert.assertNotNull(replicated.getActiveModel());
+            Assert.assertNotEquals(replicated.getActiveModel().getId(), original.getActiveModel().getId());
+        }
+
+        Assert.assertNotEquals(replicated.getId(), original.getId());
+        Assert.assertNotEquals(replicated.getDisplayName(), original.getDisplayName());
+
+        Assert.assertTrue(CollectionUtils.isEmpty(replicated.getRatingEngineNotes()));
+
+        if (original.getSegment() != null) {
+            Assert.assertNotNull(replicated.getSegment());
+            Assert.assertEquals(replicated.getSegment().getName(), original.getSegment().getName());
+        }
+        Assert.assertEquals(replicated.getType(), original.getType());
+        Assert.assertEquals(replicated.getStatus(), original.getStatus());
+        Assert.assertEquals(replicated.getDeleted(), original.getDeleted());
+        Assert.assertEquals(replicated.getAdvancedRatingConfigStr(), original.getAdvancedRatingConfigStr());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testReplicate" })
     public void testDelete() {
         // update Rating Engine to be inactive for deletion
-        DeactivateRatingEngine(rbRatingEngineId);
-        DeactivateRatingEngine(aiRatingEngineId);
+        deactivateRatingEngine(rbRatingEngineId);
+        deactivateRatingEngine(aiRatingEngineId);
 
         // Soft Delete Rule Based Rating Engine
         deleteSoftRatingEngine(rbRatingEngineId);
@@ -387,7 +423,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         ratingEngineService.revertDelete(ratingEngineId);
     }
 
-    protected void DeactivateRatingEngine(String ratingEngineId) {
+    protected void deactivateRatingEngine(String ratingEngineId) {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngineId);
         ratingEngine.setStatus(RatingEngineStatus.INACTIVE);

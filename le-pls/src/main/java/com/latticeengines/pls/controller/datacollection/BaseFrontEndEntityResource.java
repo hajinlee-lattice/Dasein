@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -26,7 +29,7 @@ public abstract class BaseFrontEndEntityResource {
     private final DataCollectionProxy dataCollectionProxy;
 
     BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy,
-            DataCollectionProxy dataCollectionProxy) {
+                               DataCollectionProxy dataCollectionProxy) {
         this.entityProxy = entityProxy;
         this.segmentProxy = segmentProxy;
         this.dataCollectionProxy = dataCollectionProxy;
@@ -51,7 +54,7 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery.setAccountRestriction(null);
             frontEndQuery.setContactRestriction(null);
         }
-        appendSegmentRestriction(frontEndQuery);
+        appendSegmentRestriction(mainEntity, frontEndQuery);
         frontEndQuery.setMainEntity(mainEntity);
         return entityProxy.getCount(tenantId, frontEndQuery);
     }
@@ -71,12 +74,12 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery.setAccountRestriction(null);
             frontEndQuery.setContactRestriction(null);
         }
-        appendSegmentRestriction(frontEndQuery);
+        appendSegmentRestriction(getMainEntity(), frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         return entityProxy.getData(tenantId, frontEndQuery);
     }
 
-    private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {
+    private void appendSegmentRestriction(BusinessEntity mainEntity, FrontEndQuery frontEndQuery) {
         if (StringUtils.isNotBlank(frontEndQuery.getPreexistingSegmentName())) {
             // Segment Restrictions
             Pair<Restriction, Restriction> segmentRestrictions = getSegmentRestrictions(
@@ -91,9 +94,9 @@ public abstract class BaseFrontEndEntityResource {
                 if (frontEndAccountRestriction != null) {
                     Restriction totalRestriction = Restriction.builder()
                             .and(frontEndAccountRestriction, segmentAccountRestriction).build();
-                    frontEndQuery.getAccountRestriction().setRestriction(totalRestriction);
+                    frontEndQuery.getAccountRestriction().setRestriction(appendAccountNotNull(totalRestriction));
                 } else {
-                    frontEndQuery.getAccountRestriction().setRestriction(segmentAccountRestriction);
+                    frontEndQuery.getAccountRestriction().setRestriction(appendAccountNotNull(segmentAccountRestriction));
                 }
             }
 
@@ -110,6 +113,19 @@ public abstract class BaseFrontEndEntityResource {
                 }
             }
         }
+    }
+
+    private Restriction appendAccountNotNull(Restriction restriction) {
+        if (restriction == null) {
+            return accountNotNullBucket();
+        } else {
+            return Restriction.builder().and(restriction, accountNotNullBucket()).build();
+        }
+    }
+
+    private BucketRestriction accountNotNullBucket () {
+        Bucket bkt = Bucket.notNullBkt();
+        return new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt);
     }
 
     private Pair<Restriction, Restriction> getSegmentRestrictions(String segmentName) {

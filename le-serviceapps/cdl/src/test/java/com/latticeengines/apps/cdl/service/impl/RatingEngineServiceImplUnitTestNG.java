@@ -80,6 +80,17 @@ public class RatingEngineServiceImplUnitTestNG {
         System.out.println(aiModel);
     }
 
+    @Test(groups = "unit")
+    public void testGenerateReplicaName() {
+        String name = "Rating Engine";
+        String replicaName = RatingEngineServiceImpl.generateReplicaName(name);
+        Assert.assertEquals(replicaName, "Replica " + name);
+        for(int i = 2; i < 20; i++) {
+            replicaName = RatingEngineServiceImpl.generateReplicaName(replicaName);
+            Assert.assertEquals(replicaName, "Replica-" + i + " " + name);
+        }
+    }
+
     private void mockDataFeedProxy() {
         DataFeed dataFeed = new DataFeed();
         dataFeed.setLastPublished(DATE);

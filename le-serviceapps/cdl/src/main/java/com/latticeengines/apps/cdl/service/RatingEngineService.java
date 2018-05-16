@@ -35,6 +35,8 @@ public interface RatingEngineService {
 
     RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment);
 
+    RatingEngine replicateRatingEngine(String id);
+
     Map<String, Long> updateRatingEngineCounts(String engineId);
 
     void deleteById(String id);

@@ -30,10 +30,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -309,30 +311,30 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setEntityCount(BusinessEntity entity, Long count) {
         switch (entity) {
-        case Account:
-            setAccounts(count);
-            break;
-        case Contact:
-            setContacts(count);
-            break;
-        case Product:
-            setProducts(count);
-            break;
-        default:
-            throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+            case Account:
+                setAccounts(count);
+                break;
+            case Contact:
+                setContacts(count);
+                break;
+            case Product:
+                setProducts(count);
+                break;
+            default:
+                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
     }
 
     public Long getEntityCount(BusinessEntity entity) {
         switch (entity) {
-        case Account:
-            return getAccounts();
-        case Contact:
-            return getContacts();
-        case Product:
-            return getProducts();
-        default:
-            throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+            case Account:
+                return getAccounts();
+            case Contact:
+                return getContacts();
+            case Product:
+                return getProducts();
+            default:
+                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
     }
 
@@ -354,13 +356,28 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     public RatingEngineFrontEndQuery toRatingEngineFrontEndQuery(BusinessEntity mainEntity) {
         RatingEngineFrontEndQuery frontEndQuery = new RatingEngineFrontEndQuery();
         frontEndQuery.setMainEntity(mainEntity);
-        FrontEndRestriction accountRestriction = getAccountRestriction() == null ? getAccountFrontEndRestriction()
-                : new FrontEndRestriction(getAccountRestriction());
+
+        Restriction innerAccountRestriction = getAccountRestriction() == null ? getAccountFrontEndRestriction().getRestriction() : getAccountRestriction();
+        if (!BusinessEntity.Account.equals(mainEntity)) {
+            if (innerAccountRestriction != null) {
+                innerAccountRestriction = Restriction.builder().and(innerAccountRestriction, accountNotNullBucket()).build();
+            } else {
+                innerAccountRestriction = accountNotNullBucket();
+            }
+        }
+
+        FrontEndRestriction accountRestriction = new FrontEndRestriction(innerAccountRestriction);
         FrontEndRestriction contactRestriction = getContactRestriction() == null ? getContactFrontEndRestriction()
                 : new FrontEndRestriction(getContactRestriction());
+
         frontEndQuery.setAccountRestriction(accountRestriction);
         frontEndQuery.setContactRestriction(contactRestriction);
         return frontEndQuery;
+    }
+
+    private BucketRestriction accountNotNullBucket () {
+        Bucket bkt = Bucket.notNullBkt();
+        return new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt);
     }
 
     @Override
