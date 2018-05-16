@@ -38,12 +38,12 @@
                                 <i ng-if="!vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort"></i>
                                 <i ng-if="vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                             </li>
-                            <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numAccounts'">
+                            <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + '!accounts'">
                                 Accounts
                                 <i ng-if="!vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort"></i>
                                 <i ng-if="vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                             </li>
-                            <li class="contacts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numContacts'">
+                            <li class="contacts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + '!contacts'">
                                 Contacts 
                                 <i ng-if="!vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort"></i>
                                 <i ng-if="vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
