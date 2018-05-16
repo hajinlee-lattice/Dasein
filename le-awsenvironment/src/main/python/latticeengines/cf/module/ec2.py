@@ -112,7 +112,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "authentication":"S3AccessCreds"
                     },
                     "/etc/ledp/createSSHAccounts.sh":{
-                        "source":"http://" + config.s3_endpoint() + "/" + cfbucket + "/ssh/createAccounts.sh",
+                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/ssh/createAccounts.sh",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
