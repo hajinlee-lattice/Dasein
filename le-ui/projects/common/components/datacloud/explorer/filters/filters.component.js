@@ -202,6 +202,15 @@ angular
                 vm.saved = false;
             }
 
+            vm.isFilterSelected = function() {
+                return  (vm.section !== 'insights'          && vm.metadata.toggle.show.enabled)     ||
+                        vm.metadata.toggle.show.selected    || vm.metadata.toggle.hide.selected     ||
+                        vm.metadata.toggle.show.premium     || vm.metadata.toggle.hide.premium      ||
+                        vm.metadata.toggle.hide.enabled     || vm.metadata.toggle.show.highlighted  ||
+                        vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls        ||
+                        vm.metadata.toggle.show.internal;
+            }
+
             vm.sortOrder = function() {
                 var sortPrefix = vm.sortPrefix.replace('+','');
                 if (!vm.category) {

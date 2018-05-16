@@ -11,19 +11,7 @@ angular.module('common.attributes.edit', [
                     value: 'My Account'
                 }
             },
-            resolve: {
-                tabs: [function() {
-                    return [{
-                        label: "My Account Attributes",
-                        category: "My Account",
-                        total: 500
-                    },{
-                        label: "My Contact Attributes",
-                        category: "My Contact",
-                        total: 500
-                    }];
-                }]
-            },
+            resolve: {},
             views: {
                 "subsummary@": "attrSubheader",
                 "main@": "attrEdit"

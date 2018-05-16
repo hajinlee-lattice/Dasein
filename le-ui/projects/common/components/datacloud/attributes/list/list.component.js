@@ -6,16 +6,12 @@ angular.module('common.attributes.list', [
     templateUrl: '/components/datacloud/attributes/list/list.component.html',
     bindings: {
         overview: '<',
-        config: '<',
-        options: '< '
+        filters: '< '
     },
     controller: function ($state, $stateParams, AttrConfigStore) {
         var vm = this;
 
-        vm.page = 1;
-        vm.pagesize = 25;
-        vm.sortPrefix = '+';
-        vm.selected = [];
+        vm.store = AttrConfigStore;
         vm.attributes = {};
         vm.indeterminate = {};
         vm.startChecked = {};
@@ -24,24 +20,20 @@ angular.module('common.attributes.list', [
 
         vm.$onInit = function() {
             console.log('init attrList', vm);
-            vm.section = AttrConfigStore.getSection();
+            vm.data = vm.store.getData();
+            vm.section = vm.store.getSection();
             vm.params = $stateParams;
-            vm.categories = vm.overview.AttrNums;
 
-            if (vm.section == 'activate') {
-                vm.limit = vm.overview[vm.params.category].Limit;
-            }
-            
             vm.parseData();
             vm.countSelected();
 
-            vm.original = angular.copy(vm.config);
+            vm.store.setData('original', angular.copy(vm.data.config));
         };
 
         vm.parseData = function() {
             var total = [];
 
-            vm.config.Subcategories.forEach(function(item) {
+            vm.data.config.Subcategories.forEach(function(item) {
                 var selected = item.Attributes.filter(function(attr) {
                     return attr.Selected;
                 });
@@ -53,13 +45,13 @@ angular.module('common.attributes.list', [
                 item.checked = selected.length;
                 item.Selected = vm.isChecked(item);
 
-                vm.allCheckedMap[item.SubCategory] = item.checked == item.TotalAttrs;
-                vm.attributes[item.SubCategory] = item.Attributes;
+                vm.allCheckedMap[item.DisplayName] = item.checked == item.TotalAttrs;
+                vm.attributes[item.DisplayName] = item.Attributes;
 
                 total.concat(selected);
             });
 
-            vm.selected = total;
+            vm.store.setSelected(total);
         };
 
         vm.countSelected = function() {
@@ -86,31 +78,31 @@ angular.module('common.attributes.list', [
                 subcategory.checked = selected.length;
             });
 
-            vm.selected = total;
-            vm.config.Selected = vm.selected.length;
+            vm.store.setSelected(total);
+            vm.data.config.Selected = vm.store.getSelected().length;
         };
 
         vm.getResults = function() {
             return vm.subcategory 
                 ? vm.attributes[vm.subcategory] 
-                : vm.config.Subcategories;
+                : vm.data.config.Subcategories;
         };
 
         vm.getCount = function() {
             return vm.subcategory 
                 ? vm.getSubcategory(vm.subcategory).TotalAttrs 
-                : vm.config.TotalAttrs;
+                : vm.data.config.TotalAttrs;
         };
 
         vm.getSubcategory = function(name) {
-            return vm.config.Subcategories.filter(function(item) {
-                return item.SubCategory == name;
+            return vm.data.config.Subcategories.filter(function(item) {
+                return item.DisplayName == name;
             })[0];
         };
 
         vm.back = function() {
             vm.subcategory = '';
-            vm.page = 1;
+            vm.filters.page = 1;
 
             $state.go('.', { 
                 subcategory: vm.subcategory 
@@ -119,8 +111,8 @@ angular.module('common.attributes.list', [
 
         vm.click = function(item) {
             if (item.Attributes) {
-                vm.subcategory = item.SubCategory;
-                vm.page = 1;
+                vm.subcategory = item.DisplayName;
+                vm.filters.page = 1;
 
                 $state.go('.', { 
                     subcategory: vm.subcategory 
@@ -136,7 +128,7 @@ angular.module('common.attributes.list', [
             }
 
             if (item.Attributes) {
-                vm.setIndeterminate(item.SubCategory, false);
+                vm.setIndeterminate(item.DisplayName, false);
 
                 item.Attributes
                     .sort(vm.sortAttributes)
@@ -148,7 +140,7 @@ angular.module('common.attributes.list', [
                         attr.Selected = (item.checked != item.TotalAttrs);
 
                         if (attr.Selected) {
-                            vm.selected.push(attr);
+                            vm.store.getSelected().push(attr);
                         }
                     });
             } else {
@@ -160,8 +152,8 @@ angular.module('common.attributes.list', [
 
         vm.isChecked = function(item) {
             if (item.Attributes) {
-                if (vm.indeterminate[item.SubCategory] === true) {
-                    vm.setIndeterminate(item.SubCategory, true);
+                if (vm.indeterminate[item.DisplayName] === true) {
+                    vm.setIndeterminate(item.DisplayName, true);
                 } else {
                     return item.checked == item.TotalAttrs;
                 }
@@ -174,8 +166,8 @@ angular.module('common.attributes.list', [
             var subcategory, selected, total, indeterminate;
 
             if (!vm.subcategory) {
-                selected = vm.selected.length;
-                total = vm.config.TotalAttrs;
+                selected = vm.store.getSelected().length;
+                total = vm.data.config.TotalAttrs;
             } else {
                 subcategory = vm.getSubcategory(vm.subcategory);
                 selected = subcategory.checked;
@@ -193,7 +185,7 @@ angular.module('common.attributes.list', [
                 return false;
             }
 
-            var overLimit = vm.selected.length >= vm.limit && !vm.isChecked(item);
+            var overLimit = vm.store.getSelected().length >= vm.store.getLimit() && !vm.isChecked(item);
             
             if (item.Attributes) {
                 var hasFrozen = item.HasFrozenAttrs;
@@ -219,7 +211,7 @@ angular.module('common.attributes.list', [
                         attr.Selected = vm.allCheckedMap[vm.subcategory];
 
                         if (attr.Selected) {
-                            vm.selected.push(attr);
+                            vm.store.getSelected().push(attr);
                         }
                     });
             } else {
@@ -241,7 +233,7 @@ angular.module('common.attributes.list', [
                                 attr.Selected = vm.allChecked;
 
                                 if (attr.Selected) {
-                                    vm.selected.push(attr);
+                                    vm.store.getSelected().push(attr);
                                 }
                             });
                     });
@@ -258,47 +250,12 @@ angular.module('common.attributes.list', [
             $('[name="' + checkbox + '"]').prop('indeterminate', value);
         };
 
-        vm.isChanged = function() {
-            var current = angular.copy(vm.config);
-            return JSON.stringify(vm.original) === JSON.stringify(current);
-        };
-
         vm.sortAttributes = function(a, b) {
             return a.Attribute.toLowerCase().localeCompare(b.Attribute.toLowerCase());
         };
 
         vm.sortSubcategories = function(a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
-        };
-
-        vm.save = function() {
-            var activate = vm.section == 'activate';
-            var type = activate ? 'activation' : 'usage';
-            var category = vm.params.category;
-            var usage = {};
-            var data = {
-                Select: []
-            };
-
-            if (!activate) {
-                usage.usage = vm.params.section;
-                data.Deselect = [];
-            }
- 
-            vm.config.Subcategories.forEach(function(item) {
-                item.Attributes.forEach(function(attr) {
-                    if (attr.Selected) {
-                        data.Select.push(attr.Attribute);
-                    } else if (!activate) {
-                        data.Deselect.push(attr.Attribute);
-                    }
-                });
-            });
-            
-            AttrConfigStore.putConfig(type, category, usage, data).then(function() {
-                console.log('save', vm.section, activate, type, category, usage, data);
-                $state.reload();
-            });
         };
     }
 });

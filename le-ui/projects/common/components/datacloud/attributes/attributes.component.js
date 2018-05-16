@@ -1,7 +1,8 @@
 angular.module('common.attributes', [
     'common.attributes.header',
-    'common.attributes.list',
+    'common.attributes.filters',
     'common.attributes.categories',
+    'common.attributes.list',
     'common.attributes.enable',
     'common.attributes.activate',
     'common.attributes.edit'

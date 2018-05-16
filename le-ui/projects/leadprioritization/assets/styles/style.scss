@@ -4087,25 +4087,25 @@ ul.inbox-pagination li {
     color:#8b8b8b;
     line-height:25px;
 }
-.profile-nav ul {
+.profile-nav ul.profile-nav-dropdown-menu {
     margin-top:1px;
     color: #666;
 text-align: left;
 }
-.profile-nav ul>li {
+.profile-nav ul.profile-nav-dropdown-menu>li {
     border-bottom:1px solid #ebeae6;
     margin-top:0;
     line-height:18px;
 }
-.profile-nav ul>li:last-child {
+.profile-nav ul.profile-nav-dropdown-menu>li:last-child {
     border-bottom:none;
 }
-.profile-nav ul>li>a {
+.profile-nav ul.profile-nav-dropdown-menu>li>a {
     border-radius:0;
     -webkit-border-radius:0;
     color:#89817f;
 }
-.profile-nav ul>li>a>i {
+.profile-nav ul.profile-nav-dropdown-menu>li>a>i {
     font-size:16px;
     padding-right:10px;
     color:#bcb3aa;

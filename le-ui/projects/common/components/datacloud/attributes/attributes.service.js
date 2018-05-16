@@ -1,22 +1,28 @@
 
 angular.module('common.attributes')
-.service('AttrConfigStore', function($q, $state, AttrConfigService) {
+.service('AttrConfigStore', function($q, $state, $stateParams, $timeout, AttrConfigService) {
     var store = this;
 
     this.init = function(){
+        this.filters = {
+            page: 1,
+            pagesize: 25,
+            sortPrefix: '+',
+            queryText: '',
+            showFilterBy: false,
+            showSelected: false,
+            hideSelected: false,
+            showPremium: false,
+            hidePremium: false
+        };
+
+        this.limit = null;
+        this.selected = [];
+
         this.data = {
-            activate: {
-                attributes: [],
-                overview: []
-            },
-            enable: {
-                attributes: [],
-                overview: []
-            },
-            edit: {
-                attributes: [],
-                overview: []
-            }
+            original: {},
+            config: {},
+            overview: {}
         };
 
         this.tabs = {
@@ -77,6 +83,14 @@ angular.module('common.attributes')
         };
     };
 
+    this.getData = function() {
+        return this.data;
+    };
+
+    this.setData = function(type, data) {
+        this.data[type] = data;
+    };
+
     this.getSection = function() {
         var map = {
             'home.attributes.activate': 'activate',
@@ -87,8 +101,28 @@ angular.module('common.attributes')
         return map[$state.current.name];
     };
 
+    this.getFilters = function() {
+        return this.filters;
+    };
+
     this.getTabMetadata = function(section) {
         return this.tabs[section];
+    };
+
+    this.getSelected = function() {
+        return this.selected;
+    };
+
+    this.setSelected = function(total) {
+        this.selected = total;
+    };
+
+    this.getLimit = function() {
+        return this.limit;
+    };
+
+    this.setLimit = function(total) {
+        this.limit = total;
     };
 
     this.putConfig = function(type, category, usage, data) {
@@ -99,6 +133,49 @@ angular.module('common.attributes')
         });
 
         return deferred.promise;
+    };
+
+    this.isChanged = function() {
+        if (!this.data.original.Entity) {
+            return true;
+        }
+
+        var current = angular.copy(this.data.config);
+        return JSON.stringify(this.data.original) === JSON.stringify(current);
+    };
+
+    this.save = function() {
+        var activate = this.getSection() == 'activate';
+        var type = activate ? 'activation' : 'usage';
+        var category = $stateParams.category;
+        var usage = {};
+        var data = {
+            Select: []
+        };
+
+        if (!activate) {
+            usage.usage = $stateParams.section;
+            data.Deselect = [];
+        }
+
+        this.data.config.Subcategories.forEach(function(item) {
+            item.Attributes.forEach(function(attr) {
+                if (attr.Selected) {
+                    data.Select.push(attr.Attribute);
+                } else if (!activate) {
+                    data.Deselect.push(attr.Attribute);
+                }
+            });
+        });
+        
+        this.setData('original', angular.copy(this.data.config));
+        
+        this.putConfig(type, category, usage, data).then(function() {
+            console.log('save', activate, type, category, usage, data);
+            $timeout(function() {
+                $state.reload();
+            }, 500);
+        });
     };
 
     this.init();
