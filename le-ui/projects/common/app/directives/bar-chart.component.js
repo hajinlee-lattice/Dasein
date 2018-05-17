@@ -14,6 +14,19 @@ angular
             },
             templateUrl: '/components/charts/bar-chart.component.html',
             controller: function ($scope, $filter, $timeout) {
+                
+                /**
+                 * Return the number with decimals truncated to the maxDigits.
+                 * If not provided the maxDigits is 1
+                 * @param {*} value 
+                 * @param {number} maxDigits
+                 */
+                function  getTruncatedValue(value, maxDigits){
+                    var numb = Number(value);
+                    var max = maxDigits ? maxDigits : 1;
+                    var ret = parseFloat(numb.toFixed(max));
+                    return ret;
+                }
 
                 function getHighestStat(stats, fieldName) {
                     var highest = 0;
@@ -201,17 +214,21 @@ angular
                  * @param {*} column 
                  */
                 $scope.getValue = function (stat, column) {
+                    var numb = 0;
+                    var ret = 0;
                     switch (column.type) {
                         case 'number':
                             {
-                                return stat[column.field];
+                                return getTruncatedValue(stat[column.field]);
                             }
                         case 'string':
                             {
-                                return stat[column.field] + column.suffix;
+                                return getTruncatedValue(stat[column.field]) + column.suffix;
                             }
                         default:
-                            return stat[column.field];
+                            {
+                                return getTruncatedValue(stat[column.field]);
+                            }
                     }
                 }
 
