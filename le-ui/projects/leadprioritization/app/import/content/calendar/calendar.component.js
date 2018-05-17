@@ -231,7 +231,7 @@ angular.module('lp.import.calendar', [])
     }
 
     vm.init = function() {
-        //parseCalendar(vm.calendar); // uncomment this to create a non-null state for existing calendars
+        //parseCalendar(vm.calendar); // uncomment this to create a non-null state for existing calendars PLS-8479
         if( vm.calendarOptions.mode === 'STARTING_DAY') {
             vm.nthMapping.nth = vm.calendarOptions.nth;
             vm.nthMapping.day = vm.calendarOptions.day;
