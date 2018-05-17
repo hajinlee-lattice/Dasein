@@ -713,6 +713,8 @@ public enum LedpCode {
     LEDP_40019("Unsupported Custom Event Modeling Type {0}"), //
     LEDP_40020("Unable to find a Model Summary for the AIModel {0} of the RatingEngine {1}, Customer Space {2}"), //
     LEDP_40021("Unable to set the default model name correctly, setting it to {0}"), //
+    LEDP_40022("Serving store is empty or wrong customer config leads to empty store"), //
+    LEDP_40023("Wrong customer config, system can't render these attrbutes {0} "), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
