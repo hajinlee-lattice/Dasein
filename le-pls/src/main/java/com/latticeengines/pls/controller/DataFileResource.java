@@ -177,7 +177,7 @@ public class DataFileResource {
     @RequestMapping(value = "/sourcefilecsv/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get source file uploaded to create model or score against model via Application Id")
-    public ResponseDocument<Boolean> getSourceFileViaAppId( //
+    public void getSourceFileViaAppId( //
             @PathVariable String applicationId, //
             @RequestParam(value = "fileName", required = true) String fileName, //
             HttpServletRequest request, //
@@ -188,13 +188,12 @@ public class DataFileResource {
         } catch (Exception e) {
             throw e;
         }
-        return ResponseDocument.successResponse(true);
     }
 
     @RequestMapping(value = "/sourcefile", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get source file uploaded to create model or score against model via internal file name")
-    public ResponseDocument<Boolean> getSourceFileViaFileName( //
+    public void getSourceFileViaFileName( //
             @RequestParam(value = "fileName", required = true) String fileName, //
             HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
@@ -203,13 +202,12 @@ public class DataFileResource {
         } catch (Exception e) {
             throw e;
         }
-        return ResponseDocument.successResponse(true);
     }
 
     @RequestMapping(value = "/errorscsv", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get error file via file path")
-    public ResponseDocument<Boolean> getErrorsCsvFile( //
+    public void getErrorsCsvFile( //
             @RequestParam(value = "filePath", required = true) String filePath, //
             HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
@@ -218,6 +216,5 @@ public class DataFileResource {
         } catch (Exception e) {
             throw e;
         }
-        return ResponseDocument.successResponse(true);
     }
 }
