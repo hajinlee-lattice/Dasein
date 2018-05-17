@@ -138,6 +138,15 @@ public class ActivityMetricsUtils {
         }
     };
 
+    private static Set<String> validPeriods = new HashSet<String>() {
+        {
+            add(PeriodStrategy.Template.Year.name());
+            add(PeriodStrategy.Template.Quarter.name());
+            add(PeriodStrategy.Template.Month.name());
+            add(PeriodStrategy.Template.Week.name());
+        }
+    };
+
     public static boolean isHasPurchasedAttr(String fullName) {
         return fullName.startsWith(ActivityMetricsUtils.HEADER)
                 && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr());
@@ -344,6 +353,9 @@ public class ActivityMetricsUtils {
         }
         Set<String> periods = new HashSet<>();
         for (TimeFilter timeFilter : timeFilters) {
+            if (!validPeriods.contains(timeFilter.getPeriod())) {
+                throw new RuntimeException("Unknown period: " + timeFilter.getPeriod());
+            }
             periods.add(timeFilter.getPeriod());
         }
         if (periods.size() > 1) {
