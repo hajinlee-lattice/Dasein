@@ -54,7 +54,7 @@
         <property name="jdbcUrl" value="${datacloud.manage.reader.url}"/>
         <property name="user" value="${datacloud.manage.user}" />
         <property name="password" value="${datacloud.manage.password.encrypted}" />
-        <property name="writerConnection" value="true"/>
+        <property name="writerConnection" value="false"/>
         <property name="maxPoolSize" value="${datacloud.manage.poolsize.max}" />
         <property name="maxPoolSizeForWebApp" value="${datacloud.manage.poolsize.max.webapp}"/>
         <property name="maxPoolSizeForAppMaster" value="${datacloud.manage.poolsize.max.appmaster}"/>
@@ -63,7 +63,7 @@
    <!-- Entity manager factory -->
     <bean id="entityManagerFactoryPropDataManageReader"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="dataSource" ref="propDataManage" />
+        <property name="dataSource" ref="propDataManageReader" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage, com.latticeengines.domain.exposed.datacloud.customer" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
