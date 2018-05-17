@@ -40,7 +40,15 @@
 
 	.chips-query-container {
 		width: 300px;
+		display: inline-block;
+		.chips-container {
+			margin-bottom: 0;
+			.chip-container {
+				padding: 7px;
+			}
+		}
 		.text-container .query {
+			padding: 6px;
 			margin-top: 0;
 		}
 	}

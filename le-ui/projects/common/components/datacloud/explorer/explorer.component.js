@@ -1528,13 +1528,13 @@ angular.module('common.datacloud.explorer', [
         if (!vm.cube) {
             return alert('Cube data not yet loaded. \nOne moment please.');
         }
-
-        attribute.SegmentChecked = true;
         
         if (!attribute.TopBkt && !vm.inWizard) {
             vm.addFreeTextAttribute(attribute, vm.cube.data[attribute.Entity].Stats[attribute.Attribute]);
             return;
         }
+
+        attribute.SegmentChecked = true;
 
         var attribute = angular.copy(attribute),
             attributeKey = attribute.Attribute || attribute.FieldName,
@@ -1582,6 +1582,8 @@ angular.module('common.datacloud.explorer', [
             entity = enrichment.Entity,
             segmentName = $stateParams.segment;
 
+        enrichment.SegmentChecked = true;
+
         if (disable) {
             return false;
         }
@@ -1621,7 +1623,8 @@ angular.module('common.datacloud.explorer', [
                 ''
             ]
         };
-        vm.selectSegmentAttributeRange(enrichment, bkt, (vm.section != 'segment.analysis'));
+        // vm.selectSegmentAttributeRange(enrichment, bkt, (vm.section != 'segment.analysis'));
+        vm.selectSegmentAttributeRange(enrichment, bkt, false);
     }
 
     var getSegmentBucketInputs = function() {
@@ -1680,6 +1683,7 @@ angular.module('common.datacloud.explorer', [
         var treeRoot = QueryStore.getAddBucketTreeRoot();
 
         if (treeRoot) {
+
             var enrichments = vm.topAttributes[enrichment.Category].Subcategories[enrichment.Subcategory],
                 attribute = enrichments.filter(function(item) { return item.Attribute == enrichment.ColumnId })[0];
             

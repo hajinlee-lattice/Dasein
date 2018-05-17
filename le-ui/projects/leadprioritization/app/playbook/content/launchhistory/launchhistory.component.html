@@ -21,6 +21,8 @@
         class="card-content" 
         ng-class="{'has-footer': !vm.allPlaysHistory}">
 
+        <menu-filter-by config="vm.header.filter"></menu-filter-by>
+
         <chips 
             ng-show="vm.allPlaysHistory"
             placeholder="All Launched Plays" 
@@ -131,7 +133,7 @@
     			</tr>
     		</thead>
     		<tbody>
-    			<tr ng-repeat="launch in vm.launches.launchSummaries">
+    			<tr ng-repeat="launch in vm.launches.launchSummaries | filter: vm.header.filter.value : true">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
                     <td ng-if="vm.allPlaysHistory">{{launch.playDisplayName}}</td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
@@ -151,7 +153,7 @@
 
         <pd-pagination-controls
             ng-if="vm.showPagination"
-            current="vm.current"
+            current="vm.currentPage"
             max="vm.launchesCount / vm.pagesize"
             class="pull-right">
         </pd-pagination-controls>

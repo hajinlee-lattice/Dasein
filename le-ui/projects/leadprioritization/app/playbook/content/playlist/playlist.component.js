@@ -2,7 +2,7 @@ angular.module('lp.playbook.plays', [
     'mainApp.playbook.content.playlist.modals.deletePlayModal'
 ])
 .controller('PlayListController', function ($scope, $timeout, $element, $state, 
-$stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal) {
+$stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal, QueryStore) {
 
     var vm = this,
         onpage = true,
@@ -150,10 +150,24 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         var tileState = vm.current.tileStates[play.name];
         tileState.launching = !tileState.launching;
 
-        PlaybookWizardStore.launchPlay(play).then(function(data) {
-            vm.lockLaunching = false;
-        });
+        console.log(play);
 
+        var params = {
+            playName: play.name,
+            sortBy: 'created',
+            descending: true,
+            offset: 0
+        };
+        PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+            QueryStore.setBucketsToLaunch(result.launchSummaries[0].selectedBuckets);
+            QueryStore.setDestinationOrgId(result.launchSummaries[0].destinationOrgId);
+            QueryStore.setDestinationSysType(result.launchSummaries[0].destinationSysType);
+            QueryStore.setDestinationAccountId(result.launchSummaries[0].destinationAccountId);
+
+            PlaybookWizardStore.launchPlay(play).then(function(data) {
+                vm.lockLaunching = false;
+            });
+        });
     }
 
     vm.showDeletePlayModalClick = function($event, play){

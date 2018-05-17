@@ -116,9 +116,9 @@ angular.module('common.datacloud.query.builder', [
                 
                 vm.setCurrentSavedTree();
 
-                console.log('[AQB] Restriction:', angular.copy(vm.restriction));
-                console.log('[AQB] Items:', vm.items);
-                console.log('[AQB] Cube:', vm.cube);
+                // console.log('[AQB] Restriction:', angular.copy(vm.restriction));
+                // console.log('[AQB] Items:', vm.items);
+                // console.log('[AQB] Cube:', vm.cube);
             }, 1);
         });
 

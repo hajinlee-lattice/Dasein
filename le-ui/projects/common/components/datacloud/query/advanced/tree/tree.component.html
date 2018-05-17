@@ -136,9 +136,9 @@
 
     <li     ng-repeat="item in vm.tree.logicalRestriction.restrictions"
             class="query-section-item-box"
-            ng-class="{
+            ng-class="{ 
                 'query-section-item-box-subtree':item.logicalRestriction,
-                'item-unused': item.bucketRestriction ? !vm.isBucketUsed(item.bucketRestriction) : false
+                'item-unused': item.bucketRestriction.ignored === true
             }" 
             ng-if="!(vm.root.draggedItem.tree == item && (vm.root.droppedItem && vm.root.droppedItem.tree != item))"
             ng-style="{ 'xdisplay': false ? 'none' : 'block'  }"

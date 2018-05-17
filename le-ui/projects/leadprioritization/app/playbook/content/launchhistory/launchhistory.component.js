@@ -12,29 +12,50 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         cumulativeStats: LaunchHistoryData.cumulativeStats,
         summaryData: {},
         launching: false,
-        current: 1,
+        currentPage: 1,
         pagesize: 10,
         showPagination: false,
         sortBy: 'created',
-        sortDesc: true
+        sortDesc: true,
+        header: {
+            filter: {
+                label: 'Filter By',
+                value: {}
+            }
+        }
     });
 
     vm.init = function() {
 
-        if(vm.launchesCount > vm.pagesize){
-            vm.showPagination = true;
-        } else {
-            vm.showPagination = false;
-        }
+        // console.log(vm.stored);
+        // console.log(vm.launches);
+
+        vm.header.filter.items = [
+            { 
+                label: "All", 
+                action: {}, 
+                total:  vm.launches.launchSummaries.length
+            }
+        ];
+        angular.forEach(vm.launches.uniqueLookupIdMapping, function(value, key) {
+            var numberOfItems = value.length;
+            vm.header.filter.items.push({ 
+                label: key.toString(), 
+                action: {
+                    destinationSysType: key.toString()
+                }, 
+                total: numberOfItems
+            });
+        });
 
         vm.defaultPlayLaunchList = angular.copy(vm.launches.uniquePlaysWithLaunches);
         vm.defaultPlayLaunchList.unshift({playName: null, displayName: 'All Launched Plays'});
 
-        if($state.current.name === 'home.playbook.plays.launchhistory'){
-            vm.allPlaysHistory = true;
-        } else {
-            vm.allPlaysHistory = false;
-        }
+        vm.header.filter.filtered = vm.defaultPlayLaunchList;
+        vm.header.filter.unfiltered = vm.defaultPlayLaunchList;
+
+        vm.showPagination = (vm.launchesCount > vm.pagesize) ? true : false;
+        vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
 
         for(var i = 0; i < vm.launches.launchSummaries.length; i++) {
             if (vm.launches.launchSummaries[i].launchState == 'Launching') {
@@ -124,10 +145,6 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 vm.showPagination = false;
             }
         });
-    };
-
-    vm.play_name_required = function(){
-        return !vm.stored.play_display_name;
     };
 
     vm.relaunchPlay = function() {

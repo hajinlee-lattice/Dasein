@@ -343,7 +343,6 @@ angular.module('common.datacloud.query')
                 }
             } 
 
-            console.log(bucketRestriction.ignored);
             // console.log('Addded restriction ',bucketRestriction);
         }
 
@@ -361,7 +360,6 @@ angular.module('common.datacloud.query')
                     (attribute.bkt ? attribute.bkt : null)
                 );
 
-            console.log(bucketRestriction);
             setBucketRestrictionUsed(bucketRestriction);
 
             if (QueryStore.mode == 'rules' || QueryStore.mode == 'dashboardrules') {
@@ -641,9 +639,6 @@ angular.module('common.datacloud.query')
                     },
                     'restrict_with_sfdcid': query.restrict_with_sfdcid
                 };
-
-                console.log(resourceType);
-
                 if(resourceType === 'accounts') {
                     queryWithRestriction.lookups = query.lookups;
                 }
