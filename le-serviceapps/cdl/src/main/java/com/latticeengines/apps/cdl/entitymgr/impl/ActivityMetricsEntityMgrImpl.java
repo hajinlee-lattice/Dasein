@@ -127,14 +127,14 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
             super.createOrUpdate(metrics);
         }
 
-        createAction(tenant.getName(), newCnt, activateCnt, deprecateCnt);
+        createAction(MultiTenantContext.getEmailAddress(), newCnt, activateCnt, deprecateCnt);
         return metricsList;
     }
 
-    private void createAction(String tenant, int newCnt, int activateCnt, int deprecateCnt) {
+    private void createAction(String initiator, int newCnt, int activateCnt, int deprecateCnt) {
         Action action = new Action();
         action.setType(ActionType.ACTIVITY_METRICS_CHANGE);
-        action.setActionInitiator(tenant);
+        action.setActionInitiator(initiator);
         ActivityMetricsActionConfiguration config = new ActivityMetricsActionConfiguration(newCnt, activateCnt, deprecateCnt);
         action.setActionConfiguration(config);
         ActionContext.setAction(action);

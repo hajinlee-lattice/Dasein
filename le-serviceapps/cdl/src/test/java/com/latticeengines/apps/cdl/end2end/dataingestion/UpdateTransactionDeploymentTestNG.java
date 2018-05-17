@@ -6,6 +6,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_2;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,17 +14,17 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
-import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 
 
@@ -37,12 +38,16 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;
 
+    @Value("${common.test.pls.url}")
+    private String deployedHostPort;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
+        
         resumeCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
 
-        // To test deprecating curated metrics
-        setupPurchaseHistoryMetrics();
+        // To test deprecating curated metrics & action
+        setupUpdatedPurchaseHistoryMetrics();
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
         long numContacts = CONTACT_IMPORT_SIZE_TOTAL;
@@ -103,8 +108,13 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
 
-    void setupPurchaseHistoryMetrics() {
-        List<ActivityMetrics> metrics = ActivityMetricsUtils.fakeUpdatedPurchaseMetrics(mainTestTenant);
-        activityMetricsProxy.save(mainCustomerSpace, ActivityType.PurchaseHistory, metrics);
+    void setupUpdatedPurchaseHistoryMetrics() {
+        // Deprecated all the selected metrics
+        List<ActivityMetrics> metrics = new ArrayList<>();
+        RestTemplate restTemplate = testBed.getRestTemplate();
+        deployedHostPort = deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
+                : deployedHostPort;
+        restTemplate.postForObject(deployedHostPort + "/pls/datacollection/metrics/PurchaseHistory", metrics,
+                List.class);
     }
 }

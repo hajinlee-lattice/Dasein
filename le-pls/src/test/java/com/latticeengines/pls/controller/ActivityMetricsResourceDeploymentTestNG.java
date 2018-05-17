@@ -106,6 +106,7 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
             Assert.assertNotNull(action);
             Assert.assertEquals(action.getType(), ActionType.ACTIVITY_METRICS_CHANGE);
             Assert.assertNotNull(action.getActionInitiator());
+            Assert.assertTrue(action.getActionInitiator().contains("@"));
             Assert.assertNotNull(action.getDescription());
             log.info("ActivityMetricsChange description is " + action.getDescription());
         });

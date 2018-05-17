@@ -9,6 +9,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsUtilsUnitTestNG {
 
@@ -57,6 +59,26 @@ public class ActivityMetricsUtilsUnitTestNG {
                         InterfaceName.AvgSpendOvertime, "Average Spend in last 1 quarter", "Q_1", "Q_1__AS",
                         "(2017-10-01 to 2017-12-31)", NullMetricsImputation.ZERO }, //
         };
+    }
+
+    @Test(groups = "unit")
+    public void testIsDeprecated() {
+        Tenant tenant = new Tenant("dummy");
+        tenant.setPid(-1L);
+        List<ActivityMetrics> metrics = ActivityMetricsUtils.fakePurchaseMetrics(tenant);
+        for (ActivityMetrics m : metrics) {
+            if (m.getMetrics() == InterfaceName.Margin) {
+                m.setEOL(true);
+            }
+        }
+        for (ActivityMetrics m : metrics) {
+            String fullName = ActivityMetricsUtils.getFullName(m, "FE5FB1286A4E60345D0E4AAD0E66E664");
+            if (m.getMetrics() == InterfaceName.Margin) {
+                Assert.assertTrue(ActivityMetricsUtils.isDeprecated(fullName, metrics));
+            } else {
+                Assert.assertFalse(ActivityMetricsUtils.isDeprecated(fullName, metrics));
+            }
+        }
     }
 
 }

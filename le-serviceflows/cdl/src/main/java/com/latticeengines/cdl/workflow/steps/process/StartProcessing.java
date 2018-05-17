@@ -169,6 +169,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         // TODO: separate out actions by entity
         List<Action> attrMgmtActions = getAttrManagementActions(actions);
         grapherContext.setHasAttrActivation(CollectionUtils.isNotEmpty(attrMgmtActions));
+        List<Action> purchaseMetricsActions = getPurchaseMetricsActions(actions);
+        grapherContext.setPurchaseMetricsChanged(CollectionUtils.isNotEmpty(purchaseMetricsActions));
 
         // FIXME: not really working before persisting action configuration
         List<Action> ratingActions = getRatingRelatedActions(actions);
@@ -227,6 +229,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     protected List<Action> getRatingRelatedActions(List<Action> actions) {
         return actions.stream().filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
+                .collect(Collectors.toList());
+    }
+
+    protected List<Action> getPurchaseMetricsActions(List<Action> actions) {
+        return actions.stream().filter(action -> action.getType() == ActionType.ACTIVITY_METRICS_CHANGE)
                 .collect(Collectors.toList());
     }
 

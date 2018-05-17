@@ -217,6 +217,20 @@ public class ActivityMetricsUtils {
         return metricsDescription.get(metrics);
     }
 
+    public static boolean isDeprecated(String fullName, List<ActivityMetrics> metrics) {
+        String depivotedAttrName = getDepivotedAttrNameFromFullName(fullName);
+        for (ActivityMetrics m : metrics) {
+            if (depivotedAttrName.equals(getNameWithPeriod(m))) {
+                if (m.isEOL()) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
     // <DisplayName, SecondDisplayName>
     public static Pair<String, String> getDisplayNamesFromFullName(String fullName, String evaluationDate,
             List<PeriodStrategy> strategies) {

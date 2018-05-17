@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CDL_ACTIVE_VERSION;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistory;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -238,20 +240,12 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     private boolean shouldCalculatePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-
         boolean shouldCalc = false;
 
-        // Temporary log for troubleshooting PLS-7568
-        try {
-            String msg = String.format(
-                    "Check whether to skip step [%d] %s: hasProducts=%b, hasAccounts=%b, hasRawStore=%b, rebuild=%b, update=%b, accountChoreographer.update=%b, accountChoreographer.rebuild=%b, productChoreographer.update=%b, productChoreographer.rebuild=%b",
-                    seq, step.name(), hasProducts, hasAccounts, hasRawStore, rebuild, update,
-                    accountChoreographer.update, accountChoreographer.rebuild, productChoreographer.update,
-                    productChoreographer.rebuild);
-            log.info(msg);
-        } catch (Exception ex) {
-            // do nothing
-        }
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        boolean purchaseMetricsChanged = grapherContext.isPurchaseMetricsChanged();
+
         if (hasProducts && hasAccounts) {
             if (hasRawStore && (accountChoreographer.update || (accountChoreographer.commonRebuild))) {
                 log.info("Need to rebuild purchase history due to Account changes.");
@@ -259,6 +253,10 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             }
             if (hasRawStore && (productChoreographer.update || productChoreographer.rebuild)) {
                 log.info("Need to rebuild purchase history due to Product changes.");
+                shouldCalc = true;
+            }
+            if (hasRawStore && purchaseMetricsChanged) {
+                log.info("Need to rebuild purchase history due to curated metrics configuration changes.");
                 shouldCalc = true;
             }
             if (update || rebuild) {

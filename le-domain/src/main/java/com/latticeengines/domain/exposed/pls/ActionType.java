@@ -13,7 +13,7 @@ public enum ActionType {
     RATING_ENGINE_CHANGE("ratingEngineChange", "Scoring"), //
     METADATA_SEGMENT_CHANGE("segmentChange", "Segment Edited"), //
     METADATA_CHANGE("metadataChange", "Metadata Change"), //
-    ACTIVITY_METRICS_CHANGE("activityMetricsChange", "Activity Metrics Change"), //
+    ACTIVITY_METRICS_CHANGE("purchaseMetricsChange", "Curated Attributes Activated"), //
     // Attribute Management related type
     ATTRIBUTE_MANAGEMENT_ACTIVATION("attributeManagementActivation", "Attributes Activated"), //
     ATTRIBUTE_MANAGEMENT_DEACTIVATION("attributeManagementDeactivation", "Attributes Deactivated");

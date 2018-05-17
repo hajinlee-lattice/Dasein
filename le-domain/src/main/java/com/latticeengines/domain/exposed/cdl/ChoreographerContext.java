@@ -33,6 +33,9 @@ public class ChoreographerContext {
     @JsonProperty
     private boolean hasRatingEngineChange;
 
+    @JsonProperty
+    private boolean purchaseMetricsChanged;
+
 
     public Set<BusinessEntity> getJobImpactedEntities() {
         return jobImpactedEntities;
@@ -81,4 +84,13 @@ public class ChoreographerContext {
     public void setHasRatingEngineChange(boolean hasRatingEngineChange) {
         this.hasRatingEngineChange = hasRatingEngineChange;
     }
+
+    public boolean isPurchaseMetricsChanged() {
+        return purchaseMetricsChanged;
+    }
+
+    public void setPurchaseMetricsChanged(boolean purchaseMetricsChanged) {
+        this.purchaseMetricsChanged = purchaseMetricsChanged;
+    }
+
 }
