@@ -115,6 +115,24 @@ angular.module('common.datacloud')
     }
 
     this.setPremiumSelectMaximum = function(item){
+        DataCloudStore.selectMaximum = item;
+    }
+
+    this.getSelectMaximum = function(){
+        var deferred = $q.defer();
+        if (DataCloudStore.selectMaximum) {
+            deferred.resolve(DataCloudStore.selectMaximum);
+        } else {
+            DataCloudService.getSelectMaximum().then(function(response){
+                var total = (response && response.data ? response.data['MaxEnrichAttributes'] : null);
+                DataCloudStore.setSelectMaximum(total);
+                deferred.resolve(total);
+            });
+        }
+        return deferred.promise;
+    }
+
+    this.setSelectMaximum = function(item){
         DataCloudStore.premiumSelectMaximum = item;
     }
 
@@ -443,6 +461,19 @@ angular.module('common.datacloud')
         $http({
             method: 'get',
             url: this.host + '/latticeinsights/insights/premiumattributeslimitation'
+        }).then(function(response){
+            deferred.resolve(response);
+        });
+        
+        return deferred.promise;
+    }
+
+    this.getSelectMaximum = function(){
+        var deferred = $q.defer();
+        
+        $http({
+            method: 'get',
+            url: '/pls/latticeinsights/insights/premiumattributeslimitationmap'
         }).then(function(response){
             deferred.resolve(response);
         });

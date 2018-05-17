@@ -176,7 +176,7 @@ angular
                 });
 
                 DataCloudStore.setMetadata('premiumSelectLimit', (vm.EnrichmentPremiumSelectMaximum.data && vm.EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10);
-                DataCloudStore.setMetadata('generalSelectLimit', 100);
+                DataCloudStore.setMetadata('generalSelectLimit', vm.EnrichmentSelectMaximum || 100);
                 vm.premiumSelectLimit = DataCloudStore.getMetadata('premiumSelectLimit'); //(vm.EnrichmentPremiumSelectMaximum.data && vm.EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
                 vm.generalSelectLimit = DataCloudStore.getMetadata('generalSelectLimit');
 

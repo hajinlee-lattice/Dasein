@@ -11,7 +11,7 @@ angular.module('common.datacloud.explorer', [
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, $rootScope, 
     Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
-    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
+    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
     RatingsEngineModels, RatingsEngineStore, QueryTreeService
 ){
@@ -47,6 +47,7 @@ angular.module('common.datacloud.explorer', [
             categories: {}
         },
         EnrichmentPremiumSelectMaximum: EnrichmentPremiumSelectMaximum,
+        EnrichmentSelectMaximum: EnrichmentSelectMaximum,
         lookupMode: (LookupResponse && LookupResponse.attributes !== null),
         lookupFiltered: LookupResponse.attributes,
         LookupResponse: LookupStore.response,

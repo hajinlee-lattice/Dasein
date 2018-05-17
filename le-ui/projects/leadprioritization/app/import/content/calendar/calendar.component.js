@@ -31,7 +31,8 @@ angular.module('lp.import.calendar', [])
         selectedQuarter: '1',
         mode: '',
         calendarStore: {},
-        dateParams: {}
+        dateParams: {},
+        calendarOptions: {}
     });
 
     function initDatePicker() {
@@ -70,17 +71,25 @@ angular.module('lp.import.calendar', [])
             }
         });
         field.parentNode.insertBefore(picker.el, field.nextSibling);
-        picker.setDate('01-01-'+year, true); // second param prevents onSelect callback
-        picker.gotoDate(new Date(year, 0));
-    }
+        if(vm.calendarOptions && vm.calendarOptions.mode === 'STARTING_DATE') {
+            var startingDateMonth = 1;
+            months.some(function(month, index) {
+                if(vm.calendarOptions.month === month.substring(0,3).toUpperCase()) {
+                    startingDateMonth = index + 1;
+                }
+            });
+            vm.dateParams.monthNumber = startingDateMonth;
+            vm.dateParams.month = vm.calendarOptions.month;
+            vm.dateParams.day = vm.calendarOptions.day;
+            vm.selectedQuarter = vm.calendarOptions.longerMonth;
 
-    vm.init = function() {
-        if((preventUnload) && !FieldDocument) {
-            $state.go('home.import.entry.product_hierarchy');
-            return false;
+            picker.setDate(('0'+startingDateMonth).slice(-2) + '-' + vm.calendarOptions.day + '-'+year, true); // second param prevents onSelect callback //MM/DD/YYYY
+            picker.gotoDate(new Date(year, startingDateMonth - 1));
+        } else {
+            picker.setDate('01-01-'+year, true); // second param prevents onSelect callback
+            picker.gotoDate(new Date(year, 0));
         }
-        $timeout(initDatePicker, 0);
-    };
+    }
 
     vm.selectMonth = function(date) {
         vm.selectedMonth = date;
@@ -170,7 +179,6 @@ angular.module('lp.import.calendar', [])
         };
 
         vm.modalCallback = function (args) {
-            console.log(args);
             if (vm.modalConfig.dischargeaction === args.action) {
                 vm.toggleModal();
             } else if (vm.modalConfig.confirmaction === args.action) {
@@ -182,7 +190,7 @@ angular.module('lp.import.calendar', [])
                 } else {
                     vm.saving = true;
                     ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
-                        $state.go(vm.lastFrom.name);
+                        //$state.go(vm.lastFrom.name);
                     });
                 }
             }
@@ -201,6 +209,44 @@ angular.module('lp.import.calendar', [])
     }
 
     vm.initModalWindow();
+
+    var parseCalendar = function(calendar) {
+        if(!calendar) {
+            return false;
+        }
+        var options = {
+                mode: calendar.mode,
+                longerMonth: calendar.longerMonth
+            };
+
+        if(calendar.mode === 'STARTING_DATE') {
+            options.month = calendar.startingDate.split('-')[0];
+            options.day = calendar.startingDate.split('-')[1];
+        } else if(calendar.mode === 'STARTING_DAY') {
+            options.nth = calendar.startingDate.split('-')[0];
+            options.day = calendar.startingDate.split('-')[1];
+            options.month = calendar.startingDate.split('-')[2];
+        }
+        vm.calendarOptions = options;
+    }
+
+    vm.init = function() {
+        parseCalendar(vm.calendar);
+        if( vm.calendarOptions.mode === 'STARTING_DAY') {
+            vm.nthMapping.nth = vm.calendarOptions.nth;
+            vm.nthMapping.day = vm.calendarOptions.day;
+            vm.nthMapping.month = vm.calendarOptions.month;
+            vm.selectedQuarter = vm.calendarOptions.longerMonth;
+        }
+
+        if((preventUnload) && !FieldDocument) {
+            //$state.go('home.import.entry.product_hierarchy');
+            //return false;
+        }
+
+        $timeout(initDatePicker, 0);
+    };
+
 
 
     vm.init();

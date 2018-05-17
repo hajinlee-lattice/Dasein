@@ -133,6 +133,15 @@ angular
 
                     return deferred.promise;
                 }],
+                EnrichmentSelectMaximum: ['$q', 'DataCloudStore', function($q, DataCloudStore) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.getSelectMaximum().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }],
                 // below resolves are needed. Do not removed
                 // override at child state when needed
                 LookupResponse: [function() {

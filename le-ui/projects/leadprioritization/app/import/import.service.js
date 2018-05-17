@@ -501,6 +501,7 @@ angular.module('lp.import')
             deferred.resolve(this.calendar);
         } else {
             ImportWizardService.getCalendar().then(function(result) {
+                ImportWizardStore.setCalendar(result);
                 deferred.resolve(result);
             });
         }
