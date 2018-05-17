@@ -43,6 +43,8 @@ public class AttributeServiceImpl implements AttributeService {
 
     private static final int MAX_SAVE_RETRY = 5;
 
+    private static final String MaxEnrichAttributes = "MaxEnrichAttributes";
+
     private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "SubCategory",
             "Description", "Data Type", "Status", "Premium");
 
@@ -183,11 +185,10 @@ public class AttributeServiceImpl implements AttributeService {
                                 key.substring(0, key.indexOf(KEY_SUFFIX)) });
             }
         }
-        Integer maxLimitation = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
-                null);
+        Integer maxLimitation = limitationMap.get(MaxEnrichAttributes);
         if (maxExistingSelectedAttributes > maxLimitation) {
             throw new LedpException(LedpCode.LEDP_18112,
-                    new String[] { maxLimitation.toString(), "MaxEnrichAttributes" });
+                    new String[] { maxLimitation.toString(), MaxEnrichAttributes });
         }
 
         DatabaseUtils.retry("saveEnrichmentAttributeSelection", MAX_SAVE_RETRY,
@@ -328,6 +329,8 @@ public class AttributeServiceImpl implements AttributeService {
                     license);
             limitationMap.put(license.getDataLicense() + KEY_SUFFIX, attributeLimitation);
         }
+        int maxLimitation = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(), null);
+        limitationMap.put(MaxEnrichAttributes, maxLimitation);
         // For future use case that we might have multiple sources of premium
         // attrs. Fow now only attributes from HG and Bombora are marked as
         // premium.
