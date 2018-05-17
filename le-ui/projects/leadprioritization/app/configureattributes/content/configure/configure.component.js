@@ -52,11 +52,12 @@ angular.module('lp.configureattributes.configure', [])
             },
             step: $state.current.name.split('.').pop(-1),
             periods: {
-                Weeks: totalMonths * 4,
-                Months: totalMonths,
-                Quarters: totalMonths / 3 ,// 3 quaters a month
-                Years: totalMonths / 12
+                Week: totalMonths * 4,
+                Month: totalMonths,
+                Quarter: totalMonths / 3 ,// 3 quaters a month
+                Year: totalMonths / 12
             },
+            periodsOptions: [],
             options: ConfigureAttributesStore.getOptions() || {},
             completed: ConfigureAttributesStore.getSaved(),
             PurchaseHistory: PurchaseHistory,
@@ -89,7 +90,7 @@ angular.module('lp.configureattributes.configure', [])
             return val;
         }
 
-        vm.getPeriod = function(type, data, index, append) {
+        vm.getPeriod = function(type, data, index) {
             if(!type || !data) {
                 return false;
             }
@@ -101,7 +102,7 @@ angular.module('lp.configureattributes.configure', [])
                 }),
                 period = valObj.Period;
 
-            return period + (period.slice(-1) !== 's' ? append : '');
+            return period;
         }
 
         vm.setOptions = function(form) {
@@ -216,7 +217,7 @@ angular.module('lp.configureattributes.configure', [])
             }
             
             if(form) {
-                //form.$setPristine(); //PLS-8321
+                form.$setPristine();
             }
         }
 
@@ -404,8 +405,22 @@ angular.module('lp.configureattributes.configure', [])
             });
         }
 
+        var makePeriodsObject = function(periods) {
+            vm.periodsOptions = [];
+            for(var i in periods) {
+                var key = i,
+                    total = periods[key],
+                    period = {
+                        label: key + 's',
+                        value: key
+                    };
+                vm.periodsOptions.push(period);
+            }
+        }
+
         vm.$onInit = function() {
             vm.initModalWindow();
+            makePeriodsObject(vm.periods);
             var completedSteps = ConfigureAttributesStore.getSaved();
             completedSteps.forEach(function(step) {
                 vm.steps[step].completed = true;

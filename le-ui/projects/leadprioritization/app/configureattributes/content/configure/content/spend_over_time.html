@@ -20,10 +20,10 @@
             <select id="options"
                 class="form-control"
                 ng-required="!vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Period']"
-                ng-init="vm.initValue('TotalSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Period', vm.getPeriod(item.periods[0].Cmp, vm.steps[vm.step].data.TotalSpendOvertime, index, 's'))" 
+                ng-init="vm.initValue('TotalSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Period', vm.getPeriod(item.periods[0].Cmp, vm.steps[vm.step].data.TotalSpendOvertime, index))" 
                 ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Period']" 
                 ng-change="vm.setOptions(form)"
-                ng-options="key as key for (key, value) in vm.periods">
+                ng-options="period.value as period.label for period in vm.periodsOptions">
                     <option value="" hidden disabled>--</option>
                 </select>
         </li>
@@ -52,14 +52,14 @@
                 ng-options="option for option in vm.newArray(vm.periods[vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period']])">
                     <option value="" hidden disabled>Select</option>
                 </select>
-            <input type="hidden" ng-model="vm.options['SpendChange']['BETWEEN']['Period']"  value="vm.getPeriod('BETWEEN', vm.steps[vm.step].data.SpendChange, null, 's')" />
+            <input type="hidden" ng-model="vm.options['SpendChange']['BETWEEN']['Period']"  value="vm.getPeriod('BETWEEN', vm.steps[vm.step].data.SpendChange)" />
             <select id="options"
                 class="form-control"
                 ng-required="!vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period']"
-                ng-init="vm.initValue('AvgSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Period', vm.getPeriod(item.periods[0].Cmp, vm.steps[vm.step].data.AvgSpendOvertime, index, 's'))" 
+                ng-init="vm.initValue('AvgSpendOvertime.' + index + '.' + item.periods[0].Cmp + '.Period', vm.getPeriod(item.periods[0].Cmp, vm.steps[vm.step].data.AvgSpendOvertime, index))" 
                 ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period']" 
                 ng-change="vm.setOptions(form)"
-                ng-options="key as key for (key, value) in vm.periods">
+                ng-options="period.value as period.label for period in vm.periodsOptions">
                     <option value="" hidden disabled>--</option>
                 </select>
         </li>

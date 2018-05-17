@@ -28,10 +28,10 @@
         <select id="options"
             class="form-control"
             ng-required="!vm.options['ShareOfWallet']['WITHIN']['Period']"
-            ng-init="vm.initValue('ShareOfWallet.WITHIN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.ShareOfWallet, null, 's'))" 
+            ng-init="vm.initValue('ShareOfWallet.WITHIN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.ShareOfWallet))" 
             ng-model="vm.options['ShareOfWallet']['WITHIN']['Period']" 
             ng-change="vm.setOptions()"
-            ng-options="key as key for (key, value) in vm.periods">
+            ng-options="period.value as period.label for period in vm.periodsOptions">
                 <option value="" hidden disabled>Weeks</option>
             </select>
     </li>
