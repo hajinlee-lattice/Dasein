@@ -327,7 +327,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.editStatusClick = function($event, rating, disable){
         $event.stopPropagation();
 
-        console.log(rating, disable);
+        // console.log(rating, disable);
         
         if (disable && !vm.isAIRating(rating)) {
             return false;
@@ -339,7 +339,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                 status: newStatus,
             }
 
-        console.log(updatedRating);
+        // console.log(updatedRating);
 
         updateRating(rating, updatedRating);
         RatingsEngineStore.setRatings(vm.current.ratings, true);
@@ -353,6 +353,23 @@ angular.module('lp.ratingsengine.ratingslist', [
         DeleteRatingModal.show(rating);
 
     };
+
+    vm.canBeActivated = function(rating){
+        var metadata = rating.bucketMetadata;
+        var type = rating.type;
+
+        var ret = false;
+        if(rating.status !== 'INACTIVE'){
+            return ret;
+        }
+
+        if(type === 'RULE_BASED'){
+            ret = vm.hasRules(rating);
+        }else{
+            ret = metadata && metadata.length > 0;
+        }   
+        return ret;
+    }
 
     function updateRating(rating, updatedRating) {
         vm.saveInProgress = true;

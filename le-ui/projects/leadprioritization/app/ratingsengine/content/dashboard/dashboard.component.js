@@ -96,7 +96,11 @@ angular.module('lp.ratingsengine.dashboard', [
                 var modal = ModalStore.get(vm.config.name);
                 modal.waiting(true);
                 modal.disableDischargeButton(true);
-                vm.deactivateRating();
+                vm.deactivateRating().then(function(result){
+                    if(result.success === true) {
+                        vm.toggleModal();
+                    }
+                });
             
             }
         }
@@ -118,10 +122,18 @@ angular.module('lp.ratingsengine.dashboard', [
     vm.isActive = function(status) {
         return (status === 'ACTIVE' ? true : false);
     }
+    
+    vm.deactivate = function(){
+        if(vm.dashboard.plays && vm.dashboard.plays.length > 0){
+            vm.toggleModal();
+        }else{
+            vm.deactivateRating();
+        }
+    }
 
     vm.deactivateRating = function(){
 
-        console.log(vm.isActive(vm.ratingEngine.status));
+        var deferred = $q.defer();
 
         var newStatus = (vm.isActive(vm.ratingEngine.status) ? 'INACTIVE' : 'ACTIVE'),
             newRating = {
@@ -129,15 +141,15 @@ angular.module('lp.ratingsengine.dashboard', [
                 status: newStatus
             }
 
-        console.log(newStatus);
-
         RatingsEngineService.saveRating(newRating).then(function(data){
             vm.ratingEngine = data;
+            vm.initDataModel();
             $rootScope.$broadcast('statusChange', { 
                 activeStatus: data.status
             });
-            vm.toggleModal();
+            deferred.resolve({success: true});
         });
+        return deferred.promise;
     }
 
     vm.status_toggle = vm.isActive(vm.ratingEngine.status);
@@ -164,18 +176,11 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     }
 
-    vm.init = function() {
-        vm.initModalWindow();
-
+    vm.initDataModel = function(){
         vm.relatedItems = vm.dashboard.plays;
         vm.hasBuckets = vm.ratingEngine.counts != null;
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
-
-        var model = vm.ratingEngine.activeModel;
-
-        // console.log(vm.ratingEngine);
-        // console.log(vm.dashboard);
 
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
@@ -226,12 +231,16 @@ angular.module('lp.ratingsengine.dashboard', [
             newBucketMetadata = dummyNewBucketData;
         }
         vm.ratingEngine.newBucketMetadata = newBucketMetadata;
-        
+    }
+
+    vm.init = function() {
+        vm.initModalWindow();
+        vm.initDataModel();
         if (vm.isRulesBased) {
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
-
+            var model = vm.ratingEngine.activeModel;
             var type = vm.ratingEngine.type.toLowerCase();
             if (type === 'cross_sell') {
                 if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig[type].filters.trainingProducts === null) {

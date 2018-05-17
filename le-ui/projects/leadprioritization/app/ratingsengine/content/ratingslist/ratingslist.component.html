@@ -78,7 +78,7 @@
                             </button>
                             <ul class="model-menu" ng-show="vm.current.tileStates[rating.id].showCustomMenu">
                                 <li 
-                                    ng-if="rating.bucketMetadata.length > 0 && rating.status === 'INACTIVE' && (vm.hasRules(rating) || vm.isAIRating(rating))"
+                                    ng-if="vm.canBeActivated(rating) == true"
                                     data-ng-click="vm.editStatusClick($event, rating, !vm.hasRules(rating))">
                                     <a href="javascript:void(0)">
                                         <span>Activate</span>

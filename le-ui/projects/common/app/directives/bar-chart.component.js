@@ -286,7 +286,7 @@ angular
                 // }
 
                 $scope.getVerticalLines = function () {
-                    if ($scope.bktlist.length == 0) {
+                    if (!$scope.bktlist || $scope.bktlist.length == 0) {
                         return [];
                     }
                     if ($scope.vertcalLines === undefined) {
