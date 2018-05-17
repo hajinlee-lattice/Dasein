@@ -285,6 +285,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         table.setAttributes(attrs);
         log.info("Enriched " + dcCount.get() + " attributes using data cloud metadata.");
         log.info("Copied " + masterCount.get() + " attributes from batch store metadata.");
+        log.info("BucketedAccount table has " + table.getAttributes().size() + " attributes in total.");
     }
 
     private String removeNonAscII(String str) {
