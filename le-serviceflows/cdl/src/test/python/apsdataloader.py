@@ -144,7 +144,7 @@ class ApsDataLoader(object):
         schema = json.loads(schemaStr)
         logger.info("Start to split Dataframe.")
 #         dfs = np.array_split(dataFrame, parallel)
-        chunkSize = 200000
+        chunkSize = 50000
         dfs = [dataFrame[i:i + chunkSize] for i in range(0, dataFrame.shape[0], chunkSize)]
         logger.info("Finished splitting Dataframe.")
 
@@ -154,7 +154,7 @@ class ApsDataLoader(object):
         for df in dfs:
             params.append([df, schema, localDir, "%s/part-0000%d.avro" % (localDir, index), self.webHdfsHostPort, self.outputPath, userId])
             index += 1
-        self.parallelExecutePool(fileWriterFunc, params, 4)
+        self.parallelExecutePool(fileWriterFunc, params, 16)
 
         files = [localDir + '/' + file for file in os.listdir(localDir)]
         for file in files:
