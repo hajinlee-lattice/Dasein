@@ -31,6 +31,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.documentdb.entity.AttrConfigEntity;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -465,16 +467,18 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @SuppressWarnings("unchecked")
-    public List<AttrConfig> render(List<ColumnMetadata> systemMetadata, List<AttrConfig> customConfig) {
+    public List<AttrConfig> render(List<ColumnMetadata> systemMetadata, List<AttrConfig> customConfigs) {
         if (systemMetadata == null) {
-            return customConfig;
-        } else if (customConfig == null) {
-            customConfig = new ArrayList<>();
+            throw new LedpException(LedpCode.LEDP_40022);
+        } else if (customConfigs == null) {
+            customConfigs = new ArrayList<>();
         }
         Map<String, AttrConfig> map = new HashMap<>();
-        for (AttrConfig config : customConfig) {
+        for (AttrConfig config : customConfigs) {
             map.put(config.getAttrName(), config);
         }
+        List<String> renderedAttrNames = customConfigs.stream().map(config -> config.getAttrName())
+                .collect(Collectors.toList());
         for (ColumnMetadata metadata : systemMetadata) {
             AttrType type = AttrTypeResolver.resolveType(metadata);
             AttrSubType subType = AttrTypeResolver.resolveSubType(metadata);
@@ -491,6 +495,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 mergeConfig = new AttrConfig();
                 mergeConfig.setAttrName(metadata.getAttrName());
                 mergeConfig.setAttrProps(new HashMap<>());
+            } else {
+                renderedAttrNames.remove(mergeConfig.getAttrName());
             }
             mergeConfig.setAttrType(type);
             mergeConfig.setAttrSubType(subType);
@@ -558,6 +564,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 mergeConfig.putProperty(group.name(), usageProp);
             }
             map.put(metadata.getAttrName(), mergeConfig);
+        }
+        // make sure the system metadata include the customer config
+        if (!CollectionUtils.isEmpty(renderedAttrNames)) {
+            throw new LedpException(LedpCode.LEDP_40023, new String[] { renderedAttrNames.toString() });
         }
         return new ArrayList<>(map.values());
     }

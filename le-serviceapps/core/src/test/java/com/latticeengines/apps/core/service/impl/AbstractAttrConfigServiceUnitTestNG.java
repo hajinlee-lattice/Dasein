@@ -2,6 +2,7 @@ package com.latticeengines.apps.core.service.impl;
 
 import static org.mockito.Mockito.doReturn;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -129,6 +132,23 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(overview.getTotalAttrs(), new Long(0));
     }
 
+    @Test(groups = "unit")
+    public void testRenderMethodWithCornerCase() {
+        try {
+            cdlAttrConfigServiceImpl.render(null, null);
+        } catch (Exception e) {
+            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40022);
+        }
+        AttrConfig config1 = new AttrConfig();
+        config1.setAttrName("Attr1");
+        AttrConfig config6 = new AttrConfig();
+        config6.setAttrName("Attr6");
+        try {
+            cdlAttrConfigServiceImpl.render(generateMetadatas(), Arrays.asList(config1, config6));
+        } catch (Exception e) {
+            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40023);
+        }
+    }
     private List<String> getPropertyNames() {
         return Arrays.asList(ColumnSelection.Predefined.Segment.getName(),
                 ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.TalkingPoint.getName(),
@@ -217,4 +237,18 @@ public class AbstractAttrConfigServiceUnitTestNG {
 
     }
 
+    public static List<ColumnMetadata> generateMetadatas() {
+        List<ColumnMetadata> metadatas = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            ColumnMetadata meta = new ColumnMetadata();
+            meta.setAttrName(String.format("Attr%d", i));
+            meta.setAttrState(AttrState.Active);
+            meta.setCategory(Category.FIRMOGRAPHICS);
+            meta.setDataLicense("HG");
+            meta.setEntity(BusinessEntity.Account);
+            meta.setDisplayName(meta.getAttrName());
+            metadatas.add(meta);
+        }
+        return metadatas;
+    }
 }
