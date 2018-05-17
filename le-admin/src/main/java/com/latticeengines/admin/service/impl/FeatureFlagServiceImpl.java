@@ -125,7 +125,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_FUZZY_MATCH, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.LATTICE_INSIGHTS, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.LATTICE_INSIGHTS, lpi).setDefaultValue(true);
+
         createDefaultFeatureFlag(LatticeFeatureFlag.BYPASS_DNB_CACHE, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MATCH_DEBUG, lpi);
@@ -134,13 +135,15 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         Collection<LatticeProduct> cg = Collections.singleton(LatticeProduct.CG);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CDL, cg);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, cg);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, cg);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, cg).setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, cg).setDefaultValue(true);
+
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
                 Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG));
         enableDataEncryption.setModifiableAfterProvisioning(false);
+        enableDataEncryption.setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.DANTE, Arrays.asList(LatticeProduct.LPA, LatticeProduct.CG)) //
                 .setDefaultValue(true);
 
