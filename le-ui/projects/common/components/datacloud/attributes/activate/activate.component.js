@@ -1,7 +1,5 @@
 /* jshint -W014 */
-angular.module('common.attributes.activate', [
-    'common.attributes.subheader'
-])
+angular.module('common.attributes.activate', [])
 .config(function($stateProvider) {
     $stateProvider
         .state('home.attributes.activate', {
@@ -56,23 +54,9 @@ angular.module('common.attributes.activate', [
         var vm = this;
 
         vm.filters = AttrConfigStore.getFilters();
-        vm.store = AttrConfigStore;
-        vm.isSaving = false;
 
         vm.$onInit = function() {
             console.log('init attrActivate', vm);
-
-            vm.data = vm.store.getData();
-            vm.section = vm.store.getSection();
-            vm.params = $stateParams;
-            vm.categories = vm.overview.AttrNums;
-            
-            vm.store.setLimit(vm.overview[vm.params.category].Limit);
-        };
-
-        vm.save = function() {
-            vm.isSaving = true;
-            vm.store.save();
         };
     }
 });

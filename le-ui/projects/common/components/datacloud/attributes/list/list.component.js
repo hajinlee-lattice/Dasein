@@ -1,11 +1,8 @@
 /* jshint -W014 */
-angular.module('common.attributes.list', [
-    'common.attributes.subheader'
-])
+angular.module('common.attributes.list', [])
 .component('attrResultsList', {
     templateUrl: '/components/datacloud/attributes/list/list.component.html',
     bindings: {
-        overview: '<',
         filters: '< '
     },
     controller: function ($state, $stateParams, AttrConfigStore) {
@@ -19,7 +16,7 @@ angular.module('common.attributes.list', [
         vm.allChecked = false;
 
         vm.$onInit = function() {
-            console.log('init attrList', vm);
+            console.log('attrResultsList', vm.data);
             vm.data = vm.store.getData();
             vm.section = vm.store.getSection();
             vm.params = $stateParams;
@@ -123,7 +120,7 @@ angular.module('common.attributes.list', [
         };
 
         vm.checked = function(item) {
-            if (vm.isDisabled(item)) {
+            if (vm.isDisabled(item) || vm.isStartsDisabled(item)) {
                 return false;
             }
 
@@ -133,7 +130,7 @@ angular.module('common.attributes.list', [
                 item.Attributes
                     .sort(vm.sortAttributes)
                     .forEach(function(attr) {
-                        if (vm.isDisabled(attr)) {
+                        if (vm.isDisabled(attr) || vm.isStartsDisabled(attr)) {
                             return;
                         }
 
@@ -154,7 +151,15 @@ angular.module('common.attributes.list', [
             if (item.Attributes) {
                 if (vm.indeterminate[item.DisplayName] === true) {
                     vm.setIndeterminate(item.DisplayName, true);
+
+                    item.Selected = true;
+                    
+                    return true;
                 } else {
+                    var condition = item.checked == item.TotalAttrs;
+                    
+                    item.Selected = condition;
+
                     return item.checked == item.TotalAttrs;
                 }
             } else {
@@ -181,20 +186,25 @@ angular.module('common.attributes.list', [
         };
 
         vm.isDisabled = function(item) {
-            if (vm.section == 'enable') {
+            var hasFrozen = item.HasFrozenAttrs;
+            var isFrozen = item.IsFrozen;
+            var overLimit = false;
+
+            if (vm.store.getLimit() >= 0) {
+                overLimit = vm.store.getSelected().length >= vm.store.getLimit() && !vm.isChecked(item);
+            }
+            
+            return item.Attributes ? overLimit : (isFrozen || overLimit);
+        };
+
+        vm.isStartsDisabled = function(item) {
+            if (item.Attributes || vm.section == 'enable') {
                 return false;
             }
 
-            var overLimit = vm.store.getSelected().length >= vm.store.getLimit() && !vm.isChecked(item);
-            
-            if (item.Attributes) {
-                var hasFrozen = item.HasFrozenAttrs;
-                return overLimit;
-            } else {
-                var startsDisabled = vm.startChecked[item.Attribute];
-                var isFrozen = item.IsFrozen;
-                return startsDisabled || isFrozen || overLimit;
-            }
+            var startsDisabled = vm.startChecked[item.Attribute];
+
+            return startsDisabled;
         };
 
         vm.toggleAll = function() {
@@ -204,7 +214,7 @@ angular.module('common.attributes.list', [
                 vm.attributes[vm.subcategory]
                     .sort(vm.sortAttributes)
                     .forEach(function(attr) {
-                        if (vm.isDisabled(attr)) {
+                        if (vm.isDisabled(attr) || vm.isStartsDisabled(attr)) {
                             return;
                         }
 
@@ -226,7 +236,7 @@ angular.module('common.attributes.list', [
                         vm.attributes[key]
                             .sort(vm.sortAttributes)
                             .forEach(function(attr) {
-                                if (vm.isDisabled(attr)) {
+                                if (vm.isDisabled(attr) || vm.isStartsDisabled(attr)) {
                                     return;
                                 }
 
@@ -256,6 +266,30 @@ angular.module('common.attributes.list', [
 
         vm.sortSubcategories = function(a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
+        };
+
+        vm.getFiltering = function() {
+            var obj = {};
+
+            if (vm.filters.queryText) {
+                obj.DisplayName = vm.filters.queryText;
+            }
+
+            Object.keys(vm.filters.show).forEach(function(property) {
+                if (vm.filters.show[property] === true) {
+                    obj[property] = true;
+                }
+            });
+
+            Object.keys(vm.filters.hide).forEach(function(property) {
+                if (vm.filters.hide[property] === true) {
+                    obj[property] = false;
+                }
+            });
+
+            console.log(obj, vm.filters);
+
+            return obj;
         };
     }
 });

@@ -1,0 +1,20 @@
+<ul class="controls">
+    <li class="attr-text">
+        <span>
+            {{$ctrl.params.category}} Attributes ({{$ctrl.data.config.TotalAttrs|number}})
+        </span>
+    </li>
+
+    <li class="attr-activate-deactivate-button pull-right">
+        <button class="button icon-button blue-button" ng-click="$ctrl.save()" ng-disabled="$ctrl.store.isChanged()">
+            <i class="fa fa-spinner fa-spin fa-fw" ng-if="$ctrl.isSaving"></i>
+            {{$ctrl.isSaving ? 'SAVING' : 'SAVE' }} {{$ctrl.section == 'usage' ? 'CONFIGURATION' : 'ACTIVATION' }}
+        </button>
+    </li>
+
+    <li class="attr-text pull-right">
+        <span>
+            {{$ctrl.store.getSelected().length|number}} <span class="attr-tiny-uppercase">{{$ctrl.store.getLimit() >= 0 ? '/ ' + $ctrl.store.getLimit() + ' ' : ''}}selected</span>
+        </span>
+    </li>
+</ul>

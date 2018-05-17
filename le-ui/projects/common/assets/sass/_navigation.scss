@@ -650,6 +650,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                     margin-right: 0.8em;
                     margin-left: .2em;
                     min-width: 2.6em;
+                    color: #222;
                     
                     span {
                         margin: 3px;
@@ -747,7 +748,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
         & > a {
             padding: 16px 20px 16px 20px;
             display: block;
-            color: $dark-gray;
+            color: #555;
 
             &:hover,
             * {
@@ -793,10 +794,10 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                 margin: 0;
                 margin-right: 1em;
                 max-width: 1em;
+                color: #222;
             }
             .pd-header-username {
                 font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
-                color: #555;
                 font-size: 14px;
                 text-overflow: ellipsis;
                 overflow: hidden;
@@ -804,7 +805,6 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
             }
             .tenant-name {
                 font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
-                color: #555;
                 font-size: 12px;
                 margin-top: .25em;
                 text-overflow: ellipsis;

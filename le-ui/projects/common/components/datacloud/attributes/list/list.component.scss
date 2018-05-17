@@ -13,9 +13,6 @@ ul.attr-list-results {
                 font-weight: bold;
             }
         }
-
-        & > div:hover {
-        }
         
         div.attr-result-checkbox { 
             height: 100%;
@@ -58,10 +55,21 @@ ul.attr-list-results {
                 padding-left: 1em;
             }
 
+            i.fa-info-circle,
             i.fa-exclamation-circle {
                 position: absolute;
-                top: 2px;
+                top: 50%;
                 left: -0.4em;
+                -webkit-transform: translateY(-50%);
+                -ms-transform: translateY(-50%);
+                transform: translateY(-50%);
+            }
+
+            i.fa-info-circle {
+                color: #457eba;
+            }
+
+            i.fa-exclamation-circle {
                 color: #ef6a30;
             }
 

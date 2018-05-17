@@ -10,13 +10,17 @@ angular.module('common.attributes')
             sortPrefix: '+',
             queryText: '',
             showFilterBy: false,
-            showSelected: false,
-            hideSelected: false,
-            showPremium: false,
-            hidePremium: false
+            show: { 
+                Selected: false,
+                IsPremium: false
+            },
+            hide: { 
+                Selected: false,
+                IsPremium: false 
+            }
         };
 
-        this.limit = null;
+        this.limit = -1;
         this.selected = [];
 
         this.data = {
@@ -125,6 +129,16 @@ angular.module('common.attributes')
         this.limit = total;
     };
 
+    this.getUsageLimit = function(overview, area) {
+        var section = this.getSection();
+        var tabs = this.getTabMetadata(section);
+        var tab = tabs.filter(function(tab) {
+            return tab.label == area;
+        })[0];
+
+        return overview.Selections[tab.category].Limit;
+    };
+
     this.putConfig = function(type, category, usage, data) {
         var deferred = $q.defer();
         
@@ -141,10 +155,11 @@ angular.module('common.attributes')
         }
 
         var current = angular.copy(this.data.config);
+
         return JSON.stringify(this.data.original) === JSON.stringify(current);
     };
 
-    this.save = function() {
+    this.saveConfig = function() {
         var activate = this.getSection() == 'activate';
         var type = activate ? 'activation' : 'usage';
         var category = $stateParams.category;

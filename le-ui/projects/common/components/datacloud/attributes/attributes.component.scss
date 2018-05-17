@@ -1,5 +1,6 @@
 @import "./header/header.component.scss";
 @import "./subheader/subheader.component.scss";
+@import "./controls/controls.component.scss";
 @import "./filters/filters.component.scss";
 @import "./categories/categories.component.scss";
 @import "./list/list.component.scss";
@@ -8,56 +9,8 @@
 @import "./edit/edit.component.scss";
 
 .attr-list {
-    margin-top: 2em;
+    margin-top: 1.5em; 
     @mixin box-shadow($r,$g,$b) {
         box-shadow: 0px 0px 11px 2px rgba($r,$g,$b,0.33);
-    }
-    .controls,
-    .filters {
-        display: block;
-        height: 2.2em;
-        vertical-align: bottom;
-        margin-bottom: 1em;
-        
-        li.attr-back-text,
-        li.attr-text {
-            position: relative;
-            top: 0.1em;
-            font-size: 16px;
-        }
-
-        .attr-back-text {
-            font-size: 1.2em;
-        }
-        
-        > * {
-            display: inline-block;
-        }
-
-        .attr-tiny-uppercase {
-            text-transform: uppercase;
-            font-size: 9px;
-            position: relative;
-            bottom: 0;
-        }
-        
-        button {
-            margin-left: 1em;
-        }
-    }
-
-    .attr-pagination-top {
-        height: 2.2em;
-        margin-bottom: 1em;
-        text-align: right;
-        
-        .attr-pagination {
-            display: inline-block;
-        }
-    }
-
-    .attr-pagination-bottom {
-        height: 2.2em;
-        margin-top: 1em;
     }
 }

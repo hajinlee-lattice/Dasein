@@ -58,32 +58,10 @@ angular.module('common.attributes.enable', [])
         var vm = this;
 
         vm.filters = AttrConfigStore.getFilters();
-        vm.store = AttrConfigStore;
-        vm.isSaving = false;
 
         vm.$onInit = function() {
             console.log('init attrEnable', vm);
-
-            vm.data = vm.store.getData();
-            vm.section = vm.store.getSection();
-            vm.params = $stateParams;
             vm.categories = vm.overview.AttrNums;
-            vm.tabs = AttrConfigStore.getTabMetadata(vm.section);
-            
-            vm.store.setLimit(vm.getTabLimit(vm.params.section));
-        };
-
-        vm.getTabLimit = function(section) {
-            var tab = vm.tabs.filter(function(tab) {
-                return tab.label == section;
-            })[0];
-
-            return vm.overview.Selections[tab.category].Limit;
-        };
-
-        vm.save = function() {
-            vm.isSaving = true;
-            vm.store.save();
         };
     }
 });

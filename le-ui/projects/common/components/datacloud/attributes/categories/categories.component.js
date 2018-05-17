@@ -17,8 +17,6 @@ angular.module('common.attributes.categories', [])
             vm.catmap = angular.copy(vm.categories);
             vm.categories = Object.keys(vm.categories);
             vm.catlength = vm.categories.length;
-
-            console.log('init categories', vm);
         };
 
         vm.click = function(category) {
@@ -68,7 +66,6 @@ angular.module('common.attributes.categories', [])
             var y = vm.getTo().category == category;
             var z = vm.getFrom().category != category || vm.getTo().category == category;
 
-            //console.log(x,y,z,category, vm.getTo().category, vm.getFrom().category);
             return (x || y) && z;
         };
     }

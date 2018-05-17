@@ -15,8 +15,6 @@ angular.module('common.attributes.subheader', [])
                 vm.overview = vm.overview.Selections;
             }
 
-            console.log('init subheader', vm.section, vm.overview, vm.tabs);
-
             vm.tabs.forEach(function(item, index) {
                 item.Selected = item.Selected ? item.Selected : 0;
                 vm.tabs[index] = angular.extend({}, item, vm.overview[item.category]);
@@ -26,7 +24,7 @@ angular.module('common.attributes.subheader', [])
         };
 
         vm.click = function(name) {
-            ShowSpinner('Loading Attribute Configuration');
+            ShowSpinner('Loading Attributes');
 
             var params = {
                 activate: {

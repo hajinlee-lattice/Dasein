@@ -1,5 +1,7 @@
 angular.module('common.attributes', [
     'common.attributes.header',
+    'common.attributes.subheader',
+    'common.attributes.controls',
     'common.attributes.filters',
     'common.attributes.categories',
     'common.attributes.list',

@@ -1,6 +1,4 @@
-angular.module('common.attributes.edit', [
-    'common.attributes.subheader'
-])
+angular.module('common.attributes.edit', [])
 .config(function($stateProvider) {
     $stateProvider
         .state('home.attributes.edit', {
