@@ -70,16 +70,12 @@ public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
 
     @Test(groups = { "functional" }, dependsOnMethods = "createGroupOfBucketMetadataForModel_assertCreated")
     public void createAnotherGroupsOfBucketMetadata_assertCreated() throws Exception {
-        long oldLastUpdateTime = modelSummary.getLastUpdateTime();
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
         request.setBucketMetadataList(BucketedScoreTestUtils.getBucketMetadataList2());
         request.setModelGuid(modelGuid);
         bucketedScoreService.createABCDBuckets(request);
         Thread.sleep(500);
-
         modelSummary = modelSummaryReaderRepository.findById(modelGuid);
-        long newLastUpdateTime = modelSummary.getLastUpdateTime();
-        assertTrue(newLastUpdateTime > oldLastUpdateTime);
 
         Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
                 .getModelBucketMetadataGroupedByCreationTimes(modelGuid);
