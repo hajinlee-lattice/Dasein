@@ -5,11 +5,18 @@ angular.module('common.utilities.SessionTimeout', [
 .service('SessionTimeoutUtility', function (
     $rootScope, $state, $modal, $timeout, BrowserStorageUtility, LoginService
 ) {
-    var vm = this;
+    var vm = this,
+        debug = true; // make the modal popup faster
 
     var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30 * 1000;
     var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 14.5 * 60 * 1000;  // 14.5 minutes
     var TIME_INTERVAL_WARNING_BEFORE_LOGOUT = 30 * 1000;
+
+    if(debug) {
+        var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30 * 100;
+        var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 14.5 * 60 * 1;
+        var TIME_INTERVAL_WARNING_BEFORE_LOGOUT = 30 * 100000;
+    }
 
     this.inactivityCheckingId = null;
     this.warningModalInstance = null;
@@ -128,6 +135,8 @@ angular.module('common.utilities.SessionTimeout', [
     }
 
     vm.closeWarningModalAndSetInstanceToNull = function() {
+        angular.element(document.body).removeClass("modal-open");
+        angular.element(".modal-backdrop").remove();
         vm.warningModalInstance.close();
         vm.warningModalInstance = null;
     }
