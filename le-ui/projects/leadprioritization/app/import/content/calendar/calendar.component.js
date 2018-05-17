@@ -231,7 +231,7 @@ angular.module('lp.import.calendar', [])
     }
 
     vm.init = function() {
-        parseCalendar(vm.calendar);
+        //parseCalendar(vm.calendar); // uncomment this to create a non-null state for existing calendars
         if( vm.calendarOptions.mode === 'STARTING_DAY') {
             vm.nthMapping.nth = vm.calendarOptions.nth;
             vm.nthMapping.day = vm.calendarOptions.day;
@@ -240,8 +240,8 @@ angular.module('lp.import.calendar', [])
         }
 
         if((preventUnload) && !FieldDocument) {
-            //$state.go('home.import.entry.product_hierarchy');
-            //return false;
+            $state.go('home.import.entry.product_hierarchy');
+            return false;
         }
 
         $timeout(initDatePicker, 0);

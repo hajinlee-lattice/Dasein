@@ -24,13 +24,13 @@ angular
             url: '/calendar',
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
-                    // var deferred = $q.defer();
-                    // ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
-                    //     ImportWizardStore.setFieldDocument(result.Result);
-                    //     deferred.resolve(result.Result);
-                    // });
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
 
-                    // return deferred.promise;
+                    return deferred.promise;
                 },
                 Calendar: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
