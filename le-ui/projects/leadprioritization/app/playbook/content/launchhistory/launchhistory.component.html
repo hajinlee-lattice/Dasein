@@ -75,10 +75,9 @@
     		<thead>
     			<tr>
 
-    				<th class="sortable" ng-if="vm.allPlaysHistory" ng-click="vm.sort('created'); vm.sortDesc = !vm.sortDesc">
+    				<th class="sortable" ng-click="vm.sort('created'); vm.sortDesc = !vm.sortDesc">
                         Launch Date
                         <i  aria-hidden="true" 
-                            ng-if="vm.allPlaysHistory"
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'created',
                                 'fa fa-sort-desc': vm.sortBy === 'created' && vm.sortDesc, 
