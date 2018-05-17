@@ -37,7 +37,7 @@ angular.module('login.form', [
             vm.loginInProgress = false;
             vm.showForgotPassword = false;
             vm.forgotPasswordUsername = "";
-            vm.copyrightString = ResourceUtility.getString('LOGIN_COPYRIGHT', ['2010 - ' + (new Date()).getFullYear()]);
+            vm.dateString = '2010 - ' + (new Date()).getFullYear();
             vm.forgotPasswordErrorMessage = "";
             vm.history = [];
             vm.visible = true;
