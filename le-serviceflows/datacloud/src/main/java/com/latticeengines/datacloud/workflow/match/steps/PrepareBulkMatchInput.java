@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -163,10 +165,26 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                 jobConfiguration.setAppName(String.format("%s~DataCloudMatch[%s]~Block[%d/%d]",
                         getConfiguration().getCustomerSpace().getTenantId(), appId, blockIdx, blocks.length));
             }
+            writeInputBuffer(jobConfiguration);
             configurations.add(jobConfiguration);
         }
 
         return configurations;
+    }
+
+    private void writeInputBuffer(DataCloudJobConfiguration jobConfiguration) {
+        String avroPath = jobConfiguration.getAvroPath();
+        String inputBufferFile = FilenameUtils.getFullPath(avroPath) + "InputBuffer.json";
+        try {
+            HdfsUtils.writeToFile(yarnConfiguration, inputBufferFile,
+                    JsonUtils.serialize(jobConfiguration.getMatchInput().getInputBuffer()));
+            jobConfiguration.setInputBufferPath(inputBufferFile);
+            jobConfiguration.getMatchInput().setInputBuffer(null);
+            log.info("Write InputBuffer on to hdfs, path=" + inputBufferFile);
+        } catch (Exception e) {
+            log.warn("Can not write InputBuffer on hdfs, path=" + inputBufferFile);
+        }
+
     }
 
     private void writeBlock(Iterator<GenericRecord> iterator, Integer blockSize, String targetFile) {

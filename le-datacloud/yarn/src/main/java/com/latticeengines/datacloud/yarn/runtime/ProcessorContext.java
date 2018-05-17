@@ -42,6 +42,7 @@ import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.datacloud.match.service.impl.MatchPlannerBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -296,6 +297,7 @@ public class ProcessorContext {
         this.dataCloudProcessor = dataCloudProcessor;
         dataCloudVersion = jobConfiguration.getMatchInput().getDataCloudVersion();
 
+        setInputBuffer(jobConfiguration);
         receivedAt = new Date();
 
         podId = jobConfiguration.getHdfsPodId();
@@ -417,6 +419,21 @@ public class ProcessorContext {
         cleanup();
 
         log.info("Partial match enabled=" + originalInput.isPartialMatchEnabled() + " partial match=" + partialMatch);
+    }
+
+    private void setInputBuffer(DataCloudJobConfiguration jobConfiguration) {
+        if (jobConfiguration.getMatchInput().getInputBuffer() == null
+                && StringUtils.isNotBlank(jobConfiguration.getInputBufferPath())) {
+            try {
+                String jsonStr = HdfsUtils.getHdfsFileContents(yarnConfiguration,
+                        jobConfiguration.getInputBufferPath());
+                jobConfiguration.getMatchInput().setInputBuffer(JsonUtils.deserialize(jsonStr, AvroInputBuffer.class));
+                log.info("Read InputBuffer from hdfs, file=" + jobConfiguration.getInputBufferPath());
+            } catch (Exception e) {
+                log.warn("Can not read InputBuffer from hdfs, file=" + jobConfiguration.getInputBufferPath());
+            }
+        }
+
     }
 
     private Schema appendDebugSchema(Schema schema) {

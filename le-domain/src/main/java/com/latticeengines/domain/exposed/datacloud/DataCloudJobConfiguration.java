@@ -39,9 +39,10 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private String yarnQueue;
     @JsonProperty("realtime_proxy_url")
     private String realTimeProxyUrl;
+    @JsonProperty("input_buffer_path")
+    private String inputBufferPath;
 
     private Schema inputAvroSchema;
-
 
     public String getHdfsPodId() {
         return hdfsPodId;
@@ -109,7 +110,7 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         if (inputAvroSchema != null && StringUtils.isNotEmpty(inputAvroSchema.toString())
                 && !"null".equalsIgnoreCase(inputAvroSchema.toString())) {
             this.inputAvroSchema = new Schema.Parser().parse(inputAvroSchema.toString());
-        } else  {
+        } else {
             this.inputAvroSchema = null;
         }
     }
@@ -164,10 +165,17 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.realTimeProxyUrl = realTimeProxyUrl;
     }
 
+    public String getInputBufferPath() {
+        return inputBufferPath;
+    }
+
+    public void setInputBufferPath(String inputBufferPath) {
+        this.inputBufferPath = inputBufferPath;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
-
 
 }
