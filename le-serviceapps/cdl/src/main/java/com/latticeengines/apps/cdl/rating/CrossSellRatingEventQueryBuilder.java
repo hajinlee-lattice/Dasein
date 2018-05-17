@@ -54,27 +54,35 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
 
     @Override
     protected void buildProductTransactionRestrictions() {
-        AggregationFilter unitsFilter = null;
-        AggregationFilter spentFilter = null;
+        TransactionRestriction unitsFilterRestriction = null;
+        TransactionRestriction spentFilterRestriction = null;
+        TransactionRestriction crossSellRestriction = null;
+
+        TimeFilter nextPeriodTimeFilter = new TimeFilter(ComparisonType.FOLLOWING, periodTypeName, Arrays.asList(1, 1));
+        TransactionRestriction purchasedInNextPeriod = new TransactionRestriction(productIds, nextPeriodTimeFilter,
+                false, null, null);
 
         CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
-
-        Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters = //
-                advancedConf.getFilters();
-
-        if (filters.containsKey(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD)) {
-            ModelingConfigFilter configFilter = filters.get(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD);
-            unitsFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.AT_LEAST_ONCE,
-                    configFilter.getCriteria(), Collections.singletonList(configFilter.getValue()));
-        }
+        Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters = advancedConf.getFilters();
 
         if (filters.containsKey(CrossSellModelingConfigKeys.SPEND_IN_PERIOD)) {
             ModelingConfigFilter configFilter = filters.get(CrossSellModelingConfigKeys.SPEND_IN_PERIOD);
-            spentFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
-                    configFilter.getCriteria(), Collections.singletonList(configFilter.getValue()));
+            AggregationFilter spentFilter = new AggregationFilter(AggregationSelector.SPENT,
+                    AggregationType.AT_LEAST_ONCE, configFilter.getCriteria(),
+                    Collections.singletonList(configFilter.getValue()));
+            spentFilterRestriction = new TransactionRestriction(productIds, nextPeriodTimeFilter, false, spentFilter,
+                    null);
         }
 
-        TimeFilter nextPeriodTimeFilter = new TimeFilter(ComparisonType.FOLLOWING, periodTypeName, Arrays.asList(1, 1));
+        if (filters.containsKey(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD)) {
+            ModelingConfigFilter configFilter = filters.get(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD);
+            AggregationFilter unitsFilter = new AggregationFilter(AggregationSelector.UNIT,
+                    AggregationType.AT_LEAST_ONCE, configFilter.getCriteria(),
+                    Collections.singletonList(configFilter.getValue()));
+            unitsFilterRestriction = new TransactionRestriction(productIds, nextPeriodTimeFilter, false, null,
+                    unitsFilter);
+        }
+
         switch (advancedConf.getModelingStrategy()) {
         case CROSS_SELL_REPEAT_PURCHASE:
             ModelingConfigFilter configFilter = filters.get(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD);
@@ -82,31 +90,22 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
                 throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
             }
 
-            TransactionRestriction notPurchasedInPastXPeriods = new TransactionRestriction(productIds,
+            // Not Purchased In Past X Periods
+            crossSellRestriction = new TransactionRestriction(productIds,
                     TimeFilter.priorOnly(configFilter.getValue() - 1, periodTypeName), false, null, null);
-
-            TransactionRestriction purchasedInNextPeriod = new TransactionRestriction(productIds, nextPeriodTimeFilter,
-                    false, spentFilter, unitsFilter);
-
-            productTxnRestriction = Restriction.builder() //
-                    .and(notPurchasedInPastXPeriods, purchasedInNextPeriod) //
-                    .build();
             break;
         case CROSS_SELL_FIRST_PURCHASE:
-            TransactionRestriction neverPurchasedIncludingCurrent = new TransactionRestriction(productIds,
-                    TimeFilter.ever(periodTypeName), true, null, null);
-
-            purchasedInNextPeriod = new TransactionRestriction(productIds, nextPeriodTimeFilter, false, spentFilter,
-                    unitsFilter);
-
-            productTxnRestriction = Restriction.builder() //
-                    .and(neverPurchasedIncludingCurrent, purchasedInNextPeriod) //
-                    .build();
+            // Never Purchased Including Current Period
+            crossSellRestriction = new TransactionRestriction(productIds, TimeFilter.ever(periodTypeName), true, null,
+                    null);
             break;
         default:
             throw new LedpException(LedpCode.LEDP_40017);
         }
 
+        productTxnRestriction = Restriction.builder() //
+                .and(crossSellRestriction, purchasedInNextPeriod, spentFilterRestriction, unitsFilterRestriction) //
+                .build();
     }
 
     @Override
