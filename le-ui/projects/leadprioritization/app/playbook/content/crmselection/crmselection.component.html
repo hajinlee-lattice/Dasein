@@ -16,8 +16,7 @@
                     </thead>
                     <tbody>
                         <tr 
-                            ng-repeat="org in $ctrl.orgs"
-                            ng-class="{'disabled': org.accountId === null || !org.isRegistered}">
+                            ng-repeat="org in $ctrl.orgs">
                             <td>
                                 <input  
                                     type="radio" 
@@ -25,8 +24,7 @@
                                     name="{{org.orgId}}" 
                                     ng-value="org"
                                     ng-change="$ctrl.checkValid(crmselection_form, org.accountId)" 
-                                    ng-model="$ctrl.stored.crm_selection"
-                                    ng-disabled="org.accountId === null" />
+                                    ng-model="$ctrl.stored.crm_selection" />
                                 <label for="{{org.orgId}}">{{ org.orgId }}</label>
                             </td>
                             <td>{{ org.orgName }}</td>

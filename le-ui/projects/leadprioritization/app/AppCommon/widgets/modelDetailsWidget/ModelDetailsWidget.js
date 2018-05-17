@@ -100,11 +100,17 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             }
             $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
             $scope.modelIsReady = (ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== null || ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined);
-            $scope.segmentName = ratingEngine.segment.display_name;
-            $scope.totalAccounts = ratingEngine.segment.accounts;
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
             $scope.activeStatus = ratingEngine.status;
 
+            if(ratingEngine.segment) {
+                $scope.segmentName = ratingEngine.segment.display_name;
+                $scope.totalAccounts = ratingEngine.segment.accounts;    
+            } else {
+                $scope.segmentName = 'No segment selected';
+                $scope.totalAccounts = '0';
+            }
+        
         }
 
         var isActive = modelDetails[widgetConfig.StatusProperty] == 'Active';

@@ -17,6 +17,7 @@ angular.module('common.datacloud.valuepicker', [])
     });
 
     vm.init = function() {
+
         vm.picker_object = QueryTreeService.getPickerObject() || {
             item: null,
             restriction: null
