@@ -5,6 +5,7 @@ import static com.latticeengines.query.exposed.translator.TranslatorUtils.genera
 import java.util.Collections;
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -266,8 +267,8 @@ abstract class QueryTranslator {
             String rhsKey = joinKeys.stream().map(Pair::getRight).map(InterfaceName::name).findFirst().orElse(null);
             Query innerQuery = Query.builder().from(innerEntity).where(innerRestriction).select(innerEntity, lhsKey)
                     .build();
-            SubQuery subQuery = new SubQuery(innerQuery, generateAlias(innerEntity.name()));
-            innerRestriction = Restriction.builder().let(outerEntity, rhsKey).inCollection(subQuery, lhsKey).build();
+            SubQuery subQuery = new SubQuery(innerQuery, NamingUtils.randomSuffix(innerEntity.name(), 6));
+            innerRestriction = Restriction.builder().let(outerEntity, rhsKey).inSubquery(subQuery).build();
         }
         return joinRestrictions(outerRestriction, innerRestriction);
     }
