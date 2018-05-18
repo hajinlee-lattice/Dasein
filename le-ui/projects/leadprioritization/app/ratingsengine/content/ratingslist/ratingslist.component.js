@@ -364,7 +364,7 @@ angular.module('lp.ratingsengine.ratingslist', [
         }
 
         if(type === 'RULE_BASED'){
-            ret = vm.hasRules(rating);
+            ret = true;//vm.hasRules(rating);
         }else{
             ret = metadata && metadata.length > 0;
         }   

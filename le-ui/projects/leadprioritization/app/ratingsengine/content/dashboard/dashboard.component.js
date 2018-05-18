@@ -9,6 +9,7 @@ angular.module('lp.ratingsengine.dashboard', [
     var vm = this;
 
     angular.extend(vm, {
+        deactivateInProgress: false,
         dashboard: Dashboard,
         ratingEngine: RatingEngine,
         modelSummary: Model,
@@ -131,8 +132,20 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     }
 
-    vm.deactivateRating = function(){
+    vm.disableScoringButton = function(){
+        if(vm.ratingEngine.status === 'INACTIVE' || vm.deactivateInProgress === true){
+            return true;
+        }
 
+        if(!vm.isRulesBased){
+            return vm.dashboard.summary.bucketMetadata ? false : true ;
+        }else{
+            return false;
+        }
+    }
+
+    vm.deactivateRating = function(){
+        vm.deactivateInProgress = true;
         var deferred = $q.defer();
 
         var newStatus = (vm.isActive(vm.ratingEngine.status) ? 'INACTIVE' : 'ACTIVE'),
@@ -140,14 +153,27 @@ angular.module('lp.ratingsengine.dashboard', [
                 id: vm.ratingEngine.id,
                 status: newStatus
             }
-
+        var model = vm.ratingEngine.activeModel;
         RatingsEngineService.saveRating(newRating).then(function(data){
-            vm.ratingEngine = data;
-            vm.initDataModel();
-            $rootScope.$broadcast('statusChange', { 
-                activeStatus: data.status
-            });
-            deferred.resolve({success: true});
+
+            //This call is made because the POST API does not return 
+            // The activeModel. Next release M-21 the json structure is going to change
+            RatingsEngineService.getRating(vm.ratingEngine.id).then(
+                function(dataUpdated){
+                    vm.ratingEngine = dataUpdated;
+                    console.log('RATING ', dataUpdated);
+                    $rootScope.$broadcast('statusChange', { 
+                        activeStatus: data.status
+                    });
+                    RatingsEngineService.getRatingDashboard(newRating.id).then(function(data){
+                        vm.dashboard.plays = data.plays;
+                        vm.initDataModel();
+                        deferred.resolve({success: true});
+                        vm.deactivateInProgress = false;
+                    });
+                }
+            );
+            
         });
         return deferred.promise;
     }
@@ -231,12 +257,8 @@ angular.module('lp.ratingsengine.dashboard', [
             newBucketMetadata = dummyNewBucketData;
         }
         vm.ratingEngine.newBucketMetadata = newBucketMetadata;
-    }
 
-    vm.init = function() {
-        vm.initModalWindow();
-        vm.initDataModel();
-        if (vm.isRulesBased) {
+                if (vm.isRulesBased) {
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
@@ -297,6 +319,12 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.prioritizeBy = 'Likely Amount of Spend';
             }
         }
+    }
+
+    vm.init = function() {
+        vm.initModalWindow();
+        vm.initDataModel();
+
     }
 
     vm.returnProductNameFromId = function(productId) {

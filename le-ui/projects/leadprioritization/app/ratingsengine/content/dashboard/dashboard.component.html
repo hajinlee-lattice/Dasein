@@ -19,19 +19,9 @@
 
                     <button
                         class="button orange-button"
-                        ng-if="!vm.isRulesBased"
                         ng-click="vm.deactivate()"
-                        ng-disabled="vm.ratingEngine.status === 'INACTIVE' || !vm.dashboard.summary.bucketMetadata">
+                        ng-disabled="vm.disableScoringButton()">
                         Deactivate Scoring
-                    </button>
-
-                    <button
-                        class="button"
-                        ng-class="{ 'orange-button': !vm.status_toggle, 'gray-button': vm.status_toggle }"
-                        ng-if="vm.isRulesBased"
-                        ng-click="vm.deactivate()"
-                        ng-disabled="vm.modelSummary === null">
-                        {{ vm.toggleScoringButtonText }}
                     </button>
                     <button
                         class="button orange-button"
