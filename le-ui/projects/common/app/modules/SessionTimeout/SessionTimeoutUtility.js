@@ -6,7 +6,7 @@ angular.module('common.utilities.SessionTimeout', [
     $rootScope, $state, $modal, $timeout, BrowserStorageUtility, LoginService
 ) {
     var vm = this,
-        debug = true; // make the modal popup faster
+        debug = false; // make the modal popup faster
 
     var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30 * 1000;
     var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 14.5 * 60 * 1000;  // 14.5 minutes
