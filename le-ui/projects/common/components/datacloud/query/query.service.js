@@ -40,12 +40,14 @@ angular.module('common.datacloud.query')
             resetLabelIncrementor: false
         };
 
+        // Play Launch Data
         this.bucketsToLaunch = null;
         this.ratedTargetsLimit = null;
         this.selectedBucket = 'A';
         this.destinationOrgId = null;
         this.destinationSysType = null;
         this.destinationAccountId = null;
+        this.excludeItems = false;
 
         this.init = function() {
             this.initRestrictions();
@@ -158,6 +160,13 @@ angular.module('common.datacloud.query')
         }
         this.getDestinationAccountId = function() {
             return this.destinationAccountId;
+        }
+
+        this.setExcludeItems = function(excludeItems) {
+            this.excludeItems = excludeItems;
+        }
+        this.getExcludeItems = function() {
+            return this.excludeItems;
         }
 
         this.setPublicProperty = function(property, value) {

@@ -99,11 +99,22 @@
                         <!-- Ratings chart if play has Launched -->
                         <div ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
 
-                            <barchart 
+
+                            <!-- <div 
+                                class="no-ratings"
+                                ng-if="play.newBucketMetadata[0].dummy">
+                                <h4>No Ratings Available</h4>
+                            </div>
+                            <bar-chart
+                                config="play.chartConfig" 
+                                bktlist="play.newBucketMetadata">
+                            </bar-chart> -->
+
+                            <!-- <barchart 
                                 header="Account Ratings"
                                 ratings="true" 
                                 data="play.ratings">
-                            </barchart>
+                            </barchart> -->
 
                             <!-- <div class="barChart">
 

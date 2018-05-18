@@ -198,6 +198,8 @@ angular.module('lp.playbook.dashboard', [
         PlaybookWizardStore.getPlay(play_name, true).then(function(play){
             vm.play = play;
 
+            console.log(vm.play);
+
             vm.launchButton = PlaybookWizardStore.launchButton(play);
             vm.launchedState = vm.launchButton.state; //(vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
             vm.ratingsGraph = makeSimpleGraph(play.ratings && play.ratings, 'count');

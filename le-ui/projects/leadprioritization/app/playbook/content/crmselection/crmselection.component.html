@@ -16,7 +16,8 @@
                     </thead>
                     <tbody>
                         <tr 
-                            ng-repeat="org in $ctrl.orgs">
+                            ng-repeat="org in $ctrl.orgs"
+                            ng-if="$ctrl.orgs.length > 0">
                             <td>
                                 <input  
                                     type="radio" 
@@ -45,15 +46,33 @@
                                 </span>
                             </td>
                         </tr>
+                        <tr ng-if="$ctrl.orgs.length === 0">
+                            <td colspan="3">
+                                You currently have not set up any SalesForce Orgs. Please set up at least one account in order to create a play.
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
-            </form>
 
-            <p ng-if="$ctrl.nullCount !== 0">For the above selected SFDC Org, <strong>{{ $ctrl.nullCount | number }} of {{ $ctrl.totalCount | number }}</strong> recommendations have blank Account ID. It is advisable to remove these recommendations from the plays as they will fail to launch your CRM system.</p>
-            <p ng-if="$ctrl.nullCount !== 0">Note: An exception of this rule is when 'Lead workflow' is used to provide recommendations to your reps.</p>
-            <label ng-if="$ctrl.nullCount !== 0">
-                <input type="checkbox">Remove all recommendations with blank Account ID
-            </label>
+                <div class="coverage-counts">
+                    <div ng-if="$ctrl.loadingCoverageCounts">
+                        <span class="fa fa-spinner fa-pulse fa-fw"></span> Looking for blank account IDs for the selected SalesForce Org.
+                    </div>
+
+                    <div ng-if="!$ctrl.loadingCoverageCounts && $ctrl.nullCount === 0">
+                        No blank account IDs found for this SalesForce Org.
+                    </div>
+
+                    <div class="blank-ids" ng-if="!$ctrl.loadingCoverageCounts && $ctrl.nullCount !== 0 && $ctrl.nullCount !== null">
+                        <p>For the above selected SFDC Org, <strong>{{ $ctrl.nullCount | number }} of {{ $ctrl.totalCount | number }}</strong> recommendations have blank Account ID. It is advisable to remove these recommendations from the plays as they will fail to launch your CRM system.</p>
+                        <p>Note: An exception of this rule is when 'Lead workflow' is used to provide recommendations to your reps.</p>
+                        <label>
+                            <input type="checkbox" ng-model="excludeItemsWithoutSalesforceId">Remove all recommendations with blank Account ID
+                        </label>
+                    </div>
+                </div>
+
+            </form>
 
         </div>
     </div>

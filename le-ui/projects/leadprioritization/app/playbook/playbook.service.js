@@ -588,6 +588,7 @@ angular.module('lp.playbook')
             destinationOrgId = QueryStore.getDestinationOrgId()
             destinationSysType = QueryStore.getDestinationSysType(),
             destinationAccountId = QueryStore.getDestinationAccountId();
+            excludeItems = QueryStore.getExcludeItems();
 
         // console.log(bucketsToLaunch);
         // console.log(ratedTargetsLimit);
@@ -601,7 +602,8 @@ angular.module('lp.playbook')
                 accountsSelected: ratedTargetsLimit,
                 destinationOrgId: destinationOrgId,
                 destinationSysType: destinationSysType,
-                destinationAccountId: destinationAccountId
+                destinationAccountId: destinationAccountId,
+                excludeItemsWithoutSalesforceId: excludeItems
             }
         }).then(function(response){
             deferred.resolve(response.data);

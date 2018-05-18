@@ -57,7 +57,7 @@ angular.module('lp.create.import.job', [
     function performCalc(job) {
         ServiceErrorUtility.process({ data: job });
 
-        console.log(job);
+        // console.log(job);
 
         if (job.jobStatus === 'Pending' || job.stepRunning === 'no_mapped_step_name') {
             ceiling = 10;

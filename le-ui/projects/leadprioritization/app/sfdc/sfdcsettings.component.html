@@ -65,10 +65,12 @@
                                     name="accountId"
                                     ng-init="$ctrl.accountids[org.accountId]" 
                                     ng-model="org.accountId" 
-                                    ng-options="accountid.fieldName as accountid.displayName for accountid in $ctrl.accountids"
                                     ng-required="org.accountId == null || org.accountId == ''">
                                         <option value="">Select</option>
+                                        <option ng-repeat="accountid in $ctrl.accountids" value="{{accountid.fieldName}}">CRM: {{accountid.displayName}}</option>
                                     </select>
+
+                                    <!-- ng-options="accountid.fieldName as accountid.displayName for accountid in $ctrl.accountids" -->
                             </td>
                         </tr>
                     </tbody>

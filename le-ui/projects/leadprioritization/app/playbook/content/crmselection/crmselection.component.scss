@@ -2,11 +2,6 @@
 	padding-left: 0;
 }
 .crm-selection {
-	form {
-		padding-bottom: 20px;
-		margin-bottom: 30px;
-		border-bottom: #ddd solid 1px;
-	}
 	strong {
 		font-weight: bold;
 	}
@@ -25,5 +20,14 @@
 		width: 200px;
 		left: -100px;
 		white-space: normal;
+	}
+	.coverage-counts {
+		padding-top: 20px;
+		margin-top: 30px;
+		border-top: #ddd solid 1px;
+		color: #676767;
+		.blank-ids {
+			color: #333;
+		}
 	}
 }

@@ -51,6 +51,8 @@ angular.module('lp.models.ratings', [
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
 
+        vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
+
         if(vm.section === 'dashboard.scoring') {
             vm.ratingModelId = $stateParams.ratingEngine.activeModel.AI.id;
         } else if (vm.section === 'dashboard.ratings') {
@@ -64,8 +66,6 @@ angular.module('lp.models.ratings', [
         } else {
             vm.modelType = "Accounts";
         };
-
-        vm.chartNotUpdated = true;
 
         renderChart();
     }

@@ -48,7 +48,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
 
     vm.init = function($q) {
 
-        // console.log(vm.current.plays);
+        console.log(vm.current.plays);
         
         PlaybookWizardStore.clear();
         vm.header.filter.filtered = vm.current.plays;

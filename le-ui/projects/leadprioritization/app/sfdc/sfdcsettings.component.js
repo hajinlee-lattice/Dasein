@@ -8,7 +8,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
     },
     controller: function(
         $q, $scope, $state, $timeout, 
-        ResourceUtility, BrowserStorageUtility, SfdcService, ModalStore
+        ResourceUtility, BrowserStorageUtility, SfdcService, ModalStore, SfdcStore
     ) {
         var vm = this;
 
@@ -43,7 +43,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         }
 
         vm.$onInit = function() {
-            console.log(vm.orgs);
+            // console.log(vm.orgs);
             // console.log(vm.accountids);
             // console.log(vm.featureflags);
 
@@ -58,6 +58,9 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         vm.originalData = angular.copy(vm.orgs);
 
         vm.uiCanExit = function() {
+
+            vm.showSuccess = false;
+
           var deferred = $q.defer();
 
           if (!angular.equals(vm.orgs, vm.originalData)) {
@@ -106,7 +109,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
                 });
             });
 
-            console.log(vm.orgs);
+            // console.log(vm.orgs);
 
             SfdcStore.setOrgs(vm.orgs);
             vm.originalData = angular.copy(vm.orgs);

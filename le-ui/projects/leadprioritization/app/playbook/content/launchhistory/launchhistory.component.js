@@ -30,21 +30,26 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         // console.log(vm.stored);
         // console.log(vm.launches);
 
+        var launchSummaries = vm.launches.launchSummaries;
+
         vm.header.filter.items = [
             { 
                 label: "All", 
                 action: {}, 
-                total:  vm.launches.launchSummaries.length
+                total:  launchSummaries.length
             }
         ];
+
         angular.forEach(vm.launches.uniqueLookupIdMapping, function(value, key) {
-            var numberOfItems = value.length;
-            vm.header.filter.items.push({ 
-                label: key.toString(), 
-                action: {
-                    destinationSysType: key.toString()
-                }, 
-                total: numberOfItems
+            angular.forEach(value, function(val, index) {
+   
+                vm.header.filter.items.push({ 
+                    label: val.orgName, 
+                    action: {
+                        destinationOrgId: val.orgId
+                    }
+                });
+
             });
         });
 
@@ -57,8 +62,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.showPagination = (vm.launchesCount > vm.pagesize) ? true : false;
         vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
 
-        for(var i = 0; i < vm.launches.launchSummaries.length; i++) {
-            if (vm.launches.launchSummaries[i].launchState == 'Launching') {
+        for(var i = 0; i < launchSummaries.length; i++) {
+            if (launchSummaries[i].launchState == 'Launching') {
                 vm.launching = true;
                 break;
             }
