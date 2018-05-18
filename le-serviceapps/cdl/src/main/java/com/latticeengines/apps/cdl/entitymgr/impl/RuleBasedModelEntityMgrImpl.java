@@ -58,7 +58,8 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
                 updateExistingRuleBasedModel(retrievedRuleBasedModel, ruleBasedModel, ratingEngineId);
                 ruleBasedModelDao.update(retrievedRuleBasedModel);
                 // set Rule-based Rating Action Context
-                if (ruleBasedModel.getRatingRule() != null) {
+                RatingEngine ratingEngine = ratingEngineDao.findById(ratingEngineId);
+                if (ruleBasedModel.getRatingRule() != null && !ratingEngine.getJustCreated()) {
                     setRuleChangeActionContext(ratingEngineId, retrievedRuleBasedModel);
                 }
                 return retrievedRuleBasedModel;

@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -108,11 +109,26 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ruleBasedModel.setRatingRule(generateRatingRule());
         ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
         ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel(ruleBasedModel, ratingEngineId);
+        validateNonAction();
+
+        // set Rating Engine to active to mimic the fact this Rating Engine is
+        // complete.
+        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+        ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
+
+        ruleBasedModel.setRatingRule(generateRatingRule());
+        ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
+        ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel(ruleBasedModel, ratingEngineId);
         validateActionContext(ruleBasedModel);
         ruleBasedModelList = ruleBasedModelEntityMgr.findAllByRatingEngineId(ratingEngineId);
         Assert.assertNotNull(ruleBasedModelList);
         Assert.assertEquals(ruleBasedModelList.size(), 1);
         assertUpdatedRuleBasedModel(ruleBasedModelList.get(0));
+    }
+
+    private void validateNonAction() {
+        Action action = ActionContext.getAction();
+        Assert.assertNull(action);
     }
 
     private void validateActionContext(RatingModel ratingModel) {

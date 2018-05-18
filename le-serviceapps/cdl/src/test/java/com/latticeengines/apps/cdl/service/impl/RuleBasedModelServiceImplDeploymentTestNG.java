@@ -19,7 +19,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
-import com.latticeengines.apps.cdl.service.RuleBasedModelService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -51,9 +50,6 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
 
     @Inject
     private CDLTestDataService cdlTestDataService;
-
-    @Inject
-    private RuleBasedModelService ruleBasedModelService;
 
     private MetadataSegment reTestSegment;
 
