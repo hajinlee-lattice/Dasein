@@ -112,8 +112,8 @@ angular
             params: {
                 section: 'lookup',
                 LoadingText: 'Looking up Company Profile data',
-                category: '',
-                subcategory: ''
+                category: { dynamic: true, value: '' },
+                subcategory: { dynamic: true, value: '' }
             },
             views: {
                 "main@": {
