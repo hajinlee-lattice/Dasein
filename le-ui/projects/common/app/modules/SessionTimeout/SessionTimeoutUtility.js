@@ -125,7 +125,7 @@ angular.module('common.utilities.SessionTimeout', [
             LoginService.Logout();
         } else {
             if (vm.warningModalInstance) {
-                closeWarningModalAndSetInstanceToNull();
+                vm.closeWarningModalAndSetInstanceToNull();
             }
 
             if (!vm.inactivityCheckingId) {
