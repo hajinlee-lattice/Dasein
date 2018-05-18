@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,8 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -105,7 +108,6 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(rbRatingEngineId, true, true);
         Assert.assertNotNull(ratingEngine);
         Assert.assertNotNull(ratingEngine.getActiveModelPid());
-
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetRatingEngineAndModel" })
@@ -133,6 +135,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
                 roleBasedModel);
         Assert.assertTrue(retrievedRuleBasedModel instanceof RuleBasedModel);
         RatingRule ratingRule = ((RuleBasedModel) retrievedRuleBasedModel).getRatingRule();
+
         Assert.assertNotNull(ratingRule);
         Assert.assertEquals(ratingRule.getDefaultBucketName(), RatingBucketName.D.getName());
         Assert.assertTrue(MapUtils.isNotEmpty(ratingRule.getBucketToRuleMap()));
@@ -186,6 +189,32 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
+    public void testRatingEngineCyclicDependency() {
+        RatingEngine ratingEngine = createRatingEngine(RatingEngineType.RULE_BASED);
+        List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(ratingEngine.getId());
+        RuleBasedModel roleBasedModel = constructRuleModel();
+        ratingEngineService.updateRatingModel(ratingEngine.getId(), ratingModels.iterator().next().getId(), roleBasedModel);
+
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // Do nothing for InterruptedException
+        }
+
+        Exception e = null;
+        try {
+            rbRatingEngine.setCreated(new Date());
+            ratingEngineService.createOrUpdate(rbRatingEngine, mainTestTenant.getId());
+        } catch (Exception ex) {
+            e = ex;
+        }
+
+        Assert.assertNotNull(e);
+        Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40024);
+        deleteRatingEngine(ratingEngine.getId());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testRatingEngineCyclicDependency" })
     public void testDelete() {
         deleteRatingEngine(rbRatingEngineId);
 

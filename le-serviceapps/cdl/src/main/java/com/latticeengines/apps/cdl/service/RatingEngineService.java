@@ -69,4 +69,6 @@ public interface RatingEngineService {
     List<RatingModel> getDependingRatingModels(List<String> attributes);
 
     List<RatingEngine> getDependingRatingEngines(List<String> attributes);
+
+    boolean ratingEngineCyclicDependency(List<RatingEngine> ratingEngines);
 }

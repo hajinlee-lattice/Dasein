@@ -213,6 +213,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         if (ratingEngine == null) {
             throw new NullPointerException("Entity is null when creating a rating engine.");
         }
+
+        if (ratingEngineCyclicDependency(Collections.singletonList(ratingEngine))) {
+            throw new LedpException(LedpCode.LEDP_40024);
+        }
+
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingEngine.getSegment() != null) {
             String segmentName = ratingEngine.getSegment().getName();
@@ -674,6 +679,45 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         return new ArrayList<>(ratingEngineSet);
+    }
+
+    @Override
+    public boolean ratingEngineCyclicDependency(List<RatingEngine> ratingEngines) {
+        boolean cyclicDependency = false;
+        if (ratingEngines != null) {
+            for (RatingEngine ratingEngine : ratingEngines) {
+                if (ratingEngine.getId() != null) {
+                    cyclicDependency = ratingEngineCyclicDependency(ratingEngine, new ArrayList<>());
+                    if (cyclicDependency) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return cyclicDependency;
+    }
+
+    private boolean ratingEngineCyclicDependency(RatingEngine ratingEngine, List<Long> ratingEngineList) {
+        ratingEngineList.add((ratingEngine.getPid()));
+        List<AttributeLookup> attributeLookups = getDependentAttrsInAllModels(ratingEngine.getId());
+        if (attributeLookups != null) {
+            for (AttributeLookup attributeLookup : attributeLookups) {
+                List<RatingEngine> childRatingEngines = getDependingRatingEngines(
+                        Collections.singletonList(sanitize(attributeLookup.toString())));
+
+                if (childRatingEngines != null) {
+                    for (RatingEngine childRatingEngine : childRatingEngines) {
+                        if (!ratingEngine.getPid().equals(childRatingEngine.getPid())) {
+                            return ratingEngineList.contains(childRatingEngine.getPid()) ||
+                                    ratingEngineCyclicDependency(childRatingEngine, ratingEngineList);
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private String sanitize(String attribute) {

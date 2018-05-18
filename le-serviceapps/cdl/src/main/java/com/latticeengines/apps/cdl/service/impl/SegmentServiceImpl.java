@@ -23,19 +23,16 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
-import com.latticeengines.common.exposed.graph.GraphNode;
-import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -61,6 +58,9 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
+        if (segmentCyclicDependency(Collections.singletonList(segment))) {
+            throw new LedpException(LedpCode.LEDP_40025);
+        }
         MetadataSegment segment1 = segmentEntityMgr.createOrUpdateSegment(segment);
         evictRatingMetadataCache();
         return segment1;
@@ -68,6 +68,9 @@ public class SegmentServiceImpl implements SegmentService {
 
     @NoCustomerSpace
     private MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
+        if (segmentCyclicDependency(Collections.singletonList(segment))) {
+            throw new LedpException(LedpCode.LEDP_40025);
+        }
         MetadataSegment segment1 = segmentEntityMgr.createOrUpdateSegment(segment);
         evictRatingMetadataCache();
         return segment1;
@@ -241,6 +244,47 @@ public class SegmentServiceImpl implements SegmentService {
         }
 
         return dependingMetadataSegments;
+    }
+
+    @Override
+    public boolean segmentCyclicDependency(List<MetadataSegment> metadataSegments) {
+        boolean cyclicDependency = false;
+        if (metadataSegments != null) {
+            for (MetadataSegment metadataSegment : metadataSegments) {
+                MetadataSegment existing = findByName(metadataSegment.getName());
+                if (existing != null) {
+                    cyclicDependency = segmentCyclicDependency(MultiTenantContext.getCustomerSpace().toString(),
+                            metadataSegment, new ArrayList<>());
+                    if (cyclicDependency) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return cyclicDependency;
+    }
+
+    private boolean segmentCyclicDependency(String customerSpace, MetadataSegment metadataSegment, List<Long> metadataSegmentList) {
+        metadataSegmentList.add((metadataSegment.getPid()));
+        List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(metadataSegment));
+        if (attributeLookups != null) {
+            for (AttributeLookup attributeLookup : attributeLookups) {
+                List<MetadataSegment> childMetadataSegments = findDependingSegments(customerSpace,
+                        Collections.singletonList(sanitize(attributeLookup.toString())));
+
+                if (childMetadataSegments != null) {
+                    for (MetadataSegment childMetadataSegment : childMetadataSegments) {
+                        if (!metadataSegment.getPid().equals(childMetadataSegment.getPid())) {
+                            return metadataSegmentList.contains(childMetadataSegment.getPid()) ||
+                                    segmentCyclicDependency(customerSpace, childMetadataSegment, metadataSegmentList);
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     @NoCustomerSpace

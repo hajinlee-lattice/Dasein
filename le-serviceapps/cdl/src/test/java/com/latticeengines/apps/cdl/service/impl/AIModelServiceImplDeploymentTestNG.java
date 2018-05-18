@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,8 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
@@ -258,6 +261,36 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
+    public void testRatingEngineCyclicDependency() {
+        RatingEngine ratingEngine = createTestRatingEngine(RatingEngineType.CROSS_SELL);
+        List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(ratingEngine.getId());
+        RatingModel ratingModel = ratingModels.get(0);
+
+        AIModel aiModel = (AIModel) ratingEngineService.getRatingModel(ratingEngine.getId(), ratingModel.getId());
+        MetadataSegment trainingSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
+                constructSegment(TRAINING_SEGMENT_NAME));
+        aiModel.setTrainingSegment(trainingSegment);
+        ratingEngineService.updateRatingModel(ratingEngine.getId(), aiModel.getId(), aiModel);
+
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // Do nothing for InterruptedException
+        }
+
+        Exception e = null;
+        try {
+            aiRatingEngine.setUpdated(new Date());
+            createRatingEngine(aiRatingEngine);
+        } catch (Exception ex) {
+            e = ex;
+        }
+        Assert.assertNotNull(e);
+        Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40024);
+        deleteRatingEngine(ratingEngine.getId());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testRatingEngineCyclicDependency" })
     public void tearDelete() {
         deleteRatingEngine(aiRatingEngineId);
 
