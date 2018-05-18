@@ -200,6 +200,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "#!/bin/bash",
                             "ADDR=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`",
                             "echo $ADDR >> /etc/internaladdr.txt",
+                            "echo $ADDR >> /etc/ledp/internaladdr.txt",
                             "PUBADDR=`curl http://169.254.169.254/latest/meta-data/public-ipv4`",
                             "echo $PUBADDR >> /etc/externaladdr.txt"
                         ] ] }
