@@ -36,6 +36,9 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
     private static final int PRODUCT_IMPORT_SIZE_1_1 = 70;
     private static final int PRODUCT_IMPORT_SIZE_1_2 = 30;
 
+    private static final long SEGMENT_2_ACCOUNT_1 = 22;
+    private static final long SEGMENT_2_CONTACT_1 = 22;
+
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
