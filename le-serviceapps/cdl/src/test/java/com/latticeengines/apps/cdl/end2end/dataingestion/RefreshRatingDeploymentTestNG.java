@@ -74,18 +74,13 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private String uuid2;
     private String uuid3;
 
-    @BeforeClass(groups = { "end2end" })
+    @BeforeClass(groups =  "end2end")
     public void setup() throws Exception {
-        setup(false, true);
-    }
-
-    @BeforeClass(groups = { "manual" })
-    public void setupForManual() throws Exception {
         setup(USE_EXISTING_TENANT, ENABLE_AI_RATINGS);
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
-    @Test(groups = {"end2end", "manual"})
+    @Test(groups = "end2end")
     public void runTest() {
         processAnalyze(constructRequest());
         verifyProcess();
@@ -105,6 +100,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
             }
             resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
             verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
+
             new Thread(() -> {
                 createTestSegment2();
                 rule1 = createRuleBasedRatingEngine();
@@ -113,6 +109,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 activateRatingEngine(rule2.getId());
                 createAndDeleteRatingEngine();
             }).start();
+
             if (enableAIRatings) {
                 createModelingSegment();
                 MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),

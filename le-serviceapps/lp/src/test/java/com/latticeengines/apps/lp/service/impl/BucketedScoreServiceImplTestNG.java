@@ -15,8 +15,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.core.repository.reader.ModelSummaryReaderRepository;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
-import com.latticeengines.apps.lp.repository.reader.ModelSummaryReaderRepository;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.apps.lp.testframework.BucketedScoreTestUtils;
 import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;

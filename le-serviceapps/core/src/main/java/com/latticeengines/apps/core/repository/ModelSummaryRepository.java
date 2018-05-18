@@ -1,4 +1,4 @@
-package com.latticeengines.apps.lp.repository;
+package com.latticeengines.apps.core.repository;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.ModelSummary;

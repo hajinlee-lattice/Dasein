@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.core.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.dao.ModelSummaryDao;
 import com.latticeengines.apps.lp.dao.ModelSummaryProvenancePropertyDao;
 import com.latticeengines.apps.lp.dao.PredictorDao;
 import com.latticeengines.apps.lp.dao.PredictorElementDao;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
-import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.dao.KeyValueDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;

@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.core.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.dao.BucketMetadataDao;
 import com.latticeengines.apps.lp.entitymgr.BucketMetadataEntityMgr;
 import com.latticeengines.apps.lp.repository.reader.BucketMetadataReaderRepository;
 import com.latticeengines.apps.lp.repository.writer.BucketMetadataWriterRepository;
-import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.repository.writer.RatingEngineReository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;

@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.apps.cdl.service.impl.RatingModelServiceBase.getRatingModelService;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -10,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -18,7 +21,9 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +40,10 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
+import com.latticeengines.apps.core.repository.reader.ModelSummaryReaderRepository;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -110,6 +117,12 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private ServingStoreCacheService servingStoreCacheService;
+
+    @Inject
+    private ModelSummaryReaderRepository modelSummaryReaderRepository;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -253,19 +266,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             RatingEngine replicatedEngine = createOrUpdate(ratingEngine, tenantId);
             log.info("Replicated rating engine " + ratingEngineId + " to " + replicatedEngine.getId());
 
-            String existingActiveModelId = null;
-            RatingModel existingActiveModel = replicatedEngine.getActiveModel();
-            if (existingActiveModel != null) {
-                existingActiveModelId = existingActiveModel.getId();
-            }
             if (activeModel != null) {
+                log.info("Replicating active model " + activeModel.getId() + " for replicated engine " + ratingEngine.getId() + "("
+                        + ratingEngine.getDisplayName() + ")");
                 RatingModel replicatedModel = replicateRatingModel(replicatedEngine, activeModel);
-                replicatedEngine.setActiveModelPid(replicatedModel.getPid());
                 createOrUpdate(replicatedEngine, tenantId);
-            }
-            if (StringUtils.isNotBlank(existingActiveModelId)) {
-                RatingModelService<?> modelService = getRatingModelService(replicatedEngine.getType());
-                modelService.deleteById(existingActiveModelId);
+                log.info("Replicated an active model " + replicatedModel.getId() + " in replicated engine " + ratingEngine.getId() + "("
+                        + ratingEngine.getDisplayName() + ")");
             }
             return replicatedEngine;
         } else {
@@ -274,25 +281,25 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     private RatingModel replicateRatingModel(RatingEngine ratingEngine, RatingModel model) {
-        log.info("Replicating active model " + model.getId() + " for replicated engine " + ratingEngine.getId() + "("
-                + ratingEngine.getDisplayName() + ")");
         RatingModel replicatedModel;
         if (model instanceof RuleBasedModel) {
             replicatedModel = replicateRuleBasedModel(ratingEngine, (RuleBasedModel) model);
         } else {
             replicatedModel = replicateAIModel(ratingEngine, (AIModel) model);
         }
-        log.info("Replicated an active model " + replicatedModel.getId() + " in replicated engine " + ratingEngine.getId() + "("
-                + ratingEngine.getDisplayName() + ")");
         return replicatedModel;
     }
 
     @SuppressWarnings("unchecked")
     private AIModel replicateAIModel(RatingEngine ratingEngine, AIModel model) {
+        AIModel activeModel = (AIModel) ratingEngine.getActiveModel();
         model.setPid(null);
-        model.setId(null);
+        model.setId(activeModel.getId());
         model.setRatingEngine(ratingEngine);
-        model.setModelSummaryId(null);
+        if (StringUtils.isNotBlank(model.getModelSummaryId())) {
+            String replicatedModelGUID = replicateModelSummary(model.getModelSummaryId());
+            model.setModelSummaryId(replicatedModelGUID);
+        }
         RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
         return ratingModelService.createOrUpdate(model, ratingEngine.getId());
@@ -300,16 +307,76 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @SuppressWarnings("unchecked")
     private RuleBasedModel replicateRuleBasedModel(RatingEngine ratingEngine, RuleBasedModel model) {
+        RuleBasedModel activeModel = (RuleBasedModel) ratingEngine.getActiveModel();
         model.setPid(null);
-        model.setId(null);
+        model.setId(activeModel.getId());
         model.setRatingEngine(ratingEngine);
         RatingModelService<RuleBasedModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
         return ratingModelService.createOrUpdate(model, ratingEngine.getId());
     }
 
-    private ModelSummary replicateModelSummary() {
-        return null;
+    private String replicateModelSummary(String modelGUID) {
+        ModelSummary modelSummary = modelSummaryReaderRepository.findById(modelGUID);
+        if (modelSummary == null) {
+            throw new IllegalStateException("Cannot find model summary with GUID " + modelGUID);
+        }
+
+        String hdfsPathParttern = "/user/s-analytics/customers/%s.%s.Production/models/%s/%s";
+        String lookupId = modelSummary.getLookupId();
+        String[] tokens = lookupId.split("\\|");
+        String tenantId = tokens[0];
+        String eventTable = tokens[1];
+        String uuid = tokens[2];
+        String hdfsPath = String.format(hdfsPathParttern, tenantId, eventTable, uuid);
+
+        try {
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsPath, uuid);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to download model artifacts to local from hdfs path " + hdfsPath, e);
+        }
+
+        List<File> dirs = new ArrayList<>(FileUtils.listFiles(new File(uuid), new String[]{}, false));
+        String appId = dirs.get(0).getName();
+
+        File modelSummaryFile = new File(uuid + File.separator + appId + File.separator + "enhancements" + File.separator + "modelsummary.json");
+        String newTenantId = MultiTenantContext.getTenantId();
+        String newUuid = updateLocalModelSummayContent(modelSummaryFile, CustomerSpace.parse(tenantId).getTenantId(), eventTable, uuid, newTenantId);
+        String newModelGUID = modelSummary.getId().replace(uuid, newUuid);
+
+        String newHdfsPath = String.format(hdfsPathParttern, newTenantId, eventTable, newUuid);
+        try {
+            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, uuid, newHdfsPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload model artifacts to " + newHdfsPath, e);
+        }
+
+        FileUtils.deleteQuietly(new File(uuid));
+
+        return newModelGUID;
+    }
+
+    private String updateLocalModelSummayContent(File modelSummaryFile, String oldTenantName, String eventTable, String uuid, String newTenantName) {
+        String modelSummaryContent;
+        try {
+            modelSummaryContent = FileUtils.readFileToString(modelSummaryFile, "UTF-8");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read modelsummary content.", e);
+        }
+        String newUuid = UUID.randomUUID().toString();
+        String lookupId = String.format("%s.%s.Production|%s|%s", oldTenantName, oldTenantName, eventTable,
+                uuid);
+        String newLookupId = String.format("%s.%s.Production|%s|%s", newTenantName, newTenantName, eventTable,
+                uuid);
+        modelSummaryContent = modelSummaryContent.replace(lookupId, newLookupId);
+        modelSummaryContent = modelSummaryContent.replace(uuid, newUuid);
+        FileUtils.deleteQuietly(modelSummaryFile);
+        try {
+            FileUtils.write(modelSummaryFile, modelSummaryContent, "UTF-8");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write model summary file", e);
+        }
+        return newUuid;
     }
 
     @Override

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -180,44 +181,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (entity != null) {
             List<String> extractPaths = ExtractUtils.getExtractPaths(yarnConfiguration, entity);
             deleteByName(name);
-            extractPaths.forEach(p -> {
-                String avroDir = p.substring(0, p.lastIndexOf("/"));
-                try {
-                    HdfsUtils.rmdir(yarnConfiguration, avroDir);
-                } catch (IOException e) {
-                    log.error(String.format("Failed to delete extract %s", avroDir), e);
-                }
-                String schemaPath = avroDir.replace("/Tables", "/TableSchemas");
-                try {
-                    if (HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
-                        HdfsUtils.rmdir(yarnConfiguration, schemaPath);
-                    }
-                } catch (IOException e) {
-                    log.error(String.format("Failed to delete extract schema %s", schemaPath), e);
-                }
-            });
-            try {
-                List<DataUnit> dataUnits = dataUnitEntityMgr.deleteAllByName(name);
-                log.info("Deleted " + dataUnits.size() + " data units associated with table " + name);
-                for (DataUnit unit: dataUnits) {
-                    if (DataUnit.StorageType.Redshift.equals(unit.getStorageType())) {
-                        RedshiftDataUnit redshiftDataUnit = (RedshiftDataUnit) unit;
-                        String redshiftTable = redshiftDataUnit.getRedshiftTable();
-                        try {
-                            redshiftService.dropTable(redshiftTable);
-                        } catch (Exception e) {
-                            log.error(String.format("Failed to drop table %s from redshift", redshiftTable), e);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.error(String.format("Failed to clean up data unit by table name %s", name), e);
-            }
-            try {
-                redshiftService.dropTable(AvroUtils.getAvroFriendlyString(name));
-            } catch (Exception e) {
-                log.error(String.format("Failed to drop table %s from redshift", AvroUtils.getAvroFriendlyString(name)), e);
-            }
+            deleteExtrasInBackend(extractPaths);
+            deleteExternalStorage(name);
         }
     }
 
@@ -441,6 +406,51 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Attribute> findAttributesByTable_Pid(Long tablePid, Pageable pageable) {
         return attributeDao.findByTablePid(tablePid, pageable);
+    }
+
+    private void deleteExtrasInBackend(List<String> extractPaths) {
+        final ImmutableList<String> finalPaths = ImmutableList.copyOf(extractPaths);
+        new Thread(() -> finalPaths.forEach(p -> {
+            String avroDir = p.substring(0, p.lastIndexOf("/"));
+            try {
+                HdfsUtils.rmdir(yarnConfiguration, avroDir);
+            } catch (IOException e) {
+                log.error(String.format("Failed to delete extract %s", avroDir), e);
+            }
+            String schemaPath = avroDir.replace("/Tables", "/TableSchemas");
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration, schemaPath);
+                }
+            } catch (IOException e) {
+                log.error(String.format("Failed to delete extract schema %s", schemaPath), e);
+            }
+        })).start();
+    }
+
+    private void deleteExternalStorage(String tableName) {
+        try {
+            List<DataUnit> dataUnits = dataUnitEntityMgr.deleteAllByName(tableName);
+            log.info("Deleted " + dataUnits.size() + " data units associated with table " + tableName);
+            for (DataUnit unit: dataUnits) {
+                if (DataUnit.StorageType.Redshift.equals(unit.getStorageType())) {
+                    RedshiftDataUnit redshiftDataUnit = (RedshiftDataUnit) unit;
+                    String redshiftTable = redshiftDataUnit.getRedshiftTable();
+                    try {
+                        redshiftService.dropTable(redshiftTable);
+                    } catch (Exception e) {
+                        log.error(String.format("Failed to drop table %s from redshift", redshiftTable), e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(String.format("Failed to clean up data unit by table name %s", tableName), e);
+        }
+        try {
+            redshiftService.dropTable(AvroUtils.getAvroFriendlyString(tableName));
+        } catch (Exception e) {
+            log.error(String.format("Failed to drop table %s from redshift", AvroUtils.getAvroFriendlyString(tableName)), e);
+        }
     }
 
 }

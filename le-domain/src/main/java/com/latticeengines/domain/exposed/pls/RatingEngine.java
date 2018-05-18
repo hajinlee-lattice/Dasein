@@ -446,11 +446,13 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
                 defaultName = String.format(CUSTOM_EVENT_NAME_PATTERN, datePart);
                 break;
             case CROSS_SELL:
-                defaultName = String.format(CROSS_SELL_NAME_PATTERN, //
-                        ((CrossSellRatingConfig) getAdvancedRatingConfig())
-                                .getModelingStrategy() == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE ? "First"
-                                        : "Repeat",
-                        datePart);
+                if (getAdvancedRatingConfig() !=null) {
+                    defaultName = String.format(CROSS_SELL_NAME_PATTERN, //
+                            ((CrossSellRatingConfig) getAdvancedRatingConfig())
+                                    .getModelingStrategy() == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE ? "First"
+                                    : "Repeat",
+                            datePart);
+                }
                 break;
             case PROSPECTING:
             default:

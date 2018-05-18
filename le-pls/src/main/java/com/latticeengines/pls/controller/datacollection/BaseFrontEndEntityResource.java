@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -54,8 +55,17 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery.setAccountRestriction(null);
             frontEndQuery.setContactRestriction(null);
         }
-        appendSegmentRestriction(mainEntity, frontEndQuery);
+        appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(mainEntity);
+        if (BusinessEntity.Contact.equals(mainEntity)) {
+            Restriction accountRestriction;
+            if (frontEndQuery.getAccountRestriction() != null && frontEndQuery.getAccountRestriction().getRestriction() != null ) {
+                accountRestriction = appendAccountNotNull(frontEndQuery.getAccountRestriction().getRestriction());
+            } else {
+                accountRestriction = accountNotNullBucket();
+            }
+            frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
+        }
         return entityProxy.getCount(tenantId, frontEndQuery);
     }
 
@@ -74,12 +84,12 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery.setAccountRestriction(null);
             frontEndQuery.setContactRestriction(null);
         }
-        appendSegmentRestriction(getMainEntity(), frontEndQuery);
+        appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         return entityProxy.getData(tenantId, frontEndQuery);
     }
 
-    private void appendSegmentRestriction(BusinessEntity mainEntity, FrontEndQuery frontEndQuery) {
+    private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {
         if (StringUtils.isNotBlank(frontEndQuery.getPreexistingSegmentName())) {
             // Segment Restrictions
             Pair<Restriction, Restriction> segmentRestrictions = getSegmentRestrictions(
@@ -94,9 +104,9 @@ public abstract class BaseFrontEndEntityResource {
                 if (frontEndAccountRestriction != null) {
                     Restriction totalRestriction = Restriction.builder()
                             .and(frontEndAccountRestriction, segmentAccountRestriction).build();
-                    frontEndQuery.getAccountRestriction().setRestriction(appendAccountNotNull(totalRestriction));
+                    frontEndQuery.getAccountRestriction().setRestriction(totalRestriction);
                 } else {
-                    frontEndQuery.getAccountRestriction().setRestriction(appendAccountNotNull(segmentAccountRestriction));
+                    frontEndQuery.getAccountRestriction().setRestriction(segmentAccountRestriction);
                 }
             }
 
