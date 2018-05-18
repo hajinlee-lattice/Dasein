@@ -82,7 +82,9 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             } else {
                 reAttr.disableGroup(ColumnSelection.Predefined.Segment);
             }
-            if (RatingEngineStatus.INACTIVE.equals(summary.getStatus())) {
+            if (summary.getDeleted()) {
+                reAttr.setAttrState(AttrState.Inactive);
+            } else if (RatingEngineStatus.INACTIVE.equals(summary.getStatus())) {
                 reAttr.setAttrState(AttrState.Deprecated);
             }
             return reAttr;
