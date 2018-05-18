@@ -15,6 +15,7 @@
                         type="button" 
                         class="button white-button"
                         ui-sref="home.ratingsengine.dashboard({ rating_id: vm.stateParams.rating_id, modelId: vm.modelId })"
+                        ui-sref-opts="{reload: true, notify: true}"
                         ng-if="vm.section === 'dashboard.scoring'">
                         Back to Dashboard</button>
                 	<button 
