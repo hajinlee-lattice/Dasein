@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -160,6 +161,36 @@ public class WorkflowJobServiceImplUnitTestNG {
         when(actionService.findByOwnerId(null, null)).thenReturn(Collections.EMPTY_LIST);
         job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         Assert.assertNull(job);
+    }
+
+    @Test(groups = "unit", dependsOnMethods = { "testGenerateUnstartedProcessAnalyzeJob" })
+    public void updateStartTimeStampAndForJob() {
+        DateTimeZone timeZone = DateTimeZone.forID("America/Montreal");
+        DateTime nextInvokeDate = new DateTime(timeZone).plusDays(1).withTimeAtStartOfDay();
+
+        Job job = new Job();
+        when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(true);
+        DateTime now = new DateTime();
+        log.info("now = " + now.toDate());
+        when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(null);
+        workflowJobService.updateStartTimeStampAndForJob(job);
+        log.info("job.startDate = " + job.getStartTimestamp());
+        Assert.assertTrue(nextInvokeDate.isEqual(job.getStartTimestamp().getTime()));
+
+        long previous1hour = new DateTime().minusHours(1).toDate().getTime();
+        when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(previous1hour);
+        workflowJobService.updateStartTimeStampAndForJob(job);
+        log.info("job.startDate = " + job.getStartTimestamp());
+        Assert.assertTrue(new DateTime(previous1hour).plusDays(1).isEqual((job.getStartTimestamp().getTime())));
+
+        when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(new DateTime().plusHours(1).toDate().getTime());
+        workflowJobService.updateStartTimeStampAndForJob(job);
+        now = new DateTime();
+        DateTime next2hours = new DateTime().plusHours(2);
+        log.info("job.startDate = " + job.getStartTimestamp());
+        Assert.assertTrue(now.isBefore(job.getStartTimestamp().getTime())
+                && next2hours.isAfter(job.getStartTimestamp().getTime()));
+
     }
 
     @Test(groups = "unit")
@@ -315,4 +346,5 @@ public class WorkflowJobServiceImplUnitTestNG {
         job.setInputs(inputContext);
         return job;
     }
+
 }

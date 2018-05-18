@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.text.SimpleDateFormat;
 
 import javax.inject.Inject;
 
@@ -19,18 +19,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
-import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -46,9 +42,13 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.JobStepDisplayInfoMapping;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
@@ -223,16 +223,18 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public String generateCSVReport(String jobId) {
         Job job = this.find(jobId, true);
-        if (job == null || job.getJobStatus() != JobStatus.COMPLETED || !job.getJobType().equals("processAnalyzeWorkflow")) {
+        if (job == null || job.getJobStatus() != JobStatus.COMPLETED
+                || !job.getJobType().equals("processAnalyzeWorkflow")) {
             throw new LedpException(LedpCode.LEDP_18184);
         }
         List<Job> subjobs = job.getSubJobs();
         Report report = job.getReports().stream()
-                                .filter(r -> r.getPurpose() == ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY)
-                                .collect(Collectors.toList()).get(0);
+                .filter(r -> r.getPurpose() == ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY)
+                .collect(Collectors.toList()).get(0);
 
         String columnDelimiter = ",";
-        StringBuilder sb = new StringBuilder("Summary Stats\n , Accounts, Contacts, Product Hierarchies, Product Bundles, Transactions \n");
+        StringBuilder sb = new StringBuilder(
+                "Summary Stats\n , Accounts, Contacts, Product Hierarchies, Product Bundles, Transactions \n");
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
             ObjectNode jsonReport = (ObjectNode) om.readTree(report.getJson().getPayload());
@@ -250,11 +252,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                             .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
 
                     if (entity == BusinessEntity.Product) {
-                        sb.append(reportConstant.equals("REPLACE") ? consolidateSummaryNode.get(ReportConstants.PRODUCT_HIERARCHY).toString() : "NA");
+                        sb.append(reportConstant.equals("REPLACE")
+                                ? consolidateSummaryNode.get(ReportConstants.PRODUCT_HIERARCHY).toString() : "NA");
                         sb.append(columnDelimiter);
-                        sb.append(reportConstant.equals("REPLACE") ? consolidateSummaryNode.get(ReportConstants.PRODUCT_BUNDLE).toString() : "NA");
+                        sb.append(reportConstant.equals("REPLACE")
+                                ? consolidateSummaryNode.get(ReportConstants.PRODUCT_BUNDLE).toString() : "NA");
                     } else {
-                        sb.append(consolidateSummaryNode.get(reportConstant) != null ? consolidateSummaryNode.get(reportConstant).toString() : "NA");
+                        sb.append(consolidateSummaryNode.get(reportConstant) != null
+                                ? consolidateSummaryNode.get(reportConstant).toString() : "NA");
                     }
                     sb.append(columnDelimiter);
                 }
@@ -267,17 +272,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             for (Job subjob : subjobs) {
                 SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mma");
                 sb.append(df.format(subjob.getStartTimestamp()) + columnDelimiter);
-                String sourceDisplayName = subjob.getInputs() != null ? subjob.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME) : null;
+                String sourceDisplayName = subjob.getInputs() != null
+                        ? subjob.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME) : null;
                 if (sourceDisplayName != null) {
-                    sb.append(getActionType(subjob.getJobType()) + sourceDisplayName.replace(",", "-") + columnDelimiter);
+                    sb.append(
+                            getActionType(subjob.getJobType()) + sourceDisplayName.replace(",", "-") + columnDelimiter);
                 } else {
                     sb.append(subjob.getName() + columnDelimiter);
                 }
                 ObjectNode subjobPayload;
                 if (subjob.getReports() != null) {
-                    subjobPayload = (ObjectNode) om.readTree(subjob.getReports().get(0)
-                                                                                .getJson()
-                                                                                .getPayload());
+                    subjobPayload = (ObjectNode) om.readTree(subjob.getReports().get(0).getJson().getPayload());
                 } else {
                     subjobPayload = null;
                 }
@@ -289,7 +294,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 sb.append(subjob.getUser());
                 sb.append("\n");
             }
-            
+
             if (jsonReport.has(ReportPurpose.SYSTEM_ACTIONS.getKey())) {
                 sb.append("\n\n\nSystem Actions\n");
                 ArrayNode systemActions = (ArrayNode) jsonReport.get(ReportPurpose.SYSTEM_ACTIONS.getKey());
@@ -318,8 +323,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return subjobPayload != null && subjobPayload.has(key) ? subjobPayload.get(key).toString() : "-";
     }
 
-    private String getImpactedBusinessEntity (Job job){
-        String str = job.getOutputs() != null ? job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES) : "";
+    private String getImpactedBusinessEntity(Job job) {
+        String str = job.getOutputs() != null
+                ? job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES) : "";
         if (StringUtils.isEmpty(str)) {
             return "";
         }
@@ -329,28 +335,29 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private String getValidation(JobStatus jobStatus, ObjectNode subjobPayload) {
         switch (jobStatus) {
-            case PENDING:
-            case RUNNING:
-                return "In Progress";
-            case COMPLETED:
-                if (subjobPayload != null && subjobPayload.has("total_rows") && subjobPayload.get("total_rows").asInt() != subjobPayload.get("imported_rows").asInt()) {
-                    return "Partial Success";
-                } else {
-                    return "Success";
-                }
-            default:
-                return jobStatus.getName();
+        case PENDING:
+        case RUNNING:
+            return "In Progress";
+        case COMPLETED:
+            if (subjobPayload != null && subjobPayload.has("total_rows")
+                    && subjobPayload.get("total_rows").asInt() != subjobPayload.get("imported_rows").asInt()) {
+                return "Partial Success";
+            } else {
+                return "Success";
+            }
+        default:
+            return jobStatus.getName();
         }
     }
 
-    private String getActionType (String jobType) {
+    private String getActionType(String jobType) {
         switch (jobType) {
-            case "cdlDataFeedImportWorkflow":
-                return ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName() + ": ";
-            case "cdlOperationWorkflow":
-                return ActionType.CDL_OPERATION_WORKFLOW.getDisplayName() + ": ";
-            default:
-                return jobType;
+        case "cdlDataFeedImportWorkflow":
+            return ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName() + ": ";
+        case "cdlOperationWorkflow":
+            return ActionType.CDL_OPERATION_WORKFLOW.getDisplayName() + ": ";
+        default:
+            return jobType;
         }
     }
 
@@ -376,8 +383,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return job;
     }
 
-    private void updateStartTimeStampAndForJob(Job job) {
-        Date nextInvokeDate = new DateTime().plusDays(1).toDate();
+    @VisibleForTesting
+    void updateStartTimeStampAndForJob(Job job) {
+        DateTimeZone timeZone = DateTimeZone.forID("America/Montreal");
+        Date nextInvokeDate = new DateTime(timeZone).plusDays(1).withTimeAtStartOfDay().toDate();
         boolean allowAutoSchedule = false;
         try {
             allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(MultiTenantContext.getTenant().getId()),
@@ -388,8 +397,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (allowAutoSchedule) {
             try {
                 Long nextInvokeTime = dataFeedProxy.nextInvokeTime(MultiTenantContext.getTenantId());
-                if (nextInvokeTime != null) {
+                if (nextInvokeTime != null && nextInvokeTime.compareTo(new DateTime().toDate().getTime()) > 0) {
                     nextInvokeDate = new Date(nextInvokeTime);
+                } else if (nextInvokeTime != null && nextInvokeTime.compareTo(new DateTime().toDate().getTime()) < 0) {
+                    nextInvokeDate = new DateTime(nextInvokeTime).plusDays(1).toDate();
                 }
                 // Only update note if auto schedule is on
                 job.setNote(String.format(CDLNote, nextInvokeDate));
