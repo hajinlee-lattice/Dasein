@@ -85,13 +85,13 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public List<Map<String, Object>> getAccountExtensionSchema() {
-        return lpiPMAccountExtension.getAccountExtensionSchema();
+    public List<Map<String, Object>> getAccountExtensionSchema(String customerSpace) {
+        return lpiPMAccountExtension.getAccountExtensionSchema(customerSpace);
     }
 
     @Override
-    public long getAccountExtensionColumnCount() {
-        return lpiPMAccountExtension.getAccountExtensionColumnCount();
+    public long getAccountExtensionColumnCount(String customerSpace) {
+        return lpiPMAccountExtension.getAccountExtensionColumnCount(customerSpace);
     }
 
     @Override
@@ -121,13 +121,13 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public List<Map<String, Object>> getContactExtensionSchema() {
-        return lpiPMAccountExtension.getContactExtensionSchema();
+    public List<Map<String, Object>> getContactExtensionSchema(String customerSpace) {
+        return lpiPMAccountExtension.getContactExtensionSchema(customerSpace);
     }
 
     @Override
-    public long getContactExtensionColumnCount() {
-        return lpiPMAccountExtension.getContactExtensionColumnCount();
+    public long getContactExtensionColumnCount(String customerSpace) {
+        return lpiPMAccountExtension.getContactExtensionColumnCount(customerSpace);
     }
 
     @Override

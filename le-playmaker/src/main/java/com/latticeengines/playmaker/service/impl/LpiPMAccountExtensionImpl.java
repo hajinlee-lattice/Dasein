@@ -1,13 +1,11 @@
 package com.latticeengines.playmaker.service.impl;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -20,20 +18,24 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Component("lpiPMAccountExtension")
 public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
@@ -47,7 +49,10 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     private EntityQueryGenerator entityQueryGenerator;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private ServingStoreProxy servingStoreProxy;
+
+    private List<Predefined> filterByPredefinedSelection = //
+            Arrays.asList(ColumnSelection.Predefined.CompanyProfile);
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, long offset, long maximum,
@@ -111,51 +116,52 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     }
 
     @Override
-    public List<Map<String, Object>> getAccountExtensionSchema() {
-        return getSchema(TableRoleInCollection.BucketedAccount);
+    public List<Map<String, Object>> getAccountExtensionSchema(String customerSpace) {
+        return getSchema(customerSpace, BusinessEntity.Account);
     }
 
     @Override
-    public List<Map<String, Object>> getContactExtensionSchema() {
-        return getSchema(TableRoleInCollection.SortedContact);
+    public List<Map<String, Object>> getContactExtensionSchema(String customerSpace) {
+        return getSchema(customerSpace, BusinessEntity.Contact);
     }
 
     @Override
-    public int getAccountExtensionColumnCount() {
-        List<Attribute> schemaAttributes = getSchemaAttributes(TableRoleInCollection.BucketedAccount);
-        return schemaAttributes.size();
+    public int getAccountExtensionColumnCount(String customerSpace) {
+        List<ColumnMetadata> cms = servingStoreProxy
+                .getDecoratedMetadata(customerSpace, BusinessEntity.Account, filterByPredefinedSelection).collectList()
+                .block();
+
+        return cms == null ? 0 : cms.size();
     }
 
     @Override
-    public int getContactExtensionColumnCount() {
-        List<Attribute> schemaAttributes = getSchemaAttributes(TableRoleInCollection.SortedContact);
-        return schemaAttributes.size();
+    public int getContactExtensionColumnCount(String customerSpace) {
+        List<ColumnMetadata> cms = servingStoreProxy
+                .getDecoratedMetadata(customerSpace, BusinessEntity.Contact, filterByPredefinedSelection).collectList()
+                .block();
+
+        return cms == null ? 0 : cms.size();
     }
 
-    private List<Map<String, Object>> getSchema(TableRoleInCollection role) {
-        List<Attribute> schemaAttributes = getSchemaAttributes(role);
+    private List<Map<String, Object>> getSchema(String customerSpace, BusinessEntity entity) {
+        List<ColumnMetadata> cms = servingStoreProxy
+                .getDecoratedMetadata(customerSpace, entity, filterByPredefinedSelection).collectList().block();
 
-        Stream<Map<String, Object>> stream = schemaAttributes.stream() //
-                .sorted(Comparator.comparing(Attribute::getName)) //
+        Mono<List<Map<String, Object>>> stream = Flux.fromIterable(cms) //
                 .map(metadata -> {
                     Map<String, Object> metadataInfoMap = new HashMap<>();
                     metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
                     metadataInfoMap.put(PlaymakerConstants.Type,
-                            PlaymakerUtils.convertToSFDCFieldType(metadata.getSourceLogicalDataType()));
+                            PlaymakerUtils.convertToSFDCFieldType(metadata.getJavaClass()));
                     metadataInfoMap.put(PlaymakerConstants.StringLength,
-                            PlaymakerUtils.findLengthIfStringType(metadata.getSourceLogicalDataType()));
-                    metadataInfoMap.put(PlaymakerConstants.Field, metadata.getName());
+                            PlaymakerUtils.findLengthIfStringType(metadata.getJavaClass()));
+                    metadataInfoMap.put(PlaymakerConstants.Field, metadata.getAttrName());
                     return metadataInfoMap;
-                });
+                }) //
+                .collectSortedList((a, b) -> ((String) a.get(PlaymakerConstants.Field))
+                        .compareTo(((String) b.get(PlaymakerConstants.Field))));
 
-        return stream.collect(Collectors.toList());
-    }
-
-    private List<Attribute> getSchemaAttributes(TableRoleInCollection role) {
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        Table schemaTable = dataCollectionProxy.getTable(customerSpace, role);
-        List<Attribute> schemaAttributes = schemaTable.getAttributes();
-        return schemaAttributes;
+        return stream.block();
     }
 
     @VisibleForTesting

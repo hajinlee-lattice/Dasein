@@ -83,7 +83,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     public List<Map<String, Object>> getAccountExtensionSchema(String tenantName, String lookupSource) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
-        List<Map<String, Object>> schemas = dao.getAccountExtensionSchema();
+        List<Map<String, Object>> schemas = dao.getAccountExtensionSchema(tenantName);
         return schemas;
     }
 
@@ -92,7 +92,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getAccountExtensionColumnCount());
+        result.put(COUNT_KEY, dao.getAccountExtensionColumnCount(tenantName));
         return result;
     }
 
@@ -139,7 +139,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public List<Map<String, Object>> getContactExtensionSchema(String tenantName, String lookupSource) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
-        List<Map<String, Object>> schemas = dao.getContactExtensionSchema();
+        List<Map<String, Object>> schemas = dao.getContactExtensionSchema(tenantName);
         return schemas;
     }
 
@@ -148,7 +148,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getContactExtensionColumnCount());
+        result.put(COUNT_KEY, dao.getContactExtensionColumnCount(tenantName));
         return result;
     }
 

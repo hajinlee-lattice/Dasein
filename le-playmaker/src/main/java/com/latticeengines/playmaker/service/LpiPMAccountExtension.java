@@ -10,11 +10,11 @@ public interface LpiPMAccountExtension {
 
     long getAccountExtensionCount(long start, List<String> accountIds, Long recStart);
 
-    List<Map<String, Object>> getAccountExtensionSchema();
+    List<Map<String, Object>> getAccountExtensionSchema(String customerSpace);
 
-    List<Map<String, Object>> getContactExtensionSchema();
+    List<Map<String, Object>> getContactExtensionSchema(String customerSpace);
 
-    int getAccountExtensionColumnCount();
+    int getAccountExtensionColumnCount(String customerSpace);
 
-    int getContactExtensionColumnCount();
+    int getContactExtensionColumnCount(String customerSpace);
 }

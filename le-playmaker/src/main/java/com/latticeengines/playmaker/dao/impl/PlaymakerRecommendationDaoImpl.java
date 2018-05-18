@@ -387,7 +387,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             }
         }
 
-        List<Map<String, Object>> schema = getAccountExtensionSchema();
+        List<Map<String, Object>> schema = getAccountExtensionSchema(null);
         StringBuilder builder = new StringBuilder();
         Set<String> columnsInDb = new HashSet<>();
         for (Map<String, Object> field : schema) {
@@ -498,7 +498,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getAccountExtensionSchema() {
+    public List<Map<String, Object>> getAccountExtensionSchema(String customerSpace) {
         String sql = "SELECT C.Column_Name AS Field, C.Column_Type AS Type, C.String_Length AS StringLength, "
                 + "S.Value AS DisplayName "
                 + "FROM [ExtensionColumn] C JOIN [ExtensionTable] T ON C.Parent_ID = T.ExtensionTable_ID "
@@ -514,8 +514,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public long getAccountExtensionColumnCount() {
-        List<Map<String, Object>> schema = getAccountExtensionSchema();
+    public long getAccountExtensionColumnCount(String customerSpace) {
+        List<Map<String, Object>> schema = getAccountExtensionSchema(customerSpace);
         return schema.size();
     }
 
@@ -631,7 +631,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getContactExtensionSchema() {
+    public List<Map<String, Object>> getContactExtensionSchema(String customerSpace) {
         String sql = "SELECT C.Column_Name AS Field, C.Column_Type AS Type, C.String_Length AS StringLength, "
                 + "(SELECT DISTINCT S.value FROM ConfigResource S "
                 + "WHERE C.Display_Name_Key IS NOT NULL AND S.Key_Name = C.Display_Name_Key AND S.Locale_ID = -1) AS DisplayName "
@@ -644,7 +644,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getContactExtensionColumns() {
-        List<Map<String, Object>> schema = getContactExtensionSchema();
+        List<Map<String, Object>> schema = getContactExtensionSchema(null);
         StringBuilder builder = new StringBuilder();
         for (Map<String, Object> field : schema) {
             builder.append("E.").append(field.get("Field")).append(", ");
@@ -654,8 +654,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public long getContactExtensionColumnCount() {
-        List<Map<String, Object>> schema = getContactExtensionSchema();
+    public long getContactExtensionColumnCount(String customerSpace) {
+        List<Map<String, Object>> schema = getContactExtensionSchema(customerSpace);
         return schema.size();
     }
 
