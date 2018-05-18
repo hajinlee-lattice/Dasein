@@ -181,7 +181,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (entity != null) {
             List<String> extractPaths = ExtractUtils.getExtractPaths(yarnConfiguration, entity);
             deleteByName(name);
-            deleteExtrasInBackend(extractPaths);
+            deleteExtractsInBackend(extractPaths);
             deleteExternalStorage(name);
         }
     }
@@ -408,7 +408,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         return attributeDao.findByTablePid(tablePid, pageable);
     }
 
-    private void deleteExtrasInBackend(List<String> extractPaths) {
+    private void deleteExtractsInBackend(List<String> extractPaths) {
         final ImmutableList<String> finalPaths = ImmutableList.copyOf(extractPaths);
         new Thread(() -> finalPaths.forEach(p -> {
             String avroDir = p.substring(0, p.lastIndexOf("/"));
