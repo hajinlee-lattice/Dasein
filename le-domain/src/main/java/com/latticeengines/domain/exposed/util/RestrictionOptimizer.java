@@ -1,11 +1,20 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.MetricRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -30,7 +39,7 @@ public class RestrictionOptimizer {
     public static Restriction optimize(Restriction restriction) {
         if (restriction == null) {
             return null;
-        } else if (restriction instanceof ConcreteRestriction || restriction instanceof TransactionRestriction) {
+        } else if (restriction instanceof ConcreteRestriction || restriction instanceof TransactionRestriction || restriction instanceof MetricRestriction) {
             return restriction;
         } else if (restriction instanceof BucketRestriction) {
             return optimizeBucketRestriction((BucketRestriction) restriction);
@@ -89,6 +98,87 @@ public class RestrictionOptimizer {
         } else {
             return logicalRestriction;
         }
+    }
+
+    public static Restriction groupMetrics(Restriction restriction) {
+        Restriction optimized = restriction;
+        if (restriction instanceof ConcreteRestriction || restriction instanceof BucketRestriction) {
+            BusinessEntity metricEntity = getMetricEntity(restriction);
+            if (metricEntity != null) {
+                MetricRestriction metricRestriction = new MetricRestriction();
+                metricRestriction.setMetricEntity(metricEntity);
+                metricRestriction.setRestriction(restriction);
+                optimized = metricRestriction;
+            }
+        } else if (restriction instanceof LogicalRestriction) {
+            List<Restriction> children = ((LogicalRestriction) restriction).getRestrictions();
+            if (CollectionUtils.isNotEmpty(children)) {
+                Map<BusinessEntity, List<Restriction>> groupByMetricEntity = new HashMap<>();
+                List<Restriction> newChildren = new ArrayList<>();
+                for (Restriction child: children) {
+                    Restriction modifiedChild = child;
+                    if (child instanceof LogicalRestriction) {
+                        modifiedChild = groupMetrics(child);
+                    }
+                    BusinessEntity metricEntity = getMetricEntity(modifiedChild);
+                    if (metricEntity != null) {
+                        if (!groupByMetricEntity.containsKey(metricEntity)) {
+                            groupByMetricEntity.put(metricEntity, new ArrayList<>());
+                        }
+                        groupByMetricEntity.get(metricEntity).add(modifiedChild);
+                    } else {
+                        newChildren.add(child);
+                    }
+                }
+                if (MapUtils.isNotEmpty(groupByMetricEntity)) {
+                    groupByMetricEntity.forEach((entity, restrictions) -> {
+                        LogicalRestriction logicalRestriction = new LogicalRestriction();
+                        logicalRestriction.setOperator(((LogicalRestriction) restriction).getOperator());
+                        List<Restriction> innerRestrictions = new ArrayList<>();
+                        restrictions.forEach(r -> {
+                            if (r instanceof MetricRestriction) {
+                                innerRestrictions.add(((MetricRestriction) r).getRestriction());
+                            } else {
+                                innerRestrictions.add(r);
+                            }
+                        });
+                        logicalRestriction.setRestrictions(innerRestrictions);
+
+                        MetricRestriction metricRestriction = new MetricRestriction();
+                        metricRestriction.setMetricEntity(entity);
+                        metricRestriction.setRestriction(optimize(logicalRestriction));
+                        newChildren.add(metricRestriction);
+                    });
+                }
+                ((LogicalRestriction) restriction).setRestrictions(newChildren);
+                if (((LogicalRestriction) restriction).getRestrictions().size() > 1) {
+                    optimized = restriction;
+                } else {
+                    optimized = ((LogicalRestriction) restriction).getRestrictions().get(0);
+                }
+            } else {
+                optimized = null;
+            }
+        }
+        return optimized;
+    }
+
+    private static BusinessEntity getMetricEntity(Restriction restriction) {
+        if (restriction instanceof MetricRestriction) {
+            MetricRestriction metricRestriction = (MetricRestriction) restriction;
+            return metricRestriction.getMetricEntity();
+        } else if (restriction instanceof ConcreteRestriction) {
+            ConcreteRestriction concreteRestriction = (ConcreteRestriction) restriction;
+            Lookup lookup = concreteRestriction.getLhs();
+            if (lookup instanceof AttributeLookup) {
+                AttributeLookup attributeLookup = (AttributeLookup) lookup;
+                BusinessEntity entity = attributeLookup.getEntity();
+                if (BusinessEntity.DepivotedPurchaseHistory.equals(entity)) {
+                    return entity;
+                }
+            }
+        }
+        return null;
     }
 
 }

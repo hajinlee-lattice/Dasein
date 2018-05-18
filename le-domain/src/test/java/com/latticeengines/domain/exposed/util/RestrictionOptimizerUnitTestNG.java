@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.util;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
+import java.util.Collections;
+
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -12,6 +14,8 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.MetricRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 
 public class RestrictionOptimizerUnitTestNG {
@@ -25,7 +29,12 @@ public class RestrictionOptimizerUnitTestNG {
     private static final Restriction C2 = bucket(Contact, 2);
     private static final Restriction C3 = bucket(Contact, 3);
     private static final Restriction C4 = bucket(Contact, 4);
-    private static final Restriction C5 = bucket(Contact, 5);
+    private static final Restriction C5 = bucket(Contact, 5); // ignored
+
+    private static final Restriction M1 = RestrictionUtils.convertBucketRestriction(metricBkt1());
+    private static final Restriction M2 = RestrictionUtils.convertBucketRestriction(metricBkt2());
+    private static final Restriction M3 = RestrictionUtils.convertBucketRestriction(metricBkt3());
+    private static final Restriction M4 = RestrictionUtils.convertBucketRestriction(metricBkt4());
 
     @Test(groups = "unit", dataProvider = "optimizeTestData")
     public void testOptimize(Restriction restriction, Restriction expected) {
@@ -94,6 +103,49 @@ public class RestrictionOptimizerUnitTestNG {
         };
     }
 
+    @Test(groups = "unit", dataProvider = "groupMetricsTestData")
+    public void testGroupMetrics(Restriction restriction, Restriction expected) {
+        Restriction grouped = RestrictionOptimizer.groupMetrics(RestrictionOptimizer.optimize(restriction));
+        System.out.println(JsonUtils.pprint(grouped));
+        Assert.assertEquals(JsonUtils.serialize(grouped), JsonUtils.serialize(RestrictionOptimizer.optimize(expected)));
+    }
+
+    @DataProvider(name = "groupMetricsTestData")
+    public Object[][] provideGroupMetricsTestData() {
+        Restriction m1 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, "M1").gt(1).build();
+        Restriction m2 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, "M2").gt(2).build();
+        Restriction m3 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, "M3").gt(3).build();
+
+        Restriction r1 = m1;
+        Restriction e1 = new MetricRestriction(BusinessEntity.DepivotedPurchaseHistory, r1);
+
+        Restriction r2 = Restriction.builder().or(m1, m2).build();
+        Restriction e2 = new MetricRestriction(BusinessEntity.DepivotedPurchaseHistory, //
+                JsonUtils.deserialize(JsonUtils.serialize(r2), Restriction.class));
+
+        Restriction r31 = Restriction.builder().and(m1, m2).build();
+        Restriction r3 = Restriction.builder().and(r31, m3).build();
+        Restriction e31 = Restriction.builder().and(m1, m2, m3).build();
+        Restriction e3 = new MetricRestriction(BusinessEntity.DepivotedPurchaseHistory, e31);
+
+        Restriction r41 = Restriction.builder().and(m1, m2, A1).build();
+        Restriction r4 = Restriction.builder().and(r41, m3).build();
+        Restriction e41 = new MetricRestriction(BusinessEntity.DepivotedPurchaseHistory, Restriction.builder().and(m1, m2, m3).build());
+        Restriction e4 = Restriction.builder().and(A1, e41).build();
+
+        Restriction r51 = Restriction.builder().and(M1, M2).build();
+        Restriction r52 = Restriction.builder().and(M3, M4).build();
+        Restriction r5 = Restriction.builder().or(r51, r52).build();
+
+        return new Object[][] { //
+                // { r1, e1 }, //
+                // { r2, e2 }, //
+                // { r3, e3 }, //
+                // { r4, e4 }, //
+                { r5, e4 }, //
+        };
+    }
+
     private static BucketRestriction bucket(BusinessEntity entity, int idx) {
         Bucket bucket = Bucket.valueBkt(String.valueOf(idx));
         AttributeLookup attrLookup = new AttributeLookup(entity, entity.name().substring(0, 1));
@@ -102,6 +154,26 @@ public class RestrictionOptimizerUnitTestNG {
             bucketRestriction.setIgnored(true);
         }
         return bucketRestriction;
+    }
+
+    private static BucketRestriction metricBkt1() {
+        Bucket bucket = Bucket.rangeBkt(30, 200, true, false);
+        return  new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_Bundle1__M_8__MG", bucket);
+    }
+
+    private static BucketRestriction metricBkt2() {
+        Bucket bucket = Bucket.valueBkt(ComparisonType.LESS_THAN, Collections.singletonList(150));
+        return  new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_Bundle2__W_40__SW", bucket);
+    }
+
+    private static BucketRestriction metricBkt3() {
+        Bucket bucket = Bucket.valueBkt(ComparisonType.LESS_THAN, Collections.singletonList(70));
+        return  new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_Bundle3__Y_1__AS", bucket);
+    }
+
+    private static BucketRestriction metricBkt4() {
+        Bucket bucket = Bucket.chgBkt(Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AT_LEAST, Collections.singletonList(5));
+        return  new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_Bundle4__M_9__M_10_21__SC", bucket);
     }
 
     private static Restriction and(Restriction... restrictions) {

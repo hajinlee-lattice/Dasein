@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.MetricRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.DateRangeTranslator;
+import com.latticeengines.query.exposed.translator.MetricTranslator;
 
 abstract class QueryTranslator {
 
@@ -186,6 +188,7 @@ abstract class QueryTranslator {
     // this is only used by non-event-table translations
     private Restriction translateTransactionRestriction(BusinessEntity entity, Restriction restriction, //
             QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
+        restriction = RestrictionOptimizer.groupMetrics(restriction);
         Restriction translated;
         if (restriction instanceof LogicalRestriction) {
             BreadthFirstSearch search = new BreadthFirstSearch();
@@ -197,6 +200,12 @@ abstract class QueryTranslator {
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(txRestriction);
                     parent.getRestrictions().add(concrete);
+                } else if (object instanceof MetricRestriction) {
+                    MetricRestriction metricRestriction = (MetricRestriction) object;
+                    Restriction concrete = MetricTranslator.convert(metricRestriction);
+                    LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                    parent.getRestrictions().remove(metricRestriction);
+                    parent.getRestrictions().add(concrete);
                 }
             });
             translated = restriction;
@@ -204,6 +213,9 @@ abstract class QueryTranslator {
             TransactionRestriction txRestriction = (TransactionRestriction) restriction;
             modifyTxnRestriction(txRestriction, timeTranslator);
             translated = new DateRangeTranslator().convert(txRestriction, queryFactory, repository);
+        } else if (restriction instanceof MetricRestriction) {
+            MetricRestriction metricRestriction = (MetricRestriction) restriction;
+            translated = MetricTranslator.convert(metricRestriction);
         } else {
             translated = restriction;
         }

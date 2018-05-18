@@ -27,6 +27,18 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
     }
 
     @Override
+    public SQLQuery<?> resolveForFrom(SubQueryAttrLookup lookup) {
+        SubQuery subQuery = lookup.getSubQuery();
+        SQLQuery<?> sqlSubQuery;
+        if (subQuery.getSubQueryExpression() == null) {
+            sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery());
+        } else {
+            sqlSubQuery = (SQLQuery<?>) subQuery.getSubQueryExpression();
+        }
+        return sqlSubQuery;
+    }
+
+    @Override
     public ComparableExpression<String> resolveForSubselect(SubQueryAttrLookup lookup) {
         SubQuery subQuery = lookup.getSubQuery();
         SQLQuery<?> sqlSubQuery;

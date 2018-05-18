@@ -210,8 +210,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 if (rhs instanceof SubQueryAttrLookup) {
                     SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
                     if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                        booleanExpression = lhsPaths.get(0)
-                                .in((SQLQuery<?>) subQueryAttrLookup.getSubQuery().getSubQueryExpression());
+                        booleanExpression = lhsPaths.get(0).in(rhsResolver.resolveForFrom(rhs));
                     } else {
                         ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
                         booleanExpression = lhsPaths.get(0).in(subselect);

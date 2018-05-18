@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -40,8 +38,6 @@ import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuer
 import com.latticeengines.objectapi.service.EntityQueryService;
 
 public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(EntityQueryServiceImplTestNG.class);
 
     private static final String ATTR_ACCOUNT_NAME = "name";
     private static final String ATTR_CONTACT_TITLE = "Title";
@@ -87,6 +83,21 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(3165L));
+    }
+
+    @Test(groups = "functional", enabled = false)
+    public void testMetricRestriction() {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Bucket bucket = Bucket.chgBkt(Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AS_MUCH_AS, Collections.singletonList(5));
+        Restriction restriction = new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_drZvmxtPAib4xI6tWtQobEvi6B9BeTQ3__M_1__M_2_3__SC", bucket);
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count, new Long(716L));
     }
 
     @Test(groups = "functional", dataProvider = "timefilterProvider")
