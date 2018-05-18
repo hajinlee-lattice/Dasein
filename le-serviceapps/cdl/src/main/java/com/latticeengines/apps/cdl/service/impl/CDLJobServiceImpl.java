@@ -144,10 +144,10 @@ public class CDLJobServiceImpl implements CDLJobService {
         for (SimpleDataFeed dataFeed : allDataFeeds) {
             Tenant tenant = dataFeed.getTenant();
             MultiTenantContext.setTenant(tenant);
-            log.debug(String.format("tenant: %s", tenant.getId()));
-            if(runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs) {
+            log.info(String.format("tenant: %s", tenant.getId()));
+            if (runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs) {
                 CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                if(processAnalyzeJobDetail.getCdlJobStatus() != CDLJobStatus.RUNNING) {
+                if (processAnalyzeJobDetail == null || processAnalyzeJobDetail.getCdlJobStatus() != CDLJobStatus.RUNNING) {
                     Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()));
                     if (invokeTime!= null && currentTimeMillis > invokeTime.getTime()) {
                         log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
@@ -164,12 +164,13 @@ public class CDLJobServiceImpl implements CDLJobService {
         for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {
             SimpleDataFeed dataFeed = entry.getValue().getKey();
             CDLJobDetail processAnalyzeJobDetail = entry.getValue().getValue();
-            if(runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs)
+            if (runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs)
             {
-                if(meetProcessAnalyzeRule(dataFeed, processAnalyzeJobDetail)) {
+                if (meetProcessAnalyzeRule(dataFeed, processAnalyzeJobDetail)) {
                     submitProcessAnalyzeJob(dataFeed.getTenant(), processAnalyzeJobDetail);
                     runningProcessAnalyzeJobs++;
-                    log.info(String.format("submitted invoke time: %s", entry.getKey()));
+                    log.info(String.format("submitted invoke time: %s, tenant name: %s", entry.getKey(),
+                            dataFeed.getTenant().getName()));
                 }
             } else {
                 break;
@@ -205,7 +206,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
 
             int day_invoke = calendar.get(Calendar.DAY_OF_YEAR);
-            if((day_invoke - day_create) * 24 + invokeHour - hour_create < 12) {
+            if ((day_invoke - day_create) * 24 + invokeHour - hour_create < 12) {
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
             }
         }
