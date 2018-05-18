@@ -165,11 +165,6 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         // new Long(67), counts);
     }
 
-    private void assertRuleBasedRatingModelUpdateAction() {
-        List<Action> actions = actionService.findAll();
-        Assert.assertEquals(actions.size(), ++actionNumber);
-    }
-
     private void assertMetadataSegmentUpdateActionNotGen() {
         List<Action> actions = actionService.findAll();
         Assert.assertEquals(actions.size(), actionNumber);
@@ -193,7 +188,6 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         String modelId = newEngine.getActiveModel().getId();
         RuleBasedModel model = constructRuleModel(modelId);
         testRatingEngineProxy.updateRatingModel(newEngine.getId(), modelId, model);
-        assertRuleBasedRatingModelUpdateAction();
         return testRatingEngineProxy.getRatingEngine(newEngine.getId());
     }
 
