@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
@@ -117,6 +118,9 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
             }
             cpds.setJdbcUrl(tenant.getJdbcUrl());
 
+            BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
+            cpds.setDataSourceName(String.format("pm-%s-%s", currentEnv, tenant.getTenantName()));
+            
             cpds.setMinPoolSize(minPoolSize);
             cpds.setMaxPoolSize(maxPoolSize);
             cpds.setMaxIdleTime(maxPoolIdleTime);
