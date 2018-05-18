@@ -161,7 +161,6 @@ angular.module('lp.ratingsengine.dashboard', [
             RatingsEngineService.getRating(vm.ratingEngine.id).then(
                 function(dataUpdated){
                     vm.ratingEngine = dataUpdated;
-                    console.log('RATING ', dataUpdated);
                     $rootScope.$broadcast('statusChange', { 
                         activeStatus: data.status
                     });
