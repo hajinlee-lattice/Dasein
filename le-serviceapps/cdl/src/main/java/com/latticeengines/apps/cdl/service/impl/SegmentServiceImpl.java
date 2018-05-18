@@ -212,7 +212,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     @NoCustomerSpace
-    public List<AttributeLookup> findDependingAttributes (List<MetadataSegment> metadataSegments) {
+    public List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments) {
         Set<AttributeLookup> dependingAttributes = new HashSet<>();
         if (metadataSegments != null) {
             for (MetadataSegment metadataSegment : metadataSegments) {
@@ -225,7 +225,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public List<MetadataSegment> findDependingSegments (String customerSpace, List<String> attributes) {
+    public List<MetadataSegment> findDependingSegments(String customerSpace, List<String> attributes) {
         List<MetadataSegment> dependingMetadataSegments = new ArrayList<>();
         if (attributes != null) {
             List<MetadataSegment> metadataSegments = getSegments(customerSpace);
@@ -254,7 +254,7 @@ public class SegmentServiceImpl implements SegmentService {
                 MetadataSegment existing = findByName(metadataSegment.getName());
                 if (existing != null) {
                     cyclicDependency = segmentCyclicDependency(MultiTenantContext.getCustomerSpace().toString(),
-                            metadataSegment, new ArrayList<>());
+                            existing, new ArrayList<>());
                     if (cyclicDependency) {
                         break;
                     }
@@ -265,7 +265,8 @@ public class SegmentServiceImpl implements SegmentService {
         return cyclicDependency;
     }
 
-    private boolean segmentCyclicDependency(String customerSpace, MetadataSegment metadataSegment, List<Long> metadataSegmentList) {
+    private boolean segmentCyclicDependency(String customerSpace, MetadataSegment metadataSegment,
+            List<Long> metadataSegmentList) {
         metadataSegmentList.add((metadataSegment.getPid()));
         List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(metadataSegment));
         if (attributeLookups != null) {
@@ -276,8 +277,9 @@ public class SegmentServiceImpl implements SegmentService {
                 if (childMetadataSegments != null) {
                     for (MetadataSegment childMetadataSegment : childMetadataSegments) {
                         if (!metadataSegment.getPid().equals(childMetadataSegment.getPid())) {
-                            return metadataSegmentList.contains(childMetadataSegment.getPid()) ||
-                                    segmentCyclicDependency(customerSpace, childMetadataSegment, metadataSegmentList);
+                            return metadataSegmentList.contains(childMetadataSegment.getPid())
+                                    || segmentCyclicDependency(customerSpace, childMetadataSegment,
+                                            metadataSegmentList);
                         }
                     }
                 }
@@ -299,7 +301,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @NoCustomerSpace
-    private Set<Restriction> getSegmentRestrictions (MetadataSegment metadataSegment) {
+    private Set<Restriction> getSegmentRestrictions(MetadataSegment metadataSegment) {
         Set<Restriction> restrictionSet = new HashSet<>();
 
         Restriction accountRestriction = metadataSegment.getAccountRestriction();
