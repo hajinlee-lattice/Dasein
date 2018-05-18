@@ -79,19 +79,20 @@ angular.module('lp.segments.segments', [
      * @param {*} newData object that containes the update values
      */
     vm.saveNameDescription = function(obj, newData){
+        var tileState = vm.tileStates[obj.name];
         if(!newData){
-            var tileState = vm.tileStates[obj.name];
             tileState.editSegment = !tileState.editSegment;
             vm.saveInProgress = false;
             vm.showAddSegmentError = false;
-            console.log(vm.tileStates);
-        }else{
+        } else {
             vm.saveInProgress = true;
-            createOrUpdateSegment(newData).then(function(result){
+            obj.display_name = newData.display_name;
+            obj.description = newData.description;
+            createOrUpdateSegment(obj).then(function(result){
                 if(result.success === true){
-                    obj.display_name = newData.display_name;
-                    obj.description = newData.description;
+                    vm.saveInProgress = false;
                 }
+                
             });
         }
         
