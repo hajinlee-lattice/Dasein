@@ -1,5 +1,17 @@
-angular.module('common.datacloud.query.builder.tree.purchasehistory.service', [])
-    .service('QueryTreePurchaseHistoryService', function () {
+angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['common.datacloud.query.builder.tree.edit.percent'])
+    .service('QueryTreePurchaseHistoryService', function (PercentStore) {
+
+        this.cmpMap = {
+            'EQUAL': 'is equal to',
+            'NOT_EQUAL': 'is not equal to',
+            'GREATER_THAN': 'is greater than',
+            'GREATER_OR_EQUAL': 'is greater than or equal to',
+            'LESS_THAN': 'is less than',
+            'LESS_OR_EQUAL': 'is less than or equal to',
+            'GTE_AND_LTE': 'is greater than or equal and lesser than or equal',
+            'GTE_AND_LT': 'is between',
+            'GT_AND_LT': "is greater than and less than",
+        };
 
         function setValsBasedOnPosition(cmp, valsArray, position, value) {
             switch (cmp) {
@@ -156,6 +168,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
          * @param {*} bucketRestriction 
          */
         this.getOperationLabel = function (cmpMap, type, bucketRestriction) {
+            console.log('The op label ', type, '  ',cmpMap, '      ',bucketRestriction);
             if (!bucketRestriction.bkt) {
                 return;
             }
@@ -176,7 +189,15 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     var ret = cmpMap[cmp];
                     // console.log('RET', ret);
                     return ret;
-                };
+                }
+                case 'PercentChange': {
+                    return PercentStore.getCmpRedable(bucketRestriction);
+                }
+                case 'Numerical': {
+                    var numRet = this.cmpMap[bucketRestriction.bkt.Cmp];
+                    return numRet;
+                }
+
                 default: return 'has a value of';
             }
         }
