@@ -4,7 +4,7 @@ angular.module('lp.segments.segments', [
 ])
 .controller('SegmentationListController', function ($q, $scope, $element, $state, $stateParams,
     SegmentsList, Enrichments, Cube, DeleteSegmentModal, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
-    DataCloudStore, LookupResponse, LookupStore
+    DataCloudStore, LookupResponse, LookupStore, PercentStore
 ) {
     var vm = this;
 
@@ -270,6 +270,12 @@ angular.module('lp.segments.segments', [
                             var value = QueryTreeService.getOperationValue(restriction.bucketRestriction, 'Boolean') ? 'True' : 'False';
                             attrs.push(enrichment.DisplayName + ': ' + value); 
                             
+                            break;
+                        case 'PercentChange':
+                                var value = PercentStore.getDirectionRedable(restriction.bucketRestriction) + ' ' + PercentStore.getCmpRedable(restriction.bucketRestriction).toLowerCase()
+                                    + ' ' + PercentStore.getValuesFormatted(restriction.bucketRestriction);
+                            attrs.push(enrichment.DisplayName + ': ' + value);
+
                             break;
                     }
                 } else {
