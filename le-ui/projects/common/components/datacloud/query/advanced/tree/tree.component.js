@@ -94,6 +94,7 @@ angular
 
             vm.checkSelected = function(bucket) {
                 // console.log('checkSelected', bucket);
+                // Remove this method and remove vm.range/vm.label since they should not be necessary
                 if (bucket.Vals && bucket.Vals[0] == vm.range[0] && bucket.Vals[1] == vm.range[1]) {
                     vm.presetOperation = bucket.Lbl;
                 }

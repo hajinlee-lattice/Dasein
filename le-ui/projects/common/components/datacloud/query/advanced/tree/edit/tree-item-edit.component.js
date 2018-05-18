@@ -106,8 +106,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.clickEditMode = function(value) {
                     vm.editMode = value;
                     if(value !== 'Custom'){
-                        // console.log('Preset');
-                        var bucket = vm.getCubeBktList()[0]
+                        var bucket = vm.getCubeBktList()[0];
                         if(bucket){
                             vm.presetOperation = bucket.Lbl;
                         }
