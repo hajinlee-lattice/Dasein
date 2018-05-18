@@ -1,11 +1,8 @@
 package com.latticeengines.objectapi.util;
 
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-
 import java.util.Collections;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.NamingUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -13,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
