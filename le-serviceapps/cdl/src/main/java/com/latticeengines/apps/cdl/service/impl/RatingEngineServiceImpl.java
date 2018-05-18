@@ -267,12 +267,12 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             log.info("Replicated rating engine " + ratingEngineId + " to " + replicatedEngine.getId());
 
             if (activeModel != null) {
-                log.info("Replicating active model " + activeModel.getId() + " for replicated engine " + ratingEngine.getId() + "("
-                        + ratingEngine.getDisplayName() + ")");
+                log.info("Replicating active model " + activeModel.getId() + " for replicated engine "
+                        + ratingEngine.getId() + "(" + ratingEngine.getDisplayName() + ")");
                 RatingModel replicatedModel = replicateRatingModel(replicatedEngine, activeModel);
                 createOrUpdate(replicatedEngine, tenantId);
-                log.info("Replicated an active model " + replicatedModel.getId() + " in replicated engine " + ratingEngine.getId() + "("
-                        + ratingEngine.getDisplayName() + ")");
+                log.info("Replicated an active model " + replicatedModel.getId() + " in replicated engine "
+                        + ratingEngine.getId() + "(" + ratingEngine.getDisplayName() + ")");
             }
             return replicatedEngine;
         } else {
@@ -336,12 +336,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             throw new RuntimeException("Failed to download model artifacts to local from hdfs path " + hdfsPath, e);
         }
 
-        List<File> dirs = new ArrayList<>(FileUtils.listFiles(new File(uuid), new String[]{}, false));
+        List<File> dirs = new ArrayList<>(FileUtils.listFiles(new File(uuid), new String[] {}, false));
         String appId = dirs.get(0).getName();
 
-        File modelSummaryFile = new File(uuid + File.separator + appId + File.separator + "enhancements" + File.separator + "modelsummary.json");
+        File modelSummaryFile = new File(
+                uuid + File.separator + appId + File.separator + "enhancements" + File.separator + "modelsummary.json");
         String newTenantId = MultiTenantContext.getTenantId();
-        String newUuid = updateLocalModelSummayContent(modelSummaryFile, CustomerSpace.parse(tenantId).getTenantId(), eventTable, uuid, newTenantId);
+        String newUuid = updateLocalModelSummayContent(modelSummaryFile, CustomerSpace.parse(tenantId).getTenantId(),
+                eventTable, uuid, newTenantId);
         String newModelGUID = modelSummary.getId().replace(uuid, newUuid);
 
         String newHdfsPath = String.format(hdfsPathParttern, newTenantId, eventTable, newUuid);
@@ -356,7 +358,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         return newModelGUID;
     }
 
-    private String updateLocalModelSummayContent(File modelSummaryFile, String oldTenantName, String eventTable, String uuid, String newTenantName) {
+    private String updateLocalModelSummayContent(File modelSummaryFile, String oldTenantName, String eventTable,
+            String uuid, String newTenantName) {
         String modelSummaryContent;
         try {
             modelSummaryContent = FileUtils.readFileToString(modelSummaryFile, "UTF-8");
@@ -364,10 +367,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             throw new RuntimeException("Failed to read modelsummary content.", e);
         }
         String newUuid = UUID.randomUUID().toString();
-        String lookupId = String.format("%s.%s.Production|%s|%s", oldTenantName, oldTenantName, eventTable,
-                uuid);
-        String newLookupId = String.format("%s.%s.Production|%s|%s", newTenantName, newTenantName, eventTable,
-                uuid);
+        String lookupId = String.format("%s.%s.Production|%s|%s", oldTenantName, oldTenantName, eventTable, uuid);
+        String newLookupId = String.format("%s.%s.Production|%s|%s", newTenantName, newTenantName, eventTable, uuid);
         modelSummaryContent = modelSummaryContent.replace(lookupId, newLookupId);
         modelSummaryContent = modelSummaryContent.replace(uuid, newUuid);
         FileUtils.deleteQuietly(modelSummaryFile);
@@ -527,7 +528,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
                 parameters.setExpectedValue(true);
             }
-            parameters.setExcludePropDataColumns(true); // PLS-8163
 
             log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
             jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
@@ -776,8 +776,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 if (childRatingEngines != null) {
                     for (RatingEngine childRatingEngine : childRatingEngines) {
                         if (!ratingEngine.getPid().equals(childRatingEngine.getPid())) {
-                            return ratingEngineList.contains(childRatingEngine.getPid()) ||
-                                    ratingEngineCyclicDependency(childRatingEngine, ratingEngineList);
+                            return ratingEngineList.contains(childRatingEngine.getPid())
+                                    || ratingEngineCyclicDependency(childRatingEngine, ratingEngineList);
                         }
                     }
                 }
