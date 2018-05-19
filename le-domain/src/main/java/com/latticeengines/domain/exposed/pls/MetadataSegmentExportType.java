@@ -14,7 +14,7 @@ public enum MetadataSegmentExportType {
     ACCOUNT("Accounts", //
             Arrays.asList(//
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.AccountId.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.LDC_Name.name(), //
+                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.CompanyName.name(), //
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Website.name(), //
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Address_Street_1.name().toLowerCase(), //
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.City.name(), //
@@ -43,7 +43,7 @@ public enum MetadataSegmentExportType {
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.PhoneNumber.name(), //
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.AccountId.name(), //
                     //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.LDC_Name.name(), //
+                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.CompanyName.name(), //
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Website.name(), //
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Address_Street_1.name().toLowerCase(), //
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.City.name(), //
