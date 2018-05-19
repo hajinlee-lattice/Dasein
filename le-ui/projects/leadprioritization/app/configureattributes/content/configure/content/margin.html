@@ -32,7 +32,7 @@
             ng-model="vm.options['Margin']['WITHIN']['Period']" 
             ng-change="vm.setOptions()"
             ng-options="period.value as period.label for period in vm.periodsOptions">
-                <option value="" hidden disabled>Weeks</option>
+                <option value="" hidden disabled> -- </option>
             </select>
     </li>
 </ul>
