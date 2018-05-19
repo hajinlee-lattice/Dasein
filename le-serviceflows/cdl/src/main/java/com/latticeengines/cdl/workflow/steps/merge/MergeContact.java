@@ -26,6 +26,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
     static final String BEAN_NAME = "mergeContact";
 
     private int mergeStep;
+    private int concatenateStep;
     private int upsertMasterStep;
     private int diffStep;
 
@@ -36,13 +37,14 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             request.setName("MergeContact");
 
             mergeStep = 0;
-            upsertMasterStep = 1;
-            diffStep = 2;
+            concatenateStep = 1;
+            upsertMasterStep = 2;
+            diffStep = 3;
 
             TransformationStepConfig merge = mergeInputs(false, true, false);
             TransformationStepConfig concatenate = concatenateContactName(mergeStep);
-            TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
-            TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
+            TransformationStepConfig upsertMaster = mergeMaster(concatenateStep);
+            TransformationStepConfig diff = diff(concatenateStep, upsertMasterStep);
             TransformationStepConfig report = reportDiff(diffStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
@@ -68,6 +70,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         config.setConcatenateFields(new String[] { InterfaceName.FirstName.name(), InterfaceName.LastName.name() });
         config.setResultField(InterfaceName.ContactName.name());
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+
         return step;
     }
 }
