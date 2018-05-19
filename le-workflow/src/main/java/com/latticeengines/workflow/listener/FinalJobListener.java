@@ -38,12 +38,15 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
         Long executionId = jobExecution.getId();
-        if (!updateStatus(executionId, jobExecution)) {
-            throw new RuntimeException("Can not update workflow job status, Id=" + executionId);
-        }
-        if (caller != null) {
-            caller.callDone();
-            callerThread.interrupt();
+        try {
+            if (!updateStatus(executionId, jobExecution)) {
+                throw new RuntimeException("Can not update workflow job status, Id=" + executionId);
+            }
+        } finally {
+            if (caller != null) {
+                caller.callDone();
+                callerThread.interrupt();
+            }
         }
     }
 
