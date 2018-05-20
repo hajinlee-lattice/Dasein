@@ -688,6 +688,7 @@ public enum LedpCode {
     LEDP_39002("Could not find Tenant information"), //
     LEDP_39003("Expected only one record of the {0} entity but found {1}"), //
     LEDP_39004("No AccountId attribute found"), //
+    LEDP_39005("Failed to compile the MetadataDocument for the CustomerSpace {0}"), //
 
     // le-cdl
     LEDP_40000("CustomerSpace in CleanupByDateRangeConfig is null."), //

@@ -1,4 +1,4 @@
-package com.latticeengines.dante.metadata;
+package com.latticeengines.domain.exposed.dante.metadata;
 
 import java.util.List;
 
@@ -8,13 +8,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /// <summary>
 /// Class for defining metadata about objects (e.g. Account, Lead)
 /// </summary>
-@JsonIgnoreProperties({ "Associations" })
 public class NotionMetadata extends BaseObjectMetadata {
-    @JsonProperty("Properties")
-    private List<PropertyMetadata> properties;
+
+    @JsonProperty("DescriptionKey")
+    private String descriptionKey;
+
+    @JsonProperty("DescriptionNameKey")
+    private String descriptionNameKey;
+
+    @JsonProperty("Name")
+    private String name;
+
+    @JsonProperty("Source")
+    private int source;
 
     @JsonProperty("IsRootNotion")
     private boolean isRootNotion;
+
+    @JsonProperty("Associations")
+    private List<Association> associations;
+
+    @JsonProperty("Properties")
+    private List<PropertyMetadata> properties;
 
     public List<PropertyMetadata> getProperties() {
         return properties;

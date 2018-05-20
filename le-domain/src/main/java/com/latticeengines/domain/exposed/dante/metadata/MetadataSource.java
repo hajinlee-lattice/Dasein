@@ -1,7 +1,7 @@
-package com.latticeengines.dante.metadata;
+package com.latticeengines.domain.exposed.dante.metadata;
 
 public enum MetadataSource {
-    BaseInstallation(0), VisiDB(1);
+    BaseInstallation(0), VisiDB(1), DataCloud(2);
 
     private final int value;
 

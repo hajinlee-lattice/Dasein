@@ -45,7 +45,7 @@ if CATALINA_HOME is None or CATALINA_HOME == '':
 else:
     logger.info('CATALINA_HOME=%s' % CATALINA_HOME)
 
-LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses', 'saml']
+LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
               'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante', 'cdl', 'lp']
 
@@ -65,13 +65,14 @@ APP_URL = {
 
 PRESETS = {
     'cdl_pre_checkin': {
-        'apps': ['admin', 'pls', 'microservice', 'matchapi','scoringapi'],
+        'apps': ['admin', 'pls', 'microservice', 'matchapi', 'scoringapi'],
         'modules': ['eai', 'metadata', 'dataflowapi', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'cdl',
                     'objectapi', 'dante', 'sqoop', 'quartz', 'lp']
     },
     'lp': {
         'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'saml'],
-        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop', 'cdl']
+        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop',
+                    'cdl']
     },
     'cdl': {
         'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses', 'saml', 'scoringapi'],
@@ -313,7 +314,7 @@ def parseCliArgs():
     parser1 = commands.add_parser("deploy")
     parser1.add_argument('-a', dest='apps', type=str,
                          help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(
-                             LE_APPS))
+                                 LE_APPS))
     parser1.add_argument('-m', dest='modules', type=str,
                          help='comma separated list of microservice modules to be deployed. core is implicitly included. Available choices are ' + ', '.join(
                                  MS_MODULES))
@@ -328,7 +329,7 @@ def parseCliArgs():
     parser1 = commands.add_parser("swap")
     parser1.add_argument('-a', dest='apps', type=str,
                          help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(
-                             LE_APPS))
+                                 LE_APPS))
     parser1.add_argument('-m', dest='modules', type=str,
                          help='comma separated list of microservice modules to be deployed. core is implicitly included. Available choices are ' + ', '.join(
                                  MS_MODULES))

@@ -74,7 +74,8 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/ulysses/talkingpoints/**", //
                         "/ulysses/api-gateway/**", //
                         "/ulysses/producthierarchy/**", //
-                        "/ulysses/purchasehistory/**") //
+                        "/ulysses/purchasehistory/**", //
+                        "/ulysses/danteconfiguration/**") //
                 .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))")
                 .antMatchers("/ulysses/**").denyAll();
 
