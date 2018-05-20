@@ -31,7 +31,11 @@ angular
                 saved: false
             });
 
-            vm.hasDeleteAccessRights = vm.$resolve.ClientSession.AccessLevel != 'EXTERNAL_USER';
+            if (vm.$resolve && vm.$resolve.ClientSession) {
+                vm.hasDeleteAccessRights = vm.$resolve.ClientSession.AccessLevel != 'EXTERNAL_USER';
+            } else {
+                vm.hasDeleteAccessRights = false;
+            }
 
             // remove highlighting
             if (!vm.showHighlighting()) {
@@ -300,11 +304,11 @@ angular
             }
 
             vm.showAtributeAdmin = function(){
-                if(vm.section == 'insight' || vm.section == 'wizard.ratingsengine_segment'){
+                if (vm.section == 'insight' || vm.section == 'wizard.ratingsengine_segment'){
                     return false;
-                }else {
-                    return true;
-                }
+                } 
+                
+                return ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
             }
 
             vm.init_filters();

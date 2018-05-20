@@ -11,6 +11,7 @@
             position: relative;
             top: 0.1em;
             font-size: 16px;
+            margin-right: .75em;
         }
 
         .attr-back-text {
@@ -29,7 +30,11 @@
         }
         
         button {
-            margin-left: 1em;
+            margin-left: 5px;
+
+            .fa-save {
+                margin-right: .5em;
+            }
         }
     }
 

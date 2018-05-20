@@ -19,7 +19,15 @@
     <ul class="attr-list-results noselect-children">
         <li ng-if="filteredList && filteredList.length > 0">
             <div class="attr-result-checkbox" ng-click="$ctrl.toggleAll()">
-                <input ng-checked="$ctrl.isAllChecked()" name="{{$ctrl.checkboxName()}}" type="checkbox" />
+                <!--input ng-checked="$ctrl.isAllChecked()" name="{{$ctrl.checkboxName()}}" type="checkbox" /-->
+
+                <i  class="fa" 
+                    ng-class="{ 
+                        'fa-square-o': !$ctrl.isAllChecked() && !$ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
+                        'fa-check-square-o': $ctrl.isAllChecked() && !$ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
+                        'fa-minus-square-o': $ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
+                    }">
+                </i>
             </div>
 
             <div class="attr-result-label" ng-click="$ctrl.toggleAll()">
@@ -35,12 +43,25 @@
                         | limitTo: $ctrl.filters.pagesize"
             ng-class="{ 'category': item.Attributes }">
             <div class="attr-result-checkbox" ng-click="$ctrl.checked(item)">
-                <input  ng-checked="$ctrl.isChecked(item)" 
+                <!--input  ng-checked="$ctrl.isChecked(item)" 
                         ng-disabled="$ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)"
-                        ng-if="!item.IsFrozen"
+                        ng-if="item.Attributes"
                         name="{{item.DisplayName}}" 
-                        type="checkbox" />
+                        type="checkbox" /-->
 
+                <i  class="fa" 
+                    ng-if="item.Attributes && !item.IsFrozen"
+                    ng-class="{ 
+                        'fa-square-o': !$ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
+                        'fa-check-square-o': $ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
+                        'fa-minus-square-o': $ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
+                        'fa-square': !$ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
+                        'fa-check-square': $ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
+                        'fa-minus-square': $ctrl.indeterminate[item.DisplayName] && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))
+                    }">
+                </i>
+                <i class="fa fa-toggle-on" ng-if="!item.Attributes && !item.IsFrozen && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))" ng-class="{ 'fa-rotate-180': !$ctrl.isChecked(item) }"></i>
+                <i class="fa fa-toggle-off" ng-if="!item.Attributes && !item.IsFrozen && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))" ng-class="{ 'fa-rotate-180': $ctrl.isChecked(item) }"></i>
                 <i class="fa fa-exclamation-triangle show-tooltip delay top left" ng-if="item.IsFrozen">
                     <div class="tooltip_" ng-if="item.IsFrozen">
                         <div class="cover">

@@ -23,34 +23,39 @@
             <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
         </div>
     </li>
-    <li class="configureattributes" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
-        <button class="button icon-button white-button" 
+    <li class="configureattributes show-tooltip title-tooltip top" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
+        <div class="tooltip_"><span><i class="fa fa-link"></i>Configure Attributes</span></div>
+        <button class="button borderless-button" 
                 ui-sref="home.configureattributes">
-            Configure Attributes
+            <i class="fa fa-wrench"></i>
         </button>
     </li>
-    <li class="import" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
-        <button class="button icon-button white-button" 
-                ui-sref="home.import.entry">
-            Import Data
-        </button>
-    </li>
-    <li class="configure" ng-if="vm.showAtributeAdmin() === true">
-        <button class="button icon-button white-button" 
+    <li class="attributeadmin show-tooltip title-tooltip top" ng-if="vm.showAtributeAdmin() === true">
+        <div class="tooltip_"><span><i class="fa fa-link"></i>Attribute Admin</span></div>
+        <button class="button borderless-button" 
                 ui-sref="home.attributes">
-            Attribute Admin
+            <i class="fa fa-sliders"></i>
         </button>
     </li>
-    <li class="import" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard && vm.hasDeleteAccessRights">
-        <button class="button icon-button white-button" 
+    <li class="import show-tooltip title-tooltip top" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
+        <div class="tooltip_"><span><i class="fa fa-link"></i>Import Data</span></div>
+        <button class="button borderless-button" 
+                ui-sref="home.import.entry">
+            <i class="fa fa-cloud-upload"></i>
+        </button>
+    </li>
+    <li class="import show-tooltip title-tooltip top right" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard && vm.hasDeleteAccessRights">
+        <div class="tooltip_"><span><i class="fa fa-link"></i>Delete Data</span></div>
+        <button class="button borderless-button" 
                 ui-sref="home.delete">
-            Delete Data
+            <i class="fa fa-trash"></i>
         </button>
     </li>
-    <li class="filter dropdown-container" ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
-        <h2 class="button icon-button white-button" ng-class="{ selected: vm.isFilterSelected() }">
+    <li class="filter dropdown-container show-tooltip title-tooltip top right" ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
+        <div class="tooltip_"><span>Filtering</span></div>
+        <button class="button borderless-button" ng-class="{ selected: vm.isFilterSelected() }">
             <i class="fa fa-filter"></i>
-        </h2>
+        </button>
         <ul class="dropdown">
             <li class="toggle selected show" ng-if="!vm.lookupMode && vm.section != 'browse' && vm.section != 'team'"><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected"  ng-disabled="vm.metadata.toggle.hide.selected" /> <label for="enabled">Enabled only</label></li>
             <li class="toggle selected hide" ng-if="!vm.lookupMode && vm.section != 'browse' && vm.section != 'team'"><input type="checkbox" id="nonenabled" name="nonenabled" ng-model="vm.metadata.toggle.hide.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.selected"  ng-disabled="vm.metadata.toggle.show.selected"/> <label for="nonenabled">Non-Enabled only</label></li>
@@ -68,16 +73,18 @@
             <li class="toggle no-attributes show" ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls" ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" /> <label for="nulls">Include "No" Attributes</label></li>
         </ul>
     </li>
-    <li class="sort" ng-disabled="!vm.category" ng-if="vm.category">
-        <a class="button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
-            <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
-        </a>
+    <li class="sort show-tooltip title-tooltip top right" ng-disabled="!vm.category" ng-if="vm.category">
+        <div class="tooltip_"><span>Sorting</span></div>
+        <button class="button borderless-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
+            <i class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></i>
+        </button>
     </li>
     <li class="save" ng-if="vm.enabledManualSave && ['wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
     </li>
-    <li class="download dropdown-container" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
-        <h2 class="button icon-button white-button">
+    <li class="download dropdown-container show-tooltip title-tooltip top right" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
+        <div class="tooltip_"><span>Download Attributes</span></div>
+        <h2 class="button borderless-button">
             <i class="fa fa-download"></i>
         </h2>
         <ul class="dropdown">

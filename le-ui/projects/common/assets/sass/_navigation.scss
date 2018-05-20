@@ -627,6 +627,11 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                         background: #ef6a30;
                         color: #fff;
                     }
+
+                    .fa-chevron-down {
+                        color: #ef6a30;
+                        transform: rotateX(180deg);
+                    }
                 }
 
                 span.jobs-nav-number {
@@ -795,6 +800,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                 margin-right: 1em;
                 max-width: 1em;
                 color: #222;
+                transition: transform 166ms ease-in;
             }
             .pd-header-username {
                 font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;

@@ -378,6 +378,16 @@ tooltip {
             left: calc(25% - 8px);
         }
     }
+    &.right > .tooltip_ {
+    right: 50%;
+    transform: translateX(25%);
+    left: unset;
+        
+        &:after,
+        &:before {
+            left: calc(75% - 10px);
+        }
+    }
     &:not(.top) > .tooltip_ {
         top: calc(100% + 15px);
         
@@ -413,5 +423,34 @@ tooltip {
             -webkit-transition: opacity 333ms ease 1000ms !important;
             transition: opacity 333ms ease 1000ms !important;
         }                           
+    }
+    &.title-tooltip {
+      .tooltip_ {
+        width: auto;
+        bottom: calc(1.5em + 7px);
+        
+        span {
+          background-color: #222831;
+          letter-spacing: 1px;
+          border-radius: 3px;
+          overflow: hidden;
+          z-index: 5;
+          padding: .5em .75em .4em;
+          white-space: nowrap;
+          color: #fff;
+          font-size: 13px;
+
+          i.fa-link {
+            margin-right: .7em;
+            font-size: 11px;
+            color: #457EBA;
+          }
+        }
+        
+        &:after,
+        &:before {
+            bottom: -2px;
+        }
+      }
     }
 }

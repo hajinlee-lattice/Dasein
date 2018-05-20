@@ -12,7 +12,9 @@ angular.module('common.attributes.header', [])
         };
 
         vm.click = function(category) {
-            $state.go('.', { category: category });
+            angular
+                .element('div#subSummaryView')
+                .addClass('inactive-disabled');
         };
 
         vm.getTo = function() {

@@ -18,6 +18,7 @@
                 | startFrom: ($ctrl.current - 1) * $ctrl.pagesize
                 | limitTo: $ctrl.pagesize" 
             class="category"
+            ng-if="$ctrl.catmap[category] > 0"
             ng-class="{ active: $ctrl.isActive(category) }"
             ng-click="$ctrl.click(category);">
 

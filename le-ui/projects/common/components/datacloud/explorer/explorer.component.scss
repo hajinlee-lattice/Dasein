@@ -155,7 +155,7 @@ attr-categories,
     }
     .filters {
         @include flex-container;
-        margin-top: 1.5em;
+        margin-top: 15px;
         margin-bottom: 15px;
         // margin-right: 14px;
         input[type="radio"], input[type="checkbox"] {

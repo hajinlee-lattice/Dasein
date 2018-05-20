@@ -115,6 +115,35 @@ a.button, .button a:link, .button a:focus, .button a:visited {
       color: $pearl-white; 
     }
   }
+	&.borderless-button {
+		color: #222222;//$black-titanium;
+		background-color: transparent;
+		border-color: transparent;
+		font-size: 14px;
+		width: 38px;
+		padding: 0;
+
+		&, & *,
+		&:after,
+		&:before,
+		& *:after,
+		& *:before {
+			-webkit-transition: color 0s linear 0s, transform 150ms linear 0s;
+			transition: color 0s linear 0s, transform 150ms linear 0s;
+		}
+		//&:focus,
+		&:hover {
+		  	color: #457EBA;
+		  	border-color: #d0d0d0;
+		  	background-color: #fff;
+		}
+		&:active {
+			color: #222222;
+      		border-color: $silver;
+      		border-style: inset;
+		  	background-color: #fff;
+		}
+	}
 	&.white-button {
 		color: #222222;//$black-titanium;
 		background-color: $pearl-white;

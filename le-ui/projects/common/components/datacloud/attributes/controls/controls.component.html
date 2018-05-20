@@ -6,9 +6,10 @@
     </li>
 
     <li class="attr-activate-deactivate-button pull-right">
-        <button class="button icon-button blue-button" ng-click="$ctrl.save()" ng-disabled="$ctrl.store.isChanged()">
+        <button class="button icon-button blue-button" ng-click="$ctrl.save()" ng-disabled="$ctrl.store.isChanged() || $ctrl.isSaving">
             <i class="fa fa-spinner fa-spin fa-fw" ng-if="$ctrl.isSaving"></i>
-            {{$ctrl.isSaving ? 'SAVING' : 'SAVE' }} {{$ctrl.section == 'usage' ? 'CONFIGURATION' : 'ACTIVATION' }}
+            <i class="fa fa-save" ng-if="!$ctrl.isSaving"></i>
+            {{$ctrl.isSaving ? 'SAVING' : 'SAVE' }}
         </button>
     </li>
 

@@ -11,7 +11,7 @@
     </li>
 
     <li class="sort pull-right">
-        <button class="button icon-button white-button" ng-init="$ctrl.filters.sortPrefix = '+';" ng-click="$ctrl.filters.sortPrefix = $ctrl.filters.sortPrefix == '+' ? '-' : '+'">
+        <button class="button borderless-button" ng-init="$ctrl.filters.sortPrefix = '+';" ng-click="$ctrl.filters.sortPrefix = $ctrl.filters.sortPrefix == '+' ? '-' : '+'">
             <span class="fa fa-sort-amount-{{$ctrl.filters.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
         </button>
     </li>
@@ -19,7 +19,7 @@
     <li class="filter dropdown-container pull-right"
         ng-class="{ 'open': $ctrl.filters.showFilterBy }"
         ng-click="$ctrl.filters.showFilterBy = !$ctrl.filters.showFilterBy">
-        <button class="button icon-button white-button" ng-class="{ selected: $ctrl.isFilterSelected() }">
+        <button class="button borderless-button" ng-class="{ selected: $ctrl.isFilterSelected() }">
             <i class="fa fa-filter"></i>
         </button>
         <ul class="dropdown">

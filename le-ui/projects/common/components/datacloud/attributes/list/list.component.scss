@@ -43,6 +43,69 @@ ul.attr-list-results {
             color: #ef6a30;
         }
 
+        i.fa {
+        }
+        .fa-square {
+            position: relative;
+            bottom: 2px;
+        }
+
+        .fa-minus-square-o,
+        .fa-check-square-o,
+        .fa-square-o,
+        .fa-check-square,
+        .fa-minus-square {
+            position: relative;
+            bottom: 1px;
+            font-size: 1.1em;
+            
+            &, &:after, &:before {
+                transition: none;
+            }
+        }
+        
+        .fa-check-square-o,
+        i.fa-toggle-on {
+            color: #60af3a;
+
+            &.fa-rotate-180 {
+                color: #aaa;
+            }
+        }
+
+        .fa-minus-square-o {
+            color: #222;
+        }
+
+        .fa-check-square,
+        .fa-minus-square,
+        .fa-square {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .fa-square-o {
+            color: #999 ;
+        } 
+
+        i.fa-toggle-off {
+            color: #aaa;
+            cursor: not-allowed;
+
+            &.fa-rotate-180 {
+                color: #60af3a;
+            }
+        }
+
+        i.fa-toggle-off,
+        i.fa-toggle-on {
+            font-size: 1.2em;
+            
+            &, &:after, &:before {
+                transition: none;
+            }
+        }
+
         div.attr-result-label {
             position: relative;
             height: 100%;

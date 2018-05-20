@@ -253,11 +253,12 @@ angular.module('common.attributes.list', [])
         };
 
         vm.checkboxName = function() {
-            return vm.subcategory ? 'check_all_' + vm.subcategory : 'check_all';
+            return vm.subcategory ? 'check_all_' + vm.subcategory : 'all_attributes';
         };
 
         vm.setIndeterminate = function(checkbox, value) {
-            $('[name="' + checkbox + '"]').prop('indeterminate', value);
+            vm.indeterminate[checkbox] = value;
+            //$('[name="' + checkbox + '"]').prop('indeterminate', value);
         };
 
         vm.sortAttributes = function(a, b) {
