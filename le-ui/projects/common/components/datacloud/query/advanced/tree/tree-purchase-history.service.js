@@ -246,6 +246,23 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                 default: return 'Unknown';
             }
         }
+        
+        function sameValues(vals1, vals2){
+            var sameVals = true;
+            if(vals1 && vals2 && vals1.length == vals2.length){
+                var index = 0;
+                vals1.forEach(function(val) {
+                    if(val != vals2[index]){
+                        sameVals = false;
+                        return;
+                    }
+                    index++;
+                });
+            }else{
+                sameVals = false;
+            }
+            return sameVals;
+        }
 
         this.getAttributeRules = function (bkt, bucket, isSameAttribute) {
             // console.log('PurchaseHistory');
@@ -271,7 +288,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                 var cmp1 = bucket.Chg.Cmp;
                 var cmp2 = bkt.Chg.Cmp;
 
-                idSameBucket = direction1 == direction2 && cmp1 == cmp2;
+                isSameBucket = direction1 == direction2 && cmp1 == cmp2;
+                if(isSameBucket){
+                    isSameBucket = sameValues(bucket.Chg.Vals, bkt.Chg.Vals);
+                }
             } else{
                 if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
                     var tmp = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp && bkt.Direction == bucket.Direction;
@@ -281,7 +301,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
             var r = isSameAttribute && isSameBucket;
             return r;
         }
-
+    
         this.isBucketUsed = function (bucket) {
             return typeof bucket.bkt.Id == "number";//typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
         }
