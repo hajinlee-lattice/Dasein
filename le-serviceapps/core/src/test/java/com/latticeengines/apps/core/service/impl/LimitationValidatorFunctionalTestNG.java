@@ -20,9 +20,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 
@@ -50,45 +53,82 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
     @Test(groups = "functional")
     public void testDataLicense() throws Exception {
         List<AttrConfig> attrConfigs = new ArrayList<>();
+        AttrConfigProp<AttrState> prop = new AttrConfigProp<>();
+        prop.setAllowCustomization(Boolean.TRUE);
+        prop.setCustomValue(AttrState.Active);
         for (int i = 0; i < mockHGLimit; i++) {
             AttrConfig config = new AttrConfig();
             config.setAttrName(StringUtils.format("Attr%d", i));
             config.setDataLicense("HG");
+            config.putProperty(ColumnMetadataKey.State, prop);
             attrConfigs.add(config);
         }
         limitationValidator.validate(attrConfigs);
-
         assertEquals(getErrorNumber(attrConfigs), 0);
+
         AttrConfig attrConfig = new AttrConfig();
-        attrConfig.setAttrName("Attr");
+        attrConfig.setAttrName("Attr_active");
         attrConfig.setDataLicense("HG");
+        attrConfig.putProperty(ColumnMetadataKey.State, prop);
         attrConfigs.add(attrConfig);
         limitationValidator.validate(attrConfigs);
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size());
+
+        // set state equal to inactive
+        AttrConfig inactiveConfig = new AttrConfig();
+        inactiveConfig.setAttrName("Attr_inactive");
+        inactiveConfig.setDataLicense("HG");
+        AttrConfigProp<AttrState> inactiveProp = new AttrConfigProp<>();
+        inactiveProp.setAllowCustomization(Boolean.TRUE);
+        inactiveProp.setCustomValue(AttrState.Inactive);
+        inactiveConfig.putProperty(ColumnMetadataKey.State, inactiveProp);
+        attrConfigs.add(inactiveConfig);
+        limitationValidator.validate(attrConfigs);
+        // the inactive config should not have error message
+        assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
 
     @Test(groups = "functional")
     public void testSystemLimit() throws Exception {
         List<AttrConfig> attrConfigs = new ArrayList<>();
+        AttrConfigProp<AttrState> prop = new AttrConfigProp<>();
+        prop.setAllowCustomization(Boolean.TRUE);
+        prop.setCustomValue(AttrState.Active);
         for (int i = 0; i < LIMIT; i++) {
             AttrConfig config = new AttrConfig();
             config.setAttrName(StringUtils.format("Attr%d", i));
             config.setEntity(BusinessEntity.Account);
             config.setAttrType(AttrType.Custom);
             config.setAttrSubType(AttrSubType.Extension);
+            config.putProperty(ColumnMetadataKey.State, prop);
             attrConfigs.add(config);
         }
         limitationValidator.validate(attrConfigs);
         assertEquals(getErrorNumber(attrConfigs), 0);
 
-        AttrConfig attrConfig = new AttrConfig();
-        attrConfig.setAttrName("Attr");
-        attrConfig.setEntity(BusinessEntity.Account);
-        attrConfig.setAttrType(AttrType.Custom);
-        attrConfig.setAttrSubType(AttrSubType.Extension);
-        attrConfigs.add(attrConfig);
+        AttrConfig activeConfig = new AttrConfig();
+        activeConfig.setAttrName("Attr_active1");
+        activeConfig.setEntity(BusinessEntity.Account);
+        activeConfig.setAttrType(AttrType.Custom);
+        activeConfig.setAttrSubType(AttrSubType.Extension);
+        activeConfig.putProperty(ColumnMetadataKey.State, prop);
+        attrConfigs.add(activeConfig);
         limitationValidator.validate(attrConfigs);
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size());
+
+        AttrConfig inactiveConfig = new AttrConfig();
+        inactiveConfig.setAttrName("Attr_inactive1");
+        inactiveConfig.setEntity(BusinessEntity.Account);
+        inactiveConfig.setAttrType(AttrType.Custom);
+        inactiveConfig.setAttrSubType(AttrSubType.Extension);
+        AttrConfigProp<AttrState> inactiveProp = new AttrConfigProp<>();
+        inactiveProp.setAllowCustomization(Boolean.TRUE);
+        inactiveProp.setCustomValue(AttrState.Inactive);
+        inactiveConfig.putProperty(ColumnMetadataKey.State, inactiveProp);
+        attrConfigs.add(inactiveConfig);
+        limitationValidator.validate(attrConfigs);
+        // the new config should not have error message
+        assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
 
     private int getErrorNumber(List<AttrConfig> configs) {

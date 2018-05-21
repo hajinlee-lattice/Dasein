@@ -718,6 +718,8 @@ public enum LedpCode {
     LEDP_40023("Wrong customer config, system can't render these attrbutes {0} "), //
     LEDP_40024("Dependency detection among rating engine"), //
     LEDP_40025("Dependency detection among segment"), //
+    LEDP_40026("invalid attribute config {0} after render"), //
+    LEDP_40027("invalid attribute config {0} in DB"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
