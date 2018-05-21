@@ -40,7 +40,7 @@
 
                 <span ng-if="vm.showItem('Numerical') && !vm.showItem('Percent')" class="query-section-item-operation">
                     <div class="num-edit-row">
-                        <div class="button-group" role="group" ng-click="vm.clickEditMode(vm.editMode == 'Custom' ? 'Preset' : 'Custom')" ng-if="vm.getEntity() !== 'PurchaseHistory'">
+                        <div class="button-group" role="group" ng-click="vm.clickEditMode(vm.editMode == 'Custom' ? 'Preset' : 'Custom')" ng-if="!vm.showItem('Percent')">
                             <button type="button" class="button icon-button {{vm.editMode == 'Custom' ? 'white' : 'light-gray'}}-button" value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
                                 <span ng-if="vm.editMode == 'Custom'">Custom</span>
                                 <i class="fa fa-bars fa-rotate-90" ng-if="vm.editMode == 'Preset'"></i>
