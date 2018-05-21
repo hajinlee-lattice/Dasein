@@ -367,13 +367,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
                 attrConfigEntityMgr.save(MultiTenantContext.getTenantId(), entity, trim(configList));
             });
-
-            // try {
-            // registerAction(diffProperties);
-            // } catch (Exception e) {
-            // log.error("Cannot register action to action table: " +
-            // e.getMessage());
-            // }
         }
 
         return toReturn;
@@ -605,6 +598,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     public List<AttrConfig> trim(List<AttrConfig> customConfig) {
         List<AttrConfig> results = new ArrayList<>();
         for (AttrConfig config : customConfig) {
+            config.setImpactWarnings(null);
+            config.setValidationErrors(null);
             AttrState state = config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
             if (AttrState.Active.equals(state)) {
                 AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) config
