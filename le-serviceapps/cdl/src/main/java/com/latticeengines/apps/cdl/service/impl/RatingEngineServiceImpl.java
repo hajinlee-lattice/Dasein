@@ -40,10 +40,8 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
-import com.latticeengines.apps.core.repository.reader.ModelSummaryReaderRepository;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -60,7 +58,6 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -117,9 +114,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private ServingStoreCacheService servingStoreCacheService;
-
-    @Inject
-    private ModelSummaryReaderRepository modelSummaryReaderRepository;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -297,8 +291,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         model.setId(activeModel.getId());
         model.setRatingEngine(ratingEngine);
         if (StringUtils.isNotBlank(model.getModelSummaryId())) {
-            String replicatedModelGUID = replicateModelSummary(model.getModelSummaryId());
-            model.setModelSummaryId(replicatedModelGUID);
+//            String replicatedModelGUID = replicateModelSummary(model.getModelSummaryId());
+//            model.setModelSummaryId(replicatedModelGUID);
+            model.setModelSummaryId(null);
         }
         RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
@@ -317,45 +312,46 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     private String replicateModelSummary(String modelGUID) {
-        ModelSummary modelSummary = modelSummaryReaderRepository.findById(modelGUID);
-        if (modelSummary == null) {
-            throw new IllegalStateException("Cannot find model summary with GUID " + modelGUID);
-        }
-
-        String hdfsPathParttern = "/user/s-analytics/customers/%s.%s.Production/models/%s/%s";
-        String lookupId = modelSummary.getLookupId();
-        String[] tokens = lookupId.split("\\|");
-        String tenantId = tokens[0];
-        String eventTable = tokens[1];
-        String uuid = tokens[2];
-        String hdfsPath = String.format(hdfsPathParttern, tenantId, eventTable, uuid);
-
-        try {
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsPath, uuid);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to download model artifacts to local from hdfs path " + hdfsPath, e);
-        }
-
-        List<File> dirs = new ArrayList<>(FileUtils.listFiles(new File(uuid), new String[] {}, false));
-        String appId = dirs.get(0).getName();
-
-        File modelSummaryFile = new File(
-                uuid + File.separator + appId + File.separator + "enhancements" + File.separator + "modelsummary.json");
-        String newTenantId = MultiTenantContext.getTenantId();
-        String newUuid = updateLocalModelSummayContent(modelSummaryFile, CustomerSpace.parse(tenantId).getTenantId(),
-                eventTable, uuid, newTenantId);
-        String newModelGUID = modelSummary.getId().replace(uuid, newUuid);
-
-        String newHdfsPath = String.format(hdfsPathParttern, newTenantId, eventTable, newUuid);
-        try {
-            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, uuid, newHdfsPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload model artifacts to " + newHdfsPath, e);
-        }
-
-        FileUtils.deleteQuietly(new File(uuid));
-
-        return newModelGUID;
+        return null;
+//        ModelSummary modelSummary = modelSummaryReaderRepository.findById(modelGUID);
+//        if (modelSummary == null) {
+//            throw new IllegalStateException("Cannot find model summary with GUID " + modelGUID);
+//        }
+//
+//        String hdfsPathParttern = "/user/s-analytics/customers/%s.%s.Production/models/%s/%s";
+//        String lookupId = modelSummary.getLookupId();
+//        String[] tokens = lookupId.split("\\|");
+//        String tenantId = tokens[0];
+//        String eventTable = tokens[1];
+//        String uuid = tokens[2];
+//        String hdfsPath = String.format(hdfsPathParttern, tenantId, eventTable, uuid);
+//
+//        try {
+//            HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsPath, uuid);
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to download model artifacts to local from hdfs path " + hdfsPath, e);
+//        }
+//
+//        List<File> dirs = new ArrayList<>(FileUtils.listFiles(new File(uuid), new String[] {}, false));
+//        String appId = dirs.get(0).getName();
+//
+//        File modelSummaryFile = new File(
+//                uuid + File.separator + appId + File.separator + "enhancements" + File.separator + "modelsummary.json");
+//        String newTenantId = MultiTenantContext.getTenantId();
+//        String newUuid = updateLocalModelSummayContent(modelSummaryFile, CustomerSpace.parse(tenantId).getTenantId(),
+//                eventTable, uuid, newTenantId);
+//        String newModelGUID = modelSummary.getId().replace(uuid, newUuid);
+//
+//        String newHdfsPath = String.format(hdfsPathParttern, newTenantId, eventTable, newUuid);
+//        try {
+//            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, uuid, newHdfsPath);
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to upload model artifacts to " + newHdfsPath, e);
+//        }
+//
+//        FileUtils.deleteQuietly(new File(uuid));
+//
+//        return newModelGUID;
     }
 
     private String updateLocalModelSummayContent(File modelSummaryFile, String oldTenantName, String eventTable,
