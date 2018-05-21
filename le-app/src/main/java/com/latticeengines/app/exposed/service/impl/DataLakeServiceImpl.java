@@ -224,7 +224,18 @@ public class DataLakeServiceImpl implements DataLakeService {
 
                 List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
                         .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
-                dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes);
+                try {
+                    dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, true);
+                } catch (Exception ex) {
+                    log.info("Ignoring error due to missing lookup id column. Trying without lookup id this time.", ex);
+                    dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, false);
+                }
+            }
+
+            if (dataPage != null && dataPage.getData() != null && dataPage.getData().size() == 1) {
+                if (!dataPage.getData().get(0).containsKey(InterfaceName.AccountId.name())) {
+                    dataPage.getData().get(0).put(InterfaceName.AccountId.name(), internalAccountId);
+                }
             }
         } else {
             dataPage = createEmptyDataPage();
@@ -301,7 +312,13 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private String getInternalAccountIdViaObjectApi(String customerSpace, String accountId, String lookupIdColumn) {
         List<String> attributes = Collections.singletonList(InterfaceName.AccountId.name());
-        DataPage dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes);
+        DataPage dataPage = null;
+        try {
+            dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, true);
+        } catch (Exception ex) {
+            log.info("Ignoring error due to missing lookup id column. Trying without lookup id this time.", ex);
+            dataPage = getAccountDataViaObjectApi(customerSpace, accountId, lookupIdColumn, attributes, false);
+        }
         String internalAccountId = null;
 
         if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
@@ -315,19 +332,21 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     private DataPage getAccountDataViaObjectApi(String customerSpace, String accountId, String lookupIdColumn,
-            List<String> attributes) {
+            List<String> attributes, boolean shouldAddLookupIdClause) {
 
-        Restriction accRestriction = Restriction.builder() //
+        Restriction restriction = Restriction.builder() //
                 .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
                 .eq(accountId) //
                 .build();
 
-        Restriction sfdcRestriction = Restriction.builder() //
-                .let(BusinessEntity.Account, lookupIdColumn) //
-                .eq(accountId) //
-                .build();
+        if (shouldAddLookupIdClause) {
+            Restriction sfdcRestriction = Restriction.builder() //
+                    .let(BusinessEntity.Account, lookupIdColumn) //
+                    .eq(accountId) //
+                    .build();
 
-        Restriction restriction = Restriction.builder().or(Arrays.asList(accRestriction, sfdcRestriction)).build();
+            restriction = Restriction.builder().or(Arrays.asList(restriction, sfdcRestriction)).build();
+        }
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));

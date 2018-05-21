@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.testframework.AppTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -70,6 +71,9 @@ public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
     private final List<String> expectedResultFields = Arrays.asList("Field1", "Field2");
 
     private final List<Object> expectedResultFieldValues = Arrays.asList("abc", new Long(123));
+
+    private final List<String> expectedResultFieldsWithAccountId = Arrays.asList("Field1", "Field2",
+            InterfaceName.AccountId.name());
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -184,36 +188,43 @@ public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
     public void testGetAccountByIdWithNoMatch() {
         mockWithNoMatchResult();
         DataPage result = dataLakeService.getAccountById("someBadId", Predefined.TalkingPoint, orgInfo);
-        checkResult(result, false);
+        checkResult(result, false, "someBadId");
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetAccountByIdWithNoMatch" })
     public void testGetAccountByIdWithActualInternalAccountId() {
         mockWithGoodMatchResult();
         DataPage result = dataLakeService.getAccountById(actualInternalAccountId, Predefined.TalkingPoint, orgInfo);
-        checkResult(result, true);
+        checkResult(result, true, actualInternalAccountId);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetAccountByIdWithActualInternalAccountId" })
     public void testGetAccountByIdWithActualSfdcAccountId() {
         mockWithGoodMatchResult();
         DataPage result = dataLakeService.getAccountById(actualSfdcAccountId, Predefined.TalkingPoint, orgInfo);
-        checkResult(result, true);
+        checkResult(result, true, actualInternalAccountId);
     }
 
-    private void checkResult(DataPage result, boolean shouldExpectMathcedResult) {
+    private void checkResult(DataPage result, boolean shouldExpectMathcedResult, String expectedAccountId) {
         Assert.assertNotNull(result);
         if (shouldExpectMathcedResult) {
+            System.out.println("\n\n" + JsonUtils.serialize(result) + "\n\n");
+
             Assert.assertNotNull(result.getData());
             Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
             Map<String, Object> resultRecordValueMap = result.getData().get(0);
             Assert.assertTrue(MapUtils.isNotEmpty(resultRecordValueMap));
-            Assert.assertEquals(resultRecordValueMap.size(), expectedResultFields.size());
+            Assert.assertEquals(resultRecordValueMap.size(), expectedResultFieldsWithAccountId.size());
             resultRecordValueMap.keySet().stream() //
-                    .forEach(k -> Assert.assertTrue(expectedResultFields.contains(k), k));
+                    .forEach(k -> Assert.assertTrue(expectedResultFieldsWithAccountId.contains(k), k));
             resultRecordValueMap.values().stream() //
-                    .forEach(v -> Assert.assertTrue(expectedResultFieldValues.contains(v),
-                            v == null ? null : v.toString()));
+                    .forEach(v -> {
+                        if (!expectedResultFieldValues.contains(v)) {
+                            Assert.assertEquals(v, expectedAccountId);
+                        } else {
+                            Assert.assertTrue(expectedResultFieldValues.contains(v), v == null ? null : v.toString());
+                        }
+                    });
         } else {
             Assert.assertNotNull(result.getData());
             Assert.assertTrue(result.getData().isEmpty());
