@@ -168,7 +168,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
          * @param {*} bucketRestriction 
          */
         this.getOperationLabel = function (cmpMap, type, bucketRestriction) {
-            console.log('The op label ', type, '  ',cmpMap, '      ',bucketRestriction);
+            // console.log('The op label ', type, '  ',cmpMap, '      ',bucketRestriction);
             if (!bucketRestriction.bkt) {
                 return;
             }
