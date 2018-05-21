@@ -115,7 +115,7 @@ angular.module('common.datacloud')
     }
 
     this.setPremiumSelectMaximum = function(item){
-        DataCloudStore.selectMaximum = item;
+        DataCloudStore.premiumSelectMaximum = item;
     }
 
     this.getSelectMaximum = function(){
@@ -133,7 +133,7 @@ angular.module('common.datacloud')
     }
 
     this.setSelectMaximum = function(item){
-        DataCloudStore.premiumSelectMaximum = item;
+        DataCloudStore.selectMaximum = item;
     }
 
     this.getCategories = function(){
