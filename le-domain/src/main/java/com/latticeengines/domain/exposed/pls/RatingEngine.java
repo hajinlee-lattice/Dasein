@@ -138,6 +138,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private AdvancedRatingConfig advancedRatingConfig;
 
+    private List<BucketMetadata> bucketMetadata;
+
     @Override
     @JsonProperty("pid")
     @Id
@@ -429,6 +431,17 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return attr;
     }
 
+    @JsonProperty("bucketMetadata")
+    @Transient
+    public List<BucketMetadata> getBucketMetadata() {
+        return bucketMetadata;
+    }
+
+    @JsonProperty("bucketMetadata")
+    public void setBucketMetadata(List<BucketMetadata> bucketMetadata) {
+        this.bucketMetadata = bucketMetadata;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
@@ -466,5 +479,4 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     public enum ScoreType {
         Rating, Probability, NormalizedScore, ExpectedRevenue
     }
-
 }

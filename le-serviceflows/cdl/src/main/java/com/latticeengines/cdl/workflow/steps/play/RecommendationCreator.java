@@ -88,20 +88,14 @@ public class RecommendationCreator {
         RatingBucketName bucket = getBucketInfo(playLaunchContext, account);
         Recommendation recommendation = null;
 
-        // Generate recommendation only when bucket is selected for launch
-        if (playLaunchContext.getPlayLaunch().getBucketsToLaunch().contains(bucket)) {
+        // prepare recommendation
+        recommendation = //
+                prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList, bucket);
 
-            // prepare recommendation
-            recommendation = //
-                    prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList, bucket);
-
-            // update corresponding counters
-            playLaunchContext.getCounter().getContactLaunched().addAndGet(
-                    recommendation.getExpandedContacts() != null ? recommendation.getExpandedContacts().size() : 0);
-            playLaunchContext.getCounter().getAccountLaunched().addAndGet(1);
-        } else {
-            playLaunchContext.getCounter().getAccountSuppressed().addAndGet(1);
-        }
+        // update corresponding counters
+        playLaunchContext.getCounter().getContactLaunched().addAndGet(
+                recommendation.getExpandedContacts() != null ? recommendation.getExpandedContacts().size() : 0);
+        playLaunchContext.getCounter().getAccountLaunched().addAndGet(1);
 
         return recommendation;
     }

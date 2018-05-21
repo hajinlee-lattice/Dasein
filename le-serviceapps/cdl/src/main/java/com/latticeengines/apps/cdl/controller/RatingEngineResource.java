@@ -364,14 +364,15 @@ public class RatingEngineResource {
             @RequestParam(value = "lookupFieldNames", required = false) List<String> lookupFieldNames, //
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
-            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
+            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets, //
+            @RequestParam(value = "lookupIdColumn", required = false) String lookupIdColumn) {
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false, false);
 
         descending = descending == null ? false : descending;
 
         return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
                 descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
-                selectedBuckets);
+                selectedBuckets, lookupIdColumn);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/entitypreview/count", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -383,10 +384,11 @@ public class RatingEngineResource {
             @RequestParam(value = "entityType", required = true) BusinessEntity entityType, //
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
-            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
+            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets, //
+            @RequestParam(value = "lookupIdColumn", required = false) String lookupIdColumn) {
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false, false);
 
         return ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, entityType, restrictNotNullSalesforceId,
-                freeFormTextSearch, selectedBuckets);
+                freeFormTextSearch, selectedBuckets, lookupIdColumn);
     }
 }

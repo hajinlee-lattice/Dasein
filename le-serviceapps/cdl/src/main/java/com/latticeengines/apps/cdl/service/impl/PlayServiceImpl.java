@@ -4,16 +4,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,23 +26,28 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LaunchHistory;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.RatingEngineUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
 @Component("playService")
 public class PlayServiceImpl implements PlayService {
@@ -47,23 +57,26 @@ public class PlayServiceImpl implements PlayService {
     @Value("${pls.play.service.threadpool.size:10}")
     private Integer fetcherNum;
 
-    @Autowired
+    @Inject
     private PlayEntityMgr playEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private TalkingPointProxy talkingPointProxy;
 
-    @Autowired
+    @Inject
     private PlayLaunchService playLaunchService;
 
-    @Autowired
+    @Inject
     private RatingEngineService ratingEngineService;
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     private ForkJoinPool tpForParallelStream;
 
@@ -110,6 +123,79 @@ public class PlayServiceImpl implements PlayService {
         } else {
             RatingEngine ratingEngine = validateRatingEngineId(tenant, ratingEngineId);
             plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid());
+        }
+
+        if (shouldLoadCoverage && CollectionUtils.isNotEmpty(plays)) {
+            Map<String, List<RatingEngine>> ratingEnginesMap = new ConcurrentHashMap<>();
+
+            Set<Pair<String, RatingEngineType>> ratingEngineIdSet = plays.stream() //
+                    .filter(p -> p.getRatingEngine() != null) //
+                    .filter(p -> StringUtils.isNotBlank(p.getRatingEngine().getId())) //
+                    .map(p -> {
+                        String reId = p.getRatingEngine().getId();
+                        if (!ratingEnginesMap.containsKey(reId)) {
+                            ratingEnginesMap.put(reId, new ArrayList<>());
+                        }
+                        ratingEnginesMap.get(reId).add(p.getRatingEngine());
+                        return new ImmutablePair<>(p.getRatingEngine().getId(), p.getRatingEngine().getType());
+                    }) //
+                    .collect(Collectors.toSet());
+
+            if (CollectionUtils.isNotEmpty(ratingEngineIdSet)) {
+                log.info("Handling unique rating engine ids: " + JsonUtils.serialize(ratingEngineIdSet)
+                        + "for corresponding plays");
+                Set<Pair<String, RatingEngineType>> rulesTypeRatingEngineIds = ratingEngineIdSet.stream() //
+                        .filter(r -> r.getRight() == RatingEngineType.RULE_BASED) //
+                        .collect(Collectors.toSet());
+                Set<Pair<String, RatingEngineType>> aiTypeRatingEngineIds = ratingEngineIdSet.stream() //
+                        .filter(r -> r.getRight() != RatingEngineType.RULE_BASED) //
+                        .collect(Collectors.toSet());
+
+                if (CollectionUtils.isNotEmpty(rulesTypeRatingEngineIds)) {
+                    log.info("Trying to build bucket metadata for rule based rating engine ids: "
+                            + JsonUtils.serialize(rulesTypeRatingEngineIds));
+                    rulesTypeRatingEngineIds //
+                            .stream() //
+                            .forEach(pair -> {
+                                String reId = pair.getLeft();
+                                List<RatingEngine> ratingEngines = ratingEnginesMap.get(reId);
+                                ratingEngines.stream() //
+                                        .forEach(r -> {
+                                            Map<String, Long> counts = r.getCountsAsMap();
+                                            if (counts != null) {
+                                                r.setBucketMetadata(counts.keySet().stream() //
+                                                        .map(c -> new BucketMetadata(BucketName.fromValue(c),
+                                                                counts.get(c).intValue()))
+                                                        .collect(Collectors.toList()));
+                                            }
+                                        });
+                            });
+                }
+                if (CollectionUtils.isNotEmpty(aiTypeRatingEngineIds)) {
+                    log.info("Trying to load latest ABDC buckets for AI rating engine ids: "
+                            + JsonUtils.serialize(aiTypeRatingEngineIds));
+                    tpForParallelStream.submit(//
+                            () -> //
+                            aiTypeRatingEngineIds //
+                                    .stream() //
+                                    .parallel() //
+                                    .forEach(pair -> {
+                                        String reId = pair.getLeft();
+                                        List<RatingEngine> ratingEngines = ratingEnginesMap.get(reId);
+                                        try {
+                                            List<BucketMetadata> latestABCDBuckets = bucketedScoreProxy
+                                                    .getLatestABCDBucketsByEngineId(tenant.getId(), reId);
+                                            ratingEngines.stream() //
+                                                    .forEach(r -> r.setBucketMetadata(latestABCDBuckets));
+                                        } catch (Exception ex) {
+                                            log.info("Ignoring exception while loading latest ABCD"
+                                                    + " bucket of rating engine " + reId
+                                                    + " to set bucket metadata for play", ex);
+                                        }
+                                    })) //
+                            .join();
+                }
+            }
         }
 
         final List<Play> innerPlays = new ArrayList<>();
@@ -204,11 +290,13 @@ public class PlayServiceImpl implements PlayService {
             CoverageInfo coverageInfo = RatingEngineUtils.getCoverageInfo(ratingEngine);
             Long accountCount = coverageInfo.getAccountCount();
             if (accountCount == null) {
-                throw new IllegalStateException("Cannot find a valid account count from rating engine " + ratingEngine.getId());
+                throw new IllegalStateException(
+                        "Cannot find a valid account count from rating engine " + ratingEngine.getId());
             }
             Long contactCount = coverageInfo.getContactCount();
             if (contactCount == null) {
-                throw new IllegalStateException("Cannot find a valid contact count from rating engine " + ratingEngine.getId());
+                throw new IllegalStateException(
+                        "Cannot find a valid contact count from rating engine " + ratingEngine.getId());
             }
             play.setRatings(coverageInfo.getBucketCoverageCounts());
 
@@ -285,7 +373,7 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public List<AttributeLookup> findDependingAttributes (List<Play> plays) {
+    public List<AttributeLookup> findDependingAttributes(List<Play> plays) {
         Set<AttributeLookup> dependingAttributes = new HashSet<>();
         if (plays != null) {
             for (Play play : plays) {
@@ -303,7 +391,8 @@ public class PlayServiceImpl implements PlayService {
             List<Play> plays = getAllPlays();
             if (plays != null) {
                 for (Play play : plays) {
-                    List<AttributeLookup> playAttributes = talkingPointProxy.getAttributesInTalkingPointOfPlay(play.getName());
+                    List<AttributeLookup> playAttributes = talkingPointProxy
+                            .getAttributesInTalkingPointOfPlay(play.getName());
                     for (AttributeLookup attributeLookup : playAttributes) {
                         if (attributes.contains(sanitize(attributeLookup.toString()))) {
                             dependingPlays.add(play);

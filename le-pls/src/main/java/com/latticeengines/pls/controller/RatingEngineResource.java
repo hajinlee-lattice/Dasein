@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.RequestEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -110,39 +111,40 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/entitypreview")
     @ResponseBody
     @ApiOperation(value = "Get preview of Account and Contact as related to Rating Engine given its id")
-    public DataPage getEntityPreview( //
+    public DataPage getEntityPreview(RequestEntity<String> requestEntity, //
             @PathVariable String ratingEngineId, //
             @RequestParam(value = "offset", required = true) long offset, //
             @RequestParam(value = "maximum", required = true) long maximum, //
             @RequestParam(value = "entityType", required = true) BusinessEntity entityType, //
             @RequestParam(value = "sortBy", required = false) String sortBy, //
             @RequestParam(value = "bucketFieldName", required = false) String bucketFieldName, //
-            @RequestParam(value = "descending", required = false) Boolean descending,
-            //
+            @RequestParam(value = "descending", required = false) Boolean descending, //
             @RequestParam(value = "lookupFieldNames", required = false) List<String> lookupFieldNames, //
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
-            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
+            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets, //
+            @RequestParam(value = "lookupIdColumn", required = false) String lookupIdColumn) {
         descending = descending == null ? false : descending;
         Tenant tenant = MultiTenantContext.getTenant();
 
         return ratingEngineProxy.getEntityPreview(tenant.getId(), ratingEngineId, offset, maximum, entityType, sortBy,
                 descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
-                selectedBuckets);
+                selectedBuckets, lookupIdColumn);
     }
 
     @GetMapping(value = "/{ratingEngineId}/entitypreview/count")
     @ResponseBody
     @ApiOperation(value = "Get total count of Account and Contact as relatedto Rating Engine given its id")
-    public Long getEntityPreviewCount( //
+    public Long getEntityPreviewCount(RequestEntity<String> requestEntity, //
             @PathVariable String ratingEngineId, //
             @RequestParam(value = "entityType", required = true) BusinessEntity entityType, //
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
-            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
+            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets, //
+            @RequestParam(value = "lookupIdColumn", required = false) String lookupIdColumn) {
         Tenant tenant = MultiTenantContext.getTenant();
         return ratingEngineProxy.getEntityPreviewCount(tenant.getId(), ratingEngineId, entityType,
-                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets);
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, lookupIdColumn);
     }
 
     @GetMapping(value = "/{ratingEngineId}/dashboard")

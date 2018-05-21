@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +39,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -203,7 +201,9 @@ public class PlayResource {
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
 
         if (play != null) {
-            validateNonEmptyTargetsForLaunch(play, playName, playLaunch);
+            validateNonEmptyTargetsForLaunch(play, playName, playLaunch, //
+                    playLaunch.getDestinationAccountId());
+
             playLaunch.setLaunchState(LaunchState.Launching);
             playLaunch.setPlay(play);
             playLaunch.setTableName(createTable(playLaunch));
@@ -340,20 +340,22 @@ public class PlayResource {
         return playId;
     }
 
-    private void validateNonEmptyTargetsForLaunch(Play play, String playName, PlayLaunch playLaunch) {
+    private void validateNonEmptyTargetsForLaunch(Play play, String playName, //
+            PlayLaunch playLaunch, String lookupIdColumn) {
         RatingEngine ratingEngine = play.getRatingEngine();
         ratingEngine = ratingEngineService.getRatingEngineById(ratingEngine.getId(), false);
         play.setRatingEngine(ratingEngine);
 
-        DataPage previewDataPage = ratingEntityPreviewService.getEntityPreview( //
-                ratingEngine, 0L, 1L, BusinessEntity.Account, //
+        Long previewDataCount = ratingEntityPreviewService.getEntityPreviewCount( //
+                ratingEngine, BusinessEntity.Account, //
                 playLaunch.getExcludeItemsWithoutSalesforceId(), //
+                null,
                 playLaunch.getBucketsToLaunch().stream() //
                         .map(RatingBucketName::getName) //
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()),
+                lookupIdColumn);
 
-        if (previewDataPage == null || CollectionUtils.isEmpty(previewDataPage.getData())
-                || (playLaunch.getTopNCount() != null && playLaunch.getTopNCount() <= 0L)) {
+        if (previewDataCount == null || previewDataCount <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
         }
     }

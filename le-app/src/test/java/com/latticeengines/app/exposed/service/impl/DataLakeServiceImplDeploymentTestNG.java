@@ -167,18 +167,15 @@ public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
 
     @Test(groups = "deployment", enabled = true)
     public void testFindLookupIdColumn() {
-        String lookupIdColumn = ((DataLakeServiceImpl) dataLakeService).findLookupIdColumn(orgInfo,
-                mainTestTenant.getId());
+        String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, mainTestTenant.getId());
         Assert.assertNotNull(lookupIdColumn);
         Assert.assertEquals(lookupIdColumn, accountIdColumn);
 
-        String lookupIdColumn2 = ((DataLakeServiceImpl) dataLakeService).findLookupIdColumn(orgInfo2,
-                mainTestTenant.getId());
+        String lookupIdColumn2 = lookupIdMappingProxy.findLookupIdColumn(orgInfo2, mainTestTenant.getId());
         Assert.assertNotNull(lookupIdColumn2);
         Assert.assertEquals(lookupIdColumn2, accountIdColumn2);
 
-        String lookupIdColumn3 = ((DataLakeServiceImpl) dataLakeService).findLookupIdColumn(null,
-                mainTestTenant.getId());
+        String lookupIdColumn3 = lookupIdMappingProxy.findLookupIdColumn(null, mainTestTenant.getId());
         Assert.assertNotNull(lookupIdColumn3);
         Assert.assertEquals(lookupIdColumn3, InterfaceName.SalesforceAccountID.name());
     }

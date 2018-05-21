@@ -47,7 +47,7 @@ public class DataCloudServiceImplDeploymentTestNG extends AppTestNGBase {
         createCustomerReport(CustomerReportType.MATCHEDATTRIBUTE);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testCustomerReport() {
         MultiTenantContext.setTenant(mainTestTenant);
         lookupCustomerReport = dataCloudService.findById(lookupCustomerReport.getId());

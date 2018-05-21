@@ -44,8 +44,6 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     private static final String RATING_BUCKET_FIELD = "RATING_BUCKET_FIELD";
 
-    private static final String SEGMENT_IDS_ERROR_MAP_KEY = "processSegmentIdsErrorMap";
-
     @Autowired
     private RatingEntityPreviewService ratingEntityPreviewService;
 
@@ -196,31 +194,31 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         }
 
         Long count1 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
-                null);
+                null, InterfaceName.SalesforceAccountID.name());
         Long count2 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
-                allRatingBuckets);
+                allRatingBuckets, InterfaceName.SalesforceAccountID.name());
         Long count3 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
-                partialRatingBuckets);
+                partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
         Long count4 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null,
-                actualNameInOneOfTheAccounts, partialRatingBuckets);
+                actualNameInOneOfTheAccounts, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
 
         Long count5 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
-                null, null);
+                null, null, InterfaceName.SalesforceAccountID.name());
         Long count6 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
-                null, allRatingBuckets);
+                null, allRatingBuckets, InterfaceName.SalesforceAccountID.name());
         Long count7 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
-                null, partialRatingBuckets);
+                null, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
         Long count8 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
-                actualNameInOneOfTheAccounts, partialRatingBuckets);
+                actualNameInOneOfTheAccounts, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
 
         Long count9 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true, null,
-                null);
+                null, InterfaceName.SalesforceAccountID.name());
         Long count10 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
-                null, allRatingBuckets);
+                null, allRatingBuckets, InterfaceName.SalesforceAccountID.name());
         Long count11 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
-                null, partialRatingBuckets);
+                null, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
         Long count12 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
-                actualNameInOneOfTheAccounts, partialRatingBuckets);
+                actualNameInOneOfTheAccounts, partialRatingBuckets, InterfaceName.SalesforceAccountID.name());
 
         Assert.assertTrue(count1 == count2);
         Assert.assertTrue(count2 >= count3);
@@ -238,7 +236,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         Assert.assertTrue(count1 >= count9);
 
         Long contactCount = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Contact, null,
-                null, null);
+                null, null, InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(contactCount);
         Assert.assertTrue(contactCount >= 0L);
     }
@@ -264,7 +262,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     public Set<String> testEntityPreview(Long offset, Long max, boolean expectingSomeAccounts) {
         DataPage response = ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, max,
                 BusinessEntity.Account, InterfaceName.AccountId.name(), false, RATING_BUCKET_FIELD, null, false, null,
-                null);
+                null, InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getData());
 

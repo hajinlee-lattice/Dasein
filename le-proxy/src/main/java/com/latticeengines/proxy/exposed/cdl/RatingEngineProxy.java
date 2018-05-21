@@ -278,7 +278,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     public DataPage getEntityPreview(String customerSpace, String ratingEngineId, long offset, long maximum,
             BusinessEntity entityType, String sortBy, Boolean descending, String bucketFieldName,
             List<String> lookupFieldNames, Boolean restrictNotNullSalesforceId, String freeFormTextSearch,
-            List<String> selectedBuckets) {
+            List<String> selectedBuckets, String lookupIdColumn) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL_PREFIX);
         sb.append("/{ratingEngineId}/entitypreview?offset={offset}&maximum={maximum}&entityType={entityType}");
@@ -293,13 +293,14 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         addParam("restrictNotNullSalesforceId", restrictNotNullSalesforceId, sb, paramObjects);
         addParam("freeFormTextSearch", freeFormTextSearch, sb, paramObjects);
         addParam("selectedBuckets", selectedBuckets, sb, paramObjects);
+        addParam("lookupIdColumn", lookupIdColumn, sb, paramObjects);
 
         String url = constructUrl(sb.toString(), paramObjects.toArray(new Object[paramObjects.size()]));
         return get("getEntityPreview", url, DataPage.class);
     }
 
     public Long getEntityPreviewCount(String customerSpace, String ratingEngineId, BusinessEntity entityType,
-            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets, String lookupIdColumn) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL_PREFIX);
         sb.append("/{ratingEngineId}/entitypreview/count?entityType={entityType}");
@@ -309,6 +310,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         addParam("restrictNotNullSalesforceId", restrictNotNullSalesforceId, sb, paramObjects);
         addParam("freeFormTextSearch", freeFormTextSearch, sb, paramObjects);
         addParam("selectedBuckets", selectedBuckets, sb, paramObjects);
+        addParam("lookupIdColumn", lookupIdColumn, sb, paramObjects);
 
         String url = constructUrl(sb.toString(), paramObjects.toArray(new Object[paramObjects.size()]));
         return get("getEntityPreview", url, Long.class);

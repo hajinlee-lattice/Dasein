@@ -27,8 +27,10 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -109,7 +111,10 @@ public class TestPlayCreationHelper {
 
     private String playName;
 
+    private String destinationOrgId;
+
     public void setupTenantAndPopuldateData() {
+        destinationOrgId = "O_" + System.currentTimeMillis();
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier);
@@ -133,7 +138,7 @@ public class TestPlayCreationHelper {
     public RatingEngine getRatingEngine() {
         return ratingEngine;
     }
-    
+
     public String getPlayName() {
         return playName;
     }
@@ -162,15 +167,16 @@ public class TestPlayCreationHelper {
         Assert.assertNotNull(playLaunch);
     }
 
-    public MetadataSegment createSegment(String segmentName, Restriction accountRestriction, Restriction contactRestriction) {
+    public MetadataSegment createSegment(String segmentName, Restriction accountRestriction,
+            Restriction contactRestriction) {
         segment = new MetadataSegment();
         segment.setAccountRestriction(accountRestriction);
         segment.setContactRestriction(contactRestriction);
         segment.setDisplayName(segmentName);
         MetadataSegment createdSegment = segmentService
                 .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentService
-                .findByName(CustomerSpace.parse(tenant.getId()).toString(), createdSegment.getName());
+        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(tenant.getId()).toString(),
+                createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         return retrievedSegment;
     }
@@ -182,8 +188,7 @@ public class TestPlayCreationHelper {
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         ratingEngine1.setStatus(RatingEngineStatus.ACTIVE);
 
-        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(),
-                ratingEngine1);
+        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
         cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
         ratingEngine1.setId(createdRatingEngine.getId());
@@ -192,8 +197,7 @@ public class TestPlayCreationHelper {
         for (RatingModel model : models) {
             if (model instanceof RuleBasedModel) {
                 ((RuleBasedModel) model).setRatingRule(ratingRule);
-                ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngine1.getId(), model.getId(),
-                        model);
+                ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngine1.getId(), model.getId(), model);
             }
         }
 
@@ -244,6 +248,9 @@ public class TestPlayCreationHelper {
     private PlayLaunch createDefaultPlayLaunch() {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())));
+        playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
+        playLaunch.setDestinationOrgId(destinationOrgId);
+        playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
         return playLaunch;
     }
 
@@ -322,9 +329,6 @@ public class TestPlayCreationHelper {
     }
 
     private Restriction createAccountRestriction() {
-        Restriction b1 = //
-                createBucketRestriction(6, ComparisonType.EQUAL, //
-                        BusinessEntity.Account, "COMPOSITE_RISK_SCORE");
         Restriction b2 = //
                 createBucketRestriction(1, ComparisonType.EQUAL, //
                         BusinessEntity.Account, "PREMIUM_MARKETING_PRESCREEN");
@@ -339,7 +343,7 @@ public class TestPlayCreationHelper {
                         BusinessEntity.Account, "BusinessTechnologiesAnalytics");
 
         Restriction innerLogical1 = LogicalRestriction.builder()//
-                .and(Arrays.asList(b1, b2, b3, b4, b5)).build();
+                .and(Arrays.asList(b2, b3, b4, b5)).build();
         Restriction innerLogical2 = LogicalRestriction.builder()//
                 .or(new ArrayList<>()).build();
 

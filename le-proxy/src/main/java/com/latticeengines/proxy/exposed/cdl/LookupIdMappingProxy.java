@@ -7,14 +7,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -106,5 +110,46 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
         }
 
         return JsonUtils.convertList(allCDLExternalSystemTypeRaw, CDLExternalSystemType.class);
+    }
+
+    public String findLookupIdColumn(Map<String, String> orgInfo, String customerSpace) {
+        String orgId = MapUtils.isNotEmpty(orgInfo) ? orgInfo.get(CDLConstants.ORG_ID) : null;
+        String externalSystemTypeStr = MapUtils.isNotEmpty(orgInfo) ? orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE)
+                : CDLExternalSystemType.CRM.name();
+        CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(externalSystemTypeStr);
+
+        String lookupIdColumn = null;
+        if ((StringUtils.isNotBlank(orgId) //
+                && externalSystemType != null)) {
+
+            Map<String, List<LookupIdMap>> lookupIdMappings = getLookupIdsMapping(customerSpace, externalSystemType,
+                    null, false);
+
+            if (MapUtils.isNotEmpty(lookupIdMappings)
+                    && CollectionUtils.isNotEmpty(lookupIdMappings.get(externalSystemType.name()))) {
+
+                LookupIdMap lookupIdMap = lookupIdMappings.get(externalSystemType.name()).stream() //
+                        .filter(l -> orgId.equals(l.getOrgId())) //
+                        .findAny() //
+                        .orElse(null);
+
+                if (lookupIdMap != null //
+                        && StringUtils.isNotBlank(lookupIdMap.getAccountId())) {
+                    lookupIdColumn = lookupIdMap.getAccountId();
+                }
+            }
+        }
+
+        if (StringUtils.isBlank(lookupIdColumn)) {
+            lookupIdColumn = InterfaceName.SalesforceAccountID.name();
+            log.info(String.format(
+                    "Didn't find any valid lookup id mapping for org = %s. Therefore using default column = %s as lookup id column",
+                    orgId, lookupIdColumn));
+        } else {
+            log.info(String.format(
+                    "Found a valid lookup id mapping for org = %s, therefore using column = %s as lookup id column",
+                    orgId, lookupIdColumn));
+        }
+        return lookupIdColumn;
     }
 }

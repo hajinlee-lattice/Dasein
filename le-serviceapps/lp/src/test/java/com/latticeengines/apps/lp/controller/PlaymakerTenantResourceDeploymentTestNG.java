@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.lp.testframework.LPDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
@@ -59,7 +60,7 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
 
         appId1 = "a1_" + currentTime;
         orgId1 = "o1_" + currentTime;
-        externalSysType1 = "e1_" + currentTime;
+        externalSysType1 = CDLExternalSystemType.CRM.name();
 
         appId2 = "a2_" + currentTime;
         orgId2 = null;

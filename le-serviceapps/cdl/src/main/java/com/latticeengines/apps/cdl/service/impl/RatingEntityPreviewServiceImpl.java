@@ -64,21 +64,24 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
     @Override
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
-            Boolean restrictNotNullSalesforceId, List<String> selectedBuckets) {
+            Boolean restrictNotNullSalesforceId, List<String> selectedBuckets, String lookupIdColumn) {
         return getEntityPreview(ratingEngine, offset, maximum, entityType, null, false, null, null,
-                restrictNotNullSalesforceId, null, selectedBuckets);
+                restrictNotNullSalesforceId, null, selectedBuckets, lookupIdColumn);
     }
 
     @Override
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
-            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets,
+            String lookupIdColumn) {
         Tenant tenant = MultiTenantContext.getTenant();
         String ratingField = RatingEngine.toRatingAttrName(ratingEngine.getId(), RatingEngine.ScoreType.Rating);
         restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
+        lookupIdColumn = StringUtils.isBlank(lookupIdColumn) ? InterfaceName.SalesforceAccountID.name()
+                : lookupIdColumn;
 
         FrontEndQuery entityFrontEndQuery = createBasicFronEndQuery(ratingEngine, entityType,
-                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField);
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField, lookupIdColumn);
 
         entityFrontEndQuery.setPageFilter(new PageFilter(offset, maximum));
 
@@ -105,7 +108,8 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
     @Override
     public Long getEntityPreviewCount(RatingEngine ratingEngine, BusinessEntity entityType,
-            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets,
+            String lookupIdColumn) {
         restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
         selectedBuckets = selectedBuckets == null
                 ? Arrays.asList(RatingBucketName.values()).stream().map(b -> b.getName()).collect(Collectors.toList())
@@ -115,7 +119,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         String ratingField = RatingEngine.toRatingAttrName(ratingEngine.getId(), RatingEngine.ScoreType.Rating);
 
         FrontEndQuery entityFrontEndQuery = createBasicFronEndQuery(ratingEngine, entityType,
-                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField);
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField, lookupIdColumn);
 
         Long count = entityProxy.getCount( //
                 tenant.getId(), //
@@ -128,9 +132,10 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
     private FrontEndQuery createBasicFronEndQuery(RatingEngine ratingEngine, BusinessEntity entityType,
             boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets,
-            String ratingField) {
+            String ratingField, String lookupIdColumn) {
         FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
-        setBasicInfo(ratingEngine, entityType, entityFrontEndQuery, restrictNotNullSalesforceId, freeFormTextSearch);
+        setBasicInfo(ratingEngine, entityType, entityFrontEndQuery, restrictNotNullSalesforceId, freeFormTextSearch,
+                lookupIdColumn);
         setSelectedBuckets(entityFrontEndQuery, selectedBuckets, ratingField);
         return entityFrontEndQuery;
     }
@@ -150,7 +155,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     }
 
     private void setBasicInfo(RatingEngine ratingEngine, BusinessEntity entityType, FrontEndQuery entityFrontEndQuery,
-            boolean restrictNotNullSalesforceId, String freeFormTextSearch) {
+            boolean restrictNotNullSalesforceId, String freeFormTextSearch, String lookupIdColumn) {
         entityFrontEndQuery.setMainEntity(entityType);
 
         if (ratingEngine.getSegment().getAccountFrontEndRestriction() == null) {
@@ -167,7 +172,16 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
             entityFrontEndQuery.setContactRestriction(ratingEngine.getSegment().getContactFrontEndRestriction());
         }
 
-        entityFrontEndQuery.setRestrictNotNullSalesforceId(restrictNotNullSalesforceId);
+        if (entityType == BusinessEntity.Account) {
+            Restriction accRestriction = entityFrontEndQuery.getAccountRestriction().getRestriction();
+            Restriction restrictionForNonNullLookupId = Restriction.builder().let(entityType, lookupIdColumn)
+                    .isNotNull().build();
+            Restriction effectiveRestriction = Restriction.builder().and(accRestriction, restrictionForNonNullLookupId)
+                    .build();
+            entityFrontEndQuery.getAccountRestriction().setRestriction(effectiveRestriction);
+        } else {
+            entityFrontEndQuery.setRestrictNotNullSalesforceId(restrictNotNullSalesforceId);
+        }
         entityFrontEndQuery.setFreeFormTextSearch(freeFormTextSearch);
     }
 

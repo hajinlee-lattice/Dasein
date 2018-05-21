@@ -133,9 +133,6 @@ public class TestPlayCreationHelper {
     }
 
     private Restriction createAccountRestriction() {
-        Restriction b1 = //
-                createBucketRestriction(6, ComparisonType.EQUAL, //
-                        BusinessEntity.Account, "COMPOSITE_RISK_SCORE");
         Restriction b2 = //
                 createBucketRestriction(1, ComparisonType.EQUAL, //
                         BusinessEntity.Account, "PREMIUM_MARKETING_PRESCREEN");
@@ -150,7 +147,7 @@ public class TestPlayCreationHelper {
                         BusinessEntity.Account, "BusinessTechnologiesAnalytics");
 
         Restriction innerLogical1 = LogicalRestriction.builder()//
-                .and(Arrays.asList(b1, b2, b3, b4, b5)).build();
+                .and(Arrays.asList(b2, b3, b4, b5)).build();
         Restriction innerLogical2 = LogicalRestriction.builder()//
                 .or(new ArrayList<>()).build();
 

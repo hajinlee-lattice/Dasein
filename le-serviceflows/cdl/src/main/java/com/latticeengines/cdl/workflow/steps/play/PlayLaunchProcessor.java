@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -42,9 +43,12 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
@@ -122,13 +126,14 @@ public class PlayLaunchProcessor {
         // prepare account and contact front end queries
         frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
 
-        long segmentAccountsCount = accountFetcher.getCount(playLaunchContext);
-        log.info(String.format("Effective records count for launch: %d", segmentAccountsCount));
+        long totalAccountsCount = accountFetcher.getCount(playLaunchContext);
 
-        playLaunchContext.getPlayLaunch().setAccountsSelected(segmentAccountsCount);
+        // do handling of SFDC id based suppression
+        totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount);
 
-        // do initial handling of SFDC id based suppression
-        handleSFDCIdBasedSuppression(playLaunchContext, segmentAccountsCount);
+        log.info(String.format("Effective records count for launch: %d", totalAccountsCount));
+
+        playLaunchContext.getPlayLaunch().setAccountsSelected(totalAccountsCount);
 
         Long currentTimeMillis = System.currentTimeMillis();
 
@@ -136,11 +141,11 @@ public class PlayLaunchProcessor {
 
         File localFile = new File(String.format("%s_%s_%s", tenant.getName(), currentTimeMillis, avroFileName));
 
-        if (segmentAccountsCount > 0) {
+        if (totalAccountsCount > 0) {
             // process accounts that exists in segment
             long processedSegmentAccountsCount = 0;
             // find total number of pages needed
-            int pages = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
+            int pages = (int) Math.ceil((totalAccountsCount * 1.0D) / pageSize);
             log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
             try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
@@ -150,7 +155,7 @@ public class PlayLaunchProcessor {
                 // loop over to required number of pages
                 for (int pageNo = 0; pageNo < pages; pageNo++) {
                     // fetch and process a single page
-                    processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, segmentAccountsCount,
+                    processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, totalAccountsCount,
                             processedSegmentAccountsCount, pageNo, dataFileWriter);
                 }
             }
@@ -216,7 +221,7 @@ public class PlayLaunchProcessor {
 
         log.info("Trying to submit sqoop job for exporting recommendations from " + avroPath);
         DbCreds.Builder credsBldr = new DbCreds.Builder();
-        String connector = dataDbUrl.contains("?")?"&":"?";
+        String connector = dataDbUrl.contains("?") ? "&" : "?";
         credsBldr.user(dataDbUser).dbType(dataDbType).driverClass(dataDbDriver)
                 .jdbcUrl(dataDbUrl + connector + "user=" + dataDbUser + "&password=" + dataDbPassword);
 
@@ -241,18 +246,30 @@ public class PlayLaunchProcessor {
         return sqoopJobStatus == FinalApplicationStatus.SUCCEEDED;
     }
 
-    private void handleSFDCIdBasedSuppression(PlayLaunchContext playLaunchContext, long segmentAccountsCount) {
+    private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount) {
         long suppressedAccounts = 0;
-        playLaunchContext.getPlayLaunch().setAccountsSuppressed(suppressedAccounts);
+        long effectiveAccountCount = totalAccountsCount;
+        PlayLaunch launch = playLaunchContext.getPlayLaunch();
+        if (launch.getExcludeItemsWithoutSalesforceId()) {
+            FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
 
-        FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
-        if (accountFrontEndQuery.restrictNotNullSalesforceId()) {
-            accountFrontEndQuery.setRestrictNotNullSalesforceId(false);
-            suppressedAccounts = accountFetcher.getCount(playLaunchContext) - segmentAccountsCount;
+            Restriction accountRestriction = accountFrontEndQuery.getAccountRestriction().getRestriction();
+            Restriction nonNullLookupIdRestriction = Restriction.builder()
+                    .let(BusinessEntity.Account, launch.getDestinationAccountId()).isNotNull().build();
+
+            Restriction accountRestrictionWithNonNullLookupId = Restriction.builder()
+                    .and(accountRestriction, nonNullLookupIdRestriction).build();
+            accountFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
+
+            effectiveAccountCount = accountFetcher.getCount(playLaunchContext);
+            suppressedAccounts = totalAccountsCount - effectiveAccountCount;
             playLaunchContext.getPlayLaunch().setAccountsSuppressed(suppressedAccounts);
-            accountFrontEndQuery.setRestrictNotNullSalesforceId(true);
+        } else {
+            launch.setAccountsSuppressed(suppressedAccounts);
         }
         playLaunchContext.getCounter().getAccountSuppressed().set(suppressedAccounts);
+
+        return effectiveAccountCount;
     }
 
     private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,

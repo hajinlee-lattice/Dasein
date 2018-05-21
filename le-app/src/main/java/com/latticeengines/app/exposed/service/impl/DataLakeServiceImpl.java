@@ -34,8 +34,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CDLConstants;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -48,7 +46,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
-import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -208,7 +205,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             throw new LedpException(LedpCode.LEDP_39001, new String[] { accountId, customerSpace });
         }
 
-        String lookupIdColumn = findLookupIdColumn(orgInfo, customerSpace);
+        String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
 
         String internalAccountId = getInternalAccountIdViaObjectApi(customerSpace, accountId, lookupIdColumn);
 
@@ -234,48 +231,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
 
         return dataPage;
-    }
-
-    @VisibleForTesting
-    String findLookupIdColumn(Map<String, String> orgInfo, String customerSpace) {
-        String orgId = MapUtils.isNotEmpty(orgInfo) ? orgInfo.get(CDLConstants.ORG_ID) : null;
-        String externalSystemTypeStr = MapUtils.isNotEmpty(orgInfo) ? orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE)
-                : CDLExternalSystemType.CRM.name();
-        CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(externalSystemTypeStr);
-
-        String lookupIdColumn = null;
-        if ((StringUtils.isNotBlank(orgId) //
-                && externalSystemType != null)) {
-
-            Map<String, List<LookupIdMap>> lookupIdMappings = lookupIdMappingProxy.getLookupIdsMapping(customerSpace,
-                    externalSystemType, null, false);
-
-            if (MapUtils.isNotEmpty(lookupIdMappings)
-                    && CollectionUtils.isNotEmpty(lookupIdMappings.get(externalSystemType.name()))) {
-
-                LookupIdMap lookupIdMap = lookupIdMappings.get(externalSystemType.name()).stream() //
-                        .filter(l -> orgId.equals(l.getOrgId())) //
-                        .findAny() //
-                        .orElse(null);
-
-                if (lookupIdMap != null //
-                        && StringUtils.isNotBlank(lookupIdMap.getAccountId())) {
-                    lookupIdColumn = lookupIdMap.getAccountId();
-                }
-            }
-        }
-
-        if (StringUtils.isBlank(lookupIdColumn)) {
-            lookupIdColumn = InterfaceName.SalesforceAccountID.name();
-            log.info(String.format(
-                    "Didn't find any valid lookup id mapping for org = %s. Therefore using default column = %s as lookup id column",
-                    orgId, lookupIdColumn));
-        } else {
-            log.info(String.format(
-                    "Found a valid lookup id mapping for org = %s, therefore using column = %s as lookup id column",
-                    orgId, lookupIdColumn));
-        }
-        return lookupIdColumn;
     }
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId,

@@ -128,11 +128,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private void checkAccountPreviewForRating(RatingEngine re) {
         String bucketFieldName = "b_" + System.currentTimeMillis();
         Long count = ratingEngineProxy.getEntityPreviewCount(tenant.getId(), re.getId(), BusinessEntity.Account, false,
-                "", null);
+                "", null, InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(count);
         Assert.assertTrue(count > 0L);
         DataPage dataPage = ratingEngineProxy.getEntityPreview(tenant.getId(), re.getId(), 0L, 10L,
-                BusinessEntity.Account, InterfaceName.LDC_Name.name(), false, bucketFieldName, null, false, "", null);
+                BusinessEntity.Account, InterfaceName.LDC_Name.name(), false, bucketFieldName, null, false, "", null, InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(dataPage);
         Assert.assertNotNull(dataPage.getData());
         Assert.assertFalse(dataPage.getData().isEmpty());
@@ -150,11 +150,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private void checkContactPreviewForRating(RatingEngine re) {
         Long count = ratingEngineProxy.getEntityPreviewCount(tenant.getId(), re.getId(), BusinessEntity.Contact, false,
-                "", null);
+                "", null, InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(count);
         Assert.assertTrue(count > 0L);
         DataPage dataPage = ratingEngineProxy.getEntityPreview(tenant.getId(), re.getId(), 0L, 10L,
-                BusinessEntity.Contact, InterfaceName.ContactId.name(), false, null, null, false, "", null);
+                BusinessEntity.Contact, InterfaceName.ContactId.name(), false, null, null, false, "", null, InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(dataPage);
         Assert.assertNotNull(dataPage.getData());
         Assert.assertFalse(dataPage.getData().isEmpty());
@@ -478,7 +478,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private PlayLaunch createDefaultPlayLaunch() {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())));
-        playLaunch.setDestinationOrgId("o_" + System.currentTimeMillis());
+        playLaunch.setDestinationOrgId("O_" + System.currentTimeMillis());
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         return playLaunch;
