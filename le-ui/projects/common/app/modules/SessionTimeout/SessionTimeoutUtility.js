@@ -137,6 +137,7 @@ angular.module('common.utilities.SessionTimeout', [
     vm.closeWarningModalAndSetInstanceToNull = function() {
         angular.element(document.body).removeClass("modal-open");
         angular.element(".modal-backdrop").remove();
+        angular.element(".modal").remove();
         vm.warningModalInstance.close();
         vm.warningModalInstance = null;
     }
