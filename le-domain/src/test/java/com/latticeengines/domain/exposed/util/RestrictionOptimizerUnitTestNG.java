@@ -138,11 +138,11 @@ public class RestrictionOptimizerUnitTestNG {
         Restriction r5 = Restriction.builder().or(r51, r52).build();
 
         return new Object[][] { //
-                // { r1, e1 }, //
-                // { r2, e2 }, //
-                // { r3, e3 }, //
-                // { r4, e4 }, //
-                { r5, e4 }, //
+                 { r1, e1 }, //
+                 { r2, e2 }, //
+                 { r3, e3 }, //
+                 { r4, e4 }, //
+//                 { r5, e4 }, //
         };
     }
 
