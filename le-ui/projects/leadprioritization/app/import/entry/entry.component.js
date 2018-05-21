@@ -31,8 +31,8 @@ angular.module('lp.import.entry', [
             case 'home.import.entry.accounts': vm.changeEntityType('Account', 'accounts'); break;
             case 'home.import.entry.contacts': vm.changeEntityType('Contact', 'contacts'); break;
             case 'home.import.entry.product_purchases': vm.changeEntityType('Transaction', 'product_purchases'); break;
-            case 'home.import.entry.product_bundles': vm.changeEntityType('Product', 'product_bundles'); break;
-            case 'home.import.entry.product_hierarchy': vm.changeEntityType('Product', 'product_hierarchy'); break;
+            case 'home.import.entry.product_bundles': vm.changeEntityType('Product', 'product_bundles', 'BundleSchema'); break;
+            case 'home.import.entry.product_hierarchy': vm.changeEntityType('Product', 'product_hierarchy', 'HierarchySchema'); break;
         }
     }
 
@@ -40,9 +40,10 @@ angular.module('lp.import.entry', [
         return "your-" + vm.goState.replace('_','-') + ".csv";
     }
 
-    vm.changeEntityType = function(type, goState) {
+    vm.changeEntityType = function(type, goState, feedType) {
         vm.goState = goState || type.toLowerCase();
         ImportWizardStore.setEntityType(type);
+        ImportWizardStore.setFeedType(feedType || null);
     }
 
     vm.fileLoad = function(headers) {

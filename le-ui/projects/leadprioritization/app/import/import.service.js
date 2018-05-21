@@ -30,6 +30,7 @@ angular.module('lp.import')
         };
 
         this.entityType = null;
+        this.feedType = null;
 
         this.nonCustomIds = [];
 
@@ -245,6 +246,7 @@ angular.module('lp.import')
 
         ImportWizardStore.mergeFieldDocument().then(function(fieldDocument) {
             ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument(), {
+                feedType: ImportWizardStore.getFeedType(),
                 entity: ImportWizardStore.getEntityType()
             }).then(callback);
             $state.go(nextState);
@@ -391,6 +393,14 @@ angular.module('lp.import')
 
     this.getEntityType = function() {
         return this.entityType;
+    };
+
+    this.getFeedType = function() {
+        return this.feedType;
+    };
+
+    this.setFeedType = function(type) {
+        this.feedType = type;
     };
 
     this.setEntityType = function(type) {

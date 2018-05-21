@@ -20,10 +20,10 @@
           <div class="button purchases {{ vm.goState == 'product_purchases' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Transaction', 'product_purchases');" ui-sref="home.import.entry.product_purchases">
             <span>Product Purchases</span>
           </div>
-          <div class="button products {{ vm.goState == 'product_bundles' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_bundles');" ui-sref="home.import.entry.product_bundles">
+          <div class="button products {{ vm.goState == 'product_bundles' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_bundles', 'BundleSchema');" ui-sref="home.import.entry.product_bundles">
             <span>Product Bundles</span>
           </div>
-          <div class="button product_hierarchy {{ vm.goState == 'product_hierarchy' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_hierarchy');" ui-sref="home.import.entry.product_hierarchy">
+          <div class="button product_hierarchy {{ vm.goState == 'product_hierarchy' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_hierarchy', 'HierarchySchema');" ui-sref="home.import.entry.product_hierarchy">
             <span>Product Hierarchy</span>
           </div>
         </div>

@@ -473,7 +473,7 @@ angular.module('common.datacloud')
         
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/insights/premiumattributeslimitationmap'
+            url: this.host + '/latticeinsights/insights/premiumattributeslimitationmap'
         }).then(function(response){
             deferred.resolve(response);
         });
