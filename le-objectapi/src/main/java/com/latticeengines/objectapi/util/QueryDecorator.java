@@ -5,9 +5,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public abstract class QueryDecorator {
 
-    public abstract boolean addSelects();
+    public abstract AttributeLookup getIdLookup();
 
-    public abstract AttributeLookup[] getAttributeLookups();
+    public abstract boolean isDataQuery();
 
     public abstract BusinessEntity getFreeTextSearchEntity();
 

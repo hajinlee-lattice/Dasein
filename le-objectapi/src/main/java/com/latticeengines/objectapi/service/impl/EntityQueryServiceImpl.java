@@ -216,14 +216,14 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return processed;
     }
 
-    private QueryDecorator getDecorator(BusinessEntity entity, boolean addSelects) {
+    private QueryDecorator getDecorator(BusinessEntity entity, boolean isDataQuery) {
         switch (entity) {
         case Account:
-            return addSelects ? AccountQueryDecorator.WITH_SELECTS : AccountQueryDecorator.WITHOUT_SELECTS;
+            return isDataQuery ? AccountQueryDecorator.DATA_QUERY : AccountQueryDecorator.COUNT_QUERY;
         case Contact:
-            return addSelects ? ContactQueryDecorator.WITH_SELECTS : ContactQueryDecorator.WITHOUT_SELECTS;
+            return isDataQuery ? ContactQueryDecorator.DATA_QUERY : ContactQueryDecorator.COUNT_QUERY;
         case Product:
-            return addSelects ? ProductQueryDecorator.WITH_SELECTS : ProductQueryDecorator.WITHOUT_SELECTS;
+            return isDataQuery ? ProductQueryDecorator.DATA_QUERY : ProductQueryDecorator.COUNT_QUERY;
         default:
             log.warn("Cannot find a decorator for entity " + entity);
             return null;

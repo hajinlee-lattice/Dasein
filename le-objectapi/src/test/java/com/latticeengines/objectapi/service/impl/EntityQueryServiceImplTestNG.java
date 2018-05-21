@@ -382,7 +382,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         contactQuery.setContactRestriction(frontEndRestriction);
         contactQuery.setLookups(Arrays.asList( //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.AccountId.name()),
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name())));
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name())
+        ));
         contactQuery.setPageFilter(new PageFilter(0, 100));
         dataPage = entityQueryService.getData(contactQuery, DataCollection.Version.Blue);
         Assert.assertEquals(dataPage.getData().size(), 10);
@@ -393,6 +394,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery emptyContactQuery = new FrontEndQuery();
         emptyContactQuery.setMainEntity(BusinessEntity.Contact);
         emptyContactQuery.setContactRestriction(frontEndRestriction);
+        emptyContactQuery.setLookups(Collections.singletonList(
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name())));
         dataPage = entityQueryService.getData(emptyContactQuery, DataCollection.Version.Blue);
         Assert.assertEquals(dataPage.getData().size(), 10);
         for (Map<String, Object> contact : dataPage.getData()) {

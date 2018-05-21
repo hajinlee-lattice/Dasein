@@ -2,10 +2,8 @@ package com.latticeengines.query.evaluator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -302,7 +300,7 @@ public class QueryProcessor {
         expressions = query.getFreeFormTextSearchAttributes().stream() //
                 .map(attr -> {
                     StringPath columnPath = QueryUtils.getAttributePath(attr.getEntity(), attr.getAttribute());
-                    return columnPath.toUpperCase().contains(query.getFreeFormTextSearch().toUpperCase());
+                    return columnPath.containsIgnoreCase(query.getFreeFormTextSearch());
                 }) //
                 .collect(Collectors.toList()) //
                 .toArray(expressions);

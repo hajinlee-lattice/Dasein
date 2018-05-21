@@ -6,23 +6,15 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ContactQueryDecorator extends QueryDecorator {
 
-    private final boolean addSelects;
+    private final boolean dataQuery;
 
-    private final static AttributeLookup[] attributeLookups = {
-            new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.toString()),
-            new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.toString()),
-            new AttributeLookup(BusinessEntity.Contact, InterfaceName.SalesforceContactID.toString()),
-            new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.toString()),
-            new AttributeLookup(BusinessEntity.Account, InterfaceName.LDC_Name.toString()),
-    };
-
-    private ContactQueryDecorator(boolean addSelect) {
-        this.addSelects = addSelect;
+    private ContactQueryDecorator(boolean dataQuery) {
+        this.dataQuery = dataQuery;
     }
 
     @Override
-    public AttributeLookup[] getAttributeLookups() {
-        return attributeLookups;
+    public AttributeLookup getIdLookup() {
+        return new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name());
     }
 
     @Override
@@ -36,11 +28,11 @@ public class ContactQueryDecorator extends QueryDecorator {
     }
 
     @Override
-    public boolean addSelects() {
-        return addSelects;
+    public boolean isDataQuery() {
+        return dataQuery;
     }
 
-    public static final ContactQueryDecorator WITH_SELECTS = new ContactQueryDecorator(true);
-    public static final ContactQueryDecorator WITHOUT_SELECTS = new ContactQueryDecorator(false);
+    public static final ContactQueryDecorator DATA_QUERY = new ContactQueryDecorator(true);
+    public static final ContactQueryDecorator COUNT_QUERY = new ContactQueryDecorator(false);
 
 }

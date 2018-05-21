@@ -68,7 +68,6 @@ public class PythonScriptModelService extends ModelServiceBase {
                                 && !LogicalDataType.isEventTypeOrDerviedFromEventType(attr.getLogicalDataType())
                                 && !LogicalDataType.isSystemGeneratedEventType(attr.getLogicalDataType())
                                 && !LogicalDataType.isExcludedFromScoringFileMapping(attr.getLogicalDataType()))
-                .filter(Objects::nonNull) //
                 .collect(Collectors.toList());
 
     }
@@ -84,7 +83,6 @@ public class PythonScriptModelService extends ModelServiceBase {
                 .filter(attr -> attr.getTags() != null && !attr.isInternalPredictor()
                         && !LogicalDataType.isEventTypeOrDerviedFromEventType(attr.getLogicalDataType())
                         && !LogicalDataType.isSystemGeneratedEventType(attr.getLogicalDataType()))
-                .filter(Objects::nonNull)//
                 .map(Attribute::getName).collect(Collectors.toSet());
         log.info("The column names are : " + attrNameSet);
         return attrNameSet;

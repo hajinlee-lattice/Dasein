@@ -67,8 +67,11 @@ abstract class QueryTranslator {
                 .freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
                         decorator.getFreeTextSearchAttrs());
 
-        if (decorator.addSelects()) {
-            queryBuilder.select(decorator.getAttributeLookups());
+        if (decorator.isDataQuery()) {
+            queryBuilder.select(BusinessEntity.Product, InterfaceName.ProductId.name());
+            queryBuilder.select(BusinessEntity.Product, InterfaceName.ProductName.name());
+        } else {
+            queryBuilder.select(decorator.getIdLookup());
         }
 
         return queryBuilder.build();

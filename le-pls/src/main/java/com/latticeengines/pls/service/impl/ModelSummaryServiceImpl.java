@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
-import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 
 @DisallowConcurrentExecution
@@ -68,9 +67,6 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Autowired
     private SourceFileEntityMgr sourceFileEntityMgr;
-
-    @Autowired
-    private BucketedScoreService bucketedScoreService;
 
     @Override
     public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
@@ -108,8 +104,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     private void resolveNameIdConflict(ModelSummary modelSummary, String tenantId) {
         List<ModelSummary> modelSummaries = modelSummaryEntityMgr.findAll();
-        List<String> existingNames = new ArrayList<String>();
-        List<String> existingIds = new ArrayList<String>();
+        List<String> existingNames = new ArrayList<>();
+        List<String> existingIds = new ArrayList<>();
         for (ModelSummary summary : modelSummaries) {
             if (summary.getTenant().getId().equals(tenantId)) {
                 existingNames.add(summary.getName());

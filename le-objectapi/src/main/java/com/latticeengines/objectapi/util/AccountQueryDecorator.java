@@ -1,29 +1,20 @@
 package com.latticeengines.objectapi.util;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class AccountQueryDecorator extends QueryDecorator {
 
-    private final boolean addSelects;
+    private final boolean dataQuery;
 
-    private final static AttributeLookup[] attributeLookups = {
-            new AttributeLookup(BusinessEntity.Account, "LDC_Domain"),
-            new AttributeLookup(BusinessEntity.Account, "LDC_Name"),
-            new AttributeLookup(BusinessEntity.Account, "LDC_Country"),
-            new AttributeLookup(BusinessEntity.Account, "LDC_City"),
-            new AttributeLookup(BusinessEntity.Account, "LDC_State"),
-            new AttributeLookup(BusinessEntity.Account, "SalesforceAccountID")
-    };
-
-
-    private AccountQueryDecorator(boolean addSelect) {
-        this.addSelects = addSelect;
+    private AccountQueryDecorator(boolean dataQuery) {
+        this.dataQuery = dataQuery;
     }
 
     @Override
-    public AttributeLookup[] getAttributeLookups() {
-        return attributeLookups;
+    public AttributeLookup getIdLookup() {
+        return new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
     }
 
     @Override
@@ -33,15 +24,15 @@ public class AccountQueryDecorator extends QueryDecorator {
 
     @Override
     public String[] getFreeTextSearchAttrs() {
-        return new String[] { "LDC_Domain", "LDC_Name" };
+        return new String[] {InterfaceName.CompanyName.name(), InterfaceName.Website.name() };
     }
 
     @Override
-    public boolean addSelects() {
-        return addSelects;
+    public boolean isDataQuery() {
+        return dataQuery;
     }
 
-    public static final AccountQueryDecorator WITH_SELECTS = new AccountQueryDecorator(true);
-    public static final AccountQueryDecorator WITHOUT_SELECTS = new AccountQueryDecorator(false);
+    public static final AccountQueryDecorator DATA_QUERY = new AccountQueryDecorator(true);
+    public static final AccountQueryDecorator COUNT_QUERY = new AccountQueryDecorator(false);
 
 }

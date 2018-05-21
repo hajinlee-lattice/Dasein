@@ -72,16 +72,14 @@ public class RatingQueryTranslator extends QueryTranslator {
                     queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
                 }
             });
-        } else if (decorator != null) {
-            if (decorator.addSelects()) {
-                queryBuilder.select(decorator.getAttributeLookups());
+        }
+
+        if (decorator != null) {
+            if (decorator.isDataQuery()) {
                 if (frontEndQuery.getRatingModels() != null) {
                     appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator);
                 }
             }
-        }
-
-        if (decorator != null) {
             queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
                     decorator.getFreeTextSearchAttrs());
         }

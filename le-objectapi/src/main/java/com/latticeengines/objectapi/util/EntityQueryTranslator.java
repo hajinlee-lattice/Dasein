@@ -48,10 +48,8 @@ public class EntityQueryTranslator extends QueryTranslator {
                 AttributeLookup attributeLookup = (AttributeLookup) lookup;
                 queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
             });
-        } else if (decorator != null) {
-            if (decorator.addSelects()) {
-                queryBuilder.select(decorator.getAttributeLookups());
-            }
+        } else if (decorator != null && !decorator.isDataQuery()) {
+            queryBuilder.select(decorator.getIdLookup());
         }
 
         if (decorator != null) {

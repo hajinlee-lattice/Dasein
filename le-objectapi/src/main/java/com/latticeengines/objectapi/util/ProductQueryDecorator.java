@@ -6,20 +6,15 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ProductQueryDecorator extends QueryDecorator {
 
-    private final boolean addSelects;
+    private final boolean dataQuery;
 
-    private final static AttributeLookup[] attributeLookups = {
-            new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductId.toString()),
-            new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductName.toString())
-    };
-
-    private ProductQueryDecorator(boolean addSelect) {
-        this.addSelects = addSelect;
+    private ProductQueryDecorator(boolean dataQuery) {
+        this.dataQuery = dataQuery;
     }
 
     @Override
-    public AttributeLookup[] getAttributeLookups() {
-        return attributeLookups;
+    public AttributeLookup getIdLookup() {
+        return new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductId.name());
     }
 
     @Override
@@ -29,15 +24,15 @@ public class ProductQueryDecorator extends QueryDecorator {
 
     @Override
     public String[] getFreeTextSearchAttrs() {
-        return new String[] { InterfaceName.ProductId.toString(), InterfaceName.ProductId.toString() };
+        return new String[] { InterfaceName.ProductId.toString(), InterfaceName.ProductName.toString() };
     }
 
     @Override
-    public boolean addSelects() {
-        return addSelects;
+    public boolean isDataQuery() {
+        return dataQuery;
     }
 
-    public static final ProductQueryDecorator WITH_SELECTS = new ProductQueryDecorator(true);
-    public static final ProductQueryDecorator WITHOUT_SELECTS = new ProductQueryDecorator(false);
+    public static final ProductQueryDecorator DATA_QUERY = new ProductQueryDecorator(true);
+    public static final ProductQueryDecorator COUNT_QUERY = new ProductQueryDecorator(false);
 
 }
