@@ -59,7 +59,8 @@ public abstract class BaseFrontEndEntityResource {
         frontEndQuery.setMainEntity(mainEntity);
         if (BusinessEntity.Contact.equals(mainEntity)) {
             Restriction accountRestriction;
-            if (frontEndQuery.getAccountRestriction() != null && frontEndQuery.getAccountRestriction().getRestriction() != null ) {
+            if (frontEndQuery.getAccountRestriction() != null
+                    && frontEndQuery.getAccountRestriction().getRestriction() != null) {
                 accountRestriction = appendAccountNotNull(frontEndQuery.getAccountRestriction().getRestriction());
             } else {
                 accountRestriction = accountNotNullBucket();
@@ -90,7 +91,8 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {
-        if (StringUtils.isNotBlank(frontEndQuery.getPreexistingSegmentName())) {
+        if (StringUtils.isNotBlank(frontEndQuery.getPreexistingSegmentName())
+                && !"Create".equals(frontEndQuery.getPreexistingSegmentName())) {
             // Segment Restrictions
             Pair<Restriction, Restriction> segmentRestrictions = getSegmentRestrictions(
                     frontEndQuery.getPreexistingSegmentName());
@@ -133,7 +135,7 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    private BucketRestriction accountNotNullBucket () {
+    private BucketRestriction accountNotNullBucket() {
         Bucket bkt = Bucket.notNullBkt();
         return new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt);
     }
