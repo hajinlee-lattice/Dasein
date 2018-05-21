@@ -39,11 +39,11 @@ angular.module('common.attributes')
                     category: "Technology Profile",
                     supplemental: 'ACTIVATED'
                 },{
-                    label: "My Attributes",
+                    label: "My Account Attributes",
                     category: "My Attributes",
                     supplemental: 'ACTIVATED'
                 },{
-                    label: "Contact Attributes",
+                    label: "My Contact Attributes",
                     category: "Contact Attributes",
                     supplemental: 'ACTIVATED'
                 }
