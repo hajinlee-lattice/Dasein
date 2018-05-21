@@ -12,11 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.apps.core.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.lp.entitymgr.BucketMetadataEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.BucketedScoreSummaryEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
