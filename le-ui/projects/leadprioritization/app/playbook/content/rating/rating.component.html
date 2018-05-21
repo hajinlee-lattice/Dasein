@@ -37,7 +37,8 @@
                     ng-repeat="rating in (filteredList = (vm.ratings| filter: vm.searchFields)) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
                     ng-class="{selected: vm.stored.rating_selection == rating.id}"
                     ng-disabled="vm.block_user"
-                    class="item rating_">
+                    class="item rating_"
+                    ng-if="filteredList.length">
                     <ul>
                         <li class="segment">
                             <input 
@@ -61,8 +62,11 @@
                         </li>
                     </ul>
                 </li>
+                <li class="item centered-info-message" ng-if="!filteredList.length">
+                    No Ratings Found
+                </li>
             </ul>
-            <div class="pd-pagination-container-margin-top pull-right">
+            <div class="pd-pagination-container-margin-top pull-right" ng-if="(filteredList.length / vm.pageSize) > 0">
                 <pd-pagination-controls
                     current="vm.currentPage"
                     max="filteredList.length / vm.pageSize">

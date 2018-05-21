@@ -56,7 +56,8 @@
                                 | orderBy: vm.sortBy
                                 | startFrom: (vm.currentPage - 1) * vm.pageSize 
                                 | limitTo: vm.pageSize"
-                        class="item product">
+                        class="item product"
+                        ng-if="filteredList.length">
                         <td>
                             <!-- ng-click="vm.selectProduct($index)" 
                             ng-checked="{{product.selected}}" -->
@@ -77,14 +78,22 @@
                         </td>
                         -->
                     </tr>
+                    <tr ng-if="!filteredList.length">
+                        <td class="centered-info-message">
+                            &nbsp;
+                        </td>
+                        <td class="centered-info-message">
+                            No Products Found
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 
-            <div class="selected-total pull-left">
+            <div class="selected-total pull-left" ng-if="vm.products.length">
                 Selected <strong>{{ vm.getSelectedCount() }}</strong> of {{ vm.getTotalProductsCount() }}
             </div>
 
-            <div class="pd-pagination-container-margin-top pull-right">
+            <div class="pd-pagination-container-margin-top pull-right" ng-if="(filteredList.length/vm.pageSize) > 0">
                 <pd-pagination-controls
                     current="vm.currentPage"
                     max="filteredList.length / vm.pageSize"

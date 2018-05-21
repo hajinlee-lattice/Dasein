@@ -56,6 +56,11 @@ section.playbook.container {
                         background-color: transparent;
                     }
                 }
+                &.centered-info-message {
+                    text-align: center;
+                    font-size: 15px;
+                    margin-top: 18px;
+                }
                 ul {
                     @include flex-container;
                     & > li {
