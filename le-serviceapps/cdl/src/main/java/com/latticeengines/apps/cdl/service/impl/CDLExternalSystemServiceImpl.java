@@ -83,6 +83,9 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
 
     private Set<String> getExternalSystemIds(CDLExternalSystemType type) {
         CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem();
+        if (externalSystem == null) {
+            return Collections.emptySet();
+        }
         Set<String> ids;
         switch (type) {
             case CRM:
