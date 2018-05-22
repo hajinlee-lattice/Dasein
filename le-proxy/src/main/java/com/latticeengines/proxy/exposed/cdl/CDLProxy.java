@@ -31,6 +31,10 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         super("cdl");
     }
 
+    public CDLProxy(String hostPort) {
+        super(hostPort, "cdl");
+    }
+
     @SuppressWarnings("unchecked")
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze",

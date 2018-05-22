@@ -11,12 +11,12 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLJobService;
@@ -46,17 +46,11 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private static final Logger log = LoggerFactory.getLogger(CDLJobServiceImpl.class);
 
+    private static final String LE_STACK = "LE_STACK";
+    private static final String QUARTZ_STACK = "quartz";
+
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
-
-    @Inject
-    private DataFeedProxy dataFeedProxy;
-
-    @Inject
-    private WorkflowProxy workflowProxy;
-
-    @Inject
-    private CDLProxy cdlProxy;
 
     @Inject
     private BatonService batonService;
@@ -76,11 +70,36 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
+    @Value("${common.public.url:}")
+    private String quartzMicroserviceHostPort;
+
+    @Value("${common.microservice.url}")
+    private String microserviceHostPort;
+
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
+
+    private DataFeedProxy dataFeedProxy;
+
+    private WorkflowProxy workflowProxy;
+
+    private CDLProxy cdlProxy;
 
     @PostConstruct
     public void initialize() throws Exception {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        if (isQuartzStack()) {
+            cdlProxy = new CDLProxy(quartzMicroserviceHostPort);
+            dataFeedProxy = new DataFeedProxy(quartzMicroserviceHostPort);
+            workflowProxy = new WorkflowProxy(quartzMicroserviceHostPort);
+            log.info(String.format("CDLJobService running on quartz stack with cdlHostPort=%s, dataFeedHostPort=%s, workflowHostPort=%s",
+                    cdlProxy.getHostport(), dataFeedProxy.getHostport(), workflowProxy.getHostport()));
+        } else {
+            cdlProxy = new CDLProxy(microserviceHostPort);
+            dataFeedProxy = new DataFeedProxy(microserviceHostPort);
+            workflowProxy = new WorkflowProxy(microserviceHostPort);
+            log.info(String.format("CDLJobService running with cdlHostPort=%s, dataFeedHostPort=%s, workflowHostPort=%s",
+                    cdlProxy.getHostport(), dataFeedProxy.getHostport(), workflowProxy.getHostport()));
+        }
     }
 
     @Override
@@ -220,7 +239,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         int runningJobs = details.size();
         for (CDLJobDetail cdlJobDetail : details) {
             String appId = cdlJobDetail.getApplicationId();
-            if (!StringUtils.isEmpty(appId)) {
+            if (StringUtils.isNotEmpty(appId)) {
                 Job job = workflowProxy.getWorkflowJobFromApplicationId(appId);
                 if (job != null && !job.isRunning()) {
                     updateOneJobStatus(cdlJobType, cdlJobDetail, job);
@@ -331,5 +350,10 @@ public class CDLJobServiceImpl implements CDLJobService {
             default:
                 return false;
         }
+    }
+
+    private boolean isQuartzStack() {
+        return StringUtils.isNotBlank(System.getenv(LE_STACK))
+                && System.getenv(LE_STACK).equalsIgnoreCase(QUARTZ_STACK);
     }
 }

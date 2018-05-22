@@ -23,6 +23,10 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         super("cdl");
     }
 
+    public DataFeedProxy(String hostPort) {
+        super(hostPort, "cdl");
+    }
+
     public DataFeed getDataFeed(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed", shortenCustomerSpace(customerSpace));
         return get("get data feed", url, DataFeed.class);

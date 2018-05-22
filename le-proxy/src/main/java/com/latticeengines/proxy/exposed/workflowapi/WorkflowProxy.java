@@ -33,6 +33,10 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         super("workflowapi/workflows");
     }
 
+    public WorkflowProxy(String hostport) {
+        super(hostport, "workflowapi/workflows");
+    }
+
     public AppSubmission submitWorkflow(WorkflowConfiguration workflowConfig, String customerSpace, Long workflowPid) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/jobs/submitwithpid";

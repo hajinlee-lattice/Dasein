@@ -8,4 +8,8 @@ public abstract class MicroserviceRestApiProxy extends BaseRestApiProxy {
         super(PropertyUtils.getProperty("common.microservice.url"), rootpath, urlVariables);
     }
 
+    protected MicroserviceRestApiProxy(String hostPort, String rootpath, Object... urlVariables) {
+        super(hostPort, rootpath, urlVariables);
+    }
+
 }
