@@ -12,13 +12,18 @@ public class HdfsPodContext {
     private static ThreadLocal<String> podId = new ThreadLocal<>();
 
     public static void changeHdfsPodId(String podId) {
-        HdfsPodContext.podId.set(podId);
-        log.info("Switched hdfs pod to " + podId);
+        if (StringUtils.isBlank(podId)) {
+            podId = getDefaultHdfsPodId();
+        }
+        if (!getHdfsPodId().equals(podId)) {
+            HdfsPodContext.podId.set(podId);
+            log.info("Switched hdfs pod to " + podId);
+        }
     }
 
     public static String getHdfsPodId() {
-        if (StringUtils.isEmpty(HdfsPodContext.podId.get())) {
-            HdfsPodContext.changeHdfsPodId(CamilleEnvironment.getPodId());
+        if (StringUtils.isBlank(HdfsPodContext.podId.get())) {
+            HdfsPodContext.changeHdfsPodId(getDefaultHdfsPodId());
         }
         return HdfsPodContext.podId.get();
     }

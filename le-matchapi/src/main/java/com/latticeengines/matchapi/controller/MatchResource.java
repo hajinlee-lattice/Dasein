@@ -3,6 +3,7 @@ package com.latticeengines.matchapi.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.datacloud.core.annotation.PodContextAware;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -60,7 +61,6 @@ public class MatchResource {
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
             + "Domain can be anything that can be parsed to a domain, such as website, email, etc. "
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
-
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         matchMonitorService.precheck(input.getDataCloudVersion());
@@ -94,6 +94,7 @@ public class MatchResource {
         }
     }
 
+    @PodContextAware
     @PostMapping(value = "/bulk", produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "
@@ -113,6 +114,7 @@ public class MatchResource {
         }
     }
 
+    @PodContextAware
     @PostMapping(value = "/bulkconf", produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "

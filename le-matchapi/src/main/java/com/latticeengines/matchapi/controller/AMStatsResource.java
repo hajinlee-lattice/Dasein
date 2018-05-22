@@ -1,6 +1,7 @@
 package com.latticeengines.matchapi.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/amstats")
 public class AMStatsResource {
 
-    @Autowired
+    @Inject
     private AccountMasterStatisticsService accountMasterStatisticsService;
 
     @RequestMapping(value = "/cubes", method = RequestMethod.POST, headers = "Accept=application/json")

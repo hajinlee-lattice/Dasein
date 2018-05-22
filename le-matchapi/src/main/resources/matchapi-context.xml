@@ -12,6 +12,7 @@
     </context:component-scan>
     <context:component-scan base-package="com.latticeengines.datacloud.yarn" />
 
+    <import resource="classpath:matchapi-aspects-context.xml" />
     <import resource="classpath:aws-context.xml" />
     <import resource="classpath:hadoop-config-context.xml" />
     <import resource="classpath:yarn-context.xml" />
