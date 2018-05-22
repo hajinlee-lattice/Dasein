@@ -46,6 +46,18 @@ public class GroupByAndBufferOperation extends Operation {
 
     @SuppressWarnings("rawtypes")
     public GroupByAndBufferOperation(Input prior, FieldList groupByFields, FieldList sortFields, Buffer buffer,
+                                     boolean descending, List<FieldMetadata> fms) {
+        Pipe groupby = new GroupBy(prior.pipe, new Fields(groupByFields.getFields()),
+                                   new Fields(sortFields.getFields()),
+                                   descending);
+        groupby = new Every(groupby, Fields.ALL, buffer, Fields.RESULTS);
+
+        this.pipe = groupby;
+        this.metadata = new ArrayList<>(fms);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public GroupByAndBufferOperation(Input prior, FieldList groupByFields, FieldList sortFields, Buffer buffer,
             boolean descending, boolean caseInsensitive) {
         init(prior, groupByFields, sortFields, buffer, descending, caseInsensitive);
     }

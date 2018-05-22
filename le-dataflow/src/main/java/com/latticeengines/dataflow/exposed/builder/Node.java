@@ -225,6 +225,13 @@ public class Node {
     }
 
     @SuppressWarnings("rawtypes")
+    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer, boolean descending,
+                                 List<FieldMetadata> fieldMetadatas) {
+        return new Node(builder.register(new GroupByAndBufferOperation(
+            opInput(identifier), groupByFieldList, sortFieldList, buffer, descending, fieldMetadatas)), builder);
+    }
+
+    @SuppressWarnings("rawtypes")
     public Node groupByAndAggregate(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
             boolean descending) {
         return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);

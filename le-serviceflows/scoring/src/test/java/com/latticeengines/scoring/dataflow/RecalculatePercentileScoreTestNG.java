@@ -1,0 +1,110 @@
+package com.latticeengines.scoring.dataflow;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import org.apache.avro.generic.GenericRecord;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+@ContextConfiguration(locations = {"classpath:serviceflows-scoring-dataflow-context.xml"})
+public class RecalculatePercentileScoreTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+
+    @Test(groups = "functional")
+    public void test() {
+        RecalculatePercentileScoreParameters parameters = prepareInput();
+        executeDataFlow(parameters);
+        verifyResult();
+    }
+
+    private void verifyResult() {
+        List<GenericRecord> inputRecords = readInput("InputTable");
+        List<GenericRecord> outputRecords = readOutput();
+
+        assertEquals(outputRecords.size(), inputRecords.size());
+
+        String[] modelGuids = {
+            "ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw",
+            "ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv",
+            "ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql"
+        };
+
+        Map<String, List<GenericRecord>> modelRecordMap = new HashMap<>();
+        Stream.of(modelGuids).forEach((guid) -> modelRecordMap.put(guid, new ArrayList<>()));
+
+        for (GenericRecord record : outputRecords) {
+            String modelGuid = record.get(ScoreResultField.ModelId.displayName).toString();
+            List<GenericRecord> perModelRecords = modelRecordMap.get(modelGuid);
+            assertNotNull(perModelRecords);
+            perModelRecords.add(record);
+        }
+
+        for (String modelGuid : modelGuids) {
+            verifyPerModelOutput(modelGuid, modelRecordMap.get(modelGuid));
+        }
+
+    }
+
+    private void verifyPerModelOutput(String modelGuid, List<GenericRecord> outputRecords) {
+        Double prevRawScore = 1.0;
+        Integer prevPct = 99;
+
+        for (GenericRecord record : outputRecords) {
+            String recordModelGuid = record.get(ScoreResultField.ModelId.displayName).toString();
+            Double curRawScore = (Double) record.get(ScoreResultField.RawScore.displayName);
+            Integer curPct = (Integer) record.get(ScoreResultField.Percentile.displayName);
+
+            assertEquals(recordModelGuid, modelGuid);
+            assertTrue(curPct <= prevPct);
+            assertTrue(curRawScore <= prevRawScore);
+
+            assertTrue(curPct <= 99 && curPct >= 5, "Percentile " + curPct + " is not in range of [5, 99]");
+            prevPct = curPct;
+            prevRawScore = curRawScore;
+        }
+    }
+
+    @Override
+    protected void postProcessSourceTable(Table table) {
+        super.postProcessSourceTable(table);
+    }
+
+    private RecalculatePercentileScoreParameters prepareInput() {
+        RecalculatePercentileScoreParameters parameters = new RecalculatePercentileScoreParameters();
+        String rawScoreField = ScoreResultField.RawScore.displayName;
+
+        String modelGuidField = ScoreResultField.ModelId.displayName;
+
+        String scoreField = ScoreResultField.Percentile.displayName;
+        parameters.setInputTableName("InputTable");
+        parameters.setRawScoreFieldName(rawScoreField);
+        parameters.setScoreFieldName(scoreField);
+        parameters.setModelGuidField(modelGuidField);
+        parameters.setPercentileLowerBound(5);
+        parameters.setPercentileUpperBound(99);
+
+        return parameters;
+    }
+
+    @Override
+    protected String getFlowBeanName() {
+        return "recalculatePercentileScore";
+    }
+
+    @Override
+    protected String getScenarioName() {
+        return "multiModel";
+    }
+}

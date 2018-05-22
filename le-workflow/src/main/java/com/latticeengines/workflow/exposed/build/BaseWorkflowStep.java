@@ -76,6 +76,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String IMPORT_DATA_APPLICATION_ID = "IMPORT_DATA_APPLICATION_ID";
     protected static final String ACTIVATE_MODEL_IDS = "ACTIVATE_MODEL_IDS";
     protected static final String COMPUTE_LIFT_INPUT_TABLE_NAME = "COMPUTE_LIFT_INPUT_TABLE_NAME";
+    protected static final String MAP_TARGET_SCORE_INPUT_TABLE_NAME = "MAP_TARGET_SCORE_INPUT_TABLE_NAME";
     protected static final String PIVOT_SCORE_INPUT_TABLE_NAME = "PIVOT_SCORE_INPUT_TABLE_NAME";
     protected static final String EXPORT_DATA_APPLICATION_ID = "EXPORT_DATA_APPLICATION_ID";
     protected static final String EXPORT_TABLE_NAME = "EXPORT_TABLE_NAME";
