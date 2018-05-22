@@ -48,7 +48,7 @@ public class DateTimeUtils {
                 dateString = dateString.substring(0, dateString.lastIndexOf(space)) + plus
                         + dateString.substring(dateString.lastIndexOf(space) + 1);
                 try {
-                    log.info("Trying to parse updated string: " + dateString);
+                    //log.info("Trying to parse updated string: " + dateString);
                     return dateFormat.parse(dateString);
                 } catch (ParseException ex) {
                     log.error("Could not parse string even after applying space replacement hack: " + dateString);
@@ -89,7 +89,7 @@ public class DateTimeUtils {
             int month = Integer.parseInt(dateUnits[1]);
             int day = Integer.parseInt(dateUnits[2]);
             int dayPeriod = (year - 1900) * 13 * 32 + month * 32 + day;
-            log.info("Date to day period " + dateString + " " + dayPeriod);
+            // log.info("Date to day period " + dateString + " " + dayPeriod);
             return new Integer(dayPeriod);
         } catch (Exception e) {
             log.error("Failed to convert " + dateString + " to period", e);
