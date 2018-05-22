@@ -37,7 +37,8 @@ public enum Category {
     private static Set<String> values;
     private static Set<Category> premiumCategories = new HashSet<>(
             Arrays.asList(INTENT, TECHNOLOGY_PROFILE, ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES));
-    private static Set<Category> hiddenFromUiCategories = new HashSet<>(Arrays.asList(LEAD_INFORMATION, DEFAULT));
+    private static Set<Category> hiddenFromUiCategories = new HashSet<>(
+            Arrays.asList(LEAD_INFORMATION, DEFAULT, ACCOUNT_INFORMATION));
 
     static {
         nameMap = new HashMap<>();
