@@ -67,7 +67,11 @@
                         <p>For the above selected SFDC Org, <strong>{{ $ctrl.nullCount | number }} of {{ $ctrl.totalCount | number }}</strong> recommendations have blank Account ID. It is advisable to remove these recommendations from the plays as they will fail to launch your CRM system.</p>
                         <p>Note: An exception of this rule is when 'Lead workflow' is used to provide recommendations to your reps.</p>
                         <label>
-                            <input type="checkbox" ng-model="excludeItemsWithoutSalesforceId">Remove all recommendations with blank Account ID
+                            <input 
+                                type="checkbox" 
+                                ng-model="excludeItemsWithoutSalesforceId"
+                                ng-change="$ctrl.checkValid(crmselection_form)">
+                                Remove all recommendations with blank Account ID
                         </label>
                     </div>
                 </div>

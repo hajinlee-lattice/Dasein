@@ -1242,6 +1242,7 @@ angular
                     var deferred = $q.defer();
 
                     SfdcStore.getAccountIds().then(function (result) {
+                        console.log(result);
                         deferred.resolve(result.CRM);
                     });
 

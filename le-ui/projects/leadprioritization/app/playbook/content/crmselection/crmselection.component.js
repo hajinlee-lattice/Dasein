@@ -39,6 +39,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
         vm.checkValid = function(form, accountId) {
 
+            vm.nullCount = null;
             vm.loadingCoverageCounts = true;
             if(vm.stored.crm_selection) {
                 // PlaybookWizardStore.setSettings({
@@ -53,28 +54,25 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 QueryStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
                 QueryStore.setExcludeItems($scope.excludeItemsWithoutSalesforceId);
             }
+            if(accountId) {
+                var accountId = accountId;
 
+                PlaybookWizardService.getRatingsCounts([vm.ratingEngine.id], false).then(function(result){
+                    var engineId = vm.ratingEngine.id;
+                    vm.totalCount = result.ratingEngineIdCoverageMap[engineId].accountCount;
 
-            var accountId = accountId;
+                    PlaybookWizardService.getLookupCounts(vm.ratingEngine.id, accountId).then(function(result){
 
-            PlaybookWizardService.getRatingsCounts([vm.ratingEngine.id], false).then(function(result){
-                var engineId = vm.ratingEngine.id;
-                vm.totalCount = result.ratingEngineIdCoverageMap[engineId].accountCount;
+                        PlaybookWizardStore.setValidation('crmselection', form.$valid);
 
-                PlaybookWizardService.getLookupCounts(vm.ratingEngine.id, accountId).then(function(result){
+                        vm.loadingCoverageCounts = false;
+                        vm.nonNullCount = result.ratingIdLookupColumnPairsCoverageMap[accountId].accountCount;
 
-                    PlaybookWizardStore.setValidation('crmselection', form.$valid);
+                        vm.nullCount = (vm.totalCount - vm.nonNullCount);
 
-                    vm.loadingCoverageCounts = false;
-                    vm.nonNullCount = result.ratingIdLookupColumnPairsCoverageMap[accountId].accountCount;
-
-                    vm.nullCount = (vm.totalCount - vm.nonNullCount);
-
+                    });
                 });
-
-            });
-            
-
+            }
         }
 
     }
