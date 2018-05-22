@@ -3,8 +3,10 @@ package com.latticeengines.playmaker.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.inject.Inject;
@@ -31,6 +33,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -51,16 +54,20 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private LookupIdMappingProxy lookupIdMappingProxy;
+
     private List<Predefined> filterByPredefinedSelection = //
             Arrays.asList(ColumnSelection.Predefined.CompanyProfile);
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, long offset, long maximum,
-            List<String> accountIds, Long recStart, String columns, boolean hasSfdcContactId) {
+            List<String> accountIds, Long recStart, String columns, boolean hasSfdcContactId,
+            Map<String, String> orgInfo) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);
-        List<String> attributes = new ArrayList<>();
+        Set<String> attributes = new HashSet<>();
         if (StringUtils.isNotBlank(columns)) {
             StringTokenizer tkz = new StringTokenizer(columns, ",");
             while (tkz.hasMoreTokens()) {
@@ -68,17 +75,23 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             }
         }
 
-        dataRequest.setAttributes(attributes);
+        String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
+        lookupIdColumn = lookupIdColumn == null ? null : lookupIdColumn.trim();
+        if (StringUtils.isNotBlank(lookupIdColumn)) {
+            attributes.add(lookupIdColumn);
+        }
+
+        dataRequest.setAttributes(new ArrayList<>(attributes));
 
         FrontEndQuery frontEndQuery = entityQueryGenerator.generateEntityQuery(start, offset, maximum, dataRequest);
 
         log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
         DataPage dataPage = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
 
-        return postProcess(dataPage.getData(), offset);
+        return postProcess(dataPage.getData(), offset, lookupIdColumn);
     }
 
-    private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, long offset) {
+    private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, long offset, String lookupIdColumn) {
 
         if (CollectionUtils.isNotEmpty(data)) {
             long rowNum = offset + 1;
@@ -89,13 +102,13 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                     accExtRec.put(PlaymakerConstants.LEAccountExternalID,
                             accExtRec.get(InterfaceName.AccountId.name()));
                 }
-                if (accExtRec.containsKey(InterfaceName.SalesforceAccountID.name())) {
-                    accExtRec.put(PlaymakerConstants.SfdcAccountID,
-                            accExtRec.get(InterfaceName.SalesforceAccountID.name()));
+
+                if (StringUtils.isNotBlank(lookupIdColumn) && accExtRec.containsKey(lookupIdColumn)) {
+                    accExtRec.put(PlaymakerConstants.SfdcAccountID, accExtRec.get(lookupIdColumn));
                 }
 
                 accExtRec.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY,
-                        accExtRec.get(InterfaceName.LastModifiedDate.name()));
+                        accExtRec.get(InterfaceName.CDLUpdatedTime.name()));
 
                 accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
             }
@@ -174,4 +187,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         this.entityQueryGenerator = entityQueryGenerator;
     }
 
+    @VisibleForTesting
+    void setLookupIdMappingProxy(LookupIdMappingProxy lookupIdMappingProxy) {
+        this.lookupIdMappingProxy = lookupIdMappingProxy;
+    }
 }

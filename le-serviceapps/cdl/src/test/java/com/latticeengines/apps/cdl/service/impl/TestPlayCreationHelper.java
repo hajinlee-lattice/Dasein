@@ -14,6 +14,7 @@ import java.util.UUID;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -326,6 +327,8 @@ public class TestPlayCreationHelper {
         Assert.assertEquals(play.getName(), playName);
         Assert.assertNotNull(play.getRatingEngine());
         Assert.assertEquals(play.getRatingEngine().getId(), ratingEngine.getId());
+        Assert.assertNotNull(play.getRatingEngine().getBucketMetadata());
+        Assert.assertTrue(CollectionUtils.isNotEmpty(play.getRatingEngine().getBucketMetadata()));
     }
 
     private Restriction createAccountRestriction() {

@@ -6,7 +6,7 @@ import java.util.Map;
 public interface LpiPMAccountExtension {
 
     List<Map<String, Object>> getAccountExtensions(long start, long offset, long maximum, List<String> accountIds,
-            Long recStart, String columns, boolean hasSfdcContactId);
+            Long recStart, String columns, boolean hasSfdcContactId, Map<String, String> orgInfo);
 
     long getAccountExtensionCount(long start, List<String> accountIds, Long recStart);
 

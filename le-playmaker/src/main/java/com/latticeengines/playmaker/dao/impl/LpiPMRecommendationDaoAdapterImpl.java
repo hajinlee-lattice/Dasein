@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -24,13 +25,13 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     private static final String ACC_EXT_LAST_MODIFIED_FIELD_NAME = "LastModified";
 
-    @Autowired
+    @Inject
     private LpiPMPlay lpiPMPlay;
 
-    @Autowired
+    @Inject
     private LpiPMRecommendation lpiPMRecommendation;
 
-    @Autowired
+    @Inject
     private LpiPMAccountExtension lpiPMAccountExtension;
 
     public LpiPMRecommendationDaoAdapterImpl() {
@@ -67,7 +68,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, List<String> accountIds,
-            String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
+            String filterBy, Long recStart, String columns, boolean hasSfdcContactId, Map<String, String> orgInfo) {
 
         if (StringUtils.isBlank(columns)) {
             columns = ACC_EXT_LAST_MODIFIED_FIELD_NAME;
@@ -76,7 +77,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
         }
 
         return lpiPMAccountExtension.getAccountExtensions(start, offset, maximum, accountIds, recStart, columns,
-                hasSfdcContactId);
+                hasSfdcContactId, orgInfo);
     }
 
     @Override

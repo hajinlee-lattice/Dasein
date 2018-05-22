@@ -77,7 +77,6 @@ public class FrontEndQueryCreator {
             throw new NullPointerException(String.format("Rating Engine is not set for the play %s", play.getName()));
         }
 
-        accountFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
         contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
 
         setSortField(BusinessEntity.Account, Arrays.asList(InterfaceName.AccountId.name()), false,

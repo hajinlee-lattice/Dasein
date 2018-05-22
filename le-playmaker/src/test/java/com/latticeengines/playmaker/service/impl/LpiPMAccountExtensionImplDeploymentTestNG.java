@@ -4,9 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -18,8 +19,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
@@ -33,11 +36,14 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
 
     private LpiPMAccountExtensionImpl lpiPMAccountExtensionImpl;
 
-    @Autowired
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
-    @Autowired
+    @Inject
     private EntityQueryGenerator entityQueryGenerator;
+
+    @Inject
+    private LookupIdMappingProxy lookupIdMappingProxy;
 
     private long accountCount;
 
@@ -62,6 +68,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         lpiPMAccountExtensionImpl = new LpiPMAccountExtensionImpl();
         lpiPMAccountExtensionImpl.setEntityProxy(entityProxy);
         lpiPMAccountExtensionImpl.setEntityQueryGenerator(entityQueryGenerator);
+        lpiPMAccountExtensionImpl.setLookupIdMappingProxy(lookupIdMappingProxy);
     }
 
     @Test(groups = "deployment")
@@ -76,7 +83,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
                         0, 0, max, null, null, //
-                        String.join(",", accountFields), false);
+                        String.join(",", accountFields), false, null);
 
         Assert.assertNotNull(datapage);
         Assert.assertEquals(datapage.size(), (int) max);
@@ -103,6 +110,8 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
                                 if (field.equals(InterfaceName.AccountId.name())) {
                                     Assert.assertNotNull(row.get(field));
                                 }
+                                Assert.assertNotNull(
+                                        row.get(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY));
                             });
                 });
     }

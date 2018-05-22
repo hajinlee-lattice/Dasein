@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -132,7 +133,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(count);
         Assert.assertTrue(count > 0L);
         DataPage dataPage = ratingEngineProxy.getEntityPreview(tenant.getId(), re.getId(), 0L, 10L,
-                BusinessEntity.Account, InterfaceName.LDC_Name.name(), false, bucketFieldName, null, false, "", null, InterfaceName.SalesforceAccountID.name());
+                BusinessEntity.Account, InterfaceName.LDC_Name.name(), false, bucketFieldName, null, false, "", null,
+                InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(dataPage);
         Assert.assertNotNull(dataPage.getData());
         Assert.assertFalse(dataPage.getData().isEmpty());
@@ -154,7 +156,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(count);
         Assert.assertTrue(count > 0L);
         DataPage dataPage = ratingEngineProxy.getEntityPreview(tenant.getId(), re.getId(), 0L, 10L,
-                BusinessEntity.Contact, InterfaceName.ContactId.name(), false, null, null, false, "", null, InterfaceName.SalesforceAccountID.name());
+                BusinessEntity.Contact, InterfaceName.ContactId.name(), false, null, null, false, "", null,
+                InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(dataPage);
         Assert.assertNotNull(dataPage.getData());
         Assert.assertFalse(dataPage.getData().isEmpty());
@@ -465,6 +468,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(play.getName(), name);
         Assert.assertNotNull(play.getRatingEngine());
         Assert.assertEquals(play.getRatingEngine().getId(), ratingEngine1.getId());
+        Assert.assertNotNull(play.getRatingEngine().getBucketMetadata());
+        Assert.assertTrue(CollectionUtils.isNotEmpty(play.getRatingEngine().getBucketMetadata()));
     }
 
     public Play getPlay() {

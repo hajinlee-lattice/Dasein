@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,10 @@ public class TestPlayCreationHelper {
         playResourceDeploymentTestNG.getCrud();
         play = playResourceDeploymentTestNG.getPlay();
         Assert.assertNotNull(play);
+        Assert.assertNotNull(play.getRatingEngine());
+        Assert.assertNotNull(play.getRatingEngine().getBucketMetadata());
+        Assert.assertTrue(CollectionUtils.isNotEmpty(play.getRatingEngine().getBucketMetadata()));
+
     }
 
     public void createPlayLaunch(boolean isDryRunMode) {

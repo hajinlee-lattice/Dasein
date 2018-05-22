@@ -132,7 +132,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getAccountExtensions() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null,
-                0L, 1, 100, null, null, 0L, null, false);
+                0L, 1, 100, null, null, 0L, null, false, null);
 
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
@@ -251,7 +251,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
             Long totalAccExtCount, int max, long startTime) {
         Map<String, Object> emptyResultDueToVeryLargeOffset = playMakerRecommendationEntityMgr.getAccountExtensions(
                 tenant.getTenantName(), null, startTime, (totalAccExtCount.intValue() + 100), max, null, null, 0L,
-                shouldSendEmptyColumnMapping ? "" : columns, false);
+                shouldSendEmptyColumnMapping ? "" : columns, false, null);
         Assert.assertNotNull(emptyResultDueToVeryLargeOffset);
         Assert.assertTrue(emptyResultDueToVeryLargeOffset.size() == 0);
     }
@@ -261,7 +261,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
             List<String> someAccountIds, boolean shouldSendEmptyColumnMapping, String columns,
             boolean expectColumnsSizeEqualTo6) {
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null,
-                startTime, offset, max, null, null, 0L, shouldSendEmptyColumnMapping ? "" : columns, false);
+                startTime, offset, max, null, null, 0L, shouldSendEmptyColumnMapping ? "" : columns, false, null);
 
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
@@ -352,7 +352,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
 
         int maximum = 250;
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null,
-                0L, 0, maximum, someAccountIds, filterBy, 0L, null, false);
+                0L, 0, maximum, someAccountIds, filterBy, 0L, null, false, null);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accExt = (List<Map<String, Object>>) result
@@ -414,7 +414,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getAccountExtensionsWithContacts() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null,
-                1000L, 1, 100, null, null, 0L, null, true);
+                1000L, 1, 100, null, null, 0L, null, true, null);
 
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
@@ -625,7 +625,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         accountIds.add("10");
         accountIds.add("12");
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                null, 0L, 0, 100, accountIds, null, 0L, null, false);
+                null, 0L, 0, 100, accountIds, null, 0L, null, false, null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
@@ -636,7 +636,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     @Test(groups = "functional", enabled = true)
     public void getAccountExtensionsWithFilterBy() throws Exception {
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                null, 0L, 0, 100, null, "RECOMMENDATIONS", 0L, null, false);
+                null, 0L, 0, 100, null, "RECOMMENDATIONS", 0L, null, false, null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
@@ -644,7 +644,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         Assert.assertTrue(accountextensions.size() > 0L);
 
         mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null, 0L, 0, 100,
-                null, "NORECOMMENDATIONS", 0L, null, false);
+                null, "NORECOMMENDATIONS", 0L, null, false, null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accountextensions2 = (List<Map<String, Object>>) mapResult
@@ -671,7 +671,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getAccountExtensionsWithSelectedColumns() throws Exception {
 
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(),
-                null, 0L, 0, 100, null, null, 0L, null, false);
+                null, 0L, 0, 100, null, null, 0L, null, false, null);
         Assert.assertNotNull(mapResult);
         List<Map<String, Object>> accountextensions = (List<Map<String, Object>>) mapResult
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
@@ -681,7 +681,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         Assert.assertTrue(extension.containsKey("RevenueGrowth"));
 
         mapResult = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null, 0L, 0, 100,
-                null, null, 0L, " yyy, CrmRefreshDate, DnBSites,xxxx, ,,,,", false);
+                null, null, 0L, " yyy, CrmRefreshDate, DnBSites,xxxx, ,,,,", false, null);
         Assert.assertNotNull(mapResult);
         accountextensions = (List<Map<String, Object>>) mapResult.get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
         Assert.assertTrue(accountextensions.size() > 0L);

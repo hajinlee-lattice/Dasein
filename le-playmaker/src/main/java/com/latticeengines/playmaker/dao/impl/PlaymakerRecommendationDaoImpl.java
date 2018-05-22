@@ -262,7 +262,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, List<String> idStrList,
-            String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
+            String filterBy, Long recStart, String columns, boolean hasSfdcContactId, Map<String, String> orgInfo) {
         List<Integer> accountIds = idStrListToIntList(idStrList);
 
         return getAccountExtensions(start, offset, maximum, filterBy, recStart, columns, hasSfdcContactId, accountIds);

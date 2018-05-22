@@ -104,14 +104,42 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public Play getPlayByName(String name) {
+        Tenant tenant = MultiTenantContext.getTenant();
+
         if (StringUtils.isBlank(name)) {
             throw new LedpException(LedpCode.LEDP_18144);
         }
         Play play = playEntityMgr.findByName(name);
         if (play != null) {
             updateLastRefreshedDate(play.getRatingEngine());
+            setBucketMetadata(tenant, play);
         }
         return play;
+    }
+
+    private void setBucketMetadata(Tenant tenant, Play play) {
+        if (play.getRatingEngine().getBucketMetadata() == null) {
+            if (play.getRatingEngine().getType() == RatingEngineType.RULE_BASED) {
+
+                Map<String, Long> counts = play.getRatingEngine().getCountsAsMap();
+                if (counts != null) {
+                    play.getRatingEngine()
+                            .setBucketMetadata(counts.keySet().stream() //
+                                    .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
+                                    .collect(Collectors.toList()));
+                }
+            } else {
+                String reId = play.getRatingEngine().getId();
+                try {
+                    List<BucketMetadata> latestABCDBuckets = bucketedScoreProxy
+                            .getLatestABCDBucketsByEngineId(tenant.getId(), reId);
+                    play.getRatingEngine().setBucketMetadata(latestABCDBuckets);
+                } catch (Exception ex) {
+                    log.info("Ignoring exception while loading latest ABCD" + " bucket of rating engine " + reId
+                            + " to set bucket metadata for play", ex);
+                }
+            }
+        }
     }
 
     @Override
@@ -239,6 +267,7 @@ public class PlayServiceImpl implements PlayService {
         if (play != null) {
             Date lastRefreshedDate = findLastRefreshedDate();
             play = getFullPlay(play, shouldLoadCoverage, tenant, lastRefreshedDate);
+            setBucketMetadata(tenant, play);
         }
         return play;
     }

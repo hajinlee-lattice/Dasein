@@ -99,7 +99,7 @@ public class RecommendationResource {
     @RequestMapping(value = "/accountextensions", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account extensions")
-    public Map<String, Object> getAccountExtensions(HttpServletRequest request,
+    public Map<String, Object> getAccountExtensions(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
@@ -116,7 +116,7 @@ public class RecommendationResource {
 
         Map<String, Object> accountExtensions = playmakerRecommendationMgr.getAccountExtensions(tenantName,
                 lookupSource, start, offset, maximum, accountIds, filterBy, recStart, columns,
-                "true".equals(hasSfdcContactId));
+                "true".equals(hasSfdcContactId), tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
         return accountExtensions;
     }
 

@@ -22,7 +22,7 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getAccountExtensions(String tenantName, String lookupSource, Long start, int offset,
             int maximum, List<String> accountIds, String filterBy, Long recStart, String columns,
-            boolean hasSfdcContactId);
+            boolean hasSfdcContactId, Map<String, String> orgInfo);
 
     Map<String, Object> getPlayValues(String tenantName, String lookupSource, long start, int offset, int maximum,
             List<Integer> playgroupIds);
