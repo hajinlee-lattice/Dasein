@@ -87,6 +87,26 @@ angular.module('lp.playbook.dashboard', [
         return path.split('.').reduce(index, obj);
     }
 
+    // var makeSimpleGraph = function(buckets, path) {
+    //     console.log(buckets);
+    //     var total =  0;
+    //     function index(obj,i) {
+    //         return obj[i]
+    //     }
+    //     for (var i in buckets) {
+    //         var bucket = buckets[i];
+    //         console.log(path.split('.').reduce(index, bucket));
+    //         total += (path ? path.split('.').reduce(index, bucket) : buckets[i]);
+    //     }
+
+    //     return {
+    //         total: total,
+    //         buckets: buckets
+    //     }
+    // };
+
+    // PLS-8472 Using play.ratingEngine.bucketMetadata instead of play.ratings to generate play ratings graph
+    // Delete this method when play.ratings becomes more reliable
     var makeSimpleGraph = function(buckets, path) {
         var total =  0;
         function index(obj,i) {
@@ -97,6 +117,12 @@ angular.module('lp.playbook.dashboard', [
             total += (path ? path.split('.').reduce(index, bucket) : buckets[i]);
         }
 
+        buckets.forEach(function(bkt) {
+            if (!bkt.height) {
+                bkt.height = (bkt.count / total) * 100;
+            }
+        });
+        
         return {
             total: total,
             buckets: buckets
@@ -202,7 +228,14 @@ angular.module('lp.playbook.dashboard', [
 
             vm.launchButton = PlaybookWizardStore.launchButton(play);
             vm.launchedState = vm.launchButton.state; //(vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
-            vm.ratingsGraph = makeSimpleGraph(play.ratings && play.ratings, 'count');
+            
+            // vm.ratingsGraph = makeSimpleGraph(play.ratings && play.ratings, 'count');
+
+            // PLS-8472 Using play.ratingEngine.bucketMetadata instead of play.ratings to generate play ratings graph once ratings object is more stable
+            buckets = reformatBucketMetadata(play.ratingEngine.bucketMetadata);
+            vm.ratingsGraph = makeSimpleGraph(buckets, 'count');
+
+
             vm.launchGraph = makeLaunchGraph(play.launchHistory);
 
             if(vm.launchedState === 'Launching') { // if it's in a launching state check every 10 seconds so we can update the button, then stop checking
@@ -223,6 +256,17 @@ angular.module('lp.playbook.dashboard', [
                 }, 10 * 1000);
             }
         });
+    }
+
+    reformatBucketMetadata = function(bucketMetadata) {
+        buckets = [];
+        bucketMetadata.forEach(function(bkt) {
+            buckets.push({
+                bucket: bkt.bucket_name,
+                count: bkt.num_leads
+            })
+        });
+        return buckets;
     }
 
     $scope.$on('$destroy', function() {
