@@ -292,8 +292,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public AttrConfigRequest validateRequest(AttrConfigRequest request) {
-        ValidationDetails details = attrValidationService.validate(request.getAttrConfigs());
-        request.setDetails(details);
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            ValidationDetails details = attrValidationService.validate(request.getAttrConfigs());
+            request.setDetails(details);
+            int count = CollectionUtils.isNotEmpty(request.getAttrConfigs()) ? request.getAttrConfigs().size() : 0;
+            String msg = String.format("Validate %d attr configs", count);
+            timer.setTimerMessage(msg);
+        }
         return request;
     }
 
