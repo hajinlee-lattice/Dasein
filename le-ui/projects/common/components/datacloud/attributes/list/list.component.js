@@ -24,7 +24,7 @@ angular.module('common.attributes.list', [])
             vm.parseData();
             vm.countSelected();
 
-            vm.store.setData('original', angular.copy(vm.data.config));
+            vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
         };
 
         vm.parseData = function() {
@@ -115,36 +115,8 @@ angular.module('common.attributes.list', [])
                     subcategory: vm.subcategory 
                 });
             } else {
-                vm.checked(item);
+                vm.toggleSelected(item);
             }
-        };
-
-        vm.checked = function(item) {
-            if (vm.isDisabled(item) || vm.isStartsDisabled(item)) {
-                return false;
-            }
-
-            if (item.Attributes) {
-                vm.setIndeterminate(item.DisplayName, false);
-
-                item.Attributes
-                    .sort(vm.sortAttributes)
-                    .forEach(function(attr) {
-                        if (vm.isDisabled(attr) || vm.isStartsDisabled(attr)) {
-                            return;
-                        }
-
-                        attr.Selected = (item.checked != item.TotalAttrs);
-
-                        if (attr.Selected) {
-                            vm.store.getSelected().push(attr);
-                        }
-                    });
-            } else {
-                item.Selected = !item.Selected;
-            }
-
-            vm.countSelected();
         };
 
         vm.isChecked = function(item) {
@@ -205,6 +177,34 @@ angular.module('common.attributes.list', [])
             var startsDisabled = vm.startChecked[item.Attribute];
 
             return startsDisabled;
+        };
+
+        vm.toggleSelected = function(item) {
+            if (vm.isDisabled(item) || vm.isStartsDisabled(item)) {
+                return false;
+            }
+
+            if (item.Attributes) {
+                vm.setIndeterminate(item.DisplayName, false);
+
+                item.Attributes
+                    .sort(vm.sortAttributes)
+                    .forEach(function(attr) {
+                        if (vm.isDisabled(attr) || vm.isStartsDisabled(attr)) {
+                            return;
+                        }
+
+                        attr.Selected = (item.checked != item.TotalAttrs);
+
+                        if (attr.Selected) {
+                            vm.store.getSelected().push(attr);
+                        }
+                    });
+            } else {
+                item.Selected = !item.Selected;
+            }
+
+            vm.countSelected();
         };
 
         vm.toggleAll = function() {
@@ -288,7 +288,7 @@ angular.module('common.attributes.list', [])
                 }
             });
 
-            console.log(obj, vm.filters);
+            //console.log(obj, vm.filters);
 
             return obj;
         };

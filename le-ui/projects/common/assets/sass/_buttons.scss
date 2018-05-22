@@ -45,6 +45,10 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 	font-weight: normal;
 	transition: all 200ms ease;
 	outline: none;
+
+	::before, ::after, i {
+		transition: none;
+	}
   
 	&:hover {
 		transition: none;

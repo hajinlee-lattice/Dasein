@@ -154,9 +154,18 @@ angular.module('common.attributes')
             return true;
         }
 
-        var current = angular.copy(this.data.config);
+        var hasChanged = false;
+        var subcategories = this.data.original.Subcategories;
 
-        return JSON.stringify(this.data.original) === JSON.stringify(current);
+        this.data.config.Subcategories.forEach(function(subcategory, index) {
+            subcategory.Attributes.forEach(function(attribute, i) {
+                if (subcategories[index].Attributes[i].Selected !== attribute.Selected) {
+                    hasChanged = true;
+                }
+            });
+        });
+
+        return hasChanged;
     };
 
     this.saveConfig = function() {
