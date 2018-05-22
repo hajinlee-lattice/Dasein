@@ -63,7 +63,7 @@
                             </li>
                         </ul>
                         <ul ng-if="vm.type == 'custom_event' ">
-                            <li> 
+                            <li class="text-ellipsis" title="{{vm.getTrainingFileName()}}"> 
                                 Training File: {{ vm.getTrainingFileName() }}
                             </li>
                             <li>
