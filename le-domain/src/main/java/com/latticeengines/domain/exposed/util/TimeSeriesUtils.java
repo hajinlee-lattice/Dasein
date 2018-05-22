@@ -38,7 +38,7 @@ public class TimeSeriesUtils {
     public static Set<Integer> collectPeriods(Configuration yarnConfiguration, String avroDir, String periodField) {
 
         avroDir = getPath(avroDir) + "/*.avro";
-        log.info("Collect " + periodField + " periods from " + avroDir);
+        log.info(String.format("Collect %s periods from %s", periodField, avroDir));
         Set<Integer> periodSet = new HashSet<>();
         try {
             Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, avroDir);
@@ -58,7 +58,7 @@ public class TimeSeriesUtils {
             String periodField, String periodNameField) {
 
         avroDir = getPath(avroDir) + "/*.avro";
-        log.info("Collect " + periodField + " periods from " + avroDir);
+        log.info(String.format("Collect %s periods for %s from %s", periodField, periodNameField, avroDir));
         Map<String, Set<Integer>> periods = new HashMap<>();
         try {
             Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, avroDir);
@@ -166,11 +166,11 @@ public class TimeSeriesUtils {
                 String[] dirs = fileName.split("/");
                 String avroName = dirs[dirs.length - 1];
                 Integer period = getPeriodFromFileName(avroName);
-                log.info("Collect period data from file " + avroName + " period " + period);
                 if (period == null) {
                     continue;
                 }
                 if (periods.contains(period)) {
+                    log.info(String.format("Collect period data for period %d from file %s", period, avroName));
                     HdfsUtils.copyFiles(yarnConfiguration, fileName, targetDir);
                 }
             }
@@ -209,6 +209,9 @@ public class TimeSeriesUtils {
                     String periodDate = DateTimeUtils.dayPeriodToDate(dayPeriod);
                     Integer period = periodBuilder.toPeriodId(periodDate);
                     if (periods.get(periodName).contains(period)) {
+                        log.info(String.format(
+                                "Collect daily period %d for period %s from file %s (Will skip re-collect same daily data for different period)",
+                                period, periodName, avroName));
                         toCopy.add(fileName);
                     }
                 }
@@ -250,13 +253,12 @@ public class TimeSeriesUtils {
                 dateRecordMap.get(period).add(record);
                 totalRecords++;
                 pendingRecords++;
-                if (pendingRecords > 2 * 128 * 1024) {
+                if (pendingRecords > 4 * 128 * 1024) {
                     log.info("Schedule " + pendingRecords + "records to write");
                     dateRecordMap = writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap);
                     pendingRecords = 0;
                 }
             }
-
             log.info("Schedule the remaining " + pendingRecords + " out of " + totalRecords + " records to write");
             writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap);
             syncWrites(pendingWrites);
@@ -319,14 +321,13 @@ public class TimeSeriesUtils {
                 dateRecordMap.get(periodName).get(period).add(record);
                 totalRecords++;
                 pendingRecords++;
-                if (pendingRecords > 2 * 128 * 1024) {
+                if (pendingRecords > 4 * 128 * 1024) {
                     log.info("Schedule " + pendingRecords + "records to write");
                     dateRecordMap = writeRecordsMultiPeriod(yarnConfiguration, executor, pendingWrites, schema,
                             periodFileMap, dateRecordMap);
                     pendingRecords = 0;
                 }
             }
-
             log.info("Schedule the remaining " + pendingRecords + " out of " + totalRecords + " records to write");
             writeRecordsMultiPeriod(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap);
             syncWrites(pendingWrites);
@@ -433,7 +434,6 @@ public class TimeSeriesUtils {
         @Override
         public Boolean call() throws Exception {
             try {
-                log.info("Write " + records.size() + " records to " + fileName);
                 if (!HdfsUtils.fileExists(yarnConfiguration, fileName)) {
                     AvroUtils.writeToHdfsFile(yarnConfiguration, schema, fileName, records);
                 } else {
