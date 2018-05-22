@@ -187,9 +187,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                 if(rating.bucketMetadata && rating.bucketMetadata.length > 0) {
                     angular.forEach(rating.bucketMetadata, function(rating, key) {
                         rating.lift = (Math.round( rating.lift * 10) / 10).toString();
-                        if(rating.num_leads > 0) {
-                            newBucketMetadata.push(rating);
-                        };
+                        newBucketMetadata.push(rating);
 
                         if(newBucketMetadata.length === 0) {
                             newBucketMetadata = dummyNewBucketData;
