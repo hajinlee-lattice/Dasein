@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.GenerateTargetScorePercentileMapParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculatePercentileScoreDataFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
@@ -38,7 +38,7 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
     private void preDataFlow() {
         String inputTableName = getStringValueFromContext(MAP_TARGET_SCORE_INPUT_TABLE_NAME);
 
-        GenerateTargetScorePercentileMapParameters params = new GenerateTargetScorePercentileMapParameters();
+        RecalculatePercentileScoreParameters params = new RecalculatePercentileScoreParameters();
         params.setInputTableName(inputTableName);
         params.setRawScoreFieldName(rawScoreField);
         params.setScoreFieldName(scoreField);

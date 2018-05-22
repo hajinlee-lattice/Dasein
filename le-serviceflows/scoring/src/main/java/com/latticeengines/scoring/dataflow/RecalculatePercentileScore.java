@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.Recalcula
 
 @Component("recalculatePercentileScore")
 public class RecalculatePercentileScore extends TypesafeDataFlowBuilder<RecalculatePercentileScoreParameters> {
-    private static final Logger log = LoggerFactory.getLogger(GenerateTargetScorePercentileMap.class);
+    private static final Logger log = LoggerFactory.getLogger(RecalculatePercentileScore.class);
 
     public static final String SCORE_COUNT_FIELD_NAME = ScoreResultField.RawScore.displayName + "_count";
 
