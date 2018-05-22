@@ -316,10 +316,12 @@ public class ActivityMetricsUtils {
         Set<String> metricsIds = new HashSet<>();
         for (ActivityMetrics m : metrics) {
             isValidMetrics(m);
-            if (!cnts.containsKey(m.getMetrics())) {
-                cnts.put(m.getMetrics(), 0);
+            if (!m.isEOL()) {
+                if (!cnts.containsKey(m.getMetrics())) {
+                    cnts.put(m.getMetrics(), 0);
+                }
+                cnts.put(m.getMetrics(), cnts.get(m.getMetrics()) + 1);
             }
-            cnts.put(m.getMetrics(), cnts.get(m.getMetrics()) + 1);
             metricsIds.add(ActivityMetricsUtils.getNameWithPeriod(m));
         }
         cnts.forEach((m, cnt) -> {
