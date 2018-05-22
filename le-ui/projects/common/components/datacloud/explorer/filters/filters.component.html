@@ -53,9 +53,9 @@
     </li>
     <li class="filter dropdown-container show-tooltip title-tooltip top right" ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <div class="tooltip_"><span>Filtering</span></div>
-        <button class="button borderless-button" ng-class="{ selected: vm.isFilterSelected() }">
+        <h2 class="button borderless-button" ng-class="{ selected: vm.isFilterSelected() }">
             <i class="fa fa-filter"></i>
-        </button>
+        </h2>
         <ul class="dropdown">
             <li class="toggle selected show" ng-if="!vm.lookupMode && vm.section != 'browse' && vm.section != 'team'"><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected"  ng-disabled="vm.metadata.toggle.hide.selected" /> <label for="enabled">Enabled only</label></li>
             <li class="toggle selected hide" ng-if="!vm.lookupMode && vm.section != 'browse' && vm.section != 'team'"><input type="checkbox" id="nonenabled" name="nonenabled" ng-model="vm.metadata.toggle.hide.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.selected"  ng-disabled="vm.metadata.toggle.show.selected"/> <label for="nonenabled">Non-Enabled only</label></li>
