@@ -86,7 +86,7 @@ public class QueryTranslatorUnitTestNG {
         Query translated = queryTranslator.translateRatingQuery(query, ContactQueryDecorator.COUNT_QUERY, null);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 5, 8, 0);
-        validateTranslatedLookups(translated, 5);
+        validateTranslatedLookups(translated, 0);
     }
 
     private void validateTranslatedLookups(Query translated, int expectedLookups) {
