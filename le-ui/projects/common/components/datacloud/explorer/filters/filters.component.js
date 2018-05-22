@@ -7,7 +7,7 @@ angular
             vm:'='
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore) {
+        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore, BrowserStorageUtility) {
             var vm = $scope.vm;
 
             angular.extend(vm, {
@@ -31,8 +31,10 @@ angular
                 saved: false
             });
 
-            if (vm.$resolve && vm.$resolve.ClientSession) {
-                vm.hasDeleteAccessRights = vm.$resolve.ClientSession.AccessLevel != 'EXTERNAL_USER';
+            var ClientSession = BrowserStorageUtility.getClientSession();
+
+            if (ClientSession) {
+                vm.hasDeleteAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
             } else {
                 vm.hasDeleteAccessRights = false;
             }
