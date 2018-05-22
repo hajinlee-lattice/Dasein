@@ -4,4 +4,6 @@ public enum CDLJobStatus {
     RUNNING,
     FAIL,
     COMPLETE,
+    IDLE,
+    READY,
 }
