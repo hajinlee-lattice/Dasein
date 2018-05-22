@@ -592,6 +592,7 @@ angular.module('lp.playbook')
 
         // console.log(bucketsToLaunch);
         // console.log(ratedTargetsLimit);
+        console.log(excludeItems);
 
         $http({
             method: 'POST',
