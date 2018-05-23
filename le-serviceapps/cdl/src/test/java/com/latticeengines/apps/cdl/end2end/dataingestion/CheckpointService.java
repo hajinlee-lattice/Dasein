@@ -274,8 +274,12 @@ public class CheckpointService {
     }
 
     long countTableRole(TableRoleInCollection role) {
+        return countTableRole(role, null);
+    }
+
+    long countTableRole(TableRoleInCollection role, DataCollection.Version version) {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        Table table = dataCollectionProxy.getTable(customerSpace.toString(), role);
+        Table table = dataCollectionProxy.getTable(customerSpace.toString(), role, version);
         if (table == null) {
             Assert.fail("Cannot find table in role " + role);
         }
