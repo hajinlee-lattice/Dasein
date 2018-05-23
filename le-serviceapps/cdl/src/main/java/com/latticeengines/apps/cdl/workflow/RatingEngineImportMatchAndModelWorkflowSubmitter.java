@@ -60,6 +60,9 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
     @Value("${pls.modelingservice.basedir}")
     protected String modelingServiceHdfsBaseDir;
 
+    @Value("${cdl.modeling.workflow.mem.mb}")
+    protected int workflowMemMb;
+
     public RatingEngineImportMatchAndModelWorkflowConfiguration generateConfiguration(
             RatingEngineModelingParameters parameters) {
 
@@ -139,6 +142,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .dataCollectionVersion(version) //
                 .aiModelId(parameters.getAiModelId()) //
                 .ratingEngineId(parameters.getRatingEngineId()) //
+                .workflowContainerMem(workflowMemMb) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }
