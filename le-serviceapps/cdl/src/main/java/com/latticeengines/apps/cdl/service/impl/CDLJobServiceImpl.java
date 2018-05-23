@@ -70,7 +70,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    @Value("${common.public.url:}")
+    @Value("${common.adminconsole.url:}")
     private String quartzMicroserviceHostPort;
 
     @Value("${common.microservice.url}")
