@@ -684,11 +684,12 @@ public enum LedpCode {
     LEDP_38023("No account attributes found for tenant {0}"), //
 
     // le-ulysses
-    LEDP_39001("No account with id {0} found for CustomerSpace {0}"), //
+    LEDP_39001("No account with id {0} found for CustomerSpace {1}"), //
     LEDP_39002("Could not find Tenant information"), //
     LEDP_39003("Expected only one record of the {0} entity but found {1}"), //
     LEDP_39004("No AccountId attribute found"), //
     LEDP_39005("Failed to compile the MetadataDocument for the CustomerSpace {0}"), //
+    LEDP_39006("No Purchase History found for the AccountId {0} and CustomerSpace {1}"), //
 
     // le-cdl
     LEDP_40000("CustomerSpace in CleanupByDateRangeConfig is null."), //
