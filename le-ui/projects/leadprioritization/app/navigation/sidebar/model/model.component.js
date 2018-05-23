@@ -29,8 +29,9 @@ angular
         vm.HasRatingsAvailable = HasRatingsAvailable;
 
         // console.log(vm.ratingEngine);
-
-        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+        if (!vm.IsRatingEngine) {
+            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+        }
 
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {
             vm.HasRatingsAvailable = true;

@@ -26,7 +26,7 @@ angular.module('lp.models.ratings', [
   };
 })
 .controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore, RatingEngine, StateHistory) {
 
     var vm = this;
     angular.extend(vm, {
@@ -48,7 +48,13 @@ angular.module('lp.models.ratings', [
     });
 
     vm.init = function() {
-        $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
+        var IsRatingEngine = Model.ModelDetails.Name.substring(0,2) == 'ai',
+            lastFrom = StateHistory.lastFrom();
+        if (["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
+            $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
+        } else {
+            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName }); 
+        }
         vm.Math = window.Math;
 
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;

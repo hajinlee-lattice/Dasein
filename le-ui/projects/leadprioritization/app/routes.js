@@ -338,12 +338,19 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $compile, $rootScope, Model, ModelStore) {
+                    controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore, RatingEngine, StateHistory) {
+                        var IsRatingEngine = Model.ModelDetails.Name.substring(0,2) == 'ai',
+                            lastFrom = StateHistory.lastFrom();
+
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="performanceTab" class="tab-content" data-performance-tab-widget></div>'))($scope);
-
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-
+                        
+                        if (["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
+                            $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
+                        } 
+                        else {
+                            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                        }
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
@@ -485,11 +492,18 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $compile, $rootScope, Model, ModelStore, IsPmml) {
+                    controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore, IsPmml, RatingEngine, StateHistory) {
+                        var IsRatingEngine = Model.ModelDetails.Name.substring(0,2) == 'ai',
+                            lastFrom = StateHistory.lastFrom();
+
                         $scope.data = ModelStore.data;
                         $scope.IsPmml = IsPmml;
 
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                        if (["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
+                            $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
+                        } else {
+                            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName }); 
+                        }
 
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'

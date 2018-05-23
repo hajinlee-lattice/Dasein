@@ -578,7 +578,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                 @include flex-item(1 1 auto);
             }
             &.header-back-name-container {
-                flex-shrink: 2;
+                flex-shrink: 3;
             }
             &.page-icon-container {
                 width: 5em;
@@ -688,7 +688,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
         .page-name,
         .header-back-name,
         .model-name {
-            font-size: 18px;
+            font-size: 15px;
         }
         .page-name {
         }
