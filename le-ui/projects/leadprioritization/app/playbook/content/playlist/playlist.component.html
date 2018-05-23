@@ -97,45 +97,13 @@
                         <div ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Failed'" class="error-text">Your most recent launch, has failed.</div>
 
                         <!-- Ratings chart if play has Launched -->
-                        <div ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
-
-
-                            <!-- <div 
-                                class="no-ratings"
-                                ng-if="play.newBucketMetadata[0].dummy">
-                                <h4>No Ratings Available</h4>
-                            </div>
+                        <div 
+                            ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'"
+                            class="{{ play.ratingEngine.tileClass }}">
                             <bar-chart
-                                config="play.chartConfig" 
-                                bktlist="play.newBucketMetadata">
-                            </bar-chart> -->
-
-                            <!-- <barchart 
-                                header="Account Ratings"
-                                ratings="true" 
-                                data="play.ratings">
-                            </barchart> -->
-
-                            <!-- <div class="barChart">
-
-                                <h4>Account Ratings</h4>
-                                <ul class="bars">
-                                    <li 
-                                        ng-repeat="(key, value) in play.ratingEngine.counts"
-                                        class="bucket-{{key|lowercase}}"
-                                        ng-class="{'bucket-aplus': key === 'A+'}">
-                                        <div class="value">{{value|number}}</div>
-                                        <div 
-                                            class="bar"
-                                            ng-attr-style="{{'height: '+ (value / vm.sumValuesOfObject(play.ratingEngine.counts))*100 + '%'}}">
-                                        </div>
-                                        <div class="meta">{{key}}</div>
-
-                                    </li>
-                                </ul>
-
-                            </div> -->
-
+                                config="play.ratingEngine.chartConfig" 
+                                bktlist="play.ratingEngine.newBucketMetadata">
+                            </bar-chart>
                         </div>
 
                     </div><!-- End .tile-body -->

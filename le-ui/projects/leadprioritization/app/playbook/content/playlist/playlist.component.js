@@ -43,16 +43,104 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
                     }
                 ]
             }
+        },
+        barChartConfig: {
+            'data': {
+                'tosort': true,
+                'sortBy': 'bucket_name',
+                'trim': true,
+                'top': 5,
+            },
+            'chart': {
+                'header':'Value',
+                'emptymsg': '',
+                'usecolor': true,
+                'color': '#e8e8e8',
+                'mousehover': false,
+                'type': 'integer',
+                'showstatcount': false,
+                'maxVLines': 3,
+                'showVLines': false,
+            },
+            'vlines': {
+                'suffix': ''
+            },
+            'columns': [{
+                'field': 'num_leads',
+                'label': 'Records',
+                'type': 'number',
+                'chart': true,
+            }]
+        },
+        barChartLiftConfig: {
+            'data': {
+                'tosort': true,
+                'sortBy': 'bucket_name',
+                'trim': true,
+                'top': 5,
+            },
+            'chart': {
+                'header':'Value',
+                'emptymsg': '',
+                'usecolor': true,
+                'color': '#e8e8e8',
+                'mousehover': false,
+                'type': 'decimal',
+                'showstatcount': false,
+                'maxVLines': 3,
+                'showVLines': true,
+            },
+            'vlines': {
+                'suffix': 'x'
+            },
+            'columns': [{
+                    'field': 'lift',
+                    'label': 'Lift',
+                    'type': 'string',
+                    'suffix': 'x',
+                    'chart': true
+                }
+            ]
         }
     });
 
     vm.init = function($q) {
 
-        console.log(vm.current.plays);
+        // console.log(vm.current.plays[0]);
         
         PlaybookWizardStore.clear();
-        vm.header.filter.filtered = vm.current.plays;
-        vm.header.filter.unfiltered = vm.current.plays;
+
+        $scope.$watch('vm.current.plays', function() {
+            vm.header.filter.filtered = vm.current.plays;
+            vm.header.filter.unfiltered = vm.current.plays;
+
+            angular.forEach(vm.current.plays, function(play, key) {
+
+                if(play.ratingEngine.type === 'CROSS_SELL' && play.ratingEngine.advancedRatingConfig) {
+                    play.ratingEngine.tileClass = play.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy;
+                } else {
+                    play.ratingEngine.tileClass = play.ratingEngine.type;
+                }
+
+                if(play.ratingEngine.type === 'CROSS_SELL' || play.ratingEngine.type === 'CUSTOM_EVENT') {
+                    play.ratingEngine.chartConfig = vm.barChartLiftConfig;
+                } else {
+                    play.ratingEngine.chartConfig = vm.barChartConfig;
+                }        
+
+                var newBucketMetadata = [];
+
+                if(play.ratingEngine.bucketMetadata && play.ratingEngine.bucketMetadata.length > 0) {
+                    angular.forEach(play.ratingEngine.bucketMetadata, function(rating, key) {
+                        rating.lift = (Math.round( rating.lift * 10) / 10).toString();
+                        newBucketMetadata.push(rating);
+                    });
+                }
+                play.ratingEngine.newBucketMetadata = newBucketMetadata;
+
+            });
+        });
+
     }
 
     vm.init();
