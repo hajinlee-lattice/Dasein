@@ -1,81 +1,61 @@
 package com.latticeengines.pls.service.impl;
 
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 @Component("sourceFileService")
 public class SourceFileServiceImpl implements SourceFileService {
-    @Autowired
-    private SourceFileEntityMgr sourceFileEntityMgr;
 
-    @Autowired
-    private Configuration yarnConfiguration;
+    @Inject
+    private SourceFileProxy sourceFileProxy;
 
     @Override
     public SourceFile findByName(String name) {
-        return sourceFileEntityMgr.findByName(name);
+        return sourceFileProxy.findByName(getShortTenantId(), name);
     }
 
     @Override
     public SourceFile findByApplicationId(String applicationId) {
-        return sourceFileEntityMgr.findByApplicationId(applicationId);
+        return sourceFileProxy.findByApplicationId(getShortTenantId(), applicationId);
     }
 
     @Override
     public void create(SourceFile sourceFile) {
-        sourceFileEntityMgr.create(sourceFile);
+        sourceFileProxy.create(getShortTenantId(), sourceFile);
     }
 
     @Override
     public void update(SourceFile sourceFile) {
-        SourceFile existing = sourceFileEntityMgr.findByName(sourceFile.getName());
-        if (existing != null) {
-            delete(existing);
-        }
-        sourceFileEntityMgr.create(sourceFile);
+        sourceFileProxy.update(getShortTenantId(), sourceFile);
     }
 
     @Override
     public void delete(SourceFile sourceFile) {
-        sourceFileEntityMgr.delete(sourceFile);
+        sourceFileProxy.delete(getShortTenantId(), sourceFile.getName());
     }
 
     @Override
     public SourceFile findByTableName(String tableName) {
-        return sourceFileEntityMgr.findByTableName(tableName);
+        return sourceFileProxy.findByTableName(getShortTenantId(), tableName);
     }
 
     @Override
-    public void copySourceFile(String tableName, SourceFile originalSourceFile, Tenant targetTenant) {
-        String outputFileName = "file_" + tableName + ".csv";
-        String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(targetTenant.getId())).toString()
-                + "/" + outputFileName;
-        try {
-            HdfsUtils.copyFiles(yarnConfiguration, originalSourceFile.getPath(), outputPath);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18118, e);
-        }
-        SourceFile file = new SourceFile();
-        file.setApplicationId(originalSourceFile.getApplicationId());
-        file.setDisplayName(originalSourceFile.getDisplayName());
-        file.setName(outputFileName);
-        file.setPath(outputPath);
-        file.setSchemaInterpretation(originalSourceFile.getSchemaInterpretation());
-        file.setState(originalSourceFile.getState());
-        file.setTableName(tableName);
-        sourceFileEntityMgr.create(file, targetTenant);
+    public void copySourceFile(String originalSourceFileName, String targetTableName, String targetTenant) {
+        sourceFileProxy.copySourceFile(getShortTenantId(), originalSourceFileName, targetTableName, targetTenant);
+    }
+
+    @Override
+    public SourceFile getByTableNameCrossTenant(String tableName) {
+        return sourceFileProxy.findByTableNameCrossTenant(tableName);
+    }
+
+    private String getShortTenantId() {
+        return MultiTenantContext.getTenantId();
     }
 }

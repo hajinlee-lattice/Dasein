@@ -2,25 +2,26 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.pls.service.impl.HdfsFileHttpDownloader.DownloadRequestBuilder;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 @Component("dataFileProviderService")
 public class DataFileProviderServiceImpl implements DataFileProviderService {
@@ -32,25 +33,25 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
-    @Autowired
+
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    @Autowired
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    @Inject
+    private SourceFileProxy sourceFileProxy;
 
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
-            String filter) throws IOException {
-
+            String filter) {
         HdfsFileHttpDownloader downloader = getDownloader(modelId, mimeType, filter);
         downloader.downloadFile(request, response);
     }
 
     @Override
     public void downloadPivotFile(HttpServletRequest request, HttpServletResponse response, String modelId,
-            String mimeType) throws IOException {
+            String mimeType) {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         validateModelSummary(summary, modelId);
         String filePath = summary.getPivotArtifactPath();
@@ -59,7 +60,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Override
     public void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId,
-            String mimeType) throws IOException {
+            String mimeType) {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         validateModelSummary(summary, modelId);
         String trainingFilePath = summary.getModelSummaryConfiguration()
@@ -81,7 +82,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     public void downloadFileByApplicationId(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String applicationId, String fileDisplayName) throws IOException {
         log.info(String.format("Download file with applicationId=%s", applicationId));
-        SourceFile sourceFile = sourceFileEntityMgr.findByApplicationId(applicationId);
+        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getTenantId(), applicationId);
         validateSourceFile(sourceFile);
         downloadSourceFileCsv(request, response, mimeType, fileDisplayName, sourceFile);
     }
@@ -90,7 +91,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     public void downloadFileByFileName(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName) throws IOException {
         log.info(String.format("Download file with fileName=%s", fileName));
-        SourceFile sourceFile = sourceFileEntityMgr.findByName(fileName);
+        SourceFile sourceFile = sourceFileProxy.findByName(MultiTenantContext.getTenantId(), fileName);
         validateSourceFile(sourceFile);
         downloadSourceFileCsv(request, response, mimeType, sourceFile.getDisplayName(), sourceFile);
     }
@@ -122,7 +123,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Override
     public void downloadFileByPath(HttpServletRequest request, HttpServletResponse response, String mimeType,
-            String filePath) throws IOException {
+            String filePath) {
         if (filePath != null && !filePath.isEmpty()) {
             CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType, filePath, null);
             downloader.downloadFile(request, response);

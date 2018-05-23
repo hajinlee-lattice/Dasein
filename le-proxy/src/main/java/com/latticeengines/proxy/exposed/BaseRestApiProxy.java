@@ -233,6 +233,10 @@ public abstract class BaseRestApiProxy {
         return post(method, url, body, returnValueClazz, true, true);
     }
 
+    protected <B> void post(final String method, final String url, final B body) {
+        post(method, url, body, Object.class, true, false);
+    }
+
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {
         return post(method, url, body, returnValueClazz, true, false);
     }

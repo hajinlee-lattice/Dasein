@@ -1,28 +1,30 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.lp.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.lp.entitymgr.SourceFileEntityMgr;
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class SourceFileEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class SourceFileEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private SourceFileEntityMgr sourceFileEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "functional")
@@ -47,7 +49,7 @@ public class SourceFileEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprec
         tenant1.setId("TENANT1");
         tenant1.setName("TENANT1");
         tenantEntityMgr.create(tenant1);
-        setupSecurityContext(tenant1);
+        MultiTenantContext.setTenant(tenant1);
 
         String name = "SomeFile";
         String applicationId = "applicationId_00010";

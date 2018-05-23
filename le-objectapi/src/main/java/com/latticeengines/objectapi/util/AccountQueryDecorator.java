@@ -24,7 +24,14 @@ public class AccountQueryDecorator extends QueryDecorator {
 
     @Override
     public String[] getFreeTextSearchAttrs() {
-        return new String[] {InterfaceName.CompanyName.name(), InterfaceName.Website.name() };
+        return new String[] { //
+                InterfaceName.CompanyName.name(), //
+                InterfaceName.Website.name(), //
+                InterfaceName.City.name(), //
+                InterfaceName.State.name(), //
+                InterfaceName.Country.name(), //
+                InterfaceName.AccountId.name() //
+        };
     }
 
     @Override

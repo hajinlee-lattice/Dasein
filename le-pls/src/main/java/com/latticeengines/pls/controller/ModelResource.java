@@ -158,8 +158,7 @@ public class ModelResource {
 
         SourceFile sourceFile = sourceFileService.findByTableName(modelSummary.getTrainingTableName());
         if (sourceFile != null) {
-            sourceFileService.copySourceFile(clone.getName(), sourceFile,
-                    tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId()));
+            sourceFileService.copySourceFile(sourceFile.getName(), clone.getName(), MultiTenantContext.getTenantId());
         } else {
             log.warn("Unable to find source file for model summary:" + modelSummary.getName());
         }
@@ -239,7 +238,6 @@ public class ModelResource {
     @ApiOperation(value = "Get customer provided attributes for model")
     public ResponseDocument<List<VdbMetadataField>> getModelAttributes(@PathVariable String modelId) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-
         return ResponseDocument
                 .successResponse(filterAttributesForModelReview(modelMetadataService.getMetadata(modelId),
                         SchemaInterpretation.valueOf(modelSummary.getSourceSchemaInterpretation())));

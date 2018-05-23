@@ -20,8 +20,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -30,12 +32,10 @@ import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component
 public abstract class ModelServiceBase implements ModelService {
@@ -59,7 +59,7 @@ public abstract class ModelServiceBase implements ModelService {
     protected TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    protected SourceFileEntityMgr sourceFileEntityMgr;
+    protected SourceFileService sourceFileService;
 
     @Value("${pls.modelingservice.basedir}")
     protected String customerBaseDir;
@@ -137,7 +137,7 @@ public abstract class ModelServiceBase implements ModelService {
             }
         }
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
-        SourceFile sourceFile = sourceFileEntityMgr.getByTableName(cpTrainingTableName);
+        SourceFile sourceFile = sourceFileService.getByTableNameCrossTenant(cpTrainingTableName);
 
         JsonNode newModelSummary = null;
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Construct new model summary")) {

@@ -1,38 +1,45 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.lp.entitymgr.impl;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.lp.dao.SourceFileDao;
+import com.latticeengines.apps.lp.entitymgr.SourceFileEntityMgr;
+import com.latticeengines.apps.lp.repository.writer.SourceFileWriterRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.dao.SourceFileDao;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
-@Component("sourceFileEntityMgr")
-public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> implements SourceFileEntityMgr {
+@Component
+public class SourceFileEntityMgrImpl extends BaseEntityMgrRepositoryImpl<SourceFile, Long>
+        implements SourceFileEntityMgr {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(SourceFileEntityMgr.class);
+    @Inject
+    private SourceFileDao dao;
 
-    @Autowired
-    private SourceFileDao sourceFileDao;
+    @Inject
+    private SourceFileWriterRepository repository;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Override
+    public BaseJpaRepository<SourceFile, Long> getRepository() {
+        return repository;
+    }
+
+    @Override
     public BaseDao<SourceFile> getDao() {
-        return sourceFileDao;
+        return dao;
     }
 
     @Override
@@ -57,30 +64,38 @@ public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public SourceFile findByName(String name) {
-        return sourceFileDao.findByName(name);
+        return dao.findByName(name);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public SourceFile findByNameFromWriter(String name) {
+        return dao.findByName(name);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public SourceFile findByApplicationId(String applicationId) {
-        return sourceFileDao.findByApplicationId(applicationId);
+        return dao.findByApplicationId(applicationId);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public SourceFile findByTableName(String tableName) {
-        return sourceFileDao.findByTableName(tableName);
+        return dao.findByTableName(tableName);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public SourceFile getByTableName(String tableName) {
-        return sourceFileDao.getByTableName(tableName);
+        return dao.getByTableName(tableName);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<SourceFile> findAllSourceFiles() {
-        return sourceFileDao.findAllSourceFiles();
+        return dao.findAllSourceFiles();
     }
+
+
 }

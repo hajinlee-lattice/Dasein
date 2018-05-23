@@ -24,7 +24,11 @@ public class ContactQueryDecorator extends QueryDecorator {
 
     @Override
     public String[] getFreeTextSearchAttrs() {
-        return new String[] { InterfaceName.ContactName.toString(), InterfaceName.Email.toString() };
+        return new String[] { //
+                InterfaceName.ContactName.name(), //
+                InterfaceName.CompanyName.name(), //
+                InterfaceName.Email.name() //
+        };
     }
 
     @Override

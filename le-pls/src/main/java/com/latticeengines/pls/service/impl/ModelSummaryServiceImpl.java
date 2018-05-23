@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.quartz.DisallowConcurrentExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,8 +33,8 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.pls.service.SourceFileService;
 
 @DisallowConcurrentExecution
 @Component("modelSummaryService")
@@ -53,20 +54,20 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public static final String NO_PREDICTORS_WITH_MORE_THAN_200_DISTINCTVALUES = "NoPredictorsWithMoreThan200DistinctValues";
     public static final String LATTICE_GT200_DISCRETE_VALUE = "LATTICE_GT200_DiscreteValue";
 
-    @Autowired
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    @Autowired
+    @Inject
     private KeyValueEntityMgr keyValueEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelSummaryParser modelSummaryParser;
 
-    @Autowired
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    @Inject
+    private SourceFileService sourceFileService;
 
     @Override
     public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
@@ -231,7 +232,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         keyValueEntityMgr.update(keyValue);
     }
 
-    public void fixBusinessAnnualSalesAbs(ModelSummary summary) {
+    private void fixBusinessAnnualSalesAbs(ModelSummary summary) {
         ObjectMapper objectMapper = new ObjectMapper();
         KeyValue keyValue = summary.getDetails();
         JsonNode details = null;
@@ -266,7 +267,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         keyValueEntityMgr.update(keyValue);
     }
 
-    public void fixLATTICEGT200DiscreteValue(ModelSummary summary) {
+    private void fixLATTICEGT200DiscreteValue(ModelSummary summary) {
         ObjectMapper objectMapper = new ObjectMapper();
         KeyValue keyValue = summary.getDetails();
         ObjectNode details = null;
@@ -302,8 +303,8 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 predictorsNodeModified.add(predictorNode);
             }
         }
-        details.put(PREDICTORS, predictorsNodeModified);
-        details.put(NO_PREDICTORS_WITH_MORE_THAN_200_DISTINCTVALUES, BooleanNode.TRUE);
+        details.set(PREDICTORS, predictorsNodeModified);
+        details.set(NO_PREDICTORS_WITH_MORE_THAN_200_DISTINCTVALUES, BooleanNode.TRUE);
         keyValue.setPayload(details.toString());
         keyValueEntityMgr.update(keyValue);
     }
@@ -324,7 +325,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         }
 
         for (ModelSummary summary : summaries) {
-            summary.setPredictors(new ArrayList<Predictor>());
+            summary.setPredictors(new ArrayList<>());
             summary.setDetails(null);
             getModelSummaryHasRating(summary);
             getModelSummaryTrainingFileState(summary);
@@ -336,7 +337,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (summary.getTrainingTableName() == null || summary.getTrainingTableName().isEmpty()) {
             summary.setTrainingFileExist(false);
         } else {
-            SourceFile sourceFile = sourceFileEntityMgr.getByTableName(summary.getTrainingTableName());
+            SourceFile sourceFile = sourceFileService.getByTableNameCrossTenant(summary.getTrainingTableName());
             if (sourceFile == null) {
                 summary.setTrainingFileExist(false);
             } else {

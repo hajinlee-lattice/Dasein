@@ -1,4 +1,4 @@
-package com.latticeengines.pls.dao;
+package com.latticeengines.apps.lp.dao;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public interface SourceFileDao extends BaseDao<SourceFile> {
     SourceFile findByName(String name);
 
     SourceFile findByApplicationId(String applicationId);
-    
+
     List<SourceFile> findAllSourceFiles();
 
     SourceFile findByTableName(String tableName);

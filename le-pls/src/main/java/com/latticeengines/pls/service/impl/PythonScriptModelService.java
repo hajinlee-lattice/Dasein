@@ -6,9 +6,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -31,7 +32,7 @@ public class PythonScriptModelService extends ModelServiceBase {
 
     private static final Logger log = LoggerFactory.getLogger(PythonScriptModelService.class);
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
     protected PythonScriptModelService() {
@@ -99,7 +100,7 @@ public class PythonScriptModelService extends ModelServiceBase {
         Tenant targetTenant = tenantEntityMgr.findByTenantId(targetTenantId);
         SourceFile sourceFile = sourceFileService.findByTableName(trainingTableName);
         if (sourceFile != null) {
-            sourceFileService.copySourceFile(cpTrainingTable.getName(), sourceFile, targetTenant);
+            sourceFileService.copySourceFile(sourceFile.getName(), cpTrainingTable.getName(), targetTenant.getId());
         }
         try {
             copyHdfsData(sourceTenantId, targetTenantId, eventTableName, cpTrainingTable.getName(),

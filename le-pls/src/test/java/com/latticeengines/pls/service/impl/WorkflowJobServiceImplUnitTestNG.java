@@ -43,10 +43,10 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class WorkflowJobServiceImplUnitTestNG {
@@ -55,7 +55,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     private WorkflowProxy workflowProxy;
 
     @Mock
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    private SourceFileProxy sourceFileProxy;
 
     @Mock
     private ModelSummaryService modelSummaryService;
@@ -254,7 +254,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     private void mockSourceFileEntityManager() {
-        when(sourceFileEntityMgr.findByApplicationId(anyString())).thenReturn(new SourceFile());
+        when(sourceFileProxy.findByApplicationId(any(), anyString())).thenReturn(new SourceFile());
     }
 
     private void mockModelSummaryService() {

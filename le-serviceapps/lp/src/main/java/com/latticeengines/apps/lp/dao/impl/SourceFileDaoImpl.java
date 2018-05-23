@@ -1,14 +1,14 @@
-package com.latticeengines.pls.dao.impl;
+package com.latticeengines.apps.lp.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.lp.dao.SourceFileDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.dao.SourceFileDao;
 
 @Component("sourceFileDao")
 public class SourceFileDaoImpl extends BaseDaoImpl<SourceFile> implements SourceFileDao {

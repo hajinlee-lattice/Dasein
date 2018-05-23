@@ -33,7 +33,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -51,11 +50,11 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("workflowJobService")
@@ -77,7 +76,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private WorkflowProxy workflowProxy;
 
     @Inject
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    private SourceFileProxy sourceFileProxy;
 
     @Inject
     private ModelSummaryService modelSummaryService;
@@ -389,7 +388,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Date nextInvokeDate = new DateTime(timeZone).plusDays(1).withTimeAtStartOfDay().toDate();
         boolean allowAutoSchedule = false;
         try {
-            allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(MultiTenantContext.getTenant().getId()),
+            allowAutoSchedule = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
                     LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
         } catch (Exception e) {
             log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
@@ -571,7 +570,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return false;
         }
 
-        SourceFile sourceFile = sourceFileEntityMgr.findByApplicationId(applicationId);
+        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getTenantId(), applicationId);
         return sourceFile != null;
     }
 

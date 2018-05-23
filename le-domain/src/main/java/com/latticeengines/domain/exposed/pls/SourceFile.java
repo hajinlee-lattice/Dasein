@@ -20,8 +20,10 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -33,22 +35,31 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @Entity
 @javax.persistence.Table(name = "SOURCE_FILE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME",
         "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasAuditingFields, HasApplicationId {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    @Basic(optional = false)
+    @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
 
     @JsonProperty("description")
-    @Column(name = "DESCRIPTION", nullable = true)
+    @Column(name = "DESCRIPTION")
     private String description;
 
     @JsonProperty("display_name")
-    @Column(name = "DISPLAY_NAME", nullable = true)
+    @Column(name = "DISPLAY_NAME")
     private String displayName;
 
     @JsonIgnore
@@ -60,13 +71,6 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
-    @Basic(optional = false)
-    @Column(name = "PID", unique = true, nullable = false)
-    private Long pid;
 
     @JsonProperty("path")
     @Column(name = "PATH", nullable = false, length = 2048)

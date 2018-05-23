@@ -17,7 +17,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -26,40 +29,50 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "TENANT")
 public class Tenant implements HasName, HasId<String>, HasPid {
-
-    @Column(name = "TENANT_ID", nullable = false, unique = true)
-    private String id;
-
-    @Column(name = "NAME", nullable = false, unique = true)
-    private String name;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "TENANT_PID", unique = true, nullable = false)
-    private Long pid;
-
-    @Column(name = "REGISTERED_TIME", nullable = false)
-    private Long registeredTime;
-
-    @Column(name = "UI_VERSION", nullable = false, unique = false)
-    private String uiVersion = "2.0";
-
-    @Column(name = "EXTERNAL_USER_EMAIL_SENT")
-    private Boolean emailSent = false;
-
-    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
-    private List<TargetMarket> targetMarkets;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
+
+    @JsonProperty("Identifier")
+    @Column(name = "TENANT_ID", nullable = false, unique = true)
+    private String id;
+
+    @JsonProperty("DisplayName")
+    @Column(name = "NAME", nullable = false, unique = true)
+    private String name;
+
+    @JsonProperty("Pid")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "TENANT_PID", unique = true, nullable = false)
+    private Long pid;
+
+    @JsonProperty("RegisteredTime")
+    @Column(name = "REGISTERED_TIME", nullable = false)
+    private Long registeredTime;
+
+    @JsonProperty("UIVersion")
+    @Column(name = "UI_VERSION", nullable = false, unique = false)
+    private String uiVersion = "2.0";
+
+    @JsonIgnore
+    @Column(name = "EXTERNAL_USER_EMAIL_SENT")
+    private Boolean emailSent = false;
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
+    private List<TargetMarket> targetMarkets;
 
     public Tenant() {
     }
@@ -69,37 +82,31 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     }
 
     @Override
-    @JsonProperty("DisplayName")
     public String getName() {
         return name;
     }
 
     @Override
-    @JsonProperty("DisplayName")
     public void setName(String name) {
         this.name = name;
     }
 
     @Override
-    @JsonProperty("Identifier")
     public String getId() {
         return id;
     }
 
     @Override
-    @JsonProperty("Identifier")
     public void setId(String id) {
         this.id = id;
     }
 
     @Override
-    @JsonProperty("Pid")
     public Long getPid() {
         return pid;
     }
 
     @Override
-    @JsonProperty("Pid")
     public void setPid(Long pid) {
         this.pid = pid;
     }
@@ -109,49 +116,40 @@ public class Tenant implements HasName, HasId<String>, HasPid {
         return JsonUtils.serialize(this);
     }
 
-    @JsonProperty("RegisteredTime")
     public Long getRegisteredTime() {
         return registeredTime;
     }
 
-    @JsonProperty("RegisteredTime")
     public void setRegisteredTime(Long registeredTime) {
         this.registeredTime = registeredTime;
     }
 
     @MetricField(name = "TenantId", fieldType = MetricField.FieldType.STRING)
-    @JsonIgnore
     private String tenantId() {
         return getId();
     }
 
-    @JsonProperty("UIVersion")
     public String getUiVersion() {
         return uiVersion;
     }
 
-    @JsonProperty("UIVersion")
     public void setUiVersion(String uiVersion) {
         this.uiVersion = uiVersion;
     }
 
-    @JsonIgnore
     public Boolean getEmailSent() {
         return emailSent;
     }
 
-    @JsonIgnore
     public void setEmailSent(Boolean emailSent) {
         this.emailSent = emailSent;
     }
 
     // TODO: Note - this is a terrible hack to avoid DP-2243
-    @JsonIgnore
     public List<TargetMarket> getTargetMarkets() {
         return targetMarkets;
     }
 
-    @JsonIgnore
     public void setTargetMarkets(List<TargetMarket> targetMarkets) {
         this.targetMarkets = targetMarkets;
     }
@@ -174,11 +172,8 @@ public class Tenant implements HasName, HasId<String>, HasPid {
             return false;
         Tenant other = (Tenant) obj;
         if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+            return other.id == null;
+        } else return id.equals(other.id);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atMost;
@@ -33,6 +34,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -40,9 +42,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
@@ -52,7 +53,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
     private static final String TENANT_ID = "TENANT1";
 
     @Mock
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    private SourceFileProxy sourceFileProxy;
 
     @Mock
     private SourceFile sourceFile;
@@ -152,10 +153,10 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFilePathProvider", enabled = true)
+    @Test(groups = { "functional" }, dataProvider = "dataFilePathProvider")
     public void testDownloadSourceFileCsv(final String mimeType, final String filePath) {
 
-        when(sourceFileEntityMgr.findByName(anyString())).thenReturn(sourceFile);
+        when(sourceFileProxy.findByName(any(), anyString())).thenReturn(sourceFile);
         doReturn(filePath).when(sourceFile).getPath();
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);

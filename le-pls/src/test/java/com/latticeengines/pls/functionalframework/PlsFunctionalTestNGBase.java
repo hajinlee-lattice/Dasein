@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
@@ -49,9 +48,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired
     private MarketoCredentialEntityMgr marketoCredentialEntityMgr;
-
-    @Autowired
-    private BucketMetadataEntityMgr bucketMetadataEntityMgr;
 
     @Value("${pls.test.functional.api:http://localhost:8080/}")
     private String hostPort;

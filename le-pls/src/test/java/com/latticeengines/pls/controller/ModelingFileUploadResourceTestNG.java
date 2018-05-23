@@ -6,12 +6,12 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -29,22 +29,23 @@ import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.repository.writer.SourceFileWriterRepository;
 
 public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv";
     private static final String COMPRESSED_PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv.gz";
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    @Inject
+    private SourceFileWriterRepository sourceFileRepository;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -55,7 +56,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeMethod
     public void beforeMethod() {
-        sourceFileEntityMgr.deleteAll();
+        sourceFileRepository.deleteAll();
     }
 
     private ResponseDocument<SourceFile> submitFile(boolean unnamed, String filePath, boolean compressed)
@@ -97,7 +98,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
         assertEquals(contents, expectedContents);
 
-        List<SourceFile> files = sourceFileEntityMgr.findAll();
+        List<SourceFile> files = sourceFileRepository.findAll();
         String path = fileResponse.getPath();
         foundTheFiles(path, files);
     }
@@ -112,7 +113,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
         assertEquals(contents, expectedContents);
 
-        List<SourceFile> files = sourceFileEntityMgr.findAll();
+        List<SourceFile> files = sourceFileRepository.findAll();
         foundTheFiles(path, files);
     }
 
@@ -129,7 +130,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
                 .getPath());
         assertEquals(contents, expectedContents);
 
-        List<SourceFile> files = sourceFileEntityMgr.findAll();
+        List<SourceFile> files = sourceFileRepository.findAll();
         foundTheFiles(path, files);
     }
 

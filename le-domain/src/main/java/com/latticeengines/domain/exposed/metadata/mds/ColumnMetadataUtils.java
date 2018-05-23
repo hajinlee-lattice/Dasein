@@ -47,6 +47,14 @@ public final class ColumnMetadataUtils {
             overwritee.setEntity(overwriter.getEntity());
         }
 
+        if (overwriter.getAttrState() != null) {
+            overwritee.setAttrState(overwriter.getAttrState());
+        }
+
+        if (overwriter.getShouldDeprecate() != null) {
+            overwritee.setShouldDeprecate(overwriter.getShouldDeprecate());
+        }
+
         // usage groups
         if (overwriter.getShouldDeprecate() != null) {
             overwritee.setShouldDeprecate(overwriter.getShouldDeprecate());

@@ -1,14 +1,16 @@
-package com.latticeengines.pls.entitymanager;
+package com.latticeengines.apps.lp.entitymgr;
 
 import java.util.List;
 
-import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public interface SourceFileEntityMgr extends BaseEntityMgr<SourceFile> {
+public interface SourceFileEntityMgr extends BaseEntityMgrRepository<SourceFile, Long> {
 
     SourceFile findByName(String name);
+
+    SourceFile findByNameFromWriter(String name);
 
     SourceFile findByApplicationId(String applicationId);
 

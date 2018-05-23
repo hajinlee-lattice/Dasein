@@ -42,10 +42,10 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
@@ -67,7 +67,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private ModelSummaryService modelSummaryService;
 
     @Autowired
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    private SourceFileService sourceFileService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -127,8 +127,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         }
     }
 
-    private void setupTwoTenants(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted)
-            throws IllegalArgumentException, Exception {
+    private void setupTwoTenants(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
         turnOffSslChecking();
         tenant1 = createTenant(scrTenantIsEncrypted);
         tenant2 = createTenant(dstTenantIsEncrypted);
@@ -188,7 +187,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         sourceFile.setPath(outputPath);
         sourceFile.setTableName(trainingTable.getName());
         sourceFile.setDisplayName(outputFileName);
-        sourceFileEntityMgr.create(sourceFile);
+        sourceFileService.create(sourceFile);
     }
 
     private void setupHdfs() throws IOException {
@@ -246,7 +245,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(provenance.get("TrainingTableName").asText(), newTrainingTableName);
         assertEquals(provenance.get("EventTableName").asText(), newEventTableName);
         assertEquals(provenance.get(ProvenancePropertyName.TrainingFilePath.getName()).asText(),
-                sourceFileEntityMgr.getByTableName(newTrainingTableName).getPath());
+                sourceFileService.getByTableNameCrossTenant(newTrainingTableName).getPath());
 
         paths = HdfsUtils.getFilesForDir(yarnConfiguration,
                 new Path(modelSummaryPath).getParent().getParent().toString(), ".*.model.json");
@@ -263,7 +262,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(summary.getTrainingTableName(), newTrainingTableName);
         assertEquals(summary.getEventTableName(), newEventTableName);
 
-        SourceFile newSourceFile = sourceFileEntityMgr.getByTableName(newTrainingTableName);
+        SourceFile newSourceFile = sourceFileService.getByTableNameCrossTenant(newTrainingTableName);
         assertNotNull(newSourceFile);
         assertEquals(newSourceFile.getDisplayName(), outputFileName);
         assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, newSourceFile.getPath()), FileUtils

@@ -119,7 +119,7 @@ public class PythonScriptModelCopyServiceImplTestNG extends PlsFunctionalTestNGB
         modelSummary.setId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
         modelSummary.setDisplayName("some model display name");
 
-        sourceFileService.copySourceFile("cpTrainingTable", sourceFile, modelCopyTargetTenant);
+        sourceFileService.copySourceFile(sourceFile.getName(), "cpTrainingTable", modelCopyTargetTenant.getId());
         pythonScriptModelService.copyHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
                 "AccountModel", "cpTrainingTable", "cpEventTable", modelSummary);
         String path = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration,
