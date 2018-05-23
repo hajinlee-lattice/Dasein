@@ -292,9 +292,10 @@ WHERE `Version` = '2.0.11';
 
 UPDATE `DataCloudVersion`
 SET
-  `AccountMasterHdfsVersion` = '2018-05-10_00-00-00_UTC',
+  `AccountMasterHdfsVersion` = '2018-05-23_05-41-11_UTC',
   `AccountLookupHdfsVersion` = '2018-05-10_00-00-00_UTC',
-  `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
+  `EnrichmentStatsVersion`      = '2018-05-10_00-00-00_UTC',
+  `DynamoTableSignature` = '20180523'
 WHERE `Version` = '2.0.12';
 
 SET SQL_SAFE_UPDATES = 1;
