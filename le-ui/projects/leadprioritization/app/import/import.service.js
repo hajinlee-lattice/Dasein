@@ -178,7 +178,7 @@ angular.module('lp.import')
                 nextLabel: 'Submit', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(){
                         $state.go(nextState); 
                     });
                 }
@@ -208,7 +208,7 @@ angular.module('lp.import')
                 nextLabel: 'Submit', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(){
                         $state.go(nextState); 
                     });
                 }
@@ -525,12 +525,12 @@ angular.module('lp.import')
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility) {
 
-	this.GetSchemaToLatticeFields = function(csvFileName, entity) {
+	this.GetSchemaToLatticeFields = function(csvFileName, entity, feedType) {
 	        var deferred = $q.defer();
 	        var params = { 
                 'entity':  entity,
                 'source': 'File',
-	            'feedType': entity + 'Schema' 
+	            'feedType': feedType || entity + 'Schema' 
             };
             if (!entity) {
                 params = {};
@@ -548,7 +548,7 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-	    this.GetFieldDocument = function(FileName, entity, schema) {
+	    this.GetFieldDocument = function(FileName, entity, schema, feedType) {
 	        var deferred = $q.defer();
 	        var entity = entity;
             var params = {};
@@ -556,7 +556,7 @@ angular.module('lp.import')
     	       params = {
                     'entity': entity,
                     'source': 'File',
-    	            'feedType': entity + 'Schema'
+    	            'feedType': feedType || entity + 'Schema'
                 }
             } else {
                 params = {
@@ -638,7 +638,7 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-	    this.startImportCsv = function(FileName, entity) {
+	    this.startImportCsv = function(FileName, entity, feedType) {
 	        var deferred = $q.defer();
 	        var result;
 	        var params = { 
@@ -646,7 +646,7 @@ angular.module('lp.import')
     	            'dataFileName': FileName,
     	            'source': 'File',
     	            'entity': entity,
-                    'feedType': entity + 'Schema' 
+                    'feedType': feedType || entity + 'Schema' 
                 };
 
 	        $http({

@@ -112,7 +112,7 @@ angular.module('lp.configureattributes.configure', [])
             }
         }
 
-        vm.addPeriod = function(array, form) {
+        vm.addPeriod = function(array, type, form) {
             var timestamp = new Date().valueOf(),
                 obj = {
                     eol: false,
@@ -132,8 +132,28 @@ angular.module('lp.configureattributes.configure', [])
 
             ConfigureAttributesStore.setOptions(vm.options);
 
+            vm.makeSpendOverTimes(type);
+
             if(form) {
                 form.$setDirty();
+            }
+        }
+
+        vm.spendOverTimes = {};
+        vm.makeSpendOverTimes = function(type) {
+            vm.spendOverTimes[type] = vm.spendOverTimes[type] || {};
+            for(var i in vm.options[type]) {
+                vm.spendOverTimes[type]['periods'] = vm.spendOverTimes[type]['periods'] || {};
+                for(var j in vm.options[type][i]) {
+                    var val = vm.options[type][i][j].Val,
+                        period = vm.options[type][i][j].Period;
+
+                    vm.spendOverTimes[type]['periods'][period] = vm.spendOverTimes[type]['periods'][period] || [];
+
+                    if(vm.spendOverTimes[type]['periods'][period].indexOf(val) === -1) {
+                        vm.spendOverTimes[type]['periods'][period].push(val);
+                    }
+                }
             }
         }
 

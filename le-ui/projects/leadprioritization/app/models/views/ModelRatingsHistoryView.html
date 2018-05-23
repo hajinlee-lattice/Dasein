@@ -29,7 +29,7 @@
 
 		        </li>
 
-		        <h4>Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
+		        <h4 ng-if="!vm.cdlIsEnabled">Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
 
 		    </ul><!-- End .history -->
 

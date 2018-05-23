@@ -352,7 +352,7 @@ angular.module('lp.models.ratings', [
 
 })
 .controller('ModelRatingsHistoryController', function ($scope, $rootScope, $stateParams,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, HistoricalABCDBuckets) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, HistoricalABCDBuckets, FeatureFlags) {
 
     var vm = this;
     angular.extend(vm, {
@@ -387,7 +387,7 @@ angular.module('lp.models.ratings', [
 
         const ordered = {};
         Object.keys(vm.historicalBuckets).sort().reverse().forEach(function(key) {
-          ordered[key] = vm.historicalBuckets[key];
+            ordered[key] = vm.historicalBuckets[key];
         });
 
         vm.historicalBuckets = ordered;
@@ -399,13 +399,15 @@ angular.module('lp.models.ratings', [
 
         // Add values for a specific key in object
         function pluckDeepKey(key, obj) {
-          if (_.has(obj, key)) {
-            return obj[key];
-          }
-          return _.reduce(_.flatten(_.map(obj, function(v) {
-            return _.isObject(v) ? pluckDeepKey(key, v) : [];
-          }), false), function(a,b) { return a + b });
+            if (_.has(obj, key)) {
+                return obj[key];
+            }
+            return _.reduce(_.flatten(_.map(obj, function(v) {
+                return _.isObject(v) ? pluckDeepKey(key, v) : [];
+            }), false), function(a,b) { return a + b });
         }
+
+        vm.cdlIsEnabled = FeatureFlags.EnableCdl;
 
     };
 

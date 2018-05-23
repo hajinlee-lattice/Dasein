@@ -35,7 +35,7 @@
                     </dl>
                 </li>
             </ul><!-- End .bucket-tiles -->
-            <h4>Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
+            <h4 ng-if="!vm.cdlIsEnabled">Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
 
         </div><!-- End .twelve.columns -->
     </div><!-- End .row -->

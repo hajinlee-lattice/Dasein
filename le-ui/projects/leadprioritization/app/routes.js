@@ -399,6 +399,15 @@ angular
         .state('home.model.ratings.history', {
             url: '/history',
             resolve: {
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
                 HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
@@ -424,12 +433,27 @@ angular
         })
         .state('home.model.ratings-demo', {
             url: '/ratings-demo',
+            resolve: {
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+            },
             params: {
                 pageIcon: 'ico-ratings',
                 pageTitle: 'Ratings'
             },
             views: {
                 "main@": {
+                    controller: function(FeatureFlags) {
+                        this.cdlIsEnabled = FeatureFlags.EnableCdl; //vm.cdlIsEnabled
+                    },
+                    controllerAs: 'vm',
                     templateUrl: 'app/models/views/ModelRatingsDemoView.html'
                 }
             }
@@ -1242,7 +1266,6 @@ angular
                     var deferred = $q.defer();
 
                     SfdcStore.getAccountIds().then(function (result) {
-                        console.log(result);
                         deferred.resolve(result.CRM);
                     });
 

@@ -563,7 +563,7 @@ angular
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
-                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -573,7 +573,7 @@ angular
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
 
-                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(result) {
                         deferred.resolve(result['Account']);
                     });
 
@@ -681,7 +681,7 @@ angular
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
-                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -691,7 +691,7 @@ angular
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
 
-                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
+                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType(), ImportWizardStore.getFeedType()).then(function(result) {
                         deferred.resolve(result['Account']);
                     });
 

@@ -20,6 +20,7 @@ angular.module('common.datacloud.explorer', [
 
     angular.extend(vm, {
         debug: (window.location.search.indexOf('debug=1') > 0),
+        Math: window.Math,
         label: {
             total: 'Total',
             premium: 'Premium',

@@ -14,7 +14,7 @@
                 ng-model="vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Val']" 
                 ng-change="vm.setOptions(form)"
                 ng-disabled="!(vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Period'])"
-                ng-options="option for option in vm.newArray(vm.periods[vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Period']])">
+                ng-options="option disable when vm.spendOverTimes['TotalSpendOvertime']['periods'][vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Period']].indexOf(option) >= 0 && option !== vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Val'] for option in vm.newArray(vm.periods[vm.options['TotalSpendOvertime'][index][item.periods[0].Cmp]['Period']])">
                     <option value="" hidden disabled>Select</option>
                 </select>
             <select id="options"
@@ -28,7 +28,7 @@
                 </select>
         </li>
         <li>
-            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.TotalSpendOvertime, form)" ng-disabled="!vm.validateSendOvertime('TotalSpendOvertime') || vm.spendOvertime.TotalSpendOvertime.length >= 5">
+            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.TotalSpendOvertime, 'TotalSpendOvertime', form)" ng-disabled="!vm.validateSendOvertime('TotalSpendOvertime') || vm.spendOvertime.TotalSpendOvertime.length >= 5">
                 <i class="fa fa-plus"></i> Add &amp; configure up to 5 time periods
             </button>
         </li>
@@ -49,7 +49,8 @@
                 ng-model="vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Val']" 
                 ng-change="vm.setOptions(form)"
                 ng-disabled="!(vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period'])"
-                ng-options="option for option in vm.newArray(vm.periods[vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period']])">
+                ng-options="option disable when vm.spendOverTimes['AvgSpendOvertime']['periods'][vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period']].indexOf(option) >= 0 && option !== vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Val'] for option in vm.newArray(vm.periods[vm.options['AvgSpendOvertime'][index][item.periods[0].Cmp]['Period']])">
+
                     <option value="" hidden disabled>Select</option>
                 </select>
             <input type="hidden" ng-model="vm.options['SpendChange']['BETWEEN']['Period']"  value="vm.getPeriod('BETWEEN', vm.steps[vm.step].data.SpendChange)" />
@@ -64,7 +65,7 @@
                 </select>
         </li>
         <li>
-            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.AvgSpendOvertime, form)" ng-disabled="!vm.validateSendOvertime('AvgSpendOvertime') || vm.spendOvertime.AvgSpendOvertime.length >= 5">
+            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.AvgSpendOvertime, 'AvgSpendOvertime', form)" ng-disabled="!vm.validateSendOvertime('AvgSpendOvertime') || vm.spendOvertime.AvgSpendOvertime.length >= 5">
                 <i class="fa fa-plus"></i> Add &amp; configure up to 5 time periods
             </button>
         </li>
