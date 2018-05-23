@@ -33,6 +33,12 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
+        public Builder microServiceHostPort(String microServiceHostPort) {
+            updateTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
+            rebuildTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
+            return this;
+        }
+
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.Transaction)) {

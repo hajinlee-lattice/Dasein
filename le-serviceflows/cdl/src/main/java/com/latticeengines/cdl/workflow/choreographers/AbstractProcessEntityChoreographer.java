@@ -34,7 +34,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private static final Logger log = LoggerFactory.getLogger(AbstractProcessEntityChoreographer.class);
 
     private boolean initialized = false;
-    private boolean hasBatchStore = false;
+    protected boolean hasBatchStore = false;
     protected boolean enforceRebuild = false;
     protected boolean hasSchemaChange = false;
     protected boolean hasActiveServingStore = false;

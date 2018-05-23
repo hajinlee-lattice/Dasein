@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -18,6 +20,9 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("RebuildEntities")
     private Set<BusinessEntity> rebuildEntities = new HashSet<>();
 
+    @JsonProperty("RebuildSteps")
+    private List<String> rebuildSteps = new ArrayList<>();
+
     @JsonProperty("IgnoreDataCloudChange")
     private Boolean ignoreDataCloudChange;
 
@@ -33,6 +38,14 @@ public class ProcessAnalyzeRequest {
 
     public void setRebuildEntities(Set<BusinessEntity> rebuildEntities) {
         this.rebuildEntities = rebuildEntities;
+    }
+
+    public List<String> getRebuildSteps() {
+        return rebuildSteps;
+    }
+
+    public void setRebuildSteps(List<String> rebuildSteps) {
+        this.rebuildSteps = rebuildSteps;
     }
 
     public String getUserId() {

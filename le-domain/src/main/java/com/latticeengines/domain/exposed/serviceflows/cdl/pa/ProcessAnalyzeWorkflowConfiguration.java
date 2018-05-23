@@ -1,9 +1,12 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -72,6 +75,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportToDynamo.setMicroServiceHostPort(microServiceHostPort);
             processRatingWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            processTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -134,6 +138,15 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder rebuildSteps(List<String> steps) {
+            HashSet<String> rebuildSteps = new HashSet<String>();
+            if (CollectionUtils.isNotEmpty(steps)) {
+                steps.forEach(s -> rebuildSteps.add(s.toLowerCase()));
+            }
+            awsPythonDataConfiguration.setRebuildSteps(rebuildSteps);
+            return this;
+        }
+
         public Builder ignoreDataCloudChange(Boolean ignoreDataCloudChange) {
             processStepConfiguration.setIgnoreDataCloudChange(ignoreDataCloudChange);
             return this;
@@ -145,7 +158,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder transformationGroup(TransformationGroup transformationGroup,
-                                           List<TransformDefinition> stdTransformDefns) {
+                List<TransformDefinition> stdTransformDefns) {
             processRatingWorkflowBuilder.transformationGroup(transformationGroup, stdTransformDefns);
             return this;
         }

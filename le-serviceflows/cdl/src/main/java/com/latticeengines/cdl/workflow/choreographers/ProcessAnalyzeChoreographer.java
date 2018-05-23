@@ -17,12 +17,13 @@ import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
 import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
-import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
+import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.BaseChoreographer;
@@ -84,7 +85,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         } else if (isTransactionStep(seq)) {
             skip = transactionChoreographer.skipStep(step, seq);
         } else if (isApsGenerationStep(step)) {
-            skip = skipApsGeneration();
+            skip = skipApsGeneration(step);
         } else if (isExportToRedshiftStep(step)) {
             skip = skipExportToRedshiftStep(step);
         } else if (isExportToDynamoStep(step)) {
@@ -154,14 +155,21 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         return step.name().equals(awsApsGeneratorStep.name());
     }
 
-    private boolean skipApsGeneration() {
+    private boolean skipApsGeneration(AbstractStep<? extends BaseStepConfiguration> step) {
         boolean skip = false;
-        if (!transactionChoreographer.update && !transactionChoreographer.rebuild) {
-            log.info("Skip APS generation because there is no change in Transaction data.");
+        if (!transactionChoreographer.update && !transactionChoreographer.rebuild && !rebuildAps(step)) {
+            log.info("Skip APS generation because there is no change in Transaction data or no enforced rebuild.");
             skip = true;
         }
         return skip;
     }
 
+    private boolean rebuildAps(AbstractStep<? extends BaseStepConfiguration> step) {
+        AWSPythonBatchConfiguration configuration = (AWSPythonBatchConfiguration) step.getConfiguration();
+        if (CollectionUtils.isNotEmpty(configuration.getRebuildSteps())) {
+            return configuration.getRebuildSteps().contains(step.name().toLowerCase());
+        }
+        return false;
+    }
 
 }

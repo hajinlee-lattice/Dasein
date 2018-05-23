@@ -27,6 +27,8 @@ import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfiguration> extends AbstractStep<T>
         implements ApplicationContextAware {
+    private static final String AWS_PYTHON_BATCH_CONFIGURATION = "AWS_PYTHON_BATCH_CONFIGURATION";
+
     private static Logger log = LoggerFactory.getLogger(BaseAwsPythonBatchStep.class);
 
     @Value("${hadoop.fs.web.defaultFS}")
@@ -54,32 +56,68 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
     @Override
     public void execute() {
         try {
-            config = getConfiguration();
-            setupConfig(config);
-            if (CollectionUtils.isEmpty(config.getInputPaths())) {
-                log.info("There's no input paths generated for Aps!");
+            log.info("Inside BaseAwsPythonBatchStep execute().");
+            if (configuration.isSubmission()) {
+                config = getObjectFromContext(AWS_PYTHON_BATCH_CONFIGURATION, AWSPythonBatchConfiguration.class);
+                if (config != null) {
+                    log.info("There's batch job running, jobId=", config.getJobId());
+                    return;
+                }
+                config = configuration;
+                setupConfig(config);
+                if (config.isRunInAws()) {
+                    executeInAws();
+                }
+                putObjectInContext(AWS_PYTHON_BATCH_CONFIGURATION, config);
                 return;
             }
-            log.info("Inside BaseAwsPythonBatchStep execute(), runInAws=" + config.isRunInAws());
-            boolean result = false;
-            if (config.isRunInAws()) {
-                result = executeInAws();
-            } else {
-                result = executeInline();
+
+            config = getObjectFromContext(AWS_PYTHON_BATCH_CONFIGURATION, AWSPythonBatchConfiguration.class);
+            if (config != null && config.isRunInAws()) {
+                waitForCompletion();
+                return;
             }
-            if (result) {
-                afterComplete(config);
-            }
+            submitAndWaitForCompletion();
+
         } catch (Exception ex) {
             log.error("Failed to run Python App!", ex);
         }
     }
 
+    private void submitAndWaitForCompletion() {
+        if (config == null) {
+            config = configuration;
+            setupConfig(config);
+        }
+        if (CollectionUtils.isEmpty(config.getInputPaths())) {
+            log.info("There's no input paths generated for Aps!");
+            return;
+        }
+
+        boolean result = false;
+        if (config.isRunInAws()) {
+            executeInAws();
+            result = waitForCompletion();
+        } else {
+            result = executeInline();
+        }
+        log.info("Submitted Aws Batch Job, result=" + result);
+    }
+
+    public boolean waitForCompletion() {
+        String batchJobId = config.getJobId();
+        boolean result = batchService.waitForCompletion(batchJobId, 1000 * 60 * 300L);
+        afterComplete(config);
+        log.info("Finished waiting for Aws Batch Job, result=" + result);
+        return result;
+    }
+
     private boolean executeInAws() {
         JobRequest jobRequest = createJobRequest();
-        String jobId = batchService.submitJob(jobRequest);
-        boolean result = batchService.waitForCompletion(jobId, 1000 * 60 * 300L);
-        log.info("Job name=" + jobName + " Job id=" + jobId + " is successful=" + result);
+        String batchJobId = batchService.submitJob(jobRequest);
+        config.setJobId(batchJobId);
+        boolean result = StringUtils.isNotBlank(batchJobId);
+        log.info("Job name=" + jobName + " Job id=" + batchJobId + " is submitted=" + result);
         return result;
     }
 
@@ -93,7 +131,6 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         jobRequest.setJobDefinition("AWS-Python-Workflow-Job-Definition");
         jobRequest.setJobQueue("AWS-Python-Workflow-Job-Queue");
 
-        config.setRunInAws(false);
         Map<String, String> envs = getRuntimeEnvs();
         jobRequest.setEnvs(envs);
         return jobRequest;
@@ -118,8 +155,7 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         try {
             ProcessExecutor executor = new ProcessExecutor().directory(getPythonWorkspace());
             executor = executor.environment(envs) //
-                    .command("bash", "pythonlauncher.sh", getCondaEnv(), getPythonScript())
-                    .redirectOutput(System.out);
+                    .command("bash", "pythonlauncher.sh", getCondaEnv(), getPythonScript()).redirectOutput(System.out);
             ProcessResult result = executor.execute();
             int exit = result.getExitValue();
             log.info("Exit code of python command: " + exit);
@@ -158,5 +194,4 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         log.info("Using python script dir = " + scriptDir);
         return scriptDir;
     }
-
 }

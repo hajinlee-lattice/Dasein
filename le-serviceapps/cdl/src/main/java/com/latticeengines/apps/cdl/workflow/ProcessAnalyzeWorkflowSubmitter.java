@@ -225,6 +225,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .importAndDeleteJobIds(actionAndJobIds.getRight()) //
                 .actionIds(actionAndJobIds.getLeft()) //
                 .rebuildEntities(request.getRebuildEntities()) //
+                .rebuildSteps(request.getRebuildSteps()) //
                 .ignoreDataCloudChange(request.getIgnoreDataCloudChange()) //
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
