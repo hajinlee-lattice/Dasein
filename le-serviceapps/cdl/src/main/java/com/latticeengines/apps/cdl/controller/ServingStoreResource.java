@@ -17,10 +17,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,13 +40,18 @@ public class ServingStoreResource {
     @Inject
     private ServingStoreService servingStoreService;
 
+    @Inject
+    private DataCollectionService dataCollectionService;
+
     @GetMapping(value = "/decoratedmetadata/count")
     @ResponseBody
     @ApiOperation(value = "Get decorated serving store metadata")
     public Mono<Long> getDecoratedMetadataCount( //
             @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
-            @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups) {
-        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, groups, false);
+            @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups,
+            @RequestParam(name = "version", required = false) DataCollection.Version version
+    ) {
+        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, version, groups, false);
         return flux.count();
     }
 
@@ -54,10 +62,11 @@ public class ServingStoreResource {
             @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
             @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
             @RequestParam(name = "offset", required = false) Integer offset, //
-            @RequestParam(name = "limit", required = false) Integer limit //
+            @RequestParam(name = "limit", required = false) Integer limit, //
+            @RequestParam(name = "version", required = false) DataCollection.Version version
     ) {
         boolean ordered = (offset != null || limit != null);
-        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, groups, ordered);
+        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, version, groups, ordered);
         if (offset != null && offset > 0) {
             flux = flux.skip(offset);
         }
@@ -67,15 +76,25 @@ public class ServingStoreResource {
         return flux;
     }
 
-    private Flux<ColumnMetadata> getFlux(String customerSpace, BusinessEntity entity,
+    private Flux<ColumnMetadata> getFlux(String customerSpace, BusinessEntity entity, DataCollection.Version version,
             List<ColumnSelection.Predefined> groups, boolean ordered) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         Flux<ColumnMetadata> flux;
         if (ordered) {
-            flux = servingStoreService.getFullyDecoratedMetadataInOrder(entity);
+            if (version == null) {
+                flux = servingStoreService.getFullyDecoratedMetadataInOrder(entity,
+                        dataCollectionService.getActiveVersion(customerSpace));
+            } else {
+                flux = servingStoreService.getFullyDecoratedMetadataInOrder(entity, version);
+            }
         } else {
-            flux = servingStoreService.getFullyDecoratedMetadata(entity).sequential();
+            if (version == null) {
+                flux = servingStoreService.getFullyDecoratedMetadata(entity,
+                        dataCollectionService.getActiveVersion(customerSpace)).sequential();
+            } else {
+                flux = servingStoreService.getFullyDecoratedMetadata(entity, version).sequential();
+            }
         }
         flux = flux //
                 .doOnSubscribe(s -> {

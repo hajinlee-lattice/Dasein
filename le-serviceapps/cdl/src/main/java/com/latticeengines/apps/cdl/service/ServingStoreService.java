@@ -11,8 +11,8 @@ public interface ServingStoreService {
 
     ParallelFlux<ColumnMetadata> getSystemMetadata(BusinessEntity entity, DataCollection.Version version);
 
-    ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity);
+    ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version);
 
-    Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity);
+    Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity, DataCollection.Version version);
 
 }

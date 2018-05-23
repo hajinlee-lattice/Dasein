@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
@@ -32,6 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -41,6 +44,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntityStepConfiguration>
@@ -58,6 +62,9 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -113,16 +120,31 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         MatchTransformerConfig config = new MatchTransformerConfig();
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(customerSpace.toString()));
-        UnionSelection us = new UnionSelection();
-        Map<ColumnSelection.Predefined, String> ps = new HashMap<>();
-        ps.put(ColumnSelection.Predefined.Segment, "2.0");
+
+        List<ColumnMetadata> segmentColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment);
+        List<ColumnMetadata> modelColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model);
+        List<Column> cols = new ArrayList<>();
         ColumnSelection cs = new ColumnSelection();
-        List<Column> cols = Arrays.asList(new Column(DataCloudConstants.ATTR_LDC_DOMAIN),
-                new Column(DataCloudConstants.ATTR_LDC_NAME));
+        Set<String> uniqueNames = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(segmentColumns)) {
+            for (ColumnMetadata cm : segmentColumns) {
+                if (!uniqueNames.contains(cm.getAttrName())) {
+                    cols.add(new Column(cm.getAttrName()));
+                    uniqueNames.add(cm.getAttrName());
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(modelColumns)) {
+            for (ColumnMetadata cm : modelColumns) {
+                if (!uniqueNames.contains(cm.getAttrName())) {
+                    cols.add(new Column(cm.getAttrName()));
+                    uniqueNames.add(cm.getAttrName());
+                }
+            }
+        }
+
         cs.setColumns(cols);
-        us.setPredefinedSelections(ps);
-        us.setCustomSelection(cs);
-        matchInput.setUnionSelection(us);
+        matchInput.setCustomSelection(cs);
 
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));

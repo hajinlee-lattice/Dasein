@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.attribute.PrimaryField;
@@ -32,6 +33,9 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
 
     @Inject
     private CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @Inject
     private ServingStoreService servingStoreService;
@@ -67,7 +71,8 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
 
         Set<String> ids = getExternalSystemIds(type);
         if (CollectionUtils.isNotEmpty(ids)) {
-            ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account);
+            ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account,
+                    dataCollectionService.getActiveVersion(customerSpace));
             systems = cms.flatMap(cm -> {
                 if (cm.isEnabledFor(ColumnSelection.Predefined.LookupId) && ids.contains(cm.getAttrName())) {
                     String attrName = cm.getAttrName();
@@ -134,7 +139,8 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
         CDLExternalSystem externalSystem = getExternalSystem(customerSpace);
         Set<String> crmIds = new HashSet<>(externalSystem.getCRMIdList());
         if (CollectionUtils.isNotEmpty(crmIds)) {
-            ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account);
+            ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account,
+                    dataCollectionService.getActiveVersion(customerSpace));
             fields = cms.flatMap(cm -> {
                 if (crmIds.contains(cm.getAttrName())) {
                     String attrName = cm.getAttrName();

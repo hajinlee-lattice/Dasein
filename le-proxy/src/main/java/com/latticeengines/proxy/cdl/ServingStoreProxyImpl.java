@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -64,6 +65,25 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
         List<String> params = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(groups)) {
             url += "?groups=" + StringUtils.join(groups, ",");
+        }
+        return getFlux("serving store metadata", url, ColumnMetadata.class);
+    }
+
+    @Override
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+                                                     List<ColumnSelection.Predefined> groups,
+                                                     DataCollection.Version version) {
+        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
+                shortenCustomerSpace(customerSpace), entity);
+        if (version != null) {
+            url += "?version=" + version.toString();
+            if (CollectionUtils.isNotEmpty(groups)) {
+                url += "&groups=" + StringUtils.join(groups, ",");
+            }
+        } else {
+            if (CollectionUtils.isNotEmpty(groups)) {
+                url += "?groups=" + StringUtils.join(groups, ",");
+            }
         }
         return getFlux("serving store metadata", url, ColumnMetadata.class);
     }

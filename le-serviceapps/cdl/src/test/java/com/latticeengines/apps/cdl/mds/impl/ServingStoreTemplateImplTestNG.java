@@ -16,6 +16,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
@@ -62,8 +63,11 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private void loadViaMds() {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        DataCollection.Version active = dataCollectionProxy.getActiveVersion(customerSpace);
         try (PerformanceTimer timer = new PerformanceTimer("Load full serving store schema.")) {
-            ParallelFlux<ColumnMetadata> pFlux = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account);
+            ParallelFlux<ColumnMetadata> pFlux = servingStoreService.getFullyDecoratedMetadata(
+                    BusinessEntity.Account, active);
             List<ColumnMetadata> cms = pFlux.sequential().collectList().block();
             Assert.assertNotNull(cms);
             Assert.assertEquals(cms.size(), 21734L);

@@ -10,13 +10,14 @@ import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.core.mds.AttrConfigDecorator;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratedMetadataStore;
-import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component
 public class CustomizedMetadataStoreImpl extends
-        DecoratedMetadataStore<Namespace1<BusinessEntity>, Namespace2<BusinessEntity, DataCollection.Version>, Namespace2<String, BusinessEntity>>
+        DecoratedMetadataStore<Namespace2<BusinessEntity, DataCollection.Version>, Namespace2<BusinessEntity,
+                DataCollection.Version>,
+                Namespace2<String, BusinessEntity>>
         implements CustomizedMetadataStore {
 
     private final CDLNamespaceService cdlNamespaceService;
@@ -30,17 +31,15 @@ public class CustomizedMetadataStoreImpl extends
         this.cdlNamespaceService = cdlNamespaceService;
     }
 
-    // (entity) -> (tenantId, entity)
     @Override
-    protected Namespace2<String, BusinessEntity> projectDecoratorNamespace(Namespace1<BusinessEntity> namespace) {
+    protected Namespace2<String, BusinessEntity> projectDecoratorNamespace(Namespace2<BusinessEntity, DataCollection.Version> namespace) {
         return cdlNamespaceService.prependTenantId(namespace);
     }
 
-    // (entity) -> (entity, version)
     @Override
     protected Namespace2<BusinessEntity, DataCollection.Version> projectBaseNamespace(
-            Namespace1<BusinessEntity> namespace) {
-        return cdlNamespaceService.appendActiveVersion(namespace);
+            Namespace2<BusinessEntity, DataCollection.Version> namespace) {
+        return namespace;
     }
 
 }

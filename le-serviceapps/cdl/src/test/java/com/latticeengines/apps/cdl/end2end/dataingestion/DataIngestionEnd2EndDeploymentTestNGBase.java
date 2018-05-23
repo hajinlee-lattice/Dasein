@@ -148,8 +148,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_1_CONTACT_4 = 68;
 
     private static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
-    static final long SEGMENT_2_ACCOUNT_1 = 12;
-    static final long SEGMENT_2_CONTACT_1 = 12;
+    static final long SEGMENT_2_ACCOUNT_1 = 13;
+    static final long SEGMENT_2_CONTACT_1 = 13;
     static final long SEGMENT_2_ACCOUNT_2 = 45;
     static final long SEGMENT_2_CONTACT_2 = 49;
     static final long SEGMENT_2_ACCOUNT_2_REBUILD = 44;
@@ -607,6 +607,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return checkpointService.countTableRole(role);
     }
 
+    long countTableRole(TableRoleInCollection role, DataCollection.Version version) {
+        return checkpointService.countTableRole(role, version);
+    }
+
     long countInRedshift(BusinessEntity entity) {
         return checkpointService.countInRedshift(entity);
     }
@@ -771,9 +775,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 Arrays.asList("CALIFORNIA", "TEXAS", "MICHIGAN", "NEW YORK"));
         BucketRestriction stateRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "LDC_State"), stateBkt);
-        Bucket techBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("Moderate"));
+        Bucket techBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("SEGMENT_5"));
         BucketRestriction techRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "BmbrSurge_EmployeeScreening_Intent"), techBkt);
+                new AttributeLookup(BusinessEntity.Account, "SpendAnalyticsSegment"), techBkt);
         Restriction accountRestriction = Restriction.builder().or(stateRestriction, techRestriction).build();
 
         Bucket titleBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
