@@ -23,7 +23,7 @@ public class HdfsPodContext {
 
     public static String getHdfsPodId() {
         if (StringUtils.isBlank(HdfsPodContext.podId.get())) {
-            HdfsPodContext.changeHdfsPodId(getDefaultHdfsPodId());
+            HdfsPodContext.podId.set(getDefaultHdfsPodId());
         }
         return HdfsPodContext.podId.get();
     }
