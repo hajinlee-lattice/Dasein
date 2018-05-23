@@ -177,13 +177,23 @@ angular.module('common.attributes')
             Select: []
         };
 
+        var original = this.getData('original').original;
+
         if (!activate) {
             usage.usage = $stateParams.section;
             data.Deselect = [];
         }
 
-        this.data.config.Subcategories.forEach(function(item) {
-            item.Attributes.forEach(function(attr) {
+        this.data.config.Subcategories.forEach(function(item, index) {
+            var oSub = original.Subcategories[index];
+
+            item.Attributes.forEach(function(attr, i) {
+                var oAttr = oSub.Attributes[i];
+                
+                if (oAttr.Selected === attr.Selected) {
+                    return;
+                }
+
                 if (attr.Selected) {
                     data.Select.push(attr.Attribute);
                 } else if (!activate) {
@@ -192,10 +202,10 @@ angular.module('common.attributes')
             });
         });
         
-        this.setData('original', angular.copy(this.data.config));
         
         this.putConfig(type, category, usage, data).then(function() {
-            console.log('save', activate, type, category, usage, data);
+            store.setData('original', JSON.parse(JSON.stringify(store.data.config)));
+
             $timeout(function() {
                 $state.reload();
             }, 500);

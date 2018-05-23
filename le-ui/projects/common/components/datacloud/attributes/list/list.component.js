@@ -3,7 +3,7 @@ angular.module('common.attributes.list', [])
 .component('attrResultsList', {
     templateUrl: '/components/datacloud/attributes/list/list.component.html',
     bindings: {
-        filters: '< '
+        filters: '<'
     },
     controller: function ($state, $stateParams, AttrConfigStore) {
         var vm = this;

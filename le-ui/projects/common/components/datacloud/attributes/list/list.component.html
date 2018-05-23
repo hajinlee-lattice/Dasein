@@ -1,7 +1,7 @@
 <div class="attr-results-container">
     <ul class="attr-pagination-top" ng-if="$ctrl.subcategory || filteredList.length > $ctrl.filters.pagesize">
         <li class="attr-back-text pull-left" ng-if="$ctrl.subcategory">
-            <a href="#" ng-click="$ctrl.back()">Back</a> | {{$ctrl.subcategory}}
+            <span ng-click="$ctrl.back()"><i class="fa fa-arrow-left"></i>Back</span>{{$ctrl.subcategory}}
         </li>
 
         <li class="attr-pagination" ng-if="filteredList.length > $ctrl.filters.pagesize">

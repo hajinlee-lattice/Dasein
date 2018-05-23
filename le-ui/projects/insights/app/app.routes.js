@@ -1,7 +1,14 @@
 angular.module('insightsApp')
 .run(function($transitions) {
     $transitions.onStart({}, function(trans) {
-        ShowSpinner('Loading Insight Data');
+        var to = trans.$to(),
+            from = trans.$from(),
+            params = trans.params('to') || {};
+        
+        if (to.name !== from.name && params.LoadingSpinner !== false) {
+            ShowSpinner('Loading Insight Data');
+        }
+
         trans.injector().get('ServiceErrorUtility').hideBanner();
     });
 })
@@ -64,26 +71,27 @@ angular.module('insightsApp')
         });
 });
 
-function ShowSpinner(LoadingString, type) {
+function ShowSpinner(LoadingString, selector) {
     // state change spinner
-    var element = $('#mainContentView'),
-        LoadingString = LoadingString || '',
-        type = type || 'lattice';
-        
+    selector = selector || '#mainContentView';
+    LoadingString = LoadingString || '';
+    
+    var element = $(selector);
+
     // jump to top of page during state change
     angular.element(window).scrollTop(0,0);
 
     element
         .children()
             .addClass('inactive-disabled');
-    
+
     element
         .css({
             position:'relative'
         })
         .prepend(
             $(
-                '<section class="loading-spinner ' + type + '">' +
+                '<section class="loading-spinner lattice">' +
                 '<h2 class="text-center">' + LoadingString + '</h2>' +
                 '<div class="meter"><span class="indeterminate"></span></div>' +
                 '</section>'
