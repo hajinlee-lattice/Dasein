@@ -70,7 +70,7 @@
                             <input 
                                 type="checkbox" 
                                 ng-model="excludeItemsWithoutSalesforceId"
-                                ng-change="$ctrl.checkValid(crmselection_form)">
+                                ng-change="$ctrl.setExcludeItems(excludeItemsWithoutSalesforceId)">
                                 Remove all recommendations with blank Account ID
                         </label>
                     </div>

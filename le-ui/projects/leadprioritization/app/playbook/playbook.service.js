@@ -143,8 +143,6 @@ angular.module('lp.playbook')
         var changed = false,
             opts = PlaybookWizardStore.settings;
 
-        console.log(opts);
-
         if(PlaybookWizardStore.currentPlay && PlaybookWizardStore.currentPlay.name) {
             opts.name = PlaybookWizardStore.currentPlay.name;
         }
@@ -321,7 +319,6 @@ angular.module('lp.playbook')
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
 
         PlaybookWizardService.savePlay(opts).then(function(data){
-            console.log(data);
             PlaybookWizardStore.setPlay(data);
             deferred.resolve(data);
         });
@@ -592,7 +589,7 @@ angular.module('lp.playbook')
 
         // console.log(bucketsToLaunch);
         // console.log(ratedTargetsLimit);
-        console.log(excludeItems);
+        // console.log(excludeItems);
 
         $http({
             method: 'POST',
