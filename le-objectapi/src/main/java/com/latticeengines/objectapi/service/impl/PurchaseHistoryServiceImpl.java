@@ -48,7 +48,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 tableName, tenant.getId(), accountId, periodName, productType, version));
 
         // For BIS use case, the product type is ProductType.Spending
-        String query = String.format("SELECT %s, %s, %s, %s, %s FROM %s where %s = ? and %s = ? and %s = %s",
+        String query = String.format("SELECT %s, %s, %s, %s, %s FROM %s where %s = ? and %s = ? and %s = '%s'",
                 InterfaceName.PeriodId, InterfaceName.ProductId, InterfaceName.TotalAmount, InterfaceName.TotalQuantity,
                 InterfaceName.TransactionCount, tableName, InterfaceName.AccountId, InterfaceName.PeriodName,
                 InterfaceName.ProductType, ProductType.Spending.toString());
