@@ -203,8 +203,8 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.initDataModel = function(){
 
-        console.log(vm.ratingEngine);
-        console.log(vm.dashboard);
+        // console.log(vm.ratingEngine);
+        // console.log(vm.dashboard);
 
         vm.relatedItems = vm.dashboard.plays;
         vm.hasBuckets = vm.ratingEngine.counts != null;
