@@ -10,7 +10,8 @@ angular.module('pd.navigation.header', [
     'mainApp.models.controllers.ModelDetailController',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.config.services.ConfigService',
-    'common.utilities.SessionTimeout'
+    'common.utilities.SessionTimeout',
+    'common.navigation.back'
 ])
 .controller('HeaderController', function (
     $scope, $rootScope, $state, $transitions, ResourceUtility, NavUtility, 
@@ -20,9 +21,6 @@ angular.module('pd.navigation.header', [
     $scope.jobs = JobsStore.data.jobs;
     $scope.importJobs = JobsStore.data.importJobs;
     $scope.exportJobs = JobsStore.data.exportJobs;
-    $scope.headerBack = null;
-    // $scope.IsRatingEngine = false;
-    $scope.isModelDetailsPage = false;
 
     $transitions.onStart({}, function(trans) {
         var to = trans.$to(),
@@ -32,20 +30,9 @@ angular.module('pd.navigation.header', [
         if (params.pageIcon) {
             setPageTitle(params);
         }
-
-        if (isModelDetailState(from.name) && !isModelDetailState(to.name)) {
-            $scope.isModelDetailsPage = false;
-        }
-        
-        if (($scope.headerBack && to.name && ($scope.headerBack.path && !to.name.match($scope.headerBack.path)))) {
-            $scope.headerBack = null;
-        }
     });
 
-    $scope.showHeaderBack = function(){
-        var ret = !!($scope.headerBack && (($scope.IsRatingEngine === true) || ($scope.isModelDetailsPage === true)));
-        return ret;
-    }
+
     /**
      * It returns the state to go to for the jobs
      * If CDL the firts tab is going to be P&A jobs
@@ -79,11 +66,6 @@ angular.module('pd.navigation.header', [
 
     FeatureFlagService.GetAllFlags().then(function(result) {
         var flags = FeatureFlagService.Flags();
-
-        if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
-            $scope.IsRatingEngine = true;
-        };
-
         $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
         $scope.showJobsPage = FeatureFlagService.FlagIsEnabled(flags.JOBS_PAGE);
     });
@@ -120,30 +102,6 @@ angular.module('pd.navigation.header', [
 
     setPageTitle($state.params);
 
-    function isModelDetailState(stateName) {
-        var stateNameArr = stateName.split('.');
-
-        if (stateNameArr[0] == 'home' && stateNameArr[1] == 'model') {
-            return true;
-        }
-        return false;
-    }
-
-    $scope.$on('model-details', function(event, args) {
-        $scope.isModelDetailsPage = true;
-        $scope.modelDisplayName = args.displayName;
-    });
-
-    $scope.$on('header-back', function(event, args) {
-        /**
-         * args.path is required.  It's a regex compared to to.name. When it fails headerBack is destroyed, otherwise your header back stuff will persist.
-         */
-        // console.log('BACK --> ', args);
-        if(args.path) {
-            $scope.headerBack = args;
-        }
-    });
-    
     checkBrowserWidth();
     var _checkBrowserWidth = _.debounce(checkBrowserWidth, 250);
 

@@ -108,13 +108,27 @@ angular.module('common.datacloud.query')
                 CurrentRatingEngine: [function() {
                     return null;
                 }],
+                backconfig: function($stateParams){
+                    var name = $stateParams.segment;
+                    var configObj = {
+                        backState: 'home.segments',
+                        backName: name
+                    };
+                    console.log('Segment name ', name);
+                    if('Create' === name){
+                        configObj.hide = true;
+                    }
+                    
+                    return configObj;
+                }
             },
             views: {
                 "main@": {
                     controller: 'AdvancedQueryCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
-                }
+                },
+                'header.back@': 'backNav'
             }
         })
         .state('home.segment.accounts', {

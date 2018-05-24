@@ -1,25 +1,20 @@
-<header>
-    <div class="secondary-nav noselect-children" ng-class="{'model-details-page': isModelDetailsPage}">
-        <ul class="secondary-nav-grid">
-            <li ng-if="isModelDetailsPage && modelDisplayName" class="header-back-name-container" title="{{modelDisplayName}}">
-                <a ui-sref="home.models" ng-if="!IsRatingEngine" class="model-name">{{ modelDisplayName }}</a>
-                <a ui-sref="home.ratingsengine" ng-if="IsRatingEngine" class="header-back-name">{{ modelDisplayName }}</a>
-            </li>
-
-            <li ng-if="showHeaderBack()" class="header-back-name-container" title="{{headerBack.displayName}}">
-                <a ui-sref="{{headerBack.sref}}" class="header-back-name">{{ headerBack.displayName }}</a>
-            </li>
-
+<header style="display: flex; justify-content:space-between">
+    <div class="left-container secondary-nav noselect-children">
+        <span class="back-container" ui-view="back"></span>
+        <ul class="secondary-nav-grid" >
             <li class="page-icon-container">
                 <span ng-if="pageDisplayIcon" class="page-icon ico-container">
                     <span class="ico {{ pageDisplayIcon }}"></span>
                 </span>
             </li>
-
             <li class="page-name-container">
                 <span ng-if="pageDisplayName" class="page-name">{{ pageDisplayName }}</span>
             </li>
-
+        </ul>
+    </div>
+    <div class="secondary-nav noselect-children" ng-class="{'model-details-page': isModelDetailsPage}">
+        
+        <ul class="secondary-nav-grid">
             <li class="jobs-nav-container">
                 <a class="jobs-nav-gear" ui-sref="{{getJobSRef()}}" title="Jobs [{{RunningJobs.length + RunningImportJobs.length + RunningSubJubsDataCount}} Running]">
                     <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0 || 

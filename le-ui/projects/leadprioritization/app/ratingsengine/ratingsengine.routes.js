@@ -155,6 +155,12 @@ angular
                             deferred.resolve(result);
                         });
                         return deferred.promise;
+                    },
+                    backconfig: function(RatingEngine){
+                        return {
+                            backState: 'home.ratingsengine',
+                            backName: RatingEngine.displayName
+                        };
                     }
                 },
                 views: {
@@ -189,7 +195,6 @@ angular
                             $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
                             $scope.modelIsReady = ((RatingEngine.activeModel[$scope.typeContext].modelSummaryId !== null) || (RatingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined));
 
-                            // console.log(RatingEngine);
 
                             $scope.stateName = function () {
                                 return $state.current.name;
@@ -206,7 +211,8 @@ angular
                         controller: 'RatingsEngineDashboard',
                         controllerAs: 'vm',
                         templateUrl: 'app/ratingsengine/content/dashboard/dashboard.component.html'
-                    }
+                    },
+                    'header.back@': 'backNav'
                 }
             })
             .state('home.ratingsengine.dashboard.segment', {

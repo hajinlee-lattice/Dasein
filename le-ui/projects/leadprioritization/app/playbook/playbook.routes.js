@@ -122,6 +122,12 @@ angular
                         deferred.resolve(result);
                     });
                     return deferred.promise;
+                },
+                backconfig: function(Play){
+                    return {
+                        backState: 'home.playbook',
+                        backName: Play.displayName
+                    };
                 }
             },
             views: {
@@ -134,7 +140,8 @@ angular
                     controller: 'PlaybookDashboard',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/dashboard/dashboard.component.html'
-                }
+                },
+                'header.back@': 'backNav'
             }
         })
         .state('home.playbook.dashboard.insights', {

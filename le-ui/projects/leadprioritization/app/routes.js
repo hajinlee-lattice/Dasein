@@ -257,6 +257,13 @@ angular
 
                     return deferred.promise;
                 },
+                
+                IsCdl : function(FeatureFlagService){
+                    var flags = FeatureFlagService.Flags();
+                    var cdl = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+                    return cdl;
+                },
+                
                 IsRatingEngine: function(Model) {
                     return Model.ModelDetails.Name.substring(0,2) == 'ai';
                 },
@@ -276,6 +283,21 @@ angular
                     });
 
                     return deferred.promise;
+                },
+                backconfig: function(IsCdl, Model, RatingEngine){
+                                          
+
+                    var displayName =  Model.ModelDetails.DisplayName;
+                    var backState = 'home.models';
+
+                    if(IsCdl === true){
+                        backState = 'home.ratingsengine';
+                        displayName = RatingEngine.displayName;
+                    }
+                    return {
+                        backState: backState,
+                        backName: displayName
+                    };
                 }
             },
             views: {
@@ -290,7 +312,8 @@ angular
                 },
                 "main@": {
                     template: ''
-                }
+                },
+                'header.back@': 'backNav'
             }
         })
         .state('home.segment.import', {
@@ -311,20 +334,14 @@ angular
                 pageIcon: 'ico-attributes',
                 pageTitle: 'Attributes'
             },
+           
             views: {
                 "main@": {
                     controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore, RatingEngine, StateHistory) {
-                        var IsRatingEngine = Model.ModelDetails.Name.substring(0,2) == 'ai',
-                            lastFrom = StateHistory.lastFrom();
 
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'))($scope);
-
-                        if (["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
-                            $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
-                        } else {
-                            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-                        }
+                      
                     }, 
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
@@ -336,24 +353,19 @@ angular
                 pageIcon: 'ico-performance',
                 pageTitle: 'Performance'
             },
+           
             views: {
                 "main@": {
-                    controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore, RatingEngine, StateHistory) {
-                        var IsRatingEngine = Model.ModelDetails.Name.substring(0,2) == 'ai',
-                            lastFrom = StateHistory.lastFrom();
-
+                    controller: function($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="performanceTab" class="tab-content" data-performance-tab-widget></div>'))($scope);
-                        
-                        if (["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
-                            $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
-                        } 
-                        else {
-                            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-                        }
+
+                        // $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
-                }
+                },
+                'header.back@': 'backNav'
             }
         })
         .state('home.model.ratings', {
@@ -473,11 +485,11 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $compile, $rootScope, Model, ModelStore) {
+                    controller: function($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsLeadsTab" class="tab-content" data-leads-tab-widget></div>'))($scope);
 
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                        // $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
@@ -492,18 +504,11 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore, IsPmml, RatingEngine, StateHistory) {
-                        var IsRatingEngine = Model.ModelDetails.Name.substring(0,2) == 'ai',
-                            lastFrom = StateHistory.lastFrom();
-
+                    controller: function($scope, $compile, ModelStore, IsPmml) {
                         $scope.data = ModelStore.data;
                         $scope.IsPmml = IsPmml;
 
-                        if (["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
-                            $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
-                        } else {
-                            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName }); 
-                        }
+                        // $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
@@ -542,10 +547,10 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $rootScope, Model, ModelStore) {
+                    controller: function($scope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
 
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                        // $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
@@ -653,9 +658,9 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: function ($rootScope, Model) {
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-                    },
+                    // controller: function (Model) {
+                    //     $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                    // },
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
