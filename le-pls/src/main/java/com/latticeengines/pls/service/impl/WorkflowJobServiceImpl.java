@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -384,8 +383,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @VisibleForTesting
     void updateStartTimeStampAndForJob(Job job) {
-        DateTimeZone timeZone = DateTimeZone.forID("America/Montreal");
-        Date nextInvokeDate = new DateTime(timeZone).plusDays(1).withTimeAtStartOfDay().toDate();
+        Date nextInvokeDate = new DateTime().plusDays(1).withTimeAtStartOfDay().toDate();
         boolean allowAutoSchedule = false;
         try {
             allowAutoSchedule = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
@@ -399,7 +397,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 if (nextInvokeTime != null && nextInvokeTime.compareTo(new DateTime().toDate().getTime()) > 0) {
                     nextInvokeDate = new Date(nextInvokeTime);
                 } else if (nextInvokeTime != null && nextInvokeTime.compareTo(new DateTime().toDate().getTime()) < 0) {
-                    nextInvokeDate = new DateTime(nextInvokeTime).plusDays(1).toDate();
+                    DateTime previousInvokeTime = new DateTime(nextInvokeTime);
+                    nextInvokeDate = new DateTime().plusDays(1).withTimeAtStartOfDay()
+                            .plusHours(previousInvokeTime.getHourOfDay())
+                            .plusMinutes(previousInvokeTime.getMinuteOfHour())
+                            .plusSeconds(previousInvokeTime.getSecondOfMinute()).toDate();
                 }
                 // Only update note if auto schedule is on
                 job.setNote(String.format(CDLNote, nextInvokeDate));

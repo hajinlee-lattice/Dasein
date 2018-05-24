@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -165,8 +164,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Test(groups = "unit", dependsOnMethods = { "testGenerateUnstartedProcessAnalyzeJob" })
     public void updateStartTimeStampAndForJob() {
-        DateTimeZone timeZone = DateTimeZone.forID("America/Montreal");
-        DateTime nextInvokeDate = new DateTime(timeZone).plusDays(1).withTimeAtStartOfDay();
+        DateTime nextInvokeDate = new DateTime().plusDays(1).withTimeAtStartOfDay();
 
         Job job = new Job();
         when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(true);
@@ -177,11 +175,18 @@ public class WorkflowJobServiceImplUnitTestNG {
         log.info("job.startDate = " + job.getStartTimestamp());
         Assert.assertTrue(nextInvokeDate.isEqual(job.getStartTimestamp().getTime()));
 
-        long previous1hour = new DateTime().minusHours(1).toDate().getTime();
-        when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(previous1hour);
+        long previous25hour = new DateTime().minusHours(25).toDate().getTime();
+        when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(previous25hour);
+        log.info("hour of day is " + new DateTime(previous25hour).getHourOfDay());
         workflowJobService.updateStartTimeStampAndForJob(job);
         log.info("job.startDate = " + job.getStartTimestamp());
-        Assert.assertTrue(new DateTime(previous1hour).plusDays(1).isEqual((job.getStartTimestamp().getTime())));
+        Assert.assertTrue(now.isBefore(job.getStartTimestamp().getTime()));
+        Assert.assertTrue(new DateTime(previous25hour)
+                .getHourOfDay() == (new DateTime(job.getStartTimestamp().getTime()).getHourOfDay()));
+        Assert.assertTrue(new DateTime(previous25hour)
+                .getMinuteOfHour() == (new DateTime(job.getStartTimestamp().getTime()).getMinuteOfHour()));
+        Assert.assertTrue(new DateTime(previous25hour)
+                .getSecondOfMinute() == (new DateTime(job.getStartTimestamp().getTime()).getSecondOfMinute()));
 
         when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(new DateTime().plusHours(1).toDate().getTime());
         workflowJobService.updateStartTimeStampAndForJob(job);
