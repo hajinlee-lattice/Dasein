@@ -35,6 +35,16 @@ public class PurgeStrategy implements HasPid, Serializable {
     @Column(name = "Source", unique = true, nullable = false, length = 100)
     private String source;
 
+    @Column(name = "HdfsBasePath")
+    private String hdfsBasePath; // If the source is standard DataCloud source,
+                                 // no need to set hdfsBasePath
+
+    @Column(name = "VersionFormat")
+    private String versionFormat; // If the source is standard DataCloud source
+                                  // with version format same as
+                                  // HdfsPathBuilder.DATE_FORMAT_STRING, no need
+                                  // to set versionFormat
+
     @Enumerated(EnumType.STRING)
     @Column(name = "SourceType", nullable = false, length = 100)
     private SourceType sourceType;
@@ -74,6 +84,26 @@ public class PurgeStrategy implements HasPid, Serializable {
     @JsonProperty("Source")
     public void setSource(String source) {
         this.source = source;
+    }
+
+    @JsonProperty("HdfsBasePath")
+    public String getHdfsBasePath() {
+        return hdfsBasePath;
+    }
+
+    @JsonProperty("HdfsBasePath")
+    public void setHdfsBasePath(String hdfsBasePath) {
+        this.hdfsBasePath = hdfsBasePath;
+    }
+
+    @JsonProperty("VersionFormat")
+    public String getVersionFormat() {
+        return versionFormat;
+    }
+
+    @JsonProperty("VersionFormat")
+    public void setVersionFormat(String versionFormat) {
+        this.versionFormat = versionFormat;
     }
 
     @JsonProperty("SourceType")
@@ -137,6 +167,6 @@ public class PurgeStrategy implements HasPid, Serializable {
     }
 
     public enum SourceType {
-        INGESTION_SOURCE, GENERAL_SOURCE, TEMP_SOURCE, ACCOUNT_MASTER, ACCOUNT_MASTER_LOOKUP, ML_SOURCE
+        INGESTION_SOURCE, GENERAL_SOURCE, TEMP_SOURCE, AM_SOURCE, TIMESERIES_SOURCE, HDFS_DIR
     }
 }

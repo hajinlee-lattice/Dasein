@@ -11,4 +11,6 @@ public interface DataCloudVersionDao extends BaseDao<DataCloudVersion>  {
 
     List<String> allApprovedMajorVersions();
 
+    List<DataCloudVersion> allApprovedVerions();
+
 }

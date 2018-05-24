@@ -3,65 +3,35 @@ package com.latticeengines.datacloudapi.engine.purge.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
-import com.latticeengines.datacloud.etl.service.HiveTableService;
-import com.latticeengines.datacloudapi.engine.purge.service.SourcePurger;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
+import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
-/**
- * The entire source will be purged
- */
-@Component("permenantPurger")
-public class PermenantPurger implements SourcePurger {
+@Component("tempSourcePurger")
+public class TempSourcePurger extends CollectionPurger {
 
-    private static Logger log = LoggerFactory.getLogger(PermenantPurger.class);
-
-    @Autowired
-    private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
-
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
-    private HiveTableService hiveTableService;
-
-    @Autowired
-    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    private long DAY_IN_MS = 1000 * 60 * 60 * 24;
+    private static Logger log = LoggerFactory.getLogger(TempSourcePurger.class);
 
     @Override
-    public List<PurgeSource> findSourcesToPurge(final boolean debug) {
-        List<PurgeStrategy> strategies = purgeStrategyEntityMgr
-                .findStrategiesByType(PurgeStrategy.SourceType.TEMP_SOURCE);
-        List<PurgeSource> list = new ArrayList<>();
-        for (PurgeStrategy strategy : strategies) {
-            List<String> srcNames = findSourceNames(strategy, debug);
-            list.addAll(constructPurgeSources(strategy, srcNames));
-        }
-        return list;
+    protected SourceType getSourceType() {
+        return SourceType.TEMP_SOURCE;
     }
 
-    private List<String> findSourceNames(PurgeStrategy strategy, final boolean debug) {
+    // SourceName -> HdfsPath
+    protected Map<String, String> findSourcePaths(PurgeStrategy strategy, final boolean debug) {
         String basePath = hdfsPathBuilder.constructSourceBaseDir().toString();
 
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
@@ -92,18 +62,22 @@ public class PermenantPurger implements SourcePurger {
         } catch (IOException e) {
             throw new RuntimeException("Fail to get source names in path " + basePath, e);
         }
-        List<String> sourceNames = new ArrayList<>();
+        Map<String, String> sourcePaths = new HashMap<>();
         files.forEach(file -> {
-            sourceNames.add(file.getPath().getName());
+            String fullPath = file.getPath().toString();
+            sourcePaths.put(file.getPath().getName(), fullPath.toString().substring(fullPath.indexOf(basePath)));
         });
 
-        return sourceNames;
+        return sourcePaths;
     }
 
-    private List<PurgeSource> constructPurgeSources(PurgeStrategy strategy, List<String> srcNames) {
+    @Override
+    protected List<PurgeSource> constructPurgeSources(PurgeStrategy strategy, Map<String, String> sourcePaths) {
         List<PurgeSource> toPurge = new ArrayList<>();
-        srcNames.forEach(srcName -> {
-            String hdfsPath = hdfsPathBuilder.constructSourceDir(srcName).toString();
+
+        for (Map.Entry<String, String> srcPath : sourcePaths.entrySet()) {
+            String srcName = srcPath.getKey();
+            String hdfsPath = srcPath.getValue();
             List<String> hdfsPaths = Collections.singletonList(hdfsPath);
             List<String> hiveTables = null;
             if (!srcName.startsWith(DataCloudConstants.PIPELINE_TEMPSRC_PREFIX)) {
@@ -121,7 +95,8 @@ public class PermenantPurger implements SourcePurger {
             }
             PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, hiveTables, false);
             toPurge.add(purgeSource);
-        });
+        }
         return toPurge;
     }
+
 }

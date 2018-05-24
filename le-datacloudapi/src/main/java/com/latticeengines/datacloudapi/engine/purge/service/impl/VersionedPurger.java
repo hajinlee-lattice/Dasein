@@ -31,9 +31,9 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 /**
  * Source is purged version by version
  */
-public abstract class ConfigurablePurger implements SourcePurger {
+public abstract class VersionedPurger implements SourcePurger {
 
-    private static Logger log = LoggerFactory.getLogger(ConfigurablePurger.class);
+    private static Logger log = LoggerFactory.getLogger(VersionedPurger.class);
 
     @Autowired
     protected PurgeStrategyEntityMgr purgeStrategyEntityMgr;
@@ -58,29 +58,29 @@ public abstract class ConfigurablePurger implements SourcePurger {
 
     protected long DAY_IN_MS = 1000 * 60 * 60 * 24;
 
-    public abstract SourceType getSourceType();
+    protected abstract SourceType getSourceType();
 
     /**
      * Override this method if the source needs to be dealt with specially
      */
-    protected List<String> findVersionsToDelete(PurgeStrategy strategy, List<String> currentVersions,
+    protected List<String> findVersionsToDelete(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
         if (!strategy.isNoBak()) {
             return null;
         }
-        return findVersionsToPurge(strategy, currentVersions, debug);
+        return findVersionsToPurge(strategy, allVersions, debug);
     }
 
 
     /**
      * Override this method if the source needs to be dealt with specially
      */
-    protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> currentVersions,
+    protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
         if (strategy.isNoBak()) {
             return null;
         }
-        return findVersionsToPurge(strategy, currentVersions, debug);
+        return findVersionsToPurge(strategy, allVersions, debug);
     }
 
     /**
@@ -151,57 +151,57 @@ public abstract class ConfigurablePurger implements SourcePurger {
         return list;
     }
 
-    private Pair<List<String>, List<String>> findPathsToDelete(PurgeStrategy strategy, List<String> currentVersions,
+    private Pair<List<String>, List<String>> findPathsToDelete(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
-        if (CollectionUtils.isEmpty(currentVersions)) {
+        if (CollectionUtils.isEmpty(allVersions)) {
             return null;
         }
         if ((strategy.getHdfsVersions() == null && strategy.getHdfsDays() == null)
                 || (strategy.getHdfsVersions() != null && strategy.getHdfsVersions() <= 0)
                 || (strategy.getHdfsDays() != null && strategy.getHdfsDays() <= 0)) {
             throw new RuntimeException(
-                    "HDFS versions/days for source " + strategy.getSource() + " is set as 0 or invalid.");
+                    "HDFS versions/days for source " + strategy.getSource() + " must be greater than 0.");
         }
-        List<String> versionsToDelete = findVersionsToDelete(strategy, currentVersions, debug);
+        List<String> versionsToDelete = findVersionsToDelete(strategy, allVersions, debug);
         if (CollectionUtils.isEmpty(versionsToDelete)) {
             return null;
         }
         return constructHdfsPathsHiveTables(strategy, versionsToDelete);
     }
 
-    private Pair<List<String>, List<String>> findPathsToBak(PurgeStrategy strategy, List<String> currentVersions,
+    private Pair<List<String>, List<String>> findPathsToBak(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
-        if (CollectionUtils.isEmpty(currentVersions)) {
+        if (CollectionUtils.isEmpty(allVersions)) {
             return null;
         }
         if ((strategy.getHdfsVersions() == null && strategy.getHdfsDays() == null)
                 || (strategy.getHdfsVersions() != null && strategy.getHdfsVersions() <= 0)
                 || (strategy.getHdfsDays() != null && strategy.getHdfsDays() <= 0)) {
             throw new RuntimeException(
-                    "HDFS versions/days for source " + strategy.getSource() + " is set as 0 or invalid.");
+                    "HDFS versions/days for source " + strategy.getSource() + " must be greater than 0.");
         }
-        List<String> versionsToBak = findVersionsToBak(strategy, currentVersions, debug);
+        List<String> versionsToBak = findVersionsToBak(strategy, allVersions, debug);
         if (CollectionUtils.isEmpty(versionsToBak)) {
             return null;
         }
         return constructHdfsPathsHiveTables(strategy, versionsToBak);
     }
 
-    private List<String> findVersionsToPurge(PurgeStrategy strategy, List<String> currentVersions,
+    private List<String> findVersionsToPurge(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
-        Collections.sort(currentVersions);
+        Collections.sort(allVersions);
 
         if (strategy.getHdfsVersions() != null) {
-            if (currentVersions.size() <= strategy.getHdfsVersions()) {
+            if (allVersions.size() <= strategy.getHdfsVersions()) {
                 return null;
             }
             for (int i = 0; i < strategy.getHdfsVersions(); i++) {
-                currentVersions.remove(currentVersions.size() - 1);
+                allVersions.remove(allVersions.size() - 1);
             }
         }
 
         if (strategy.getHdfsDays() != null) {
-            Set<String> versionSet = new HashSet<>(currentVersions);
+            Set<String> versionSet = new HashSet<>(allVersions);
             String sourcePath = hdfsPathBuilder.constructSnapshotRootDir(strategy.getSource()).toString();
             try {
                 List<FileStatus> versionStatus = HdfsUtils.getFileStatusesForDir(yarnConfiguration, sourcePath, null);
@@ -209,7 +209,7 @@ public abstract class ConfigurablePurger implements SourcePurger {
                     if (status.isDirectory() && versionSet.contains(status.getPath().getName())
                             && System.currentTimeMillis() - status.getModificationTime() <= strategy.getHdfsDays()
                                     * DAY_IN_MS) {
-                        currentVersions.remove(status.getPath().getName());
+                        allVersions.remove(status.getPath().getName());
                     }
                 });
             } catch (IOException e) {
@@ -217,6 +217,6 @@ public abstract class ConfigurablePurger implements SourcePurger {
             }
         }
 
-        return currentVersions;
+        return allVersions;
     }
 }

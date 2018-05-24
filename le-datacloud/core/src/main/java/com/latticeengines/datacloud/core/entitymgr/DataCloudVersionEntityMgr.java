@@ -23,5 +23,7 @@ public interface DataCloudVersionEntityMgr {
 
     List<DataCloudVersion> allVerions();
 
+    List<DataCloudVersion> allApprovedVerions();
+
     List<String> allApprovedMajorVersions();
 }

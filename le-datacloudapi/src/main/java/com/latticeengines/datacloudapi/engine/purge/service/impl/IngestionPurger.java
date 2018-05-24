@@ -13,12 +13,12 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
 @Component("ingestionPurger")
-public class IngestionPurger extends ConfigurablePurger{
+public class IngestionPurger extends VersionedPurger{
 
     private static Logger log = LoggerFactory.getLogger(IngestionPurger.class);
 
     @Override
-    public SourceType getSourceType() {
+    protected SourceType getSourceType() {
         return SourceType.INGESTION_SOURCE;
     }
 

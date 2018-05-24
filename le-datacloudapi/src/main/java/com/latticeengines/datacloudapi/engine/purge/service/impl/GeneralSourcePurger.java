@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
 @Component("generalSourcePurger")
-public class GeneralSourcePurger extends ConfigurablePurger {
+public class GeneralSourcePurger extends VersionedPurger {
     @Override
-    public SourceType getSourceType() {
+    protected SourceType getSourceType() {
         return SourceType.GENERAL_SOURCE;
     }
 }

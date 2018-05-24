@@ -35,7 +35,7 @@ public class PurgeStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
 
     @Test(groups = "functional")
     public void testFindStrategiesByType() {
-        List<PurgeStrategy> list = purgeStrategyEntityMgr.findStrategiesByType(SourceType.ACCOUNT_MASTER);
+        List<PurgeStrategy> list = purgeStrategyEntityMgr.findStrategiesByType(SourceType.AM_SOURCE);
         Assert.assertEquals(list.size(), 1);
     }
 
@@ -49,7 +49,7 @@ public class PurgeStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
         List<PurgeStrategy> list = new ArrayList<>();
         PurgeStrategy ps1 = new PurgeStrategy();
         ps1.setSource(TEST_SRC1);
-        ps1.setSourceType(SourceType.ACCOUNT_MASTER);
+        ps1.setSourceType(SourceType.AM_SOURCE);
         ps1.setHdfsVersions(2);
         ps1.setS3Days(200);
         ps1.setGlacierDays(1000);

@@ -7,53 +7,58 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
-public abstract class MLSourcePurger extends ConfigurablePurger {
+@Component("timeSeriesPurger")
+public class TimeSeriesPurger extends VersionedPurger {
 
-    private static Logger log = LoggerFactory.getLogger(MLSourcePurger.class);
-
-    private static final String VERSION_FORMAT = "yyyy-MM-dd";
-
-    protected abstract String getRootPath();
+    private static Logger log = LoggerFactory.getLogger(TimeSeriesPurger.class);
 
     @Override
-    public SourceType getSourceType() {
-        return SourceType.ML_SOURCE;
+    protected SourceType getSourceType() {
+        return SourceType.TIMESERIES_SOURCE;
     }
 
     @Override
     protected List<String> findAllVersions(PurgeStrategy strategy) {
+        if (StringUtils.isBlank(strategy.getHdfsBasePath()) || StringUtils.isBlank(strategy.getVersionFormat())) {
+            throw new RuntimeException(
+                    "TIMESERIES_SOURCE type must be provided with HdfsBasePath and VersionFormat, or change the type to GENERAL_SOURCE. Please check source "
+                            + strategy.getSource());
+        }
         try {
-            List<FileStatus> fileStatus = HdfsUtils.getFileStatusesForDir(yarnConfiguration, getRootPath(), null);
+            List<FileStatus> fileStatus = HdfsUtils.getFileStatusesForDir(yarnConfiguration, strategy.getHdfsBasePath(),
+                    null);
             List<String> versions = new ArrayList<>();
             fileStatus.forEach(status -> {
-                if (status.isDirectory() && isValidVersion(status.getPath().getName())) {
+                if (status.isDirectory() && isValidVersion(status.getPath().getName(), strategy.getVersionFormat())) {
                     versions.add(status.getPath().getName());
                 }
             });
             return versions;
         } catch (IOException e) {
-            log.error("Fail to get file status for hdfs path " + getRootPath(), e);
+            log.error("Fail to get file status for hdfs path " + strategy.getHdfsBasePath(), e);
             return null;
         }
     }
 
     @Override
-    protected List<String> findVersionsToDelete(PurgeStrategy strategy, List<String> currentVersions,
+    protected List<String> findVersionsToDelete(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
         List<String> toDelete = new ArrayList<>();
-        currentVersions.forEach(version -> {
+        allVersions.forEach(version -> {
             try {
-                Date date = new SimpleDateFormat(VERSION_FORMAT).parse(version);
+                Date date = new SimpleDateFormat(strategy.getVersionFormat()).parse(version);
                 Date now = new Date();
                 int days = (int) ((now.getTime() - date.getTime()) / DAY_IN_MS);
                 if (days > (strategy.getHdfsDays() + strategy.getS3Days() + strategy.getGlacierDays())) {
@@ -67,12 +72,12 @@ public abstract class MLSourcePurger extends ConfigurablePurger {
     }
 
     @Override
-    protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> currentVersions,
+    protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
         List<String> toBak = new ArrayList<>();
-        currentVersions.forEach(version -> {
+        allVersions.forEach(version -> {
             try {
-                Date date = new SimpleDateFormat(VERSION_FORMAT).parse(version);
+                Date date = new SimpleDateFormat(strategy.getVersionFormat()).parse(version);
                 Date now = new Date();
                 int days = (int) ((now.getTime() - date.getTime()) / DAY_IN_MS);
                 if (days > strategy.getHdfsDays()
@@ -92,16 +97,16 @@ public abstract class MLSourcePurger extends ConfigurablePurger {
         List<String> hdfsPaths = new ArrayList<>();
         List<String> hiveTables = new ArrayList<>();
         versions.forEach(version -> {
-            String hdfsPath = new Path(getRootPath(), version).toString();
+            String hdfsPath = new Path(strategy.getHdfsBasePath(), version).toString();
             hdfsPaths.add(hdfsPath);
         });
 
         return Pair.of(hdfsPaths, hiveTables);
     }
 
-    private boolean isValidVersion(String version) {
+    private boolean isValidVersion(String version, String versionFormat) {
         try {
-            Date date = new SimpleDateFormat(VERSION_FORMAT).parse(version);
+            new SimpleDateFormat(versionFormat).parse(version);
         } catch (ParseException e) {
             return false;
         }

@@ -50,4 +50,13 @@ public class DataCloudVersionDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public List<DataCloudVersion> allApprovedVerions() {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format("from %s where Status = '%s'", getEntityClass().getSimpleName(),
+                DataCloudVersion.Status.APPROVED);
+        Query query = session.createQuery(queryStr);
+        return (List<DataCloudVersion>) query.list();
+    }
+
 }
