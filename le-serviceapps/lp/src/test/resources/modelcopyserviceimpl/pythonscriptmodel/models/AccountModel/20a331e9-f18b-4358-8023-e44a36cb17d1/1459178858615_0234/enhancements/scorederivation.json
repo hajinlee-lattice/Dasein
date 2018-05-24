@@ -1,0 +1,27 @@
+{
+    "target": null, 
+    "averageProbability": 1.0, 
+    "buckets": [
+        {
+            "name": "Low", 
+            "lower": null, 
+            "upper": 0.80000000000000004
+        }, 
+        {
+            "name": "Medium", 
+            "lower": 0.80000000000000004, 
+            "upper": null
+        }, 
+        {
+            "name": "High", 
+            "lower": null, 
+            "upper": null
+        }, 
+        {
+            "name": "Highest", 
+            "lower": null, 
+            "upper": null
+        }
+    ], 
+    "percentiles": []
+}
