@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
@@ -31,10 +32,12 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.PAReportUtils;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TransactionUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Choreographer;
@@ -297,6 +300,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         }
         if (!foundAnalyticProduct) {
             log.info("Didn't find Analytic Product in " + productTable.getName());
+            String warning = "No analytic product found. Skip generating curated attributes.";
+            addWarningToProductReport(step, warning);
             return false;
         }
 
@@ -318,7 +323,18 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         if (TransactionUtils.hasAnalyticProduct(yarnConfiguration, yearTable.getExtracts().get(0).getPath())) {
             log.info("Found Analytic Product in table " + yearTable.getName());
             return true;
+        } else {
+            log.info("Did not find Analytic Product in table " + yearTable.getName());
+            String warning = "No analytic product id matched between products and transactions. Skip generating curated attributes.";
+            addWarningToProductReport(step, warning);
         }
         return false;
+    }
+
+    private void addWarningToProductReport(AbstractStep<? extends BaseStepConfiguration> step, String warning) {
+        ObjectNode jsonReport = step.getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
+                ObjectNode.class);
+        jsonReport = PAReportUtils.appendMessageToProductReport(jsonReport, warning, true);
+        step.putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), jsonReport);
     }
 }

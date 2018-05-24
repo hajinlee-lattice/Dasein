@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.util.PAReportUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -138,7 +139,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 BusinessEntity.Transaction };
         for (BusinessEntity entity : entities) {
             ObjectNode entityNode = entitiesSummaryNode.get(entity.name()) != null
-                    ? (ObjectNode) entitiesSummaryNode.get(entity.name()) : initEntityReport(entity);
+                    ? (ObjectNode) entitiesSummaryNode.get(entity.name())
+                    : PAReportUtils.initEntityReport(entity);
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             if (entity != BusinessEntity.Product) {
@@ -270,36 +272,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         log.error("Fail to get count from serving store for entity " + entity.name() + " with version "
                 + inactive.name());
         return 0L;
-    }
-
-    private ObjectNode initEntityReport(BusinessEntity entity) {
-        ObjectNode entityNode = JsonUtils.createObjectNode();
-        ObjectNode consolidateSummaryNode = JsonUtils.createObjectNode();
-        switch (entity) {
-        case Account:
-            consolidateSummaryNode.put(ReportConstants.NEW, "0");
-            consolidateSummaryNode.put(ReportConstants.UPDATE, "0");
-            consolidateSummaryNode.put(ReportConstants.UNMATCH, "0");
-            break;
-        case Contact:
-            consolidateSummaryNode.put(ReportConstants.NEW, "0");
-            consolidateSummaryNode.put(ReportConstants.UPDATE, "0");
-            break;
-        case Product:
-            consolidateSummaryNode.put(ReportConstants.PRODUCT_ID, "0");
-            consolidateSummaryNode.put(ReportConstants.PRODUCT_HIERARCHY, "0");
-            consolidateSummaryNode.put(ReportConstants.PRODUCT_BUNDLE, "0");
-            consolidateSummaryNode.put(ReportConstants.ERROR_MESSAGE, "");
-            consolidateSummaryNode.put(ReportConstants.WARN_MESSAGE, "");
-            break;
-        case Transaction:
-            consolidateSummaryNode.put(ReportConstants.NEW, "0");
-            break;
-        default:
-            throw new UnsupportedOperationException(entity.name() + " business entity is not supported in P&A report");
-        }
-        entityNode.set(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey(), consolidateSummaryNode);
-        return entityNode;
     }
 
 }
