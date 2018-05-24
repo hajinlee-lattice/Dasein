@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("cdlJobService")
@@ -67,36 +66,28 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Value("${cdl.processAnalyze.job.retry.count:0}")
     private int processAnalyzeJobRetryCount;
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
     @Value("${common.adminconsole.url:}")
     private String quartzMicroserviceHostPort;
 
     @Value("${common.microservice.url}")
     private String microserviceHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
+    @Inject
     private WorkflowProxy workflowProxy;
 
     private CDLProxy cdlProxy;
 
     @PostConstruct
-    public void initialize() throws Exception {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    public void initialize() {
         if (isQuartzStack()) {
             cdlProxy = new CDLProxy(quartzMicroserviceHostPort);
-            dataFeedProxy = new DataFeedProxy(quartzMicroserviceHostPort);
-            workflowProxy = new WorkflowProxy(quartzMicroserviceHostPort);
             log.info(String.format("CDLJobService running on quartz stack with cdlHostPort=%s, dataFeedHostPort=%s, workflowHostPort=%s",
                     cdlProxy.getHostport(), dataFeedProxy.getHostport(), workflowProxy.getHostport()));
         } else {
             cdlProxy = new CDLProxy(microserviceHostPort);
-            dataFeedProxy = new DataFeedProxy(microserviceHostPort);
-            workflowProxy = new WorkflowProxy(microserviceHostPort);
             log.info(String.format("CDLJobService running with cdlHostPort=%s, dataFeedHostPort=%s, workflowHostPort=%s",
                     cdlProxy.getHostport(), dataFeedProxy.getHostport(), workflowProxy.getHostport()));
         }
