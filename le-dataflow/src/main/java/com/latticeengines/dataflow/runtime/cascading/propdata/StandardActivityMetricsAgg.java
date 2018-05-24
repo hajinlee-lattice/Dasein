@@ -292,11 +292,7 @@ public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityM
     }
 
     private Context updateHasPurchasedContext(Context context, TupleEntry arguments, ActivityMetrics metrics) {
-        // treat null as 0 by design
-        double amount = arguments.getDouble(InterfaceName.TotalAmount.name());
-        if (amount > 0) {
-            context.hasPurchasedContext.hasPurchased = true;
-        }
+        context.hasPurchasedContext.hasPurchased = true;
         return context;
     }
 
