@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.NameValidationUtils;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
@@ -84,9 +83,6 @@ public class ModelResource {
 
     @Autowired
     private SourceFileService sourceFileService;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
     private ModelCleanUpService modelCleanUpService;

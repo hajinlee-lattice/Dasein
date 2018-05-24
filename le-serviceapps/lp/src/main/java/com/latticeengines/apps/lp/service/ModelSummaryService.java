@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service;
+package com.latticeengines.apps.lp.service;
 
 import java.util.List;
 
@@ -34,5 +34,5 @@ public interface ModelSummaryService {
 
     List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
 
-    void updateLastUpdateTime(String modelId);
+    public void updateLastUpdateTime(String modelId);
 }

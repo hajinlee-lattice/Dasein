@@ -11,7 +11,7 @@ public interface ModelService {
 
     List<Attribute> getRequiredColumns(String modelId);
 
-    boolean copyModel(ModelSummary modelSummary, String sourceTenantId, String targetTenantId);
+    String copyModel(ModelSummary modelSummary, String sourceTenantId, String targetTenantId);
 
     Set<String> getLatticeAttributeNames(String modelId);
 

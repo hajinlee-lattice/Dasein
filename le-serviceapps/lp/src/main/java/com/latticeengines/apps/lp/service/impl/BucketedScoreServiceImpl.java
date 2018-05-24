@@ -65,6 +65,11 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Override
+    public List<BucketMetadata> getABCDBucketsByModelGuidAcrossTenant(String modelGuid) {
+        return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForModelFromReader(modelGuid);
+    }
+
+    @Override
     public List<BucketMetadata> getABCDBucketsByRatingEngineId(String ratingEngineId) {
         return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForEngineFromReader(ratingEngineId);
     }

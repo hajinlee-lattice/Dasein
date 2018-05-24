@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
@@ -15,10 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.lp.util.ModelingHdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
@@ -94,7 +99,22 @@ public class PmmlModelService extends ModelServiceBase {
 
     @Override
     public String copyModel(ModelSummary modelSummary, String sourceTenantId, String targetTenantId) {
-        return "";
+        String newModelGuid = null;
+        try {
+            String eventTableName = modelSummary.getEventTableName();
+            if (StringUtils.isEmpty(eventTableName)) {
+                eventTableName = ModelingHdfsUtils.getEventTableNameFromHdfs(yarnConfiguration,
+                        customerBaseDir + sourceTenantId + "/models", modelSummary.getId());
+            }
+            String cpEventTable = "copy_PMML" + UUID.randomUUID().toString();
+
+            newModelGuid = copyHdfsData(sourceTenantId, targetTenantId, eventTableName, "", cpEventTable, modelSummary);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new LedpException(LedpCode.LEDP_18111,
+                    new String[] { modelSummary.getName(), sourceTenantId, targetTenantId });
+        }
+        return newModelGuid;
     }
 
     @Override

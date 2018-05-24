@@ -51,7 +51,7 @@ public class SourceFileServiceImpl implements SourceFileService {
     }
 
     @Override
-    public SourceFile getByTableNameCrossTenant(String tableName) {
+    public SourceFile getByTableNameAcrossTenant(String tableName) {
         return sourceFileProxy.findByTableNameCrossTenant(tableName);
     }
 

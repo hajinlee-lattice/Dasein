@@ -1,5 +1,6 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -12,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.lp.service.SourceFileService;
+import com.latticeengines.apps.lp.util.MetadataUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -19,10 +22,11 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
-import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.pls.util.MetadataUtils;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("pythonScriptModelService")
 public class PythonScriptModelService extends ModelServiceBase {
@@ -88,7 +92,39 @@ public class PythonScriptModelService extends ModelServiceBase {
 
     @Override
     public String copyModel(ModelSummary modelSummary, String sourceTenantId, String targetTenantId) {
-        return "";
+        String newModelGuid;
+        String trainingTableName = modelSummary.getTrainingTableName();
+        String eventTableName = modelSummary.getEventTableName();
+
+        String cpTrainingTableName = trainingTableName;
+        String cpEventTableName = eventTableName;
+        if (metadataProxy.getTable(sourceTenantId, trainingTableName) != null) {
+            Table cpTrainingTable = metadataProxy.copyTable(sourceTenantId, trainingTableName, targetTenantId);
+            cpTrainingTableName = cpTrainingTable.getName();
+        }
+        if (metadataProxy.getTable(sourceTenantId, eventTableName) != null) {
+            Table cpEventTable = metadataProxy.copyTable(sourceTenantId, eventTableName, targetTenantId);
+            cpEventTableName = cpEventTable.getName();
+        }
+
+        Tenant targetTenant = tenantEntityMgr.findByTenantId(targetTenantId);
+        SourceFile sourceFile = sourceFileService.findByTableName(trainingTableName);
+        if (sourceFile != null) {
+            CopySourceFileRequest request = new CopySourceFileRequest();
+            request.setOriginalSourceFile(sourceFile.getName());
+            request.setTargetTable(cpTrainingTableName);
+            request.setTargetTenant(targetTenant.getId());
+            sourceFileService.copySourceFile(request);
+        }
+        try {
+            newModelGuid = copyHdfsData(sourceTenantId, targetTenantId, eventTableName, cpTrainingTableName,
+                    cpEventTableName, modelSummary);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new LedpException(LedpCode.LEDP_18111,
+                    new String[] { modelSummary.getName(), sourceTenantId, targetTenantId });
+        }
+        return newModelGuid;
     }
 
 }

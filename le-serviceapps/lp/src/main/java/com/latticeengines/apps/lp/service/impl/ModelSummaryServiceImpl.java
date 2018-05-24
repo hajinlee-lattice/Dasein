@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.quartz.DisallowConcurrentExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,6 +17,9 @@ import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
+import com.latticeengines.apps.lp.service.SourceFileService;
 import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -26,17 +28,14 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.pls.service.SourceFileService;
 
-@DisallowConcurrentExecution
 @Component("modelSummaryService")
 public class ModelSummaryServiceImpl implements ModelSummaryService {
 
@@ -337,7 +336,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (summary.getTrainingTableName() == null || summary.getTrainingTableName().isEmpty()) {
             summary.setTrainingFileExist(false);
         } else {
-            SourceFile sourceFile = sourceFileService.getByTableNameAcrossTenant(summary.getTrainingTableName());
+            SourceFile sourceFile = sourceFileService.getByTableNameCrossTenant(summary.getTrainingTableName());
             if (sourceFile == null) {
                 summary.setTrainingFileExist(false);
             } else {

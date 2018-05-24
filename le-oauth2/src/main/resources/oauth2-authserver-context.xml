@@ -17,9 +17,13 @@
     </context:component-scan>
 
     <mvc:annotation-driven/>
+    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
+    <mvc:resources mapping="/swagger-ui.html" location="classpath:/META-INF/resources/swagger-ui.html"/>
 
     <bean id="oauth2HealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="oauth2"/>
     </bean>
+
+
 
 </beans>

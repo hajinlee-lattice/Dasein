@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,9 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.SourceFileService;
+import com.latticeengines.apps.lp.util.ModelingHdfsUtils;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -32,9 +35,6 @@ import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component
@@ -88,7 +88,7 @@ public abstract class ModelServiceBase implements ModelService {
     }
 
     @VisibleForTesting
-    void copyHdfsData(String sourceTenantId, String targetTenantId, String eventTableName, String cpTrainingTableName,
+    String copyHdfsData(String sourceTenantId, String targetTenantId, String eventTableName, String cpTrainingTableName,
             String cpEventTableName, ModelSummary modelSummary) throws IOException {
         String sourceCustomerRoot = customerBaseDir + sourceTenantId;
         String targetCustomerRoot = customerBaseDir + targetTenantId;
@@ -137,7 +137,7 @@ public abstract class ModelServiceBase implements ModelService {
             }
         }
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
-        SourceFile sourceFile = sourceFileService.getByTableNameAcrossTenant(cpTrainingTableName);
+        SourceFile sourceFile = sourceFileService.getByTableNameCrossTenant(cpTrainingTableName);
 
         JsonNode newModelSummary = null;
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Construct new model summary")) {
@@ -173,5 +173,7 @@ public abstract class ModelServiceBase implements ModelService {
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete directory")) {
             FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
         }
+
+        return newModelSummary.get("ModelDetails").get("ModelID").asText();
     }
 }

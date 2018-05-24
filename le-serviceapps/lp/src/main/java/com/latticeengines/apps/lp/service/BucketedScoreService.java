@@ -23,4 +23,6 @@ public interface BucketedScoreService {
 
     BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid,
             BucketedScoreSummary bucketedScoreSummary);
+
+    List<BucketMetadata> getABCDBucketsByModelGuidAcrossTenant(String modelGuid);
 }

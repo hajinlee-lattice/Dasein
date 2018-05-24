@@ -1,11 +1,10 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +16,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -31,13 +30,10 @@ import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.BucketedScoreService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.service.TenantService;
 
 
-public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
@@ -55,10 +51,6 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant1;
 
-    @Autowired
-    private BucketedScoreService bucketedScoreService;
-
-    @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         tenant1 = tenantService.findByTenantId("TENANT1");
@@ -71,7 +63,7 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
+    public void teardown() {
         tenant1 = tenantService.findByTenantId("TENANT1");
         tenantService.discardTenant(tenant1);
     }
@@ -221,33 +213,5 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
     private void testFixAccountCategory(JsonNode predictor) {
         String category = predictor.get(ModelSummaryServiceImpl.CATEGORY).asText();
         assertEquals(category, Category.ACCOUNT_INFORMATION.getName());
-    }
-
-    @Test(groups = "functional", enabled = false)
-    private void createRatingForModel()
-    {
-        ModelSummary testSummary = modelSummaryService.getModelSummary(summary1.getId());
-        assertEquals(summary1.getId(), testSummary.getId());
-        assertEquals(testSummary.getHasBucketMetadata(), Boolean.FALSE);
-
-        BucketMetadata BUCKET_METADATA_A = new BucketMetadata();
-        final Double LIFT_1 = 3.4;
-        final int NUM_LEADS_BUCKET_1 = 28588;
-        BUCKET_METADATA_A.setBucket(BucketName.A);
-        BUCKET_METADATA_A.setNumLeads(NUM_LEADS_BUCKET_1);
-        BUCKET_METADATA_A.setLeftBoundScore(95);
-        BUCKET_METADATA_A.setRightBoundScore(99);
-        BUCKET_METADATA_A.setLift(LIFT_1);
-        final Double LIFT_2 = 2.4;
-        final int NUM_LEADS_BUCKET_2 = 14534;
-        BucketMetadata BUCKET_METADATA_B = new BucketMetadata();
-        BUCKET_METADATA_B.setBucket(BucketName.B);
-        BUCKET_METADATA_B.setNumLeads(NUM_LEADS_BUCKET_2);
-        BUCKET_METADATA_B.setLeftBoundScore(85);
-        BUCKET_METADATA_B.setRightBoundScore(95);
-        BUCKET_METADATA_B.setLift(LIFT_2);
-        bucketedScoreService.createBucketMetadatas(summary1.getId(), Arrays.asList(BUCKET_METADATA_A, BUCKET_METADATA_B));
-        ModelSummary newSummary = modelSummaryService.getModelSummary(summary1.getId());
-        assertTrue(newSummary.getHasBucketMetadata());
     }
 }

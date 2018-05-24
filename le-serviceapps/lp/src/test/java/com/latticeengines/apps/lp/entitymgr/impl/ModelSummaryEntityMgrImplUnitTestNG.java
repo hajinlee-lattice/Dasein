@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.lp.entitymgr.impl;
 
 import static org.testng.Assert.assertTrue;
 
@@ -22,7 +22,7 @@ public class ModelSummaryEntityMgrImplUnitTestNG {
     public void setup() {
         modelSummaryEntityMgrImpl = new ModelSummaryEntityMgrImpl();
 
-        predictorList = new ArrayList<Predictor>();
+        predictorList = new ArrayList<>();
         Predictor predictor1 = new Predictor();
         predictor1.setName("p1");
         Predictor predictor2 = new Predictor();
@@ -47,7 +47,7 @@ public class ModelSummaryEntityMgrImplUnitTestNG {
         missingPredictors = modelSummaryEntityMgrImpl.getMissingPredictors(predictorList, attrMap2);
         assertTrue(missingPredictors.size() == 2);
         try {
-            missingPredictors = modelSummaryEntityMgrImpl.getMissingPredictors(null, attrMap2);
+            modelSummaryEntityMgrImpl.getMissingPredictors(null, attrMap2);
             assertTrue(true, "Should have thrown exception");
         } catch (Exception e) {
             assertTrue(e instanceof NullPointerException);

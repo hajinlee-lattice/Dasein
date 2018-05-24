@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -63,8 +62,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     public Table cloneTrainingTable(String modelId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Table trainingTable = getTrainingTableFromModelId(modelId);
-        Table clone = metadataProxy.cloneTable(customerSpace, trainingTable.getName());
-        return clone;
+        return metadataProxy.cloneTable(customerSpace, trainingTable.getName());
     }
 
     @Override
@@ -105,10 +103,10 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
                     Attribute updatedAttribute = overwriteAttributeWithFieldValues(attribute, field);
                     ApprovedUsage approvedUsageUpdated = CollectionUtils.isNotEmpty(updatedAttribute.getApprovedUsage())
                             ? ApprovedUsage.fromName(updatedAttribute.getApprovedUsage().get(0)) : null;
-                    if (approvedUsageUpdated != null && approvedUsageUpdated != approvedUsageOriginal)
+                    if (approvedUsageUpdated != null && approvedUsageUpdated != approvedUsageOriginal) {
                         userEditedAttributes.add(updatedAttribute);
-                    if (updatedAttribute != null)
-                        editedAttributes.add(updatedAttribute);
+                    }
+                    editedAttributes.add(updatedAttribute);
                     found = true;
                     break;
                 }
@@ -127,7 +125,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
             private Map<Attribute, Integer> generation = new HashMap<>();
 
-            CompareNumberOfGenerations(Map<Attribute, List<Attribute>> childParent) {
+            private CompareNumberOfGenerations(Map<Attribute, List<Attribute>> childParent) {
                 for (Map.Entry<Attribute, List<Attribute>> entry : childParent.entrySet()) {
                     generation.put(entry.getKey(), getMaxGeneration(childParent, entry.getValue()));
                 }
@@ -150,13 +148,13 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
             @Override
             public int compare(Attribute a1, Attribute a2) {
-                Integer gen1 = generation.containsKey(a1) ? generation.get(a1) : 0;
-                Integer gen2 = generation.containsKey(a2) ? generation.get(a2) : 0;
+                Integer gen1 = generation.getOrDefault(a1, 0);
+                Integer gen2 = generation.getOrDefault(a2, 0);
                 return Integer.compare(gen1, gen2);
             }
         }
 
-        Collections.sort(userEditedAttributes, new CompareNumberOfGenerations(childParent));
+        userEditedAttributes.sort(new CompareNumberOfGenerations(childParent));
 
         for (Attribute userEditedAttribute : userEditedAttributes) {
             if (parentChild.containsKey(userEditedAttribute))

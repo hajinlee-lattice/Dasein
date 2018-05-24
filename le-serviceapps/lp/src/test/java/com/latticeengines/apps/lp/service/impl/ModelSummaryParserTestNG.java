@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -8,30 +8,32 @@ import static org.testng.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ModelSummaryParserTestNG extends LPFunctionalTestNGBase {
 
     @Value("${pls.default.buyerinsights.num.predictors}")
     private int defaultBiPredictorNum;
 
-    @Autowired
+    @Inject
     private ModelSummaryParser modelSummaryParser;
 
     @Test(groups = { "unit", "functional" })
     public void parse() throws Exception {
         InputStream is = ClassLoader
-                .getSystemResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+                .getSystemResourceAsStream("modelsummary/modelsummary-eloqua.json");
         String data = new String(IOUtils.toByteArray(is));
         ModelSummary summary = modelSummaryParser.parse("modelsummary-eloqua.json", data);
 
@@ -98,7 +100,7 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBaseDeprecated 
     @Test(groups = { "unit", "functional" })
     public void parseDetailsOnly() throws Exception {
         InputStream is = ClassLoader
-                .getSystemResourceAsStream("com/latticeengines/pls/service/impl/modelsummary-detailsonly.json");
+                .getSystemResourceAsStream("modelsummary/modelsummary-detailsonly.json");
         String data = new String(IOUtils.toByteArray(is));
         ModelSummary summary = modelSummaryParser.parse("modelsummary-detailsonly.json", data);
 

@@ -139,6 +139,14 @@ public class RatingEngineResource {
                 unlinkSegment);
     }
 
+    @PostMapping(value = "/replicate/{engineId}")
+    @ResponseBody
+    @ApiOperation(value = "Replicate a Rating Engine")
+    public RatingEngine replicateRatingEngine(@PathVariable String customerSpace,
+                                              @PathVariable String engineId) {
+        return ratingEngineService.replicateRatingEngine(engineId);
+    }
+
     @PostMapping(value = "/with-action")
     @ResponseBody
     @Action

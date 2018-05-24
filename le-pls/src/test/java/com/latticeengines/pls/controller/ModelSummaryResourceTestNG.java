@@ -13,10 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -33,13 +32,13 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorStatus;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
 /**
  * This test has two users with particular privileges:
@@ -66,9 +65,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     private String tenantId;
 
     private String modelId;
-
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
@@ -508,6 +504,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             InputStream ins = getClass().getClassLoader().getResourceAsStream(
                     "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
             assertNotNull(ins, "Testing json file is missing");
+            ModelSummaryParser modelSummaryParser = new ModelSummaryParser();
             ModelSummary modelSummary = modelSummaryParser.parse("", new String(IOUtils.toByteArray(ins)));
             restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/", modelSummary, Boolean.class);
         } catch (Exception e) {

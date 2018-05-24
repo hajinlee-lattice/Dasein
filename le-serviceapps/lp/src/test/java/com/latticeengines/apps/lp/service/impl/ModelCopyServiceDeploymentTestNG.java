@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.apps.lp.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -6,30 +6,37 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
+
+import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.ModelCopyService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
+import com.latticeengines.apps.lp.service.SourceFileService;
+import com.latticeengines.apps.lp.testframework.LPDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -40,43 +47,40 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.ModelCopyService;
-import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
-public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelCopyResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelCopyServiceDeploymentTestNG.class);
     private static final String ORIGINAL_MODELID = "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork";
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private ModelCopyService modelCopyService;
 
-    @Autowired
+    @Inject
     private ModelSummaryService modelSummaryService;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
-    @Autowired
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
     private static final String localPathBase = ClassLoader
-            .getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel").getPath();
+            .getSystemResource("modelcopyserviceimpl/pythonscriptmodel").getPath();
 
     private Tenant tenant1;
 
@@ -128,7 +132,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private void setupTwoTenants(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
-        turnOffSslChecking();
+        SSLUtils.turnOffSSLNameVerification();
         tenant1 = createTenant(scrTenantIsEncrypted);
         tenant2 = createTenant(dstTenantIsEncrypted);
     }
@@ -141,8 +145,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                     .construct(new CustomerSpaceScope(CustomerSpace.parse(tenant.getId())));
             assertTrue(controller.exists(new com.latticeengines.domain.exposed.camille.Path("/EncryptionKey")));
         } else {
-            // TODO: convert to TestFrameworkUtils.generateTenantName()
-            String TenantName = TestFrameworkUtils.TENANTID_PREFIX + UUID.randomUUID();
+            String TenantName = TestFrameworkUtils.generateTenantName();
             tenant.setName(String.format("%s.%s.Production", TenantName, TenantName));
             tenant.setId(tenant.getName());
             deploymentTestBed.deleteTenant(tenant);
@@ -154,31 +157,27 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private void setupTables() throws IOException {
         Table trainingTable = JsonUtils.deserialize(IOUtils.toString(
-                ClassLoader.getSystemResourceAsStream(
-                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/TrainingTable.json"),
+                ClassLoader.getSystemResourceAsStream(getResourcePath("tables/TrainingTable.json")),
                 "UTF-8"), Table.class);
         Extract extract = trainingTable.getExtracts().get(0);
         extract.setPath(
                 PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
                         .append("SourceFile_Account_copy_csv").append("Extracts").append("2016-03-31-18-26-19")
                         .toString() + "/*.avro");
-        trainingTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
+        trainingTable.setExtracts(Collections.singletonList(extract));
         metadataProxy.createTable(tenant1.getId(), trainingTable.getName(), trainingTable);
 
         Table eventTable = JsonUtils.deserialize(IOUtils.toString(
-                ClassLoader.getSystemResourceAsStream(
-                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/EventTable.json"),
-                "UTF-8"), Table.class);
+                ClassLoader.getSystemResourceAsStream(getResourcePath("tables/EventTable.json")),"UTF-8"), Table.class);
         extract = eventTable.getExtracts().get(0);
         extract.setPath(customerBase + tenant1.getId() + "/data/AccountModel/Samples/allTraining-r-00000.avro");
-        eventTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
+        eventTable.setExtracts(Collections.singletonList(extract));
         metadataProxy.createTable(tenant1.getId(), eventTable.getName(), eventTable);
 
         String outputPath = PathBuilder
                 .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId())).toString() + "/"
                 + outputFileName;
-        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/"
-                + outputFileName;
+        sourceFileLocalPath = getResourcePath(outputFileName);
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
                 outputPath);
         SourceFile sourceFile = new SourceFile();
@@ -192,7 +191,6 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private void setupHdfs() throws IOException {
         HdfsUtils.mkdir(yarnConfiguration, customerBase + tenant1.getId());
-        System.out.println(localPathBase + "/models");
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase + tenant1.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data", customerBase + tenant1.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, //
@@ -204,7 +202,6 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private void testModelCopy() throws Exception {
-
         modelCopyService.copyModel(tenant2.getId(), ORIGINAL_MODELID);
 
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant2.getId());
@@ -212,16 +209,12 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupSecurityContext(tenant2);
 
         List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration,
-                customerBase + tenant2.getId() + "/models", new HdfsUtils.HdfsFileFilter() {
-
-                    @Override
-                    public boolean accept(FileStatus file) {
-                        if (file == null) {
-                            return false;
-                        }
-                        String name = file.getPath().getName().toString();
-                        return name.equals("modelsummary.json");
+                customerBase + tenant2.getId() + "/models", file -> {
+                    if (file == null) {
+                        return false;
                     }
+                    String name = file.getPath().getName();
+                    return name.equals("modelsummary.json");
                 });
         assertTrue(paths.size() == 1);
         String modelSummaryPath = paths.get(0);
@@ -271,6 +264,13 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @DataProvider(name = "dataProvider")
     public Object[][] dataProvider() {
-        return new Object[][] { { Boolean.FALSE, Boolean.TRUE }, { Boolean.TRUE, Boolean.FALSE } };
+        return new Object[][] {
+                { Boolean.FALSE, Boolean.TRUE },
+                { Boolean.TRUE, Boolean.FALSE }
+        };
+    }
+
+    private String getResourcePath(String relativePath) {
+        return "modelcopyserviceimpl/pythonscriptmodel/" + relativePath;
     }
 }

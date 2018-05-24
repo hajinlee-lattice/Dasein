@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 
 public interface ModelMetadataService {
+
     List<VdbMetadataField> getMetadata(String modelId);
 
     Table cloneTrainingTable(String modelSummaryId);

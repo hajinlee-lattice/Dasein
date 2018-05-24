@@ -1,12 +1,13 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.lp.entitymgr.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -14,17 +15,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloaderEntityMgr;
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.BucketedScoreService;
+import com.latticeengines.apps.lp.service.impl.FeatureImportanceParser;
+import com.latticeengines.apps.lp.service.impl.ModelDownloaderCallable;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloaderEntityMgr;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.mbean.TimeStampContainer;
-import com.latticeengines.pls.service.impl.ModelDownloaderCallable;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
 @Component("modelSummaryDownloaderEntityMgr")
-public class ModelSummaryDownloaderEntityMgrImpl implements
-        ModelSummaryDownloaderEntityMgr {
+public class ModelSummaryDownloaderEntityMgrImpl implements ModelSummaryDownloaderEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(ModelSummaryDownloaderEntityMgrImpl.class);
 
@@ -36,20 +37,23 @@ public class ModelSummaryDownloaderEntityMgrImpl implements
 
     private AsyncListenableTaskExecutor modelSummaryDownloadListenableExecutor;
 
-    @Autowired
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ModelSummaryParser modelSummaryParser;
 
-    @Autowired
-    private TimeStampContainer timeStampContainer;
+    @Inject
+    private FeatureImportanceParser featureImportanceParser;
+
+    @Inject
+    private BucketedScoreService bucketedScoreService;
 
     public ListenableFuture<Boolean> downloadModel(Tenant tenant) {
         log.debug("Downloading model for tenant " + tenant.getId());
@@ -58,10 +62,11 @@ public class ModelSummaryDownloaderEntityMgrImpl implements
                 .tenant(tenant) //
                 .modelSummaryEntityMgr(modelSummaryEntityMgr) //
                 .yarnConfiguration(yarnConfiguration) //
+                .bucketedScoreService(bucketedScoreService) //
+                .featureImportanceParser(featureImportanceParser) //
                 .modelSummaryParser(modelSummaryParser);
         ModelDownloaderCallable callable = new ModelDownloaderCallable(builder);
-        ListenableFuture<Boolean> task = modelSummaryDownloadListenableExecutor
-                .submitListenable(callable);
+        ListenableFuture<Boolean> task = modelSummaryDownloadListenableExecutor.submitListenable(callable);
         task.addCallback(new ListenableFutureCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
@@ -79,10 +84,10 @@ public class ModelSummaryDownloaderEntityMgrImpl implements
     @Override
     public String downloadModel() {
         log.debug("ModelDownloader is ready to pick up models.");
-        timeStampContainer.setTimeStamp();
-        if (log.isDebugEnabled()) {
-            log.debug(String.valueOf(timeStampContainer.getTimeStamp().getSeconds()));
-        }
+        // timeStampContainer.setTimeStamp();
+        // if (log.isDebugEnabled()) {
+        // log.debug(String.valueOf(timeStampContainer.getTimeStamp().getSeconds()));
+        // }
         SimpleAsyncTaskExecutor simpleTaskExecutor = new SimpleAsyncTaskExecutor();
         simpleTaskExecutor.setConcurrencyLimit(concurrencyLimit);
 
@@ -94,14 +99,14 @@ public class ModelSummaryDownloaderEntityMgrImpl implements
             futures.add(downloadModel(tenant));
         }
 
-        String jobId = "";
+        StringBuilder jobId = new StringBuilder();
         for (ListenableFuture<Boolean> future : futures) {
-            jobId += Integer.toString(future.hashCode()) + "&&";
+            jobId.append(Integer.toString(future.hashCode())).append("&&");
         }
         if (jobId.length() > 2) {
-            jobId = jobId.substring(0, jobId.length() - 2);
+            jobId = new StringBuilder(jobId.substring(0, jobId.length() - 2));
         }
-        return jobId;
+        return jobId.toString();
     }
 
 }

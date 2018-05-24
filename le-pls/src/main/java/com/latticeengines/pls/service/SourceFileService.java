@@ -18,5 +18,5 @@ public interface SourceFileService {
 
     void copySourceFile(String originalSourceFileName, String targetTableName, String targetTenant);
 
-    SourceFile getByTableNameCrossTenant(String tableName);
+    SourceFile getByTableNameAcrossTenant(String tableName);
 }

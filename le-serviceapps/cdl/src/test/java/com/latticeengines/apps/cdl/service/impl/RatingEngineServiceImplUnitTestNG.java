@@ -84,11 +84,11 @@ public class RatingEngineServiceImplUnitTestNG {
     public void testGenerateReplicaName() {
         String name = "Rating Engine";
         String replicaName = RatingEngineServiceImpl.generateReplicaName(name);
-        Assert.assertEquals(replicaName, "Replica " + name);
-        for(int i = 2; i < 20; i++) {
-            replicaName = RatingEngineServiceImpl.generateReplicaName(replicaName);
-            Assert.assertEquals(replicaName, "Replica-" + i + " " + name);
-        }
+        Assert.assertTrue(replicaName.startsWith("Replica"), replicaName);
+        Assert.assertTrue(replicaName.endsWith(name), replicaName);
+
+        replicaName = RatingEngineServiceImpl.generateReplicaName(replicaName);
+        Assert.assertFalse(replicaName.replace("Replica", "").contains("Replica"), replicaName);
     }
 
     private void mockDataFeedProxy() {

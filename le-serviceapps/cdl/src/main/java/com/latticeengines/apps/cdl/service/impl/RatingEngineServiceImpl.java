@@ -2,8 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.apps.cdl.service.impl.RatingModelServiceBase.getRatingModelService;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -12,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -21,9 +18,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +69,7 @@ import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuer
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
+import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -116,7 +112,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private ServingStoreCacheService servingStoreCacheService;
 
     @Inject
-    private Configuration yarnConfiguration;
+    private ModelCopyProxy modelCopyProxy;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -291,9 +287,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         model.setId(activeModel.getId());
         model.setRatingEngine(ratingEngine);
         if (StringUtils.isNotBlank(model.getModelSummaryId())) {
-//            String replicatedModelGUID = replicateModelSummary(model.getModelSummaryId());
-//            model.setModelSummaryId(replicatedModelGUID);
-            model.setModelSummaryId(null);
+            String tenantId = MultiTenantContext.getTenant().getId();
+            String replicatedModelGUID = modelCopyProxy.copyModel(tenantId, tenantId, model.getModelSummaryId());
+            model.setModelSummaryId(replicatedModelGUID);
         }
         RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
@@ -309,71 +305,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingModelService<RuleBasedModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
         return ratingModelService.createOrUpdate(model, ratingEngine.getId());
-    }
-
-    private String replicateModelSummary(String modelGUID) {
-        return null;
-//        ModelSummary modelSummary = modelSummaryReaderRepository.findById(modelGUID);
-//        if (modelSummary == null) {
-//            throw new IllegalStateException("Cannot find model summary with GUID " + modelGUID);
-//        }
-//
-//        String hdfsPathParttern = "/user/s-analytics/customers/%s.%s.Production/models/%s/%s";
-//        String lookupId = modelSummary.getLookupId();
-//        String[] tokens = lookupId.split("\\|");
-//        String tenantId = tokens[0];
-//        String eventTable = tokens[1];
-//        String uuid = tokens[2];
-//        String hdfsPath = String.format(hdfsPathParttern, tenantId, eventTable, uuid);
-//
-//        try {
-//            HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsPath, uuid);
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to download model artifacts to local from hdfs path " + hdfsPath, e);
-//        }
-//
-//        List<File> dirs = new ArrayList<>(FileUtils.listFiles(new File(uuid), new String[] {}, false));
-//        String appId = dirs.get(0).getName();
-//
-//        File modelSummaryFile = new File(
-//                uuid + File.separator + appId + File.separator + "enhancements" + File.separator + "modelsummary.json");
-//        String newTenantId = MultiTenantContext.getTenantId();
-//        String newUuid = updateLocalModelSummayContent(modelSummaryFile, CustomerSpace.parse(tenantId).getTenantId(),
-//                eventTable, uuid, newTenantId);
-//        String newModelGUID = modelSummary.getId().replace(uuid, newUuid);
-//
-//        String newHdfsPath = String.format(hdfsPathParttern, newTenantId, eventTable, newUuid);
-//        try {
-//            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, uuid, newHdfsPath);
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to upload model artifacts to " + newHdfsPath, e);
-//        }
-//
-//        FileUtils.deleteQuietly(new File(uuid));
-//
-//        return newModelGUID;
-    }
-
-    private String updateLocalModelSummayContent(File modelSummaryFile, String oldTenantName, String eventTable,
-            String uuid, String newTenantName) {
-        String modelSummaryContent;
-        try {
-            modelSummaryContent = FileUtils.readFileToString(modelSummaryFile, "UTF-8");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read modelsummary content.", e);
-        }
-        String newUuid = UUID.randomUUID().toString();
-        String lookupId = String.format("%s.%s.Production|%s|%s", oldTenantName, oldTenantName, eventTable, uuid);
-        String newLookupId = String.format("%s.%s.Production|%s|%s", newTenantName, newTenantName, eventTable, uuid);
-        modelSummaryContent = modelSummaryContent.replace(lookupId, newLookupId);
-        modelSummaryContent = modelSummaryContent.replace(uuid, newUuid);
-        FileUtils.deleteQuietly(modelSummaryFile);
-        try {
-            FileUtils.write(modelSummaryFile, modelSummaryContent, "UTF-8");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to write model summary file", e);
-        }
-        return newUuid;
     }
 
     @Override
@@ -792,21 +723,18 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     public static String generateReplicaName(String name) {
         final String replica = "Replica";
+        Pattern pattern = Pattern.compile("^" + replica + "-(\\d+) ");
+        Matcher matcher = pattern.matcher(name);
+        String newPrefix = replica + "-" + String.valueOf(System.currentTimeMillis()) + " ";
+
         String replicaName;
-        if (!name.startsWith(replica)) {
-            replicaName = replica + " " + name;
+        if (matcher.find()) {
+            String oldPrefix = matcher.group(0);
+            replicaName = name.replaceFirst(oldPrefix, newPrefix);
         } else {
-            Pattern pattern = Pattern.compile("^" + replica + "-(\\d+) ");
-            Matcher matcher = pattern.matcher(name);
-            if (matcher.find()) {
-                String oldPrefix = matcher.group(0);
-                int idx = Integer.parseInt(matcher.group(1)) + 1;
-                String newPrefix = replica + "-" + String.valueOf(idx) + " ";
-                replicaName = name.replaceFirst(oldPrefix, newPrefix);
-            } else {
-                replicaName = name.replaceFirst(replica, replica + "-2");
-            }
+            replicaName = newPrefix + name;
         }
+
         return replicaName;
     }
 

@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.lp.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -16,9 +16,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -29,11 +32,9 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -77,7 +78,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
 
     private void setDetails(ModelSummary summary) throws Exception {
         InputStream modelSummaryFileAsStream = ClassLoader
-                .getSystemResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
+                .getSystemResourceAsStream("modelsummary/modelsummary-marketo.json");
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();
@@ -351,7 +352,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         modelSummaryEntityMgr.update(retrievedSummary);
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.DELETED);
         assertNotNull(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false));
-        assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false).getStatus(),
+        Assert.assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false).getStatus(),
                 ModelSummaryStatus.DELETED);
         List<ModelSummary> modelSummaryList = modelSummaryEntityMgr.findAllValid();
         Assert.assertEquals(modelSummaryList.size(), 0);
@@ -486,4 +487,9 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         attrMap.put("Browser", "0");
         return attrMap;
     }
+
+    private void setupSecurityContext(ModelSummary summary1) {
+        MultiTenantContext.setTenant(summary1.getTenant());
+    }
+
 }
