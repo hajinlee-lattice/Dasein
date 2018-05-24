@@ -84,6 +84,10 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         if (endTimestamp != null) {
             params.add("end-timestamp=" + endTimestamp);
         }
+        if (StringUtils.isNotBlank(orgId) && StringUtils.isNotBlank(externalSysType)) {
+            params.add("org-id=" + orgId.trim());
+            params.add("external-sys-type=" + externalSysType.trim());
+        }
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
         }
