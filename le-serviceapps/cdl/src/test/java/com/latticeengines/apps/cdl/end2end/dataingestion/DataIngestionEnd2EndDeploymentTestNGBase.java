@@ -520,7 +520,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         long endTime = System.currentTimeMillis();
         assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
         verifyActionRegistration();
-        return tryGetAvroFileRows(startTime, endTime);
+        return tryGetAvroFileRows(startTime, endTime, entity);
     }
 
     protected void verifyActionRegistration() {
@@ -529,12 +529,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         // Assert.assertEquals(actions.size(), ++actionsNumber);
     }
 
-    private long tryGetAvroFileRows(long startMillis, long endMillis) throws Exception {
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
+    private long tryGetAvroFileRows(long startMillis, long endMillis, BusinessEntity entity) throws Exception {
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-%s/Extracts",
                 PathBuilder
                         .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
                         .toString(),
-                SourceType.FILE.getName());
+                SourceType.FILE.getName(),
+                entity.name());
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, targetPath);
         for (String file : files) {

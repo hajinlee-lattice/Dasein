@@ -328,7 +328,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = "importBase")
     public void verifyTransaction() throws IOException {
         Assert.assertNotNull(baseTransactionFile);
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Transaction/Extracts",
                 PathBuilder
                         .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
                         .toString(),

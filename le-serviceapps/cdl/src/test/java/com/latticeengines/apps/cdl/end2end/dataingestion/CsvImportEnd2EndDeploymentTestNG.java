@@ -89,7 +89,7 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
     }
 
     private void collectAvroFilesForEntity(BusinessEntity entity) throws IOException {
-        File rootDir = new File(downloadDir + "/DataFeed1-Account/Extracts");
+        File rootDir = new File(downloadDir + String.format("/DataFeed1-%s/Extracts", entity.name()));
         if (rootDir.exists()) {
             List<File> files = new ArrayList<>(FileUtils.listFiles(rootDir, new String[] { "avro" }, true));
             files.sort(Comparator.comparing(File::getPath));

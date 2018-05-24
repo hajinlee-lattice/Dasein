@@ -99,7 +99,7 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             log.info(String.format("Modeling metadata for template: %s",
                     JsonUtils.serialize(template.getModelingMetadata())));
             context.setProperty(ImportProperty.METADATA, JsonUtils.serialize(template.getModelingMetadata()));
-            String targetPath = createTargetPath(config.getCustomerSpace());
+            String targetPath = createTargetPath(config.getCustomerSpace(), config.getBusinessEntity());
             List<Table> tableMetadata = new ArrayList<>();
             for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
                 log.info("Importing for " + sourceImportConfig.getSourceType());
@@ -158,10 +158,12 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
                 Arrays.asList(Long.toString(processedRecords)), totalRecords, ignoredRecords, duplicatedRecords);
     }
 
-    private String createTargetPath(CustomerSpace customerSpace) {
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
+    private String createTargetPath(CustomerSpace customerSpace, BusinessEntity entity) {
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-%s/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                SourceType.FILE.getName(), new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
+                SourceType.FILE.getName(),
+                entity.name(),
+                new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
         return targetPath;
     }
 
