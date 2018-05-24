@@ -55,7 +55,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         // For BIS use case, the product type is ProductType.Spending
         String baseQuery = "SELECT t.{0}, t.{1}, t.{2}, t.{3}, t.{4} FROM {5} t "
                 + "join {6} p on (p.productlineid = t.productid or p.productfamilyid = t.productid or p.productCategoryid = t.productid) "
-                + "where {7} = ? and {8} = ? and {9} = ''{10}''";
+                + "where t.{7} = ? and t.{8} = ? and t.{9} = ''{10}''";
         String query = MessageFormat.format(baseQuery, //
                 InterfaceName.PeriodId, // 0
                 InterfaceName.ProductId, // 1
