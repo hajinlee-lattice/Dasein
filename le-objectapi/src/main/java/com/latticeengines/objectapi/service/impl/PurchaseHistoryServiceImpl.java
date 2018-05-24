@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.service.impl;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,20 +42,35 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             DataCollection.Version version, ProductType productType) {
         List<PeriodTransaction> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
-        String tableName = dataCollectionProxy.getTableName(tenant.getId(),
+        String periodTransactionTableName = dataCollectionProxy.getTableName(tenant.getId(),
                 BusinessEntity.PeriodTransaction.getServingStore());
+
+        String productHierarchyTableName = dataCollectionProxy.getTableName(tenant.getId(),
+                BusinessEntity.ProductHierarchy.getServingStore());
+
         log.info(String.format(
                 "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s, version %s",
-                tableName, tenant.getId(), accountId, periodName, productType, version));
+                periodTransactionTableName, tenant.getId(), accountId, periodName, productType, version));
 
         // For BIS use case, the product type is ProductType.Spending
-        String query = String.format("SELECT %s, %s, %s, %s, %s FROM %s where %s = ? and %s = ? and %s = '%s'",
-                InterfaceName.PeriodId, InterfaceName.ProductId, InterfaceName.TotalAmount, InterfaceName.TotalQuantity,
-                InterfaceName.TransactionCount, tableName, InterfaceName.AccountId, InterfaceName.PeriodName,
-                InterfaceName.ProductType, ProductType.Spending.toString());
-        log.info(String.format("query for getPeriodTransactionByAccountId " + query));
-        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query,
-                new Object[] { accountId, periodName });
+        String baseQuery = "SELECT t.{0}, t.{1}, t.{2}, t.{3}, t.{4} FROM {5} t "
+                + "join {6} p on (p.productlineid = t.productid or p.productfamilyid = t.productid or p.productCategoryid = t.productid) "
+                + "where {7} = ? and {8} = ? and {9} = ''{10}''";
+        String query = MessageFormat.format(baseQuery, //
+                InterfaceName.PeriodId, // 0
+                InterfaceName.ProductId, // 1
+                InterfaceName.TotalAmount, // 2
+                InterfaceName.TotalQuantity, // 3
+                InterfaceName.TransactionCount, // 4
+                periodTransactionTableName, // 5
+                productHierarchyTableName, // 6
+                InterfaceName.AccountId, // 7
+                InterfaceName.PeriodName, // 8
+                InterfaceName.ProductType, // 9
+                productType.toString()); // 10
+
+        log.info("Query for getPeriodTransactionByAccountId " + query);
+        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, accountId, periodName);
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
             periodTransaction.setTotalAmount((Double) row.get("totalamount"));
@@ -84,7 +100,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         log.info(String.format("Get product Hierarchy table %s for %s", tableName, tenant.getId()));
         String query = String.format("SELECT %s, %s, %s, %s FROM %s", InterfaceName.ProductId,
                 InterfaceName.ProductLine, InterfaceName.ProductFamily, InterfaceName.ProductCategory, tableName);
-        log.info(String.format("query for getProductHierarchy " + query));
+        log.info("query for getProductHierarchy " + query);
         List<Map<String, Object>> retList = redshiftJdbcTemplate
                 .queryForList("SELECT productid, productline, productfamily, productcategory FROM " + tableName);
         for (Map row : retList) {
