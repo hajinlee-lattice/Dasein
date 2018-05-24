@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWor
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
+import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
@@ -43,6 +44,9 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     private ScoreEventTable scoreEventTable;
 
     @Inject
+    private RecalculatePercentileScoreDataFlow recalculatePercentileScore;
+
+    @Inject
     private ScoreAggregateFlow scoreAggregate;
 
     @Inject
@@ -64,7 +68,8 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
         }
         builder.next(matchDataCloud) //
                 .next(addStandardAttributes) //
-                .next(scoreEventTable); //
+            .next(scoreEventTable) //
+            .next(recalculatePercentileScore); //
         if (!isLPI) {
             builder.next(scoreAggregate); //
         }

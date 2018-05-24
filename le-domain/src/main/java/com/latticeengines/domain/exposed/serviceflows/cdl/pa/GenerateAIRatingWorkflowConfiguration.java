@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineIn
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculatePercentileScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -59,6 +60,8 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         private MatchDataCloudWorkflowConfiguration.Builder match = new MatchDataCloudWorkflowConfiguration.Builder();
 
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
+        private RecalculatePercentileScoreDataFlowConfiguration recalculatePercentile =
+            new RecalculatePercentileScoreDataFlowConfiguration();
         private ScoreAggregateFlowConfiguration scoreAgg = new ScoreAggregateFlowConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
@@ -71,6 +74,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             addStandardAttributes.setCustomerSpace(customerSpace);
             match.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
+            recalculatePercentile.setCustomerSpace(customerSpace);
             scoreAgg.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             computeLift.setCustomerSpace(customerSpace);
@@ -84,6 +88,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             match.microServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
+            recalculatePercentile.setMicroServiceHostPort(microServiceHostPort);
             scoreAgg.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
@@ -211,6 +216,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             configuration.add(addStandardAttributes);
             configuration.add(match.build());
             configuration.add(score);
+            configuration.add(recalculatePercentile);
             configuration.add(scoreAgg);
             configuration.add(combineInputWithScores);
             configuration.add(computeLift);
