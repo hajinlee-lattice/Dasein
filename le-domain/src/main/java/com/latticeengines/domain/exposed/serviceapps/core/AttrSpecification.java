@@ -5,19 +5,21 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public enum AttrSpecification {
 
-    LDC_NON_PREMIUM("LDC Non-Premium Attributes", true, true, true, true, true, false, false, false, true, false),
-    LDC_PREMIUM("LDC Premium Attributes", true, true, true, true, true, false, false, false, true, false),
-    LDC_INTERNAL("LDC Internal Attributes", false, true, false, true, true, false, false, false, true, false),
-    CDL_STD("CDL Standard Attributes", true, true, true, true, true, false, false, false, false, false),
-    CDL_LOOKUP_ID("CDL Lookup Ids", true, true, true, true, false, false, false, true, true, false),
-    CDL_ACCOUNT_EXTENSION("CDL Account Extensions", true, true, true, true, true, false, false, true, true, false),
-    CDL_CONTACT_EXTENSION("CDL Contact Extensions", true, true, true, true, true, false, false, true, true, false),
+    LDC_NON_PREMIUM("LDC Non-Premium Attributes", true, true, true, true, true, false, false, false, true, false, true), //
+    LDC_PREMIUM("LDC Premium Attributes", true, true, true, true, true, false, false, false, true, false, true), //
+    LDC_INTERNAL("LDC Internal Attributes", false, true, false, true, true, false, false, false, true, false, true), //
+    CDL_STD("CDL Standard Attributes", true, true, true, true, true, false, false, false, false, false, true), //
+    CDL_LOOKUP_ID("CDL Lookup Ids", true, true, true, true, false, false, false, true, true, false, true), //
+    CDL_ACCOUNT_EXTENSION("CDL Account Extensions", true, true, true, true, true, false, false, true, true, false,
+            true), //
+    CDL_CONTACT_EXTENSION("CDL Contact Extensions", true, true, true, true, true, false, false, true, true, false,
+            true), //
     CDL_DERIVED_PB("CDL Derived Attributes for Product Bundles", true, false, false, false, false, false, false, false,
-            false, false),
-    CDL_DERIVED_WBC("CDL Derived Attributes for Website Behavior Categories", true, true, true, true, false, false, false, true, false, false),
-    CDL_RATING("CDL Rating Attributes", true, false, false, true, false, false, false, false, false,
-            false),
-    CDL_SEGMENTS("CDL Segments as Attributes", true, true, true, true, false, false, true, true, true, false);
+            false, false, true), //
+    CDL_DERIVED_WBC("CDL Derived Attributes for Website Behavior Categories", true, true, true, true, false, false,
+            false, true, false, false, true), //
+    CDL_RATING("CDL Rating Attributes", true, false, false, true, false, false, false, false, false, false, false), //
+    CDL_SEGMENTS("CDL Segments as Attributes", true, true, true, true, false, false, true, true, true, false, true); //
 
     private String specification;
     private boolean segmentationChange;
@@ -30,11 +32,12 @@ public enum AttrSpecification {
     private boolean descriptionChange;
     private boolean categoryNameChange;
     private boolean iconChange;
+    private boolean stateChange;
 
     AttrSpecification(String specification, boolean segmentationChange, boolean enrichmentChange,
                       boolean companyProfileChange, boolean talkingPointChange, boolean modelChange,
                       boolean typeChange, boolean displayNameChange, boolean descriptionChange,
-                      boolean categoryNameChange, boolean iconChange) {
+            boolean categoryNameChange, boolean iconChange, boolean stateChange) {
         this.specification = specification;
         this.segmentationChange = segmentationChange;
         this.enrichmentChange = enrichmentChange;
@@ -46,6 +49,7 @@ public enum AttrSpecification {
         this.descriptionChange = descriptionChange;
         this.categoryNameChange = categoryNameChange;
         this.iconChange = iconChange;
+        this.stateChange = stateChange;
     }
 
     public static AttrSpecification getAttrSpecification(AttrType attrType, AttrSubType attrSubType,
@@ -143,6 +147,10 @@ public enum AttrSpecification {
 
     public boolean iconChange() {
         return iconChange;
+    }
+
+    public boolean stateChange() {
+        return stateChange;
     }
 
     public boolean allowChange(ColumnSelection.Predefined group) {

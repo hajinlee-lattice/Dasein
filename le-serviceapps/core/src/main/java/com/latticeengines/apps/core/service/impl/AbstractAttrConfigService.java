@@ -527,7 +527,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 state = metadata.getAttrState();
             }
             stateProp.setSystemValue(state);
-            stateProp.setAllowCustomization(true);
+            stateProp.setAllowCustomization(attrSpec == null || attrSpec.stateChange());
             mergeConfig.putProperty(ColumnMetadataKey.State, stateProp);
             modifyDeprecatedAttrState(mergeConfig, metadata);
 
