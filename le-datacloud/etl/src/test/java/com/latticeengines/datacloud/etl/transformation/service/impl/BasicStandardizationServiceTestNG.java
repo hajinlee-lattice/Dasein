@@ -153,11 +153,12 @@ public class BasicStandardizationServiceTestNG
         return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
+    // ID, Name, Country, State, ZipCode, DUNS, CHIEF_EXECUTIVE_OFFICER_NAME
     private Object[][] input = new Object[][] { //
             { 1, "Name1", "United States", "CA", "  94404  ", "0123456789", null }, //
-            { 2, "Name2", "England", "Scotland &.", null, "123456789", "CEO2" }, //
+            { 2, "Name2", "England", "Scotland &.", " null ", "123456789", "CEO2" }, //
             { 3, "Name3", null, "Scotland &.", "", "6789", "CEO3" }, //
-            { 4, "Name4", "USA", null, null, null, "" }, //
+            { 4, "Name4", "USA", null, "none", null, "" }, //
     };
 
     private void prepareInput() {

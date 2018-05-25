@@ -98,6 +98,18 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    @DataProvider(name = "nullStringDataProvider")
+    Object[][] nullStringDataProvider() {
+        return new Object[][] {
+                { null, null }, //
+                { " null ", null }, //
+                { " none ", null }, //
+                { " NULL ", null }, //
+                { "NONE", null }, //
+                { "nonenull", "nonenull" },//
+        };
+    }
+
     @Test(groups = "unit", dataProvider = "locationStringDataProvider")
     public void testLocationStringStandardizeString(String input, String expectedOutput) {
         String output = LocationStringStandardizationUtils.getStandardString(input);
@@ -135,6 +147,12 @@ public class StringStandardizationUtilsUnitTestNG {
 //                Mockito.anyString(), Mockito.anyIterable()));
 //        StringStandardizationUtils.setAlertService(mockAlertService);
         String output = StringStandardizationUtils.getStandardizedOutputLatticeID(input);
+        Assert.assertEquals(output, expectedOutput);
+    }
+
+    @Test(groups = "unit", dataProvider = "nullStringDataProvider")
+    public void testCleanNullString(String input, String expectedOutput) {
+        String output = StringStandardizationUtils.cleanNullString(input);
         Assert.assertEquals(output, expectedOutput);
     }
 }

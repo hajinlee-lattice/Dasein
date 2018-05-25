@@ -34,6 +34,16 @@ public class StringStandardizationUtils {
         return singletonUtil.getStandardStringInternal(str);
     }
 
+    public static String cleanNullString(String str) {
+        if (StringUtils.isBlank(str)) {
+            return null;
+        }
+        if ("null".equalsIgnoreCase(str.trim()) || "none".equalsIgnoreCase(str.trim())) {
+            return null;
+        }
+        return str;
+    }
+
     public static String getStandardDuns(String duns) {
         if (StringUtils.isBlank(duns)) {
             return null;
@@ -83,22 +93,13 @@ public class StringStandardizationUtils {
             return sb.append(latticeIdAsString).toString();
         } catch (NumberFormatException exc) {
             log.error(String.format("LatticeId %s is not in numeric format.", latticeId));
-//            String msg = String.format(LedpCode.LEDP_25007.getMessage() +
-//                            "Failed to standardize LatticeId [%s] in match output.", latticeId);
-//            String dedupKey = String.format(singletonUtil.getClass().getName() +
-//                    " - getStandardizedOutputLatticeID(%s)", latticeId);
-//            List<BasicNameValuePair> details = new ArrayList<>();
-//            details.add(new BasicNameValuePair("LatticeId", latticeId));
-//            details.add(new BasicNameValuePair("ExceptionMessage", exc.getMessage()));
-//            details.add(new BasicNameValuePair("ExceptionStackTrace", JsonUtils.serialize(exc.getStackTrace())));
-//            alertService.triggerCriticalEvent(msg, appTimelineWebappAddress, dedupKey, details);
             return null;
         }
     }
 
     String getStandardStringInternal(String str) {
         try {
-            if (StringUtils.isEmpty(str) || str.trim().equalsIgnoreCase("none")) {
+            if (cleanNullString(str) == null) {
                 return null;
             }
             Set<Character> removedSet = new HashSet<>(getCharactersToRemove());
