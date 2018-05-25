@@ -138,6 +138,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             applicationIds.add(appId);
 
             MatchCommand matchCommand = matchCommandService.getByRootOperationUid(rootOperationUid);
+            log.info("#####match block application id : " + appId + "+block operation uid :"
+                    + jobConfiguration.getBlockOperationUid());
             matchCommandService.startBlock(matchCommand, appId, jobConfiguration.getBlockOperationUid(),
                     jobConfiguration.getBlockSize());
             log.info("Submit a match block to application id " + appId);
@@ -165,6 +167,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
     private void finalizeMatch() {
         try {
+            log.info("####In finalize match update : rootOperationUid : " + rootOperationUid);
             matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f).commit();
 
             Long startTime = matchOutput.getReceivedAt().getTime();
@@ -192,6 +195,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 }
             }
             log.info("Aggregated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
+            log.info("### matchCommand update : rootOperationUid : " + rootOperationUid + " avroDir : " + avroDir
+                    + " count.intValue() : match status finished");
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
                     .dnbCommands() //
