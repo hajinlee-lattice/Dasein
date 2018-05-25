@@ -17,11 +17,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
@@ -37,7 +39,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("dataFeedTaskManagerService")
 public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerService {
@@ -52,16 +53,21 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private final CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter;
 
+    private final CDLExternalSystemService cdlExternalSystemService;
+
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
-            DataFeedProxy dataFeedProxy, TenantService tenantService, DLTenantMappingService dlTenantMappingService) {
+                                          DataFeedProxy dataFeedProxy, TenantService tenantService,
+                                          DLTenantMappingService dlTenantMappingService,
+                                          CDLExternalSystemService cdlExternalSystemService) {
         this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
         this.dataFeedProxy = dataFeedProxy;
         this.tenantService = tenantService;
         this.dlTenantMappingService = dlTenantMappingService;
+        this.cdlExternalSystemService = cdlExternalSystemService;
     }
 
     @Override
@@ -94,6 +100,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedTask.setImportTemplate(mergeTable(originMeta, newMeta));
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
             }
+            dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta, customerSpace.toString());
             return dataFeedTask.getUniqueId();
         } else {
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
@@ -115,6 +122,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), DataFeed.Status.Initialized.getName());
                 }
             }
+            dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta, customerSpace.toString());
             return dataFeedTask.getUniqueId();
         }
     }

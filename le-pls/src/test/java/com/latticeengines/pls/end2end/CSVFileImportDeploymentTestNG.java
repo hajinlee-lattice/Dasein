@@ -146,13 +146,14 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         crmID.setUserField("ID");
         crmID.setMappedField("SFDC ID");
         crmID.setFieldType(UserDefinedType.TEXT);
-        crmID.setMappedToLatticeField(true);
+        crmID.setMappedToLatticeField(false);
         crmID.setCdlExternalSystemType(CDLExternalSystemType.CRM);
 
         FieldMapping mapID = new FieldMapping();
         mapID.setUserField("ID");
         mapID.setMappedField("MAP_System");
         mapID.setFieldType(UserDefinedType.TEXT);
+        mapID.setMappedToLatticeField(false);
         mapID.setCdlExternalSystemType(CDLExternalSystemType.MAP);
         fieldMappingDocument.getFieldMappings().addAll(Arrays.asList(crmID, mapID));
 
@@ -170,10 +171,10 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         validateJobsPage();
 
         DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_ACCOUNT);
-        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("sfdc_id"));
+        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("SFDC_ID"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("sfdc_id"));
+        Assert.assertTrue(system.getCRMIdList().contains("SFDC_ID"));
     }
 
     private void validateImportAction(List<Action> actions) {

@@ -8,8 +8,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema.Type;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -337,10 +339,14 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         if (cdlExternalSystemService == null || table == null) {
             return;
         }
-        Attribute crmAttr = table.getAttribute(InterfaceName.SalesforceAccountID);
-        if (crmAttr != null) {
+        List<String> crmAttr = table.getAttributes().stream()
+                .filter(attr -> attr.getName().equalsIgnoreCase("CRMAccount_External_ID")
+                        || attr.getName().equalsIgnoreCase("SalesforceAccountId"))
+                .map(Attribute::getName)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(crmAttr)) {
             CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-            cdlExternalSystem.setCrmIds(crmAttr.getName());
+            cdlExternalSystem.setCRMIdList(crmAttr);
             cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
         }
     }

@@ -490,14 +490,6 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.NUMERIC.name()) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .build());
-        table.addAttribute(attr(InterfaceName.SalesforceAccountID.name()) //
-                .allowedDisplayNames(Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.SalesforceAccountID) //
-                .logicalType(LogicalDataType.Id) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
         table.addAttribute(attr(InterfaceName.Type.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TYPE")) //
                 .type(Schema.Type.STRING) //

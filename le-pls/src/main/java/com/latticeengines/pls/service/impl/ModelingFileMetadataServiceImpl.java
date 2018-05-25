@@ -108,12 +108,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             FieldMappingDocument fieldMappingFromTemplate = getFieldMappingBaseOnTable(sourceFile, templateTable);
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo);
         }
-        for (FieldMapping fieldMapping : resultDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() != null
-                    && fieldMapping.getMappedField().equals(InterfaceName.SalesforceAccountID.name())) {
-                fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
-            }
-        }
         return resultDocument;
     }
 
@@ -204,10 +198,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (fieldMapping.getCdlExternalSystemType() != null) {
                 if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
                     fieldMapping.setMappedField(fieldMapping.getMappedField() + "ID");
-                }
-                if (!fieldMapping.getMappedField().equals(InterfaceName.SalesforceAccountID.name())) {
-                    fieldMapping.setMappedField(fieldMapping.getMappedField().toLowerCase());
-                    fieldMapping.setMappedToLatticeField(false);
                 }
                 fieldMapping.setMappedField(
                         ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));

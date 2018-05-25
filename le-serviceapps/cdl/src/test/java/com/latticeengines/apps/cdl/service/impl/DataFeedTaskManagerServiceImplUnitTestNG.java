@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public class DataFeedTaskManagerServiceImplUnitTestNG {
 
     private DataFeedTaskManagerServiceImpl dataFeedTaskManagerServiceImpl = new DataFeedTaskManagerServiceImpl(null,
-            null, null, null);
+            null, null, null, null);
 
     @Test(groups = "unit")
     public void testUpdateTableAttrName() {
