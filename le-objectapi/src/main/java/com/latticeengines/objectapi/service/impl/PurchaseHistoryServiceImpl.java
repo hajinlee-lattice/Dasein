@@ -45,17 +45,13 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         String periodTransactionTableName = dataCollectionProxy.getTableName(tenant.getId(),
                 BusinessEntity.PeriodTransaction.getServingStore());
 
-        String productHierarchyTableName = dataCollectionProxy.getTableName(tenant.getId(),
-                BusinessEntity.ProductHierarchy.getServingStore());
-
         log.info(String.format(
                 "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s, version %s",
                 periodTransactionTableName, tenant.getId(), accountId, periodName, productType, version));
 
         // For BIS use case, the product type is ProductType.Spending
         String baseQuery = "SELECT t.{0}, t.{1}, t.{2}, t.{3}, t.{4} FROM {5} t "
-                + "join {6} p on (p.productlineid = t.productid or p.productfamilyid = t.productid or p.productCategoryid = t.productid) "
-                + "where t.{7} = ? and t.{8} = ? and t.{9} = ''{10}''";
+                + "where t.{6} = ? and t.{7} = ? and t.{8} = ''{9}''";
         String query = MessageFormat.format(baseQuery, //
                 InterfaceName.PeriodId, // 0
                 InterfaceName.ProductId, // 1
@@ -63,21 +59,21 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 InterfaceName.TotalQuantity, // 3
                 InterfaceName.TransactionCount, // 4
                 periodTransactionTableName, // 5
-                productHierarchyTableName, // 6
-                InterfaceName.AccountId, // 7
-                InterfaceName.PeriodName, // 8
-                InterfaceName.ProductType, // 9
-                productType.toString()); // 10
+                InterfaceName.AccountId, // 6
+                InterfaceName.PeriodName, // 7
+                InterfaceName.ProductType, // 8
+                productType.toString()); // 9
 
         log.info("Query for getPeriodTransactionByAccountId " + query);
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, accountId, periodName);
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
-            periodTransaction.setTotalAmount((Double) row.get("totalamount"));
-            periodTransaction.setTotalQuantity((Long) row.get("totalquantity"));
-            periodTransaction.setTransactionCount((Double) row.get("transactioncount"));
-            periodTransaction.setProductId((String) row.get("productid"));
-            periodTransaction.setPeriodId((Integer) row.get("periodid"));
+            periodTransaction.setTotalAmount((Double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
+            periodTransaction.setTotalQuantity((Long) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
+            periodTransaction
+                    .setTransactionCount((Double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
+            periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
+            periodTransaction.setPeriodId((Integer) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
         }
         log.info("resultList is " + resultList);
@@ -98,17 +94,22 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         String tableName = dataCollectionProxy.getTableName(tenant.getId(),
                 BusinessEntity.ProductHierarchy.getServingStore());
         log.info(String.format("Get product Hierarchy table %s for %s", tableName, tenant.getId()));
-        String query = String.format("SELECT %s, %s, %s, %s FROM %s", InterfaceName.ProductId,
-                InterfaceName.ProductLine, InterfaceName.ProductFamily, InterfaceName.ProductCategory, tableName);
+        String query = String.format("SELECT %s, %s, %s, case" //
+                + " when " + InterfaceName.ProductLineId + " is not null then " + InterfaceName.ProductLineId //
+                + " when " + InterfaceName.ProductFamilyId + " is not null then " + InterfaceName.ProductFamilyId //
+                + " else " + InterfaceName.ProductCategoryId + " end"//
+                + " FROM %s", InterfaceName.ProductLine, InterfaceName.ProductFamily, InterfaceName.ProductCategory,
+                tableName);
         log.info("query for getProductHierarchy " + query);
         List<Map<String, Object>> retList = redshiftJdbcTemplate
                 .queryForList("SELECT productid, productline, productfamily, productcategory FROM " + tableName);
         for (Map row : retList) {
             ProductHierarchy productHierarchy = new ProductHierarchy();
-            productHierarchy.setProductCategory((String) row.get("productcategory"));
-            productHierarchy.setProductFamily((String) row.get("productfamily"));
-            productHierarchy.setProductLine((String) row.get("productline"));
-            productHierarchy.setProductId((String) row.get("productid"));
+            productHierarchy
+                    .setProductCategory((String) row.get(InterfaceName.ProductCategory.toString().toLowerCase()));
+            productHierarchy.setProductFamily((String) row.get(InterfaceName.ProductFamily.toString().toLowerCase()));
+            productHierarchy.setProductLine((String) row.get(InterfaceName.ProductLine.toString().toLowerCase()));
+            productHierarchy.setProductId((String) row.get("case"));
             resultList.add(productHierarchy);
         }
         log.info("resultList is " + resultList);
