@@ -19,6 +19,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 @Component("hdfsDirPurger")
 public class HdfsDirPurger extends CollectionPurger {
 
+    public static final String HIVE = "Hive";
+
     @Override
     protected SourceType getSourceType() {
         return SourceType.HDFS_DIR;
@@ -75,7 +77,11 @@ public class HdfsDirPurger extends CollectionPurger {
             String srcName = srcPath.getKey();
             String hdfsPath = srcPath.getValue();
             List<String> hdfsPaths = Collections.singletonList(hdfsPath);
-            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, null, !strategy.isNoBak());
+            List<String> hiveTables = null;
+            if (HIVE.equals(strategy.getSource())) {
+                hiveTables = Collections.singletonList(srcName.toLowerCase());
+            }
+            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, hiveTables, !strategy.isNoBak());
             if (!strategy.isNoBak()) {
                 purgeSource.setS3Days(strategy.getS3Days());
                 purgeSource.setGlacierDays(strategy.getGlacierDays());

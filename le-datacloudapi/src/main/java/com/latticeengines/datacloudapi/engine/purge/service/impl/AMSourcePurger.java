@@ -27,8 +27,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 @Component("amSourcePurger")
 public class AMSourcePurger extends VersionedPurger {
 
-    private static final String ACCOUNT_MASTER = "AccountMaster";
-    private static final String ACCOUNT_MASTER_LOOKUP = "AccountMasterLookup";
+    public static final String ACCOUNT_MASTER = "AccountMaster";
+    public static final String ACCOUNT_MASTER_LOOKUP = "AccountMasterLookup";
 
     @Override
     protected SourceType getSourceType() {
