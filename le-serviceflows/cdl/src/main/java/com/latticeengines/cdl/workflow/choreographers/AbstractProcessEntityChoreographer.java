@@ -112,12 +112,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return step.name().endsWith(resetStep().name());
     }
 
-    private boolean belongsToUpdate(int seq) {
+    protected boolean belongsToUpdate(int seq) {
         String namespace = getStepNamespace(seq);
         return updateWorkflow() != null && namespace.contains(updateWorkflow().name());
     }
 
-    private boolean belongsToRebuild(int seq) {
+    protected boolean belongsToRebuild(int seq) {
         String namespace = getStepNamespace(seq);
         return rebuildWorkflow() != null && namespace.contains(rebuildWorkflow().name());
     }
