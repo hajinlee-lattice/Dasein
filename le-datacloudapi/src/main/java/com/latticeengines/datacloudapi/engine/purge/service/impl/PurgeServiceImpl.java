@@ -27,6 +27,45 @@ public class PurgeServiceImpl implements PurgeService {
 
     private static Logger log = LoggerFactory.getLogger(PurgeServiceImpl.class);
 
+    private Set<String> retainedSources = new HashSet<String>() {
+        {
+            add("AMRefreshVersionUpdater");
+            add("Alexa");
+            add("AlexaMostRecent");
+            add("Bombora30DayAgg");
+            add("BuiltWith");
+            add("BuiltWithBak");
+            add("BuiltWithMostRecent");
+            add("BuiltWithPivoted");
+            add("BuiltWith_20160802");
+            add("CompeteMostRecent");
+            add("DomainValidation");
+            add("Feature");
+            add("FeatureMostRecent");
+            add("FeaturePivoted");
+            add("Fortune1000");
+            add("Fortune1000Standard");
+            add("G2000");
+            add("G2000DomainOnly");
+            add("G2000Standard");
+            add("HGDataPivoted");
+            add("LargeBusinesses");
+            add("LargeBusinessesFullLocation");
+            add("LargeBusinessesNameAndStateAndCountry");
+            add("MediumBusinesses");
+            add("OrbGolden");
+            add("OrbIntelligenceMostRecent");
+            add("OrbIntelligenceV1");
+            add("PublicDomain");
+            add("QADnBMonitor");
+            add("QADnBMonitorNameAndStateAndCountry");
+            add("QAFuzzyMatchLoadTest");
+            add("QAFuzzyMatchLoadTestNameAndStateAndCountry");
+            add("SmallBusinesses");
+            add("VerySmallBusinesses");
+        }
+    };
+
     @Autowired
     private List<SourcePurger> sourcePurgers;
 
@@ -80,6 +119,9 @@ public class PurgeServiceImpl implements PurgeService {
                 Iterator<String> it = sources.iterator();
                 while (it.hasNext()) {
                     String source = it.next();
+                    if (retainedSources.contains(source)) {
+                        it.remove();
+                    }
                     if (generalSources.contains(source)) {
                         it.remove();
                     }
