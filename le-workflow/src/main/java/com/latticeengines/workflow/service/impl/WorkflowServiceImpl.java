@@ -257,7 +257,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             } else {
                 throw new LedpException(LedpCode.LEDP_28000, new String[] { String.valueOf(workflowId.getId()) });
             }
-        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
+        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException | RuntimeException e) {
             throw new LedpException(LedpCode.LEDP_28003, e, new String[] { String.valueOf(workflowId.getId()) });
         }
     }
@@ -265,8 +265,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public WorkflowStatus getStatus(WorkflowExecutionId workflowId) {
         JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
-        WorkflowStatus workflowStatus = getStatus(workflowId, jobExecution);
-        return workflowStatus;
+        return getStatus(workflowId, jobExecution);
     }
 
     @Override
@@ -429,7 +428,8 @@ public class WorkflowServiceImpl implements WorkflowService {
                         return true;
                     }
                     log.warn(
-                            String.format("Getting exception when waiting for %s", workflowId.getId(), e.getMessage()));
+                            String.format("Getting exception when waiting for %s, exception=%s",
+                                    workflowId.getId(), e.getMessage()));
                     if (--retryOnException == 0)
                         throw new RuntimeException(e);
                 }
