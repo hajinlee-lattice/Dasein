@@ -113,8 +113,8 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
             if (entity != null) {
                 Map<BusinessEntity, Integer> entityValueMap;
                 try {
-                    entityValueMap = step.getMapObjectFromContext(
-                            BaseWorkflowStep.FINAL_RECORDS, BusinessEntity.class, Integer.class);
+                    entityValueMap = step.getMapObjectFromContext(BaseWorkflowStep.FINAL_RECORDS, BusinessEntity.class,
+                            Integer.class);
                 } catch (Exception e) {
                     entityValueMap = null;
                 }
@@ -124,10 +124,21 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
                     Integer finalRecords = entityValueMap.get(entity);
                     skip = ((finalRecords == null) || (finalRecords == 0));
                 }
+                if (skip)
+                    updateFlags(seq, entity);
             }
         }
 
         return skip;
+    }
+
+    private void updateFlags(int seq, BusinessEntity entity) {
+        if (belongsToUpdate(seq)) {
+            update = false;
+        } else if (belongsToRebuild(seq)) {
+            rebuild = false;
+        }
+        log.info("Skip was changed to true for " + entity);
     }
 
     private boolean isProfileProduct(AbstractStep<? extends BaseStepConfiguration> step) {
