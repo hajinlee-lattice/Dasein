@@ -260,7 +260,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(ratingEngines.size(), 1);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" }, enabled = false)
     public void testRatingEngineCyclicDependency() {
         RatingEngine ratingEngine = createTestRatingEngine(RatingEngineType.CROSS_SELL);
         List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(ratingEngine.getId());
@@ -290,7 +290,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         deleteRatingEngine(ratingEngine.getId());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testRatingEngineCyclicDependency" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
     public void tearDelete() {
         deleteRatingEngine(aiRatingEngineId);
 

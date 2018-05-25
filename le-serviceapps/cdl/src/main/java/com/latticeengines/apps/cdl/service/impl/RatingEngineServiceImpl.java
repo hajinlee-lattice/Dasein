@@ -678,16 +678,16 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public boolean ratingEngineCyclicDependency(List<RatingEngine> ratingEngines) {
         boolean cyclicDependency = false;
-        if (ratingEngines != null) {
-            for (RatingEngine ratingEngine : ratingEngines) {
-                if (ratingEngine.getId() != null) {
-                    cyclicDependency = ratingEngineCyclicDependency(ratingEngine, new ArrayList<>());
-                    if (cyclicDependency) {
-                        break;
-                    }
-                }
-            }
-        }
+//        if (ratingEngines != null) {
+//            for (RatingEngine ratingEngine : ratingEngines) {
+//                if (ratingEngine.getId() != null) {
+//                    cyclicDependency = ratingEngineCyclicDependency(ratingEngine, new ArrayList<>());
+//                    if (cyclicDependency) {
+//                        break;
+//                    }
+//                }
+//            }
+//        }
 
         return cyclicDependency;
     }

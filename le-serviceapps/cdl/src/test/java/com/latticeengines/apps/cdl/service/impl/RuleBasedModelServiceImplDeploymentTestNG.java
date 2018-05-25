@@ -188,7 +188,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         Assert.assertEquals(ratingEngines.size(), 1);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" }, enabled = false)
     public void testRatingEngineCyclicDependency() {
         RatingEngine ratingEngine = createRatingEngine(RatingEngineType.RULE_BASED);
         List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(ratingEngine.getId());
@@ -214,7 +214,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         deleteRatingEngine(ratingEngine.getId());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testRatingEngineCyclicDependency" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
     public void testDelete() {
         deleteRatingEngine(rbRatingEngineId);
 

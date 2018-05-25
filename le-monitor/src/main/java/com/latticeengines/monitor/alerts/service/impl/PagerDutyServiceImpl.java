@@ -170,16 +170,13 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     }
 
     private boolean filterEvent(String content, List<JsonNode> nodes) {
-        boolean result = true;
         for (JsonNode subjectNode : nodes.get(0)) {
-            result = result &&  Pattern.matches(subjectNode.get("filter").asText(), content);
-            result = subjectNode.get("condition").asBoolean() ? result : !result;
-
-            if(!result) {
-                return result;
+            if (Pattern.matches(subjectNode.get("filter").asText(), content) !=
+                    subjectNode.get("condition").asBoolean()) {
+                return false;
             }
         }
 
-        return result;
+        return true;
     }
 }

@@ -249,18 +249,18 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public boolean segmentCyclicDependency(List<MetadataSegment> metadataSegments) {
         boolean cyclicDependency = false;
-        if (metadataSegments != null) {
-            for (MetadataSegment metadataSegment : metadataSegments) {
-                MetadataSegment existing = findByName(metadataSegment.getName());
-                if (existing != null) {
-                    cyclicDependency = segmentCyclicDependency(MultiTenantContext.getCustomerSpace().toString(),
-                            existing, new ArrayList<>());
-                    if (cyclicDependency) {
-                        break;
-                    }
-                }
-            }
-        }
+//        if (metadataSegments != null) {
+//            for (MetadataSegment metadataSegment : metadataSegments) {
+//                MetadataSegment existing = findByName(metadataSegment.getName());
+//                if (existing != null) {
+//                    cyclicDependency = segmentCyclicDependency(MultiTenantContext.getCustomerSpace().toString(),
+//                            existing, new ArrayList<>());
+//                    if (cyclicDependency) {
+//                        break;
+//                    }
+//                }
+//            }
+//        }
 
         return cyclicDependency;
     }
