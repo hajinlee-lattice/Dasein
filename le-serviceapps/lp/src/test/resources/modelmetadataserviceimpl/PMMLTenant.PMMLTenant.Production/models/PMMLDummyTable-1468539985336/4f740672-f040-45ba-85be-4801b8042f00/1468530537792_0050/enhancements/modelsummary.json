@@ -1,0 +1,18 @@
+{ 
+    "ModelDetails": {
+        "Name": "pmmlmodel", 
+        "DisplayName": "pmmlmodel", 
+        "LookupID": "PMMLTenant.PMMLTenant.Production|PMMLDummyTable-1468556106468|4f740672-f040-45ba-85be-4801b8042f00", 
+        "ModelID": "ms__4f740672-f040-45ba-85be-4801b8042f00-pmmlmode", 
+        "TotalLeads": 0, 
+        "TestingLeads": 0, 
+        "TrainingLeads": 0, 
+        "TotalConversions": 0, 
+        "TestingConversions": 0, 
+        "TrainingConversions": 0, 
+        "ModelType": "PmmlModel", 
+        "RocScore": -1, 
+        "ConstructionTime": 1468556115, 
+        "TemplateVersion": null
+    }
+}
