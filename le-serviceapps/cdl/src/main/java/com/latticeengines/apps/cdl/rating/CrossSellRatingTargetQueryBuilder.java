@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -69,5 +70,10 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
     @Override
     protected void setQueryEvaluationId() {
         evaluationPeriodId = getTargetPeriodId();
+    }
+
+    @Override
+    protected Restriction buildFinalQueryRestriction() {
+        return productTxnRestriction;
     }
 }

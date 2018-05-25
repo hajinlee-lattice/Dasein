@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -101,7 +100,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
                 if (object instanceof LogicalRestriction
                         && CollectionUtils.isNotEmpty(((LogicalRestriction) object).getChildren()) //
                         && ((LogicalRestriction) object).getChildren().stream()
-                                .anyMatch(c -> c instanceof TransactionRestriction)) {
+                        .anyMatch(c -> c instanceof TransactionRestriction)) {
                     LogicalRestriction node = (LogicalRestriction) object;
                     List<Restriction> newList = new ArrayList<>();
                     boolean anyChildUpdated = false;
@@ -129,10 +128,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     }
 
     private void buildRatingFrontEndQuery() {
-        RestrictionBuilder restrictionBuilder = Restriction.builder();
-
-        Restriction finalQueryRestriction = restrictionBuilder
-                .and(baseSegment.getAccountRestriction(), productTxnRestriction).build();
+        Restriction finalQueryRestriction = buildFinalQueryRestriction();
 
         MetadataSegment querySegment = baseSegment;
         querySegment.setAccountFrontEndRestriction(new FrontEndRestriction(finalQueryRestriction));
@@ -143,6 +139,11 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         ratingFrontEndQuery.setTargetProductIds(getProductsAsList());
         ratingFrontEndQuery.setEvaluationPeriodId(evaluationPeriodId);
         ratingFrontEndQuery.setSegmentQuery(getAccountFiltererSegmentQuery());
+    }
+
+    protected Restriction buildFinalQueryRestriction() {
+        return Restriction.builder()
+                .and(baseSegment.getAccountRestriction(), productTxnRestriction).build();
     }
 
     private List<String> getProductsAsList() {
@@ -166,16 +167,16 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     }
 
     public static RatingQueryBuilder getCrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel,
-            ModelingQueryType modelingQueryType, int targetPeriodId) {
+                                                                    ModelingQueryType modelingQueryType, int targetPeriodId) {
         switch (modelingQueryType) {
-        case TARGET:
-            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, targetPeriodId);
-        case TRAINING:
-            return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, targetPeriodId);
-        case EVENT:
-            return new CrossSellRatingEventQueryBuilder(ratingEngine, aiModel, targetPeriodId);
-        default:
-            throw new LedpException(LedpCode.LEDP_40010, new String[] { modelingQueryType.getModelingQueryTypeName() });
+            case TARGET:
+                return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, targetPeriodId);
+            case TRAINING:
+                return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, targetPeriodId);
+            case EVENT:
+                return new CrossSellRatingEventQueryBuilder(ratingEngine, aiModel, targetPeriodId);
+            default:
+                throw new LedpException(LedpCode.LEDP_40010, new String[]{modelingQueryType.getModelingQueryTypeName()});
         }
     }
 
