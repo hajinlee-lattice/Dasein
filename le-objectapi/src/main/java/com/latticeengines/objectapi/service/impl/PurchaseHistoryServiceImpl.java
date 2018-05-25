@@ -94,12 +94,10 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         String tableName = dataCollectionProxy.getTableName(tenant.getId(),
                 BusinessEntity.ProductHierarchy.getServingStore());
         log.info(String.format("Get product Hierarchy table %s for %s", tableName, tenant.getId()));
-        String query = String.format("SELECT %s, %s, %s, case" //
-                + " when " + InterfaceName.ProductLineId + " is not null then " + InterfaceName.ProductLineId //
-                + " when " + InterfaceName.ProductFamilyId + " is not null then " + InterfaceName.ProductFamilyId //
-                + " else " + InterfaceName.ProductCategoryId + " end"//
-                + " FROM %s", InterfaceName.ProductLine, InterfaceName.ProductFamily, InterfaceName.ProductCategory,
-                tableName);
+        String query = String.format(
+                "SELECT %s, %s, %s, coalesce(" + InterfaceName.ProductLineId + ", " + InterfaceName.ProductFamilyId
+                        + ", " + InterfaceName.ProductCategoryId + ") as productid FROM %s",
+                InterfaceName.ProductLine, InterfaceName.ProductFamily, InterfaceName.ProductCategory, tableName);
         log.info("query for getProductHierarchy " + query);
         List<Map<String, Object>> retList = redshiftJdbcTemplate
                 .queryForList("SELECT productid, productline, productfamily, productcategory FROM " + tableName);
@@ -109,7 +107,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                     .setProductCategory((String) row.get(InterfaceName.ProductCategory.toString().toLowerCase()));
             productHierarchy.setProductFamily((String) row.get(InterfaceName.ProductFamily.toString().toLowerCase()));
             productHierarchy.setProductLine((String) row.get(InterfaceName.ProductLine.toString().toLowerCase()));
-            productHierarchy.setProductId((String) row.get("case"));
+            productHierarchy.setProductId((String) row.get("productid"));
             resultList.add(productHierarchy);
         }
         log.info("resultList is " + resultList);
