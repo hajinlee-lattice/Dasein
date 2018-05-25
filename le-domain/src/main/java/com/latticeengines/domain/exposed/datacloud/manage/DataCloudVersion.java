@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.manage;
 
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -213,6 +214,22 @@ public class DataCloudVersion implements HasPid, Serializable {
         }
     }
 
+    public static String parseMajorVersion(String version) {
+        String[] tokens = version.split("\\.");
+        if (tokens.length < 2) {
+            throw new RuntimeException("Cannot parse a major version from " + version);
+        }
+        return tokens[0] + "." + tokens[1];
+    }
+
+    public static String parseMinorVersion(String version) {
+        String[] tokens = version.split("\\.");
+        if (tokens.length < 3) {
+            throw new RuntimeException("Cannot parse a minor version from " + version);
+        }
+        return tokens[2];
+    }
+
     public static DataCloudVersion parseBuildNumber(String buildNumber) {
         if (buildNumber == null) {
             throw new IllegalArgumentException("Cannot parse null build number");
@@ -237,5 +254,18 @@ public class DataCloudVersion implements HasPid, Serializable {
 
         return version;
     }
+
+    public static Comparator<DataCloudVersion> versionComparator = new Comparator<DataCloudVersion>() {
+
+        public int compare(DataCloudVersion dc1, DataCloudVersion dc2) {
+            if (!dc1.majorVersion.equals(dc2.majorVersion)) {
+                return dc1.majorVersion.compareTo(dc2.majorVersion);
+            }
+            String dc1MinorVer = parseMinorVersion(dc1.getVersion());
+            String dc2MinorVer = parseMinorVersion(dc2.getVersion());
+            return Integer.valueOf(dc1MinorVer).compareTo(Integer.valueOf(dc2MinorVer));
+        }
+
+    };
 
 }

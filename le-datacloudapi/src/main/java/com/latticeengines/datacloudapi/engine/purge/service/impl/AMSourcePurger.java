@@ -2,7 +2,6 @@ package com.latticeengines.datacloudapi.engine.purge.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,8 +41,7 @@ public class AMSourcePurger extends VersionedPurger {
         if (CollectionUtils.isEmpty(dcVersions)) {
             return null;
         }
-        DataCloudVersion latestApprovedDCVersion = Collections.max(dcVersions,
-                Comparator.comparing(dc -> dc.getVersion()));
+        DataCloudVersion latestApprovedDCVersion = Collections.max(dcVersions, DataCloudVersion.versionComparator);
         String latestApprovedVersion = getHdfsVersionFromDCVersion(strategy.getSource(), latestApprovedDCVersion);
         Set<String> approvedVersions = new HashSet<>();
         dcVersions.forEach(dcv -> {
@@ -63,23 +61,24 @@ public class AMSourcePurger extends VersionedPurger {
     protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
         List<DataCloudVersion> dcVersions = dataCloudVersionEntityMgr.allApprovedVerions();
-        Collections.sort(dcVersions, (dc1, dc2) -> dc2.getVersion().compareToIgnoreCase(dc1.getVersion())); // Descend
+        Collections.sort(dcVersions, DataCloudVersion.versionComparator);
         String versionToCompare = dcVersions.size() >= strategy.getHdfsVersions()
-                ? getHdfsVersionFromDCVersion(strategy.getSource(), dcVersions.get(strategy.getHdfsVersions() - 1))
-                : getHdfsVersionFromDCVersion(strategy.getSource(), dcVersions.get(dcVersions.size() - 1));
+                ? getHdfsVersionFromDCVersion(strategy.getSource(),
+                        dcVersions.get(dcVersions.size() - strategy.getHdfsVersions()))
+                : getHdfsVersionFromDCVersion(strategy.getSource(), dcVersions.get(0));
         Set<String> approvedVersions = new HashSet<>();
         dcVersions.forEach(dcv -> {
             approvedVersions.add(getHdfsVersionFromDCVersion(strategy.getSource(), dcv));
         });
 
-        List<String> toDelete = new ArrayList<>();
+        List<String> toBak = new ArrayList<>();
         for (String version : allVersions) {
             if (approvedVersions.contains(version) && version.compareTo(versionToCompare) < 0) {
-                toDelete.add(version);
+                toBak.add(version);
             }
         }
 
-        return toDelete;
+        return toBak;
     }
 
     private String getHdfsVersionFromDCVersion(String srcName, DataCloudVersion dcv) {

@@ -255,7 +255,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         String sourceName = AMSourcePurger.ACCOUNT_MASTER;
         String versionToRetain1 = dataCloudVersionEntityMgr.currentApprovedVersion().getAccountMasterHdfsVersion();
         String versionToRetain2 = HdfsPathBuilder.dateFormat.format(new Date());
-        String versionToBak = dataCloudVersionEntityMgr.findVersion("2.0.0").getAccountMasterHdfsVersion();
+        String versionToBak = dataCloudVersionEntityMgr.findVersion("2.0.8").getAccountMasterHdfsVersion();
         String versionToDelete = "2000-01-01_00-00-00_UTC";
 
         String hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToRetain1).toString();
@@ -297,7 +297,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         sourceName = AMSourcePurger.ACCOUNT_MASTER_LOOKUP;
         versionToRetain1 = dataCloudVersionEntityMgr.currentApprovedVersion().getAccountLookupHdfsVersion();
         versionToRetain2 = HdfsPathBuilder.dateFormat.format(new Date());
-        versionToBak = dataCloudVersionEntityMgr.findVersion("2.0.0").getAccountLookupHdfsVersion();
+        versionToBak = dataCloudVersionEntityMgr.findVersion("2.0.8").getAccountLookupHdfsVersion();
         versionToDelete = "2000-01-01_00-00-00_UTC";
 
         hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToRetain1).toString();

@@ -31,7 +31,7 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
     }
 
     public DataCloudVersion latestApprovedForMajorVersion(String version) {
-        String majorVersion = parseMajorVersion(version);
+        String majorVersion = DataCloudVersion.parseMajorVersion(version);
         return versionEntityMgr.latestApprovedForMajorVersion(majorVersion);
     }
 
@@ -39,35 +39,19 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
         if (StringUtils.isBlank(version)) {
             return null;
         }
-        String majorVersion = parseMajorVersion(version);
-        String minorVersion = parseMinorVersion(version);
+        String majorVersion = DataCloudVersion.parseMajorVersion(version);
+        String minorVersion = DataCloudVersion.parseMinorVersion(version);
         return majorVersion + "." + (Integer.valueOf(minorVersion) + 1);
     }
 
     public List<String> priorVersions(String version, int num) {
         List<String> list = new ArrayList<>();
-        String majorVersion = parseMajorVersion(version);
-        int minorVersion = Integer.valueOf(parseMinorVersion(version));
+        String majorVersion = DataCloudVersion.parseMajorVersion(version);
+        int minorVersion = Integer.valueOf(DataCloudVersion.parseMinorVersion(version));
         for (int i = 0; i < num && i < minorVersion; i++) {
             list.add(majorVersion + "." + String.valueOf(minorVersion - i));
         }
         return list;
-    }
-
-    private String parseMajorVersion(String version) {
-        String[] tokens = version.split("\\.");
-        if (tokens.length < 2) {
-            throw new RuntimeException("Cannot parse a major version from " + version);
-        }
-        return tokens[0] + "." + tokens[1];
-    }
-
-    private String parseMinorVersion(String version) {
-        String[] tokens = version.split("\\.");
-        if (tokens.length < 3) {
-            throw new RuntimeException("Cannot parse a minor version from " + version);
-        }
-        return tokens[2];
     }
 
     public void updateRefreshVersion() {
