@@ -63,6 +63,7 @@ public class PurgeServiceImpl implements PurgeService {
             add("QAFuzzyMatchLoadTestNameAndStateAndCountry");
             add("SmallBusinesses");
             add("VerySmallBusinesses");
+            add("pipelineSource");
         }
     };
 
