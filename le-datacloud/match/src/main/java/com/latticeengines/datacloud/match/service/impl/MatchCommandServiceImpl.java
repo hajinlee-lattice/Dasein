@@ -295,10 +295,10 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             matchCommand.setRowsMatchedByDnb(rowsMatchedByDnb);
             // average dnb duration
             matchCommand.setDnbDurationAvg(dnbDurationAvg);
-            log.info("#### rowsToDnb : " + rowsToDnb);
-            log.info("#### rowsMatchedByDnb : " + rowsMatchedByDnb);
-            log.info("#### dnbDurationAvg : " + dnbDurationAvg);
-            log.info("### job Type : " + matchCommand.getJobType());
+            String logMsg = String.format(
+                    "In dnbCommands(), RowsToDnb : [%d], RowsMatchedByDnB : [%d], DnBDurationAvg : [%d], jobType : [%s]",
+                    rowsToDnb, rowsMatchedByDnb, dnbDurationAvg, matchCommand.getJobType());
+            log.info("### logMsg : " + logMsg);
             return this;
         }
 
