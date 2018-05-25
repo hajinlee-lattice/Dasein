@@ -112,7 +112,6 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
 
     @Override
     public void endRecord(Record record) throws IOException {
-        log.info(record.toString());
         csvFilePrinter.println();
     }
 
