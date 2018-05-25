@@ -1,14 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +13,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -31,25 +23,24 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.Artifact;
-import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
-public class PmmlModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class PythonScriptModelCopyServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(PmmlModelCopyServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonScriptModelCopyServiceImplDeploymentTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;
 
     @Autowired
-    private PmmlModelService pmmlModelService;
+    private PythonScriptModelService pythonScriptModelService;
 
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
@@ -57,15 +48,20 @@ public class PmmlModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
+    @Autowired
+    private SourceFileService sourceFileService;
+
     private Tenant modelCopySourceTenant = new Tenant();
 
     private Tenant modelCopyTargetTenant = new Tenant();
 
-    private String moduleName = "rfpmml_1474925594307";
+    private SourceFile sourceFile;
 
-    private String pivotFilePath;
+    private String sourceFileLocalPath;
 
-    @BeforeClass(groups = "functional")
+    private String outputFileName = "nonLatinInRows.csv";
+
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         modelCopySourceTenant.setId(CustomerSpace.parse("modelCopySourceTenant").toString());
         modelCopySourceTenant.setName(modelCopySourceTenant.getId());
@@ -81,63 +77,34 @@ public class PmmlModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
 
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopyTargetTenant.getId());
-        HdfsUtils.rmdir(
-                yarnConfiguration,
-                PathBuilder.buildMetadataPath(CamilleEnvironment.getPodId(),
-                        CustomerSpace.parse(modelCopySourceTenant.getId())).toString());
-        HdfsUtils.rmdir(
-                yarnConfiguration,
-                PathBuilder.buildMetadataPath(CamilleEnvironment.getPodId(),
-                        CustomerSpace.parse(modelCopyTargetTenant.getId())).toString());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(modelCopySourceTenant.getId())).toString());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(modelCopyTargetTenant.getId())).toString());
 
-        String localPathBase = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pmmlmodel").getPath();
-
-        HdfsUtils.mkdir(
-                yarnConfiguration,
-                PathBuilder.buildMetadataPath(CamilleEnvironment.getPodId(),
-                        CustomerSpace.parse(modelCopySourceTenant.getId())).toString());
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/metadata/" + moduleName, PathBuilder
-                .buildMetadataPath(CamilleEnvironment.getPodId(), CustomerSpace.parse(modelCopySourceTenant.getId()))
-                .toString());
-
+        String localPathBase = ClassLoader
+                .getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel").getPath();
         HdfsUtils.mkdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase
                 + modelCopySourceTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data",
                 customerBase + modelCopySourceTenant.getId());
 
-        Module module = new Module();
-        module.setName(moduleName);
-        Artifact pivotArtifact = new Artifact();
-        pivotArtifact.setArtifactType(ArtifactType.PivotMapping);
-        pivotArtifact.setTenantId(modelCopySourceTenant.getPid());
-        pivotArtifact.setName("pivotvalues");
+        String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(modelCopySourceTenant.getId())).toString()
+                + "/" + outputFileName;
+        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/" + outputFileName;
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
+                outputPath);
 
-        pivotFilePath = PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(modelCopySourceTenant.getId()), moduleName, ArtifactType.PivotMapping).toString()
-                + "/" + "pivotvalues.csv";
-        pivotArtifact.setPath(pivotFilePath);
-        pivotArtifact.setModule(module);
-
-        Artifact pmmlArtifact = new Artifact();
-        pmmlArtifact.setArtifactType(ArtifactType.PMML);
-        pmmlArtifact.setTenantId(modelCopySourceTenant.getPid());
-        pmmlArtifact.setName("rfpmml");
-        pmmlArtifact.setPath(PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(modelCopySourceTenant.getId()), moduleName, ArtifactType.PMML).toString()
-                + "/" + "rfpmml.xml");
-        pmmlArtifact.setModule(module);
-        module.addArtifact(pivotArtifact);
-        module.addArtifact(pmmlArtifact);
-
-        MetadataProxy proxy = mock(MetadataProxy.class);
-
-        when(proxy.getModule(modelCopySourceTenant.getId(), moduleName)).thenReturn(module);
-        when(proxy.createArtifact(eq(modelCopyTargetTenant.getId()), anyString(), anyString(), any(Artifact.class)))
-                .thenReturn(true);
-        ReflectionTestUtils.setField(pmmlModelService, "metadataProxy", proxy);
-
+        setupSecurityContext(modelCopySourceTenant);
+        sourceFile = new SourceFile();
+        sourceFile.setTenant(modelCopySourceTenant);
+        sourceFile.setName(outputFileName);
+        sourceFile.setPath(outputPath);
+        sourceFile.setTableName("SourceFile_Account_copy_csv");
+        sourceFile.setDisplayName(outputFileName);
+        sourceFileService.create(sourceFile);
     }
 
     public void tearDown() throws Exception {
@@ -147,17 +114,15 @@ public class PmmlModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         tenantEntityMgr.delete(targetTenant);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void testModelCopyInHdfs() throws IOException {
         ModelSummary modelSummary = new ModelSummary();
-        modelSummary.setId("ms__4f1d08f8-3678-420a-b419-8e5dad939834-rfpmml_2");
+        modelSummary.setId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
         modelSummary.setDisplayName("some model display name");
-        modelSummary.setModuleName(moduleName);
-        modelSummary.setPivotArtifactPath(pivotFilePath);
 
-        setupSecurityContext(modelCopySourceTenant);
-        pmmlModelService.copyHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
-                "PMMLDummyTable-1474925639299", "cpTrainingTable", "cpEventTable", modelSummary);
+        sourceFileService.copySourceFile(sourceFile.getName(), "cpTrainingTable", modelCopyTargetTenant.getId());
+        pythonScriptModelService.copyHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
+                "AccountModel", "cpTrainingTable", "cpEventTable", modelSummary);
         String path = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration,
                 customerBase + modelCopyTargetTenant.getId() + "/models/cpEventTable");
         assertNotNull(path);
@@ -174,12 +139,6 @@ public class PmmlModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         JsonNode provenance = json.get("EventTableProvenance");
         assertEquals(provenance.get("TrainingTableName").asText(), "cpTrainingTable");
         assertEquals(provenance.get("EventTableName").asText(), "cpEventTable");
-        assertTrue(provenance.get("Module_Name").asText().startsWith("cp_module"));
-        assertNotEquals(provenance.get("Pivot_Artifact_Path").asText(), pivotFilePath);
-        assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, provenance.get("Pivot_Artifact_Path").asText()),
-                FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
-                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pmmlmodel/"
-                                + "metadata/rfpmml_1474925594307/PivotMappings/pivotvalues.csv").getFile())));
 
         System.out.println(new Path(path).getParent().getParent().toString());
         path = ModelingHdfsUtils.getModelFilePath(yarnConfiguration, new Path(path).getParent().getParent().toString());
@@ -187,5 +146,12 @@ public class PmmlModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
         json = objectMapper.readTree(contents);
         assertEquals(json.get("Summary").get("ModelID").asText(), "ms__" + uuid + "-PLSModel");
+
+        setupSecurityContext(modelCopyTargetTenant);
+        SourceFile newSourceFile = sourceFileService.findByTableName("cpTrainingTable");
+        assertNotNull(newSourceFile);
+        assertEquals(newSourceFile.getDisplayName(), outputFileName);
+        assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, newSourceFile.getPath()),
+                FileUtils.readFileToString(new File(ClassLoader.getSystemResource(sourceFileLocalPath).getFile())));
     }
 }

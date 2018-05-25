@@ -15,15 +15,18 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class FileUploadServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private FileUploadService fileUploadService;
@@ -41,46 +44,29 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
     private File dataFile;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", "TENANT1"));
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
-
-        tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
-        tenantEntityMgr.create(tenant1);
-        setupSecurityContext(tenant1);
+        setupTestEnvironmentWithOneTenant();
 
         dataFile = new File(ClassLoader.getSystemResource(
                 "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath());
         fileInputStream = new FileInputStream(dataFile);
     }
 
-    @AfterClass(groups = "functional")
-    public void cleanup() {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
-    }
-
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void uploadFile() throws Exception {
+        MultiTenantContext.setTenant(mainTestTenant);
         SourceFile sourceFile = fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation
                         .SalesforceAccount, null, null,
                 fileInputStream);
-
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         Assert.assertNotNull(sourceFile);
         String contents = HdfsUtils
                 .getHdfsFileContents(
                         yarnConfiguration, //
                         String.format( //
                                 "/Pods/Default/Contracts/%s/Tenants/%s/Spaces/Production/Data/Files/fileUploadServiceImplTestNG.csv", //
-                                "TENANT1", "TENANT1"));
+                                customerSpace.getContractId(), customerSpace.getTenantId()));
         String expectedContents = FileUtils.readFileToString(dataFile);
         assertEquals(contents, expectedContents);
     }

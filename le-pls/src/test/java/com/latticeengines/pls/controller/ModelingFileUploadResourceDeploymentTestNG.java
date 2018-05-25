@@ -33,10 +33,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.repository.writer.SourceFileWriterRepository;
 
-public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
+public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv";
     private static final String COMPRESSED_PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv.gz";
@@ -47,9 +48,9 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
     @Inject
     private SourceFileWriterRepository sourceFileRepository;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupMarketoEloquaTestEnvironment();
+        setupTestEnvironmentWithOneTenant();
         String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", tenantId));
     }
@@ -88,7 +89,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void uploadFile() throws Exception {
         switchToExternalUser();
         ResponseDocument<SourceFile> response = submitFile(false, PATH, false);
@@ -103,7 +104,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         foundTheFiles(path, files);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void uploadUnnamedFile() throws Exception {
         switchToExternalAdmin();
         ResponseDocument<SourceFile> response = submitFile(true, PATH, false);
@@ -117,7 +118,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         foundTheFiles(path, files);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void uploadCompressedFile() throws Exception {
         switchToExternalAdmin();
 
