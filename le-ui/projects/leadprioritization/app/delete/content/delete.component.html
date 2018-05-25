@@ -30,28 +30,17 @@
       <hr />
       <div class="section-body with-padding" >
         <div class="button-tabs">
-<!--           <div class="button account {{ $ctrl.currentTab == 'account' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Account', 'account');">
-            <span>Accounts</span>
-            <span>{{$ctrl.counts.accounts}}</span>
-          </div>
-          <div class="button contact {{ $ctrl.currentTab == 'contact' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Contact', 'contact');">
-            <span>Contacts</span>
-            <span>{{$ctrl.counts.contacts}}</span>
-          </div>
-          <div class="button purchases {{ $ctrl.currentTab == 'transaction' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Transaction', 'transaction');">
-            <span>Transactions</span>
-          </div> -->
-          <div class="button {{ $ctrl.currentTab == 'account' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Account', 'account');">
+          <div class="button {{ $ctrl.currentTab == 'account' ? 'blue' : 'white' }}-button" ng-click="$ctrl.setEntity('Account', 'account');">
             <span>Accounts</span>
             <img src="{{$ctrl.getEntityImage('account')}}"/>
             <span>{{$ctrl.counts.accounts}}</span>
           </div>
-          <div class="button {{ $ctrl.currentTab == 'contact' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Contact', 'contact');">
+          <div class="button {{ $ctrl.currentTab == 'contact' ? 'blue' : 'white' }}-button" ng-click="$ctrl.setEntity('Contact', 'contact');">
             <span>Contacts</span>
             <img src="{{$ctrl.getEntityImage('contact')}}"/>
             <span>{{$ctrl.counts.contacts}}</span>
           </div>
-          <div class="button {{ $ctrl.currentTab == 'transaction' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Transaction', 'transaction');">
+          <div class="button {{ $ctrl.currentTab == 'transaction' ? 'blue' : 'white' }}-button" ng-click="$ctrl.setEntity('Transaction', 'transaction');">
             <span>Transactions</span>
             <img src="{{$ctrl.getEntityImage('transaction', 'purchase')}}"/>
             <span>0</span>
@@ -65,18 +54,15 @@
         <div ng-if="($ctrl.currentTab == 'account' || $ctrl.currentTab == 'contact') && $ctrl.counts[$ctrl.currentTab + 's'] > 0" class="options-text" >
               <ul class="checkbox-list">
                 <li>
-                  <!-- <label> -->
                     <input  type="radio"
                             data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID'"
                             ng-click="$ctrl.setCleanupType('BYUPLOAD_ID', 'DeleteAccountTemplate')" />
-                       <!--      Upload a single csv file with {{$ctrl.currentTab == 'account' ? 'Account' : 'Contact'}} IDs
-                  </label> -->
                       <div 
                         ng-if="$ctrl.currentTab == 'account' "
                         file-uploader-container
-                        params="$ctrl.params['BYUPLOAD_ID']"
-                        label="{{$ctrl.params['BYUPLOAD_ID'].accountLabel}}"
-                        info-template="$ctrl.params['BYUPLOAD_ID'].accountInfoTemplate"
+                        params="$ctrl.uploadParams['BYUPLOAD_ID']"
+                        label="{{$ctrl.uploadParams['BYUPLOAD_ID'].accountLabel}}"
+                        info-template="$ctrl.uploadParams['BYUPLOAD_ID'].accountInfoTemplate"
                         input-name="csvFileName"
                         file-select="$ctrl.fileSelect(fileName)"
                         file-load="$ctrl.fileLoad(headers)"
@@ -90,9 +76,9 @@
                       <div 
                         ng-if="$ctrl.currentTab == 'contact' "
                         file-uploader-container
-                        params="$ctrl.params['BYUPLOAD_ID']"
-                        label="{{$ctrl.params['BYUPLOAD_ID'].contactLabel}}"
-                        info-template="$ctrl.params['BYUPLOAD_ID'].contactInfoTemplate"
+                        params="$ctrl.uploadParams['BYUPLOAD_ID']"
+                        label="{{$ctrl.uploadParams['BYUPLOAD_ID'].contactLabel}}"
+                        info-template="$ctrl.uploadParams['BYUPLOAD_ID'].contactInfoTemplate"
                         input-name="csvFileName"
                         file-select="$ctrl.fileSelect(fileName)"
                         file-load="$ctrl.fileLoad(headers)"
@@ -143,68 +129,62 @@
                       </date-range-directive>
                   </li>
                   <li>
-                    <!-- <label> -->
                       <input  type="radio" 
                               data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT'"
                               ng-click="$ctrl.setCleanupType('BYUPLOAD_MINDATEANDACCOUNT')" />
-                      <!-- Upload a single csv file with Account IDs and Transaction Start Dates</label> -->
                         <div 
                           file-uploader-container
                           label="Upload a single csv file with Account IDs and Transaction Start Dates"
-                          params="$ctrl.params['BYUPLOAD_MINDATEANDACCOUNT']"
+                          params="$ctrl.uploadParams['BYUPLOAD_MINDATEANDACCOUNT']"
                           input-name="csvFileName"
-                          info-template="$ctrl.params['BYUPLOAD_MINDATEANDACCOUNT'].infoTemplate"
+                          info-template="$ctrl.uploadParams['BYUPLOAD_MINDATEANDACCOUNT'].infoTemplate"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT' && $ctrl.uploadedFiles[$ctrl.currentTab]['BYUPLOAD_MINDATEANDACCOUNT'] == '' }"
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT' && $ctrl.fileName == '' }"
                           ng-click="$ctrl.setCleanupType('BYUPLOAD_MINDATEANDACCOUNT')"
                           >
                       </div>
                   </li>
                   <li>
-                    <!-- <label> -->
                       <input  type="radio" 
                               data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1'"
                               ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')" style="position: relative;"/>
-                      <!-- Upload a single csv file with Account IDs, Product, and Transaction Start Dates</label> -->
                         <div 
                           file-uploader-container
                           label="Upload a single csv file with Account IDs, Product IDs, and Transaction Start Dates"
-                          params="$ctrl.params['BYUPLOAD_ACPD_1']"
-                          info-template="$ctrl.params['BYUPLOAD_ACPD_1'].infoTemplate"
+                          params="$ctrl.uploadParams['BYUPLOAD_ACPD_1']"
+                          info-template="$ctrl.uploadParams['BYUPLOAD_ACPD_1'].infoTemplate"
                           input-name="csvFileName"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1' && $ctrl.uploadedFiles[$ctrl.currentTab]['BYUPLOAD_ACPD_1'] == ''}"
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1' && $ctrl.fileName == ''}"
                           ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')"
 
                           >
                       </div>
                   </li>
                   <li>
-                    <!-- <label> -->
                       <input  type="radio" 
                               data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2'"
                               ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_2')" />
-                      <!-- Upload a single csv file with Account IDs, Products, Contact IDs, and Transaction Start Dates</label> -->
                         <div 
                           file-uploader-container
                           label="Upload a single csv file with Account IDs, Product IDs, Contact IDs, and Transaction Start Dates"
-                          params="$ctrl.params['BYUPLOAD_ACPD_2']"
-                          info-template="$ctrl.params['BYUPLOAD_ACPD_2'].infoTemplate"
+                          params="$ctrl.uploadParams['BYUPLOAD_ACPD_2']"
+                          info-template="$ctrl.uploadParams['BYUPLOAD_ACPD_2'].infoTemplate"
                           input-name="csvFileName"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2' && $ctrl.uploadedFiles[$ctrl.currentTab]['BYUPLOAD_ACPD_2'] == '' }"
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2' && $ctrl.fileName == '' }"
                           ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_2')"
                           >
                       </div>

@@ -136,24 +136,13 @@
         <tbody ng-if="!vm.loading">
             <tr 
                 ng-repeat="account in (vm.tmpAccounts = (vm.accounts | 
-                            orderBy:sortType:sortReverse | 
-                            filter:vm.search))">
-                <td>{{account.CompanyName}}</td>
-                <td>{{account.Website}}</td>
-                <td>{{account.City}}</td>
-                <td>{{account.State}}</td>
-                <td>{{account.Country}}</td>
-                <td>
-                    <span 
-                        class="gray-text"
-                        ng-if="account.AccountId === null">
-                        None
-                    </span>
-                    <span
-                        ng-if="account.AccountId != null">
-                        {{account.AccountId}}
-                    </span>
-                </td>
+                            orderBy:sortType:sortReverse))">
+                <td ng-class="{'gray-text': account.CompanyName === null}">{{account.CompanyName || 'None'}}</td>
+                <td ng-class="{'gray-text': account.Website === null}">{{account.Website || 'None'}}</td>
+                <td ng-class="{'gray-text': account.City === null}">{{account.City || 'None'}}</td>
+                <td ng-class="{'gray-text': account.State === null}">{{account.State || 'None'}}</td>
+                <td ng-class="{'gray-text': account.Country === null}">{{account.Country || 'None'}}</td>
+                <td ng-class="{'gray-text': account.AccountId === null}">{{account.AccountId || 'None'}}</td>
             </tr>
         </tbody>
     </table>
@@ -221,12 +210,11 @@
         <tbody ng-if="!vm.loading">
             <tr 
                 ng-repeat="contact in (vm.tmpContacts = (vm.contacts | 
-                            orderBy:sortType:sortReverse | 
-                            filter:vm.search))">
+                            orderBy:sortType:sortReverse))">
 
-                <td>{{contact.ContactName}}</td>
-                <td>{{contact.LDC_Name}}</td>
-                <td>{{contact.Email}}</td>
+                <td ng-class="{'gray-text': account.ContactName === null}">{{contact.ContactName || 'None'}}</td>
+                <td ng-class="{'gray-text': account.LDC_Name === null}">{{contact.LDC_Name || 'None'}}</td>
+                <td ng-class="{'gray-text': account.Email === null}">{{contact.Email || 'None'}}</td>
             </tr>
         </tbody>
     </table>

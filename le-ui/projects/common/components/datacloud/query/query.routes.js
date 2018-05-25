@@ -137,6 +137,11 @@ angular.module('common.datacloud.query')
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Accounts'
             },
+            onExit: ['QueryStore', function(QueryStore) {
+                QueryStore.getEntitiesCounts().then(function() {
+                    // console.log('resetEntitiesCount');
+                });
+            }],
             resolve: {
                 Accounts: resolveGetData('accounts'),
                 Contacts: [function() { return null; }],
@@ -159,6 +164,11 @@ angular.module('common.datacloud.query')
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Contacts'
             },
+            onExit: ['$stateParams', 'QueryStore', function($stateParams, QueryStore) {
+                QueryStore.getEntitiesCounts().then(function() {
+                    // console.log('resetEntitiesCount');
+                });
+            }],
             resolve: {
                 Contacts: resolveGetData('contacts'),
                 Accounts: [function() { return null; }],

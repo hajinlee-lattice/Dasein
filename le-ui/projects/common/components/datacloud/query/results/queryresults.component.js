@@ -161,7 +161,6 @@ angular.module('common.datacloud.query.results', [
                 }
             };
 
-            console.log(vm.page);
             if (vm.page === 'Accounts'){
                 QueryStore.setAccounts(dataQuery).then(function(response) {
                     vm.accounts = response.data;
@@ -174,18 +173,29 @@ angular.module('common.datacloud.query.results', [
                 });
             }
 
-            QueryStore.getEntitiesCounts().then(function(data){ 
+            var query = {
+               "free_form_text_search": vm.search,
+               "account_restriction": vm.accountRestriction,
+               "contact_restriction": vm.contactRestriction,
+               "restrict_without_sfdcid": false,
+               "page_filter":{  
+                    "num_rows": vm.pagesize,
+                    "row_offset": offset
+               }
+            };
+
+            QueryStore.getEntitiesCounts(query).then(function(data){ 
                 vm.counts[vm.page.toLowerCase()].value = data[vm.page == 'Contacts' ? 'Contact' : 'Account'];
                 vm.counts[vm.page.toLowerCase()].loading = false;
 
-                if (vm.page == 'Accounts' || vm.page === 'Playbook' && data['Account'] > 10) {
-                    vm.showAccountPagination = true;
+                if (vm.page == 'Accounts' || vm.page === 'Playbook') {
+                    vm.showAccountPagination =  data['Account'] > 10;
                     vm.showContactPagination = false;
                 }
 
-                if (vm.page == 'Contacts' && data['Contact'] > 10) {
+                if (vm.page == 'Contacts') {
                     vm.showAccountPagination = false;
-                    vm.showContactPagination = true;
+                    vm.showContactPagination = data['Contact'] > 10;
                 }
             });
         } else {

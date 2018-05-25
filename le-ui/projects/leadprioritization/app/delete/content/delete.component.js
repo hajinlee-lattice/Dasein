@@ -14,11 +14,11 @@ angular.module('lp.delete.entry', [])
             showWarningMsg: true,
             showFromTime: true,
             showToTime: true,
-            showTimeFrame: false,
             submittingJob: false,
             currentTab: 'account',
             deleteWarningMsg: 'Once the delete action is submitted, it can’t be undone.',
-            params: DeleteDataStore.getFileUploadParams(),
+            uploadParams: DeleteDataStore.getFileUploadParams(),
+            fileName: '',
             counts: {
                 'accounts': EntitiesCount.Account,
                 'contacts': EntitiesCount.Contact 
@@ -42,19 +42,6 @@ angular.module('lp.delete.entry', [])
                 'contact': '',
                 'transaction': ''
             };
-            vm.uploadedFiles = {
-                'account': {
-                    'BYUPLOAD_ID': ''
-                },
-                'contact': {
-                    'BYUPLOAD_ID': ''
-                },
-                'transaction': {
-                    'BYUPLOAD_MINDATEANDACCOUNT': '',
-                    'BYUPLOAD_ACPD_1': '',
-                    'BYUPLOAD_ACPD_2': ''
-                }
-            };
             vm.isValid = {
                 'account': false,
                 'contact': false,
@@ -66,94 +53,37 @@ angular.module('lp.delete.entry', [])
             return $scope.delete_form;
         }
 
-        vm.getDefaultMessage = function()  {
-            return "your-" + vm.currentTab + "s.csv";
-        }
-
-        vm.callbackChangedValue = function (type, position, value) {
-            vm.startTime = position == 0 ? value : vm.startTime;
-            vm.endTime = position == 1 ? value : vm.endTime;
-
-            // vm.isValid[vm.currentTab] = ($scope.delete_form['from-time'].$valid && $scope.delete_form['to-time'].$valid);
-
-        }
-
-        vm.changeEntityType = function(type, goState) {
+        vm.setEntity = function(type, goState) {
             if (!vm.uploading) { // prevent changing tabs when file is uploading
-                vm.clearUploadedFiles(vm.currentTab);
+                clearPreviousSelection();
                 vm.cleanupOperationType[vm.currentTab] = '';
                 vm.isValid[vm.currentTab] = false;
-                
+
                 vm.currentTab = goState || type.toLowerCase();
                 vm.isValid[vm.currentTab] = false;
-                
             }
-        }
-
-        vm.fileLoad = function(headers) {
-            // console.log('headers', headers);
-            vm.uploading = true;
-        }
-
-        vm.fileSelect = function(fileName) {
-            if (vm.currentTab == 'account' || vm.currentTab == 'contact') {
-                vm.params['BYUPLOAD_ID'].schema = vm.getSchema();
-            }
-        }
-
-        vm.fileDone = function(result) {
-            vm.uploading = false;
-
-            if (result.Result) {
-                vm.fileName = result.Result.name;
-                vm.uploadedFiles[vm.currentTab][vm.cleanupOperationType[vm.currentTab]] = result.Result.name;
-                vm.isValid[vm.currentTab] = vm.uploadedFiles[vm.currentTab][vm.cleanupOperationType[vm.currentTab]] != '';
-            } else {
-                vm.showWarningMsg = false;
-            }
-        }
-        
-        vm.fileCancel = function() {
-            vm.uploading = false;
-            var xhr = ImportStore.Get('cancelXHR', true);
-            
-            if (xhr) {
-                xhr.abort();
-            }
-        }
-
-        vm.disableSubmit = function() {
-            if (!vm.hasAccessRights() || vm.submittingJob) {
-                return true;
-            }
-            return vm.getCleanupType() != 'BYDATERANGE' ? !vm.isValid[vm.currentTab] : !$scope.delete_form || ($scope.delete_form['from-time'].$invalid || $scope.delete_form['to-time'].$invalid);
-        }
-
-        vm.hasAccessRights = function() {
-            return vm.ClientSession.AccessLevel == 'INTERNAL_ADMIN' || vm.ClientSession.AccessLevel == 'EXTERNAL_ADMIN' || vm.ClientSession.AccessLevel == 'SUPER_ADMIN';
         }
 
         vm.setCleanupType = function(option) {
+            clearPreviousSelection(option);
+
             vm.cleanupOperationType[vm.currentTab] = option;
-            if (vm.uploadOperations.indexOf(vm.getCleanupType()) >= 0) {
-                vm.isValid[vm.currentTab] = vm.uploadedFiles[vm.currentTab][option] != '';
-            } else if (vm.getCleanupType() == 'BYDATERANGE') {
-                vm.isValid[vm.currentTab] = vm.startTime && vm.endTime && $scope.delete_form['from-time'].$valid;
-            } else if (vm.getCleanupType() == 'ALLDATA') {
+            if (vm.getCleanupType() == 'ALLDATA') {
                 vm.isValid[vm.currentTab] = true;
+            } else {
+                vm.isValid[vm.currentTab] = false;
             }
         }
 
-        vm.click = function() {
-            vm.toggleModal();
-        }
-
-        vm.getPeriodTimeConfString = function () {
-            // initDateRange();
-            vm.periodTimeConf.from.visible = vm.showFromTime;
-            vm.periodTimeConf.to.visible = vm.showToTime;
-            var ret = JSON.stringify(vm.periodTimeConf);
-            return ret;
+        vm.getCleanupType = function() {
+            var type = vm.cleanupOperationType[vm.currentTab];
+            switch (type) {
+                case 'BYUPLOAD_ACPD_1':
+                case 'BYUPLOAD_ACPD_2':
+                    return 'BYUPLOAD_ACPD';
+                default:
+                    return type;
+            }
         }
 
         vm.getSchema = function() {
@@ -169,20 +99,66 @@ angular.module('lp.delete.entry', [])
             }
         }
 
-        vm.getCleanupType = function() {
-            var type = vm.cleanupOperationType[vm.currentTab];
-            switch (type) {
-                case 'BYUPLOAD_ACPD_1':
-                case 'BYUPLOAD_ACPD_2':
-                    return 'BYUPLOAD_ACPD';
-                default:
-                    return type;
-            }
-        }
-
         vm.getEntityImage = function(entity, ico_name) {
             ico_name = !ico_name ? entity : ico_name;
             return vm.currentTab == entity ? '/assets/images/ico-' + ico_name + 's-white.png' : '/assets/images/ico-' + ico_name + 's-dark.png';
+        }
+
+        vm.fileLoad = function(headers) {
+            vm.uploading = true;
+        }
+
+        vm.fileSelect = function(fileName) {
+            if (vm.currentTab == 'account' || vm.currentTab == 'contact') {
+                vm.uploadParams['BYUPLOAD_ID'].schema = vm.getSchema();
+            }
+        }
+
+        vm.fileDone = function(result) {
+            vm.uploading = false;
+
+            if (result.Result) {
+                vm.fileName = result.Result.name;
+                vm.isValid[vm.currentTab] = vm.fileName != '';
+            } else {
+                vm.showWarningMsg = false;
+            }
+        }
+        
+        vm.fileCancel = function() {
+            vm.uploading = false;
+            var xhr = ImportStore.Get('cancelXHR', true);
+            
+            if (xhr) {
+                xhr.abort();
+            }
+        }
+
+        vm.disableSubmit = function() {
+            if (!hasAccessRights() || vm.submittingJob) {
+                return true;
+            }
+            return vm.getCleanupType() != 'BYDATERANGE' ? !vm.isValid[vm.currentTab] : !$scope.delete_form || ($scope.delete_form['from-time'].$invalid || $scope.delete_form['to-time'].$invalid);
+        }
+
+        function hasAccessRights() {
+            return vm.ClientSession.AccessLevel == 'INTERNAL_ADMIN' || vm.ClientSession.AccessLevel == 'EXTERNAL_ADMIN' || vm.ClientSession.AccessLevel == 'SUPER_ADMIN';
+        }
+
+        vm.click = function() {
+            vm.toggleModal();
+        }
+
+        vm.callbackChangedValue = function (type, position, value) {
+            vm.startTime = position == 0 ? value : vm.startTime;
+            vm.endTime = position == 1 ? value : vm.endTime;
+        }
+
+        vm.getPeriodTimeConfString = function () {
+            vm.periodTimeConf.from.visible = vm.showFromTime;
+            vm.periodTimeConf.to.visible = vm.showToTime;
+            var ret = JSON.stringify(vm.periodTimeConf);
+            return ret;
         }
 
         vm.submitCleanupJob = function() {
@@ -222,7 +198,7 @@ angular.module('lp.delete.entry', [])
                 DeleteDataService.cleanup(url, params).then(function(result) {
                     if (result && result.Success) {
                         vm.setBannerMsg(false, true);
-                        setTimeout(vm.resetMethod, 0);
+                        setTimeout(vm.reset, 0);
                     } else {
                         vm.setBannerMsg(false, false); // show default error message
                     }
@@ -231,30 +207,26 @@ angular.module('lp.delete.entry', [])
             }
         }
 
-        vm.resetMethod = function() {
-            
-            if (vm.currentTab == 'account' || vm.currentTab == 'contact') {
-                vm.params['BYUPLOAD_ID'].scope.cancel();
-            }
-
-            if (vm.currentTab == 'transaction') {
-                vm.resetDatePicker();
-                for (var type in vm.uploadedFiles['transaction']) {
-                    if (vm.uploadedFiles['transaction'][type]) {
-                        vm.params[type].scope.cancel();
-                    }
-                };
-            }
+        vm.reset = function() {
+            clearPreviousSelection();
 
             vm.init();
 
             $scope.$apply();
         }
 
-        vm.clearUploadedFiles = function(entity) {
-            for (var type in vm.uploadedFiles[entity]) {
-                vm.uploadedFiles[entity][type] = '';
-            }; 
+        function clearPreviousSelection (option) {
+            if (vm.uploadOperations.indexOf(vm.getCleanupType()) >= 0) {
+                vm.fileName = '';
+                var cleanupType = vm.cleanupOperationType[vm.currentTab];
+                vm.uploadParams[cleanupType].scope.cancel();
+            } else if (vm.getCleanupType() == 'BYDATERANGE' && option != 'BYDATERANGE') {
+                vm.resetDatePicker();
+                $scope.delete_form['from-time'].$pristine = true;
+                $scope.delete_form['to-time'].$pristine = true;
+                vm.startTime = '';
+                vm.endTime = '';
+            }
         }
 
         vm.initModalWindow = function () {
@@ -283,7 +255,6 @@ angular.module('lp.delete.entry', [])
 
                 }
             }
-
 
             vm.toggleModal = function () {
                 var modal = ModalStore.get(vm.modalConfig.name);

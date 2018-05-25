@@ -52,11 +52,13 @@ angular
                     if(from){
                         $scope.fromDate = undefined;
                         from.value = '';
+                        fromPicker.setDate('', false);
                     }
                     var to = document.getElementById($scope.getToDateId());
                     if(to){
                         $scope.toDate = undefined;
                         to.value = '';
+                        toPicker.setDate('', false);
                     }
                 }
 
