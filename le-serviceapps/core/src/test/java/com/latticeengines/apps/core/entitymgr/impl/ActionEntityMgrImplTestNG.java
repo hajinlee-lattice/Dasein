@@ -18,7 +18,12 @@ import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ActivityMetricsActionConfiguration;
+import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
+import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 
 public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
 
@@ -41,8 +46,11 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         actions = new ArrayList<>();
         Action actionWithOwner = generateCDLImportAction();
         actionWithOwner.setOwnerId(OWNER_ID);
+        actionWithOwner.setActionConfiguration(generateActionConfig(0));
         Action actionWithoutOwner1 = generateCDLImportAction();
+        actionWithoutOwner1.setActionConfiguration(generateActionConfig(1));
         Action actionWithoutOwner2 = generateCDLImportAction();
+        actionWithoutOwner2.setActionConfiguration(generateActionConfig(2));
         actions.add(actionWithOwner);
         actions.add(actionWithoutOwner1);
         actions.add(actionWithoutOwner2);
@@ -57,6 +65,37 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         int trackingId = r.ints(0, (10000 + 1)).findFirst().getAsInt();
         action.setTrackingId((long) trackingId);
         return action;
+    }
+
+    private ActionConfiguration generateActionConfig(int n) {
+        ActionConfiguration ac;
+        switch (n) {
+            case 0:
+                ac = new SegmentActionConfiguration();
+                ((SegmentActionConfiguration) ac).setSegmentName("Segment_abc");
+                break;
+            case 1:
+                ac = new RatingEngineActionConfiguration();
+                ((RatingEngineActionConfiguration) ac).setRatingEngineId("RatingEngine_abc");
+                ((RatingEngineActionConfiguration) ac).setSubType(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
+                ((RatingEngineActionConfiguration) ac).setModelId("RatingModel_abc");
+                break;
+            case 2:
+                ac = new ActivityMetricsActionConfiguration();
+                ((ActivityMetricsActionConfiguration) ac).setActivateCnt(100);
+                ((ActivityMetricsActionConfiguration) ac).setDeprecateCnt(200);
+                ((ActivityMetricsActionConfiguration) ac).setNewCnt(300);
+                break;
+            case 3:
+                ac = new AttrConfigLifeCycleChangeConfiguration();
+                ((AttrConfigLifeCycleChangeConfiguration) ac).setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
+                ((AttrConfigLifeCycleChangeConfiguration) ac).setAttrNums(1000L);
+                ((AttrConfigLifeCycleChangeConfiguration) ac).setCategoryName("Category_abc");
+                default:
+                    ac = null;
+                    break;
+        }
+        return ac;
     }
 
     @Test(groups = "functional")
@@ -75,8 +114,14 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
         Assert.assertEquals(actionsWithOwner.size(), 1);
         Action retrievedAction = findByPid(actionsWithOwner.get(0).getPid());
         Assert.assertNotNull(retrievedAction);
+        Assert.assertNotNull(actionsWithOwner.get(0).getActionConfiguration());
+        Assert.assertTrue(actionsWithOwner.get(0).getActionConfiguration() instanceof SegmentActionConfiguration);
         List<Action> actionsWithoutOwner = findByOwnerId(null);
         Assert.assertEquals(actionsWithoutOwner.size(), 2);
+        Assert.assertNotNull(actionsWithoutOwner.get(0).getActionConfiguration());
+        Assert.assertNotNull(actionsWithoutOwner.get(1).getActionConfiguration());
+        Assert.assertTrue(actionsWithoutOwner.get(0).getActionConfiguration() instanceof RatingEngineActionConfiguration);
+        Assert.assertTrue(actionsWithoutOwner.get(1).getActionConfiguration() instanceof ActivityMetricsActionConfiguration);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGet" })

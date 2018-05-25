@@ -10,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
         @Type(value = RatingEngineActionConfiguration.class, name = "ratingEngineActionConfiguration"),
         @Type(value = SegmentActionConfiguration.class, name = "segmentActionConfiguration"),
         @Type(value = ActivityMetricsActionConfiguration.class, name = "activityMetricsActionConfiguration"),
-        @Type(value = AttrConfigLifeCycleChangeConfiguration.class, name = "attrConfigLifeCycleChangeConfiguration") })
+        @Type(value = AttrConfigLifeCycleChangeConfiguration.class, name = "attrConfigLifeCycleChangeConfiguration"),
+        @Type(value = ImportActionConfiguration.class, name = "importActionConfiguration"),
+        @Type(value = CleanupActionConfiguration.class, name = "cleanupActionConfiguration") })
 public abstract class ActionConfiguration {
 
     public abstract String serialize();

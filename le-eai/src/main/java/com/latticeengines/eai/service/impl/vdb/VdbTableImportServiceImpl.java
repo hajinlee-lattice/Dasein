@@ -402,7 +402,7 @@ public class VdbTableImportServiceImpl extends ImportService {
         for (Table table : tables) {
             ImportVdbTableConfiguration importVdbTableConfiguration = vdbConnectorConfiguration
                     .getVdbTableConfiguration(table.getName());
-            if (importVdbTableConfiguration == null) {
+            if (importVdbTableConfiguration == null || importVdbTableConfiguration.getTotalRows() <= 0) {
                 continue;
             }
 

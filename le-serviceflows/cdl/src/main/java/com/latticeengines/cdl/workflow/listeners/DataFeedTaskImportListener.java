@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -93,6 +94,10 @@ public class DataFeedTaskImportListener extends LEJobListener {
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             try {
+                ImportActionConfiguration importActionConfiguration = new ImportActionConfiguration();
+                importActionConfiguration.setWorkflowId(job.getPid());
+                importActionConfiguration.setDataFeedTaskId(importJobIdentifier);
+                importActionConfiguration.setImportCount(0L);
                 List<String> registeredTables;
                 String templateName = eaiImportJobDetail.getTemplateName();
                 List<String> pathList = eaiImportJobDetail.getPathDetail();
@@ -103,11 +108,11 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
 
                     if (vdbLoadTableStatus != null) {
-                        vdbLoadTableStatus.setJobStatus("Failed");
-                        vdbLoadTableStatus.setMessage("Error in extract info, skip register extract.");
+                        vdbLoadTableStatus.setJobStatus("Succeed");
+                        vdbLoadTableStatus.setMessage("Skip register extract.");
                         dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
                     }
-
+                    updateImportActionConfiguration(job, importActionConfiguration);
                     return;
                 }
                 setErrorFileContext(pathList, job);
@@ -121,20 +126,26 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     }
                 }
                 if (extracts.size() > 0) {
+                    Long totalRecords = 0L;
                     if (extracts.size() == 1) {
                         log.info(String.format("Register single extract: %s", extracts.get(0).getName()));
+                        totalRecords = extracts.get(0).getProcessedRecords();
                         registeredTables = dataFeedProxy.registerExtract(customerSpace, importJobIdentifier, templateName,
                                 extracts.get(0));
                     } else {
                         log.info(String.format("Register %d extracts.", extracts.size()));
+                        for (Extract extract : extracts) {
+                            totalRecords += extract.getProcessedRecords();
+                        }
                         registeredTables = dataFeedProxy.registerExtracts(customerSpace, importJobIdentifier, templateName,
                                 extracts);
                     }
+                    importActionConfiguration.setImportCount(totalRecords);
+                    importActionConfiguration.setRegisteredTables(registeredTables);
                     log.info(String.format("Registered Tables are: %s", String.join(",", registeredTables)));
-                    job.setOutputContextValue(WorkflowContextConstants.Outputs.DATAFEEDTASK_REGISTERED_TABLES,
-                            JsonUtils.serialize(registeredTables));
-                    workflowJobEntityMgr.updateWorkflowJob(job);
                 }
+                workflowJobEntityMgr.updateWorkflowJob(job);
+                updateImportActionConfiguration(job, importActionConfiguration);
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.SUCCESS);
                 updateDataFeedStatus(customerSpace);
 
@@ -197,6 +208,22 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     JsonUtils.serialize(duplicateFiles));
         } else {
             log.info("Duplicate file list empty.");
+        }
+    }
+
+    private void updateImportActionConfiguration(WorkflowJob job, ImportActionConfiguration importActionConfiguration) {
+        String ActionPidStr = job.getInputContextValue(WorkflowContextConstants.Inputs.ACTION_ID);
+        if (ActionPidStr != null) {
+            Long pid = Long.parseLong(ActionPidStr);
+            Action action = actionProxy.getActionsByPids(job.getTenant().getId(), Collections.singletonList(pid)).get(0);
+            if (action != null) {
+                action.setActionConfiguration(importActionConfiguration);
+                actionProxy.updateAction(job.getTenant().getId(),action);
+            } else {
+                log.warn(String.format("Action with pid=%d cannot be found", pid));
+            }
+        } else {
+            log.warn(String.format("ActionPid is not correctly registered by workflow job=%d", job.getWorkflowId()));
         }
     }
 

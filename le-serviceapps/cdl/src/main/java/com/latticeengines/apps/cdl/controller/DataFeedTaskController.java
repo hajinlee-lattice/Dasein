@@ -50,8 +50,6 @@ public class DataFeedTaskController {
                                                                  @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
         if (vdbLoadTableConfig == null) {
             return ResponseDocument.failedResponse(new RuntimeException("Vdb load table config can't be null!"));
-        } else if (vdbLoadTableConfig.getTotalRows() == 0) {
-            return ResponseDocument.failedResponse(new RuntimeException("Import data should not be 0 row!"));
         } else {
             VdbImportConfig vdbImportConfig = new VdbImportConfig();
             vdbImportConfig.setVdbLoadTableConfig(vdbLoadTableConfig);

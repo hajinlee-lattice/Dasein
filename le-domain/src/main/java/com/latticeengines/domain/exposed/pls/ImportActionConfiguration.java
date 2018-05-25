@@ -1,0 +1,71 @@
+package com.latticeengines.domain.exposed.pls;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+public class ImportActionConfiguration extends ActionConfiguration {
+
+    public ImportActionConfiguration() {
+
+    }
+
+    @JsonProperty("workflow_id")
+    private Long workflowId;
+
+    @JsonProperty("data_feed_task_id")
+    private String dataFeedTaskId;
+
+    @JsonProperty("import_count")
+    private Long importCount;
+
+    @JsonProperty("registered_tables")
+    private List<String> registeredTables;
+
+    public Long getWorkflowId() {
+        return workflowId;
+    }
+
+    public void setWorkflowId(Long workflowId) {
+        this.workflowId = workflowId;
+    }
+
+    public String getDataFeedTaskId() {
+        return dataFeedTaskId;
+    }
+
+    public void setDataFeedTaskId(String dataFeedTaskId) {
+        this.dataFeedTaskId = dataFeedTaskId;
+    }
+
+    public Long getImportCount() {
+        return importCount;
+    }
+
+    public void setImportCount(Long importCount) {
+        this.importCount = importCount;
+    }
+
+    public List<String> getRegisteredTables() {
+        return registeredTables;
+    }
+
+    public void setRegisteredTables(List<String> registeredTables) {
+        this.registeredTables = registeredTables;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
+    @Override
+    public String serialize() {
+        return toString();
+    }
+}

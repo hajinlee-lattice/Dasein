@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowConfiguration;
@@ -73,6 +74,21 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         Action action = new Action();
         action.setType(ActionType.CDL_OPERATION_WORKFLOW);
         action.setActionInitiator(maintenanceOperationConfiguration.getOperationInitiator());
+        if (maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
+            CleanupActionConfiguration cleanupActionConfiguration = new CleanupActionConfiguration();
+            BusinessEntity businessEntity = ((CleanupOperationConfiguration) maintenanceOperationConfiguration)
+                    .getEntity();
+            if (businessEntity == null) {
+                cleanupActionConfiguration.addImpactEntity(BusinessEntity.Account);
+                cleanupActionConfiguration.addImpactEntity(BusinessEntity.Contact);
+                cleanupActionConfiguration.addImpactEntity(BusinessEntity.Product);
+                cleanupActionConfiguration.addImpactEntity(BusinessEntity.Transaction);
+            } else {
+                cleanupActionConfiguration.addImpactEntity(businessEntity);
+            }
+            action.setActionConfiguration(cleanupActionConfiguration);
+        }
+
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
         if (tenant == null) {
             throw new NullPointerException(

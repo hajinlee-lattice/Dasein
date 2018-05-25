@@ -34,12 +34,20 @@ CREATE PROCEDURE `UpdateDataFeed_Execution`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateActionTable`()
+    BEGIN
+        ALTER TABLE `PLS_MultiTenant`.`ACTION` add column `ACTION_CONFIGURATION` JSON;
+    END;
+//
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
     BEGIN
         START TRANSACTION;
         CALL `UpdateCDLTables`();
         CALL `UpdateDataFeed_Execution`();
+        CALL `UpdateActionTable`()
         COMMIT;
     END;
 //

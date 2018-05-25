@@ -22,10 +22,14 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -39,7 +43,7 @@ public class StartProcessingUnitTestNG {
         DataCollectionProxy dataCollectionProxy = mock(DataCollectionProxy.class);
         when(dataCollectionProxy.getDefaultDataCollection(anyString())).thenReturn(dataCollection);
 
-        StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, null,
+        StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, null, null,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
@@ -72,7 +76,17 @@ public class StartProcessingUnitTestNG {
         InternalResourceRestApiProxy internalResourceProxy = mock(InternalResourceRestApiProxy.class);
         when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
 
-        StartProcessing startProcessing = new StartProcessing(null, internalResourceProxy,
+        Action action = new Action();
+        action.setType(ActionType.CDL_OPERATION_WORKFLOW);
+        action.setActionInitiator("Test_Action_Initiator");
+        CleanupActionConfiguration cleanupActionConfiguration = new CleanupActionConfiguration();
+        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Contact);
+        action.setActionConfiguration(cleanupActionConfiguration);
+        List<Action> actions = Arrays.asList(action);
+        ActionProxy actionProxy = mock(ActionProxy.class);
+        when(actionProxy.getActionsByPids(any(), any())).thenReturn(actions);
+
+        StartProcessing startProcessing = new StartProcessing(null, internalResourceProxy, actionProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
@@ -93,7 +107,16 @@ public class StartProcessingUnitTestNG {
         internalResourceProxy = mock(InternalResourceRestApiProxy.class);
         when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
 
-        startProcessing = new StartProcessing(null, internalResourceProxy,
+        cleanupActionConfiguration = new CleanupActionConfiguration();
+        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Account);
+        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Contact);
+        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Product);
+        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Transaction);
+        action.setActionConfiguration(cleanupActionConfiguration);
+        actionProxy = mock(ActionProxy.class);
+        when(actionProxy.getActionsByPids(any(), any())).thenReturn(actions);
+
+        startProcessing = new StartProcessing(null, internalResourceProxy, actionProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
 

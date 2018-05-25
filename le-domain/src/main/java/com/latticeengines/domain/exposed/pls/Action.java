@@ -83,7 +83,8 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     private String description;
 
     @JsonProperty("actionConfiguration")
-    @Transient
+    @Column(name = "ACTION_CONFIGURATION", columnDefinition = "'JSON'")
+    @Type(type = "json")
     private ActionConfiguration actionConfiguration;
 
     @Override

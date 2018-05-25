@@ -36,6 +36,8 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -104,9 +106,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @VisibleForTesting
     StartProcessing(DataCollectionProxy dataCollectionProxy, InternalResourceRestApiProxy internalResourceProxy,
-            CustomerSpace customerSpace) {
+                    ActionProxy actionProxy, CustomerSpace customerSpace) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.internalResourceProxy = internalResourceProxy;
+        this.actionProxy = actionProxy;
         this.customerSpace = customerSpace;
         this.reportJson = JsonUtils.createObjectNode();
     }
@@ -295,14 +298,25 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         return engineIds;
     }
 
+    private List<Action> getDeleteActions() {
+        List<Action> actionList = getActions();
+        List<Action> deleteAction = actionList.stream()
+                .filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()))
+                .collect(Collectors.toList());
+        return deleteAction;
+    }
+
+    private List<Action> getImportActions() {
+        List<Action> actionList = getActions();
+        List<Action> importAction = actionList.stream()
+                .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
+                .collect(Collectors.toList());
+        return importAction;
+    }
+
     private List<Job> getDeleteJobs() {
         return internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace.toString(),
                 configuration.getActionIds(), ActionType.CDL_OPERATION_WORKFLOW);
-    }
-
-    private List<Job> getImportJobs() {
-        return internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace.toString(),
-                configuration.getActionIds(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
     }
 
     private void determineVersions() {
@@ -326,21 +340,23 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void addActionAssociateTables() {
-        List<Job> importJobs = getImportJobs();
-        if (importJobs != null) {
-            for (Job job : importJobs) {
-                String taskId = job.getInputs().get(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER);
+        List<Action> actionList = getImportActions();
+        if (CollectionUtils.isNotEmpty(actionList)) {
+            for (Action action : actionList) {
+                ImportActionConfiguration importActionConfiguration =
+                        (ImportActionConfiguration) action.getActionConfiguration();
+                String taskId = importActionConfiguration.getDataFeedTaskId();
                 if (StringUtils.isEmpty(taskId)) {
                     continue;
                 }
-                String tablesStr = job.getOutputs()
-                        .get(WorkflowContextConstants.Outputs.DATAFEEDTASK_REGISTERED_TABLES);
-                if (StringUtils.isEmpty(tablesStr)) {
-                    log.warn(String.format("Job %s doesn't have table to be registered.", job.getApplicationId()));
+                if (importActionConfiguration.getImportCount() == 0) {
                     continue;
                 }
-                List<?> rawList = JsonUtils.deserialize(tablesStr, List.class);
-                List<String> tables = JsonUtils.convertList(rawList, String.class);
+                List<String> tables = importActionConfiguration.getRegisteredTables();
+                if (CollectionUtils.isEmpty(tables)) {
+                    log.warn(String.format("Action %d doesn't have table to be registered.", action.getPid()));
+                    continue;
+                }
                 dataFeedProxy.addTablesToQueue(customerSpace.toString(), taskId, tables);
             }
         }
@@ -424,15 +440,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         public Set<BusinessEntity> getRebuildEntities() {
             Set<BusinessEntity> rebuildEntities = new HashSet<>();
             try {
-                List<Job> deleteJobs = getDeleteJobs();
-                for (Job job : deleteJobs) {
-                    String str = job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
-                    if (StringUtils.isEmpty(str)) {
-                        continue;
-                    }
-                    List<?> entityList = JsonUtils.deserialize(str, List.class);
-                    rebuildEntities.addAll(JsonUtils.convertList(entityList, BusinessEntity.class));
-                    setEntityToRebuild();
+                List<Action> deleteActions = getDeleteActions();
+                for (Action action : deleteActions) {
+                    CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action
+                            .getActionConfiguration();
+                    rebuildEntities.addAll(cleanupActionConfiguration.getImpactEntities());
                 }
                 return rebuildEntities;
             } catch (Exception e) {
