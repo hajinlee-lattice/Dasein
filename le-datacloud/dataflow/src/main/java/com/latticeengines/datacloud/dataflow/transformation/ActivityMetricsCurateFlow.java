@@ -267,21 +267,24 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
         List<Aggregation> accountProductSpendAgg = Collections.singletonList(
                 new Aggregation(InterfaceName.TotalAmount.name(), "_APSpend_", AggregationType.SUM));
         Node apSpend = periodTable.groupBy(new FieldList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name(),
-                InterfaceName.SpendAnalyticsSegment.name()), accountProductSpendAgg).renamePipe("_apspend_node_");
+                InterfaceName.SpendAnalyticsSegment.name()), accountProductSpendAgg)
+                .renamePipe("_ap_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         List<Aggregation> accountTotalSpendAgg = Collections.singletonList(
                 new Aggregation("_APSpend_", "_ATSpend_", AggregationType.SUM));
         Node atSpend = apSpend.groupBy(new FieldList(InterfaceName.AccountId.name()), accountTotalSpendAgg)
-                .renamePipe("_atspend_node_");
+                .renamePipe("_at_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         List<Aggregation> segmentProductSpendAgg = Collections
                 .singletonList(new Aggregation("_APSpend_", "_SPSpend_", AggregationType.SUM));
         Node spSpend = apSpend.groupBy(new FieldList(InterfaceName.SpendAnalyticsSegment.name(), InterfaceName.ProductId.name()),
-                segmentProductSpendAgg).renamePipe("_spspend_node_");
+                        segmentProductSpendAgg)
+                .renamePipe("_sp_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         List<Aggregation> semgentTotalSpendAgg = Collections
                 .singletonList(new Aggregation("_SPSpend_", "_STSpend_", AggregationType.SUM));
-        Node stSpend = spSpend.groupBy(new FieldList(InterfaceName.SpendAnalyticsSegment.name()), semgentTotalSpendAgg).renamePipe("_stspend_node_");
+        Node stSpend = spSpend.groupBy(new FieldList(InterfaceName.SpendAnalyticsSegment.name()), semgentTotalSpendAgg)
+                .renamePipe("_st_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         periodTable = apSpend.join(new FieldList(InterfaceName.AccountId.name()), atSpend,
                 new FieldList(InterfaceName.AccountId.name()), JoinType.LEFT)
@@ -297,7 +300,7 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
                         "_SPSpend_", "_STSpend_"),
                 new FieldList(periodTable.getFieldNames()), metricsMetadata.get(metrics))
                 .retain(new FieldList(retainFields));
-        return periodTable.renamePipe("_shareofwallet_node_" + periodTable.getPipeName());
+        return periodTable.renamePipe("_sw_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
     }
 
     private Node appendSegment(Node periodTable) {

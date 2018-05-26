@@ -53,12 +53,13 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
     private String MAX_TXN_DATE = "2018-01-01";
 
-    private ActivityMetrics weekMarginMetrics;
-    private ActivityMetrics weekShareOfWalletMetrics;
-    private ActivityMetrics weekSpendChangeMetrics;
-    private ActivityMetrics weekAvgSpendOvertimeMetrics;
-    private ActivityMetrics weekTotalSpendOvertimeMetrics;
-    private ActivityMetrics everHasPurchased;
+    private ActivityMetrics weekMG;
+    private ActivityMetrics weekSW;
+    private ActivityMetrics weekSWDepr;
+    private ActivityMetrics weekSC;
+    private ActivityMetrics weekAS;
+    private ActivityMetrics weekTS;
+    private ActivityMetrics everHP;
 
     private List<ActivityMetrics> metricsList;
 
@@ -168,31 +169,36 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         ActivityMetricsCuratorConfig conf = new ActivityMetricsCuratorConfig();
         conf.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
         conf.setCurrentDate(MAX_TXN_DATE);
-        weekMarginMetrics = new ActivityMetrics();
-        weekMarginMetrics.setMetrics(InterfaceName.Margin);
-        weekMarginMetrics.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
-        weekShareOfWalletMetrics = new ActivityMetrics();
-        weekShareOfWalletMetrics.setMetrics(InterfaceName.ShareOfWallet);
-        weekShareOfWalletMetrics
-                .setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
-        weekAvgSpendOvertimeMetrics = new ActivityMetrics();
-        weekAvgSpendOvertimeMetrics.setMetrics(InterfaceName.AvgSpendOvertime);
-        weekAvgSpendOvertimeMetrics
-                .setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
-        weekTotalSpendOvertimeMetrics = new ActivityMetrics();
-        weekTotalSpendOvertimeMetrics.setMetrics(InterfaceName.TotalSpendOvertime);
-        weekTotalSpendOvertimeMetrics
-                .setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
-        weekSpendChangeMetrics = new ActivityMetrics();
-        weekSpendChangeMetrics.setMetrics(InterfaceName.SpendChange);
-        weekSpendChangeMetrics.setPeriodsConfig(
+        weekMG = new ActivityMetrics();
+        weekMG.setMetrics(InterfaceName.Margin);
+        weekMG.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+
+        weekSW = new ActivityMetrics();
+        weekSW.setMetrics(InterfaceName.ShareOfWallet);
+        weekSW.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+
+        weekSWDepr = new ActivityMetrics();
+        weekSWDepr.setMetrics(InterfaceName.ShareOfWallet);
+        weekSWDepr.setPeriodsConfig(Arrays.asList(TimeFilter.within(2, PeriodStrategy.Template.Week.name())));
+        weekSWDepr.setEOL(true);
+
+        weekAS = new ActivityMetrics();
+        weekAS.setMetrics(InterfaceName.AvgSpendOvertime);
+        weekAS.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+
+        weekTS = new ActivityMetrics();
+        weekTS.setMetrics(InterfaceName.TotalSpendOvertime);
+        weekTS.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+
+        weekSC = new ActivityMetrics();
+        weekSC.setMetrics(InterfaceName.SpendChange);
+        weekSC.setPeriodsConfig(
                 Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name()),
                         TimeFilter.between(2, 2, PeriodStrategy.Template.Week.name())));
-        everHasPurchased = new ActivityMetrics();
-        everHasPurchased.setMetrics(InterfaceName.HasPurchased);
-        everHasPurchased.setPeriodsConfig(Arrays.asList(TimeFilter.ever(PeriodStrategy.Template.Week.name())));
-        metricsList = Arrays.asList(weekMarginMetrics, weekShareOfWalletMetrics, weekAvgSpendOvertimeMetrics,
-                weekTotalSpendOvertimeMetrics, weekSpendChangeMetrics, everHasPurchased);
+        everHP = new ActivityMetrics();
+        everHP.setMetrics(InterfaceName.HasPurchased);
+        everHP.setPeriodsConfig(Arrays.asList(TimeFilter.ever(PeriodStrategy.Template.Week.name())));
+        metricsList = Arrays.asList(weekMG, weekSW, weekSWDepr, weekAS, weekTS, weekSC, everHP);
         conf.setMetrics(metricsList);
         conf.setPeriodStrategies(Arrays.asList(PeriodStrategy.CalendarWeek));
         conf.setType(ActivityType.PurchaseHistory);
@@ -402,105 +408,105 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
     };
 
-    // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1__AS, W_1__TS, W_1__W_2_2__SC, EVER__HP
+    // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1__AS, W_1__TS, W_1__W_2_2__SC, EVER__HP, W_2__SW
     private Object[][] depivotedMetricsData = new Object[][] { //
-            { "AID1", "PID1", 50, 85, 45.0, 45.0, 125, true }, //
-            { "AID1", "PID2", 50, 85, 45.0, 45.0, 125, true }, //
-            { "AID1", "PID3", 50, 122, 45.0, 45.0, 125, true }, //
-            { "AID1", "PID4", 50, 122, 45.0, 45.0, 125, true }, //
+            { "AID1", "PID1", 50, 85, 45.0, 45.0, 125, true, 100 }, //
+            { "AID1", "PID2", 50, 85, 45.0, 45.0, 125, true, 81 }, //
+            { "AID1", "PID3", 50, 122, 45.0, 45.0, 125, true, 100 }, //
+            { "AID1", "PID4", 50, 122, 45.0, 45.0, 125, true, 131 }, //
 
-            { "AID2", "PID1", 33, 169, 20.0, 20.0, 100, true }, //
-            { "AID2", "PID2", 33, 169, 20.0, 20.0, 0, true }, //
-            { "AID2", "PID3", null, null, 0.0, 0.0, -100, true }, //
-            { "AID2", "PID4", null, null, 0.0, 0.0, 0, false }, //
+            { "AID2", "PID1", 33, 169, 20.0, 20.0, 100, true, 100 }, //
+            { "AID2", "PID2", 33, 169, 20.0, 20.0, 0, true, 162 }, //
+            { "AID2", "PID3", null, null, 0.0, 0.0, -100, true, 100 }, //
+            { "AID2", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID3", "PID1", -56, 150, 20.0, 20.0, 0, true }, //
-            { "AID3", "PID2", null, null, 0.0, 0.0, 0, true }, //
-            { "AID3", "PID3", null, null, 0.0, 0.0, 0, true }, //
-            { "AID3", "PID4", null, null, 0.0, 0.0, 0, false }, //
+            { "AID3", "PID1", -56, 150, 20.0, 20.0, 0, true, 140 }, //
+            { "AID3", "PID2", null, null, 0.0, 0.0, 0, true, null }, //
+            { "AID3", "PID3", null, null, 0.0, 0.0, 0, true, null }, //
+            { "AID3", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID4", "PID1", 300, 90, 60.0, 60.0, 100, true }, //
-            { "AID4", "PID2", null, 120, 20.0, 20.0, 100, true }, //
-            { "AID4", "PID3", null, 120, 20.0, 20.0, 100, true }, //
-            { "AID4", "PID4", null, null, 0.0, 0.0, 0, false }, //
+            { "AID4", "PID1", 300, 90, 60.0, 60.0, 100, true, 84 }, //
+            { "AID4", "PID2", null, 120, 20.0, 20.0, 100, true, 140 }, //
+            { "AID4", "PID3", null, 120, 20.0, 20.0, 100, true, 140 }, //
+            { "AID4", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID5", "PID1", null, null, 0.0, 0.0, 0, true }, //
-            { "AID5", "PID2", null, null, 0.0, 0.0, 0, true }, //
-            { "AID5", "PID3", null, null, 0.0, 0.0, 0, false }, //
-            { "AID5", "PID4", null, null, 0.0, 0.0, 0, false }, //
+            { "AID5", "PID1", null, null, 0.0, 0.0, 0, true, null }, //
+            { "AID5", "PID2", null, null, 0.0, 0.0, 0, true, null }, //
+            { "AID5", "PID3", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID5", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID6", "PID1", 100, 100, 10.0, 10.0, 100, true }, //
-            { "AID6", "PID2", 100, 100, 10.0, 10.0, 100, true }, //
-            { "AID6", "PID3", null, null, 0.0, 0.0, 0, false }, //
-            { "AID6", "PID4", null, null, 0.0, 0.0, 0, false }, //
+            { "AID6", "PID1", 100, 100, 10.0, 10.0, 100, true , 100}, //
+            { "AID6", "PID2", 100, 100, 10.0, 10.0, 100, true , 100}, //
+            { "AID6", "PID3", null, null, 0.0, 0.0, 0, false , null}, //
+            { "AID6", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID7", "PID1", 100, null, 10.0, 10.0, 100, true }, //
-            { "AID7", "PID2", null, null, 0.0, 0.0, 0, false }, //
-            { "AID7", "PID3", null, null, 0.0, 0.0, 0, false }, //
-            { "AID7", "PID4", null, null, 0.0, 0.0, 0, false }, //
+            { "AID7", "PID1", 100, null, 10.0, 10.0, 100, true, null }, //
+            { "AID7", "PID2", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID7", "PID3", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID7", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID8", "PID1", null, null, 0.0, 0.0, -100, true }, //
-            { "AID8", "PID2", null, null, 0.0, 0.0, 0, false }, //
-            { "AID8", "PID3", null, null, 0.0, 0.0, 0, false }, //
-            { "AID8", "PID4", null, null, 0.0, 0.0, 0, false }, //
+            { "AID8", "PID1", null, null, 0.0, 0.0, -100, true, 100 }, //
+            { "AID8", "PID2", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID8", "PID3", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID8", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { AID_NO_TXN, "PID1", null, null, 0.0, 0.0, 0, false }, //
-            { AID_NO_TXN, "PID2", null, null, 0.0, 0.0, 0, false }, //
-            { AID_NO_TXN, "PID3", null, null, 0.0, 0.0, 0, false }, //
-            { AID_NO_TXN, "PID4", null, null, 0.0, 0.0, 0, false }, //
+            { AID_NO_TXN, "PID1", null, null, 0.0, 0.0, 0, false, null }, //
+            { AID_NO_TXN, "PID2", null, null, 0.0, 0.0, 0, false, null }, //
+            { AID_NO_TXN, "PID3", null, null, 0.0, 0.0, 0, false, null }, //
+            { AID_NO_TXN, "PID4", null, null, 0.0, 0.0, 0, false, null }, //
     };
 
     // Schema: AccountId
-    // AM_PID1__W_1__MG, AM_PID1__W_1__SW, AM_PID1__W_1__AS, AM_PID1__W_1__TS, AM_PID1__W_1__W_2_2__SC, AM_PID1__EVER__HP
-    // AM_PID2__W_1__MG, AM_PID2__W_1__SW, AM_PID2__W_1__AS, AM_PID2__W_1__TS, AM_PID2__W_1__W_2_2__SC, AM_PID2__EVER__HP
-    // AM_PID3__W_1__MG, AM_PID3__W_1__SW, AM_PID3__W_1__AS, AM_PID3__W_1__TS, AM_PID3__W_1__W_2_2__SC, AM_PID3__EVER__HP
-    // AM_PID4__W_1__MG, AM_PID4__W_1__SW, AM_PID4__W_1__AS, AM_PID4__W_1__TS, AM_PID4__W_1__W_2_2__SC, AM_PID4__EVER__HP
+    // AM_PID1__W_1__MG, AM_PID1__W_1__SW, AM_PID2__W_2__SW, AM_PID1__W_1__AS, AM_PID1__W_1__TS, AM_PID1__W_1__W_2_2__SC, AM_PID1__EVER__HP
+    // AM_PID2__W_1__MG, AM_PID2__W_1__SW, AM_PID2__W_2__SW, AM_PID2__W_1__AS, AM_PID2__W_1__TS, AM_PID2__W_1__W_2_2__SC, AM_PID2__EVER__HP
+    // AM_PID3__W_1__MG, AM_PID3__W_1__SW, AM_PID3__W_2__SW, AM_PID3__W_1__AS, AM_PID3__W_1__TS, AM_PID3__W_1__W_2_2__SC, AM_PID3__EVER__HP
+    // AM_PID4__W_1__MG, AM_PID4__W_1__SW, AM_PID4__W_2__SW, AM_PID4__W_1__AS, AM_PID4__W_1__TS, AM_PID4__W_1__W_2_2__SC, AM_PID4__EVER__HP
     private Object[][] pivotMetricsData = new Object[][] {
             { "AID1", //
-                    50, 85, 45.0, 45.0, 125, true, //
-                    50, 85, 45.0, 45.0, 125, true, //
-                    50, 122, 45.0, 45.0, 125, true, //
-                    50, 122, 45.0, 45.0, 125, true }, //
+                    50, 85, 100, 45.0, 45.0, 125, true, //
+                    50, 85, 81, 45.0, 45.0, 125, true, //
+                    50, 122, 100, 45.0, 45.0, 125, true, //
+                    50, 122, 131, 45.0, 45.0, 125, true }, //
             { "AID2", //
-                    33, 169, 20.0, 20.0, 100, true, //
-                    33, 169, 20.0, 20.0, 0, true, //
-                    null, null, 0.0, 0.0, -100, true, //
-                    null, null, 0.0, 0.0, 0, false }, //
+                    33, 169, 100, 20.0, 20.0, 100, true, //
+                    33, 169, 162, 20.0, 20.0, 0, true, //
+                    null, null, 100, 0.0, 0.0, -100, true, //
+                    null, null, null, 0.0, 0.0, 0, false }, //
             { "AID3", //
-                    -56, 150, 20.0, 20.0, 0, true, //
-                    null, null, 0.0, 0.0, 0, true, //
-                    null, null, 0.0, 0.0, 0, true, //
-                    null, null, 0.0, 0.0, 0, false }, //
+                    -56, 150, 140, 20.0, 20.0, 0, true, //
+                    null, null, null, 0.0, 0.0, 0, true, //
+                    null, null, null, 0.0, 0.0, 0, true, //
+                    null, null, null, 0.0, 0.0, 0, false }, //
             { "AID4", //
-                    300, 90, 60.0, 60.0, 100, true, //
-                    null, 120, 20.0, 20.0, 100, true, //
-                    null, 120, 20.0, 20.0, 100, true, //
-                    null, null, 0.0, 0.0, 0, false }, //
+                    300, 90, 84, 60.0, 60.0, 100, true, //
+                    null, 120, 140, 20.0, 20.0, 100, true, //
+                    null, 120, 140, 20.0, 20.0, 100, true, //
+                    null, null, null, 0.0, 0.0, 0, false }, //
             { "AID5", //
-                    null, null, 0.0, 0.0, 0, true, //
-                    null, null, 0.0, 0.0, 0, true, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false }, //
+                    null, null, null, 0.0, 0.0, 0, true, //
+                    null, null, null, 0.0, 0.0, 0, true, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false }, //
             { "AID6", //
-                    100, 100, 10.0, 10.0, 100, true, //
-                    100, 100, 10.0, 10.0, 100, true, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false }, //
+                    100, 100, 100, 10.0, 10.0, 100, true, //
+                    100, 100, 100, 10.0, 10.0, 100, true, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false }, //
             { "AID7", //
-                    100, null, 10.0, 10.0, 100, true, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false }, //
+                    100, null, null, 10.0, 10.0, 100, true, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false }, //
             { "AID8", //
-                    null, null, 0.0, 0.0, -100, true, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false }, //
+                    null, null, 100, 0.0, 0.0, -100, true, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false }, //
             { AID_NO_TXN, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false, //
-                    null, null, 0.0, 0.0, 0, false }, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false, //
+                    null, null, null, 0.0, 0.0, 0, false }, //
 
     };
 
@@ -569,19 +575,20 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             Object[] expected = expectedMetrics.get(key);
             Assert.assertNotNull(expected);
             Assert.assertTrue(
-                    isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekMarginMetrics)), expected[2]));
-            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekShareOfWalletMetrics)),
+                    isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekMG)), expected[2]));
+            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSW)),
                     expected[3]));
             Assert.assertTrue(isObjEquals(
-                    record.get(ActivityMetricsUtils.getNameWithPeriod(weekAvgSpendOvertimeMetrics)), expected[4]));
+                    record.get(ActivityMetricsUtils.getNameWithPeriod(weekAS)), expected[4]));
             Assert.assertTrue(isObjEquals(
-                    record.get(ActivityMetricsUtils.getNameWithPeriod(weekTotalSpendOvertimeMetrics)), expected[5]));
-            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSpendChangeMetrics)),
+                    record.get(ActivityMetricsUtils.getNameWithPeriod(weekTS)), expected[5]));
+            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSC)),
                     expected[6]));
             Assert.assertTrue(
-                    isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(everHasPurchased)), expected[7]));
-            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(everHasPurchased)),
+                    isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(everHP)), expected[7]));
+            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(everHP)),
                     expected[7]));
+            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSWDepr)), expected[8]));
             cnt++;
         }
 
