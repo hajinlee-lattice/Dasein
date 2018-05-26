@@ -2,7 +2,6 @@ package com.latticeengines.objectapi.service.impl;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -76,14 +75,58 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             periodTransaction.setPeriodId((Integer) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
         }
-        log.info("resultList is " + resultList);
+        log.info("resultList for account is " + resultList);
         return resultList;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public List<PeriodTransaction> getPeriodTransactionForSegmentAccount(String spendanalyticssegmentId,
-            String periodName) {
-        return Collections.emptyList();
+    public List<PeriodTransaction> getPeriodTransactionForSegmentAccount(String segment, String periodName,
+            ProductType productType) {
+        List<PeriodTransaction> resultList = new ArrayList<>();
+        Tenant tenant = MultiTenantContext.getTenant();
+        String periodTransactionTableName = dataCollectionProxy.getTableName(tenant.getId(),
+                BusinessEntity.PeriodTransaction.getServingStore());
+        String accountTableName = dataCollectionProxy.getTableName(tenant.getId(),
+                BusinessEntity.Account.getServingStore());
+
+        log.info(String.format(
+                "Get Period Transaction Table %s, Account Table %s for %s with segment %s and periodName %s, productType %s",
+                periodTransactionTableName, accountTableName, tenant.getId(), segment, periodName, productType));
+        String baseQuery = "SELECT count(pt.{0}), pt.{1}, pt.{2}, sum(pt.{3}) as totalaccount, sum(pt.{4}) as totalquantity, sum(pt.{5}) as transactioncount FROM {6} as pt "
+                + "inner join {7} as ac on  pt.{0} = ac.{0} " //
+                + "where pt.{8} = ? and ac.{9} = ? and pt.{10} = ?" //
+                + "group by pt.{1}, pt.{2}" //
+                + "sort by pt.{1}, pt.{2}";
+
+        String query = MessageFormat.format(baseQuery, //
+                InterfaceName.AccountId, // 0
+                InterfaceName.PeriodId, // 1
+                InterfaceName.ProductId, // 2
+                InterfaceName.TotalAmount, // 3
+                InterfaceName.TotalQuantity, // 4
+                InterfaceName.TransactionCount, // 5
+                periodTransactionTableName, // 6
+                accountTableName, // 7
+                InterfaceName.PeriodName, // 8
+                InterfaceName.SpendAnalyticsSegment, // 9
+                InterfaceName.ProductType); // 10
+
+        log.info("Query for getPeriodTransactionForSegmentAccount " + query);
+        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, periodName, segment,
+                productType.toString());
+        for (Map row : retList) {
+            PeriodTransaction periodTransaction = new PeriodTransaction();
+            periodTransaction.setTotalAmount((Double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
+            periodTransaction.setTotalQuantity((Long) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
+            periodTransaction
+                    .setTransactionCount((Double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
+            periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
+            periodTransaction.setPeriodId((Integer) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
+            resultList.add(periodTransaction);
+        }
+        log.info("resultList for segment is " + resultList);
+        return resultList;
     }
 
     @SuppressWarnings("rawtypes")

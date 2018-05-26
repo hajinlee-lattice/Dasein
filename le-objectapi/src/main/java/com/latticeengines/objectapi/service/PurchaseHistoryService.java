@@ -13,7 +13,8 @@ public interface PurchaseHistoryService {
     List<PeriodTransaction> getPeriodTransactionByAccountId(String accountId, String periodName, Version version,
             ProductType productType);
 
-    List<PeriodTransaction> getPeriodTransactionForSegmentAccount(String spendanalyticssegment, String periodName);
+    List<PeriodTransaction> getPeriodTransactionForSegmentAccount(String segment, String periodName,
+            ProductType productType);
 
     List<ProductHierarchy> getProductHierarchy(DataCollection.Version version);
 

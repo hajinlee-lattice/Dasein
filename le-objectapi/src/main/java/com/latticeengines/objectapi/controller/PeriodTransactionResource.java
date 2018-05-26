@@ -35,17 +35,18 @@ public class PeriodTransactionResource {
             @PathVariable String accountId, //
             @RequestParam(value = "periodname", required = false, defaultValue = "Month") String periodName, //
             @RequestParam(value = "version", required = false) DataCollection.Version version, //
-            @RequestParam(value = "producttype", required = false, defaultValue = "Hierarchy") ProductType productType) {
+            @RequestParam(value = "producttype", required = false, defaultValue = "Spending") ProductType productType) {
         return purchaseHistoryService.getPeriodTransactionByAccountId(accountId, periodName, version, productType);
     }
 
-    @GetMapping(value = "/segment/accountid/{accountId}")
+    @GetMapping(value = "/segment/{segment}")
     @ResponseBody
     @ApiOperation("Get Period Transaction for Segment Account")
     public List<PeriodTransaction> getPeriodTransactionForSegmentAccount(@PathVariable String customerSpace,
-            @PathVariable String accountId, //
-            @RequestParam(value = "periodname", required = false, defaultValue = "Month") String periodName) {
-        return purchaseHistoryService.getPeriodTransactionForSegmentAccount(accountId, periodName);
+            @PathVariable String segment, //
+            @RequestParam(value = "periodname", required = false, defaultValue = "Month") String periodName, //
+            @RequestParam(value = "producttype", required = false, defaultValue = "Spending") ProductType productType) {
+        return purchaseHistoryService.getPeriodTransactionForSegmentAccount(segment, periodName, productType);
     }
 
     @GetMapping(value = "/producthierarchy")
