@@ -18,7 +18,7 @@ import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.service.TenantConfigService;
-import com.latticeengines.pls.service.VdbMetadataConstants;
+import com.latticeengines.domain.exposed.pls.VdbMetadataConstants;
 import com.latticeengines.pls.service.VdbMetadataService;
 
 public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {

@@ -22,7 +22,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,11 +56,9 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -77,7 +74,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -90,18 +86,15 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
-import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -130,20 +123,12 @@ public class InternalResource extends InternalResourceBase {
     private static final String adUsername = "testuser1";
     private static final String adPassword = "Lattice1";
     public static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
-    private static final Integer BUCKET_0 = 99;
-    private static final Integer BUCKET_1 = 95;
-    private static final Integer BUCKET_2 = 85;
-    private static final Integer BUCKET_3 = 50;
-    private static final Integer BUCKET_4 = 5;
 
     @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
     @Inject
     private GlobalUserManagementService globalUserManagementService;
-
-    @Inject
-    private ModelMetadataService modelMetadataService;
 
     @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -185,9 +170,6 @@ public class InternalResource extends InternalResourceBase {
     private EmailService emailService;
 
     @Inject
-    private BucketedScoreService bucketedScoreService;
-
-    @Inject
     private ModelNoteService modelNoteService;
 
     @Inject
@@ -201,9 +183,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private WorkflowJobService workflowJobService;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -385,18 +364,6 @@ public class InternalResource extends InternalResourceBase {
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenantId);
     }
 
-    @RequestMapping(value = "/attributesFromFields/" + TENANT_ID_PATH
-            + "/{eventTableName}", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "get Attributes with user defined fields")
-    public List<Attribute> getAttributesFromFields(@PathVariable("tenantId") String tenantId,
-            @PathVariable("eventTableName") String eventTableName, @RequestBody List<VdbMetadataField> fields) {
-        manufactureSecurityContextForInternalAccess(tenantId);
-        log.info(String.format("Get attributes for tenant=%s, table name=%s", tenantId, eventTableName));
-        Table eventTable = metadataProxy.getTable(tenantId, eventTableName);
-        return modelMetadataService.getAttributesFromFields(eventTable.getAttributes(), fields);
-    }
-
     @RequestMapping(value = "/modelsummaries/{modelId}/"
             + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
@@ -508,17 +475,6 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         return modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
-    }
-
-    @RequestMapping(value = "/metadata/required/modelId/{modelId}/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get required column names for the event table used for the specified model")
-    public List<Attribute> getRequiredColumns(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
-            HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return modelMetadataService.getRequiredColumns(modelId);
     }
 
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")

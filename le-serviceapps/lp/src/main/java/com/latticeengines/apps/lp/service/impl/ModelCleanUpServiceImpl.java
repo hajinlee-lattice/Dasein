@@ -1,19 +1,24 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.lp.service.ModelCleanUpService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
+import com.latticeengines.apps.lp.service.SourceFileService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -21,11 +26,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.pls.service.ModelCleanUpService;
-import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("modelCleanUpService")
@@ -35,19 +36,19 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
     private static final String MODEL_SUMMARY_SUPPORTING_FILES_PATH = "/user/s-analytics/customers/%s/models/%s";
     private static final String MATCHED_AND_SCORED_TRAINING_CSV_FILES_PATH = "/user/s-analytics/customers/%s/data/%s";
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private ModelSummaryService modelSummaryService;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
     @Override

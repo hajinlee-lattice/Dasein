@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -13,12 +13,13 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
@@ -26,36 +27,37 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
+import com.latticeengines.apps.lp.util.ModelingHdfsUtils;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
-public class PmmlModelCopyServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class PmmlModelCopyServiceImplTestNG extends LPFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(PmmlModelCopyServiceImplDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PmmlModelCopyServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private PmmlModelService pmmlModelService;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
 
     private Tenant modelCopySourceTenant = new Tenant();
 
@@ -65,7 +67,9 @@ public class PmmlModelCopyServiceImplDeploymentTestNG extends PlsDeploymentTestN
 
     private String pivotFilePath;
 
-    @BeforeClass(groups = "deployment")
+    private String localPathBase = ClassLoader.getSystemResource("modelcopyserviceimpl/pmmlmodel").getPath();
+
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         modelCopySourceTenant.setId(CustomerSpace.parse("modelCopySourceTenant").toString());
         modelCopySourceTenant.setName(modelCopySourceTenant.getId());
@@ -89,9 +93,6 @@ public class PmmlModelCopyServiceImplDeploymentTestNG extends PlsDeploymentTestN
                 yarnConfiguration,
                 PathBuilder.buildMetadataPath(CamilleEnvironment.getPodId(),
                         CustomerSpace.parse(modelCopyTargetTenant.getId())).toString());
-
-        String localPathBase = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pmmlmodel").getPath();
 
         HdfsUtils.mkdir(
                 yarnConfiguration,
@@ -147,7 +148,7 @@ public class PmmlModelCopyServiceImplDeploymentTestNG extends PlsDeploymentTestN
         tenantEntityMgr.delete(targetTenant);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "functional", enabled = true)
     public void testModelCopyInHdfs() throws IOException {
         ModelSummary modelSummary = new ModelSummary();
         modelSummary.setId("ms__4f1d08f8-3678-420a-b419-8e5dad939834-rfpmml_2");
@@ -155,7 +156,7 @@ public class PmmlModelCopyServiceImplDeploymentTestNG extends PlsDeploymentTestN
         modelSummary.setModuleName(moduleName);
         modelSummary.setPivotArtifactPath(pivotFilePath);
 
-        setupSecurityContext(modelCopySourceTenant);
+        MultiTenantContext.setTenant(modelCopySourceTenant);
         pmmlModelService.copyHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
                 "PMMLDummyTable-1474925639299", "cpTrainingTable", "cpEventTable", modelSummary);
         String path = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration,
@@ -178,7 +179,7 @@ public class PmmlModelCopyServiceImplDeploymentTestNG extends PlsDeploymentTestN
         assertNotEquals(provenance.get("Pivot_Artifact_Path").asText(), pivotFilePath);
         assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, provenance.get("Pivot_Artifact_Path").asText()),
                 FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
-                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pmmlmodel/"
+                        "modelcopyserviceimpl/pmmlmodel/"
                                 + "metadata/rfpmml_1474925594307/PivotMappings/pivotvalues.csv").getFile())));
 
         System.out.println(new Path(path).getParent().getParent().toString());

@@ -46,7 +46,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
-import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
@@ -65,9 +64,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private PlsFeatureFlagService plsFeatureFlagService;
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -136,15 +132,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     private Table getTableFromParameters(SchemaInterpretation schemaInterpretation) {
         Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
-        if (plsFeatureFlagService.isFuzzyMatchEnabled()) {
-            SchemaInterpretationFunctionalInterface function = (interfaceName) -> {
-                Attribute domainAttribute = table.getAttribute(interfaceName);
-                if (domainAttribute != null) {
-                    domainAttribute.setNullable(Boolean.TRUE);
-                }
-            };
-            schemaInterpretation.apply(function);
-        }
+        SchemaInterpretationFunctionalInterface function = (interfaceName) -> {
+            Attribute domainAttribute = table.getAttribute(interfaceName);
+            if (domainAttribute != null) {
+                domainAttribute.setNullable(Boolean.TRUE);
+            }
+        };
+        schemaInterpretation.apply(function);
         return table;
     }
 

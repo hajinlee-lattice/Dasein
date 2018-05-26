@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.proxy.exposed.lp.ModelMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
@@ -58,6 +59,12 @@ public class ModelResource {
 
     @Inject
     private CustomEventModelingWorkflowSubmitter customEventModelingWorkflowSubmitter;
+
+    @Inject
+    private ModelMetadataProxy modelMetadataProxy;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @PostConstruct
     public void init() {
@@ -115,8 +122,10 @@ public class ModelResource {
         List<Table> trainingTargetTables = cdlModelMetadataService.cloneTrainingTargetTable(modelSummary);
         List<String> trainingTargetTableNames = Arrays.asList(trainingTargetTables.get(0).getName(),
                 trainingTargetTables.get(1).getName());
-        List<Attribute> userRefinedAttributes = internalResourceProxy.getAttributesFromFields(customerSpace,
-                modelSummary.getEventTableName(), parameters.getAttributes());
+
+        Table eventTable = metadataProxy.getTable(customerSpace, modelSummary.getEventTableName());
+        List<Attribute> userRefinedAttributes = modelMetadataProxy.getAttributesFromFields(customerSpace,
+                eventTable.getAttributes(), parameters.getAttributes());
         internalResourceProxy.setModelSummaryDownloadFlag(customerSpace);
         return ratingEngineModelWorkflowSubmitter
                 .submit(trainingTargetTableNames, parameters, userRefinedAttributes, modelSummary).toString();

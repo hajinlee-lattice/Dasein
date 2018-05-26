@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,15 +37,14 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
-import com.latticeengines.pls.service.ModelCleanUpService;
-import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelMetadataService;
-import com.latticeengines.pls.service.ModelReplaceService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.cdl.CDLModelProxy;
+import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
+import com.latticeengines.proxy.exposed.lp.ModelOperationProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import io.swagger.annotations.Api;
@@ -57,37 +57,34 @@ import io.swagger.annotations.ApiOperation;
 public class ModelResource {
     private static final Logger log = LoggerFactory.getLogger(ModelResource.class);
 
-    @Autowired
+    @Inject
     private MatchAndModelWorkflowSubmitter modelWorkflowSubmitter;
 
-    @Autowired
+    @Inject
     private ModelSummaryService modelSummaryService;
 
-    @Autowired
+    @Inject
     private ModelMetadataService modelMetadataService;
 
-    @Autowired
+    @Inject
     private PMMLModelWorkflowSubmitter pmmlModelWorkflowSubmitter;
 
-    @Autowired
-    private ModelCopyService modelCopyService;
+    @Inject
+    private ModelCopyProxy modelCopyProxy;
 
-    @Autowired
-    private ModelReplaceService modelReplaceService;
-
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
-    @Autowired
-    private ModelCleanUpService modelCleanUpService;
+    @Inject
+    private ModelOperationProxy modelOperationProxy;
 
-    @Autowired
+    @Inject
     private CDLModelProxy cdlModelProxy;
 
     @Value("${common.test.microservice.url}")
@@ -147,7 +144,7 @@ public class ModelResource {
         }
         log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
                 parameters.getDeduplicationType()));
-        Table clone = modelMetadataService.cloneTrainingTable(parameters.getSourceModelSummaryId());
+        Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getTenantId(), parameters.getSourceModelSummaryId());
 
         ModelSummary modelSummary = modelSummaryService
                 .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
@@ -198,8 +195,8 @@ public class ModelResource {
     public ResponseDocument<Boolean> copyModel(@PathVariable String modelId,
             @RequestParam(value = "targetTenantId") String targetTenantId) {
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(targetTenantId);
-        return ResponseDocument.successResponse( //
-                modelCopyService.copyModel(targetTenantId, modelId));
+        modelCopyProxy.copyModel(MultiTenantContext.getTenantId(), targetTenantId, modelId);
+        return ResponseDocument.successResponse(true);
     }
 
     @RequestMapping(value = "/replacemodel/{sourceModelId}", method = RequestMethod.POST)
@@ -210,7 +207,7 @@ public class ModelResource {
             @RequestParam(value = "targetModelId") String targetModelId) {
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(targetTenantId);
         return ResponseDocument.successResponse( //
-                modelReplaceService.replaceModel(sourceModelId, targetTenantId, targetModelId));
+                modelOperationProxy.replaceModel(MultiTenantContext.getTenantId(), sourceModelId, targetTenantId, targetModelId));
     }
 
     @RequestMapping(value = "/reviewmodel/{modelName}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -272,7 +269,7 @@ public class ModelResource {
     @ApiOperation(value = "Clean up model")
     public ResponseDocument<Boolean> cleanUpModel(@PathVariable String modelId) {
         log.info("Clean up model by user: " + MultiTenantContext.getEmailAddress());
-        return ResponseDocument.successResponse(modelCleanUpService.cleanUpModel(modelId));
+        return ResponseDocument.successResponse(modelOperationProxy.cleanUpModel(modelId));
     }
 
     private List<VdbMetadataField> filterAttributesForModelReview(List<VdbMetadataField> metadataFields,

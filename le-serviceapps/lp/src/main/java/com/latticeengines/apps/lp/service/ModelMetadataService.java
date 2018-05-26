@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service;
+package com.latticeengines.apps.lp.service;
 
 import java.util.List;
 import java.util.Set;
@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 public interface ModelMetadataService {
 
     List<VdbMetadataField> getMetadata(String modelId);
+
+    Table getTrainingTableFromModelId(String modelId);
 
     List<Attribute> getAttributesFromFields(List<Attribute> attributes, List<VdbMetadataField> fields);
 

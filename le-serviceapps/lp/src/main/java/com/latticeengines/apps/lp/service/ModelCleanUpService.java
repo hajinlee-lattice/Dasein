@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service;
+package com.latticeengines.apps.lp.service;
 
 public interface ModelCleanUpService {
 

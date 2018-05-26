@@ -5,23 +5,31 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.lp.service.ModelCopyService;
+import com.latticeengines.apps.lp.service.ModelMetadataService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("modelCopyService")
 public class ModelCopyServiceImpl implements ModelCopyService {
 
     private final ModelSummaryService modelSummaryService;
+    private final ModelMetadataService modelMetadataService;
+    private final MetadataProxy metadataProxy;
 
     @Inject
-    public ModelCopyServiceImpl(ModelSummaryService modelSummaryService) {
+    public ModelCopyServiceImpl(ModelSummaryService modelSummaryService, ModelMetadataService modelMetadataService,
+            MetadataProxy metadataProxy) {
         this.modelSummaryService = modelSummaryService;
+        this.modelMetadataService = modelMetadataService;
+        this.metadataProxy = metadataProxy;
     }
 
     @Override
@@ -44,5 +52,12 @@ public class ModelCopyServiceImpl implements ModelCopyService {
     @Override
     public String copyModel(String targetTenantId, String modelId) {
         return copyModel(MultiTenantContext.getTenantId(), targetTenantId, modelId);
+    }
+
+    @Override
+    public Table cloneTrainingTable(String modelSummaryId) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        Table trainingTable = modelMetadataService.getTrainingTableFromModelId(modelSummaryId);
+        return metadataProxy.cloneTable(customerSpace, trainingTable.getName());
     }
 }

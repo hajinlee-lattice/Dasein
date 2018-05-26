@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -6,9 +6,10 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,22 +17,23 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.apps.lp.service.ModelReplaceService;
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
+import com.latticeengines.apps.lp.util.ModelingHdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.ModelReplaceService;
-import com.latticeengines.pls.util.ModelingHdfsUtils;
 
-public class ModelReplaceServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class ModelReplaceServiceImplTestNG extends LPFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ModelReplaceService modelReplaceService;
 
-    @Autowired
+    @Inject
     private ModelSummaryParser modelSummaryParser;
 
     @Value("${pls.modelingservice.basedir}")
@@ -53,16 +55,14 @@ public class ModelReplaceServiceImplTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelReplaceSourceTenant.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelReplaceTargetTenant.getId());
 
-        String localPathBase = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/modelreplaceserviceimpl").getPath();
+        String localPathBase = ClassLoader.getSystemResource("modelreplaceserviceimpl").getPath();
         HdfsUtils.mkdir(yarnConfiguration, customerBase + modelReplaceSourceTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase
                 + modelReplaceSourceTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data", customerBase
                 + modelReplaceSourceTenant.getId());
 
-        localPathBase = ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel")
-                .getPath();
+        localPathBase = ClassLoader.getSystemResource("modelcopyserviceimpl/pythonscriptmodel").getPath();
         HdfsUtils.mkdir(yarnConfiguration, customerBase + modelReplaceTargetTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase
                 + modelReplaceTargetTenant.getId());

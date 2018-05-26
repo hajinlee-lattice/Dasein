@@ -1,7 +1,9 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+
+import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -9,34 +11,42 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.ModelReplaceService;
+import com.latticeengines.apps.lp.util.ModelingHdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.service.ModelReplaceService;
-import com.latticeengines.pls.util.ModelingHdfsUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.serviceapps.lp.ReplaceModelRequest;
 
 @Component("modelReplaceService")
 public class ModelReplaceServiceImpl implements ModelReplaceService {
 
     private static Logger log = LoggerFactory.getLogger(ModelReplaceServiceImpl.class);
 
-    @Autowired
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
+
+    @Override
+    public boolean replaceModel(ReplaceModelRequest replaceModelRequest) {
+        String sourceTenantId = CustomerSpace.parse(replaceModelRequest.getSourceTenant()).toString();
+        String sourceModelId = replaceModelRequest.getSourceModelGuid();
+        String targetTenantId = CustomerSpace.parse(replaceModelRequest.getTargetTenant()).toString();
+        String targetModelId = replaceModelRequest.getTargetModelGuid();
+        return replaceModel(sourceTenantId, sourceModelId, targetTenantId, targetModelId);
+    }
 
     /**
      * 
@@ -174,11 +184,5 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
             config.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
         }
         return ModelingHdfsUtils.getModelFileName(config, path);
-    }
-
-    @Override
-    public boolean replaceModel(String sourceModelId, String targetTenantId, String targetModelId) {
-        CustomerSpace space = MultiTenantContext.getCustomerSpace();
-        return replaceModel(space.toString(), sourceModelId, targetTenantId, targetModelId);
     }
 }

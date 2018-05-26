@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
@@ -180,7 +180,7 @@ public class ModelMetadataServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void getRequiredColumnsFromPythonScriptModel() throws FileNotFoundException {
-        URL csvFileUrl = ClassLoader.getSystemResource("com/latticeengines/pls/util/pythonscriptmodeltable.json");
+        URL csvFileUrl = ClassLoader.getSystemResource("modelmetadataserviceimpl/pythonscriptmodeltable.json");
         Table t = JsonUtils.deserialize(new FileInputStream(new File(csvFileUrl.getPath())), Table.class);
         PythonScriptModelService pythonScriptModelService = new PythonScriptModelService();
         List<Attribute> attrs = pythonScriptModelService.getRequiredColumns(t);

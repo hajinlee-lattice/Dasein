@@ -1,31 +1,33 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.apps.lp.service.ModelDetailService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.CategoryObject;
 import com.latticeengines.domain.exposed.pls.ModelDetail;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.pls.service.ModelDetailService;
-import com.latticeengines.pls.service.ModelSummaryService;
 
 @Component("modelDetailService")
 public class ModelDetailServiceImpl implements ModelDetailService {
-    public static final String MODEL_SUMMARY_PREDICTORS = "Predictors";
-    public static final String MODEL_SUMMARY_CATEGORY = "Category";
-    public static final String MODEL_SUMMARY_TAGS = "Tags";
-    public static final String INTERNAL = "Internal";
+    private static final String MODEL_SUMMARY_PREDICTORS = "Predictors";
+    private static final String MODEL_SUMMARY_CATEGORY = "Category";
+    private static final String MODEL_SUMMARY_TAGS = "Tags";
+    private static final String INTERNAL = "Internal";
     private static final char FROM_DELIMETER = ' ';
     private static final char TO_DELIMETER = '_';
-    @Autowired
+
+    @Inject
     private ModelSummaryService modelSummaryService;
 
     @Override

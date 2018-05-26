@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -16,6 +16,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -23,12 +26,10 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class PythonScriptModelServiceTestNG extends PlsFunctionalTestNGBase {
+public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
 
     private static final String TENANT1 = "TENANT1";
     private static final Attribute ATTRIBUTE_1 = new Attribute();
@@ -52,7 +53,7 @@ public class PythonScriptModelServiceTestNG extends PlsFunctionalTestNGBase {
             .mock(ModelSummaryEntityMgr.class);
     private MetadataProxy mockedMetadataProxy = Mockito.mock(MetadataProxy.class);
 
-    private void setupTenant(String t) throws Exception {
+    private void setupTenant(String t) {
         Tenant tenant = tenantService.findByTenantId(t);
         if (tenant != null) {
             tenantService.discardTenant(tenant);
@@ -62,12 +63,11 @@ public class PythonScriptModelServiceTestNG extends PlsFunctionalTestNGBase {
         tenant.setName(t);
         tenantService.registerTenant(tenant);
 
-        setupSecurityContext(tenant);
+        MultiTenantContext.setTenant(tenant);
     }
 
-    @Override
     @BeforeClass(groups = { "functional" })
-    public void setup() throws Exception {
+    public void setup() {
         setupTenant(TENANT1);
         ReflectionTestUtils.setField(pythonScriptModelService, "modelSummaryEntityMgr",
                 mockedModelSummaryEntityMgr);

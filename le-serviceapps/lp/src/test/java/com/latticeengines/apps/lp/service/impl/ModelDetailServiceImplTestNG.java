@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.lp.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -6,12 +6,16 @@ import static org.testng.Assert.assertNotNull;
 import java.io.InputStream;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.lp.service.ModelDetailService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -25,23 +29,21 @@ import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.ModelDetailService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
-public class ModelDetailServiceImplTestNG extends PlsFunctionalTestNGBase {
-    @Autowired
+public class ModelDetailServiceImplTestNG extends LPFunctionalTestNGBase {
+
+    @Inject
     private ModelSummaryService modelSummaryService;
 
-    @Autowired
+    @Inject
     private ModelDetailService modelDetailService;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private ModelSummary summary1;
@@ -49,7 +51,7 @@ public class ModelDetailServiceImplTestNG extends PlsFunctionalTestNGBase {
     private Tenant tenant1;
 
     private final String tenantName = TestFrameworkUtils.generateTenantName();
-    @Override
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         tenant1 = tenantService.findByTenantId(tenantName);
@@ -69,7 +71,7 @@ public class ModelDetailServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private void setDetails(ModelSummary summary) throws Exception {
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary-marketo-UI-issue.json");
+                "modelsummary/modelsummary-marketo-UI-issue.json");
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();

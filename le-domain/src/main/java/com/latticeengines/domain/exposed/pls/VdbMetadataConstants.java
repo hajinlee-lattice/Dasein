@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service;
+package com.latticeengines.domain.exposed.pls;
 
 import java.util.Collections;
 import java.util.HashMap;

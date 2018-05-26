@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.lp.service.ModelCopyService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceapps.lp.CopyModelRequest;
 
 import io.swagger.annotations.Api;
@@ -35,6 +36,13 @@ public class ModelCopyResource {
             targetTenantId = sourceTenantId;
         }
         return modelCopyService.copyModel(sourceTenantId, targetTenantId, request.getModelGuid());
+    }
+
+    @PostMapping("/modelid/{modelId}/training-table")
+    @ResponseBody
+    @ApiOperation(value = "Clone training table")
+    public Table cloneTrainingTable(@PathVariable String customerSpace, @PathVariable String modelSummaryId) {
+        return modelCopyService.cloneTrainingTable(modelSummaryId);
     }
 
 }

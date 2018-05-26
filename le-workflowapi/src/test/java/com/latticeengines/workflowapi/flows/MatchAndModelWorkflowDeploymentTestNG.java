@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -47,6 +49,7 @@ import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
@@ -78,6 +81,9 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     @Autowired
     private ModelNoteService modelNoteService;
+
+    @Inject
+    private ModelCopyProxy modelCopyProxy;
 
     @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
@@ -140,7 +146,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
             }
         }
 
-        Table clone = modelMetadataService.cloneTrainingTable(summary.getId());
+        Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getTenantId(), summary.getId());
         ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(summary.getId());
         cloneAndRemodel(clone, modelMetadataService.getAttributesFromFields(clone.getAttributes(), metadata),
                 modelSummary);

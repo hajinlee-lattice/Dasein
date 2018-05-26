@@ -20,7 +20,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -33,7 +32,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -101,12 +99,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         } catch (Exception e) {
             throw new RuntimeException("getModelSummariesNeedToRefreshInCache: Remote call failure", e);
         }
-    }
-
-    public List<String> getRequiredColumnNames(String modelId, CustomerSpace customerSpace) {
-        String url = constructUrl("pls/internal/metadata/required/modelId/", modelId, customerSpace.toString());
-        List<?> requiredColumnObjList = restTemplate.getForObject(url, List.class);
-        return JsonUtils.convertList(requiredColumnObjList, String.class);
     }
 
     public void createModelSummary(ModelSummary modelSummary, CustomerSpace customerSpace) {
@@ -427,22 +419,10 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public List<Attribute> getAttributesFromFields(String tenantId, String eventTableName,
-            List<VdbMetadataField> fields) {
-        try {
-            return restTemplate.postForObject(
-                    constructUrl("pls/internal/attributesFromFields", tenantId, eventTableName), fields, List.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getAttributesFromFields: Remote call failure", e);
-        }
-    }
-
     private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
             String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes) {
-        url += "?" + "onlySelectedAttributes" + "="
-                + ((onlySelectedAttributes != null && onlySelectedAttributes == true) ? true : false);
+        url += "?" + "onlySelectedAttributes" + "=" + String.valueOf(Boolean.TRUE.equals(onlySelectedAttributes));
         if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
             url += "&" + "attributeDisplayNameFilter" + "=" + attributeDisplayNameFilter;
         }
