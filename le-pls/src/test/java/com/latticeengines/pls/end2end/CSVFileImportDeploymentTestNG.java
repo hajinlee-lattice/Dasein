@@ -468,7 +468,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         assertEquals(completedStatus2, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment")
+    //Backend will add some auto update logic to prevent wrong mapping.
+    @Test(groups = "deployment", enabled = false)
     public void testWrongFieldMapping() {
         SourceFile firstFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
