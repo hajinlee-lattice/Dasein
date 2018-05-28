@@ -70,7 +70,7 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
 
     private void setDetails(ModelSummary summary) throws Exception {
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary-marketo-UI-issue.json");
+                "modelsummary/modelsummary-marketo-UI-issue.json");
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();
