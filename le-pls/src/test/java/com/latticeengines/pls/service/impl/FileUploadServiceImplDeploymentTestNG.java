@@ -14,6 +14,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -61,12 +63,9 @@ public class FileUploadServiceImplDeploymentTestNG extends PlsDeploymentTestNGBa
                 fileInputStream);
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         Assert.assertNotNull(sourceFile);
-        String contents = HdfsUtils
-                .getHdfsFileContents(
-                        yarnConfiguration, //
-                        String.format( //
-                                "/Pods/Default/Contracts/%s/Tenants/%s/Spaces/Production/Data/Files/fileUploadServiceImplTestNG.csv", //
-                                customerSpace.getContractId(), customerSpace.getTenantId()));
+        String filePath = String.format("%s/fileUploadServiceImplTestNG.csv",
+                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), customerSpace).toString());
+        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, filePath);
         String expectedContents = FileUtils.readFileToString(dataFile);
         assertEquals(contents, expectedContents);
     }
