@@ -4,6 +4,7 @@ package com.latticeengines.pls.controller.datacollection;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,10 +13,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -26,6 +31,8 @@ public class DataCollectionResource {
 
     public static final String ATTR_CONFIG_PATH = "/attrconfig";
 
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
 
@@ -62,4 +69,13 @@ public class DataCollectionResource {
         return cdlAttrConfigProxy.validateAttrConfig(tenant.getId(), config);
     }
 
+    @GetMapping(value = "/status")
+    @ResponseBody
+    @ApiOperation(value = "Get attr data collection status")
+    public DataCollectionStatus getCollectionStatus(
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        DataCollectionStatus status = dataCollectionProxy
+                .getOrCreateDataCollectionStatus(MultiTenantContext.getCustomerSpace().toString(), version);
+        return status;
+    }
 }

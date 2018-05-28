@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -130,11 +131,13 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         Map<BusinessEntity, Long> previousCnts = retrievePreviousEntityCnts();
         Map<BusinessEntity, Long> currentCnts = retrieveCurrentEntityCnts();
 
+        generateCollectionStatus(currentCnts);
         ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
         if (entitiesSummaryNode == null) {
             log.info("No entity summary reports found. Create it.");
             entitiesSummaryNode = report.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
         }
+
         BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
                 BusinessEntity.Transaction };
         for (BusinessEntity entity : entities) {
@@ -157,6 +160,17 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
             entitiesSummaryNode.set(entity.name(), entityNode);
         }
+    }
+
+    private void generateCollectionStatus(Map<BusinessEntity, Long> currentCnts) {
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        detail.setAccountCount(currentCnts.get(BusinessEntity.Account));
+        detail.setContactCount(currentCnts.get(BusinessEntity.Contact));
+        detail.setTransactionCount(currentCnts.get(BusinessEntity.Transaction));
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
+        log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
+
     }
 
     private Map<BusinessEntity, Long> retrievePreviousEntityCnts() {

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -48,6 +50,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
+
+    @Inject
+    private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
 
     @Inject
     private TableEntityMgr tableEntityMgr;
@@ -383,5 +388,33 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         cacheService.refreshKeysByPattern(tenantId, CacheName.getCdlCacheGroup());
         localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
     }
+
+    @Override
+    public DataCollectionStatus getOrCreateDataCollectionStatus(String customerSpace, DataCollection.Version version) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (version == null) {
+            version = dataCollectionEntityMgr.findActiveVersion();
+        }
+        DataCollectionStatus status = dataCollectionStatusEntityMgr.findByTenantAndVersion(tenant, version);
+        if (status == null) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            status = new DataCollectionStatus();
+            status.setDataCollection(collection);
+            status.setTenant(tenant);
+            status.setVersion(version);
+        }
+        return status;
+    }
+
+    @Override
+    public void saveOrUpdateStatus(String customerSpace, DataCollectionStatus status,
+            DataCollection.Version version) {
+        DataCollectionStatus currentStatus = getOrCreateDataCollectionStatus(customerSpace, version);
+        currentStatus.setDetail(status.getDetail());
+        // skip compare new detail with previous detail in DB,PA will get
+        // current collection status in DB
+        dataCollectionStatusEntityMgr.createOrUpdate(currentStatus);
+    }
+
 
 }

@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -47,6 +48,7 @@ import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
+
 
 @Component(MergeTransaction.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -379,6 +381,12 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         if (newEarliest != currentEarliest || newLatest != currentLatest) {
             dataFeedProxy.updateEarliestLatestTransaction(customerSpace.toString(), newEarliest, newLatest);
         }
+
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        detail.setMaxTxnDate(newLatest);
+        detail.setMinTxnDate(newEarliest);
+        log.info("MergeTransaction step : dataCollection Status is " + JsonUtils.serialize(detail));
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
     }
 
 }

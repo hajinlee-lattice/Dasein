@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -64,6 +65,26 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
                 "/customerspaces/{customerSpace}/datacollection/datacloudbuildnumber/{dataCloudBuildNumber}",
                 shortenCustomerSpace(customerSpace), dataCloudBuildNumber);
         put("update dataCollection datacloudbuildnumber", url);
+    }
+
+    public DataCollectionStatus getOrCreateDataCollectionStatus(String customerSpace,
+            DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/status";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        if (version != null) {
+            urlPattern += "?version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        return get("get dataCollection status", url, DataCollectionStatus.class);
+    }
+
+    public void saveOrUpdateDataCollectionStatus(String customerSpace, DataCollectionStatus detail,
+            DataCollection.Version version) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/version/{version}/status",
+                shortenCustomerSpace(customerSpace), version);
+        post("save Or Update Status", url, detail, Void.class);
     }
 
     public AttributeRepository getAttrRepo(String customerSpace, DataCollection.Version version) {

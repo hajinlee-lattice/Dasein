@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -73,6 +74,25 @@ public class DataCollectionResource {
         DataCollection.Version version1 = dataCollectionService.switchDataCollectionVersion(customerSpace, null,
                 version);
         return ResponseDocument.successResponse(version1);
+    }
+
+    @GetMapping(value = "/status")
+    @ResponseBody
+    @ApiOperation(value = "Get or create data collection status")
+    public DataCollectionStatus getDataCollectionStatus(@PathVariable String customerSpace,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
+        return status;
+    }
+
+    @PostMapping(value = "/version/{version}/status")
+    @ResponseBody
+    @ApiOperation(value = "Save or update data collection status")
+    public void saveDataCollectionStatus(@PathVariable String customerSpace,
+            @PathVariable DataCollection.Version version, @RequestBody DataCollectionStatus status) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.saveOrUpdateStatus(customerSpace, status, version);
     }
 
     @PutMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber:.+}")

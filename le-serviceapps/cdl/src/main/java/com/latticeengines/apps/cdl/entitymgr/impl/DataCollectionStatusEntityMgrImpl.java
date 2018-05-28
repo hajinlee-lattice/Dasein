@@ -1,18 +1,21 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.apps.cdl.dao.DataCollectionStatusDao;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.repository.writer.DataCollectionStatusRepositoy;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
-import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -24,7 +27,7 @@ public class DataCollectionStatusEntityMgrImpl extends BaseEntityMgrRepositoryIm
     private DataCollectionStatusRepositoy repository;
 
     @Inject
-    private DataCollectionStatusDao dataCollectionDao;
+    private DataCollectionStatusDao dataCollectionStatusDao;
 
     @Override
     public BaseJpaRepository<DataCollectionStatus, Long> getRepository() {
@@ -33,20 +36,23 @@ public class DataCollectionStatusEntityMgrImpl extends BaseEntityMgrRepositoryIm
 
     @Override
     public BaseDao<DataCollectionStatus> getDao() {
-        return dataCollectionDao;
+        return dataCollectionStatusDao;
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public DataCollectionStatus findByTenant(Tenant tenant) {
-        return repository.findByTenant(tenant);
+    public DataCollectionStatus findByTenantAndVersion(Tenant tenant, DataCollection.Version version) {
+        List<DataCollectionStatus> stats = repository.findByTenantAndVersion(tenant, version);
+        if (CollectionUtils.isEmpty(stats)) {
+            return null;
+        }
+        if (stats.size() == 1) {
+            return stats.get(0);
+        }
+        throw new RuntimeException(
+                "There are " + stats.size() + " data collections in current tenant with the version " + version);
     }
 
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void saveStatus(DataCollectionStatus status) {
-        getDao().createOrUpdate(status);
-    }
 
 
 

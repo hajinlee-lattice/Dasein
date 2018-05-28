@@ -7,11 +7,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 
-public class DataCollectionStatusEntityMgrTestNG extends CDLFunctionalTestNGBase {
+public class DataCollectionStatusEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
@@ -25,28 +25,25 @@ public class DataCollectionStatusEntityMgrTestNG extends CDLFunctionalTestNGBase
     public void testCRUD() throws Exception {
 
         DataCollectionStatus status = new DataCollectionStatus();
-        DataCollectionStatusDetail detail = new DataCollectionStatusDetail();
-        detail.setAccountCount(0L);
         status.setTenant(mainTestTenant);
         status.setDataCollection(dataCollection);
         status.setVersion(DataCollection.Version.Blue);
-        status.setDetail(detail);
-        dataCollectionStatusEntityMgr.saveStatus(status);
+        status.setAccountCount(10L);
+        dataCollectionStatusEntityMgr.createOrUpdate(status);
+
+        Thread.sleep(500);
+        DataCollectionStatus retrievedStatus = dataCollectionStatusEntityMgr.findByTenantAndVersion(mainTestTenant,
+                DataCollection.Version.Blue);
+        System.out.print(JsonUtils.serialize(retrievedStatus));
+        Assert.assertTrue(retrievedStatus.getAccountCount() == 10L);
+
+        status.setAccountCount(20L);
+        dataCollectionStatusEntityMgr.createOrUpdate(status);
         // wait 500 replication lag
         Thread.sleep(500);
-
-        DataCollectionStatus retrievedStatus = dataCollectionStatusEntityMgr.findByTenant(mainTestTenant);
-        DataCollectionStatusDetail retrievedDetail = retrievedStatus.getDetail();
-        Assert.assertTrue(retrievedDetail.getAccountCount() == 0L);
-
-        detail.setAccountCount(10L);
-        status.setDetail(detail);
-        dataCollectionStatusEntityMgr.saveStatus(status);
-        // wait 500 replication lag
-        Thread.sleep(500);
-        retrievedStatus = dataCollectionStatusEntityMgr.findByTenant(mainTestTenant);
-        retrievedDetail = retrievedStatus.getDetail();
-        Assert.assertTrue(retrievedDetail.getAccountCount() == 10L);
+        retrievedStatus = dataCollectionStatusEntityMgr.findByTenantAndVersion(mainTestTenant,
+                DataCollection.Version.Blue);
+        Assert.assertTrue(retrievedStatus.getAccountCount() == 20L);
     }
 
 }

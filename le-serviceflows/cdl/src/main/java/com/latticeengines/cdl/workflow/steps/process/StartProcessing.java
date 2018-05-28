@@ -29,6 +29,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -92,7 +93,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private DataCollection.Version inactiveVersion;
     private InternalResourceRestApiProxy internalResourceProxy;
     private ObjectNode reportJson;
-
     private ChoreographerContext grapherContext = new ChoreographerContext();;
 
     @PostConstruct
@@ -140,6 +140,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
+
+        // get current active collection status
+        DataCollectionStatus detail = dataCollectionProxy
+                .getOrCreateDataCollectionStatus(customerSpace.toString(), null);
+        detail.setEvaluationDate(evaluationDate);
+        detail.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
+        log.info("StartProxessing step: dataCollection Status is " + JsonUtils.serialize(detail));
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
 
         createReportJson();
         setupInactiveVersion();
