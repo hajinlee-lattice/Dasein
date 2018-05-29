@@ -367,6 +367,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         return _dataLakeService.getStatsCubesFromCache(customerSpace);
     }
 
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", unless = "#result == null")
     public TopNTree getTopNTreeFromCache(String customerSpace) {
         Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
