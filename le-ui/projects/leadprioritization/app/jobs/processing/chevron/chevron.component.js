@@ -51,6 +51,19 @@ angular.module('lp.jobs.chevron', [])
                     return false;
                 }
             }
+            vm.getEndTime = function(index){
+                var stepName = vm.chevronConfig[index].name;
+                // console.log(vm.chevronConfig, ' == ', value, ' == ', stepName);
+                // console.log(stepName, $scope.stepscompleted);
+                for (var i = 0; i < $scope.stepscompleted.length; i++) {
+                    if ($scope.stepscompleted[i].name == stepName && $scope.stepscompleted[i].endTimestamp && $scope.stepscompleted[i].endTimestamp != null) {
+                        // console.log('!!!! ',$scope.stepscompleted[i].endTimestamp);
+                        return $scope.stepscompleted[i].endTimestamp;
+                    }
+                }
+                // console.log('NONE');
+                return '';
+            }
         }];
 
         return {

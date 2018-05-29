@@ -20,6 +20,19 @@ section.import-jobs {
     .chevron-container {
         padding: 10px;
         padding-right: 0px;
+        
+    }
+
+    .step-container{
+        display: flex;
+        flex-direction: column;
+
+        .end-time{
+            color: rgb(175, 175, 175);
+        }
+    }
+    .job-info{
+        padding-left: 18px;
     }
     .import-jobs-container {
         max-width: 1500px;

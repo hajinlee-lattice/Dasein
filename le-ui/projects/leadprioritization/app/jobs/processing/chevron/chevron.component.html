@@ -6,8 +6,9 @@
                 ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
                 <div class="chevron-element">
 
-                    <span class="">
+                    <span class="step-container">
                         <span>{{value.lable}} </span>
+                        <span class="end-time" title="Completion time">{{vm.getEndTime(key) | date : 'MM/dd/yyyy h:mma'}}</span>
                     </span>
                     <span>
                         <span class="loading-small" ng-if="vm.isStepRunning(key)"></span>
