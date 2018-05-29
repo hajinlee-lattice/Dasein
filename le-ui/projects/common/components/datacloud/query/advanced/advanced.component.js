@@ -659,7 +659,9 @@ angular.module('common.datacloud.query.builder', [
                     : 'home.segment.explorer.attributes';
         }
 
-        $state.go(state);
+        $state.go(state, { 
+            segment: $stateParams.segment 
+        });
     }
 
     vm.mouseUp = function(event) { 
