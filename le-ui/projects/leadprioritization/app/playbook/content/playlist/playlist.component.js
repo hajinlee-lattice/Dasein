@@ -44,64 +44,8 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
                 ]
             }
         },
-        barChartConfig: {
-            'data': {
-                'tosort': true,
-                'sortBy': 'bucket_name',
-                'trim': true,
-                'top': 5,
-            },
-            'chart': {
-                'header':'Value',
-                'emptymsg': '',
-                'usecolor': true,
-                'color': '#e8e8e8',
-                'mousehover': false,
-                'type': 'integer',
-                'showstatcount': false,
-                'maxVLines': 3,
-                'showVLines': false,
-            },
-            'vlines': {
-                'suffix': ''
-            },
-            'columns': [{
-                'field': 'num_leads',
-                'label': 'Records',
-                'type': 'number',
-                'chart': true,
-            }]
-        },
-        barChartLiftConfig: {
-            'data': {
-                'tosort': true,
-                'sortBy': 'bucket_name',
-                'trim': true,
-                'top': 5,
-            },
-            'chart': {
-                'header':'Value',
-                'emptymsg': '',
-                'usecolor': true,
-                'color': '#e8e8e8',
-                'mousehover': false,
-                'type': 'decimal',
-                'showstatcount': false,
-                'maxVLines': 3,
-                'showVLines': true,
-            },
-            'vlines': {
-                'suffix': 'x'
-            },
-            'columns': [{
-                    'field': 'lift',
-                    'label': 'Lift',
-                    'type': 'string',
-                    'suffix': 'x',
-                    'chart': true
-                }
-            ]
-        }
+        barChartConfig: PlaybookWizardStore.barChartConfig,
+        barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig
     });
 
     vm.init = function($q) {
@@ -183,7 +127,6 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         $event.preventDefault();
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
         PlaybookWizardStore.setPlay(play);
-        console.log(play);
         
         if(launchedStatus.hasLaunched) {
             $state.go('home.playbook.dashboard', {play_name: play.name} );

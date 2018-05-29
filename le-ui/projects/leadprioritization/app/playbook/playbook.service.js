@@ -21,19 +21,19 @@ angular.module('lp.playbook')
         this.settings_form = {
             play_display_name: '',
             play_description: ''
-        }
+        };
 
         this.segment_form = {
             segment_selection: ''
-        }
+        };
 
         this.crmselection_form = {
             crm_selection: ''
-        }
+        };
 
         this.rating_form = {
             rating_selection: ''
-        }
+        };
 
         this.validation = {
             settings: false,
@@ -43,7 +43,67 @@ angular.module('lp.playbook')
             insights: false,
             preview: true,
             launch: true
-        }
+        };
+
+        this.barChartConfig = {
+            'data': {
+                'tosort': true,
+                'sortBy': 'bucket_name',
+                'trim': true,
+                'top': 5,
+            },
+            'chart': {
+                'header':'Value',
+                'emptymsg': '',
+                'usecolor': true,
+                'color': '#e8e8e8',
+                'mousehover': false,
+                'type': 'integer',
+                'showstatcount': false,
+                'maxVLines': 3,
+                'showVLines': false,
+            },
+            'vlines': {
+                'suffix': ''
+            },
+            'columns': [{
+                'field': 'num_leads',
+                'label': 'Records',
+                'type': 'number',
+                'chart': true,
+            }]
+        };
+
+        this.barChartLiftConfig = {
+            'data': {
+                'tosort': true,
+                'sortBy': 'bucket_name',
+                'trim': true,
+                'top': 5,
+            },
+            'chart': {
+                'header':'Value',
+                'emptymsg': '',
+                'usecolor': true,
+                'color': '#e8e8e8',
+                'mousehover': false,
+                'type': 'decimal',
+                'showstatcount': false,
+                'maxVLines': 3,
+                'showVLines': true,
+            },
+            'vlines': {
+                'suffix': 'x'
+            },
+            'columns': [{
+                    'field': 'lift',
+                    'label': 'Lift',
+                    'type': 'string',
+                    'suffix': 'x',
+                    'chart': true
+                }
+            ]
+        };
     }
 
     this.init();

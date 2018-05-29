@@ -108,13 +108,17 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="dashboard-section-content-subsection ratings">
-
+                        <div class="dashboard-section-content-subsection ratings {{vm.play.ratingEngine.tileClass}} " ng-class="{'padded-lift-chart': vm.hasLiftChart(vm.play)}">
+<!-- 
                             <barchart 
                                 header="Account Ratings"
                                 ratings="true" 
                                 data="vm.ratingsGraph.buckets">
-                            </barchart>
+                            </barchart> -->
+                            <bar-chart
+                                config="vm.play.ratingEngine.chartConfig" 
+                                bktlist="vm.play.ratingEngine.newBucketMetadata">
+                            </bar-chart>
 
                             <!-- <div class="dashboard-subsection-header">
                                 <h3>Account ratings</h3>

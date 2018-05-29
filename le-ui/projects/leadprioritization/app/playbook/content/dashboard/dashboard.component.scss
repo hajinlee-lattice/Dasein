@@ -29,6 +29,29 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                             .dashboard-subsection-header {
                                 margin-top: 20px;
                             }
+                            &.CROSS_SELL_FIRST_PURCHASE {
+                                .bar-graph {
+                                    background-color: #4BAEB5 !important;   
+                                }
+                            }
+                            &.CROSS_SELL_REPEAT_PURCHASE {
+                                .bar-graph {
+                                    background-color: #218F73 !important;   
+                                }           
+                            }
+                            &.CUSTOM_EVENT {
+                                .bar-graph {
+                                    background-color: #5EA83D !important;   
+                                }
+                            }
+                            &.RULE_BASED {
+                                .bar-graph {
+                                    background-color: #8166A3 !important;   
+                                }
+                            }
+                            &.padded-lift-chart {
+                                padding-bottom: 20px;
+                            }
                         }
                     }
                 }

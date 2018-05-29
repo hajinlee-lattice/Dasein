@@ -31,7 +31,9 @@ angular.module('lp.playbook.dashboard', [
         play: null,
         launchButton: angular.copy(launchButtonStates.initial),
         showLaunchSpinner: false,
-        editing: {}
+        editing: {},
+        barChartConfig: PlaybookWizardStore.barChartConfig,
+        barChartLiftConfig: PlaybookWizardStore.barChartLiftConfig
     });
 
     // $q.when($stateParams.play_name, function() {
@@ -61,6 +63,10 @@ angular.module('lp.playbook.dashboard', [
             $event.preventDefault();
         }
 
+    }
+
+    vm.hasLiftChart = function(play) {
+        return play.ratingEngine.type === 'CROSS_SELL' || play.ratingEngine.type === 'CUSTOM_EVENT';
     }
 
     vm.removeSegment = function(play) {
@@ -196,11 +202,10 @@ angular.module('lp.playbook.dashboard', [
             PlaybookWizardStore.savePlay(savePlay).then(function(play){
                 vm.play = play;
                 vm.editable = true;
-                $rootScope.$broadcast('header-back', { 
-                    path: '^home.playbook.dashboard',
-                    displayName: play.displayName,
-                    sref: 'home.playbook'
-                });
+                // backconfig.backName = vm.play.displayName;
+                // console.log('backconfig', backconfig);
+                // $scope.$apply();
+
             });
         }
     }
@@ -224,8 +229,6 @@ angular.module('lp.playbook.dashboard', [
         PlaybookWizardStore.getPlay(play_name, true).then(function(play){
             vm.play = play;
 
-            console.log(vm.play);
-
             vm.launchButton = PlaybookWizardStore.launchButton(play);
             vm.launchedState = vm.launchButton.state; //(vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
             
@@ -234,7 +237,28 @@ angular.module('lp.playbook.dashboard', [
             // PLS-8472 Using play.ratingEngine.bucketMetadata instead of play.ratings to generate play ratings graph once ratings object is more stable
             buckets = reformatBucketMetadata(play.ratingEngine.bucketMetadata);
             vm.ratingsGraph = makeSimpleGraph(buckets, 'count');
+   
+            if(play.ratingEngine.type === 'CROSS_SELL' && play.ratingEngine.advancedRatingConfig) {
+                    play.ratingEngine.tileClass = play.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy;
+                } else {
+                    play.ratingEngine.tileClass = play.ratingEngine.type;
+                }
 
+                if(play.ratingEngine.type === 'CROSS_SELL' || play.ratingEngine.type === 'CUSTOM_EVENT') {
+                    play.ratingEngine.chartConfig = vm.barChartLiftConfig;
+                } else {
+                    play.ratingEngine.chartConfig = vm.barChartConfig;
+                }        
+
+                var newBucketMetadata = [];
+
+                if(play.ratingEngine.bucketMetadata && play.ratingEngine.bucketMetadata.length > 0) {
+                    angular.forEach(play.ratingEngine.bucketMetadata, function(rating, key) {
+                        rating.lift = (Math.round( rating.lift * 10) / 10).toString();
+                        newBucketMetadata.push(rating);
+                    });
+                }
+                play.ratingEngine.newBucketMetadata = newBucketMetadata;
 
             vm.launchGraph = makeLaunchGraph(play.launchHistory);
 
