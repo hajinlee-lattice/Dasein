@@ -10,13 +10,13 @@ angular.module('lp.jobs.import.row', [])
             $scope.chevronConfig = {
                 0: { name: 'Merging, De-duping & matching to Lattice Data Cloud', lable: 'Merging, De-duping & Matching' },
                 1: { name: 'Analyzing', lable: 'Analyzing' },
-                2: { name: 'Publishing', lable: 'Publishing' },
+                2: { name: 'Publishing', lable: 'Loading' },
                 3: { name: 'Scoring', lable: 'Scoring' }
             }
             $scope.stepsConfig = {
                 "Merging, De-duping & matching to Lattice Data Cloud": { position: 1, label: 'Merging, De-duping & Matching' },
                 'Analyzing': { position: 2, label: 'Analyzing' },
-                'Publishing': { position: 3, label: 'Publishing' },
+                'Publishing': { position: 3, label: 'Loading' },
                 'Scoring': { position: 4, label: 'Scoring' }
             };
 
