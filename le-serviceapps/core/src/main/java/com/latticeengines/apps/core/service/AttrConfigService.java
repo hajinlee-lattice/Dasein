@@ -23,8 +23,8 @@ public interface AttrConfigService {
     Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
             List<String> propertyNames, boolean onlyActive);
 
-    AttrConfigRequest validateRequest(AttrConfigRequest request);
+    AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin);
 
-    AttrConfigRequest saveRequest(AttrConfigRequest request);
+    AttrConfigRequest saveRequest(AttrConfigRequest request, boolean isAdmin);
 
 }

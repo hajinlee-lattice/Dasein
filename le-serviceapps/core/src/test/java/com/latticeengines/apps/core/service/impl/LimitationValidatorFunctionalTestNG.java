@@ -63,7 +63,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
             config.putProperty(ColumnMetadataKey.State, prop);
             attrConfigs.add(config);
         }
-        limitationValidator.validate(attrConfigs);
+        limitationValidator.validate(attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), 0);
 
         AttrConfig attrConfig = new AttrConfig();
@@ -71,7 +71,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         attrConfig.setDataLicense("HG");
         attrConfig.putProperty(ColumnMetadataKey.State, prop);
         attrConfigs.add(attrConfig);
-        limitationValidator.validate(attrConfigs);
+        limitationValidator.validate(attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size());
 
         // set state equal to inactive
@@ -83,7 +83,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         inactiveProp.setCustomValue(AttrState.Inactive);
         inactiveConfig.putProperty(ColumnMetadataKey.State, inactiveProp);
         attrConfigs.add(inactiveConfig);
-        limitationValidator.validate(attrConfigs);
+        limitationValidator.validate(attrConfigs, false);
         // the inactive config should not have error message
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
@@ -103,7 +103,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
             config.putProperty(ColumnMetadataKey.State, prop);
             attrConfigs.add(config);
         }
-        limitationValidator.validate(attrConfigs);
+        limitationValidator.validate(attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), 0);
 
         AttrConfig activeConfig = new AttrConfig();
@@ -113,7 +113,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         activeConfig.setAttrSubType(AttrSubType.Extension);
         activeConfig.putProperty(ColumnMetadataKey.State, prop);
         attrConfigs.add(activeConfig);
-        limitationValidator.validate(attrConfigs);
+        limitationValidator.validate(attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size());
 
         AttrConfig inactiveConfig = new AttrConfig();
@@ -126,7 +126,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         inactiveProp.setCustomValue(AttrState.Inactive);
         inactiveConfig.putProperty(ColumnMetadataKey.State, inactiveProp);
         attrConfigs.add(inactiveConfig);
-        limitationValidator.validate(attrConfigs);
+        limitationValidator.validate(attrConfigs, false);
         // the new config should not have error message
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }

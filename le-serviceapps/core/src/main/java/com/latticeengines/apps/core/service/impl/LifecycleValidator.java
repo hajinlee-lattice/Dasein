@@ -25,13 +25,13 @@ public class LifecycleValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> attrConfigs) {
+    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
         for (AttrConfig attrConfig : attrConfigs) {
-            checkState(attrConfig);
+            checkState(attrConfig, isAdmin);
         }
     }
 
-    private void checkState(AttrConfig attrConfig) {
+    private void checkState(AttrConfig attrConfig, boolean isAdmin) {
         Map<String, AttrConfigProp<?>> attrConfigPropMap = attrConfig.getAttrProps();
         if (MapUtils.isEmpty(attrConfigPropMap)) {
             return;
@@ -40,7 +40,7 @@ public class LifecycleValidator extends AttrValidator {
         if(stateProp != null) {
             if(stateProp.getCustomValue() != null) {
                 AttrState customState = AttrState.valueOf(stateProp.getCustomValue().toString());
-                if (customState.equals(AttrState.Inactive)) {
+                if (!isAdmin && customState.equals(AttrState.Inactive)) {
                     addErrorMsg(ValidationErrors.Type.INVALID_ACTIVATION,
                             String.format(ValidationMsg.Errors.FORBID_SET_INACTIVE, attrConfig.getAttrName()),
                             attrConfig);

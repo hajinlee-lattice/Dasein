@@ -22,7 +22,7 @@ public class GenericValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> attrConfigs) {
+    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
         for (AttrConfig attrConfig : attrConfigs) {
             checkInvalidPropChange(attrConfig);
         }

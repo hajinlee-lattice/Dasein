@@ -10,7 +10,6 @@ import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class DataCollectionStatusResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 

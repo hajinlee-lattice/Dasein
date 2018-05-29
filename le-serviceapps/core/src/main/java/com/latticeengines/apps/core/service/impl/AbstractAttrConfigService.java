@@ -291,9 +291,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @Override
-    public AttrConfigRequest validateRequest(AttrConfigRequest request) {
+    public AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            ValidationDetails details = attrValidationService.validate(request.getAttrConfigs());
+            ValidationDetails details = attrValidationService.validate(request.getAttrConfigs(), isAdmin);
             request.setDetails(details);
             int count = CollectionUtils.isNotEmpty(request.getAttrConfigs()) ? request.getAttrConfigs().size() : 0;
             String msg = String.format("Validate %d attr configs", count);
@@ -303,7 +303,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @Override
-    public AttrConfigRequest saveRequest(AttrConfigRequest request) {
+    public AttrConfigRequest saveRequest(AttrConfigRequest request, boolean isAdmin) {
         AttrConfigRequest toReturn;
 
         // split by entity
@@ -361,7 +361,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             log.info("rendered List" + JsonUtils.serialize(renderedList));
             toReturn = new AttrConfigRequest();
             toReturn.setAttrConfigs(renderedList);
-            AttrConfigRequest validated = validateRequest(toReturn);
+            AttrConfigRequest validated = validateRequest(toReturn, isAdmin);
             if (validated.hasError()) {
                 throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
                         + JsonUtils.serialize(validated.getDetails()));

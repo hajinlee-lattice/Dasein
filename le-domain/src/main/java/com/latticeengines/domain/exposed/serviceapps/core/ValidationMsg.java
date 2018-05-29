@@ -20,5 +20,11 @@ public class ValidationMsg {
         public static final String INVALID_ATTRIBUTE_USAGE_CHANGE = "Usage change is not allowed(Usage group %s ," +
                 "Attribute type %s)";
         public static final String EXCEED_LIMIT = "You are trying to enable %d %s attributes, Please not choose more than the limit %d";
+        public static final String IMPACT_SEGMENTS = "Attribute %s change will impact the following segments: [%s]";
+        public static final String IMPACT_RATING_ENGINES = "Attribute %s change will impact the following rating "
+                + "engines: [%s]";
+        public static final String IMPACT_RATING_MODELS = "Attribute %s change will impact the following rating "
+                + "models: [%s]";
+        public static final String IMPACT_PLAYS = "Attribute %s change will impact the following plays: [%s]";
     }
 }

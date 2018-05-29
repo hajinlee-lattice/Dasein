@@ -51,7 +51,7 @@ public class LimitationValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> attrConfigs) {
+    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
         // make sure user selected attr don't have two same attribute
         checkAmbiguityInFieldNames(attrConfigs);
         String tenantId = MultiTenantContext.getTenantId();

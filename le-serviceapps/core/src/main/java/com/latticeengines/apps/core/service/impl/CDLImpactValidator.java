@@ -14,14 +14,17 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.proxy.exposed.cdl.CDLDependenciesProxy;
 
 @Component("cdlImpactValidator")
@@ -39,13 +42,13 @@ public class CDLImpactValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> attrConfigs) {
+    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
         for (AttrConfig attrConfig : attrConfigs) {
-            checkImpact(attrConfig);
+            checkImpact(attrConfig, isAdmin);
         }
     }
 
-    private void checkImpact(AttrConfig attrConfig) {
+    private void checkImpact(AttrConfig attrConfig, boolean isAdmin) {
         if (attrConfig.getEntity() != null && hasCustomValue(attrConfig)) {
             List<String> attributes = Collections.singletonList(String.format("%s.%s", attrConfig.getEntity().name(),
                     attrConfig.getAttrName()));
@@ -58,29 +61,55 @@ public class CDLImpactValidator extends AttrValidator {
             List<RatingEngine> impactRatingEngines = cdlDependenciesProxy.getDependingRatingEngines(customerSpace, attributes);
             List<RatingModel> impactRatingModels = cdlDependenciesProxy.getDependingRatingModels(customerSpace, attributes);
             List<Play> impactPlays = cdlDependenciesProxy.getDependingPlays(customerSpace, attributes);
+            AttrConfigProp stateProp = attrConfig.getProperty(ColumnMetadataKey.State);
             if (CollectionUtils.isNotEmpty(impactSegments)) {
-                addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS,
-                        String.format(ValidationMsg.Warnings.IMPACT_SEGMENTS,
-                                attrConfig.getAttrName(), getImpactSegmentNames(impactSegments)),
-                        attrConfig);
+                if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
+                    addErrorMsg(ValidationErrors.Type.IMPACTED_SEGMENTS,
+                            String.format(ValidationMsg.Errors.IMPACT_SEGMENTS, attrConfig.getAttrName(),
+                                    getImpactSegmentNames(impactSegments)),
+                            attrConfig);
+                } else {
+                    addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS,
+                            String.format(ValidationMsg.Warnings.IMPACT_SEGMENTS, attrConfig.getAttrName(),
+                                    getImpactSegmentNames(impactSegments)),
+                            attrConfig);
+                }
             }
             if (CollectionUtils.isNotEmpty(impactRatingEngines)) {
-                addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES,
-                        String.format(ValidationMsg.Warnings.IMPACT_RATING_ENGINES,
-                                attrConfig.getAttrName(), getImpactRatingEngineNames(impactRatingEngines)),
-                        attrConfig);
+                if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
+                    addErrorMsg(ValidationErrors.Type.IMPACTED_RATING_ENGINES,
+                            String.format(ValidationMsg.Errors.IMPACT_RATING_ENGINES, attrConfig.getAttrName(),
+                                    getImpactRatingEngineNames(impactRatingEngines)),
+                            attrConfig);
+                } else {
+                    addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES,
+                            String.format(ValidationMsg.Warnings.IMPACT_RATING_ENGINES, attrConfig.getAttrName(),
+                                    getImpactRatingEngineNames(impactRatingEngines)),
+                            attrConfig);
+                }
             }
             if (CollectionUtils.isNotEmpty(impactRatingModels)) {
-                addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS,
-                        String.format(ValidationMsg.Warnings.IMPACT_RATING_MODELS,
-                                attrConfig.getAttrName(), getImpactRatingModleNames(impactRatingModels)),
-                        attrConfig);
+                if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
+                    addErrorMsg(ValidationErrors.Type.IMPACTED_RATING_MODELS,
+                            String.format(ValidationMsg.Errors.IMPACT_RATING_MODELS, attrConfig.getAttrName(),
+                                    getImpactRatingModleNames(impactRatingModels)),
+                            attrConfig);
+                } else {
+                    addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS,
+                            String.format(ValidationMsg.Warnings.IMPACT_RATING_MODELS, attrConfig.getAttrName(),
+                                    getImpactRatingModleNames(impactRatingModels)),
+                            attrConfig);
+                }
             }
             if (CollectionUtils.isNotEmpty(impactPlays)) {
-                addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS,
-                        String.format(ValidationMsg.Warnings.IMPACT_PLAYS,
-                                attrConfig.getAttrName(), getImpactPlayNames(impactPlays)),
-                        attrConfig);
+                if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
+                    addErrorMsg(ValidationErrors.Type.IMPACTED_PLAYS, String.format(ValidationMsg.Errors.IMPACT_PLAYS,
+                            attrConfig.getAttrName(), getImpactPlayNames(impactPlays)),
+                            attrConfig);
+                } else {
+                    addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, String.format(ValidationMsg.Warnings.IMPACT_PLAYS,
+                            attrConfig.getAttrName(), getImpactPlayNames(impactPlays)), attrConfig);
+                }
             }
         }
 

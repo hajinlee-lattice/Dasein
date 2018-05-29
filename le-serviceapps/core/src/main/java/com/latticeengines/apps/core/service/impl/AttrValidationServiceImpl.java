@@ -28,11 +28,11 @@ public class AttrValidationServiceImpl implements AttrValidationService {
     }
 
     @Override
-    public ValidationDetails validate(List<AttrConfig> attrConfigs) {
+    public ValidationDetails validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
         for (String validatorName : validatorList) {
             AttrValidator validator = AttrValidator.getValidator(validatorName);
             if (validator != null) {
-                validator.validate(attrConfigs);
+                validator.validate(attrConfigs, isAdmin);
             }
         }
         return generateReport(attrConfigs);

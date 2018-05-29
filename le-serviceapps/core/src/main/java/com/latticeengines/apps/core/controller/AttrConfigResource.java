@@ -87,18 +87,20 @@ public class AttrConfigResource {
     @ResponseBody
     @ApiOperation("save cdl attribute config request")
     public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace,
-            @RequestBody AttrConfigRequest request) {
+            @RequestBody AttrConfigRequest request,
+            @RequestParam(value = "isAdmin", required = false, defaultValue = "0") boolean isAdmin) {
         request.fixJsonDeserialization();
-        return attrConfigService.saveRequest(request);
+        return attrConfigService.saveRequest(request, isAdmin);
     }
 
     @PostMapping(value = "/validate")
     @ResponseBody
     @ApiOperation("put cdl attribute config request")
     public AttrConfigRequest validateAttrConfig(@PathVariable String customerSpace,
-            @RequestBody AttrConfigRequest request) {
+            @RequestBody AttrConfigRequest request,
+            @RequestParam(value = "isAdmin", required = false, defaultValue = "0") boolean isAdmin) {
         request.fixJsonDeserialization();
-        return attrConfigService.validateRequest(request);
+        return attrConfigService.validateRequest(request, isAdmin);
     }
 
     private Category resolveCategory(String categoryName) {
