@@ -851,6 +851,37 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         });
     }
 
+    void verityTestSegmentCountIncrease(List<BusinessEntity> entities) {
+        final MetadataSegment immutableSegment1 = getSegmentByName(SEGMENT_NAME_1);
+        final MetadataSegment immutableSegment2 = getSegmentByName(SEGMENT_NAME_2);
+        entities.forEach(entity -> {
+            Assert.assertNotNull(immutableSegment1.getEntityCount(entity),
+                    "Cannot find count of " + entity + " in segment1");
+            Assert.assertNotNull(immutableSegment2.getEntityCount(entity),
+                    "Cannot find count of " + entity + " in segment2");
+            Long count1 = immutableSegment1.getEntityCount(entity);
+            Long count2 = immutableSegment2.getEntityCount(entity);
+            Assert.assertTrue(count2 > count1);
+        });
+    }
+
+    private MetadataSegment getSegmentByName(String segmentName) {
+        MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
+        int retries = 0;
+        while (segment == null && retries++ < 3) {
+            logger.info("Wait for 1 sec to retry getting rating engine.");
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            segment = testMetadataSegmentProxy.getSegment(segmentName);
+        }
+        Assert.assertNotNull(segment,
+                "Cannot find rating engine " + segmentName + " in tenant " + mainTestTenant.getId());
+        return segment;
+    }
+
     RatingEngine createRuleBasedRatingEngine() {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(constructTestSegment2());

@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -91,6 +92,8 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
+        verityTestSegmentCountIncrease(ImmutableList.of(BusinessEntity.Account, BusinessEntity.Contact));
+        /*
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_4,
                 BusinessEntity.Contact, SEGMENT_1_CONTACT_4);
@@ -99,6 +102,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_2_REBUILD, BusinessEntity.Contact,
                 SEGMENT_2_CONTACT_2_REBUILD);
         verifyTestSegment2Counts(segment2Counts);
+        */
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RatingBucketName.A, RATING_A_COUNT_2_REBUILD, //
                 RatingBucketName.D, RATING_D_COUNT_2_REBUILD, //
