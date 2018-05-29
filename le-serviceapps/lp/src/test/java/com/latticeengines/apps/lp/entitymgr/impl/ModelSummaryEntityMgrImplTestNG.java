@@ -48,20 +48,16 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
+    private Tenant tenant1;
+    private Tenant tenant2;
     private ModelSummary summary1;
     private ModelSummary summary2;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
-        Tenant tenant2 = tenantService.findByTenantId("TENANT2");
-
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
-        if (tenant2 != null) {
-            tenantService.discardTenant(tenant2);
-        }
+        testBed.bootstrap(2);
+        tenant1 = testBed.getMainTestTenant();
+        tenant2 = testBed.getTestTenants().get(1);
 
         summary1 = createModelSummaryForTenant1();
         summary2 = createModelSummaryForTenant2();
@@ -69,11 +65,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
-        Tenant tenant2 = tenantService.findByTenantId("TENANT2");
-
-        tenantService.discardTenant(tenant1);
-        tenantService.discardTenant(tenant2);
+        testBed.deleteTenant(tenant1);
+        testBed.deleteTenant(tenant2);
     }
 
     private void setDetails(ModelSummary summary) throws Exception {
@@ -87,15 +80,11 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     }
 
     private ModelSummary createModelSummaryForTenant1() throws Exception {
-        Tenant tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
-        tenantEntityMgr.create(tenant1);
         summary1 = new ModelSummary();
         summary1.setId("123");
         summary1.setName("Model1");
         summary1.setRocScore(0.75);
-        summary1.setLookupId("TENANT1|Q_EventTable_TENANT1|abcde");
+        summary1.setLookupId(String.format("%s|Q_EventTable_%s|abcde", tenant1.getName(), tenant1.getName()));
         summary1.setTrainingRowCount(8000L);
         summary1.setTestRowCount(2000L);
         summary1.setTotalRowCount(10000L);
@@ -165,15 +154,11 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     }
 
     private ModelSummary createModelSummaryForTenant2() throws Exception {
-        Tenant tenant2 = new Tenant();
-        tenant2.setId("TENANT2");
-        tenant2.setName("TENANT2");
-        tenantEntityMgr.create(tenant2);
         ModelSummary summary2 = new ModelSummary();
         summary2.setId("456");
         summary2.setName("Model2");
         summary2.setRocScore(0.80);
-        summary2.setLookupId("TENANT2|Q_EventTable_TENANT2|fghij");
+        summary2.setLookupId(String.format("%s|Q_EventTable_%s|fghij", tenant2.getName(), tenant2.getName()));
         summary2.setTrainingRowCount(80000L);
         summary2.setTestRowCount(20000L);
         summary2.setTotalRowCount(100000L);
@@ -285,15 +270,13 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testGetByModelNameInTenant() {
         setupSecurityContext(summary1);
-        Tenant tenant = tenantService.findByTenantId("TENANT1");
-        ModelSummary summary = modelSummaryEntityMgr.getByModelNameInTenant(summary1.getName(), tenant);
+        ModelSummary summary = modelSummaryEntityMgr.getByModelNameInTenant(summary1.getName(), tenant1);
         assertNotNull(summary);
         assertEquals(summary.getId(), summary1.getId());
         assertEquals(summary.getName(), summary1.getName());
-        summary = modelSummaryEntityMgr.getByModelNameInTenant("someRandomName", tenant);
+        summary = modelSummaryEntityMgr.getByModelNameInTenant("someRandomName", tenant1);
         assertNull(summary);
-        tenant = tenantService.findByTenantId("TENANT2");
-        summary = modelSummaryEntityMgr.getByModelNameInTenant(summary1.getName(), tenant);
+        summary = modelSummaryEntityMgr.getByModelNameInTenant(summary1.getName(), tenant2);
         assertNull(summary);
     }
 
