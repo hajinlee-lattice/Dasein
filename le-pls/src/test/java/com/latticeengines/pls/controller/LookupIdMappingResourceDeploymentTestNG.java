@@ -145,7 +145,8 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         confirmNonEmptyLookupConfigs(Boolean.TRUE);
     }
 
-    @Test(groups = "deployment")
+    // TODO - anoop - enable it
+    @Test(groups = "deployment", enabled = false)
     public void getAllLookupIds() {
 
         @SuppressWarnings({ "rawtypes" })
