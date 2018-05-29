@@ -26,11 +26,14 @@ import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.util.AttrTypeResolver;
+import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.documentdb.entity.AttrConfigEntity;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -370,7 +373,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             log.info("AttrConfig before saving is " + JsonUtils.serialize(request));
             // trim and save
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
-                attrConfigEntityMgr.save(MultiTenantContext.getTenantId(), entity, trim(configList));
+                String shortTenantId = MultiTenantContext.getTenantId();
+                String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
+                attrConfigEntityMgr.save(shortTenantId, entity, trim(configList));
+                CacheService cacheService = CacheServiceBase.getCacheService();
+                cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
             });
         }
 
