@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
 import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
@@ -590,7 +591,14 @@ public class StatsCubeUtils {
             String key = cubeEntry.getKey();
             StatsCube cube = cubeEntry.getValue();
             if (cmMap.containsKey(key)) {
-                List<ColumnMetadata> cmList = cmMap.get(key);
+                List<ColumnMetadata> cmList = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(cmMap.get(key))) {
+                    cmMap.get(key).forEach(cm -> {
+                        if (cm.isEnabledFor(ColumnSelection.Predefined.Segment)) {
+                            cmList.add(cm);
+                        }
+                    });
+                }
                 addToTopNTree(key, cube, cmList, topNTree, includeTopBkt);
             } else {
                 log.warn("Did not provide column metadata for " + key //
@@ -604,7 +612,7 @@ public class StatsCubeUtils {
             boolean includeTopBkt) {
         BusinessEntity entity = BusinessEntity.valueOf(key);
         Map<String, ColumnMetadata> cmMap = new HashMap<>();
-        cmList.forEach(cm -> cmMap.put(cm.getColumnId(), cm));
+        cmList.forEach(cm -> cmMap.put(cm.getAttrName(), cm));
         Map<String, AttributeStats> attrStatsMap = cube.getStatistics();
         for (String name : attrStatsMap.keySet()) {
             ColumnMetadata cm = cmMap.get(name);
@@ -658,8 +666,7 @@ public class StatsCubeUtils {
         if (attributeStats.getBuckets() != null) {
             return attributeStats.getBuckets().getBucketList().stream() //
                     .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0) //
-                    .sorted(comparator) //
-                    .findFirst().orElse(null);
+                    .min(comparator).orElse(null);
         } else {
             return null;
         }

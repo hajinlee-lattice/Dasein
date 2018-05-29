@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.metadata.mds.impl.AttrConfigMetadataStore;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,6 +42,9 @@ public class ServingStoreResource {
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Inject
+    private AttrConfigMetadataStore attrConfigMetadataStore;
 
     @GetMapping(value = "/decoratedmetadata/count")
     @ResponseBody

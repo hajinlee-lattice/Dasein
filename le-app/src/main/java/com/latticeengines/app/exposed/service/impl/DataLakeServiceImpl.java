@@ -114,7 +114,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             return getServingMetadataForEntity(customerSpace, entity).collectList().block();
         }, 100); //
 
-        LOOKUP_FIELDS = Arrays.asList(InterfaceName.AccountId.name());
+        LOOKUP_FIELDS = Collections.singletonList(InterfaceName.AccountId.name());
         KEY_MAP = new HashMap<>();
         KEY_MAP.put(MatchKey.LookupId, LOOKUP_FIELDS);
     }
@@ -255,7 +255,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         datum.add(internalAccountId);
         data.add(datum);
 
-        Tenant tenant = new Tenant(customerSpace.toString());
+        Tenant tenant = new Tenant(customerSpace);
         matchInput.setTenant(tenant);
         matchInput.setFields(LOOKUP_FIELDS);
         matchInput.setData(data);
@@ -359,7 +359,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Override
     public synchronized TopNTree getTopNTree(String customerSpace) {
-        return _dataLakeService.getTopNTreeFromCache(customerSpace);
+        return  _dataLakeService.getTopNTreeFromCache(customerSpace);
     }
 
     @Override
@@ -367,7 +367,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         return _dataLakeService.getStatsCubesFromCache(customerSpace);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", unless = "#result == null")
     public TopNTree getTopNTreeFromCache(String customerSpace) {
         Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
