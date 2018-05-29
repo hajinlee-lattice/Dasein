@@ -95,9 +95,9 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 periodTransactionTableName, accountTableName, tenant.getId(), segment, periodName, productType));
         String baseQuery = "SELECT count(pt.{0}), pt.{1}, pt.{2}, sum(pt.{3}) as totalaccount, sum(pt.{4}) as totalquantity, sum(pt.{5}) as transactioncount FROM {6} as pt "
                 + "inner join {7} as ac on  pt.{0} = ac.{0} " //
-                + "where pt.{8} = ? and ac.{9} = ? and pt.{10} = ?" //
-                + "group by pt.{1}, pt.{2}" //
-                + "sort by pt.{1}, pt.{2}";
+                + "where pt.{8} = ? and ac.{9} = ? and pt.{10} = ? " //
+                + "group by pt.{1}, pt.{2} " //
+                + "order by pt.{1}, pt.{2}";
 
         String query = MessageFormat.format(baseQuery, //
                 InterfaceName.AccountId, // 0
