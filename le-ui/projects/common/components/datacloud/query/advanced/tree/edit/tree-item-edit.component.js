@@ -45,14 +45,16 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 function initNumericalRange(reset) {
-
                     if (!reset) {
-                        showNumericalRange();
+                        
                         var fromNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration.from.position);
-                        vm.numericalConfiguration.from.value = (fromNumerical != null && fromNumerical != 0) ? Number(fromNumerical) : undefined;
-
+                        vm.numericalConfiguration.from.value = (fromNumerical != null) ? Number(fromNumerical) : undefined;
                         var toNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration.to.position);
-                        vm.numericalConfiguration.to.value = (toNumerical != null && toNumerical != 0) ? Number(toNumerical) : undefined;
+                        vm.numericalConfiguration.to.value = (toNumerical != null) ? Number(toNumerical) : undefined;
+                        setTimeout(function(){
+                            showNumericalRange();
+                        },0);
+                        
                     } else {
                         vm.showFromNumerical = false;
                         vm.showToNumerical = false;
