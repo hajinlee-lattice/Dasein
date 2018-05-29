@@ -371,14 +371,17 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
 
             log.info("AttrConfig before saving is " + JsonUtils.serialize(request));
+            CacheService cacheService = CacheServiceBase.getCacheService();
             // trim and save
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
                 String shortTenantId = MultiTenantContext.getTenantId();
-                String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
                 attrConfigEntityMgr.save(shortTenantId, entity, trim(configList));
-                CacheService cacheService = CacheServiceBase.getCacheService();
+
+                // clear serving metadata cache
+                String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
                 cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
             });
+            cacheService.refreshKeysByPattern(MultiTenantContext.getTenantId() + "|topn", CacheName.DataLakeStatsCubesCache);
         }
 
         return toReturn;
