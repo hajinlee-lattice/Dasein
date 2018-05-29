@@ -41,8 +41,8 @@ public class ModelCopyResource {
     @PostMapping("/modelid/{modelId}/training-table")
     @ResponseBody
     @ApiOperation(value = "Clone training table")
-    public Table cloneTrainingTable(@PathVariable String customerSpace, @PathVariable String modelSummaryId) {
-        return modelCopyService.cloneTrainingTable(modelSummaryId);
+    public Table cloneTrainingTable(@PathVariable String customerSpace, @PathVariable String modelId) {
+        return modelCopyService.cloneTrainingTable(modelId);
     }
 
 }
