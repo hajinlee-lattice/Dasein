@@ -268,7 +268,7 @@ angular.module('lp.segments.segments', [
 
                         case 'TimeSeries':
                             var value = QueryTreeService.getOperationValue(restriction.bucketRestriction, 'Boolean') ? 'True' : 'False';
-                            attrs.push(enrichment.DisplayName + ': ' + value); 
+                            attrs.push(enrichment.DisplayName + ' (' + enrichment.Subcategory +  '): ' + value); 
                             
                             break;
                         case 'PercentChange':
