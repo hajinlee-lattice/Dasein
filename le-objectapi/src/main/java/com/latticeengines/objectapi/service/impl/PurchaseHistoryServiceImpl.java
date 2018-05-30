@@ -142,8 +142,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                         + ", " + InterfaceName.ProductCategoryId + ") as productid FROM %s",
                 InterfaceName.ProductLine, InterfaceName.ProductFamily, InterfaceName.ProductCategory, tableName);
         log.info("query for getProductHierarchy " + query);
-        List<Map<String, Object>> retList = redshiftJdbcTemplate
-                .queryForList("SELECT productid, productline, productfamily, productcategory FROM " + tableName);
+        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
         for (Map row : retList) {
             ProductHierarchy productHierarchy = new ProductHierarchy();
             productHierarchy
@@ -154,6 +153,29 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             resultList.add(productHierarchy);
         }
         log.info("resultList is " + resultList);
+        return resultList;
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public List<String> getAllSegments() {
+        List<String> resultList = new ArrayList<>();
+        Tenant tenant = MultiTenantContext.getTenant();
+        String accountTableName = dataCollectionProxy.getTableName(tenant.getId(),
+                BusinessEntity.Account.getServingStore());
+
+        log.info(String.format("Get Account Table %s for %s", accountTableName, tenant.getId()));
+        String query = String.format("SELECT distinct %s FROM %s", InterfaceName.SpendAnalyticsSegment,
+                accountTableName);
+        log.info("query for getAllSegments " + query);
+        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
+        for (Map row : retList) {
+            String segment = ((String) row.get(InterfaceName.SpendAnalyticsSegment.toString().toLowerCase()));
+            if (segment != null) {
+                resultList.add(segment);
+            }
+        }
+        log.info("resultList for all segment is " + resultList);
         return resultList;
     }
 

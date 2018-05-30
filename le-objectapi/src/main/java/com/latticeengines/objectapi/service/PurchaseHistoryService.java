@@ -18,4 +18,6 @@ public interface PurchaseHistoryService {
 
     List<ProductHierarchy> getProductHierarchy(DataCollection.Version version);
 
+    List<String> getAllSegments();
+
 }

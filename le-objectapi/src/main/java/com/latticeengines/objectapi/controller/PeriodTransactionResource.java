@@ -39,6 +39,13 @@ public class PeriodTransactionResource {
         return purchaseHistoryService.getPeriodTransactionByAccountId(accountId, periodName, version, productType);
     }
 
+    @GetMapping(value = "/segments")
+    @ResponseBody
+    @ApiOperation("Get All Segments")
+    public List<String> getAllSegments(@PathVariable String customerSpace) {
+        return purchaseHistoryService.getAllSegments();
+    }
+
     @GetMapping(value = "/segment/{segment}")
     @ResponseBody
     @ApiOperation("Get Period Transaction for Segment Account")
