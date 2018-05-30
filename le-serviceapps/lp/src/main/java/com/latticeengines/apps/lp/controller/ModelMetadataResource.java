@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -72,7 +73,7 @@ public class ModelMetadataResource {
         return modelMetadataService.getLatticeAttributeNames(modelId);
     }
 
-    @GetMapping("/attributes-from-fields")
+    @PostMapping("/attributes-from-fields")
     @ResponseBody
     @ApiOperation(value = "Get customized attributes from fields")
     public List<Attribute> getAttributesFromFields(@PathVariable String customerSpace,
