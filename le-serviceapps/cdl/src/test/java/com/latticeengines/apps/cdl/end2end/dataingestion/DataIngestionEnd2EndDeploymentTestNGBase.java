@@ -160,7 +160,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     static final long RATING_A_COUNT_1 = 6;
     static final long RATING_D_COUNT_1 = 5;
-    static final long RATING_F_COUNT_1 = 1;
+    static final long RATING_F_COUNT_1 = 2;
 
     static final long RATING_A_COUNT_2 = 20;
     static final long RATING_D_COUNT_2 = 22;
