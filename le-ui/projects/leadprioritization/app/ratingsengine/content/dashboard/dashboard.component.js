@@ -340,6 +340,23 @@ angular.module('lp.ratingsengine.dashboard', [
         return dataStore.length == 1 ? RatingsEngineStore.formatTrainingAttributes(dataStore[0]) : 
                 RatingsEngineStore.formatTrainingAttributes(dataStore[0]) + ' + ' + RatingsEngineStore.formatTrainingAttributes(dataStore[1]);
     };
+    vm.getScoringButtonLable = function(){
+        if(vm.isRulesBased){
+            return vm.ratingEngine.status === 'INACTIVE' ? 'Activate Scoring' : 'Deactivate Scoring' ; 
+        }else {
+            return 'Deactivate Scoring';
+        }
+        
+    };
+    vm.disableButtonScoring = function(){
+        if(!vm.isRulesBased){
+            var deactivate = (vm.ratingEngine.status === 'INACTIVE' ||vm.deactivateInProgress === true);
+        
+            return deactivate;
+        }else{
+            return vm.deactivateInProgress; 
+        }
+    };
 
     vm.init();
 });

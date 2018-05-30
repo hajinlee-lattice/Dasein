@@ -20,8 +20,8 @@
                     <button
                         class="button orange-button"
                         ng-click="vm.deactivate()"
-                        ng-disabled="vm.disableScoringButton()">
-                        Deactivate Scoring
+                        ng-disabled="vm.disableButtonScoring()">
+                        {{vm.getScoringButtonLable()}}
                     </button>
                     <button
                         class="button orange-button"
