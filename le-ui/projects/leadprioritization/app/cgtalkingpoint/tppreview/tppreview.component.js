@@ -36,14 +36,45 @@ angular.module('lp.cg.talkingpoint.preview', [])
 
         CgTalkingPointStore.generateLeadPreviewObject({playName: $stateParams.play_name}).then(function(leadPreviewObject){
             vm.leadPreviewObject = leadPreviewObject;
-            CgTalkingPointStore.getDanteAccounts({no_cache: true}).then(function(accounts) {
+            var opts = {
+                no_cache: true, 
+                account_restriction: $scope.play.ratingEngine.segment.account_restriction,
+                lookups: [
+                    {
+                        attribute: {
+                            entity: 'Account',
+                            attribute: 'AccountId'
+                        }
+                    },
+                    {
+                        attribute: {
+                            entity: 'Account',
+                            attribute: 'LookupId'
+                        }
+                    },
+                    {
+                        attribute: {
+                            entity: 'Account',
+                            attribute: 'CompanyName'
+                        }
+                    },{
+                        attribute: {
+                            entity: 'Account',
+                            attribute: 'Website'
+                        }
+                    }
+                ]
+            };
+            CgTalkingPointStore.getDanteAccounts(opts).then(function(accounts) {
                 vm.accounts = filterInvalidAccounts(accounts);
                 return CgTalkingPointStore.getDanteUrl({no_cache: true});
             }).then(function(danteUrl) {
                 vm.sceIframeSrc = $sce.trustAsResourceUrl(danteUrl);
             }).then(function() {
                 vm.selected = vm.accounts[0];
-                vm.leadPreviewObject.notionObject.SalesforceAccountID = vm.selected.id;
+                if(vm.selected){
+                    vm.leadPreviewObject.notionObject.SalesforceAccountID = vm.selected.id;
+                }
                 vm.leadPreviewObject.notionObject.PlayDisplayName = $scope.play.display_name;
                 vm.leadPreviewObject.notionObject.PlayDescription = $scope.play.description;
                 //vm.leadPreviewObject.notionObject.TalkingPoints = vm.talkingPoints;
@@ -52,7 +83,7 @@ angular.module('lp.cg.talkingpoint.preview', [])
     };
 
     function filterInvalidAccounts(accounts) {
-        result = []
+        var result = [];
         for (var i = 0; i < accounts.length; i++) {
             if (accounts[i].name !== undefined && accounts[i].name !== null) {
                 result.push(accounts[i]);

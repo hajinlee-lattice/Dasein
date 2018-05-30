@@ -203,10 +203,18 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     var makeDanteAccountsObj = function(obj) {
         var accounts = [];
         obj.forEach(function(value, key){
+            var nameToAdd = value.CompanyName;
+            if(nameToAdd == null){
+                nameToAdd = value.Website;
+            }
+            if(nameToAdd == null){
+                nameToAdd = value.AccountId;
+            }
             var tmpObj = {
-                name: value.LDC_Name,
-                id: value.SalesforceAccountID != null ? value.SalesforceAccountID : value.AccountId
+                name: nameToAdd,
+                id: value.AccountId
             };
+
             accounts.push(tmpObj);
         });
         return accounts;
@@ -219,7 +227,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             deferred.resolve(this.danteAccounts);
         } else {
             var self = this;
-            CgTalkingPointService.getDanteAccounts().then(function(response) {
+            CgTalkingPointService.getDanteAccounts(20, opts).then(function(response) {
                 self.danteAccounts = makeDanteAccountsObj(response.data);
                 deferred.resolve(self.danteAccounts);
             });
@@ -417,40 +425,27 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     };
 
-    this.getDanteAccounts = function(count, segment) {
+    this.getDanteAccounts = function(count, opts) {
         var deferred = $q.defer(),
             count = count || 20;
+        var data = {
+            'page_filter': { 
+                'num_rows': count, 
+                'row_offset': 0 
+            }, 
+            'restrict_with_sfdcid': false
+        };
+        
+        var keys = Object.keys(opts);
+        keys.forEach(function(key){
+            data[key] = opts[key];
+        });
         $http({
             // method: 'GET',
             // url: this.host + '/dante/accounts/' + count
             method: 'POST',
             url: this.host + '/accounts/data',
-            data: {
-                "lookups": 
-                [{
-                    "attribute": {
-                        "entity": "Account",
-                        "attribute": "AccountId"
-                    }
-                },
-                {
-                    "attribute": {
-                        "entity": "Account",
-                        "attribute": "LDC_Name"
-                    }
-                },
-                {
-                    "attribute": {
-                        "entity": "Account",
-                        "attribute": "SalesforceAccountID"
-                    }
-                }],
-                "page_filter": { 
-                    "num_rows": count, 
-                    "row_offset": 0 
-                }, 
-                "restrict_with_sfdcid": false 
-            }
+            data: data
         }).then(function(response){
             deferred.resolve(response.data);
         });

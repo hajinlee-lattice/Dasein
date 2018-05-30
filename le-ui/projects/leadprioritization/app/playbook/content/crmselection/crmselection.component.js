@@ -69,8 +69,10 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     PlaybookWizardStore.setValidation('crmselection', form.$valid);
 
                     vm.loadingCoverageCounts = false;
-                    vm.nonNullCount = result.ratingIdLookupColumnPairsCoverageMap[accountId].accountCount;
-
+                    vm.nonNullCount = 0;
+                    if(result.ratingIdLookupColumnPairsCoverageMap[accountId] && result.ratingIdLookupColumnPairsCoverageMap[accountId].accountCount){
+                        vm.nonNullCount = result.ratingIdLookupColumnPairsCoverageMap[accountId].accountCount;
+                    }
                     vm.nullCount = (vm.totalCount - vm.nonNullCount);
 
                 });
