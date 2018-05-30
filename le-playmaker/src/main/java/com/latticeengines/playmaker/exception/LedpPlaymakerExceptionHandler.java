@@ -40,7 +40,12 @@ public class LedpPlaymakerExceptionHandler {
         String stackTrace = ex.getCause() != null ? ExceptionUtils.getStackTrace(ex.getCause()) : ExceptionUtils
                 .getStackTrace(ex);
 
-        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        String tenantName = null;
+        try {
+            tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        } catch (Exception e) {
+            tenantName = e.getMessage();
+        }
         log.error(String.format("%s tenantName=%s\n%s", ex.getCode(), tenantName, stackTrace));
 
         String errorMsg = ex.getMessage();
@@ -60,7 +65,12 @@ public class LedpPlaymakerExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleException(Exception ex, HttpServletRequest request) {
         String trace = ExceptionUtils.getStackTrace(ex);
-        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        String tenantName = null;
+        try {
+            tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+        } catch (Exception e) {
+            tenantName = e.getMessage();
+        }
         log.error(String.format("tenantName=%s\n%s", tenantName, trace));
 
         List<String> messages = new ArrayList<String>();

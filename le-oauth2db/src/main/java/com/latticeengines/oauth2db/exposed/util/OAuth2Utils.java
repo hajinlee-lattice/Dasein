@@ -93,7 +93,9 @@ public class OAuth2Utils {
             }
             return tenantName;
         } catch (Exception ex) {
-            log.error("Can not get tenant!", ex);
+            if (ex instanceof LedpException) {
+                throw ex;
+            }
             throw new LedpException(LedpCode.LEDP_23003, ex);
         }
     }
