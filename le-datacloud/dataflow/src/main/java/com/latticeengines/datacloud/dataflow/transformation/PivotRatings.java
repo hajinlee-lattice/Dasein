@@ -116,13 +116,9 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         Node rating = pivotField(rawRatings, aiEngineIds, InterfaceName.Rating.name(), String.class, null)
                 .renamePipe("ai_rating");
         List<Node> rhs = new ArrayList<>();
-        for (RatingEngine.ScoreType scoreType : RatingEngine.COMMON_SCORES) {
-            rhs.add(pivotScoreField(rawRatings, aiEngineIds, scoreType));
-        }
+        rhs.add(pivotScoreField(rawRatings, aiEngineIds, RatingEngine.ScoreType.Score));
         if (CollectionUtils.isNotEmpty(evEngineIds)) {
-            for (RatingEngine.ScoreType scoreType : RatingEngine.EV_SCORES) {
-                rhs.add(pivotScoreField(rawRatings, evEngineIds, scoreType));
-            }
+            rhs.add(pivotScoreField(rawRatings, evEngineIds, RatingEngine.ScoreType.ExpectedRevenue));
         }
         FieldList joinKey = new FieldList(idCol);
         List<FieldList> joinKeys = rhs.stream().map(n -> joinKey).collect(Collectors.toList());

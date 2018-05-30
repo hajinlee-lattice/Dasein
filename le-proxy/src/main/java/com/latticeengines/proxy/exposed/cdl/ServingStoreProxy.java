@@ -20,6 +20,8 @@ public interface ServingStoreProxy {
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, List<ColumnSelection
             .Predefined> groups, DataCollection.Version version);
 
+    // only use cache when you have performance control.
+    // otherwise using above non-cached apis gives more up-to-date info.
     List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity);
 
 }

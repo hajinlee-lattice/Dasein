@@ -439,7 +439,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
 
         String ratingField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.Rating);
-        String scoreField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.NormalizedScore);
+        String scoreField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.Score);
         String evField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.ExpectedRevenue);
         frontEndQuery.setLookups(Arrays.asList(//
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()),

@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.pls;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -85,20 +84,14 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     public static final Map<ScoreType, String> SCORE_ATTR_SUFFIX = ImmutableMap.of( //
             ScoreType.Probability, "prob", //
             ScoreType.ExpectedRevenue, "ev", //
-            ScoreType.NormalizedScore, "score" //
+            ScoreType.Score, "score" //
     );
 
     public static final Map<ScoreType, Class<? extends Serializable>> SCORE_ATTR_CLZ = ImmutableMap.of( //
             ScoreType.Probability, Double.class, //
             ScoreType.ExpectedRevenue, Double.class, //
-            ScoreType.NormalizedScore, Double.class //
+            ScoreType.Score, Integer.class //
     );
-
-    // needed for both prediction types
-    public static final List<ScoreType> COMMON_SCORES = Collections.singletonList(ScoreType.NormalizedScore);
-
-    // needed for ev models
-    public static final List<ScoreType> EV_SCORES = Collections.singletonList(ScoreType.ExpectedRevenue);
 
     private Long pid;
 
@@ -266,7 +259,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.deleted = deleted;
     }
 
-    @Column(name = "JUST_CREATED", nullable = true)
+    @Column(name = "JUST_CREATED")
     @JsonProperty("justCreated")
     public Boolean getJustCreated() {
         return this.justCreated;
@@ -283,7 +276,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     @JsonProperty("segment")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_SEGMENT_ID", nullable = true)
+    @JoinColumn(name = "FK_SEGMENT_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public MetadataSegment getSegment() {
         return this.segment;
@@ -477,6 +470,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     public enum ScoreType {
-        Rating, Probability, NormalizedScore, ExpectedRevenue
+        Rating, Probability, Score, ExpectedRevenue
     }
 }
