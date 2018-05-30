@@ -54,7 +54,7 @@ public class RedissonBeanFactory implements FactoryBean<RedissonClient> {
                 .setRetryInterval(40000).setScanInterval(2000) //
                 .setMasterConnectionPoolSize(masterPoolSize).setMasterConnectionMinimumIdleSize(masterIdle) //
                 .setSlaveConnectionPoolSize(slavePoolSize).setSlaveConnectionMinimumIdleSize(slaveIdle);
-        elastiCacheService.getNodeAddresses().forEach(serverConfig::addNodeAddress);
+        elastiCacheService.getDistributedCacheNodeAddresses().forEach(serverConfig::addNodeAddress);
         return Redisson.create(config);
     }
 

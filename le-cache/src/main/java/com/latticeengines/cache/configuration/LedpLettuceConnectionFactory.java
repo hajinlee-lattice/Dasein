@@ -97,7 +97,6 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
             }
 
             if (StatefulConnection.class.isAssignableFrom(connectionType)) {
-
                 if (readFrom.isPresent()) {
                     throw new UnsupportedOperationException(
                             "Not supported. Configured to Master/Slave with multiple URLs");

@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface ElastiCacheService {
 
-    List<String> getNodeAddresses();
+    List<String> getDistributedCacheNodeAddresses();
 
 }

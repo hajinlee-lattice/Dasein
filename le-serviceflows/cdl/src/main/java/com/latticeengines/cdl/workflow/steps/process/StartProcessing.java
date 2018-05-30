@@ -308,18 +308,16 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private List<Action> getDeleteActions() {
         List<Action> actionList = getActions();
-        List<Action> deleteAction = actionList.stream()
+        return actionList.stream()
                 .filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
-        return deleteAction;
     }
 
     private List<Action> getImportActions() {
         List<Action> actionList = getActions();
-        List<Action> importAction = actionList.stream()
+        return actionList.stream()
                 .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
-        return importAction;
     }
 
     private List<Job> getDeleteJobs() {

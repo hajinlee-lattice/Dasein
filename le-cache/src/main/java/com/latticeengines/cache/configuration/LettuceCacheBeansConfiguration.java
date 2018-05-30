@@ -242,7 +242,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
             factory = new LettuceConnectionFactory(standaloneConfiguration, clientConfig);
         } else {
             LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
-                    elastiCacheService.getNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
+                    elastiCacheService.getDistributedCacheNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
 
             LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                     .readFrom(ReadFrom.SLAVE_PREFERRED)//

@@ -617,8 +617,7 @@ public class StatsCubeUtils {
         for (String name : attrStatsMap.keySet()) {
             ColumnMetadata cm = cmMap.get(name);
             if (cm == null) {
-                log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity
-                        + ", skipping it.");
+                //log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity + ", skipping it.");
                 continue;
             }
             if (shouldHideAttr(cm)) {

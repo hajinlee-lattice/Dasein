@@ -44,19 +44,18 @@ public class CacheBeansConfiguration {
                         .entryTtl(Duration.ofMinutes(20)) //
                         .prefixKeysWith(CacheName.SessionCache.name()) //
                         .disableCachingNullValues());
-        RedisCacheManager cacheManager = RedisCacheManager
+        return RedisCacheManager
                 .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory()))//
                 .cacheDefaults(config) //
                 .withInitialCacheConfigurations(cacheConfigs) //
                 .transactionAware()//
                 .build();
-        return cacheManager;
     }
 
     @Bean
     public RedisConnectionFactory lettuceConnectionFactory() {
-        LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
-                elastiCacheService.getNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
+        LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(elastiCacheService
+                .getDistributedCacheNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .readFrom(ReadFrom.SLAVE_PREFERRED)//
