@@ -92,7 +92,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
-        verityTestSegmentCountIncrease(ImmutableList.of(BusinessEntity.Account, BusinessEntity.Contact));
+        verityTestSegmentCountDiff(ImmutableList.of(BusinessEntity.Account, BusinessEntity.Contact));
         /*
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_4,

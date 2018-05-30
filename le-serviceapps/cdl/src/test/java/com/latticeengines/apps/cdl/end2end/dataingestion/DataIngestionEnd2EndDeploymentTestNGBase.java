@@ -851,7 +851,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         });
     }
 
-    void verityTestSegmentCountIncrease(List<BusinessEntity> entities) {
+    void verityTestSegmentCountDiff(List<BusinessEntity> entities) {
         final MetadataSegment immutableSegment1 = getSegmentByName(SEGMENT_NAME_1);
         final MetadataSegment immutableSegment2 = getSegmentByName(SEGMENT_NAME_2);
         entities.forEach(entity -> {
@@ -861,7 +861,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                     "Cannot find count of " + entity + " in segment2");
             Long count1 = immutableSegment1.getEntityCount(entity);
             Long count2 = immutableSegment2.getEntityCount(entity);
-            Assert.assertTrue(count2 > count1);
+            Assert.assertTrue(count2.longValue() != count1.longValue());
         });
     }
 
