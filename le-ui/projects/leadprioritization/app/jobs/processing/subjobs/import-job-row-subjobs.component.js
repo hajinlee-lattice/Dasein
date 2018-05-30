@@ -62,7 +62,7 @@ angular.module('lp.jobs.row.subjobs', [])
             };
 
             $scope.getValidation = function (subjob) {
-                if (subjob.jobStatus === 'Failed') {
+                if (subjob.jobStatus === 'Failed' || (getPayloadValue('total_rows') === getPayloadValue('total_failed_rows'))){
                     return 'Failed';
                 }
                 if (subjob.jobStatus === 'Running') {
