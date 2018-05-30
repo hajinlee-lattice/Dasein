@@ -20,7 +20,6 @@ import com.amazonaws.services.elasticache.model.DescribeCacheClustersResult;
 import com.amazonaws.services.elasticache.model.DescribeReplicationGroupsRequest;
 import com.amazonaws.services.elasticache.model.DescribeReplicationGroupsResult;
 import com.amazonaws.services.elasticache.model.Endpoint;
-import com.amazonaws.services.elasticache.model.NodeGroup;
 import com.amazonaws.services.elasticache.model.ReplicationGroup;
 import com.latticeengines.aws.elasticache.ElastiCacheService;
 
@@ -54,10 +53,6 @@ public class ElastiCacheServiceImpl implements ElastiCacheService {
         DescribeReplicationGroupsResult result = client.describeReplicationGroups(drgRequest);
         for (ReplicationGroup replicationGroup: result.getReplicationGroups()) {
             if (replicationGroup.getReplicationGroupId().equalsIgnoreCase(groupName)) {
-                boolean encrypted = replicationGroup.getTransitEncryptionEnabled();
-                NodeGroup nodeGroup = replicationGroup.getNodeGroups().get(0);
-                Endpoint primaryEndpoint = nodeGroup.getPrimaryEndpoint();
-                addrPortInfo.add(getFullAddr(primaryEndpoint, encrypted));
                 for (String childCluster: replicationGroup.getMemberClusters()) {
                     addrPortInfo.add(getClusterNodeAddr(childCluster));
                 }

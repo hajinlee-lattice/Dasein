@@ -45,6 +45,8 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 
 import io.lettuce.core.ReadFrom;
 import io.lettuce.core.RedisURI;
+import io.lettuce.core.cluster.ClusterClientOptions;
+import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 
 @Configuration
 @EnableCaching
@@ -244,10 +246,17 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
             LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
                     elastiCacheService.getDistributedCacheNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
 
+            ClusterTopologyRefreshOptions topologyRefreshOptions = ClusterTopologyRefreshOptions.builder() //
+                    .enablePeriodicRefresh(Duration.ofMinutes(10)) //
+                    .enableAllAdaptiveRefreshTriggers() //
+                    .refreshTriggersReconnectAttempts(3) //
+                    .build();
+
             LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                     .readFrom(ReadFrom.SLAVE_PREFERRED)//
                     .commandTimeout(Duration.ofMinutes(redisTimeout))//
                     .shutdownTimeout(Duration.ZERO) //
+                    .clientOptions(ClusterClientOptions.builder().topologyRefreshOptions(topologyRefreshOptions).build()) //
                     .useSsl() //
                     .build();
 
