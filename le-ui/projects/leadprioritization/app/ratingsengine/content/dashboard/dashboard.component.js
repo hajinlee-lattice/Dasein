@@ -213,7 +213,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
-            vm.publishOrActivateButtonLabel = vm.dashboard.summary.bucketMetadata.length > 0 ? 'New Scoring Configuration' : 'Activate Scoring';
+            vm.publishOrActivateButtonLabel = 'New Scoring Configuration';//vm.dashboard.summary.bucketMetadata.length > 0 ? 'New Scoring Configuration' : 'Activate Scoring';
         } else {
             vm.ratingEngine.chartConfig = vm.barChartConfig;
         }        
