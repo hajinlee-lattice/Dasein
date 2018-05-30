@@ -6,7 +6,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 ])
 .controller('RatingsEngineListController', function (
     $scope, $timeout, $location, $element, $state, $stateParams, $filter, $interval, $rootScope,
-    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory, JobsStore
+    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory, JobsStore, JobsService
 ) {
     var vm = this;
 
@@ -202,6 +202,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 
         // var arr = vm.current.ratings;
         // console.log(arr.slice(Math.max(arr.length - 10, 1)));
+        console.log('inProgressModelJobs', JobsStore.inProgressModelJobs);
 
     }
 
@@ -364,6 +365,29 @@ angular.module('lp.ratingsengine.ratingslist', [
             ret = metadata && metadata.length > 0;
         }   
         return ret;
+    }
+
+    vm.enableDelete = function(ratingId) {
+        return !JobsStore.inProgressModelJobs.hasOwnProperty(ratingId);
+    }
+
+    vm.disableCancelJob = function(ratingId) {
+        return !vm.enableDelete(ratingId) && JobsStore.inProgressModelJobs[ratingId] == null;
+    }
+
+    vm.cancelJobClickConfirm = function ($event, ratingId) {
+        $event.stopPropagation();
+
+        console.log(JobsStore.inProgressModelJobs);
+        var jobId = JobsStore.inProgressModelJobs[ratingId];
+        if (jobId) { //jobId can be null when status is pending
+            JobsService.cancelJob(jobId).then(function (result) {
+                console.log('cancelling job', result);
+                $rootScope.$broadcast("updateAsCancelledJob", jobId);
+            });
+        } else {
+            console.log('jobid', jobId);
+        }
     }
 
     function updateRating(rating, updatedRating) {

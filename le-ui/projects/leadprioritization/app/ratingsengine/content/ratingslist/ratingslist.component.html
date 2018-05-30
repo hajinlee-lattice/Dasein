@@ -93,10 +93,16 @@
                                 </li>
                                 <li 
                                     data-ng-click="vm.showDeleteRatingModalClick($event, rating)"
-                                    ng-if="rating.status === 'INACTIVE'">
+                                    ng-if="rating.status === 'INACTIVE' && vm.enableDelete(rating.id)">
                                     <a href="javascript:void(0)">Delete</a>
                                     <i class="fa fa-trash"></i>
                                 </li>
+                                <li 
+                                    data-ng-click="vm.cancelJobClickConfirm($event, rating.id)"
+                                    ng-if="rating.status === 'INACTIVE' && !vm.enableDelete(rating.id) && !vm.disableCancelJob(rating.id)">
+                                    <a href="javascript:void(0)">Cancel Job</a>
+                                    <i class="fa fa-times"></i>
+                                </li>                     
                             </ul>
                         </div>
 

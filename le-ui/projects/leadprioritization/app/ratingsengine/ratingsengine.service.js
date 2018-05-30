@@ -1,7 +1,7 @@
 angular.module('lp.ratingsengine')
 .service('RatingsEngineStore', function(
     $q, $state, $stateParams,  $rootScope, RatingsEngineService, DataCloudStore,
-    BrowserStorageUtility, SegmentStore, ImportWizardService, $timeout
+    BrowserStorageUtility, SegmentStore, ImportWizardService, $timeout, JobsStore
 ){
     var RatingsEngineStore = this;
     
@@ -958,6 +958,7 @@ angular.module('lp.ratingsengine')
         // console.log('Launching the model', obj);
         RatingsEngineService.createAIModel(currentRating.id, obj.id).then(function(applicationid) {
             RatingsEngineStore.setApplicationId(applicationid);
+            JobsStore.inProgressModelJobs[currentRating.id] = null;
             var id = applicationid.Result;
             // console.log('Model Launched', id, nextState);
             $state.go(nextState, { ai_model_job_id: id });

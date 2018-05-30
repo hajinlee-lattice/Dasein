@@ -35,6 +35,7 @@ angular
         jobsMap: {},
         isModelState: false
     };
+    this.inProgressModelJobs = {};
 
     function isImportJob(job){
         if(job.jobType === 'processAnalyzeWorkflow'){
@@ -47,20 +48,6 @@ angular
     function isExportJob(job) {
         return (job.jobType === 'segmentExportWorkflow');
     }
-
-
-    // function isImportSubJob(job){
-    //     switch (job.jobType) {
-    //         case 'cdlDataFeedImportWorkflow': 
-    //         case 'cdlOperationWorkflow':
-    //         case 'metadataChange':{
-    //             return true;
-    //         };
-    //         default: {
-    //             return false;
-    //         }
-    //     }
-    // }
 
     function isType(job, type) {
         switch (type) {
@@ -77,6 +64,10 @@ angular
         }else{
             return true;
         }
+    }
+
+    this.isNonWorkflowJobType = function(job) {
+        return job.id == null && job.pid == null;
     }
 
     this.getJob = function(jobId) {
@@ -143,6 +134,7 @@ angular
                     JobsStore.data.jobs.length = 0;
 
                     var nullIdsMap = {};
+                    JobsStore.inProgressModelJobs = {};
                     JobsStore.jobTypes.forEach(function(type) {
                         nullIdsMap[type] = false;
                     })
@@ -188,7 +180,7 @@ angular
                     break;
                 };
                 default:
-                    JobsStore.data.jobs.push(job);
+                    JobsStore.addModelJob(job);
                     break;
             }
         }
@@ -235,6 +227,16 @@ angular
         return deferred.promise;
         
     };
+
+    this.addModelJob = function(job) {
+        var ratingEngineId = job.inputs.RATING_ENGINE_ID;
+        if (job.jobStatus != 'Failed' && job.jobStatus != 'Completed' && job.jobStatus != 'Cancelled') {
+            console.log('in progress job.id', job.id);
+            JobsStore.inProgressModelJobs[ratingEngineId] = job.id;
+        }
+        JobsStore.data.jobs.push(job);
+    }
+
     this.addImportJob = function(job){
         job.displayName = "Data Processing & Analysis";
         var jobid = job.id;
@@ -335,7 +337,7 @@ angular
         JobsStore.data.importJobs = [];
         JobsStore.importJobsMap = {};   
     }
-    
+
     /**
      * Updates the fields in the job
      * The arrays should not be updated otherwise the view that relys on them will refresh and loose its state
