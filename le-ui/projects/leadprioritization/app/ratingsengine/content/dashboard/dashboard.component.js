@@ -350,7 +350,8 @@ angular.module('lp.ratingsengine.dashboard', [
     };
     vm.disableButtonScoring = function(){
         if(!vm.isRulesBased){
-            var deactivate = (vm.ratingEngine.status === 'INACTIVE' ||vm.deactivateInProgress === true);
+            // return vm.dashboard.summary.bucketMetadata ? false : true ;
+            var deactivate = (vm.ratingEngine.status === 'INACTIVE' || (!vm.dashboard.summary.bucketMetadata) || vm.deactivateInProgress === true);
         
             return deactivate;
         }else{
