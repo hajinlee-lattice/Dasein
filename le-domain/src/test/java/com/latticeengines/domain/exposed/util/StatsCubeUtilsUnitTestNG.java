@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.avro.generic.GenericRecord;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
 import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
@@ -114,7 +116,10 @@ public class StatsCubeUtilsUnitTestNG {
             is = readResource(role + ".json.gz");
             gis = new GZIPInputStream(is);
             Table table = JsonUtils.deserialize(gis, Table.class);
-            cmMap.put(entity.name(), table.getColumnMetadata());
+            List<ColumnMetadata> cms = table.getColumnMetadata().stream() //
+                    .peek(cm -> cm.enableGroup(ColumnSelection.Predefined.Segment)) //
+                    .collect(Collectors.toList());
+            cmMap.put(entity.name(), cms);
         }
 
         cubes = StatsCubeUtils.filterStatsCube(cubes, cmMap);
