@@ -72,6 +72,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Value("${common.microservice.url}")
     private String microserviceHostPort;
 
+    @Value("${common.quartz.stack.flag:false}")
+    private boolean isQuartzStack;
+
     @Inject
     private DataFeedProxy dataFeedProxy;
 
@@ -82,7 +85,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @PostConstruct
     public void initialize() {
-        if (isQuartzStack()) {
+        if (isQuartzStack) {
             cdlProxy = new CDLProxy(quartzMicroserviceHostPort);
             log.info(String.format("CDLJobService running on quartz stack with cdlHostPort=%s, dataFeedHostPort=%s, workflowHostPort=%s",
                     cdlProxy.getHostport(), dataFeedProxy.getHostport(), workflowProxy.getHostport()));
@@ -343,8 +346,4 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    private boolean isQuartzStack() {
-        return StringUtils.isNotBlank(System.getenv(LE_STACK))
-                && System.getenv(LE_STACK).equalsIgnoreCase(QUARTZ_STACK);
-    }
 }
