@@ -22,6 +22,7 @@ public class DefaultConfigOverwriter {
 
     private final String listDelimiter = ",";
 
+    //TODO: (Yintao - May 2018) should explicitly set values in all environments
     @Value("${admin.overwrite.dl.url:DEFAULT}")
     private String dlUrl;
 
