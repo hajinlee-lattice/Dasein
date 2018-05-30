@@ -14,8 +14,12 @@ public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("inputPaths")
     private List<String> inputPaths;
+
     @JsonProperty("outputPath")
     private String outputPath;
+
+    @JsonProperty("tableName")
+    private String tableName;
 
     @JsonProperty("rebuild_steps")
     private Set<String> rebuildSteps;
@@ -66,11 +70,6 @@ public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
         this.jobId = jobId;
     }
 
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
     public boolean isSubmission() {
         return submission;
     }
@@ -79,5 +78,17 @@ public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
         this.submission = submission;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 
 }

@@ -68,9 +68,6 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     private DataCollection.Version active;
     private DataCollection.Version inactive;
 
-    private String newTableName;
-    private String newHdfsPath;
-
     @Override
     protected String getCondaEnv() {
         return "v01";
@@ -96,8 +93,7 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
         config.setRunInAws(apsInAws);
         List<String> inputPaths = getInputPaths(periodTable);
         config.setInputPaths(inputPaths);
-        String hdfsPath = getOutputPath(config);
-        config.setOutputPath(hdfsPath);
+        getOutputPath(config);
     }
 
     private List<Table> getPeriodTables(AWSPythonBatchConfiguration config) {
@@ -118,14 +114,15 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     @Override
     protected void afterComplete(AWSPythonBatchConfiguration config) {
         try {
-            if (AvroUtils.count(yarnConfiguration, newHdfsPath + "/*.avro") > 0) {
+            if (AvroUtils.count(yarnConfiguration, config.getOutputPath() + "/*.avro") > 0) {
                 String customerSpace = configuration.getCustomerSpace().toString();
-                Table apsTable = MetaDataTableUtils.createTable(yarnConfiguration, newTableName, newHdfsPath);
+                Table apsTable = MetaDataTableUtils.createTable(yarnConfiguration, config.getTableName(),
+                        config.getOutputPath());
                 apsTable.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
                 Map<String, List<Product>> productMap = loadProductMap(config);
                 AwsApsGeneratorUtils.setupMetaData(apsTable, productMap);
-                metadataProxy.updateTable(customerSpace, newTableName, apsTable);
-                dataCollectionProxy.upsertTable(customerSpace, newTableName,
+                metadataProxy.updateTable(customerSpace, config.getTableName(), apsTable);
+                dataCollectionProxy.upsertTable(customerSpace, config.getTableName(),
                         TableRoleInCollection.AnalyticPurchaseState, inactive);
             } else {
                 throw new RuntimeException("There's no new APS file created!");
@@ -168,16 +165,18 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
         return inputPaths;
     }
 
-    private String getOutputPath(AWSPythonBatchConfiguration config) {
+    private void getOutputPath(AWSPythonBatchConfiguration config) {
         try {
-            newTableName = NamingUtils.timestamp(APS);
-            newHdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), "")
+            String newTableName = NamingUtils.timestamp(APS);
+            String newHdfsPath = PathBuilder
+                    .buildDataTablePath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), "")
                     .append(newTableName).toString();
             if (HdfsUtils.fileExists(yarnConfiguration, newHdfsPath)) {
                 HdfsUtils.rmdir(yarnConfiguration, newHdfsPath);
             }
             HdfsUtils.mkdir(yarnConfiguration, newHdfsPath);
-            return newHdfsPath;
+            config.setOutputPath(newHdfsPath);
+            config.setTableName(newTableName);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
