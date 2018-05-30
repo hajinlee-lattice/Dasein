@@ -381,7 +381,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
                 cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
             });
-            cacheService.refreshKeysByPattern(MultiTenantContext.getTenantId() + "|topn", CacheName.DataLakeStatsCubesCache);
+            cacheService.refreshKeysByPattern(MultiTenantContext.getTenantId(),
+                    CacheName.DataLakeStatsCubesCache);
         }
 
         return toReturn;
