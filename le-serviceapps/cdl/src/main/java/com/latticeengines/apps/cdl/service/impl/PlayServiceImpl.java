@@ -118,6 +118,10 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private void setBucketMetadata(Tenant tenant, Play play) {
+        if (play.getRatingEngine() == null) {
+            log.info("No RatingEngine for play " + play.getName() + " hence no BucketMetadata can be set.");
+        }
+
         if (play.getRatingEngine().getBucketMetadata() == null) {
             if (play.getRatingEngine().getType() == RatingEngineType.RULE_BASED) {
 
@@ -135,7 +139,7 @@ public class PlayServiceImpl implements PlayService {
                             .getLatestABCDBucketsByEngineId(tenant.getId(), reId);
                     play.getRatingEngine().setBucketMetadata(latestABCDBuckets);
                 } catch (Exception ex) {
-                    log.info("Ignoring exception while loading latest ABCD" + " bucket of rating engine " + reId
+                    log.error("Ignoring exception while loading latest ABCD" + " bucket of rating engine " + reId
                             + " to set bucket metadata for play", ex);
                 }
             }
