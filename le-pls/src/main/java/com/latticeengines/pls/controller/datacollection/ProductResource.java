@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,8 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -34,7 +40,8 @@ public class ProductResource extends BaseFrontEndEntityResource {
     private static final Logger log = LoggerFactory.getLogger(ProductResource.class);
 
     @Inject
-    public ProductResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy) {
+    public ProductResource(EntityProxy entityProxy, SegmentProxy segmentProxy,
+            DataCollectionProxy dataCollectionProxy) {
         super(entityProxy, segmentProxy, dataCollectionProxy);
     }
 
@@ -43,10 +50,10 @@ public class ProductResource extends BaseFrontEndEntityResource {
     @ApiOperation(value = "Retrieve all the products")
     public DataPage getData( //
             @ApiParam(value = "Offset for pagination of products") //
-            @RequestParam(value = "offset", required = false)  //
+            @RequestParam(value = "offset", required = false) //
             Integer offset, //
-            @ApiParam(value = "Maximum number of products in page")//
-            @RequestParam(value = "max", required = false)//
+            @ApiParam(value = "Maximum number of products in page") //
+            @RequestParam(value = "max", required = false) //
             Integer max) {
         try {
             FrontEndQuery query = new FrontEndQuery();
@@ -64,6 +71,13 @@ public class ProductResource extends BaseFrontEndEntityResource {
     @Override
     BusinessEntity getMainEntity() {
         return BusinessEntity.Product;
+    }
+
+    @Override
+    List<Lookup> getDataLookups() {
+        return Arrays.asList( //
+                new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductId.name()), //
+                new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductName.name()));
     }
 
 }

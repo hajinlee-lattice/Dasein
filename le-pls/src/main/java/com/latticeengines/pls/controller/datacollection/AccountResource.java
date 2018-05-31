@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,8 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -66,6 +72,17 @@ public class AccountResource extends BaseFrontEndEntityResource {
     @Override
     BusinessEntity getMainEntity() {
         return BusinessEntity.Account;
+    }
+
+    @Override
+    List<Lookup> getDataLookups() {
+        return Arrays.asList( //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
     }
 
 }

@@ -1,6 +1,8 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -8,6 +10,9 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.Lookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -94,6 +99,11 @@ public class EntityResource extends BaseFrontEndEntityResource {
             }
         }
 
+    }
+
+    @Override
+    List<Lookup> getDataLookups() {
+        throw new UnsupportedOperationException("Do not support data query.");
     }
 
 }

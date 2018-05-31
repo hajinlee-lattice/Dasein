@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -12,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -87,6 +91,9 @@ public abstract class BaseFrontEndEntityResource {
         }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
+        if (CollectionUtils.isEmpty(frontEndQuery.getLookups())) {
+            frontEndQuery.setLookups(getDataLookups());
+        }
         return entityProxy.getData(tenantId, frontEndQuery);
     }
 
@@ -151,5 +158,7 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     abstract BusinessEntity getMainEntity();
+
+    abstract List<Lookup> getDataLookups();
 
 }
