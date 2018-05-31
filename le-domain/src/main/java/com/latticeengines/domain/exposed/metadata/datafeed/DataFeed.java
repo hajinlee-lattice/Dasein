@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -382,6 +383,8 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
         private final String name;
         private static Map<String, Status> nameMap;
+
+        public static final EnumSet<Status> RUNNING_STATUS = EnumSet.of(ProcessAnalyzing, Deleting);
 
         public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
             return Collections.emptySet();

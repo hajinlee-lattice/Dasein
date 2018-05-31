@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -29,6 +30,7 @@ public class StartMaintenanceStep extends BaseWorkflowStep<StartMaintenanceConfi
         } else {
             dataFeedProxy.updateDataFeedMaintenanceMode(customerSpaceStr, true);
         }
+        dataFeedProxy.startExecution(customerSpaceStr, DataFeedExecutionJobType.CDLOperation, jobId);
 
         saveOutputValue(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES,
                 JsonUtils.serialize(configuration.getEntityList()));

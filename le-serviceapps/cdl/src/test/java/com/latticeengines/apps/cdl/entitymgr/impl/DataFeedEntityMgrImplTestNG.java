@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.Date;
 
@@ -134,6 +135,7 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(retrieved.getName(), datafeed.getName());
         assertNotNull(retrieved.getActiveExecutionId());
         assertNotNull(retrieved.getActiveExecution());
+        assertNotNull(retrieved.getActiveExecution().getCreated());
         assertEquals(retrieved.getTasks().size(), 1);
         assertEquals(retrieved.getTasks().get(0).getImportTemplate().getTableType(), TableType.IMPORTTABLE);
         assertNotNull(retrieved.getTasks().get(0).getImportTemplate().getPid());
@@ -141,13 +143,14 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
-    public void finishExecution() {
+    public void finishExecution() throws InterruptedException {
+        Thread.sleep(1000L);
         DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(uniqueDataFeedName,
                 DataFeedExecution.Status.Completed, DataFeed.Status.Active);
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Completed);
-
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(uniqueDataFeedName);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
+        assertTrue(df.getActiveExecution().getUpdated().after(df.getActiveExecution().getCreated()));
         assertEquals(df.getExecutions().size(), 1);
         assertEquals(df.getStatus(), DataFeed.Status.Active);
         assertEquals(exec1.getStatus(), df.getExecutions().get(0).getStatus());

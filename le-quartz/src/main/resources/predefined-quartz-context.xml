@@ -149,6 +149,17 @@
         <property name="jobTimeout" value="${quartz.cdl.profile.job.timeout:3600}" />
     </bean>
 
+    <bean name="cdlDateFeedExecutionCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlDateFeedExecutionCleanupJob" />
+        <property name="cronTrigger" value="${quartz.cdl.execution.cleanup.job.cron:0 0/1 * * * ?}" />
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlDateFeedExecutionCleanupJob&quot;}" />
+        <property name="jobTimeout" value="${quartz.cdl.profile.job.timeout:3600}" />
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="plsModelSummaryFullDownload"/>
         <ref bean="plsModelSummaryDownload"/>
@@ -163,6 +174,7 @@
         <ref bean="matchCommandClean"/>
         <ref bean="cdlImportJob"/>
         <ref bean="cdlOrchestrationJob"/>
+        <ref bean="cdlDateFeedExecutionCleanupJob"/>
     </util:list>
 
 </beans>

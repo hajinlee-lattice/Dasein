@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.metadata.datafeed;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -28,10 +31,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Entity
 @Table(name = "DATAFEED_EXECUTION")
-public class DataFeedExecution implements HasPid, Serializable {
+public class DataFeedExecution implements HasPid, HasAuditingFields, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
 
@@ -70,6 +74,16 @@ public class DataFeedExecution implements HasPid, Serializable {
     @JsonProperty("job_type")
     @Enumerated(EnumType.STRING)
     private DataFeedExecutionJobType jobType;
+
+    @Column(name = "CREATED")
+    @JsonProperty("created")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
+
+    @Column(name = "UPDATED")
+    @JsonProperty("updated")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updated;
 
     @Override
     public Long getPid() {
@@ -137,6 +151,26 @@ public class DataFeedExecution implements HasPid, Serializable {
 
     public void setDataFeedExecutionJobType(DataFeedExecutionJobType jobType) {
         this.jobType = jobType;
+    }
+
+    @Override
+    public Date getCreated() {
+        return created;
+    }
+
+    @Override
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    @Override
+    public Date getUpdated() {
+        return updated;
+    }
+
+    @Override
+    public void setUpdated(Date updated) {
+        this.updated = updated;
     }
 
     @Override

@@ -139,6 +139,11 @@ public class DataFeedServiceImpl implements DataFeedService {
             long jobId) {
         if (DataFeedExecutionJobType.PA == jobType) {
             return startPnAExecution(customerSpace, datafeedName, jobId);
+        } else if (DataFeedExecutionJobType.CDLOperation == jobType) {
+            DataFeedExecution execution = datafeedEntityMgr.findByName(datafeedName).getActiveExecution();
+            execution.setWorkflowId(jobId);
+            datafeedExecutionEntityMgr.update(execution);
+            return execution;
         }
         return datafeedEntityMgr.findByName(datafeedName).getActiveExecution();
     }
