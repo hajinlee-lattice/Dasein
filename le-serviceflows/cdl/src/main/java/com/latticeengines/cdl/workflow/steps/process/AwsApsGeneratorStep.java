@@ -125,8 +125,10 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
                 Map<String, List<Product>> productMap = loadProductMap(config);
                 AwsApsGeneratorUtils.setupMetaData(apsTable, productMap);
                 metadataProxy.updateTable(customerSpace, config.getTableName(), apsTable);
+                active = dataCollectionProxy.getActiveVersion(config.getCustomerSpace().toString());
+                inactive = active.complement();
                 dataCollectionProxy.upsertTable(customerSpace, config.getTableName(),
-                        TableRoleInCollection.AnalyticPurchaseState, config.getVersion());
+                        TableRoleInCollection.AnalyticPurchaseState, inactive);
             } else {
                 throw new RuntimeException("There's no new APS file created!");
             }
