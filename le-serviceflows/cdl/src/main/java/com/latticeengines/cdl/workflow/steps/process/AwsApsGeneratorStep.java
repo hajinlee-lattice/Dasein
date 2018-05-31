@@ -93,24 +93,22 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
         config.setRunInAws(apsInAws);
         List<String> inputPaths = getInputPaths(periodTable);
         config.setInputPaths(inputPaths);
+        config.setVersion(inactive);
         getOutputPath(config);
     }
 
     private List<Table> getPeriodTables(AWSPythonBatchConfiguration config) {
         List<Table> periodTables = dataCollectionProxy.getTables(config.getCustomerSpace().toString(),
                 TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
-        DataCollection.Version version = inactive;
         if (CollectionUtils.isEmpty(periodTables)) {
             periodTables = dataCollectionProxy.getTables(config.getCustomerSpace().toString(),
                     TableRoleInCollection.ConsolidatedPeriodTransaction, active);
             if (CollectionUtils.isNotEmpty(periodTables)) {
                 log.info("Found period stores in active version " + active);
-                version = active;
             }
         } else {
             log.info("Found period stores in inactive version " + inactive);
         }
-        config.setVersion(version);
         return periodTables;
     }
 
@@ -125,10 +123,8 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
                 Map<String, List<Product>> productMap = loadProductMap(config);
                 AwsApsGeneratorUtils.setupMetaData(apsTable, productMap);
                 metadataProxy.updateTable(customerSpace, config.getTableName(), apsTable);
-                active = dataCollectionProxy.getActiveVersion(config.getCustomerSpace().toString());
-                inactive = active.complement();
                 dataCollectionProxy.upsertTable(customerSpace, config.getTableName(),
-                        TableRoleInCollection.AnalyticPurchaseState, inactive);
+                        TableRoleInCollection.AnalyticPurchaseState, config.getVersion());
             } else {
                 throw new RuntimeException("There's no new APS file created!");
             }
