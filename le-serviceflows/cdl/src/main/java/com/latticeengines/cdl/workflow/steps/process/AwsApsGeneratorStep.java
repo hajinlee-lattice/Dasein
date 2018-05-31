@@ -99,15 +99,18 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     private List<Table> getPeriodTables(AWSPythonBatchConfiguration config) {
         List<Table> periodTables = dataCollectionProxy.getTables(config.getCustomerSpace().toString(),
                 TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+        DataCollection.Version version = inactive;
         if (CollectionUtils.isEmpty(periodTables)) {
             periodTables = dataCollectionProxy.getTables(config.getCustomerSpace().toString(),
                     TableRoleInCollection.ConsolidatedPeriodTransaction, active);
             if (CollectionUtils.isNotEmpty(periodTables)) {
                 log.info("Found period stores in active version " + active);
+                version = active;
             }
         } else {
             log.info("Found period stores in inactive version " + inactive);
         }
+        config.setVersion(version);
         return periodTables;
     }
 
@@ -123,7 +126,7 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
                 AwsApsGeneratorUtils.setupMetaData(apsTable, productMap);
                 metadataProxy.updateTable(customerSpace, config.getTableName(), apsTable);
                 dataCollectionProxy.upsertTable(customerSpace, config.getTableName(),
-                        TableRoleInCollection.AnalyticPurchaseState, inactive);
+                        TableRoleInCollection.AnalyticPurchaseState, config.getVersion());
             } else {
                 throw new RuntimeException("There's no new APS file created!");
             }

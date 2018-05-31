@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
@@ -29,6 +30,9 @@ public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("submission")
     private boolean submission;
+
+    @JsonProperty("version")
+    private Version version;
 
     public boolean isRunInAws() {
         return runInAws;
@@ -84,6 +88,14 @@ public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public Version getVersion() {
+        return version;
+    }
+
+    public void setVersion(Version version) {
+        this.version = version;
     }
 
     @Override
