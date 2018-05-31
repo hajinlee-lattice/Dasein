@@ -160,6 +160,17 @@
         <property name="jobTimeout" value="${quartz.cdl.profile.job.timeout:3600}" />
     </bean>
 
+    <bean name="datacloudCollectionJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="datacloudCollectionJob" />
+        <property name="cronTrigger" value="${quartz.datacloudcollection.job.cron:0/30 * * * * ?}" />
+        <property name="destUrl" value="${quartz.datacloudapi.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.datacloudapi.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.datacloudapi.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.datacloudapi.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;datacloudCollectionJob&quot;}" />
+        <property name="jobTimeout" value="${quartz.datacloudcollection.job.timeout}" />
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="plsModelSummaryFullDownload"/>
         <ref bean="plsModelSummaryDownload"/>
@@ -170,6 +181,7 @@
         <ref bean="dellebiDailyJob2"/>
         <ref bean="dellebiDailyJob3"/>
         <ref bean="dataCloudRefresh"/>
+        <ref bean="datacloudCollectionJob"/>
         <ref bean="scoringManagerJob"/>
         <ref bean="matchCommandClean"/>
         <ref bean="cdlImportJob"/>

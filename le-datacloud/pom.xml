@@ -159,6 +159,7 @@
         <module>etl</module>
         <module>match</module>
         <module>yarn</module>
+        <module>collection</module>
     </modules>
 
 </project>

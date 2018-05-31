@@ -1,0 +1,15 @@
+package com.latticeengines.datacloud.collection.service;
+
+import java.util.List;
+
+public interface CollectionDBService {
+    //int transferRawRequests(boolean deleteFilteredReqs);
+    //int spawnCollectionWorker() throws Exception;
+    //int updateCollectingStatus() throws Exception;
+
+    boolean addNewDomains(List<String> domains, String vendor, String reqId);
+
+    int getActiveTaskCount();
+
+    void service();
+}

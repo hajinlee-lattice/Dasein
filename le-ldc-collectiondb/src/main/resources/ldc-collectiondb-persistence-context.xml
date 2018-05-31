@@ -5,7 +5,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean id="ldc_collectionDbSource"
+    <bean id="ldcCollectionDbSource"
           class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory">
         <property name="driverClass" value="${ldc_collectiondb.datasource.driver}"/>
         <property name="jdbcUrl" value="${ldc_collectiondb.datasource.url}"/>
@@ -19,9 +19,9 @@
     </bean>
 
     <!-- Entity manager factory -->
-    <bean id="ldc_collectionEntityManagerFactory"
+    <bean id="ldcCollectionEntityManagerFactory"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="dataSource" ref="ldc_collectionDbSource"/>
+        <property name="dataSource" ref="ldcCollectionDbSource"/>
         <property name="packagesToScan" value="com.latticeengines.ldc_collectiondb.entity"/>
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
@@ -44,13 +44,13 @@
         </property>
     </bean>
 
-    <bean id="ldc_collectionTransactionManager"
+    <bean id="ldcCollectionTransactionManager"
           class="org.springframework.orm.jpa.JpaTransactionManager">
-        <property name="entityManagerFactory" ref="ldc_collectionEntityManagerFactory"/>
+        <property name="entityManagerFactory" ref="ldcCollectionEntityManagerFactory"/>
     </bean>
 
 
-    <bean id="ldc_collectionDbSourceReader"
+    <bean id="ldcCollectionDbSourceReader"
           class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory">
         <property name="driverClass" value="${ldc_collectiondb.datasource.driver}"/>
         <property name="jdbcUrl" value="${ldc_collectiondb.datasource.reader.url}"/>
@@ -61,9 +61,9 @@
         <property name="maxPoolSizeForAppMaster" value="${ldc_collectiondb.datasource.reader.poolsize.max.appmaster}"/>
     </bean>
 
-    <bean id="ldc_collectionEntityManagerFactoryReader"
+    <bean id="ldcCollectionEntityManagerFactoryReader"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="dataSource" ref="ldc_collectionDbSourceReader"/>
+        <property name="dataSource" ref="ldcCollectionDbSourceReader"/>
         <property name="packagesToScan" value="com.latticeengines.ldc_collectiondb.entity"/>
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
@@ -86,17 +86,11 @@
         </property>
     </bean>
 
-    <bean id="ldc_collectionTransactionManagerReader"
+    <bean id="ldcCollectionTransactionManagerReader"
           class="org.springframework.orm.jpa.JpaTransactionManager">
-        <property name="entityManagerFactory" ref="ldc_collectionEntityManagerFactoryReader"/>
+        <property name="entityManagerFactory" ref="ldcCollectionEntityManagerFactoryReader"/>
     </bean>
 
     <jpa:auditing/>
-
-    <jpa:repositories base-package="com.latticeengines.ldc_collectiondb.repository"
-                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
-                      entity-manager-factory-ref="ldc_collectionEntityManagerFactory"
-                      transaction-manager-ref="ldc_collectionTransactionManager"  />
-
 
 </beans>

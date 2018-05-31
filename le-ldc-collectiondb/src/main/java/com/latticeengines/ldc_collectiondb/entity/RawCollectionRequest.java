@@ -37,6 +37,7 @@ public class RawCollectionRequest {
     public long getPid() {
         return pid;
     }
+
     public void setPid(long pid) {
         this.pid = pid;
     }

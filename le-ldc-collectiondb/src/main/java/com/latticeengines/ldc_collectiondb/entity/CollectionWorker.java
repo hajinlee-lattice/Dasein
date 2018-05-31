@@ -11,27 +11,27 @@ import javax.persistence.Table;
 @Entity
 @Table
 public class CollectionWorker {
+    //NEW → RUNNING → FINISHED → CONSUMED
+    public static final String STATUS_NEW = "NEW";
+    public static final String STATUS_RUNNING = "RUNNING";
+    public static final String STATUS_FINISHED = "FINISHED";
+    public static final String STATUS_CONSUMED = "CONSUMED";
+    public static final String STATUS_FAILED = "FAILED";
     @Id
     @Basic(optional = false)
     @Column(name = "WORKER_ID", unique = true, nullable = false)
     private String workerId;
-
     @Column(name = "VENDOR", nullable = false)
     private String vendor;
-
     @Column(name = "TASK_ARN", nullable = false)
     private String taskArn;
-
     @Column(name = "SPAWN_TIME", nullable = false)
     private Timestamp spawnTime;
-
-    @Column(name = "TERMINATION_TIME", nullable = false)
+    @Column(name = "TERMINATION_TIME")
     private Timestamp terminationTime;
-
     @Column(name = "STATUS", nullable = false)
     private String status;
-
-    @Column(name = "RECORDS_COLLECTED", nullable = false)
+    @Column(name = "RECORDS_COLLECTED")
     private long recordsCollected;
 
     public String getWorkerId() {
