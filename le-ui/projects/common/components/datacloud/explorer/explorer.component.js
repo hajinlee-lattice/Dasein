@@ -20,7 +20,6 @@ angular.module('common.datacloud.explorer', [
 
     angular.extend(vm, {
         debug: (window.location.search.indexOf('debug=1') > 0),
-        Math: window.Math,
         label: {
             total: 'Total',
             premium: 'Premium',
@@ -879,6 +878,16 @@ angular.module('common.datacloud.explorer', [
         array.forEach(function(item, index) {
             if(item) {
                 ret.push(item);
+            }
+        });
+        return ret;
+    }
+
+    vm.removeEmptyCategories = function(categories) {
+        var ret = [];
+        categories.forEach(function(category, index) {
+            if(vm.categoryCount(category)) {
+                ret.push(category);
             }
         });
         return ret;

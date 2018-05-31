@@ -121,11 +121,14 @@ angular
                 Result: null
             };
 
+            console.log("addEventListener('error')", result, this.responseText, xhr); // adding this so once it's deployed I can see when it triggers for  PLS-7212
+
             deferred.resolve(result);
         });
 
         xhr.addEventListener('abort', function(event) {
             deferred.resolve(this.responseText);
+            console.log("addEventListener('abort')", this.responseText, xhr); // adding this so once it's deployed I can see when it triggers for  PLS-7212
         });
 
         xhr.open('POST', options.url);
