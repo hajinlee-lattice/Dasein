@@ -5,6 +5,7 @@ import json
 from trainingtestbase import TrainingTestBase
 from uuid import UUID
 
+
 class EnhancedFilesTest(TrainingTestBase):
 
     def tearDown(self):
@@ -17,6 +18,7 @@ class EnhancedFilesTest(TrainingTestBase):
         self.check_model_summary()
         self.check_data_composition()
         self.check_score_derivation()
+        self.check_fit_function_parameters()
 
     def launch(self, model):
         # Dynamically import launcher to make sure globals() is clean in launcher
@@ -73,11 +75,13 @@ class EnhancedFilesTest(TrainingTestBase):
         self.assertEqual(provenance["QueryName"], "DataForScoring_Lattice")
 
     def check_data_composition(self):
-        # Output File Exists?        
         outputFile = "./results/enhancements/datacomposition.json"
         self.assertTrue(os.path.isfile(outputFile))
 
     def check_score_derivation(self):
-        # Output File Exists?       
         outputFile = "./results/enhancements/scorederivation.json"
+        self.assertTrue(os.path.isfile(outputFile))
+
+    def check_fit_function_parameters(self):
+        outputFile = "./results/enhancements/fitfunctionparameters.json"
         self.assertTrue(os.path.isfile(outputFile))

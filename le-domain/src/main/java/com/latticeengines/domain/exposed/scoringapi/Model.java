@@ -12,6 +12,7 @@ public class Model {
     public static final String HDFS_ENHANCEMENTS_DIR = "enhancements/";
     public static final String PMML_FILENAME = "rfpmml.xml";
     public static final String SCORE_DERIVATION_FILENAME = "scorederivation.json";
+    public static final String FIT_FUNCTION_PARAMETERS = "fitfunctionparameters.json";
     public static final String DATA_COMPOSITION_FILENAME = "datacomposition.json";
     public static final String MODEL_JSON = "model.json";
     public static final String DATA_EXPORT_CSV = "_dataexport.csv";

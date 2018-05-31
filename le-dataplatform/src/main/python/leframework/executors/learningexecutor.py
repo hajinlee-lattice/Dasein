@@ -30,6 +30,7 @@ from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
+from leframework.model.states.generatefitfunction import FitFunctionGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -77,7 +78,8 @@ class LearningExecutor(Executor):
         stateMachine.addState(CrossValidationGenerator(), 20)
         stateMachine.addState(EnhancedSummaryGenerator(), 21)
         stateMachine.addState(ModelPredictorGenerator(), 22)
-        stateMachine.addState(Finalize(), 23)
+        stateMachine.addState(FitFunctionGenerator(), 23)
+        stateMachine.addState(Finalize(), 24)
         return stateMachine
 
     @overrides(Executor)
