@@ -252,6 +252,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 templateTable.addAttribute(newAttr);
             } else {
                 templateAttrs.get(attr.getName()).setDisplayName(attr.getDisplayName());
+                if (attr.getSourceAttrName() != null) {
+                    templateAttrs.get(attr.getName()).setSourceAttrName(attr.getSourceAttrName());
+                }
             }
         }
         return templateTable;

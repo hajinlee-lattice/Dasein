@@ -38,12 +38,19 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     private VdbImportConfig errorVdbMetadata;
 
+    private VdbImportConfig vdbMetadata1;
+
+    private VdbImportConfig vdbMetadata2;
+
     private Table testTable;
 
     private Table resolvedTable;
 
     @Autowired
     private VdbDataFeedMetadataServiceImpl vdbDataFeedMetadataService;
+
+    @Autowired
+    private DataFeedTaskManagerServiceImpl dataFeedTaskManagerService;
 
     @Autowired
     private CDLExternalSystemService cdlExternalSystemService;
@@ -63,6 +70,32 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
                 IOUtils.toString(Thread.currentThread().getContextClassLoader()
                         .getResourceAsStream("metadata/vdb/testmetadata_error.json"), "UTF-8"),
                 VdbLoadTableConfig.class));
+        vdbMetadata1 = new VdbImportConfig();
+        vdbMetadata2 = new VdbImportConfig();
+        vdbMetadata1.setVdbLoadTableConfig(JsonUtils.deserialize(
+                IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("metadata/vdb/test1.json"), "UTF-8"),
+                VdbLoadTableConfig.class));
+        vdbMetadata2.setVdbLoadTableConfig(JsonUtils.deserialize(
+                IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("metadata/vdb/test2.json"), "UTF-8"),
+                VdbLoadTableConfig.class));
+    }
+
+    @Test(groups = "functional")
+    public void mergeTest() {
+        Table test1Table = vdbDataFeedMetadataService.getMetadata(vdbMetadata1, "Account");
+        Table test2Table = vdbDataFeedMetadataService.getMetadata(vdbMetadata2, "Account");
+
+        Table schemaTable1 = SchemaRepository.instance().getSchema(BusinessEntity.Account);
+        Table schemaTable2 = SchemaRepository.instance().getSchema(BusinessEntity.Account);
+        Table resolved1 = vdbDataFeedMetadataService.resolveMetadata(test1Table, schemaTable1);
+        Table resolved2 = vdbDataFeedMetadataService.resolveMetadata(test2Table, schemaTable2);
+        Assert.assertNotNull(resolved2.getAttribute(InterfaceName.CompanyName));
+        Assert.assertNull(resolved2.getAttribute(InterfaceName.CompanyName).getSourceAttrName());
+        Table mergedTable = dataFeedTaskManagerService.mergeTable(resolved2, resolved1);
+        Assert.assertNotNull(mergedTable.getAttribute(InterfaceName.CompanyName));
+        Assert.assertNotNull(mergedTable.getAttribute(InterfaceName.CompanyName).getSourceAttrName());
     }
 
     @Test(groups = "functional", expectedExceptions = RuntimeException.class)

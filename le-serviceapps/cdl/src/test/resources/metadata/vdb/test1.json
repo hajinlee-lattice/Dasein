@@ -1,0 +1,379 @@
+{
+  "batch_size": 20000,
+  "create_table_rule": "CREATE",
+  "data_category": "CDL",
+  "get_query_data_endpoint": "http://10.41.1.187:8089/DLRestService/GetVisiDBQueryData",
+  "launch_id": "1014487_Job_1968",
+  "merge_rule": "APPEND",
+  "report_status_endpoint": "http://10.41.1.187:8089/DLRestService/SetLoadDataJobStatus_DP",
+  "table_name": "Acccount_Stream_Std",
+  "tenant_id": "FisherScientific_CDL_Test",
+  "total_rows": 276919,
+  "vdb_query_handle": "11187",
+  "vdb_spec_metadata": [
+    {
+      "approved_usage": null,
+      "column_name": "Address_Street_1",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(255)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Address_Street_1",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Address_Street_2",
+      "data_quality": null,
+      "data_source": null,
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Address_Street_2",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "City",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(150)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "City",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Company_Name",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(1900)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Company Name",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Country",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(150)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Country",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "CrmAccount_External_ID",
+      "data_quality": null,
+      "data_source": [
+        "SFDC_Account_Key_XW_Import",
+        "FlatFile_Account_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "CrmAccount_External_ID",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "DUNS",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(18)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "DUNS",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Est_Yearly_Revenue",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "Double",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Est_Yearly_Revenue",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Est_Yearly_Revenue_Currency_External_ID",
+      "data_quality": null,
+      "data_source": null,
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Est_Yearly_Revenue_Currency_External_ID",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "ID",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "VarChar(50)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "ID",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Lattitude",
+      "data_quality": null,
+      "data_source": null,
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Lattitude",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Longitude",
+      "data_quality": null,
+      "data_source": null,
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Longitude",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Parent_External_ID",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(50)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Parent_External_ID",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Phone",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(150)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Phone",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Postal_Code",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(150)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Postal_Code",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Spend_Analytics_Segment",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import",
+        "Domain_Account_Key_XW_Import",
+        "Cfg_Prov_OrbToIndustry_Import",
+        "Cfg_Prov_IndustryRollup4_Import",
+        "Cfg_Prov_IndustryRollup3_Import",
+        "Cfg_Prov_IndustryRollup2_Import"
+      ],
+      "data_type": "NVarChar(300)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Segment",
+      "extensions": [
+        {
+          "Key": "Category",
+          "Value": "Firm"
+        }
+      ],
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "State_Province",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(150)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "State_Province",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Type",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(100)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Type",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Website",
+      "data_quality": null,
+      "data_source": [
+        "S_Account_Import"
+      ],
+      "data_type": "NVarChar(1900)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Website",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    }
+  ]
+}
