@@ -43,7 +43,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         }
 
         vm.$onInit = function() {
-            // console.log(vm.orgs);
+            console.log(vm.orgs);
             // console.log(vm.accountids);
             // console.log(vm.featureflags);
 

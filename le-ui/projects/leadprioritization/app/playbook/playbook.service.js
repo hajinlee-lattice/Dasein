@@ -725,9 +725,9 @@ angular.module('lp.playbook')
             data: {
                 ratingIdLookupColumnPairs:[
                     {
-                        responseKeyId: accountId,
-                        ratingEngineId: engineId,
-                        lookupColumn: accountId
+                        responseKeyId: accountId || null,
+                        ratingEngineId: engineId || null,
+                        lookupColumn: accountId || null
                     }
                 ]
             }

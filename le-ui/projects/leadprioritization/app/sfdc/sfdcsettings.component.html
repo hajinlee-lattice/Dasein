@@ -56,16 +56,18 @@
                         </tr>
                     </tbody>
                     <tbody ng-if="$ctrl.orgs.length > 0">
-                        <tr ng-repeat="org in $ctrl.orgs">
+                        <tr ng-repeat="org in $ctrl.orgs"
+                            ng-class="{disabled: org.isRegistered === false}">
                             <td>{{ org.orgId }}</td>
-                            <td>{{ org.orgName }}</td>
+                            <td>{{ org.orgName }} <span class="unregisterd"> - Unregistered Org</span></td>
                             <td>
                                 <select
                                     class="form-control"
                                     name="accountId"
                                     ng-init="$ctrl.accountids[org.accountId]" 
                                     ng-model="org.accountId" 
-                                    ng-required="org.accountId == null || org.accountId == ''">
+                                    ng-required="org.accountId == null || org.accountId == ''"
+                                    ng-disabled="org.isRegistered === false">
                                         <option value="">Select</option>
                                         <option ng-repeat="accountid in $ctrl.accountids" value="{{accountid.fieldName}}">CRM: {{accountid.displayName}}</option>
                                     </select>

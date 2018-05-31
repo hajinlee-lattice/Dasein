@@ -1,8 +1,6 @@
 
 
 <section class="playbook playbook-launch-history container">
-
-
     <div 
         ng-if="vm.launchesCount === 0"
         class="no-data">
@@ -13,16 +11,12 @@
             Create a play
         </a>
     </div>
-
-
-
     <div
         ng-if="vm.launchesCount > 0" 
         class="card-content" 
         ng-class="{'has-footer': !vm.allPlaysHistory}">
 
         <menu-filter-by config="vm.header.filter"></menu-filter-by>
-
         <chips 
             ng-show="vm.allPlaysHistory"
             placeholder="All Launched Plays" 
@@ -33,7 +27,6 @@
             queryscope="displayName"
             displayname="displayName">
         </chips>
-        
         <ul class="history-metadata">
         	<li>
         		<dl>
@@ -132,7 +125,11 @@
     			</tr>
     		</thead>
     		<tbody>
-    			<tr ng-repeat="launch in vm.launches.launchSummaries | filter: vm.header.filter.value : true">
+    			<tr ng-repeat="
+                    launch in vm.launches.launchSummaries | 
+                    filter: vm.header.filter.value : true | 
+                    startFrom: (vm.currentPage - 1) * vm.pagesize | 
+                    limitTo: vm.pagesize">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
                     <td ng-if="vm.allPlaysHistory">{{launch.playDisplayName}}</td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
@@ -153,7 +150,7 @@
         <pd-pagination-controls
             ng-if="vm.showPagination"
             current="vm.currentPage"
-            max="vm.launchesCount / vm.pagesize"
+            max="max = vm.header.filter.filtered.length / vm.pagesize"
             class="pull-right">
         </pd-pagination-controls>
 

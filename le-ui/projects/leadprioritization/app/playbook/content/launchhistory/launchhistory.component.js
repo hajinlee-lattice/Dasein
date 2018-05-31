@@ -15,6 +15,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         currentPage: 1,
         pagesize: 10,
         showPagination: false,
+        playName: null,
         sortBy: 'created',
         sortDesc: true,
         header: {
@@ -28,30 +29,9 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     vm.init = function() {
 
         // console.log(vm.stored);
-        // console.log(vm.launches);
+        console.log(vm.launches);
 
-        var launchSummaries = vm.launches.launchSummaries;
-
-        vm.header.filter.items = [
-            { 
-                label: "All", 
-                action: {}, 
-                total:  launchSummaries.length
-            }
-        ];
-
-        angular.forEach(vm.launches.uniqueLookupIdMapping, function(value, key) {
-            angular.forEach(value, function(val, index) {
-   
-                vm.header.filter.items.push({ 
-                    label: val.orgName, 
-                    action: {
-                        destinationOrgId: val.orgId
-                    }
-                });
-
-            });
-        });
+        vm.updateFilterData();
 
         vm.defaultPlayLaunchList = angular.copy(vm.launches.uniquePlaysWithLaunches);
         vm.defaultPlayLaunchList.unshift({playName: null, displayName: 'All Launched Plays'});
@@ -62,6 +42,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.showPagination = (vm.launchesCount > vm.pagesize) ? true : false;
         vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
 
+        var launchSummaries = vm.launches.launchSummaries;
         for(var i = 0; i < launchSummaries.length; i++) {
             if (launchSummaries[i].launchState == 'Launching') {
                 vm.launching = true;
@@ -77,6 +58,29 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             contactsWithinRecommendations: vm.cumulativeStats.contactsWithinRecommendations
         }
     };
+
+    vm.updateFilterData = function() {
+        vm.header.filter.items = [
+            { 
+                label: "All", 
+                action: {}, 
+                total:  vm.launchesCount
+            }
+        ];
+
+        angular.forEach(vm.launches.uniqueLookupIdMapping, function(value, key) {
+            angular.forEach(value, function(val, index) {
+   
+                vm.header.filter.items.push({ 
+                    label: val.orgName, 
+                    action: {
+                        destinationOrgId: val.orgId
+                    }
+                });
+
+            });
+        });
+    }
 
     vm.count = function(type, current) {
         var filter = current
@@ -110,32 +114,48 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
     vm.sort = function(header) {
         vm.sortBy = header;
+
+        console.log(vm.playName, $stateParams.play_name);
+
         var params = {
-            playName: $stateParams.play_name,
-            sortby: header,
-            descending: vm.sortDesc,
-            offset: 0
-        };
-        PlaybookWizardStore.getPlayLaunches(params).then(function(result){
-            vm.launches = result;
-        });
-    }
-
-    vm.playSelectChange = function(play){
-        var playName = null;
-
-        if(play === undefined || play.length == 0){
-            playName = null;
-        } else {
-            playName = play[0].name;
-        }
-
-        var dataParams = {
-                playName: playName,
+                playName: vm.playName || $stateParams.play_name,
+                sortby: header,
+                descending: vm.sortDesc,
                 offset: 0
             },
             countParams = {
-                playName: playName,
+                playName: vm.playName,
+                offset: 0,
+                startTimestamp: 0
+            };
+
+        PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+            vm.launches = result;
+        });
+
+        // PlaybookWizardStore.getPlayLaunchCount(countParams).then(function(result){
+        //     if(result > vm.pagesize){
+        //         vm.showPagination = true;
+        //     } else {
+        //         vm.showPagination = false;
+        //     }
+        // });
+    }
+
+    vm.playSelectChange = function(play){
+
+        if(play === undefined || play.length == 0){
+            vm.playName = null;
+        } else {
+            vm.playName = play[0].name;
+        }
+
+        var dataParams = {
+                playName: vm.playName,
+                offset: 0
+            },
+            countParams = {
+                playName: vm.playName,
                 offset: 0,
                 startTimestamp: 0
             };
@@ -144,6 +164,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             vm.launches = result;
         });
         PlaybookWizardStore.getPlayLaunchCount(countParams).then(function(result){
+            vm.launchesCount = result;
+            vm.updateFilterData();
             if(result > vm.pagesize){
                 vm.showPagination = true;
             } else {

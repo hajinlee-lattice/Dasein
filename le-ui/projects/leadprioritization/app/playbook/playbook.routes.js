@@ -690,7 +690,20 @@ angular
                     var deferred = $q.defer();
 
                     SfdcStore.getOrgs().then(function (result) {
+                        
                         deferred.resolve(result.CRM);
+                        
+                        // var orgs = result.CRM;
+
+                        // angular.forEach(orgs, function(value, key) {
+                        //     if (value.isRegistered === false) {
+                        //         orgs.splice(key, 1);
+                        //     }
+                        // });
+
+                        // orgs.filter(function(vendor){ return vendor.Name === "Magenic" });
+
+                        // deferred.resolve(orgs);
                     });
 
                     return deferred.promise;
