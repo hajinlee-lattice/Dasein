@@ -303,7 +303,7 @@ public enum LedpCode {
     LEDP_18180(
             "There is no active Rating Model associated with the current Rating Engine {0} and thus it cannot be activated."), //
     LEDP_18181("The current Rating Engine {0} is not inactive thus it cannot be deleted."), //
-    LEDP_18182("Submit ProcessAnalyze job failed: {0}"), //
+    LEDP_18182("Submit {0} job failed: {1}"), //
     LEDP_18183("Column name {0} has potential conflict with system defined name, Please don't begin with {1}"), //
     LEDP_18184("Job cannot be null or incomplete"), //
 

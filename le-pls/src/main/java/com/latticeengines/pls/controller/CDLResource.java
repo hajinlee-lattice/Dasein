@@ -61,7 +61,7 @@ public class CDLResource {
             return ResponseDocument.successResponse(result.toString());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit processAnalyze job: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] {e.getMessage()});
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"ProcessAnalyze", e.getMessage()});
         }
     }
 
@@ -84,8 +84,13 @@ public class CDLResource {
                                             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
                                             @RequestParam(value = "cleanupOperationType") CleanupOperationType type) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        ApplicationId applicationId = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
-        return ResponseDocument.successResponse(applicationId.toString());
+        try {
+            ApplicationId applicationId = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
+            return ResponseDocument.successResponse(applicationId.toString());
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to submit cleanup by upload job: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"Cleanup", e.getMessage()});
+        }
     }
 
     @RequestMapping(value = "/cleanupbyrange", method = RequestMethod.POST)
@@ -94,15 +99,25 @@ public class CDLResource {
                                             @RequestParam(value = "endTime") String endTime,
                                             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        ApplicationId applicationId = cdlService.cleanupByTimeRange(customerSpace.toString(), startTime, endTime, schemaInterpretation);
-        return ResponseDocument.successResponse(applicationId.toString());
+        try {
+            ApplicationId applicationId = cdlService.cleanupByTimeRange(customerSpace.toString(), startTime, endTime, schemaInterpretation);
+            return ResponseDocument.successResponse(applicationId.toString());
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to submit cleanup by range job: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"Cleanup", e.getMessage()});
+        }
     }
 
     @RequestMapping(value = "/cleanupall", method = RequestMethod.POST)
     @ApiOperation(value = "Start cleanup job")
     public ResponseDocument<String> cleanupAll(@RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        ApplicationId applicationId = cdlService.cleanupAllData(customerSpace.toString(), schemaInterpretation);
-        return ResponseDocument.successResponse(applicationId.toString());
+        try {
+            ApplicationId applicationId = cdlService.cleanupAllData(customerSpace.toString(), schemaInterpretation);
+            return ResponseDocument.successResponse(applicationId.toString());
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to submit cleanup all job: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"Cleanup", e.getMessage()});
+        }
     }
 }
