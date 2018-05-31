@@ -1,11 +1,14 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -13,6 +16,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.FeatureFlagService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
@@ -29,6 +33,9 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
     private static FeatureFlagDefinition definition = newFlagDefinition();
     private static final String FLAG_ID = "TestFlag";
 
+    @Value("${admin.overwrite.cdl.autoschedule:true}")
+    private boolean autoSchedule;
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
         featureFlagService.undefineFlag(FLAG_ID);
@@ -43,7 +50,6 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
     public void testDefaultFeatureFlags() {
         FeatureFlagDefinitionMap defaultFeatureFlagMap = featureFlagService.getDefinitions();
         Assert.assertNotNull(defaultFeatureFlagMap);
-        System.out.println(defaultFeatureFlagMap.keySet());
         Assert.assertTrue(defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length,
                 "Should have at least LatticeFeatureFlags");
         Assert.assertTrue(
@@ -72,6 +78,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, //
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG);
+        if (autoSchedule ^ true) {
+            expectedDefaultFalseFlags = new ArrayList<>(expectedDefaultFalseFlags);
+            expectedDefaultFalseFlags.add(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+        }
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);
