@@ -257,7 +257,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             } else {
                 throw new LedpException(LedpCode.LEDP_28000, new String[] { String.valueOf(workflowId.getId()) });
             }
-        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException | RuntimeException e) {
+        } catch (NoSuchJobExecutionException | JobExecutionNotRunningException | IllegalArgumentException e) {
             throw new LedpException(LedpCode.LEDP_28003, e, new String[] { String.valueOf(workflowId.getId()) });
         }
     }
