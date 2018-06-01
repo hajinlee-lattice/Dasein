@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -34,6 +36,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -59,9 +62,11 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelin
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("ratingEngineEntityMgr")
@@ -384,13 +389,58 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         ruleBasedModel.setId(RuleBasedModel.generateIdStr());
         ruleBasedModel.setRatingEngine(ratingEngine);
-        ruleBasedModel.setRatingRule(new RatingRule());
+
+        ruleBasedModel.setRatingRule(RatingRule.constructDefaultRule());
         List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
         ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
+
+        populateUnusedAttrsInBktRestrictions(ratingEngine, ruleBasedModel);
+
         ruleBasedModelDao.create(ruleBasedModel);
         ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
         ratingEngine.setActiveModel(ruleBasedModel);
         ratingEngineDao.update(ratingEngine);
+    }
+
+    private void populateUnusedAttrsInBktRestrictions(RatingEngine ratingEngine, RuleBasedModel ruleBasedModel) {
+        Map<String, Map<String, Restriction>> bucketToRuleMap = //
+                ruleBasedModel.getRatingRule().getBucketToRuleMap();
+
+        if (ratingEngine.getSegment() != null) {
+            populateUnusedAttrsInBktRestrictions(ratingEngine, bucketToRuleMap,
+                    ratingEngine.getSegment().getAccountRestriction(), FrontEndQueryConstants.ACCOUNT_RESTRICTION);
+
+            populateUnusedAttrsInBktRestrictions(ratingEngine, bucketToRuleMap,
+                    ratingEngine.getSegment().getContactRestriction(), FrontEndQueryConstants.CONTACT_RESTRICTION);
+        }
+    }
+
+    private void populateUnusedAttrsInBktRestrictions(RatingEngine ratingEngine,
+            Map<String, Map<String, Restriction>> bucketToRuleMap, Restriction partialSegmentRestriction, String type) {
+        Set<String> attributesPartialRestrictionInSegment = new HashSet<>();
+        traverseAndRestriction(attributesPartialRestrictionInSegment, partialSegmentRestriction);
+
+        final Restriction bucketAccountRestriction;
+
+        if (CollectionUtils.isNotEmpty(attributesPartialRestrictionInSegment)) {
+            List<Restriction> unusedAttributeRestrictions = //
+                    attributesPartialRestrictionInSegment.stream() //
+                            .map(attr -> {
+                                BucketRestriction unusedAttrRestriction = new BucketRestriction(
+                                        AttributeLookup.fromString(attr), Bucket.nullBkt());
+                                unusedAttrRestriction.setIgnored(true);
+                                return unusedAttrRestriction;
+                            }) //
+                            .collect(Collectors.toList());
+
+            bucketAccountRestriction = LogicalRestriction.builder().and(unusedAttributeRestrictions).build();
+        } else {
+            bucketAccountRestriction = null;
+        }
+
+        bucketToRuleMap.keySet() //
+                .forEach(k -> bucketToRuleMap.get(k) //
+                        .put(type, bucketAccountRestriction));
     }
 
     private void createAIModel(RatingEngine ratingEngine, AdvancedModelingConfig advancedModelingConfig) {

@@ -1,7 +1,13 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -16,8 +22,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -26,6 +34,10 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
@@ -115,13 +127,62 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
         switch (createdRatingEngine.getType()) {
         case RULE_BASED:
-            Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
+            detailedAssertionForRuleBasedModel(createdRatingEngine);
             break;
         case CROSS_SELL:
             break;
         default:
             break;
         }
+
+    }
+
+    private void detailedAssertionForRuleBasedModel(RatingEngine createdRatingEngine) {
+        Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
+        RuleBasedModel model = (RuleBasedModel) createdRatingEngine.getActiveModel();
+        Set<String> selectedAttributes = new HashSet<>(model.getSelectedAttributes());
+        Assert.assertNotNull(selectedAttributes);
+        Assert.assertFalse(selectedAttributes.isEmpty());
+        Assert.assertNotNull(model.getRatingRule());
+        TreeMap<String, Map<String, Restriction>> bucketRuleMap = model.getRatingRule().getBucketToRuleMap();
+        Assert.assertNotNull(bucketRuleMap);
+        Assert.assertFalse(bucketRuleMap.isEmpty());
+        Arrays.asList(RatingBucketName.values()).stream() //
+                .forEach(b -> {
+                    Assert.assertTrue(bucketRuleMap.containsKey(b.name()));
+                    Map<String, Restriction> rulesMap = bucketRuleMap.get(b.name());
+                    Assert.assertNotNull(rulesMap);
+                    Assert.assertFalse(rulesMap.isEmpty());
+                    List<Boolean> hasNonEmptyPrepopulatedRules = new ArrayList<>();
+                    rulesMap.keySet().stream() //
+                            .forEach(t -> {
+                                Assert.assertTrue(FrontEndQueryConstants.ACCOUNT_RESTRICTION.equals(t) //
+                                        || FrontEndQueryConstants.CONTACT_RESTRICTION.equals(t));
+                                Assert.assertTrue(FrontEndQueryConstants.ACCOUNT_RESTRICTION.equals(t) //
+                                        || FrontEndQueryConstants.CONTACT_RESTRICTION.equals(t));
+                                Restriction topRestriction = rulesMap.get(t);
+                                if (topRestriction != null) {
+                                    hasNonEmptyPrepopulatedRules.add(true);
+                                    Assert.assertTrue(topRestriction instanceof LogicalRestriction);
+                                    List<Restriction> unusedRestrictions = ((LogicalRestriction) topRestriction)
+                                            .getRestrictions();
+                                    Assert.assertFalse(unusedRestrictions.isEmpty());
+                                    unusedRestrictions.stream().forEach(u -> {
+                                        Assert.assertTrue(u instanceof BucketRestriction);
+                                        BucketRestriction unusedRestriction = (BucketRestriction) u;
+                                        Assert.assertTrue(unusedRestriction.getIgnored());
+                                        Assert.assertTrue(
+                                                selectedAttributes.contains(unusedRestriction.getAttr().toString()),
+                                                String.format(
+                                                        "selectedAttributes = %s, unusedRestriction.getAttr() = %s, unusedRestriction = %s",
+                                                        JsonUtils.serialize(selectedAttributes),
+                                                        unusedRestriction.getAttr().toString(),
+                                                        JsonUtils.serialize(unusedRestriction)));
+                                    });
+                                }
+                            });
+                    Assert.assertFalse(hasNonEmptyPrepopulatedRules.isEmpty());
+                });
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
