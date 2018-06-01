@@ -59,11 +59,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
-    public void deleteByLaunchId(String launchId) {
+    public void deleteByLaunchId(String launchId, boolean hardDelete) {
         if (StringUtils.isBlank(launchId)) {
             throw new LedpException(LedpCode.LEDP_18146);
         }
-        playLaunchEntityMgr.deleteByLaunchId(launchId);
+        playLaunchEntityMgr.deleteByLaunchId(launchId, hardDelete);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         dashboard.setCumulativeStats(totalCounts);
         dashboard.setUniquePlaysWithLaunches(uniquePlaysWithLaunches);
         dashboard.setUniqueLookupIdMapping(calculateUniqueLookupIdMapping(playId, launchStates, startTimestamp,
-                endTimestamp, orgId, externalSysType,  skipLoadingAllLookupIdMapping));
+                endTimestamp, orgId, externalSysType, skipLoadingAllLookupIdMapping));
         return dashboard;
     }
 

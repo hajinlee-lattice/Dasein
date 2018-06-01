@@ -92,9 +92,16 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Override
     @Modifying
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteByLaunchId(String launchId) {
+    public void deleteByLaunchId(String launchId, boolean hardDelete) {
         PlayLaunch playLaunch = findByLaunchId(launchId);
-        deletePlayLaunch(playLaunch);
+        if (playLaunch != null) {
+            if (hardDelete) {
+                playLaunchDao.delete(playLaunch);
+            } else {
+                playLaunch.setDeleted(true);
+                playLaunchDao.update(playLaunch);
+            }
+        }
     }
 
     @Override
@@ -137,12 +144,6 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             Long endTimestamp, String orgId, String externalSysType) {
         return playLaunchDao.findTotalCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp,
                 orgId, externalSysType);
-    }
-
-    private void deletePlayLaunch(PlayLaunch playLaunch) {
-        if (playLaunch != null) {
-            playLaunchDao.delete(playLaunch);
-        }
     }
 
     private String generateLaunchId() {

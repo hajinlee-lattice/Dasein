@@ -79,7 +79,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setCreatedBy(CREATED_BY);
 
         playEntityMgr.create(play);
-        play = playEntityMgr.findByName(NAME);
+        play = playEntityMgr.getPlayByName(NAME, false);
 
         playLaunch1 = createPlay(null, null, null);
         playLaunch2 = createPlay(null, null, null);
@@ -432,12 +432,12 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCumulativeStatsDashboard" })
     public void testDelete() {
-        playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId());
-        playLaunchEntityMgr.deleteByLaunchId(playLaunch2.getLaunchId());
-        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org1_1.getLaunchId());
-        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org1_2.getLaunchId());
-        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org2_1.getLaunchId());
-        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org2_2.getLaunchId());
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId(), false);
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch2.getLaunchId(), false);
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org1_1.getLaunchId(), false);
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org1_2.getLaunchId(), false);
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org2_1.getLaunchId(), false);
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org2_2.getLaunchId(), false);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testDelete" })
@@ -453,10 +453,10 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
         if (playLaunch1 != null && playLaunch1.getLaunchId() != null) {
-            playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId());
+            playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         }
         if (playLaunch2 != null && playLaunch2.getLaunchId() != null) {
-            playLaunchEntityMgr.deleteByLaunchId(playLaunch2.getLaunchId());
+            playLaunchEntityMgr.deleteByLaunchId(playLaunch2.getLaunchId(), false);
         }
         Tenant tenant1 = tenantService.findByTenantId("testTenant1");
         if (tenant1 != null) {
@@ -478,7 +478,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private void cleanupPlayLunches() {
         for (PlayLaunch launch : playLaunchEntityMgr.findByState(LaunchState.Launching)) {
-            playLaunchEntityMgr.deleteByLaunchId(launch.getLaunchId());
+            playLaunchEntityMgr.deleteByLaunchId(launch.getLaunchId(), false);
         }
     }
 

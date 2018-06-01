@@ -23,9 +23,13 @@ import javax.persistence.TemporalType;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,8 +46,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @javax.persistence.Table(name = "PLAY_LAUNCH")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
+@FilterDefs({
+        @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
+                @ParamDef(name = "tenantFilterId", type = "java.lang.Long") }),
+        @FilterDef(name = "softDeleteFilter", defaultCondition = "DELETED !=true") })
+@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
+        @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
+public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditingFields, SoftDeletable {
 
     public static final int PID_INIT_VALUE = 1_000_000; // 1M
 
@@ -152,6 +161,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("destinationAccountId")
     @Column(name = "DESTINATION_ACC_ID", nullable = true)
     private String destinationAccountId;
+
+    @Index(name = "PLAY_LAUNCH_DELETED")
+    @JsonProperty("deleted")
+    @Column(name = "DELETED", nullable = false)
+    private Boolean deleted = Boolean.FALSE;
 
     @Override
     public Long getPid() {
@@ -353,6 +367,16 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setDestinationAccountId(String destinationAccountId) {
         this.destinationAccountId = destinationAccountId;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override

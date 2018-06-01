@@ -38,10 +38,12 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     public Recommendation findByRecommendationId(String recommendationId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = String.format("FROM %s WHERE recommendationId = :recommendationId",
-                entityClz.getSimpleName());
+        String queryStr = String.format("FROM %s " //
+                + "WHERE recommendationId = :recommendationId " //
+                + "AND deleted = :notDeleted ", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("recommendationId", recommendationId);
+        query.setBoolean("notDeleted", Boolean.FALSE);
         return (Recommendation) query.uniqueResult();
 
         //
@@ -60,9 +62,12 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     public List<Recommendation> findByLaunchId(String launchId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = String.format("FROM %s WHERE launchId = :launchId", entityClz.getSimpleName());
+        String queryStr = String.format("FROM %s " //
+                + "WHERE launchId = :launchId " //
+                + "AND deleted = :notDeleted ", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("launchId", launchId);
+        query.setBoolean("notDeleted", Boolean.FALSE);
         return query.list();
     }
 
@@ -75,8 +80,10 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Pair<String, String> effectiveOrgInfo = getEffectiveOrgInfo(orgInfo);
 
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = "FROM %s WHERE synchronizationDestination = :syncDestination " //
-                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp ";
+        String queryStr = "FROM %s " //
+                + "WHERE synchronizationDestination = :syncDestination " //
+                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp " //
+                + "AND deleted = :notDeleted ";
 
         queryStr = additionalWhereClause(playIds, effectiveOrgInfo, queryStr);
 
@@ -89,6 +96,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         updateQueryWithLastUpdatedTimestamp(lastModificationDate, query);
 
         setParamValues(playIds, effectiveOrgInfo, query);
+        query.setBoolean("notDeleted", Boolean.FALSE);
 
         return query.list();
     }
@@ -113,8 +121,11 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Pair<String, String> effectiveOrgInfo = getEffectiveOrgInfo(orgInfo);
 
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = "SELECT count(*) FROM %s WHERE synchronizationDestination = :syncDestination " //
-                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp ";
+        String queryStr = "SELECT count(*) " //
+                + "FROM %s " //
+                + "WHERE synchronizationDestination = :syncDestination " //
+                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp " //
+                + "AND deleted = :notDeleted ";
 
         queryStr = additionalWhereClause(playIds, effectiveOrgInfo, queryStr);
 
@@ -126,6 +137,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         updateQueryWithLastUpdatedTimestamp(lastModificationDate, query);
 
         setParamValues(playIds, effectiveOrgInfo, query);
+        query.setBoolean("notDeleted", Boolean.FALSE);
         return ((Long) query.uniqueResult()).intValue();
     }
 
@@ -159,7 +171,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + ") " //
                 + "FROM %s " //
                 + "WHERE synchronizationDestination = :syncDestination " //
-                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp ";
+                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp " //
+                + "AND deleted = :notDeleted ";
 
         queryStr = additionalWhereClause(playIds, effectiveOrgInfo, queryStr);
 
@@ -170,6 +183,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setMaxResults(max);
         query.setFirstResult(offset);
         query.setString("syncDestination", syncDestination);
+        query.setBoolean("notDeleted", Boolean.FALSE);
 
         updateQueryWithLastUpdatedTimestamp(lastModificationDate, query);
 
@@ -223,23 +237,106 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     }
 
     @Override
-    public void deleteInBulkByCutoffDate(Date cutoffDate) {
-        // WIP
+    public void deleteByRecommendationId(String recommendationId, boolean hardDelete) {
+        Session session = getSessionFactory().getCurrentSession();
+
+        Class<Recommendation> entityClz = getEntityClass();
+        String updateQueryStr = "UPDATE %s SET deleted = :deleted " //
+                + "WHERE recommendationId = :recommendationId ";
+
+        updateQueryStr = String.format(updateQueryStr, entityClz.getSimpleName());
+        Query query = session.createQuery(updateQueryStr);
+        query.setBoolean("deleted", Boolean.TRUE);
+        query.setParameter("recommendationId", recommendationId);
+        query.executeUpdate();
     }
 
     @Override
-    public void deleteByRecommendationId(String recommendationId) {
-        // WIP
+    public int deleteInBulkByLaunchId(String launchId, boolean hardDelete, int maxUpdateRows) {
+        Session session = getSessionFactory().getCurrentSession();
+
+        Class<Recommendation> entityClz = getEntityClass();
+        String selectQueryStr = "SELECT recommendationId " + "FROM %s " //
+                + "WHERE launchId = :launchId " //
+                + "AND deleted = :notDeleted ";
+
+        selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
+
+        Query query = session.createQuery(selectQueryStr);
+        query.setParameter("launchId", launchId);
+        query.setBoolean("notDeleted", Boolean.FALSE);
+        query.setMaxResults(maxUpdateRows);
+        List<?> recommendationIds = query.getResultList();
+
+        return runBulkUpdate(session, entityClz, recommendationIds);
     }
 
     @Override
-    public void deleteInBulkByLaunchId(String launchId) {
-        // WIP
+    public int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows) {
+        Session session = getSessionFactory().getCurrentSession();
+
+        Class<Recommendation> entityClz = getEntityClass();
+        String selectQueryStr = "SELECT recommendationId " //
+                + "FROM %s " //
+                + "WHERE playId = :playId " //
+                + "AND deleted = :notDeleted ";
+        if (cutoffDate != null) {
+            selectQueryStr += "AND UNIX_TIMESTAMP(launchDate) <= :launchDate ";
+        }
+
+        selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
+
+        Query query = session.createQuery(selectQueryStr);
+        query.setParameter("playId", playId);
+        query.setBoolean("notDeleted", Boolean.FALSE);
+        if (cutoffDate != null) {
+            query.setBigInteger("launchDate", new BigInteger((dateToUnixTimestamp(cutoffDate).toString())));
+        }
+        query.setMaxResults(maxUpdateRows);
+        List<?> recommendationIds = query.getResultList();
+
+        return runBulkUpdate(session, entityClz, recommendationIds);
     }
 
     @Override
-    public void deleteInBulkByPlayId(String playId, Date cutoffDate) {
-        // WIP
+    public int deleteInBulkByCutoffDate(Date cutoffDate, boolean hardDelete, int maxUpdateRows) {
+        if (cutoffDate == null) {
+            return 0;
+        }
+        Session session = getSessionFactory().getCurrentSession();
+
+        Class<Recommendation> entityClz = getEntityClass();
+        String selectQueryStr = "SELECT recommendationId " //
+                + "FROM %s " //
+                + "WHERE UNIX_TIMESTAMP(launchDate) <= :launchDate " //
+                + "AND deleted = :notDeleted ";
+
+        selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
+
+        Query query = session.createQuery(selectQueryStr);
+        query.setBigInteger("launchDate", new BigInteger((dateToUnixTimestamp(cutoffDate).toString())));
+        query.setBoolean("notDeleted", Boolean.FALSE);
+
+        query.setMaxResults(maxUpdateRows);
+        List<?> recommendationIds = query.getResultList();
+
+        return runBulkUpdate(session, entityClz, recommendationIds);
     }
 
+    private int runBulkUpdate(Session session, Class<Recommendation> entityClz, List<?> recommendationIds) {
+        if (CollectionUtils.isEmpty(recommendationIds)) {
+            return 0;
+        }
+
+        String updateQueryStr = "UPDATE %s " //
+                + "SET deleted = :deleted " //
+                + "WHERE recommendationId IN (:recommendationIds) ";
+
+        updateQueryStr = String.format(updateQueryStr, entityClz.getSimpleName());
+
+        Query<?> query = session.createQuery(updateQueryStr);
+        query.setBoolean("deleted", Boolean.TRUE);
+        query.setParameterList("recommendationIds", recommendationIds);
+        return query.executeUpdate();
+    }
 }

@@ -254,7 +254,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         }
 
         // Soft Delete should fail since Rating is still active
-        play.setPlayStatus(PlayStatus.DELETED);
+        play.setDeleted(true);
         playEntityMgr.createOrUpdatePlay(play);
         try {
             ratingEngineEntityMgr.deleteRatingEngine(re, false);

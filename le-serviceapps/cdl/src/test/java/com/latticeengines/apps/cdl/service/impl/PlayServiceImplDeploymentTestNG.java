@@ -19,11 +19,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 
 public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -36,8 +37,6 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Inject
     private SegmentProxy segmentProxy;
 
-    private RatingEngine ratingEngine1;
-
     @Inject
     private PlayService playService;
 
@@ -47,6 +46,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Inject
     private TalkingPointProxy talkingPointProxy;
 
+    private RatingEngine ratingEngine1;
     private Play play;
     private String playName;
 
@@ -78,9 +78,9 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Play newPlay = playService.createOrUpdate(play, mainTestTenant.getId());
         assertPlay(newPlay);
         playName = newPlay.getName();
-        newPlay = playService.getPlayByName(playName);
+        newPlay = playService.getPlayByName(playName, true);
         assertPlay(newPlay);
-        newPlay = playService.getFullPlayByName(playName);
+        newPlay = playService.getFullPlayByName(playName, true);
         assertPlay(newPlay);
         List<Play> plays = playService.getAllFullPlays(false, ratingEngine1.getId());
         Assert.assertNotNull(plays);
@@ -115,18 +115,129 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "testFindDependingPalys" })
     public void testDelete() {
-        playService.deleteByName(playName);
-        Play newPlay = playService.getPlayByName(playName);
-        Assert.assertNull(newPlay);
-        List<Play> plays = playService.getAllPlays();
+        Play retrievedPlay = playService.getPlayByName(playName, false);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+
+        retrievedPlay.setPlayStatus(PlayStatus.INACTIVE);
+        playService.createOrUpdate(retrievedPlay, mainCustomerSpace);
+
+        retrievedPlay = playService.getPlayByName(playName, true);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+
+        playService.deleteByName(playName, false);
+        List<Play> playList = playService.getAllPlays();
+        Assert.assertNotNull(playList);
+        Assert.assertEquals(playList.size(), 0);
+
+        retrievedPlay = playService.getPlayByName(playName, false);
+        Assert.assertNull(retrievedPlay);
+
+        retrievedPlay = playService.getPlayByName(playName, true);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+
+        List<String> deletedPlayIds = playService.getAllDeletedPlayIds(true);
+        Assert.assertNotNull(deletedPlayIds);
+        Assert.assertEquals(deletedPlayIds.size(), 1);
+        Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
+
+        deletedPlayIds = playService.getAllDeletedPlayIds(false);
+        Assert.assertNotNull(deletedPlayIds);
+        Assert.assertEquals(deletedPlayIds.size(), 1);
+        Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
+
+        retrievedPlay.setIsCleanupDone(Boolean.TRUE);
+        playService.createOrUpdate(retrievedPlay, mainTestTenant.getId());
+
+        retrievedPlay = playService.getPlayByName(playName, true);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.TRUE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+
+        deletedPlayIds = playService.getAllDeletedPlayIds(true);
+        Assert.assertNotNull(deletedPlayIds);
+        Assert.assertEquals(deletedPlayIds.size(), 0);
+
+        deletedPlayIds = playService.getAllDeletedPlayIds(false);
+        Assert.assertNotNull(deletedPlayIds);
+        Assert.assertEquals(deletedPlayIds.size(), 1);
+        Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testDelete" })
+    public void testDeleteViaRatingEngine() {
+        Play newPlay = playService.createOrUpdate(createDefaultPlay(), mainTestTenant.getId());
+        assertPlay(newPlay);
+        playName = newPlay.getName();
+        newPlay = playService.getPlayByName(playName, true);
+        assertPlay(newPlay);
+        newPlay = playService.getFullPlayByName(playName, true);
+        assertPlay(newPlay);
+        List<Play> plays = playService.getAllFullPlays(false, ratingEngine1.getId());
         Assert.assertNotNull(plays);
-        Assert.assertEquals(plays.size(), 0);
+        Assert.assertEquals(plays.size(), 1);
+
+        Play retrievedPlay = playService.getPlayByName(playName, false);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+
+        ratingEngineService.deleteById(ratingEngine1.getId(), false);
+
+        retrievedPlay = playService.getPlayByName(playName, false);
+        Assert.assertNull(retrievedPlay);
+
+        retrievedPlay = playService.getPlayByName(playName, true);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
     }
 
     private void assertPlay(Play play) {
         Assert.assertNotNull(play);
         Assert.assertEquals(play.getCreatedBy(), CREATED_BY);
         Assert.assertNotNull(play.getRatingEngine());
+        Assert.assertNotNull(play.getName());
+        Assert.assertNotNull(play.getPid());
         log.info(String.format("play is %s", play.toString()));
     }
 
@@ -143,7 +254,8 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         // or mock dante server using StandaloneHttpServer
 
         // List<TalkingPointDTO> tps = new ArrayList<>();
-        // talkingPointProxy.createOrUpdateByNameAndStorageType(tps, tenant.getId());
+        // talkingPointProxy.createOrUpdateByNameAndStorageType(tps,
+        // tenant.getId());
 
         return play;
     }

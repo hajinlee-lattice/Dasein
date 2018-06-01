@@ -20,7 +20,11 @@ import javax.persistence.TemporalType;
 
 import org.apache.avro.Schema;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,13 +34,19 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.SoftDeletable;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
 @javax.persistence.Table(name = "Recommendation")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class Recommendation implements HasPid, HasId<String>, HasTenantId {
+@FilterDefs({
+        @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
+                @ParamDef(name = "tenantFilterId", type = "java.lang.Long") }),
+        @FilterDef(name = "softDeleteFilter", defaultCondition = "DELETED !=true") })
+@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
+        @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
+public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftDeletable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -135,6 +145,11 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     @JsonProperty("tenant_id")
     private Long tenantId;
+
+    @Index(name = "REC_DELETED")
+    @JsonProperty("deleted")
+    @Column(name = "DELETED", nullable = false)
+    private Boolean deleted = Boolean.FALSE;
 
     public Long getPid() {
         return pid;
@@ -304,12 +319,24 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
         this.destinationSysType = destinationSysType;
     }
 
+    @Override
     public Long getTenantId() {
         return tenantId;
     }
 
+    @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override
@@ -347,6 +374,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
         setAttribute(schema, index++, "DESTINATION_ORG_ID", Schema.Type.STRING);
         setAttribute(schema, index++, "DESTINATION_SYS_TYPE", Schema.Type.STRING);
         setAttribute(schema, index++, "TENANT_ID", Schema.Type.LONG);
+        setAttribute(schema, index++, "DELETED", Schema.Type.BOOLEAN);
 
         return schema;
     }
@@ -381,6 +409,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
             recMap.put("DESTINATION_ORG_ID", rec.getDestinationOrgId());
             recMap.put("DESTINATION_SYS_TYPE", rec.getDestinationSysType());
             recMap.put("TENANT_ID", rec.getTenantId());
+            recMap.put("DELETED", rec.getDeleted());
         }
 
         return recMap;

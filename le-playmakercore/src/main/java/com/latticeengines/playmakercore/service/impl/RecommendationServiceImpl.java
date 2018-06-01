@@ -22,7 +22,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public void delete(Recommendation entity) {
+    public void delete(Recommendation entity, boolean hardDelete) {
         recommendationEntityMgr.delete(entity);
     }
 

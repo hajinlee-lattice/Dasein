@@ -95,7 +95,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Play play1 = playList.get(0);
         playName = play1.getName();
         log.info(String.format("play1 has name %s", playName));
-        retrievedPlay = playEntityMgr.findByName(playName);
+        retrievedPlay = playEntityMgr.getPlayByName(playName, true);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreate" })
@@ -118,7 +118,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     public void testUpdate() {
         retrievedPlay.setDescription(null);
         retrievedPlay.setDisplayName(NEW_DISPLAY_NAME);
-        retrievedPlay.setPlayStatus(PlayStatus.DELETED);
+        retrievedPlay.setPlayStatus(PlayStatus.INACTIVE);
         RatingEngine newRatingEngine = new RatingEngine();
         newRatingEngine.setId(ratingEngine2.getId());
         retrievedPlay.setRatingEngine(newRatingEngine);
@@ -127,32 +127,88 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         log.info("ratingEngine 2 is " + ratingEngine2.getId());
 
         playEntityMgr.createOrUpdatePlay(retrievedPlay);
-        retrievedPlay = playEntityMgr.findByName(playName);
+        retrievedPlay = playEntityMgr.getPlayByName(playName, true);
         Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), playName);
         Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
         Assert.assertEquals(retrievedPlay.getDisplayName(), NEW_DISPLAY_NAME);
         Assert.assertNotNull(retrievedPlay.getDisplayName());
         Assert.assertNotNull(retrievedPlay.getRatingEngine());
-        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.DELETED);
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
         Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine2.getId());
 
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
 
-        playList = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine2, Arrays.asList(PlayStatus.DELETED));
+        playList = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine2, Arrays.asList(PlayStatus.INACTIVE));
         Assert.assertEquals(playList.size(), 1);
-        playList = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine1, Arrays.asList(PlayStatus.DELETED));
+        playList = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine1, Arrays.asList(PlayStatus.INACTIVE));
         Assert.assertEquals(playList.size(), 0);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
-        playEntityMgr.deleteByName(playName);
+        retrievedPlay = playEntityMgr.getPlayByName(playName, false);
+        Assert.assertNotNull(retrievedPlay);
+
+        retrievedPlay = playEntityMgr.getPlayByName(playName, true);
+        Assert.assertNotNull(retrievedPlay);
+
+        playEntityMgr.deleteByName(playName, false);
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 0);
-    }
 
+        retrievedPlay = playEntityMgr.getPlayByName(playName, false);
+        Assert.assertNull(retrievedPlay);
+
+        retrievedPlay = playEntityMgr.getPlayByName(playName, true);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
+        Assert.assertEquals(retrievedPlay.getDisplayName(), NEW_DISPLAY_NAME);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine2.getId());
+
+        List<String> deletedPlayIds = playEntityMgr.getAllDeletedPlayIds(true);
+        Assert.assertNotNull(deletedPlayIds);
+        Assert.assertEquals(deletedPlayIds.size(), 1);
+        Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
+
+        deletedPlayIds = playEntityMgr.getAllDeletedPlayIds(false);
+        Assert.assertNotNull(deletedPlayIds);
+        Assert.assertEquals(deletedPlayIds.size(), 1);
+        Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
+
+        retrievedPlay.setIsCleanupDone(Boolean.TRUE);
+        playEntityMgr.createOrUpdatePlay(retrievedPlay);
+
+        retrievedPlay = playEntityMgr.getPlayByName(playName, true);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
+        Assert.assertEquals(retrievedPlay.getDisplayName(), NEW_DISPLAY_NAME);
+        Assert.assertNotNull(retrievedPlay.getDisplayName());
+        Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
+        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
+        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.TRUE);
+        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine2.getId());
+
+        deletedPlayIds = playEntityMgr.getAllDeletedPlayIds(true);
+        Assert.assertNotNull(deletedPlayIds);
+        Assert.assertEquals(deletedPlayIds.size(), 0);
+
+        deletedPlayIds = playEntityMgr.getAllDeletedPlayIds(false);
+        Assert.assertNotNull(deletedPlayIds);
+        Assert.assertEquals(deletedPlayIds.size(), 1);
+        Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
+    }
 }

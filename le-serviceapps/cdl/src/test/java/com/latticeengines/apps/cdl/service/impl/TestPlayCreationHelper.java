@@ -410,11 +410,11 @@ public class TestPlayCreationHelper {
     }
 
     public void deletePlay(String playName) {
-        playProxy.deletePlay(tenant.getId(), playName);
+        playProxy.deletePlay(tenant.getId(), playName, false);
     }
 
     public void deletePlayLaunch(String playName, String playLaunchId) {
-        playProxy.deletePlayLaunch(tenant.getId(), playName, playLaunchId);
+        playProxy.deletePlayLaunch(tenant.getId(), playName, playLaunchId, false);
     }
 
     private void ignoreException(Exception ex) {

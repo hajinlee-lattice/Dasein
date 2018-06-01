@@ -14,7 +14,6 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -36,11 +35,14 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
     private static final Logger log = LoggerFactory.getLogger(LpiPMRecommendationImpl.class);
 
-    @Autowired
-    private RecommendationEntityMgr recommendationEntityMgr;
-
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
+
+    @Value("${playmaker.update.bulk.max:1000}")
+    private int maxUpdateRows;
+
+    @Inject
+    private RecommendationEntityMgr recommendationEntityMgr;
 
     @Inject
     private PlayProxy playProxy;
@@ -159,7 +161,20 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
     @Override
     public void cleanupRecommendations(String playId) {
-        recommendationEntityMgr.deleteInBulkByPlayId(playId, null);
+        boolean shouldLoop = true;
+        log.info(String.format("Begin cleanup recommendations for playId = ", playId));
+        try {
+            while (shouldLoop) {
+                int updatedCount = recommendationEntityMgr.deleteInBulkByPlayId(playId, null, true, maxUpdateRows);
+                shouldLoop = updatedCount > 0;
+            }
+            log.info(String.format("Completed cleanup recommendations for playId = ", playId));
+            Play play = playProxy.getPlay(MultiTenantContext.getCustomerSpace().toString(), playId);
+            play.setIsCleanupDone(true);
+            playProxy.createOrUpdatePlay(MultiTenantContext.getCustomerSpace().toString(), play);
+        } catch (Exception ex) {
+            log.error(String.format("Failed to cleanup recommendations for playId = ", playId), ex);
+        }
     }
 
     @VisibleForTesting

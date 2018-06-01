@@ -24,9 +24,15 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.ParamDef;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -44,9 +50,15 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "PLAY")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@FilterDefs({
+        @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
+                @ParamDef(name = "tenantFilterId", type = "java.lang.Long") }),
+        @FilterDef(name = "softDeleteFilter", defaultCondition = "DELETED !=true") })
+@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
+        @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "pid")
-public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
+public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, SoftDeletable {
 
     public static final String PLAY_NAME_PREFIX = "play";
     public static final String PLAY_NAME_FORMAT = "%s__%s";
@@ -57,6 +69,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     }
 
     @Id
+    @JsonProperty("pid")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
@@ -105,7 +118,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @JsonProperty("status")
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
-    private PlayStatus playStatus;
+    private PlayStatus playStatus = PlayStatus.ACTIVE;
 
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
@@ -126,12 +139,24 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastTalkingPointPublishTime;
 
+    @Index(name = "PLAY_DELETED")
+    @JsonProperty("deleted")
+    @Column(name = "DELETED", nullable = false)
+    private Boolean deleted = Boolean.FALSE;
+
+    @Index(name = "PLAY_CLEANUP_DONE")
+    @JsonProperty("isCleanupDone")
+    @Column(name = "CLEANUP_DONE", nullable = false)
+    private Boolean isCleanupDone = Boolean.FALSE;
+
     @Override
+    @JsonIgnore
     public Long getPid() {
         return pid;
     }
 
     @Override
+    @JsonIgnore
     public void setPid(Long pid) {
         this.pid = pid;
     }
@@ -203,6 +228,16 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
         this.tenantId = tenantId;
     }
 
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }
@@ -257,6 +292,14 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
 
     public void setRatings(List<RatingBucketCoverage> ratings) {
         this.ratings = ratings;
+    }
+
+    public Boolean getIsCleanupDone() {
+        return isCleanupDone;
+    }
+
+    public void setIsCleanupDone(Boolean isCleanupDone) {
+        this.isCleanupDone = isCleanupDone;
     }
 
     @Override

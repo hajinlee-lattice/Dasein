@@ -24,11 +24,11 @@ public interface RecommendationEntityMgr extends BaseEntityMgr<Recommendation> {
     List<Map<String, Object>> findRecommendationsAsMap(Date lastModificationDate, //
             int offset, int max, String syncDestination, List<String> playIds, Map<String, String> orgInfo);
 
-    void deleteInBulkByCutoffDate(Date cutoffDate);
+    int deleteInBulkByCutoffDate(Date cutoffDate, boolean hardDelete, int maxUpdateRows);
 
-    void delete(Recommendation entity);
+    void delete(Recommendation entity, boolean hardDelete);
 
-    void deleteInBulkByLaunchId(String launchId);
+    int deleteInBulkByLaunchId(String launchId, boolean hardDelete, int maxUpdateRows);
 
-    void deleteInBulkByPlayId(String playId, Date cutoffDate);
+    int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows);
 }

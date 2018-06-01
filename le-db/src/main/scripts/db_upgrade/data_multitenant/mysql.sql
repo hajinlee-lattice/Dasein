@@ -1,13 +1,12 @@
 CREATE PROCEDURE `UpdateRecommendation`()
   BEGIN
     ALTER TABLE `Data_MultiTenant`.`Recommendation`
-    ADD `DESTINATION_ORG_ID` varchar(255);
+    ADD `DELETED` bit null DEFAULT 0;
 
-    ALTER TABLE `Data_MultiTenant`.`Recommendation`
-    ADD `DESTINATION_SYS_TYPE` varchar(255);
+    CREATE INDEX REC_DELETED ON `Data_MultiTenant`.`Recommendation` (`DELETED`);
 
-    CREATE INDEX DESTINATION_ORG_ID ON `Data_MultiTenant`.`Recommendation` (`DESTINATION_ORG_ID`);
-    CREATE INDEX DESTINATION_SYS_TYPE ON `Data_MultiTenant`.`Recommendation` (`DESTINATION_SYS_TYPE`);
+    UPDATE `Data_MultiTenant`.`Recommendation`
+    SET `DELETED` = 0;
   END;
 //
 DELIMITER ;

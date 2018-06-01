@@ -103,13 +103,18 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public Play getPlayByName(String name) {
+    public List<String> getAllDeletedPlayIds(boolean forCleanupOnly) {
+        return playEntityMgr.getAllDeletedPlayIds(forCleanupOnly);
+    }
+
+    @Override
+    public Play getPlayByName(String name, Boolean considerDeleted) {
         Tenant tenant = MultiTenantContext.getTenant();
 
         if (StringUtils.isBlank(name)) {
             throw new LedpException(LedpCode.LEDP_18144);
         }
-        Play play = playEntityMgr.findByName(name);
+        Play play = playEntityMgr.getPlayByName(name, considerDeleted);
         if (play != null) {
             updateLastRefreshedDate(play.getRatingEngine());
             setBucketMetadata(tenant, play);
@@ -259,8 +264,8 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public Play getFullPlayByName(String name) {
-        Play play = getPlayByName(name);
+    public Play getFullPlayByName(String name, Boolean considerDeleted) {
+        Play play = getPlayByName(name, considerDeleted);
         if (play != null) {
             play = getFullPlay(play, true, null);
         }
@@ -354,11 +359,20 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public void deleteByName(String name) {
+    public void deleteByName(String name, Boolean hardDelete) {
         if (StringUtils.isBlank(name)) {
             throw new LedpException(LedpCode.LEDP_18144);
         }
-        playEntityMgr.deleteByName(name);
+        if (hardDelete != Boolean.TRUE) {
+            // soft delete all related launches first
+            Long playPid = playEntityMgr.getPlayByName(name, false).getPid();
+            List<PlayLaunch> launches = playLaunchService.findByPlayId(playPid, null);
+            if (CollectionUtils.isNotEmpty(launches)) {
+                launches.stream().forEach(l -> playLaunchService.deleteByLaunchId(l.getId(), false));
+            }
+        }
+
+        playEntityMgr.deleteByName(name, hardDelete);
     }
 
     @Override
@@ -366,7 +380,7 @@ public class PlayServiceImpl implements PlayService {
         if (StringUtils.isBlank(playName)) {
             throw new LedpException(LedpCode.LEDP_18144);
         }
-        Play play = playEntityMgr.findByName(playName);
+        Play play = playEntityMgr.getPlayByName(playName, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_18144, new String[] { playName });
         }

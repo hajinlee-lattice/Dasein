@@ -54,7 +54,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Play, Long> i
             playDao.create(play);
             return play;
         } else {
-            Play retrievedPlay = findByName(play.getName());
+            Play retrievedPlay = getPlayByName(play.getName(), true);
             if (retrievedPlay == null) {
                 log.warn(String.format("Play with name %s does not exist, creating it now", play.getName()));
                 createNewPlay(play);
@@ -102,6 +102,12 @@ public class PlayEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Play, Long> i
         if (play.getRatingEngine() != null) {
             existingPlay.setRatingEngine(findRatingEngine(play));
         }
+        if (play.getDeleted() != null) {
+            existingPlay.setDeleted(play.getDeleted());
+        }
+        if (play.getIsCleanupDone() != null) {
+            existingPlay.setIsCleanupDone(play.getIsCleanupDone());
+        }
     }
 
     @Override
@@ -130,23 +136,29 @@ public class PlayEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Play, Long> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Play findByName(String name) {
-        return playDao.findByName(name);
+    public Play getPlayByName(String name, Boolean considerDeleted) {
+        return playDao.findByName(name, considerDeleted == Boolean.TRUE);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteByName(String name) {
-        Play play = findByName(name);
+    public void deleteByName(String name, Boolean hardDelete) {
+        Play play = getPlayByName(name, true);
         if (play == null) {
             throw new NullPointerException(String.format("Play with name %s cannot be found", name));
         }
-        super.delete(play);
+        playDao.deleteByPid(play.getPid(), hardDelete == Boolean.TRUE);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void createOrUpdate(Play play) {
         createOrUpdatePlay(play);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<String> getAllDeletedPlayIds(boolean forCleanupOnly) {
+        return playDao.findAllDeletedPlayIds(forCleanupOnly);
     }
 }

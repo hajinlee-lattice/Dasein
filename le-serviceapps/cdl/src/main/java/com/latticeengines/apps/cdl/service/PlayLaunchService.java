@@ -13,7 +13,7 @@ public interface PlayLaunchService {
 
     PlayLaunch findByLaunchId(String launchId);
 
-    void deleteByLaunchId(String launchId);
+    void deleteByLaunchId(String launchId, boolean hardDelete);
 
     PlayLaunch findByPlayAndTimestamp(Long playId, Date timestamp);
 

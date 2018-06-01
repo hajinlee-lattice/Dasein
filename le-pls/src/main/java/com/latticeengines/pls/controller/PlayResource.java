@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,9 +41,6 @@ public class PlayResource {
 
     @Inject
     private PlayProxy playProxy;
-
-    @Inject
-    private RatingEngineProxy ratingEngineProxy;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -147,9 +143,10 @@ public class PlayResource {
     @ResponseBody
     @ApiOperation(value = "Delete a play")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public Boolean delete(@PathVariable String playName) {
+    public Boolean delete(@PathVariable String playName, //
+            @RequestParam(value = "hardDelete", required = false, defaultValue = "false") Boolean hardDelete) {
         Tenant tenant = MultiTenantContext.getTenant();
-        playProxy.deletePlay(tenant.getId(), playName);
+        playProxy.deletePlay(tenant.getId(), playName, hardDelete);
         return true;
     }
 
@@ -204,9 +201,10 @@ public class PlayResource {
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Delete play launch for a given play and launch id")
     public void deletePlayLaunch(@PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId) {
+            @PathVariable("launchId") String launchId, //
+            @RequestParam(value = "hardDelete", required = false, defaultValue = "false") Boolean hardDelete) {
         Tenant tenant = MultiTenantContext.getTenant();
-        playProxy.deletePlayLaunch(tenant.getId(), playName, launchId);
+        playProxy.deletePlayLaunch(tenant.getId(), playName, launchId, hardDelete);
     }
 
 }

@@ -270,6 +270,6 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @AfterTest(groups = { "deployment" })
     public void teardown() throws Exception {
         MultiTenantContext.setTenant(mainTestTenant);
-        playProxy.deletePlay(mainTestTenant.getId(), play.getName());
+        playProxy.deletePlay(mainTestTenant.getId(), play.getName(), false);
     }
 }

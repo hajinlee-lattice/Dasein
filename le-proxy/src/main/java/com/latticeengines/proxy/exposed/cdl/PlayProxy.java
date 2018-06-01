@@ -34,22 +34,40 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         super("cdl");
     }
 
-    @SuppressWarnings("rawtypes")
     public List<Play> getPlays(String customerSpace, Boolean shouldLoadCoverage, String ratingEngineId) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
+
         if (shouldLoadCoverage != null) {
             params.add("should-load-coverage=" + shouldLoadCoverage);
         }
         if (StringUtils.isNotBlank(ratingEngineId)) {
             params.add("rating-engine-id=" + ratingEngineId);
         }
+
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
         }
+
         log.info("url is " + url);
-        List list = get("get plays", url, List.class);
+        List<?> list = get("get plays", url, List.class);
         return JsonUtils.convertList(list, Play.class);
+    }
+
+    public List<String> getDeletedPlayIds(String customerSpace, Boolean forCleanupOnly) {
+        String url = constructUrl(URL_PREFIX + "/deleted-play-ids", shortenCustomerSpace(customerSpace));
+        List<String> params = new ArrayList<>();
+        if (forCleanupOnly == Boolean.TRUE) {
+            params.add("for-cleanup-only=" + true);
+        }
+
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
+
+        log.info("url is " + url);
+        List<?> list = get("get deleted play idss", url, List.class);
+        return JsonUtils.convertList(list, String.class);
     }
 
     public PlayLaunchDashboard getPlayLaunchDashboard(String customerSpace, String playName,
@@ -144,9 +162,14 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         post(String.format("publish talking points for play %s", playName), url, null, Void.class);
     }
 
-    public void deletePlay(String customerSpace, String playName) {
+    public void deletePlay(String customerSpace, String playName, boolean hardDelete) {
         String url = constructUrl(URL_PREFIX + "/{playName}", shortenCustomerSpace(customerSpace), playName);
         log.info("url is " + url);
+        List<String> params = new ArrayList<>();
+        params.add("hard-delete=" + hardDelete);
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
         delete("Delete a play", url);
     }
 
@@ -221,9 +244,15 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         put("update PlayLaunch ", url);
     }
 
-    public void deletePlayLaunch(String customerSpace, String playName, String launchId) {
+    public void deletePlayLaunch(String customerSpace, String playName, String launchId, boolean hardDelete) {
         String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}", shortenCustomerSpace(customerSpace),
                 playName, launchId);
+        List<String> params = new ArrayList<>();
+        params.add("hard-delete=" + hardDelete);
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
+
         log.info("url is " + url);
         delete("delete PlayLaunch ", url);
     }

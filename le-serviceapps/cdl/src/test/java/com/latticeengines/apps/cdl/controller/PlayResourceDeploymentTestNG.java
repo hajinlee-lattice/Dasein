@@ -87,8 +87,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(launchList.size(), 0);
 
         playProxy.updatePlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), LaunchState.Launched);
-        playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L,
-                0L, 2L);
+        playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), 100.0D, 10L, 8L,
+                25L, 0L, 2L);
 
         launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Arrays.asList(LaunchState.Canceled, LaunchState.Failed, LaunchState.Launched));
@@ -96,7 +96,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
-        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName, Collections.singletonList(LaunchState.Launched));
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
+                Collections.singletonList(LaunchState.Launched));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
@@ -106,12 +107,14 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
-        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName, Collections.singletonList(LaunchState.Launching));
+        launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
+                Collections.singletonList(LaunchState.Launching));
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
-        PlayLaunch retrievedLaunch = playProxy.getPlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId());
+        PlayLaunch retrievedLaunch = playProxy.getPlayLaunch(mainTestTenant.getId(), playName,
+                playLaunch.getLaunchId());
 
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
@@ -179,11 +182,11 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     public void deletePlay(String playName) {
-        playProxy.deletePlay(mainTestTenant.getId(), playName);
+        playProxy.deletePlay(mainTestTenant.getId(), playName, false);
     }
 
     public void deletePlayLaunch(String playName, String playLaunchId) {
-        playProxy.deletePlayLaunch(mainTestTenant.getId(), playName, playLaunchId);
+        playProxy.deletePlayLaunch(mainTestTenant.getId(), playName, playLaunchId, false);
     }
 
     public void useExistingtenant(boolean shouldSkipAutoTenantCreation, Tenant tenant) {

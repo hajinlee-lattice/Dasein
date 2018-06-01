@@ -10,7 +10,7 @@ public interface RecommendationService {
 
     void create(Recommendation entity);
 
-    void delete(Recommendation entity);
+    void delete(Recommendation entity, boolean hardDelete);
 
     List<Recommendation> findByLaunchId(String launchId);
 

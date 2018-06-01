@@ -17,10 +17,12 @@ public interface PlayEntityMgr extends BaseEntityMgrRepository<Play, Long> {
 
     List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine, List<PlayStatus> statusList);
 
-    Play findByName(String name);
+    Play getPlayByName(String name, Boolean considerDeleted);
 
-    void deleteByName(String name);
+    void deleteByName(String name, Boolean hardDelete);
 
     void createOrUpdate(Play play);
+
+    List<String> getAllDeletedPlayIds(boolean forCleanupOnly);
 
 }

@@ -9,9 +9,8 @@ import java.util.stream.Stream;
 public enum PlayStatus {
 
     ACTIVE(0), //
-    INACTIVE(1), //
-    DELETED(2);
-
+    INACTIVE(1);
+    
     private int stautsId;
 
     private static Map<Integer, PlayStatus> statusMap = new HashMap<>();
@@ -22,8 +21,7 @@ public enum PlayStatus {
             statusMap.put(status.getStatusId(), status);
         }
         transitionMap.put(ACTIVE, Stream.of(INACTIVE).collect(Collectors.toSet()));
-        transitionMap.put(INACTIVE, Stream.of(ACTIVE, DELETED).collect(Collectors.toSet()));
-        transitionMap.put(DELETED, Stream.of(INACTIVE).collect(Collectors.toSet()));
+        transitionMap.put(INACTIVE, Stream.of(ACTIVE).collect(Collectors.toSet()));
     }
 
     private PlayStatus(int statusId) {

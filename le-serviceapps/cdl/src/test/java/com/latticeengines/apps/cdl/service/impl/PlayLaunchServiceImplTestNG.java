@@ -12,8 +12,9 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -21,6 +22,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -36,13 +38,16 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private static long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
-    @Autowired
+    @Inject
     private PlayEntityMgr playEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayLaunchService playLaunchService;
 
-    @Autowired
+    @Inject
+    private PlayService playService;
+
+    @Inject
     private TenantService tenantService;
 
     private Play play;
@@ -79,7 +84,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         play.setCreatedBy(CREATED_BY);
 
         playEntityMgr.create(play);
-        play = playEntityMgr.findByName(NAME);
+        play = playEntityMgr.getPlayByName(NAME, false);
 
         bucketsToLaunch1 = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
 
@@ -108,17 +113,17 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private void cleanupPlayLunches() {
         for (PlayLaunch launch : playLaunchService.findByState(LaunchState.Launching)) {
-            playLaunchService.deleteByLaunchId(launch.getLaunchId());
+            playLaunchService.deleteByLaunchId(launch.getLaunchId(), false);
         }
     }
 
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
         if (playLaunch1 != null) {
-            playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId());
+            playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         }
         if (playLaunch2 != null) {
-            playLaunchService.deleteByLaunchId(playLaunch2.getLaunchId());
+            playLaunchService.deleteByLaunchId(playLaunch2.getLaunchId(), false);
         }
         Tenant tenant1 = tenantService.findByTenantId("testTenant1");
         if (tenant1 != null) {
@@ -277,18 +282,12 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testEntriesDashboard" })
-    public void testDelete() {
+    public void testBasicDelete() {
 
-        playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId());
-        System.out.println("deleted " + playLaunch1.getLaunchId());
-        playLaunchService.deleteByLaunchId(playLaunch2.getLaunchId());
-        System.out.println("deleted " + playLaunch2.getLaunchId());
-    }
-
-    @Test(groups = "functional", dependsOnMethods = { "testDelete" })
-    public void testPostDelete() {
+        playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), false);
+        playLaunchService.deleteByLaunchId(playLaunch2.getLaunchId(), false);
         try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(5L));
+            Thread.sleep(TimeUnit.SECONDS.toMillis(2L));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -298,6 +297,31 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNull(retreivedPlayLaunch);
 
         checkNonExistance();
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testBasicDelete" })
+    public void testDeleteViaPlay() {
+        PlayLaunch playLaunch3 = new PlayLaunch();
+        playLaunch3.setTenant(mainTestTenant);
+        playLaunch3.setLaunchState(LaunchState.Launching);
+        playLaunch3.setPlay(play);
+        playLaunch3.setBucketsToLaunch(bucketsToLaunch2);
+        playLaunch3.setDestinationAccountId("SFDC_ACC2");
+        playLaunch3.setDestinationOrgId(org2);
+        playLaunch3.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunchService.create(playLaunch3);
+
+        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId());
+        Assert.assertNotNull(retreivedPlayLaunch);
+
+        playService.deleteByName(play.getName(), false);
+        try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(2L));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId());
+        Assert.assertNull(retreivedPlayLaunch);
     }
 
     private void checkCountForDashboard(Long playId, List<LaunchState> goodStates, List<LaunchState> badStates,

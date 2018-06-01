@@ -7,8 +7,10 @@ import com.latticeengines.domain.exposed.pls.Play;
 
 public interface PlayDao extends BaseDao<Play> {
 
-    Play findByName(String name);
+    Play findByName(String name, boolean considerDeleted);
 
     List<Play> findAllByRatingEnginePid(long pid);
+
+    List<String> findAllDeletedPlayIds(boolean forCleanupOnly);
 
 }

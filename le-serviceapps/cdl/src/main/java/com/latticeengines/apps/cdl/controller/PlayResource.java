@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,12 +87,20 @@ public class PlayResource {
     @ApiOperation(value = "Get all full plays for a tenant")
     public List<Play> getPlays( //
             @PathVariable String customerSpace, //
-            @RequestParam(value = "should-load-coverage", required = false) Boolean shouldLoadCoverage, //
+            @RequestParam(value = "should-load-coverage", required = false, defaultValue = "false") Boolean shouldLoadCoverage, //
             @RequestParam(value = "rating-engine-id", required = false) String ratingEngineId) {
         // by default shouldLoadCoverage flag should be false otherwise play
         // listing API takes lot of time to load
-        shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
         return playService.getAllFullPlays(shouldLoadCoverage, ratingEngineId);
+    }
+
+    @RequestMapping(value = "/deleted-play-ids", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all deleted play ids for a tenant")
+    public List<String> getDeletedPlayIds( //
+            @PathVariable String customerSpace, //
+            @RequestParam(value = "for-cleanup-only", required = false, defaultValue = "false") Boolean forCleanupOnly) {
+        return playService.getAllDeletedPlayIds(forCleanupOnly);
     }
 
     @RequestMapping(value = "/launches/dashboard", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -155,8 +164,9 @@ public class PlayResource {
     @ApiOperation(value = "Get full play for a specific tenant based on playName")
     public Play getPlay(//
             @PathVariable String customerSpace, //
-            @PathVariable String playName) {
-        return playService.getFullPlayByName(playName);
+            @PathVariable String playName, //
+            @RequestParam(value = "consider-deleted", required = false, defaultValue = "false") Boolean considerDeleted) {
+        return playService.getFullPlayByName(playName, considerDeleted);
     }
 
     @PostMapping(value = "")
@@ -181,8 +191,9 @@ public class PlayResource {
     @ApiOperation(value = "Delete a play")
     public Boolean delete( //
             @PathVariable String customerSpace, //
-            @PathVariable String playName) {
-        playService.deleteByName(playName);
+            @PathVariable String playName, //
+            @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
+        playService.deleteByName(playName, hardDelete == Boolean.TRUE);
         return true;
     }
 
@@ -196,7 +207,7 @@ public class PlayResource {
             boolean isDryRunMode, //
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
-        Play play = playService.getPlayByName(playName);
+        Play play = playService.getPlayByName(playName, false);
         PlayUtils.validatePlayBeforeLaunch(play);
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
 
@@ -268,6 +279,7 @@ public class PlayResource {
             @PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId) {
+        getPlayId(playName);
         return playLaunchService.findByLaunchId(launchId);
     }
 
@@ -305,6 +317,8 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @PathVariable("action") LaunchState action) {
+        getPlayId(playName);
+
         PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId);
         if (existingPlayLaunch != null) {
             if (LaunchState.canTransit(existingPlayLaunch.getLaunchState(), action)) {
@@ -321,17 +335,18 @@ public class PlayResource {
     public void deletePlayLaunch( //
             @PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId) {
+            @PathVariable("launchId") String launchId, //
+            @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
         if (playLaunch != null) {
-            playLaunchService.deleteByLaunchId(launchId);
+            playLaunchService.deleteByLaunchId(launchId, hardDelete == Boolean.TRUE);
         }
     }
 
     private Long getPlayId(String playName) {
         Long playId = null;
         if (StringUtils.isNotBlank(playName)) {
-            Play play = playService.getPlayByName(playName);
+            Play play = playService.getPlayByName(playName, false);
             if (play == null) {
                 throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
             }

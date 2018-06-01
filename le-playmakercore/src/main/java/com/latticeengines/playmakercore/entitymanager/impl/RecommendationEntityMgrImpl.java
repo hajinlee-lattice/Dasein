@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +23,7 @@ public class RecommendationEntityMgrImpl implements RecommendationEntityMgr {
     private static final String PLAY_LAUNCH_NAME_PREFIX = "recmm";
     private static final String PLAY_LAUNCH_NAME_FORMAT = "%s__%s";
 
-    @Autowired
+    @Inject
     private RecommendationDao recommendationDao;
 
     @Override
@@ -43,8 +45,8 @@ public class RecommendationEntityMgrImpl implements RecommendationEntityMgr {
 
     @Transactional(value = "datadb", propagation = Propagation.REQUIRED)
     @Override
-    public void delete(Recommendation entity) {
-        getDao().delete(entity);
+    public void delete(Recommendation entity, boolean hardDelete) {
+        getDao().deleteByPid(entity.getPid(), hardDelete);
     }
 
     @Transactional(value = "datadb", propagation = Propagation.REQUIRED)
@@ -131,20 +133,25 @@ public class RecommendationEntityMgrImpl implements RecommendationEntityMgr {
 
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
-    public void deleteInBulkByCutoffDate(Date cutoffDate) {
-        recommendationDao.deleteInBulkByCutoffDate(cutoffDate);
+    public int deleteInBulkByCutoffDate(Date cutoffDate, boolean hardDelete, int maxUpdateRows) {
+        return recommendationDao.deleteInBulkByCutoffDate(cutoffDate, hardDelete, maxUpdateRows);
     }
 
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
-    public void deleteInBulkByLaunchId(String launchId) {
-        recommendationDao.deleteInBulkByLaunchId(launchId);
+    public int deleteInBulkByLaunchId(String launchId, boolean hardDelete, int maxUpdateRows) {
+        return recommendationDao.deleteInBulkByLaunchId(launchId, hardDelete, maxUpdateRows);
     }
 
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
-    public void deleteInBulkByPlayId(String playId, Date cutoffDate) {
-        recommendationDao.deleteInBulkByPlayId(playId, cutoffDate);
+    public int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows) {
+        return recommendationDao.deleteInBulkByPlayId(playId, cutoffDate, hardDelete, maxUpdateRows);
     }
 
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public void delete(Recommendation entity) {
+        getDao().deleteByPid(entity.getPid(), false);
+    }
 }

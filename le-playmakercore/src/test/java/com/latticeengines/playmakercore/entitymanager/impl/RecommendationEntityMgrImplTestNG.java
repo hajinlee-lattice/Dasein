@@ -6,9 +6,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -33,7 +37,9 @@ import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 @ContextConfiguration(locations = { "classpath:test-playmakercore-context.xml" })
 public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(RecommendationEntityMgrImplTestNG.class);
+
+    @Inject
     private RecommendationEntityMgr recommendationEntityMgr;
 
     private Recommendation recommendationWithoutOrgInfo;
@@ -61,19 +67,37 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     private String DESTINATION_ORG_ID_1 = "destinationOrgId_1";
     private String DESTINATION_SYS_TYPE_2 = "destinationSysType_2";
     private String DESTINATION_ORG_ID_2 = "destinationOrgId_2";
+    private Date LAUNCH_DATE;
+    private Date LAUNCH_1_DATE;
+    private Date LAUNCH_2_DATE;
+    private Date T1;
+    private Date T2;
+    private Date T3;
+    private Date T4;
 
     private List<Recommendation> allRecommendationsAcrossAllLaunches = null;
 
     private Tenant tenant;
 
+    private int maxUpdateRows = 10;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        LAUNCH_DATE = new Date(CURRENT_TIME_MILLIS / 10);
+        LAUNCH_1_DATE = new Date(CURRENT_TIME_MILLIS / 5);
+        LAUNCH_2_DATE = new Date(CURRENT_TIME_MILLIS);
 
-        recommendationWithoutOrgInfo = createRecommendationObject(LAUNCH_ID, SFDC_ACCOUNT_ID, null, null, "A");
-        recommendationWithOrg1 = createRecommendationObject(LAUNCH_ID_1, SFDC_ACCOUNT_ID_1, DESTINATION_ORG_ID_1,
-                DESTINATION_SYS_TYPE_1, "B");
-        recommendationWithOrg2 = createRecommendationObject(LAUNCH_ID_2, SFDC_ACCOUNT_ID_2, DESTINATION_ORG_ID_2,
-                DESTINATION_SYS_TYPE_2, "C");
+        T1 = new Date(LAUNCH_DATE.getTime() - 10000L);
+        T2 = new Date(LAUNCH_DATE.getTime() + 10000L);
+        T3 = new Date(LAUNCH_1_DATE.getTime() + 10000L);
+        T4 = new Date(LAUNCH_2_DATE.getTime() + 10000L);
+
+        recommendationWithoutOrgInfo = createRecommendationObject(LAUNCH_ID, LAUNCH_DATE, SFDC_ACCOUNT_ID, null, null,
+                "A");
+        recommendationWithOrg1 = createRecommendationObject(LAUNCH_ID_1, LAUNCH_1_DATE, SFDC_ACCOUNT_ID_1,
+                DESTINATION_ORG_ID_1, DESTINATION_SYS_TYPE_1, "B");
+        recommendationWithOrg2 = createRecommendationObject(LAUNCH_ID_2, LAUNCH_2_DATE, SFDC_ACCOUNT_ID_2,
+                DESTINATION_ORG_ID_2, DESTINATION_SYS_TYPE_2, "C");
 
         allRecommendationsAcrossAllLaunches = Arrays.asList(recommendationWithoutOrgInfo, recommendationWithOrg1,
                 recommendationWithOrg2);
@@ -131,8 +155,131 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                 .forEach(rec -> testGetRecommendationWithoutPlayId(rec));
     }
 
-    private Recommendation createRecommendationObject(String launchId, String sfdcAccountID, String destinationOrgId,
-            String destinationSysType, String priorityDisplayName) {
+    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationWithoutPlayId" })
+    public void populateMoreRecommendations() throws InterruptedException {
+        IntStream.range(0, 100).forEach(i -> testCreateRecommendation(
+                createRecommendationObject(LAUNCH_ID, LAUNCH_DATE, SFDC_ACCOUNT_ID, null, null, "B")));
+        IntStream.range(0, 100).forEach(i -> testCreateRecommendation(createRecommendationObject(LAUNCH_ID_1,
+                LAUNCH_1_DATE, SFDC_ACCOUNT_ID_1, DESTINATION_ORG_ID_1, DESTINATION_SYS_TYPE_1, "C")));
+        IntStream.range(0, 100).forEach(i -> testCreateRecommendation(createRecommendationObject(LAUNCH_ID_2,
+                LAUNCH_2_DATE, SFDC_ACCOUNT_ID_2, DESTINATION_ORG_ID_2, DESTINATION_SYS_TYPE_2, "D")));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "populateMoreRecommendations" })
+    public void testDeleteRecommendationWithLaunchId() {
+        testDelete(false, LAUNCH_ID_1, null, 101, 101, 101, 101, 0, 101);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testDeleteRecommendationWithLaunchId" })
+    public void testDeleteRecommendationWithPlayId() {
+        testDelete(true, PLAY_ID, T1, 101, 0, 101, 101, 0, 101);
+
+        testDelete(true, PLAY_ID, T2, 101, 0, 101, 0, 0, 101);
+
+        testDelete(true, PLAY_ID, T3, 0, 0, 101, 0, 0, 101);
+
+        testDelete(true, PLAY_ID, null, 0, 0, 101, 0, 0, 0);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testDeleteRecommendationWithPlayId" })
+    public void testDeleteRecommendationByCutoffDate() throws InterruptedException {
+        populateMoreRecommendations();
+        verifyRecommendationCount(100, 100, 100);
+
+        boolean shouldLoop = true;
+        while (shouldLoop) {
+            int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(T1, false, maxUpdateRows);
+            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            shouldLoop = (updatedCount > 0);
+        }
+        verifyRecommendationCount(100, 100, 100);
+
+        shouldLoop = true;
+        while (shouldLoop) {
+            int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(T2, false, maxUpdateRows);
+            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            shouldLoop = (updatedCount > 0);
+        }
+        verifyRecommendationCount(0, 100, 100);
+
+        shouldLoop = true;
+        while (shouldLoop) {
+            int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(T3, false, maxUpdateRows);
+            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            shouldLoop = (updatedCount > 0);
+        }
+        verifyRecommendationCount(0, 0, 100);
+
+        shouldLoop = true;
+        while (shouldLoop) {
+            int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(T4, false, maxUpdateRows);
+            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            shouldLoop = (updatedCount > 0);
+        }
+        verifyRecommendationCount(0, 0, 0);
+    }
+
+    private void bulkDeleteByLaunchId(String launchId, boolean hardDelete) {
+        boolean shouldLoop = true;
+        while (shouldLoop) {
+            int updatedCount = recommendationEntityMgr.deleteInBulkByLaunchId(launchId, hardDelete, maxUpdateRows);
+            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            shouldLoop = (updatedCount > 0);
+        }
+    }
+
+    private void bulkDeleteByPlayId(String playId, Date cutoffTimestamp, boolean hardDelete) {
+        boolean shouldLoop = true;
+        while (shouldLoop) {
+            int updatedCount = recommendationEntityMgr.deleteInBulkByPlayId(playId, cutoffTimestamp, hardDelete,
+                    maxUpdateRows);
+            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            shouldLoop = (updatedCount > 0);
+        }
+    }
+
+    private void testDelete(boolean isPlayId, String id, Date cutoffTimestamp, int count_b_0, int count_b_1,
+            int count_b_2, int count_a_0, int count_a_1, int count_a_2) {
+        verifyRecommendationCount(count_b_0, count_b_1, count_b_2);
+
+        if (isPlayId) {
+            bulkDeleteByPlayId(id, cutoffTimestamp, false);
+        } else {
+            bulkDeleteByLaunchId(id, false);
+        }
+
+        verifyRecommendationCount(count_a_0, count_a_1, count_a_2);
+    }
+
+    private void verifyRecommendationCount(int count_0, int count_1, int count_2) {
+        List<Recommendation> recs = recommendationEntityMgr.findByLaunchId(LAUNCH_ID);
+        Assert.assertNotNull(recs);
+        if (count_0 == 0) {
+            Assert.assertFalse(recs.size() > 0);
+        } else {
+            Assert.assertTrue(recs.size() > 0);
+            Assert.assertEquals(recs.size(), count_0);
+        }
+        recs = recommendationEntityMgr.findByLaunchId(LAUNCH_ID_1);
+        Assert.assertNotNull(recs);
+        if (count_1 == 0) {
+            Assert.assertFalse(recs.size() > 0);
+        } else {
+            Assert.assertTrue(recs.size() > 0);
+            Assert.assertEquals(recs.size(), count_1);
+        }
+        recs = recommendationEntityMgr.findByLaunchId(LAUNCH_ID_2);
+        Assert.assertNotNull(recs);
+        if (count_2 == 0) {
+            Assert.assertFalse(recs.size() > 0);
+        } else {
+            Assert.assertTrue(recs.size() > 0);
+            Assert.assertEquals(recs.size(), count_2);
+        }
+    }
+
+    private Recommendation createRecommendationObject(String launchId, Date launchDate, String sfdcAccountID,
+            String destinationOrgId, String destinationSysType, String priorityDisplayName) {
         Recommendation recommendation = new Recommendation();
         recommendation.setDescription(LAUNCH_DESCRIPTION);
         recommendation.setLaunchId(launchId);
@@ -163,6 +310,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         recommendation.setSynchronizationDestination(SynchronizationDestinationEnum.SFDC.toString());
         recommendation.setDestinationOrgId(destinationOrgId);
         recommendation.setDestinationSysType(destinationSysType);
+        recommendation.setLaunchDate(launchDate);
         return recommendation;
     }
 
@@ -348,25 +496,28 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() == 0);
 
-     // TODO - enable it once fixed
+        // TODO - enable it once fixed
         /*
-        recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate3, //
-                SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
-
-        Assert.assertEquals(recommendationCount, 1);
-
-        recommendations = recommendationEntityMgr.findRecommendations(lastModificationDate3, //
-                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null,
-                orgInfo);
-        Assert.assertNotNull(recommendations);
-        Assert.assertTrue(recommendations.size() > 0,
-                String.format(
-                        "lastModificationDate3 = %s, (recommendationCount - minPageSize) = %d, "
-                                + "minPageSize = %d, orgInfo = %s, recommendations.size() = %d",
-                        lastModificationDate3.toString(), (recommendationCount - minPageSize), minPageSize, orgInfo,
-                        recommendations.size()));
-        compareOriginalAndExtractedRecommendations(originalRecommendation, recommendations.get(0));
-        */
+         * recommendationCount =
+         * recommendationEntityMgr.findRecommendationCount(
+         * lastModificationDate3, //
+         * SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
+         * 
+         * Assert.assertEquals(recommendationCount, 1);
+         * 
+         * recommendations =
+         * recommendationEntityMgr.findRecommendations(lastModificationDate3, //
+         * (recommendationCount - minPageSize), minPageSize,
+         * SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
+         * Assert.assertNotNull(recommendations);
+         * Assert.assertTrue(recommendations.size() > 0, String.format(
+         * "lastModificationDate3 = %s, (recommendationCount - minPageSize) = %d, "
+         * + "minPageSize = %d, orgInfo = %s, recommendations.size() = %d",
+         * lastModificationDate3.toString(), (recommendationCount -
+         * minPageSize), minPageSize, orgInfo, recommendations.size()));
+         * compareOriginalAndExtractedRecommendations(originalRecommendation,
+         * recommendations.get(0));
+         */
     }
 
     private void compareOriginalAndExtractedRecommendations(Recommendation originalRec,

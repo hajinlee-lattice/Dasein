@@ -31,6 +31,7 @@ import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
@@ -113,6 +114,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private ModelCopyProxy modelCopyProxy;
+
+    @Inject
+    private PlayService playService;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -314,6 +318,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public void deleteById(String id, boolean hardDelete) {
+        if (hardDelete != Boolean.TRUE) {
+            List<Play> relatedPlays = playService.getAllFullPlays(false, id);
+            if (CollectionUtils.isNotEmpty(relatedPlays)) {
+                relatedPlays.stream().forEach(p -> playService.deleteByName(p.getName(), false));
+            }
+        }
+
         ratingEngineEntityMgr.deleteById(id, hardDelete);
         evictRatingMetadataCache();
     }
@@ -678,16 +689,17 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public boolean ratingEngineCyclicDependency(List<RatingEngine> ratingEngines) {
         boolean cyclicDependency = false;
-//        if (ratingEngines != null) {
-//            for (RatingEngine ratingEngine : ratingEngines) {
-//                if (ratingEngine.getId() != null) {
-//                    cyclicDependency = ratingEngineCyclicDependency(ratingEngine, new ArrayList<>());
-//                    if (cyclicDependency) {
-//                        break;
-//                    }
-//                }
-//            }
-//        }
+        // if (ratingEngines != null) {
+        // for (RatingEngine ratingEngine : ratingEngines) {
+        // if (ratingEngine.getId() != null) {
+        // cyclicDependency = ratingEngineCyclicDependency(ratingEngine, new
+        // ArrayList<>());
+        // if (cyclicDependency) {
+        // break;
+        // }
+        // }
+        // }
+        // }
 
         return cyclicDependency;
     }

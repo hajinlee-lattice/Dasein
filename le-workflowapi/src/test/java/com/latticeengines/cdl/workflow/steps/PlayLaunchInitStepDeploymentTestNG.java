@@ -157,7 +157,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         recommendations.stream().forEach(rec -> {
             log.info("Cleaning up recommendation: " + rec.getId());
-            recommendationService.delete(rec);
+            recommendationService.delete(rec, false);
         });
     }
 
