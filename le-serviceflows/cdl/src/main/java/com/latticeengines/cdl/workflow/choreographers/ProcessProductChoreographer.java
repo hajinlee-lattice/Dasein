@@ -120,9 +120,13 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
                 }
                 if (entityValueMap == null) {
                     skip = true;
+                    log.info("Change to skip because entityValueMap is null.");
                 } else {
-                    Integer finalRecords = entityValueMap.get(entity);
-                    skip = ((finalRecords == null) || (finalRecords == 0));
+                    Integer finalRecords = entityValueMap.getOrDefault(entity, 0);
+                    if (finalRecords == 0) {
+                        skip = true;
+                        log.info("Change to skip because finalRecords is " + String.valueOf(finalRecords));
+                    }
                 }
                 if (skip)
                     updateFlags(seq, entity);
