@@ -371,6 +371,21 @@ angular
                 category: { dynamic: true, value: '' },
                 subcategory: { dynamic: true, value: '' }
             },
+            onEnter: ['$stateParams', 'SegmentStore', 'BackStore', function($stateParams, SegmentStore, BackStore) {
+                var name = $stateParams.segment;
+
+                BackStore.setBackState('home.segments');
+                if('Create' === name){
+                    BackStore.setBackLabel($stateParams.segment);
+                    BackStore.setHidden(true);
+                } else {
+                    SegmentStore.getSegmentByName(name).then(function(result) {
+                        BackStore.setBackLabel(result.display_name);
+                        BackStore.setHidden(false);
+                    });
+                    
+                }
+            }],
             resolve: {
                 LookupResponse: [ function() {
                     return { attributes: null };
@@ -397,7 +412,8 @@ angular
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
-                }
+                },
+                'header.back@': 'backNav'
             }
         })
         .state('home.nodata', {
@@ -406,7 +422,7 @@ angular
                 pageTitle: 'My Data',
                 pageIcon: 'ico-analysis'
             },
-            resolve: {
+           resolve: {
                 AttributesCount: ['$q', '$state', 'DataCloudStore', 'ApiHost', function($q, $state, DataCloudStore, ApiHost) {
                     var deferred = $q.defer();
 

@@ -101,6 +101,11 @@ angular
                     pageTitle: 'Model',
                     modelId: ''
                 },
+                onEnter: ['RatingEngine', 'BackStore', function(RatingEngine, BackStore) {
+                    BackStore.setBackLabel(RatingEngine.displayName);
+                    BackStore.setBackState('home.ratingsengine');
+                    BackStore.setHidden(false);
+                }],
                 resolve: {
                     Dashboard: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
@@ -155,12 +160,6 @@ angular
                             deferred.resolve(result);
                         });
                         return deferred.promise;
-                    },
-                    backconfig: function(RatingEngine){
-                        return {
-                            backState: 'home.ratingsengine',
-                            backName: RatingEngine.displayName
-                        };
                     }
                 },
                 views: {
@@ -173,9 +172,6 @@ angular
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
-
-                            // console.log($scope.rating_id);
-                            // console.log(Dashboard);
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -199,11 +195,6 @@ angular
                             $scope.stateName = function () {
                                 return $state.current.name;
                             }
-                            $rootScope.$broadcast('header-back', {
-                                path: '^home.rating.dashboard',
-                                displayName: Dashboard.summary.displayName,
-                                sref: 'home.ratingsengine'
-                            });
                         },
                         templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
                     },
@@ -413,11 +404,6 @@ angular
                             $scope.stateName = function () {
                                 return $state.current.name;
                             }
-                            $rootScope.$broadcast('header-back', {
-                                path: '^home.rating.dashboard',
-                                displayName: Dashboard.summary.displayName,
-                                sref: 'home.ratingsengine'
-                            });
                         },
                         templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
                     },
@@ -513,11 +499,6 @@ angular
                             $scope.stateName = function () {
                                 return $state.current.name;
                             }
-                            $rootScope.$broadcast('header-back', {
-                                path: '^home.rating.dashboard',
-                                displayName: Dashboard.summary.displayName,
-                                sref: 'home.ratingsengine'
-                            });
                         },
                         templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
                     },

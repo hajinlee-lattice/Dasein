@@ -3,7 +3,7 @@ angular.module('lp.playbook.dashboard', [
 ])
 .controller('PlaybookDashboard', function(
     $q, $scope, $stateParams, $state, $interval, $rootScope,
-    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore
+    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore, BackStore
 ) {
 
     var vm = this,
@@ -200,12 +200,12 @@ angular.module('lp.playbook.dashboard', [
                 description: newPlay.description
             }
             PlaybookWizardStore.savePlay(savePlay).then(function(play){
-                vm.play = play;
+                vm.play.name = play.name;
+                vm.play.displayName = play.displayName;
+                vm.play.description = play.description;
                 vm.editable = true;
-                // backconfig.backName = vm.play.displayName;
-                // console.log('backconfig', backconfig);
-                // $scope.$apply();
 
+                BackStore.setBackLabel(vm.play.displayName);
             });
         }
     }

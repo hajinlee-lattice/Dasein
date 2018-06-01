@@ -26,7 +26,6 @@ angular.module('lp.ratingsengine.activatescoring', [
     });
 
     vm.init = function() {
-        $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){

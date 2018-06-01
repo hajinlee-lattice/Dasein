@@ -55,18 +55,6 @@ angular.module('common.datacloud.query.builder', [
 
         QueryStore.mode = vm.mode;
 
-        if (vm.segment != null && vm.segment != "Create"){
-            SegmentStore.getSegmentByName(vm.segment).then(function(result) {
-                vm.displayName = result.display_name;
-
-                $rootScope.$broadcast('header-back', { 
-                    path: '^home.segment.accounts',
-                    displayName: vm.displayName,
-                    sref: 'home.segments'
-                });
-            });    
-        }
-
         if (vm.mode == 'rules' || vm.mode == 'dashboardrules') {
             vm.ratingEngineModel = RatingEngineModel;
             vm.rating_rule = RatingEngineModel.rule.ratingRule;

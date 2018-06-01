@@ -236,6 +236,17 @@ angular
                 modelId: '',
                 rating_id: ''
             },
+            onEnter: ['IsCdl', 'Model', 'RatingEngine', 'BackStore', function(IsCdl, Model, RatingEngine, BackStore) {
+                var displayName =  Model.ModelDetails.DisplayName;
+                var backState = 'home.models';
+
+                if(IsCdl === true){
+                    backState = 'home.ratingsengine';
+                    displayName = RatingEngine.displayName;
+                }
+                BackStore.setBackLabel(displayName);
+                BackStore.setBackState(backState);
+            }],
             resolve: {
                 RatingEngine: function($q, $stateParams, RatingsEngineStore) {
                     var deferred = $q.defer(),
@@ -283,21 +294,6 @@ angular
                     });
 
                     return deferred.promise;
-                },
-                backconfig: function(IsCdl, Model, RatingEngine){
-                                          
-
-                    var displayName =  Model.ModelDetails.DisplayName;
-                    var backState = 'home.models';
-
-                    if(IsCdl === true){
-                        backState = 'home.ratingsengine';
-                        displayName = RatingEngine.displayName;
-                    }
-                    return {
-                        backState: backState,
-                        backName: displayName
-                    };
                 }
             },
             views: {
@@ -359,9 +355,6 @@ angular
                     controller: function($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="performanceTab" class="tab-content" data-performance-tab-widget></div>'))($scope);
-
-                        // $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 },
@@ -488,9 +481,6 @@ angular
                     controller: function($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsLeadsTab" class="tab-content" data-leads-tab-widget></div>'))($scope);
-
-                        // $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
@@ -507,8 +497,6 @@ angular
                     controller: function($scope, $compile, ModelStore, IsPmml) {
                         $scope.data = ModelStore.data;
                         $scope.IsPmml = IsPmml;
-
-                        // $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
@@ -549,8 +537,6 @@ angular
                 "main@": {
                     controller: function($scope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
-
-                        // $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
@@ -658,9 +644,6 @@ angular
             },
             views: {
                 "summary@": {
-                    // controller: function (Model) {
-                    //     $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-                    // },
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {

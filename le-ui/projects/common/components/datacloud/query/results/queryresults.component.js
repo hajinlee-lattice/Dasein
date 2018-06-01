@@ -46,13 +46,6 @@ angular.module('common.datacloud.query.results', [
     });
 
     vm.init = function() {
-        if(vm.segment != null && vm.section != 'create.targets'){
-            $rootScope.$broadcast('header-back', { 
-                path: '^home.segment.accounts',
-                displayName: vm.segment.display_name,
-                sref: 'home.segments'
-            });
-        }
 
         // Set Counts for Segment and PLay Targets
         if (vm.section === 'segment.analysis') {

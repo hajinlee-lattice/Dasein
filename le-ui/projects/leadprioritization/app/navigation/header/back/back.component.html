@@ -1,5 +1,5 @@
 <ul >
-        <li class="header-back-name-container" title="{{$ctrl.backName}}" ng-if="!$ctrl.hide">
-                <a ui-sref="{{$ctrl.headerBack}}" class="header-back-name">{{ $ctrl.backName }}</a>
+        <li class="header-back-name-container" title="{{$ctrl.getBackLabel()}}" ng-if="!$ctrl.isHidden()">
+                <a ui-sref="{{$ctrl.getBackState()}}" class="header-back-name">{{ $ctrl.getBackLabel() }}</a>
         </li>
 </ul>

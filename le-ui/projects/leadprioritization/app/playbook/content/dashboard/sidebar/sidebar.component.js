@@ -27,11 +27,6 @@ angular
             vm.menuDisabled = true;
         }
 
-        $rootScope.$broadcast('header-back', { 
-            path: '^home.playbook.dashboard',
-            displayName: vm.play.displayName,
-            sref: 'home.playbook'
-        });
     }
 
     vm.init();

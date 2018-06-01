@@ -90,6 +90,21 @@ angular.module('common.datacloud.query')
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Query Builder'
             },
+            onEnter: ['$stateParams', 'SegmentStore', 'BackStore', function($stateParams, SegmentStore, BackStore) {
+                var name = $stateParams.segment;
+
+                BackStore.setBackState('home.segments');
+                if('Create' === name){
+                    BackStore.setBackLabel($stateParams.segment);
+                    BackStore.setHidden(true);
+                } else {
+                    SegmentStore.getSegmentByName(name).then(function(result) {
+                        BackStore.setBackLabel(result.display_name);
+                        BackStore.setHidden(false);
+                    });
+                    
+                }
+            }],
             resolve: {
                 Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
                     var deferred = $q.defer();
@@ -107,20 +122,7 @@ angular.module('common.datacloud.query')
                 }],
                 CurrentRatingEngine: [function() {
                     return null;
-                }],
-                backconfig: function($stateParams){
-                    var name = $stateParams.segment;
-                    var configObj = {
-                        backState: 'home.segments',
-                        backName: name
-                    };
-                    console.log('Segment name ', name);
-                    if('Create' === name){
-                        configObj.hide = true;
-                    }
-                    
-                    return configObj;
-                }
+                }]
             },
             views: {
                 "main@": {
@@ -137,6 +139,21 @@ angular.module('common.datacloud.query')
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Accounts'
             },
+            onEnter: ['$stateParams', 'SegmentStore', 'BackStore', function($stateParams, SegmentStore, BackStore) {
+                var name = $stateParams.segment;
+
+                BackStore.setBackState('home.segments');
+                if('Create' === name){
+                    BackStore.setBackLabel($stateParams.segment);
+                    BackStore.setHidden(true);
+                } else {
+                    SegmentStore.getSegmentByName(name).then(function(result) {
+                        BackStore.setBackLabel(result.display_name);
+                        BackStore.setHidden(false);
+                    });
+                    
+                }
+            }],
             onExit: ['QueryStore', function(QueryStore) {
                 QueryStore.getEntitiesCounts().then(function() {
                     // console.log('resetEntitiesCount');
@@ -148,14 +165,15 @@ angular.module('common.datacloud.query')
                 // for the Playbook wizard Targets tab
                 NoSFIdsCount: [function() { return null; }],
                 AccountsCoverage: [function() { return null; }],
-                Config: [function() { return null; }],
+                Config: [function() { return null; }]
             },
             views: {
                 "main@": {
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
-                }
+                },
+                'header.back@': 'backNav'
             }
         })
         .state('home.segment.contacts', {
@@ -164,6 +182,21 @@ angular.module('common.datacloud.query')
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Contacts'
             },
+            onEnter: ['$stateParams', 'SegmentStore', 'BackStore', function($stateParams, SegmentStore, BackStore) {
+                var name = $stateParams.segment;
+
+                BackStore.setBackState('home.segments');
+                if('Create' === name){
+                    BackStore.setBackLabel($stateParams.segment);
+                    BackStore.setHidden(true);
+                } else {
+                    SegmentStore.getSegmentByName(name).then(function(result) {
+                        BackStore.setBackLabel(result.display_name);
+                        BackStore.setHidden(false);
+                    });
+                    
+                }
+            }],
             onExit: ['$stateParams', 'QueryStore', function($stateParams, QueryStore) {
                 QueryStore.getEntitiesCounts().then(function() {
                     // console.log('resetEntitiesCount');
@@ -175,14 +208,15 @@ angular.module('common.datacloud.query')
                 // for the Playbook wizard Targets tab
                 NoSFIdsCount: [function() { return null; }],
                 AccountsCoverage: [function() { return null; }],
-                Config: [function() { return null; }],
+                Config: [function() { return null; }]
             },
             views: {
                 "main@": {
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
-                }
+                },
+                'header.back@': 'backNav'
             }
         });
 });

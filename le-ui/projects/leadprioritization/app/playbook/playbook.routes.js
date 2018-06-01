@@ -113,6 +113,11 @@ angular
                 pageTitle: 'Play Overview',
                 play_name: ''
             },
+            onEnter: ['Play', 'BackStore', function(Play, BackStore) {
+                BackStore.setBackLabel(Play.displayName);
+                BackStore.setBackState('home.playbook');
+                BackStore.setHidden(false);
+            }],
             resolve: {
                 Play: function($q, $stateParams, PlaybookWizardStore) {
                     var deferred = $q.defer(),
@@ -122,12 +127,6 @@ angular
                         deferred.resolve(result);
                     });
                     return deferred.promise;
-                },
-                backconfig: function(Play){
-                    return {
-                        backState: 'home.playbook',
-                        backName: Play.displayName
-                    };
                 }
             },
             views: {

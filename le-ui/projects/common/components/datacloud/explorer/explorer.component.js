@@ -109,20 +109,6 @@ angular.module('common.datacloud.explorer', [
 
         QueryStore.setSegmentEnabled = false;
 
-        if (vm.segment != null && vm.segment != "Create"){
-            SegmentStore.getSegmentByName(vm.segment).then(function(result) {
-                if(result){
-                    vm.displayName = result.display_name;
-                
-                    $rootScope.$broadcast('header-back', { 
-                        path: '^home.segment.accounts',
-                        displayName: vm.displayName,
-                        sref: 'home.segments'
-                    });
-                }
-            });    
-        }
-
         if (vm.section == 'insights' && !vm.show_lattice_insights) {
             vm.statusMessage(vm.label.insufficientUserRights, { wait: 0, special: 'nohtml' });
             return false;
