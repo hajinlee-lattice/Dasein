@@ -20,24 +20,30 @@ import com.amazonaws.services.elasticache.model.DescribeCacheClustersResult;
 import com.amazonaws.services.elasticache.model.DescribeReplicationGroupsRequest;
 import com.amazonaws.services.elasticache.model.DescribeReplicationGroupsResult;
 import com.amazonaws.services.elasticache.model.Endpoint;
+import com.amazonaws.services.elasticache.model.NodeGroup;
 import com.amazonaws.services.elasticache.model.ReplicationGroup;
-import com.latticeengines.aws.elasticache.ElastiCacheService;
+import com.latticeengines.aws.elasticache.ElasticCacheService;
 
-@Service("elastiCacheService")
-public class ElastiCacheServiceImpl implements ElastiCacheService {
+@Service("elasticCacheService")
+public class ElasticCacheServiceImpl implements ElasticCacheService {
 
     private AmazonElastiCache client;
 
     private String clusterName;
 
     @Inject
-    public ElastiCacheServiceImpl(AWSCredentials awsCredentials, @Value("${aws.region}") String region,
-            @Value("${aws.elasticache.cluster.name}") String clusterName) {
+    public ElasticCacheServiceImpl(AWSCredentials awsCredentials, @Value("${aws.region}") String region,
+                                   @Value("${aws.elasticache.cluster.name}") String clusterName) {
         this.client = AmazonElastiCacheClientBuilder.standard() //
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))//
                 .withRegion(region)//
                 .build();
         this.clusterName = clusterName;
+    }
+
+    @Override
+    public String getPrimaryEndpointAddress() {
+        return getPrimaryEndpointAddr(clusterName);
     }
 
     @Override
@@ -64,6 +70,27 @@ public class ElastiCacheServiceImpl implements ElastiCacheService {
         }
 
         return addrPortInfo;
+    }
+
+    private String getPrimaryEndpointAddr(String groupName) {
+        String addr = null;
+        DescribeReplicationGroupsRequest drgRequest = new DescribeReplicationGroupsRequest();
+        drgRequest.setReplicationGroupId(groupName);
+        DescribeReplicationGroupsResult result = client.describeReplicationGroups(drgRequest);
+        for (ReplicationGroup replicationGroup: result.getReplicationGroups()) {
+            if (replicationGroup.getReplicationGroupId().equalsIgnoreCase(groupName)) {
+                boolean encrypted = replicationGroup.getTransitEncryptionEnabled();
+                NodeGroup nodeGroup = replicationGroup.getNodeGroups().get(0);
+                Endpoint primaryEndpoint = nodeGroup.getPrimaryEndpoint();
+                addr = getFullAddr(primaryEndpoint, encrypted);
+            }
+        }
+
+        if (StringUtils.isBlank(addr)) {
+            throw new IllegalArgumentException("Failed to get addresses for replication group named " + groupName);
+        }
+
+        return addr;
     }
 
     private String getClusterNodeAddr(String clusterName) {

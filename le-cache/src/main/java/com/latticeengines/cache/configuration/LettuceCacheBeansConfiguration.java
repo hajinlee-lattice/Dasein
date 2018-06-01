@@ -3,11 +3,9 @@ package com.latticeengines.cache.configuration;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +26,6 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -40,23 +34,16 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.aws.elasticache.ElastiCacheService;
 import com.latticeengines.domain.exposed.cache.CacheName;
-
-import io.lettuce.core.ReadFrom;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.cluster.ClusterClientOptions;
-import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 
 @Configuration
 @EnableCaching
 public class LettuceCacheBeansConfiguration implements CachingConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(LettuceCacheBeansConfiguration.class);
-    private static final String USE_LOCAL_REDIS = "USE_LOCAL_REDIS";
 
     @Inject
-    private ElastiCacheService elastiCacheService;
+    private RedisConnectionFactory lettuceConnectionFactory;
 
     @Value("${cache.type}")
     private String cacheType;
@@ -190,7 +177,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.DataCloudVersionCacheName, dataCloudVersionCacheConfig);
 
         RedisCacheManager cacheManager = RedisCacheManager
-                .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory()))//
+                .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory))//
                 .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig()) //
                 .withInitialCacheConfigurations(cacheConfigs) //
                 .transactionAware()//
@@ -210,11 +197,10 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.SessionCacheName));
-
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
         cacheConfigs.put(CacheName.Constants.SessionCacheName, sessionCacheConfig);
         RedisCacheManager cacheManager = RedisCacheManager
-                .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory()))//
+                .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory))//
                 .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig()) //
                 .withInitialCacheConfigurations(cacheConfigs) //
                 .transactionAware()//
@@ -228,55 +214,6 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         compositeCacheManager.setFallbackToNoOpCache(true);
         compositeCacheManager.afterPropertiesSet();
         return compositeCacheManager;
-    }
-
-    @Bean
-    public RedisConnectionFactory lettuceConnectionFactory() {
-        RedisConnectionFactory factory;
-
-        if (useLocalRedis()) {
-            log.info("Using local redis server");
-            RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
-            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
-                    .shutdownTimeout(Duration.ZERO) //
-                    .build();
-            factory = new LettuceConnectionFactory(standaloneConfiguration, clientConfig);
-        } else {
-            LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
-                    elastiCacheService.getDistributedCacheNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
-
-            ClusterTopologyRefreshOptions topologyRefreshOptions = ClusterTopologyRefreshOptions.builder() //
-                    .enablePeriodicRefresh(Duration.ofMinutes(10)) //
-                    .enableAllAdaptiveRefreshTriggers() //
-                    .refreshTriggersReconnectAttempts(3) //
-                    .build();
-
-            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                    .readFrom(ReadFrom.SLAVE_PREFERRED)//
-                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
-                    .shutdownTimeout(Duration.ZERO) //
-                    .clientOptions(ClusterClientOptions.builder().topologyRefreshOptions(topologyRefreshOptions).build()) //
-                    .useSsl() //
-                    .build();
-
-            LedpLettuceConnectionFactory lettuceFactory = new LedpLettuceConnectionFactory(masterSlave, clientConfig);
-            lettuceFactory.afterPropertiesSet();
-            factory = lettuceFactory;
-        }
-
-        return factory;
-    }
-
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(getValueSerializer());
-        redisTemplate.setConnectionFactory(lettuceConnectionFactory());
-        redisTemplate.setEnableTransactionSupport(true);
-        redisTemplate.afterPropertiesSet();
-        return redisTemplate;
     }
 
     @Override
@@ -313,11 +250,6 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 throw exception;
             }
         };
-    }
-
-    private boolean useLocalRedis() {
-        return StringUtils.isNotBlank(System.getenv(USE_LOCAL_REDIS))
-                && Boolean.valueOf(System.getenv(USE_LOCAL_REDIS));
     }
 
 }

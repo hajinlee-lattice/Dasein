@@ -1,4 +1,4 @@
-package com.latticeengines.cache.configuration;
+package com.latticeengines.redis.bean;
 
 import java.time.Duration;
 import java.util.List;
@@ -31,7 +31,7 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
     private final LettuceClientConfiguration clientConfiguration;
 
     public LedpLettuceConnectionFactory(LedpMasterSlaveConfiguration standaloneConfig,
-            LettuceClientConfiguration clientConfig) {
+                                        LettuceClientConfiguration clientConfig) {
         super(standaloneConfig, clientConfig);
         this.configuration = standaloneConfig;
         this.clientConfiguration = clientConfig;
@@ -109,7 +109,6 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
 
         @SuppressWarnings("rawtypes")
         private StatefulRedisConnection masterSlaveConnection(List<RedisURI> endpoints, ReadFrom readFrom) {
-
             StatefulRedisMasterSlaveConnection<?, ?> connection = MasterSlave.connect(client, codec, endpoints);
             connection.setReadFrom(readFrom);
             Duration duration = clientConfiguration.getCommandTimeout();

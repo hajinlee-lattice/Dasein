@@ -2,7 +2,8 @@ package com.latticeengines.cache.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -16,7 +17,7 @@ import com.latticeengines.cache.test.annotation.CacheEntity;
 @ContextConfiguration(locations = { "classpath:test-cache-annotation-context.xml" })
 public class AnnotationCacheServiceTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private CacheEntity cacheEntity;
 
     @BeforeClass
@@ -27,11 +28,20 @@ public class AnnotationCacheServiceTestNG extends AbstractTestNGSpringContextTes
 
     @Test
     public void test() {
-        int k = 0;
-        int v = 0;
-        assertEquals(cacheEntity.getValue(k), 0);
-        cacheEntity.putValue(++v);
-        assertEquals(cacheEntity.getValue(k), 0);
-        assertEquals(cacheEntity.getValue(v), 1);
+        final Integer key = 0;
+        cacheEntity.putValueBypassCache(key, 0);
+
+        assertEquals(cacheEntity.getValue(key), new Integer(0));
+        cacheEntity.putValueBypassCache(key, 1);
+        assertEquals(cacheEntity.getValue(key), new Integer(0));
+        assertEquals(cacheEntity.getValueBypassCache(key), new Integer(1));
+
+        cacheEntity.putValue(key, 2);
+        assertEquals(cacheEntity.getValue(key), new Integer(2));
+        assertEquals(cacheEntity.getValueBypassCache(key), new Integer(2));
+
+        cacheEntity.putValue(key, 3);
+        assertEquals(cacheEntity.getValue(key), new Integer(3));
+        assertEquals(cacheEntity.getValueBypassCache(key), new Integer(3));
     }
 }

@@ -3,7 +3,6 @@ package com.latticeengines.cache.test.annotation;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,22 +14,15 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 
-import com.latticeengines.aws.elasticache.ElastiCacheService;
-import com.latticeengines.cache.configuration.LedpLettuceConnectionFactory;
-import com.latticeengines.cache.configuration.LedpMasterSlaveConfiguration;
 import com.latticeengines.domain.exposed.cache.CacheName;
-
-import io.lettuce.core.ReadFrom;
-import io.lettuce.core.RedisURI;
 
 @Configuration
 @EnableCaching
 public class CacheBeansConfiguration {
 
     @Inject
-    private ElastiCacheService elastiCacheService;
+    private RedisConnectionFactory lettuceConnectionFactory;
 
     @Bean
     public CacheManager redisTestCacheManager() {
@@ -45,28 +37,10 @@ public class CacheBeansConfiguration {
                         .prefixKeysWith(CacheName.SessionCache.name()) //
                         .disableCachingNullValues());
         return RedisCacheManager
-                .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory()))//
+                .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory))//
                 .cacheDefaults(config) //
                 .withInitialCacheConfigurations(cacheConfigs) //
                 .transactionAware()//
                 .build();
-    }
-
-    @Bean
-    public RedisConnectionFactory lettuceConnectionFactory() {
-        LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(elastiCacheService
-                .getDistributedCacheNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
-
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .readFrom(ReadFrom.SLAVE_PREFERRED)//
-                .commandTimeout(Duration.ofSeconds(2))//
-                .shutdownTimeout(Duration.ZERO) //
-                .useSsl() //
-                .and() //
-                .build();
-
-        LedpLettuceConnectionFactory factory = new LedpLettuceConnectionFactory(masterSlave, clientConfig);
-        factory.afterPropertiesSet();
-        return factory;
     }
 }

@@ -11,8 +11,4 @@
 
     <import resource="classpath:aws-credentials-context.xml"/>
 
-    <!--  bean id="redisson" class="com.latticeengines.redis.bean.RedissonBeanFactory">
-        <property name="elastiCacheService" ref="elastiCacheService"/>
-    </bean-->
-
 </beans>

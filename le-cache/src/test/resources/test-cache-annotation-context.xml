@@ -8,8 +8,7 @@
        http://www.springframework.org/schema/context/spring-context.xsd">
 
     <import resource="classpath:common-testclient-env-context.xml"/>
-    <!-- <import resource="classpath:redis-context.xml" /> -->
-    <import resource="classpath:aws-credentials-context.xml"/>
-    <context:component-scan base-package="com.latticeengines.cache.test, com.latticeengines.aws.elasticache" />
+    <import resource="classpath:cache-context.xml" />
+    <context:component-scan base-package="com.latticeengines.cache.test" />
 
 </beans>

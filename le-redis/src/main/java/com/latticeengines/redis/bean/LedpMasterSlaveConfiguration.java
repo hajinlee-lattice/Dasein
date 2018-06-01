@@ -1,4 +1,4 @@
-package com.latticeengines.cache.configuration;
+package com.latticeengines.redis.bean;
 
 import java.util.List;
 

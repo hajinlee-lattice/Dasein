@@ -1,5 +1,8 @@
 package com.latticeengines.cache.test.annotation;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -8,20 +11,29 @@ import org.springframework.stereotype.Component;
 @Component("cacheEntity")
 public class CacheEntity {
 
-    private int v = 0;
+    private ConcurrentMap<Integer, Integer> map = new ConcurrentHashMap<>();
 
-    @Cacheable(cacheNames = "Test")
-    public int getValue(int k) {
-        return this.v;
+    @Cacheable(cacheNames = "Test", unless = "#result == null")
+    public Integer getValue(Integer k) {
+        return getValueBypassCache(k);
     }
 
-    @CachePut(cacheNames = "Test")
-    public int putValue(int v) {
-        this.v = v;
-        return v;
+    @CachePut(cacheNames = "Test", key = "#k", unless = "#result == null")
+    public Integer putValue(Integer k, Integer v) {
+        return putValueBypassCache(k, v);
     }
 
     @CacheEvict(cacheNames = "Test")
-    public void clear(int k) {
+    public void clear(Integer k) {
+        map.remove(k);
+    }
+
+    public Integer getValueBypassCache(Integer k) {
+        return map.get(k);
+    }
+
+    public Integer putValueBypassCache(Integer k, Integer v) {
+        map.put(k, v);
+        return v;
     }
 }

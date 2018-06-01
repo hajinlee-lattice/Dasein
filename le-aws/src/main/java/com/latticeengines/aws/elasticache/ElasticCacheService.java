@@ -2,8 +2,10 @@ package com.latticeengines.aws.elasticache;
 
 import java.util.List;
 
-public interface ElastiCacheService {
+public interface ElasticCacheService {
 
     List<String> getDistributedCacheNodeAddresses();
+
+    String getPrimaryEndpointAddress();
 
 }
