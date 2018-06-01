@@ -39,7 +39,7 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-        importingEntity = BusinessEntity.Account;
+        importingEntity = BusinessEntity.Transaction;
     }
 
     @Test(groups = "manual")
@@ -75,6 +75,12 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
             importData(BusinessEntity.Product, "ProductBundles.csv");
             importData(BusinessEntity.Product, "ProductHierarchies.csv");
             importData(BusinessEntity.Product, "ProductVDB.csv");
+        }
+
+        if (importingEntity.equals(BusinessEntity.Transaction)) {
+            importData(BusinessEntity.Transaction, "Transaction_0_15K.csv");
+            importData(BusinessEntity.Transaction, "Transaction_15K_30K.csv");
+            importData(BusinessEntity.Transaction, "Transaction_20K_60K.csv");
         }
     }
 

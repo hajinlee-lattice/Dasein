@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,6 +78,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -137,7 +139,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final String S3_CSV_DIR = "le-serviceapps/cdl/end2end/csv";
     private static final String S3_CSV_VERSION = "2";
 
-    private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
+    private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
+    private static final String S3_AVRO_VERSION = "1";
+
+    static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
     static final long SEGMENT_1_CONTACT_1 = 23;
     static final long SEGMENT_1_ACCOUNT_2 = 30;
@@ -147,7 +152,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_1_ACCOUNT_4 = 58;
     static final long SEGMENT_1_CONTACT_4 = 68;
 
-    private static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
+    static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
     static final long SEGMENT_2_ACCOUNT_1 = 13;
     static final long SEGMENT_2_CONTACT_1 = 13;
     static final long SEGMENT_2_ACCOUNT_2 = 45;
@@ -352,8 +357,94 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity.name());
         List<String> tables = dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(),
                 importTemplate.getName(), e);
-        registerImportAction(dataFeedTask);
+        registerMetadataChangeAction(dataFeedTask);
         dataFeedProxy.addTablesToQueue(customerSpace.toString(), dataFeedTask.getUniqueId(), tables);
+    }
+
+    void mockCSVImport(BusinessEntity entity, int fileIdx, String feedType) {
+        List<String> strings = registerMockDataFeedTask(entity, feedType);
+        String feedTaskId = strings.get(0);
+        String templateName = strings.get(1);
+        Date now = new Date();
+        String fileName = String.format("%s-%d.avro", entity.name(), fileIdx);
+        InputStream is = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, S3_AVRO_VERSION, fileName);
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        String extractPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
+                SourceType.FILE.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(now));
+        long numRecords;
+        try {
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, extractPath + "/part-00000.avro");
+            numRecords = AvroUtils.count(yarnConfiguration, extractPath + "/*.avro");
+            logger.info("Uploaded " + numRecords + " records from " + fileName + " to " + extractPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload avro file " + fileName);
+        }
+        Extract extract = new Extract();
+        extract.setName("Extract-" + templateName);
+        extract.setPath(extractPath);
+        extract.setProcessedRecords(numRecords);
+        extract.setExtractionTimestamp(now.getTime());
+        List<String> tableNames = dataFeedProxy.registerExtract(customerSpace.toString(), feedTaskId, templateName, extract);
+        registerImportAction(feedTaskId, numRecords, tableNames);
+    }
+
+    private Table getMockTemplate(BusinessEntity entity) {
+        String templateFileName = String.format("%s_Template.json", entity.name());
+        InputStream templateIs = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, S3_AVRO_VERSION, templateFileName);
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.readValue(templateIs, Table.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read " + entity.name() + " template from S3.");
+        }
+    }
+
+    private List<String> registerMockDataFeedTask(BusinessEntity entity, String feedType) {
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        String feedTaskId;
+        String templateName = NamingUtils.timestamp(entity.name());
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(), feedType,
+                entity.name());
+        if (dataFeedTask == null) {
+            dataFeedTask = new DataFeedTask();
+            Table importTemplate = getMockTemplate(entity);
+            importTemplate.setTableType(TableType.IMPORTTABLE);
+            importTemplate.setName(templateName);
+            dataFeedTask.setImportTemplate(importTemplate);
+
+            dataFeedTask.setStatus(DataFeedTask.Status.Active);
+            dataFeedTask.setEntity(entity.name());
+            dataFeedTask.setFeedType(feedType);
+            dataFeedTask.setSource(SourceType.FILE.getName());
+            dataFeedTask.setActiveJob("Not specified");
+            dataFeedTask.setSourceConfig("Not specified");
+            dataFeedTask.setStartTime(new Date());
+            dataFeedTask.setLastImported(new Date(0L));
+            dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
+            dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
+            feedTaskId = dataFeedTask.getUniqueId();
+        } else {
+            feedTaskId = dataFeedTask.getUniqueId();
+            templateName = dataFeedTask.getImportTemplate().getName();
+
+        }
+        return Arrays.asList(feedTaskId, templateName);
+    }
+
+    private void registerImportAction(String feedTaskId, long count, List<String> tableNames) {
+        logger.info(String.format("Registering action for dataFeedTask=%s", feedTaskId));
+        ImportActionConfiguration configuration = new ImportActionConfiguration();
+        configuration.setDataFeedTaskId(feedTaskId);
+        configuration.setImportCount(count);
+        configuration.setRegisteredTables(tableNames);
+        Action action = new Action();
+        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action.setActionInitiator(INITIATOR);
+        action.setDescription(feedTaskId);
+        action.setTrackingId(null);
+        action.setActionConfiguration(configuration);
+        actionProxy.createAction(mainCustomerSpace, action);
     }
 
     void importData(BusinessEntity entity, int offset, int limit) {
@@ -366,9 +457,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         SourceFile template = fileUploadProxy.uploadFile(s3FileName, false, s3FileName, entity.name(), csvResource);
         FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
-        if (BusinessEntity.Account.equals(entity)) {
-            setExternalSystem(fieldMappingDocument.getFieldMappings());
-        }
+        modifyFieldMappings(entity, fieldMappingDocument);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -383,6 +472,19 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         logger.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
+    }
+
+    private void modifyFieldMappings(BusinessEntity entity, FieldMappingDocument fieldMappingDocument) {
+        switch (entity) {
+            case Account:
+                modifyFieldMappingsForAccount(fieldMappingDocument);
+                break;
+            default:
+        }
+    }
+
+    private void modifyFieldMappingsForAccount(FieldMappingDocument fieldMappingDocument) {
+        setExternalSystem(fieldMappingDocument.getFieldMappings());
     }
 
     private void setExternalSystem(List<FieldMapping> fieldMappings) {
@@ -432,7 +534,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         CSVImportConfig csvImportConfig = new CSVImportConfig();
         csvImportConfig.setCsvToHdfsConfiguration(importConfig);
         csvImportConfig.setCSVImportFileInfo(importFileInfo);
-
         return csvImportConfig;
     }
 
@@ -460,7 +561,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
     }
 
-    private void registerImportAction(DataFeedTask dataFeedTask) {
+    private void registerMetadataChangeAction(DataFeedTask dataFeedTask) {
         logger.info(String.format("Registering action for dataFeedTask=%s", dataFeedTask));
         Action action = new Action();
         action.setType(ActionType.METADATA_CHANGE);
@@ -848,6 +949,27 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         expectedCounts.forEach((entity, count) -> {
             Assert.assertNotNull(immutableSegment.getEntityCount(entity), "Cannot find count of " + entity);
             Assert.assertEquals(immutableSegment.getEntityCount(entity), count, JsonUtils.pprint(immutableSegment));
+        });
+    }
+
+    void verifySegmentCountsNonNegative(String segmentName, Collection<BusinessEntity> entities) {
+        MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
+        int retries = 0;
+        while (segment == null && retries++ < 3) {
+            logger.info("Wait for 1 sec to retry getting rating engine.");
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            segment = testMetadataSegmentProxy.getSegment(segmentName);
+        }
+        Assert.assertNotNull(segment,
+                "Cannot find rating engine " + segmentName + " in tenant " + mainTestTenant.getId());
+        final MetadataSegment immutableSegment = segment;
+        entities.forEach(entity -> {
+            Assert.assertNotNull(immutableSegment.getEntityCount(entity), "Cannot find count of " + entity);
+            Assert.assertTrue(immutableSegment.getEntityCount(entity) > 0, JsonUtils.pprint(immutableSegment));
         });
     }
 
