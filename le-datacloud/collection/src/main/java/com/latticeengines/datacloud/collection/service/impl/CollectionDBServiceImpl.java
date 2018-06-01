@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.collection.service.impl;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.Timestamp;
@@ -23,34 +22,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ecr.AmazonECR;
-import com.amazonaws.services.ecr.model.GetAuthorizationTokenRequest;
-import com.amazonaws.services.ecs.AmazonECS;
-import com.amazonaws.services.ecs.model.AssignPublicIp;
-import com.amazonaws.services.ecs.model.AwsVpcConfiguration;
-import com.amazonaws.services.ecs.model.Compatibility;
-import com.amazonaws.services.ecs.model.ContainerDefinition;
-import com.amazonaws.services.ecs.model.ContainerOverride;
-import com.amazonaws.services.ecs.model.CreateClusterRequest;
-import com.amazonaws.services.ecs.model.CreateClusterResult;
-import com.amazonaws.services.ecs.model.DescribeTasksRequest;
-import com.amazonaws.services.ecs.model.DescribeTasksResult;
-import com.amazonaws.services.ecs.model.Failure;
 import com.amazonaws.services.ecs.model.KeyValuePair;
-import com.amazonaws.services.ecs.model.LaunchType;
 import com.amazonaws.services.ecs.model.LogConfiguration;
 import com.amazonaws.services.ecs.model.LogDriver;
-import com.amazonaws.services.ecs.model.NetworkConfiguration;
-import com.amazonaws.services.ecs.model.NetworkMode;
-import com.amazonaws.services.ecs.model.RegisterTaskDefinitionRequest;
-import com.amazonaws.services.ecs.model.RegisterTaskDefinitionResult;
-import com.amazonaws.services.ecs.model.RunTaskRequest;
-import com.amazonaws.services.ecs.model.RunTaskResult;
 import com.amazonaws.services.ecs.model.Task;
-import com.amazonaws.services.ecs.model.TaskOverride;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.latticeengines.aws.ecs.ECSService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.collection.entitymgr.CollectionRequestMgr;
@@ -76,11 +53,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Inject
     S3Service s3Service;
     @Inject
-    AmazonECS ecsClient;
-    @Inject
-    AmazonECR ecrClient;
-    @Inject
-    AmazonS3 s3Client;
+    ECSService ecsService;
+    //@Inject
+    //AmazonECS ecsClient;
+    //@Inject
+    //AmazonECR ecrClient;
+    //@Inject
+    //AmazonS3 s3Client;
     @Value("${datacloud.collection.s3bucket}")
     String s3Bucket;
     @Value("${datacloud.collection.s3bucket.prefix}")
@@ -136,6 +115,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         return ret;
     }
 
+    /*
     private String spawnECSTask(String clusterName,
                                 String taskDefName,
                                 String imageName,
@@ -201,7 +181,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         }
 
         return ret2.getTasks().get(0).getTaskArn();
-    }
+    }*/
 
     public int spawnCollectionWorker() throws Exception {
         int spawnedTasks = 0;
@@ -243,7 +223,18 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             //spawn worker in aws, '-v vendor -w worker_id'
             String cmdLine = "-v " + vendor + " -w " + workerId;
-            String taskArn = spawnECSTask(ecsClusterName, vendor, ecrImageName, cmdLine, workerId);
+            //String taskArn = spawnECSTask(ecsClusterName, vendor, ecrImageName, cmdLine, workerId);
+            String taskArn = ecsService.spawECSTask(
+                    ecsClusterName, "python", vendor, ecrImageName,
+                    cmdLine, workerId, "ecsTaskExecutionRole", "ecsTaskExecutionRole",
+                    Integer.valueOf(ecsTaskCpu), Integer.valueOf(ecsTaskMemory),
+                    ecsTaskSubnets,
+                    new LogConfiguration()
+                            .withLogDriver(LogDriver.Awslogs)
+                            .withOptions(constructLogOptions()),
+                    new KeyValuePair()
+                            .withName("DATA_CLOUD_USE_CONSUL")
+                            .withValue("true"));
 
             //create worker record in
             Timestamp ts = new Timestamp(System.currentTimeMillis());
@@ -271,8 +262,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         for (int i = 0; i < workers.size(); ++i)
             taskArns.add(workers.get(i).getTaskArn());
 
-        DescribeTasksResult ret0 = ecsClient.describeTasks(new DescribeTasksRequest().withCluster(ecsClusterName).withTasks(taskArns));
-        List<Task> tasks = ret0.getTasks();
+        List<Task> tasks = ecsService.getTasks(ecsClusterName, taskArns);
         HashMap<String, Task> arn2tasks = new HashMap<>(tasks.size() * 2);
         for (int i = 0; i < tasks.size(); ++i) {
             Task task = tasks.get(i);
@@ -316,13 +306,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         //list file in s3 output path
         String prefix = s3BucketPrefix + workerId + "/output/";
-        List<S3ObjectSummary> itemDescs = s3Client.listObjects(s3Bucket, prefix).getObjectSummaries();
+        List<S3ObjectSummary> itemDescs = s3Service.listObjects(s3Bucket, prefix);
+        //s3Client.listObjects(s3Bucket, prefix).getObjectSummaries();
         if (itemDescs.size() < 1)
             return false;
 
         //download content
         List<File> tmpFiles = new ArrayList<>(itemDescs.size());
-        byte[] buf = new byte[16384];
         for (int i = 0; i < itemDescs.size(); ++i) {
             S3ObjectSummary itemDesc = itemDescs.get(i);
             if (itemDesc.getSize() == 0)
@@ -332,17 +322,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             tmpFile.deleteOnExit();
             tmpFiles.add(tmpFile);
 
-            try (S3ObjectInputStream stream = s3Client.getObject(itemDesc.getBucketName(), itemDesc.getKey()).getObjectContent()) {
-                try (FileOutputStream writer = new FileOutputStream(tmpFile)) {
-                    while (stream.available() > 0) {
-                        int bytes = stream.read(buf);
-                        if (bytes <= 0)
-                            break;
-
-                        writer.write(buf, 0, bytes);
-                    }
-                }
-            }
+            s3Service.downloadS3File(itemDesc, tmpFile);
         }
 
         if (tmpFiles.size() == 0)
@@ -406,7 +386,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             if (worker.getStatus().equals(CollectionWorker.STATUS_NEW) &&
                     (task.getLastStatus().equals("RUNNING") || task.getLastStatus().equals("STOPPED"))) {
-                log.info(worker.getWorkerId() + " starts running");
+                log.info("task " + worker.getWorkerId() + " starts running");
                 worker.setStatus(CollectionWorker.STATUS_RUNNING);
                 collectionWorkerMgr.update(worker);
             }
@@ -416,7 +396,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             //transfer state to finished
             if (worker.getStatus().equals(CollectionWorker.STATUS_RUNNING)) {
-                log.info(worker.getWorkerId() + " finished running");
+                log.info("task " + worker.getWorkerId() + " finished running");
                 worker.setStatus(CollectionWorker.STATUS_FINISHED);
                 collectionWorkerMgr.update(worker);
             }
@@ -427,7 +407,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             //no csv file: status => fail
             //copy csv file to hdfs
             if (worker.getStatus().equals(CollectionWorker.STATUS_FINISHED)) {
-                log.info(worker.getWorkerId() + " finished, starts consuming its output");
+                log.info("task " + worker.getWorkerId() + " finished, starts consuming its output");
                 boolean succ = handleFinishedTask(worker);
 
                 //status => consumed/failed
@@ -436,7 +416,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 collectionWorkerMgr.update(worker);
 
                 ++stoppedTasks;
-                log.info(worker.getWorkerId() + " consumed");
+                log.info("task " + worker.getWorkerId() + (succ ? " consumed" : " failed"));
             }
         }
 
@@ -453,26 +433,34 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         return activeWorkers == null ? 0 : activeWorkers.size();
     }
 
+    private long prevMillis = 0;
     public void service() {
+        if (prevMillis == 0)
+            log.info("datacloud collection job starts...");
+        long currentMillis = System.currentTimeMillis();
+
         try {
-            log.info("Datacloud collection job starts...");
             int activeTasks = getActiveTaskCount();
-            log.info("There're " + activeTasks + " tasks");
-            Thread.sleep(LATENCY_GAP_MS);
+            if (prevMillis == 0 || currentMillis - prevMillis >= 60 * 1000) {
+                prevMillis = currentMillis;
+                log.info("There're " + activeTasks + " tasks");
+            }
 
-            log.info("Start migrating raw requests to collection requests");
             int reqs = transferRawRequests(true);
-            log.info("Request migration done: " + reqs + " requests transferred");
+            if (reqs > 0)
+                log.info(reqs + " requests transferred from raw requests to collection requests");
             Thread.sleep(LATENCY_GAP_MS);
 
-            log.info("Start spawn collection worker to handle requests");
-            activeTasks += spawnCollectionWorker();
-            log.info("Active tasks => " + activeTasks);
+            int newTasks = spawnCollectionWorker();
+            activeTasks += newTasks;
+            if (newTasks > 0)
+                log.info(newTasks + " new collection workers spawned, active tasks => " + activeTasks);
             Thread.sleep(LATENCY_GAP_MS);
 
-            log.info("Start handling running/finished workers");
-            activeTasks -= updateCollectingStatus();
-            log.info("Active tasks => " + activeTasks);
+            int stoppedTasks = updateCollectingStatus();
+            activeTasks -= stoppedTasks;
+            if (stoppedTasks > 0)
+                log.info(stoppedTasks + " tasks stopped, active tasks => " + activeTasks);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

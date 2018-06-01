@@ -20,4 +20,5 @@ public interface S3Service {
 
     Upload uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync);
 
+    void downloadS3File(S3ObjectSummary itemDesc, File file) throws Exception;
 }
