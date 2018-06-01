@@ -6,7 +6,8 @@
       "Children" : [
         { "Node": "MaxEnrichAttributes", "Data": {"Type": "number", "Required": false}},
         { "Node": "HG", "Data": {"Type": "number", "Required": false}},
-        { "Node": "Bombora", "Data": {"Type": "number", "Required": false}}
+        { "Node": "Bombora", "Data": {"Type": "number", "Required": false}},
+        { "Node": "WebsiteKeyword", "Data": {"Type": "number", "Required": false}}
       ]
     }
   ]
