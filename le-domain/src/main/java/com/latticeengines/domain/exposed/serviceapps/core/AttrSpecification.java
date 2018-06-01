@@ -18,7 +18,7 @@ public enum AttrSpecification {
             false, false, true), //
     CDL_DERIVED_WBC("CDL Derived Attributes for Website Behavior Categories", true, true, true, true, false, false,
             false, true, false, false, true), //
-    CDL_RATING("CDL Rating Attributes", true, false, false, true, false, false, false, false, false, false, false), //
+    CDL_RATING("CDL Rating Attributes", true, false, false, false, false, false, false, false, false, false, false), //
     CDL_SEGMENTS("CDL Segments as Attributes", true, true, true, true, false, false, false, true, true, false, true); //
 
     private String specification;
