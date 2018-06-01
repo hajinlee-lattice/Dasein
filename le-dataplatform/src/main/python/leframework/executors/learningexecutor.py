@@ -78,7 +78,7 @@ class LearningExecutor(Executor):
         stateMachine.addState(CrossValidationGenerator(), 20)
         stateMachine.addState(EnhancedSummaryGenerator(), 21)
         stateMachine.addState(ModelPredictorGenerator(), 22)
-        stateMachine.addState(FitFunctionGenerator(), 23)
+        # stateMachine.addState(FitFunctionGenerator(), 23)
         stateMachine.addState(Finalize(), 24)
         return stateMachine
 

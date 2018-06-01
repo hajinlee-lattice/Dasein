@@ -18,7 +18,7 @@ class EnhancedFilesTest(TrainingTestBase):
         self.check_model_summary()
         self.check_data_composition()
         self.check_score_derivation()
-        self.check_fit_function_parameters()
+        # self.check_fit_function_parameters()
 
     def launch(self, model):
         # Dynamically import launcher to make sure globals() is clean in launcher

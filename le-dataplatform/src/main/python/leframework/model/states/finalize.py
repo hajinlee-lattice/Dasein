@@ -113,8 +113,8 @@ class Finalize(State):
         with open(os.path.join(base, "scorederivation.json"), "wb") as f:
             json.dump(self.mediator.score_derivation, f, indent=4)
 
-        with open(os.path.join(base, "fitfunctionparameters.json"), "wb") as f:
-            json.dump(self.mediator.fit_function_parameters, f, indent=4)
+        # with open(os.path.join(base, "fitfunctionparameters.json"), "wb") as f:
+        #    json.dump(self.mediator.fit_function_parameters, f, indent=4)
 
     def writeModelQualityFile(self, mediator):
         base = self.mediator.modelEnhancementsLocalDir
