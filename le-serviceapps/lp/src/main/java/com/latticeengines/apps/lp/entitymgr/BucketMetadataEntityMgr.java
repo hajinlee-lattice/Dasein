@@ -17,4 +17,6 @@ public interface BucketMetadataEntityMgr extends BaseEntityMgrRepository<BucketM
 
     List<BucketMetadata> getUpToDateBucketMetadatasForEngineFromReader(String engineId);
 
+    BucketMetadata getBucketMetadatasByBucketNameAndTimestamp(String bucketName, long timestamp);
+
 }

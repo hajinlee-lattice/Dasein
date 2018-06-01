@@ -6,10 +6,13 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 
 public interface BucketedScoreProxy {
 
     void createABCDBuckets(String customerSpace, CreateBucketMetadataRequest request);
+
+    List<BucketMetadata> updateABCDBuckets(String customerSpace, UpdateBucketMetadataRequest request);
 
     Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String customerSpace, String modelGuid);
 

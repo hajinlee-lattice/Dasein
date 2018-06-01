@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 
 public interface BucketedMetadataRepository extends BaseJpaRepository<BucketMetadata, Long> {
 
@@ -15,5 +16,7 @@ public interface BucketedMetadataRepository extends BaseJpaRepository<BucketMeta
 
     BucketMetadata findFirstByModelSummary_IdOrderByCreationTimestampDesc(String modelGuid);
     BucketMetadata findFirstByRatingEngine_IdOrderByCreationTimestampDesc(String engineId);
+
+    BucketMetadata findByCreationTimestampAndBucketName(long creationTimestamp, BucketName bucketName);
 
 }

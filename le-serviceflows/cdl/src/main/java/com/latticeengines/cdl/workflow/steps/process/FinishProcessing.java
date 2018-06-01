@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -103,6 +105,17 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                 log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
                         + JsonUtils.serialize(bucketedScoreSummary));
                 bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace.toString(), modelGuid, bucketedScoreSummary);
+            });
+        }
+        Map<String, List> listMap = getMapObjectFromContext(BUCKET_METADATA_MAP, String.class, List.class);
+        if (MapUtils.isNotEmpty(listMap)) {
+            log.info("Found " + listMap.size() + " bucket metadata lists to update");
+            listMap.forEach((modelGuid, list) -> {
+                List<BucketMetadata> bucketMetadata = JsonUtils.convertList(list, BucketMetadata.class);
+                UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
+                request.setModelGuid(modelGuid);
+                request.setBucketMetadataList(bucketMetadata);
+                bucketedScoreProxy.updateABCDBuckets(customerSpace.toString(), request);
             });
         }
     }

@@ -19,6 +19,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 
@@ -96,6 +97,12 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
         } else {
             return readerRepository.findByCreationTimestampAndRatingEngine_Id(bm.getCreationTimestamp(), engineId);
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public BucketMetadata getBucketMetadatasByBucketNameAndTimestamp(String bucketName, long timestamp) {
+        return repository.findByCreationTimestampAndBucketName(timestamp, BucketName.fromValue(bucketName));
     }
 
 }

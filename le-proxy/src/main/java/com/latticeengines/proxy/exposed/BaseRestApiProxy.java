@@ -505,7 +505,7 @@ public abstract class BaseRestApiProxy {
         return flux //
                 .doOnCancel(() -> log.info(String.format("Cancel reading %s flux from %s", channel, url)))
                 .onErrorResume(throwable -> {
-                    log.warn("Failed to read %s flux from %s", channel, url);
+                    log.warn(String.format("Failed to read %s flux from %s", channel, url));
                     return Flux.error(throwable);
                 });
     }

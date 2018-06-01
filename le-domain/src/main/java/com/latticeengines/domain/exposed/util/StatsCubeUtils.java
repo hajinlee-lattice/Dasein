@@ -463,7 +463,6 @@ public class StatsCubeUtils {
                         }
                     }
                 });
-
             } else {
                 log.warn("Did not provide column metadata for " + key //
                         + ", skipping the stats for the whole cube.");
@@ -652,7 +651,11 @@ public class StatsCubeUtils {
         AttributeLookup attributeLookup = new AttributeLookup(entity, attrName);
         TopAttribute topAttribute = new TopAttribute(attributeLookup, attributeStats.getNonNullCount());
         if (includeTopBkt && attributeStats.getBuckets() != null) {
-            Comparator<Bucket> comparator = getBktComparatorForCategory(category);
+            BucketType bucketType = null;
+            if (BusinessEntity.Rating.equals(entity)) {
+                bucketType = attributeStats.getBuckets().getType();
+            }
+            Comparator<Bucket> comparator = getBktComparatorForCategory(bucketType, category);
             Bucket topBkt = getTopBkt(attributeStats, comparator);
             if (topBkt != null) {
                 topAttribute.setTopBkt(topBkt);
@@ -671,7 +674,7 @@ public class StatsCubeUtils {
         }
     }
 
-    static Comparator<Bucket> getBktComparatorForCategory(Category category) {
+    static Comparator<Bucket> getBktComparatorForCategory(BucketType bucketType, Category category) {
         switch (category) {
         case INTENT:
             return intentBktComparator();
@@ -680,6 +683,8 @@ public class StatsCubeUtils {
             return techBktComparator();
         case PRODUCT_SPEND:
             return productBktComparator();
+        case RATING:
+            return ratingBktComparator(bucketType);
         default:
             return Comparator.comparing(Bucket::getCount).reversed();
         }
@@ -693,6 +698,14 @@ public class StatsCubeUtils {
         return Comparator.comparing(Bucket::getId);
     }
 
+    private static Comparator<Bucket> ratingBktComparator(BucketType bucketType) {
+        if (BucketType.Enum.equals(bucketType)) {
+            return Comparator.comparing(Bucket::getLabel);
+        } else {
+            return Comparator.comparing(Bucket::getCount).reversed();
+        }
+    }
+
     private static Comparator<Bucket> productBktComparator() {
         return (o1, o2) -> {
             if (isBooleanBkt(o1) || isBooleanBkt(o2)) {
@@ -704,7 +717,7 @@ public class StatsCubeUtils {
     }
 
     private static boolean isBooleanBkt(Bucket bkt) {
-        return bkt != null && bkt.getLabel().equalsIgnoreCase("Yes") || bkt.getLabel().equalsIgnoreCase("No");
+        return bkt != null && (bkt.getLabel().equalsIgnoreCase("Yes") || bkt.getLabel().equalsIgnoreCase("No"));
     }
 
     private static Comparator<TopAttribute> defaultTopAttrComparator() {

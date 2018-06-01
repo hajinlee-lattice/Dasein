@@ -116,6 +116,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
     protected static final String RATING_LIFTS = "RATING_LIFTS";
     protected static final String BUCKETED_SCORE_SUMMARIES = "BUCKETED_SCORE_SUMMARIES";
+    protected static final String BUCKET_METADATA_MAP = "BUCKET_METADATA_MAP";
     public static final String EXISTING_RECORDS = "EXISTING_RECORDS";
     public static final String UPDATED_RECORDS = "UPDATED_RECORDS";
     public static final String NEW_RECORDS = "NEW_RECORDS";

@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
@@ -41,7 +40,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.DataPage;
 
 public class StatsCubeUtilsUnitTestNG {
 
@@ -124,18 +122,7 @@ public class StatsCubeUtilsUnitTestNG {
 
         cubes = StatsCubeUtils.filterStatsCube(cubes, cmMap);
 
-        is = readResource("productData.json");
-        DataPage dataPage = JsonUtils.deserialize(is, DataPage.class);
-        Map<String, String> productMap = new HashMap<>();
-        dataPage.getData().forEach(row -> productMap.put( //
-                (String) row.get(InterfaceName.ProductId.name()), //
-                (String) row.get(InterfaceName.ProductName.name()) //
-        ));
-
         TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
-//         StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
-        // JsonUtils.serialize(topNTree, new FileOutputStream(new File("tree.json")));
-
         verifyDateAttrInTopN(topNTree, cmMap);
         StatsCube cube = StatsCubeUtils.retainTop5Bkts(cubes.get(BusinessEntity.Account.name()));
         verifyFirmographicsTopN(topNTree.getCategories().get(Category.FIRMOGRAPHICS), cube);
@@ -201,7 +188,7 @@ public class StatsCubeUtilsUnitTestNG {
             TopAttribute attr = topAttrs.get(idx++);
             Assert.assertEquals(attr.getAttribute(), expectedAttr);
             verifyTopBkt(cube, attr.getAttribute(), attr.getTopBkt(), //
-                    StatsCubeUtils.getBktComparatorForCategory(Category.FIRMOGRAPHICS));
+                    StatsCubeUtils.getBktComparatorForCategory(null, Category.FIRMOGRAPHICS));
         }
     }
 

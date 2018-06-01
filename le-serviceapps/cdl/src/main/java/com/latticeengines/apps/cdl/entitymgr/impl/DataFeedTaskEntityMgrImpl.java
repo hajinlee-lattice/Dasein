@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -182,7 +183,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         Table templateTable = getTemplate(tableName);
         String registeredTableName = registerExtractTable(templateTable, extract, datafeedTask);
         updateDataFeedTaskAfterRegister(datafeedTask);
-        return Arrays.asList(registeredTableName);
+        return Collections.singletonList(registeredTableName);
     }
 
     @Override

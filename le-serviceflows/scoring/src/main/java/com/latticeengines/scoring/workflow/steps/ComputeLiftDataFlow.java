@@ -87,22 +87,23 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
             liftMap.get(engineId).put(rating, lift);
         });
         putObjectInContext(RATING_LIFTS, liftMap);
-        modelGuidToEngineIdMap.forEach((modelGuid, engineId) -> {
-            List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
-            boolean isRatingEngine = !modelGuid.equals(engineId);
-            log.info("Updating bucket metadata for " + (isRatingEngine ? "engine " : "model ") + engineId + " to "
-                    + JsonUtils.pprint(bucketMetadata));
-            if (Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
-                String ratingEngineId = isRatingEngine ? engineId : configuration.getRatingEngineId();
+        if (Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
+            modelGuidToEngineIdMap.forEach((modelGuid, engineId) -> {
+                List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
+                boolean isRatingEngine = !modelGuid.equals(engineId);
                 CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+                String ratingEngineId = isRatingEngine ? engineId : configuration.getRatingEngineId();
                 request.setModelGuid(modelGuid);
                 request.setRatingEngineId(ratingEngineId);
                 request.setLastModifiedBy(configuration.getUserId());
                 request.setBucketMetadataList(bucketMetadata);
-                log.info("Save bucket metadata for modelGuid=" + modelGuid + ", ratingEngineId=" + ratingEngineId);
+                log.info("Save bucket metadata for modelGuid=" + modelGuid + ", ratingEngineId=" + ratingEngineId + ": "
+                        + JsonUtils.pprint(bucketMetadata));
                 bucketedScoreProxy.createABCDBuckets(configuration.getCustomerSpace().toString(), request);
-            }
-        });
+            });
+        } else {
+            putObjectInContext(BUCKET_METADATA_MAP, modelGuidToBucketMetadataMap);
+        }
         metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), configuration.getTargetTableName());
     }
 

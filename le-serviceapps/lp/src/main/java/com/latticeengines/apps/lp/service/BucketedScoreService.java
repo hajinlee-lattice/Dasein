@@ -6,6 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 
 public interface BucketedScoreService {
 
@@ -18,6 +19,8 @@ public interface BucketedScoreService {
     List<BucketMetadata> getABCDBucketsByRatingEngineId(String ratingEngineId);
 
     void createABCDBuckets(CreateBucketMetadataRequest request);
+
+    List<BucketMetadata> updateABCDBuckets(UpdateBucketMetadataRequest request);
 
     BucketedScoreSummary getBucketedScoreSummaryByModelGuid(String modelGuid);
 

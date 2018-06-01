@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 
 @Service("bucketedScoreService")
 public class BucketedScoreServiceImpl implements BucketedScoreService {
@@ -93,6 +94,36 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         if (StringUtils.isNotBlank(request.getRatingEngineId())) {
             registerAction(request);
         }
+    }
+
+    @Override
+    public List<BucketMetadata> updateABCDBuckets(UpdateBucketMetadataRequest request) {
+        List<BucketMetadata> bucketMetadataList = request.getBucketMetadataList();
+        String modelGuid = request.getModelGuid();
+        List<BucketMetadata> updated = new ArrayList<>();
+        for (BucketMetadata bucketMetadata: bucketMetadataList) {
+            if (bucketMetadata.getCreationTimestamp() <= 0) {
+                throw new RuntimeException("Must specify meaningful creation timestamp for bucket metadata to be updated.");
+            }
+            BucketMetadata existing = bucketMetadataEntityMgr
+                    .getBucketMetadatasByBucketNameAndTimestamp(bucketMetadata.getBucketName(), bucketMetadata.getCreationTimestamp());
+            if (existing != null) {
+                existing.setNumLeads(bucketMetadata.getNumLeads());
+                existing.setLift(bucketMetadata.getLift());
+                bucketMetadataEntityMgr.update(existing);
+                if (existing.getModelSummary() != null && StringUtils.isNotBlank(existing.getModelSummary().getId())) {
+                    modelGuid = existing.getModelSummary().getId();
+                }
+                updated.add(existing);
+            } else {
+                bucketMetadataEntityMgr.create(bucketMetadata);
+                updated.add(bucketMetadata);
+            }
+        }
+        if (StringUtils.isNotBlank(modelGuid)) {
+            modelSummaryEntityMgr.updateLastUpdateTime(request.getModelGuid());
+        }
+        return updated;
     }
 
     @Override

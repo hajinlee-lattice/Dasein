@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 
 public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
@@ -97,6 +99,24 @@ public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
     public void testGetUpToDateModelBucketMetadata() {
         List<BucketMetadata> bucketMetadatas = bucketedScoreService.getABCDBucketsByModelGuid(modelGuid);
         BucketedScoreTestUtils.testSecondGroupBucketMetadata(bucketMetadatas);
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = "testGetUpToDateModelBucketMetadata")
+    public void testUpdateBucketMetadata() {
+        List<BucketMetadata> bucketMetadatas = bucketedScoreService.getABCDBucketsByModelGuid(modelGuid);
+        bucketMetadatas.get(0).setNumLeads(1000); // A
+        bucketMetadatas.get(1).setNumLeads(2000); // B
+        bucketMetadatas.get(0).setLift(1.0); // C
+        bucketMetadatas.get(1).setLift(0.5); // D
+        UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
+        request.setModelGuid(modelGuid);
+        request.setBucketMetadataList(bucketMetadatas);
+        List<BucketMetadata> updated = bucketedScoreService.updateABCDBuckets(request);
+        Assert.assertEquals(updated.size(), bucketMetadatas.size());
+        Assert.assertEquals(updated.get(0).getNumLeads(), 1000);
+        Assert.assertEquals(updated.get(1).getNumLeads(), 2000);
+        Assert.assertEquals(updated.get(0).getLift(), 1.0);
+        Assert.assertEquals(updated.get(1).getLift(), 0.5);
     }
 
     @Test(groups = { "functional" })

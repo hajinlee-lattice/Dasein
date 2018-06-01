@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
@@ -30,6 +31,14 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
         String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets",
                 shortenCustomerSpace(customerSpace));
         post("create bucket metadata", url, request, SimpleBooleanResponse.class);
+    }
+
+    @Override
+    public List<BucketMetadata> updateABCDBuckets(String customerSpace, UpdateBucketMetadataRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets",
+                shortenCustomerSpace(customerSpace));
+        List list = put("update bucket metadata", url, request, List.class);
+        return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
     @Override

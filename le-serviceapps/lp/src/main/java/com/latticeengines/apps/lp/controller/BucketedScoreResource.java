@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,6 +38,13 @@ public class BucketedScoreResource {
     public SimpleBooleanResponse createABCDBuckets(@PathVariable String customerSpace, @RequestBody CreateBucketMetadataRequest request) {
         bucketedScoreService.createABCDBuckets(request);
         return SimpleBooleanResponse.successResponse();
+    }
+
+    @PutMapping(value = "/abcdbuckets")
+    @ResponseBody
+    @ApiOperation(value = "Create ABCD Buckets")
+    public List<BucketMetadata> updateABCDBuckets(@PathVariable String customerSpace, @RequestBody UpdateBucketMetadataRequest request) {
+        return bucketedScoreService.updateABCDBuckets(request);
     }
 
     @GetMapping(value = "/abcdbuckets/model/{modelGuid}")
