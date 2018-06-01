@@ -4,6 +4,7 @@ angular.module('lp.jobs.row.subjobs', [])
         var controller = ['$scope', 'JobsStore', 'JobsService', 'BrowserStorageUtility', function ($scope, JobsStore, JobsService, BrowserStorageUtility) {
             function init() {
                 // console.log('EXPANDED ======= ',$scope);
+                $scope.emptyMessage = "No Actions Found";
             }
             $scope.getActionType = function (subjob) {
 
@@ -62,7 +63,7 @@ angular.module('lp.jobs.row.subjobs', [])
             };
 
             $scope.getValidation = function (subjob) {
-                if (subjob.jobStatus === 'Failed' || (getPayloadValue('total_rows') === getPayloadValue('total_failed_rows'))){
+                if (subjob.jobStatus === 'Failed' || (getPayloadValue('total_rows') === getPayloadValue('total_failed_rows') && getPayloadValue('total_rows') != '-')) {
                     return 'Failed';
                 }
                 if (subjob.jobStatus === 'Running') {
@@ -98,8 +99,11 @@ angular.module('lp.jobs.row.subjobs', [])
             }
 
             $scope.getRecordFound = function (subjob) {
-                return getPayloadValue(subjob, 'total_rows');
-
+                if ($scope.hasImpactedEntity()) {
+                    return getPayloadValue(subjob, JSON.parse(subjob.outputs.IMPACTED_BUSINESS_ENTITIES)[0] + '_Deleted');
+                } else {
+                    return getPayloadValue(subjob, 'total_rows');
+                }
             }
             $scope.getRecordFailed = function (subjob) {
                 return getPayloadValue(subjob, 'total_failed_rows');
@@ -111,6 +115,10 @@ angular.module('lp.jobs.row.subjobs', [])
             }
             $scope.getUser = function (subjob) {
                 return subjob.user;
+            }
+
+            $scope.hasImpactedEntity = function(subjob) {
+                return subjob && subjob.outputs && JSON.parse(subjob.outputs.IMPACTED_BUSINESS_ENTITIES)[0] != undefined;
             }
 
             $scope.getErrorsLink = function (subjob) {
