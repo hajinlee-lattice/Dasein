@@ -212,9 +212,9 @@
                 ng-repeat="contact in (vm.tmpContacts = (vm.contacts | 
                             orderBy:sortType:sortReverse))">
 
-                <td ng-class="{'gray-text': account.ContactName === null}">{{contact.ContactName || 'None'}}</td>
-                <td ng-class="{'gray-text': account.LDC_Name === null}">{{contact.LDC_Name || 'None'}}</td>
-                <td ng-class="{'gray-text': account.Email === null}">{{contact.Email || 'None'}}</td>
+                <td ng-class="{'gray-text': contact.ContactName === null}">{{contact.ContactName || 'None'}}</td>
+                <td ng-class="{'gray-text': contact.CompanyName === null}">{{contact.CompanyName || 'None'}}</td>
+                <td ng-class="{'gray-text': contact.Email === null}">{{contact.Email || 'None'}}</td>
             </tr>
         </tbody>
     </table>
