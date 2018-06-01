@@ -12,17 +12,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.lp.dao.BucketMetadataDao;
 import com.latticeengines.apps.lp.entitymgr.BucketMetadataEntityMgr;
 import com.latticeengines.apps.lp.repository.reader.BucketMetadataReaderRepository;
+import com.latticeengines.apps.lp.repository.writer.AIModelRepository;
 import com.latticeengines.apps.lp.repository.writer.BucketMetadataWriterRepository;
 import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.repository.writer.RatingEngineReository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-
 
 @Component("bucketMetadataEntityMgr")
 public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<BucketMetadata, Long>
@@ -42,6 +43,9 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
 
     @Inject
     private RatingEngineReository ratingEngineReository;
+
+    @Inject
+    private AIModelRepository aiModelRepostiry;
 
     @Override
     public BaseDao<BucketMetadata> getDao() {
@@ -91,12 +95,9 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<BucketMetadata> getUpToDateBucketMetadatasForEngineFromReader(String engineId) {
-        BucketMetadata bm = readerRepository.findFirstByRatingEngine_IdOrderByCreationTimestampDesc(engineId);
-        if (bm == null) {
-            return Collections.emptyList();
-        } else {
-            return readerRepository.findByCreationTimestampAndRatingEngine_Id(bm.getCreationTimestamp(), engineId);
-        }
+        RatingEngine ratingEngine = ratingEngineReository.findById(engineId);
+        AIModel aiModel = aiModelRepostiry.findByPid(ratingEngine.getActiveModelPid());
+        return getUpToDateBucketMetadatasForModelFromReader(aiModel.getModelSummaryId());
     }
 
     @Override

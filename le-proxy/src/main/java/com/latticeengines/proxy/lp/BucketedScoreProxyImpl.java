@@ -69,8 +69,7 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     public List<BucketMetadata> getLatestABCDBucketsByEngineId(String customerSpace, String engineId) {
         String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/uptodateabcdbuckets/engine/{engineId}",
                 shortenCustomerSpace(customerSpace), engineId);
-        List list = get("get up-to-date bucket metadata for engine", url, List.class);
-        return JsonUtils.convertList(list, BucketMetadata.class);
+        return getList("get up-to-date bucket metadata for engine", url, BucketMetadata.class);
     }
 
     @Override
