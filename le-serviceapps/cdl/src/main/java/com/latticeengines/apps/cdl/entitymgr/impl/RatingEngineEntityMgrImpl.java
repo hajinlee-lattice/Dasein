@@ -420,10 +420,11 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         Set<String> attributesPartialRestrictionInSegment = new HashSet<>();
         traverseAndRestriction(attributesPartialRestrictionInSegment, partialSegmentRestriction);
 
-        final Restriction bucketAccountRestriction;
+        List<Restriction> unusedAttributeRestrictions;
+        Restriction bucketAccountRestriction;
 
         if (CollectionUtils.isNotEmpty(attributesPartialRestrictionInSegment)) {
-            List<Restriction> unusedAttributeRestrictions = //
+            unusedAttributeRestrictions = //
                     attributesPartialRestrictionInSegment.stream() //
                             .map(attr -> {
                                 BucketRestriction unusedAttrRestriction = new BucketRestriction(
@@ -433,10 +434,11 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
                             }) //
                             .collect(Collectors.toList());
 
-            bucketAccountRestriction = LogicalRestriction.builder().and(unusedAttributeRestrictions).build();
         } else {
-            bucketAccountRestriction = null;
+            unusedAttributeRestrictions = new ArrayList<>();
         }
+
+        bucketAccountRestriction = LogicalRestriction.builder().and(unusedAttributeRestrictions).build();
 
         bucketToRuleMap.keySet() //
                 .forEach(k -> bucketToRuleMap.get(k) //
