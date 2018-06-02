@@ -63,7 +63,7 @@ angular.module('lp.jobs.row.subjobs', [])
             };
 
             $scope.getValidation = function (subjob) {
-                if (subjob.jobStatus === 'Failed' || (getPayloadValue('total_rows') === getPayloadValue('total_failed_rows') && getPayloadValue('total_rows') != '-')) {
+                if (subjob.jobStatus === 'Failed') {
                     return 'Failed';
                 }
                 if (subjob.jobStatus === 'Running') {
@@ -73,7 +73,7 @@ angular.module('lp.jobs.row.subjobs', [])
                 if (getPayloadValue(subjob, 'total_rows') === '-' && getPayloadValue(subjob, 'imported_rows') === '-' && subjob.jobStatus !== 'Completed') {
                     return 'In Progress';
                 }
-                if (getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows') && subjob.jobStatus !== 'Completed') {
+                if (!isNaN(getPayloadValue(subjob, 'total_failed_rows')) && !isNaN(getPayloadValue(subjob, 'total_rows')) && getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows')) {
                     return 'Failed';
                 }
                 if (getPayloadValue(subjob, 'total_rows') === getPayloadValue(subjob, 'imported_rows') && subjob.jobStatus === 'Completed') {
