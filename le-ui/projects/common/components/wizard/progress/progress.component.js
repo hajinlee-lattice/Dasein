@@ -23,9 +23,19 @@ angular.module('common.wizard.progress', [
             vm.itemMap[vm.rootState + item.state.split('.').pop()] = item;
         });
     }
+    
+    vm.isDisable = function(item){
+        if(item.progressDisabled === true){
+            return true;
+        }
+        return false;
+    }
 
-    vm.click = function(state, $event) {
-
+    vm.click = function(item, state, $event) {
+        if(item.progressDisabled === true){
+            $event.preventDefault();
+            return;
+        }
         var split = state.split('.'),
             selected = split.pop(),
             validation = WizardValidationStore.validation,

@@ -1,7 +1,8 @@
 <ul class="import-wizard-progress">
     <li     ng-repeat="item in vm.items"
+            ng-class="{'ignore-ngclick': vm.isDisable(item)}"
             ng-if="!item.hide && !vm.disabledNav"
-            ng-click="vm.click(item.state, $event)"
+            ng-click="vm.click(item, item.state, $event)"
             ui-sref="home.{{ vm.context }}{{ vm.wizard }}{{ item.state }}" 
             ui-sref-active="previous" 
             ui-sref-active-eq="current">

@@ -67,6 +67,7 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Segment', 
                     state: 'segment', 
+                    progressDisabled: true,
                     nextLabel: 'Next, Choose Attributes', 
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveRatingEngine(nextState);
@@ -74,6 +75,7 @@ angular.module('lp.ratingsengine')
                 },{ 
                     label: 'Attributes', 
                     state: 'segment.attributes', 
+                    progressDisabled: true,
                     nextLabel: 'Next, Set Rules',
                     nextFn: function(nextState){
                         var current = RatingsEngineStore.getRule();
@@ -87,6 +89,7 @@ angular.module('lp.ratingsengine')
                     hide: true,
                     label: 'Add',
                     state: 'segment.attributes.add', 
+                    progressDisabled: true,
                     nextLabel: 'Next, Rules',
                     nextFn: function(nextState){
                         var current = RatingsEngineStore.getRule();
@@ -100,6 +103,7 @@ angular.module('lp.ratingsengine')
                     hideBack: true,
                     label: 'Picker',
                     state: 'segment.attributes.rules.picker', 
+                    progressDisabled: true,
                     nextLabel: 'Back to Rules',
                     nextFn: function(nextState){
                         var current = RatingsEngineStore.getRule();
@@ -109,8 +113,10 @@ angular.module('lp.ratingsengine')
                         $state.go(nextState);
                     }
                 },{ 
+                    hideBack: true,
                     label: 'Rules', 
                     state: 'segment.attributes.rules', 
+                    progressDisabled: true,
                     nextLabel: 'Next, Summary', 
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveRules(nextState);
@@ -118,6 +124,7 @@ angular.module('lp.ratingsengine')
                 },{
                     label: 'Summary', 
                     state: 'segment.attributes.rules.summary', 
+                    progressDisabled: true,
                     nextLabel: 'Save', 
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveSummary(nextState);

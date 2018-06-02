@@ -1,5 +1,6 @@
 // grid view multple of 12 (24), dynamic across
 angular.module('common.datacloud.explorer', [
+    'common.datacloud.explorer.utils',
     'common.datacloud.explorer.filters',
     'common.datacloud.explorer.companyprofile',
     'common.datacloud.explorer.latticeratingcard',
@@ -13,7 +14,7 @@ angular.module('common.datacloud.explorer', [
     Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
-    RatingsEngineModels, RatingsEngineStore, QueryTreeService
+    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils
 ){
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -1676,6 +1677,7 @@ angular.module('common.datacloud.explorer', [
         QueryStore.setPublicProperty('enableSaveSegmentButton', (oldVal !== newVal));
     };
 
+
     vm.selectRatingsEngineAttribute = function(enrichment) {
         var treeRoot = QueryStore.getAddBucketTreeRoot();
 
@@ -1693,8 +1695,10 @@ angular.module('common.datacloud.explorer', [
             vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
             var rule = getRatingsEngineRule(RatingsEngineModels);
-
+            var entity = enrichment.Entity;
+            var attr = enrichment.ColumnId;
             DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.Entity + '.' + enrichment.ColumnId]).then(function(response) {
+                ExplorerUtils.removeAddAttrFromRule(!enrichment.IsRatingsEngineAttribute, rule, entity, attr);
                 enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
                 
                 var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
