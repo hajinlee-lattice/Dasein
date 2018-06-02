@@ -396,7 +396,7 @@ public class TestPlayCreationHelper {
 
         try {
             log.info("Cleaning up rating engine: " + play.getRatingEngine().getId());
-            ratingEngineEntityMgr.deleteById(play.getRatingEngine().getId());
+            ratingEngineEntityMgr.deleteById(play.getRatingEngine().getId(), false);
         } catch (Exception ex) {
             ignoreException(ex);
         }

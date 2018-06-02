@@ -163,35 +163,20 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteById(String id) {
-        deleteById(id, true);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteRatingEngine(RatingEngine ratingEngine) {
-        deleteRatingEngine(ratingEngine, true);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteById(String id, boolean hardDelete) {
-        RatingEngine ratingEngine = findById(id);
-        checkDependencies(ratingEngine);
+        checkFeasibilityForDelete(id);
         ratingEngineDao.deleteById(id, hardDelete);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteRatingEngine(RatingEngine ratingEngine, boolean hardDelete) {
+    private void checkFeasibilityForDelete(String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new NullPointerException("RatingEngine id cannot be empty");
+        }
+        RatingEngine ratingEngine = findById(id);
         if (ratingEngine == null || ratingEngine.getPid() == null) {
             throw new NullPointerException("RatingEngine cannot be found");
         }
-        checkDependencies(ratingEngine);
-        ratingEngineDao.deleteByPid(ratingEngine.getPid(), hardDelete);
-    }
 
-    private void checkDependencies(RatingEngine ratingEngine) {
         if (CollectionUtils.isNotEmpty(playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine,
                 Arrays.asList(PlayStatus.ACTIVE, PlayStatus.INACTIVE)))) {
             log.error(String.format("Dependency check failed for Rating Engine=%s", ratingEngine.getId()));

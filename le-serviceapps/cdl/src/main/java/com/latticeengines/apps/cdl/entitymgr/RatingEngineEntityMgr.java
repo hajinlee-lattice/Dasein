@@ -22,14 +22,8 @@ public interface RatingEngineEntityMgr {
 
     RatingEngine findById(String id, boolean withActiveModel);
 
-    void deleteById(String id);
-
     void deleteById(String id, boolean hardDelete);
 
     void revertDelete(String id);
-
-    void deleteRatingEngine(RatingEngine ratingEngine);
-
-    void deleteRatingEngine(RatingEngine ratingEngine, boolean hardDelete);
 
 }

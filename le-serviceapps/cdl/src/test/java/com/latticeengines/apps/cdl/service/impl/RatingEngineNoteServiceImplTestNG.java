@@ -98,7 +98,7 @@ public class RatingEngineNoteServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(notes);
         Assert.assertEquals(notes.size(), 1);
         Assert.assertEquals(notes.get(0).getId(), note2.getId());
-        ratingEngineEntityMgr.deleteById(ratingEngine.getId());
+        ratingEngineEntityMgr.deleteById(ratingEngine.getId(), true);
         RatingEngineNote note = ratingEngineNoteService.findById(note2.getId());
         Assert.assertNull(note);
     }

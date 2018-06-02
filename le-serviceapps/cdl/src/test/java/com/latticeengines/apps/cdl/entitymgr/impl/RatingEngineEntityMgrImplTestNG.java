@@ -246,7 +246,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.createOrUpdatePlay(play);
         re = ratingEngineEntityMgr.findById(ratingEngine.getId());
         try {
-            ratingEngineEntityMgr.deleteRatingEngine(re, false);
+            ratingEngineEntityMgr.deleteById(re.getId(), false);
             Assert.fail("Should have thrown exeption due to the transition should fail");
         } catch (Exception e) {
             Assert.assertTrue(e instanceof LedpException);
@@ -257,7 +257,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setDeleted(true);
         playEntityMgr.createOrUpdatePlay(play);
         try {
-            ratingEngineEntityMgr.deleteRatingEngine(re, false);
+            ratingEngineEntityMgr.deleteById(re.getId(), false);
             Assert.fail("Should have thrown exeption due to the transition should fail");
         } catch (Exception e) {
             Assert.assertTrue(e instanceof LedpException);
@@ -270,7 +270,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
         re = ratingEngineEntityMgr.findById(ratingEngine.getId());
         // Soft Delete should now succeed
-        ratingEngineEntityMgr.deleteRatingEngine(re, false);
+        ratingEngineEntityMgr.deleteById(re.getId(), false);
         RatingEngine retrievedRe = ratingEngineEntityMgr.findById(ratingEngine.getId());
         Assert.assertNotNull(retrievedRe);
         Assert.assertTrue(retrievedRe.getDeleted());
@@ -313,7 +313,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDeletion() {
-        ratingEngineEntityMgr.deleteById(ratingEngineId);
+        ratingEngineEntityMgr.deleteById(ratingEngineId, true);
         ratingEngineList = ratingEngineEntityMgr.findAll();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);

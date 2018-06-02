@@ -57,6 +57,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -120,6 +121,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
+
+    @Value("${cdl.model.delete.propagate:false}")
+    private Boolean shouldPropagateDelete;
 
     private InternalResourceRestApiProxy internalResourceProxy;
 
@@ -318,15 +322,30 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public void deleteById(String id, boolean hardDelete) {
-        if (hardDelete != Boolean.TRUE) {
+        if (shouldPropagateDelete == Boolean.TRUE) {
+            checkFeasibilityForDelete(id);
             List<Play> relatedPlays = playService.getAllFullPlays(false, id);
             if (CollectionUtils.isNotEmpty(relatedPlays)) {
-                relatedPlays.stream().forEach(p -> playService.deleteByName(p.getName(), false));
+                relatedPlays.stream() //
+                        .forEach(p -> playService.deleteByName(p.getName(), hardDelete));
             }
         }
-
         ratingEngineEntityMgr.deleteById(id, hardDelete);
         evictRatingMetadataCache();
+    }
+
+    private void checkFeasibilityForDelete(String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new NullPointerException("RatingEngine id cannot be empty");
+        }
+        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
+        if (ratingEngine == null || ratingEngine.getPid() == null) {
+            throw new NullPointerException("RatingEngine cannot be found");
+        }
+
+        if (ratingEngine.getStatus() != null && ratingEngine.getStatus() != RatingEngineStatus.INACTIVE) {
+            throw new LedpException(LedpCode.LEDP_18181, new String[] { ratingEngine.getDisplayName() });
+        }
     }
 
     @Override

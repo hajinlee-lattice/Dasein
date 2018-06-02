@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -16,6 +17,8 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -45,6 +48,9 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Inject
     private TalkingPointProxy talkingPointProxy;
+
+    @Value("${cdl.model.delete.propagate:false}")
+    private Boolean shouldPropagateDelete;
 
     private RatingEngine ratingEngine1;
     private Play play;
@@ -215,21 +221,42 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
         Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
 
-        ratingEngineService.deleteById(ratingEngine1.getId(), false);
+        try {
+            ratingEngineService.deleteById(ratingEngine1.getId(), false);
+            if (shouldPropagateDelete != Boolean.TRUE) {
+                Assert.fail("Should not be able to delete rating engine if non-deleted play exists");
+            } else {
+                retrievedPlay = playService.getPlayByName(playName, false);
+                Assert.assertNull(retrievedPlay);
 
-        retrievedPlay = playService.getPlayByName(playName, false);
-        Assert.assertNull(retrievedPlay);
+                retrievedPlay = playService.getPlayByName(playName, true);
+                Assert.assertNotNull(retrievedPlay);
+                Assert.assertEquals(retrievedPlay.getName(), playName);
+                Assert.assertNotNull(retrievedPlay.getDisplayName());
+                Assert.assertNotNull(retrievedPlay.getRatingEngine());
+                Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
+                Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
+                Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+                Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+            }
+        } catch (LedpException ex) {
+            if (shouldPropagateDelete != Boolean.TRUE) {
+                Assert.assertEquals(ex.getCode(), LedpCode.LEDP_18175);
+                retrievedPlay = playService.getPlayByName(playName, false);
+                Assert.assertNotNull(retrievedPlay);
+                Assert.assertEquals(retrievedPlay.getName(), playName);
+                Assert.assertNotNull(retrievedPlay.getDisplayName());
+                Assert.assertNotNull(retrievedPlay.getRatingEngine());
+                Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
+                Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
+                Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
+                Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+            } else {
+                Assert.fail("Should have been able to delete rating engine even "
+                        + "if non-deleted play exists as it would have first soft deleted plays");
+            }
 
-        retrievedPlay = playService.getPlayByName(playName, true);
-        Assert.assertNotNull(retrievedPlay);
-        Assert.assertNotNull(retrievedPlay);
-        Assert.assertEquals(retrievedPlay.getName(), playName);
-        Assert.assertNotNull(retrievedPlay.getDisplayName());
-        Assert.assertNotNull(retrievedPlay.getRatingEngine());
-        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
-        Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
-        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
+        }
     }
 
     private void assertPlay(Play play) {
