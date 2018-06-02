@@ -60,6 +60,7 @@ angular.module('lp.ratingsengine')
         this.fileName = "";
         this.applicationId = "";
         this.displayFileName = "";
+        this.availableFields = [];
 
         this.wizardProgressItems = {
             "rulesprospects": [
@@ -817,6 +818,10 @@ angular.module('lp.ratingsengine')
         });
     }
 
+    this.isUnmappedField = function(fieldMapping) {
+        return !fieldMapping.mappedToLatticeField || this.availableFields.indexOf(fieldMapping.userField) >= 0;
+    }
+
     this.saveFieldMapping = function(nextState) {
         var ratingId = $stateParams.rating_id;
         
@@ -825,10 +830,9 @@ angular.module('lp.ratingsengine')
             if (fieldMapping.ignored) {
                 FieldDocument.ignoredFields.push(fieldMapping.userField);
                 delete fieldMapping.ignored;
-            } else if (!fieldMapping.mappedToLatticeField) {
-                // CustomFieldsController handles LPI case
-                if (RatingsEngineStore.getCustomEventModelingType() == 'CDL') {
-                    // treat unmapped fields as ignored
+            } else if (RatingsEngineStore.isUnmappedField(fieldMapping)) {
+                if (RatingsEngineStore.dataStores.indexOf('CustomFileAttributes') < 0) {
+                    fieldMapping.mappedToLatticeField = false;
                     fieldMapping.mappedField = fieldMapping.userField;
                     fieldMapping.ignored = true;
                     FieldDocument.ignoredFields.push(fieldMapping.mappedField);
@@ -927,6 +931,14 @@ angular.module('lp.ratingsengine')
             });
         });
         
+    }
+
+    this.setAvailableFields = function(availableFields) {
+        this.availableFields = availableFields;
+    }
+
+    this.getAvailableFields = function() {
+        return this.availableFields;
     }
     
     this.getRatingModel = function(engineId, modelId) {

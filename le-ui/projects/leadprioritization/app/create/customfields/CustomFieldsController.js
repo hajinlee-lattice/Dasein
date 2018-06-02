@@ -44,7 +44,7 @@ angular
     vm.init = function() {
         if (RatingsEngineStore.getCustomEventModelingType()) {
             RatingsEngineStore.setValidation("mapping", false);
-            vm.showAdditionalFieldsCDL = RatingsEngineStore.getCustomEventModelingType() != 'CDL';
+            vm.showAdditionalFieldsCDL = RatingsEngineStore.getDataStores().indexOf('CustomFileAttributes') >= 0;
         }
         vm.initialized = true;
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
@@ -168,6 +168,7 @@ angular
                 }
             });
         }
+        RatingsEngineStore.setAvailableFields(vm.AvailableFields);
 
         $timeout(vm.validateForm, 0);
     };
