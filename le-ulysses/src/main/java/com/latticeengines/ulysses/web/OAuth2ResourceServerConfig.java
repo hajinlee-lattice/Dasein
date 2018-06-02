@@ -73,6 +73,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/ulysses/recommendations/**", //
                         "/ulysses/talkingpoints/**", //
                         "/ulysses/api-gateway/**", //
+                        "/ulysses/generic/**", //
                         "/ulysses/producthierarchy/**", //
                         "/ulysses/purchasehistory/**", //
                         "/ulysses/danteconfiguration/**") //

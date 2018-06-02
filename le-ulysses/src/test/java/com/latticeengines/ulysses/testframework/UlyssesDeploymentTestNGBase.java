@@ -34,7 +34,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
 
     protected static String CLIENT_ID = UlyssesSupportedClients.CLIENT_ID_LP;
     protected static String GW_API_KEY = "TEST_GW_KEY_1";
-    
+
     protected static class UlyssesSupportedClients {
         public static final String CLIENT_ID_LP = "lp";
         public static final String CLIENT_ID_PM = "playmaker";
@@ -55,7 +55,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Autowired
-    private Oauth2RestApiProxy oauth2RestApiProxy;
+    protected Oauth2RestApiProxy oauth2RestApiProxy;
 
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
@@ -68,7 +68,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
         Map<String, Boolean> flags = new HashMap<>();
         flags.put(featureFlag, true);
         Tenant tenant = setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, flags);
-        
+
         PlaymakerTenant oAuthTenant = new PlaymakerTenant();
         oAuthTenant.setTenantName(tenant.getId());
         oAuthTenant.setExternalId(CLIENT_ID);
