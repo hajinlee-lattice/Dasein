@@ -96,7 +96,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         if (shouldReset) {
             skip = !isResetRatingStep(step) && !isCombineStatisticsStep(step);
         } else {
-            skip = false;
+            skip = shouldProcessAI || shouldProcessRuleBased;
             if (isResetRatingStep(step)) {
                 skip = true;
             } else if (isAIWorkflow(seq)) {
