@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.security;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.TimeZone;
@@ -35,7 +36,8 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "TENANT")
-public class Tenant implements HasName, HasId<String>, HasPid {
+public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
+    private static final long serialVersionUID = 3412997313415383107L;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
 

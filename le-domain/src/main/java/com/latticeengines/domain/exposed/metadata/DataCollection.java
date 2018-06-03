@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
         uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
+public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, Serializable {
+
+    private static final long serialVersionUID = 1486599346464777223L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
