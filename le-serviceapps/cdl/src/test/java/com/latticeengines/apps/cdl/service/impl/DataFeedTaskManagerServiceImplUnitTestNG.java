@@ -6,7 +6,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class DataFeedTaskManagerServiceImplUnitTestNG {
 
@@ -30,5 +33,21 @@ public class DataFeedTaskManagerServiceImplUnitTestNG {
         Assert.assertNull(metaTable.getAttribute("testATTR"));
         Assert.assertNotNull(metaTable.getAttribute("AccountId"));
         Assert.assertNotNull(metaTable.getAttribute("TestAttr"));
+    }
+
+    @Test(groups = "unit")
+    public void testFinalSchemaCheck() {
+        Table table1 = SchemaRepository.instance().getSchema(BusinessEntity.Account);
+        Table table2 = SchemaRepository.instance().getSchema(BusinessEntity.Account);
+        Attribute attribute2 = new Attribute("TestAttr");
+        attribute2.setPhysicalDataType("String");
+        table2.addAttribute(attribute2);
+        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table1, "Account"));
+        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table2, "Account"));
+        table1.getAttribute(InterfaceName.AccountId).setPhysicalDataType("Int");
+        Assert.assertFalse(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table1, "Account"));
+        table2.getAttribute("TestAttr").setPhysicalDataType("Int");
+        Assert.assertTrue(dataFeedTaskManagerServiceImpl.finalSchemaCheck(table2, "Account"));
+
     }
 }

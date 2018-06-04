@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -97,13 +98,20 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             if (!dataFeedMetadataService.compareMetadata(originMeta, newMeta,
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
-                dataFeedTask.setImportTemplate(mergeTable(originMeta, newMeta));
+                Table finalTemplate = mergeTable(originMeta, newMeta);
+                if (!finalSchemaCheck(finalTemplate, entity)) {
+                    throw new RuntimeException("The final import template is invalid, please check import settings!");
+                }
+                dataFeedTask.setImportTemplate(finalTemplate);
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
             }
             dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta, customerSpace.toString());
             return dataFeedTask.getUniqueId();
         } else {
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
+            if (!finalSchemaCheck(newMeta, entity)) {
+                throw new RuntimeException("The final import template is invalid, please check import settings!");
+            }
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
             dataFeedTask.setImportTemplate(newMeta);
@@ -258,6 +266,53 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
         }
         return templateTable;
+    }
+
+    @VisibleForTesting
+    boolean finalSchemaCheck(Table finalTemplate, String entity){
+        if (finalTemplate == null) {
+            log.error("Template cannot be null!");
+            return false;
+        }
+        if (CollectionUtils.isEmpty(finalTemplate.getAttributes())) {
+            log.error("Template has no attributes!");
+            return false;
+        }
+        Map<String, Attribute> standardAttrs = new HashMap<>();
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity));
+        standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
+        Map<String, Attribute> templateAttrs = new HashMap<>();
+        finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
+        for(Map.Entry<String, Attribute> attrEntry : standardAttrs.entrySet()) {
+            if (attrEntry.getValue().getRequired() && attrEntry.getValue().getDefaultValueStr() == null) {
+                if (!templateAttrs.containsKey(attrEntry.getKey())) {
+                    log.error("Missing required field: " + attrEntry.getKey());
+                    return false;
+                }
+            }
+            if (templateAttrs.containsKey(attrEntry.getKey())) {
+                if (!compareAttribute(attrEntry.getValue(), templateAttrs.get(attrEntry.getKey()))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean compareAttribute(Attribute attr1, Attribute attr2) {
+        if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
+            log.error("PhysicalDataType is not the same for attribute: " + attr1.getName());
+            return false;
+        }
+        if (!attr1.getRequired().equals(attr2.getRequired())) {
+            log.error("Required flag is not the same for attribute: " + attr1.getName());
+            return false;
+        }
+        if (!attr1.getInterfaceName().equals(attr2.getInterfaceName())) {
+            log.error("Interface name is not the same for attribute: " + attr1.getName());
+            return false;
+        }
+        return true;
     }
 
 }
