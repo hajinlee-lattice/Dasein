@@ -136,6 +136,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
 
         public Builder skipDedupStep(boolean skipDedupStep) {
             match.setSkipDedupe(skipDedupStep);
+            prepareMatchDataConfiguration.setSkipStep(skipDedupStep);
             return this;
         }
 
