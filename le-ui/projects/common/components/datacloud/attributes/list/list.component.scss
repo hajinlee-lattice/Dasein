@@ -101,7 +101,7 @@ ul.attr-list-results {
         .fa-check-square,
         .fa-minus-square,
         .fa-square {
-            color: #ccc;
+            color: #d7d7d7;
             cursor: not-allowed;
         }
 
@@ -147,6 +147,7 @@ ul.attr-list-results {
                 -webkit-transform: translateY(-50%);
                 -ms-transform: translateY(-50%);
                 transform: translateY(-50%);
+                z-index: 1;
             }
 
             i.fa-info-circle {

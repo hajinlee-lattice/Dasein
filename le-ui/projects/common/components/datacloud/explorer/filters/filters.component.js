@@ -68,27 +68,26 @@ angular
                 clearFilters();
 
                 $scope.$watchGroup([
-                        'vm.metadata.toggle.show.nulls',
-                        'vm.metadata.toggle.show.selected',
-                        'vm.metadata.toggle.hide.selected',
-                        'vm.metadata.toggle.show.premium',
-                        'vm.metadata.toggle.hide.premium',
-                        'vm.metadata.toggle.show.internal',
-                        'vm.metadata.toggle.show.enabled',
-                        'vm.metadata.toggle.hide.enabled',
-                        'vm.metadata.toggle.show.highlighted',
-                        'vm.metadata.toggle.hide.highlighted',
-                        'vm.metadata.toggle.show.selected_ratingsengine_attributes'
-                    ], function(newValues, oldValues, scope) {
+                    'vm.metadata.toggle.hide.highlighted',
+                    'vm.metadata.toggle.hide.selected',
+                    'vm.metadata.toggle.hide.premium',
+                    'vm.metadata.toggle.hide.enabled',
+                    'vm.metadata.toggle.show.nulls',
+                    'vm.metadata.toggle.show.selected',
+                    'vm.metadata.toggle.show.premium',
+                    'vm.metadata.toggle.show.internal',
+                    'vm.metadata.toggle.show.enabled',
+                    'vm.metadata.toggle.show.highlighted',
+                    'vm.metadata.toggle.show.selected_ratingsengine_attributes'
+                ], function(newValues, oldValues, scope) {
                     vm.filterEmptySubcategories();
                     vm.TileTableItems = {};
                 });
 
                 $scope.$watchGroup([
-                        'vm.premiumSelectedTotal',
-                        'vm.generalSelectedTotal'
-                    ], function(newValues, oldValues, scope) {
-
+                    'vm.premiumSelectedTotal',
+                    'vm.generalSelectedTotal'
+                ], function(newValues, oldValues, scope) {
                     DataCloudStore.setMetadata('generalSelectedTotal', vm.generalSelectedTotal);
                     DataCloudStore.setMetadata('premiumSelectedTotal', vm.premiumSelectedTotal);
                 });

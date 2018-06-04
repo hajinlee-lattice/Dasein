@@ -33,7 +33,7 @@ angular.module('common.attributes')
             activate: [{
                     label: "Intent Attributes",
                     category: "Intent",
-                    supplemesntal: 'ACTIVATED'
+                    supplemental: 'ACTIVATED'
                 },{
                     label: "Technology Profile Attributes",
                     category: "Technology Profile",

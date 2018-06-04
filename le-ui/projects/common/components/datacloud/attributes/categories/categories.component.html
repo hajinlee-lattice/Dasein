@@ -1,6 +1,5 @@
 <div class="carousel-container">
     <div    class="row enrichment-wizard-category-pagination noselect-children" 
-            ng-init="$ctrl.current = 1" 
             ng-if="$ctrl.catlength > $ctrl.pagesize">
         
         <div class="twelve columns">
@@ -18,7 +17,6 @@
                 | startFrom: ($ctrl.current - 1) * $ctrl.pagesize
                 | limitTo: $ctrl.pagesize" 
             class="category"
-            ng-if="$ctrl.catmap[category] > 0"
             ng-class="{ active: $ctrl.isActive(category) }"
             ng-click="$ctrl.click(category);">
 

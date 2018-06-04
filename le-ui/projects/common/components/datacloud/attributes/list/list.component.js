@@ -209,7 +209,7 @@ angular.module('common.attributes.list', [])
 
         vm.toggleAll = function() {
             if (vm.subcategory) {
-                vm.allCheckedMap[vm.subcategory] = !vm.allCheckedMap[vm.subcategory];
+                vm.allCheckedMap[vm.subcategory] = vm.allCheckedMap[vm.subcategory] !== undefined ? !vm.allCheckedMap[vm.subcategory] : false;
 
                 vm.attributes[vm.subcategory]
                     .sort(vm.sortAttributes)

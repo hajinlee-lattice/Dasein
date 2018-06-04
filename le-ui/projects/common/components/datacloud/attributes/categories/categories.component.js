@@ -8,16 +8,34 @@ angular.module('common.attributes.categories', [])
         var vm = this;
 
         vm.current = 1;
-        vm.pagesize = 7;
+        vm.pagesize = 6;
         vm.catlength = 1;
 
         vm.$onInit = function() {
             vm.params = $stateParams;
             vm.category = vm.params.category;
-            vm.catmap = angular.copy(vm.categories);
-            vm.categories = Object.keys(vm.categories);
+            vm.catmap = vm.pruneEmptyCategories(angular.copy(vm.categories));
+            vm.categories = Object.keys(vm.catmap);
             vm.catlength = vm.categories.length;
+
+            console.log(vm.params.category, index, vm.current, vm.categories.indexOf(vm.params.category), vm.categories);
+            var index = vm.categories.indexOf(vm.params.category);
+
+            vm.current = Math.ceil(index / vm.pagesize);
+
         };
+
+        vm.pruneEmptyCategories = function(catmap) {
+            Object.keys(catmap).forEach(function(name) {
+                var count = catmap[name];
+
+                if (count === 0) {
+                    delete catmap[name];
+                }
+            });
+
+            return catmap;
+        }
 
         vm.click = function(category) {
             ShowSpinner('Loading ' + category + ' Data', 'div.attr-results-container')
