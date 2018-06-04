@@ -1,14 +1,17 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +19,9 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +44,6 @@ import com.latticeengines.datacloud.collection.util.CollectionDBUtil;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
-import com.opencsv.CSVReader;
 
 @Component
 public class CollectionDBServiceImpl implements CollectionDBService {
@@ -272,6 +277,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         return arn2tasks;
     }
 
+    /*
     private long getDomainFromCsv(String vendor, File csvFile, Set<String> domains) throws Exception {
         long ret = 0;
         String domainField = CollectionDBUtil.getDomainField(vendor);
@@ -297,6 +303,36 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             }
 
             return ret;
+        }
+    }*/
+
+    private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains) throws Exception {
+        long ret = 0;
+        String domainField = CollectionDBUtil.getDomainField(vendor);
+        String domainCheckField = CollectionDBUtil.getDomainCheckField(vendor);
+
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
+                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile)))) {
+            try (CSVParser parser = new CSVParser(reader, format)) {
+                Map<String, Integer> colMap = parser.getHeaderMap();
+                int domainIdx = colMap.getOrDefault(domainField, -1);
+                int domainChkIdx = colMap.getOrDefault(domainCheckField, -1);
+                if (domainIdx == -1 || domainChkIdx == -1)
+                    return ret;
+
+                Iterator<CSVRecord> ite = parser.iterator();
+                while (ite.hasNext())
+                {
+                    ++ret;
+
+                    CSVRecord rec = ite.next();
+                    if (!rec.get(domainChkIdx).equals(""))
+                        domains.add(rec.get(domainIdx));
+                }
+
+                return ret;
+            }
         }
     }
 
@@ -338,7 +374,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         HashSet<String> domains = new HashSet<>();
         long recordsCollected = 0;
         for (int i = 0; i < tmpFiles.size(); ++i) {
-            recordsCollected += getDomainFromCsv(vendor, tmpFiles.get(i), domains);
+            recordsCollected += getDomainFromCsvEx(vendor, tmpFiles.get(i), domains);
         }
         worker.setRecordsCollected(recordsCollected);
 
