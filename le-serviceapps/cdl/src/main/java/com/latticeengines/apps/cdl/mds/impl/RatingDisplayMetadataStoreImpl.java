@@ -73,8 +73,7 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             String attrName = engineNameStem + suffix;
             ColumnMetadata reAttr = new ColumnMetadata();
             reAttr.setAttrName(attrName);
-            reAttr.setDisplayName(reDisplayName);
-            reAttr.setSecondaryDisplayName(getSecondaryDisplayName(suffix));
+            reAttr.setDisplayName(reDisplayName + " " + getSecondaryDisplayName(suffix));
             reAttr.setSubcategory(segmentDisplayName);
             reAttr.setCategory(Category.RATING);
             if (isSegmentable(suffix) && !Boolean.TRUE.equals(summary.getDeleted())) {
