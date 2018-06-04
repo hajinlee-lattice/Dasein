@@ -499,9 +499,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     void updateJobWithSubJobsIfIsPnA(Job job) {
         if (job.getJobType().equals("processAnalyzeWorkflow")) {
             List<Long> actionPids = getActionIdsForJob(job);
-            List<Action> actions = getActions(actionPids);
-            List<Job> subJobs = expandActions(actions);
-            job.setSubJobs(subJobs);
+            if (CollectionUtils.isNotEmpty(actionPids)) {
+                List<Action> actions = getActions(actionPids);
+                List<Job> subJobs = expandActions(actions);
+                job.setSubJobs(subJobs);
+            }
         }
     }
 
