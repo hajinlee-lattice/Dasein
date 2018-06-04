@@ -16,6 +16,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -31,11 +32,13 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
+import com.latticeengines.objectapi.service.EventQueryService;
 
 public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
@@ -44,6 +47,9 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Inject
     private EntityQueryService entityQueryService;
+
+    @Inject
+    private EventQueryService eventQueryService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -165,32 +171,43 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testAccountWithNegativeTxn() {
+    public void testAccountWithPriorOnly() {
         MultiTenantContext.setTenant(tenant);
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
 
+        // prior only to last month
         TimeFilter timeFilter = new TimeFilter( //
-                ComparisonType.WITHIN, //
-                TimeFilter.Period.Month.name(), //
+                ComparisonType.PRIOR_ONLY, //
+                PeriodStrategy.Template.Month.name(), //
                 Collections.singletonList(1));
-
-        Bucket.Transaction txn0 = new Bucket.Transaction(prodId, timeFilter, null, null, true);
+        Bucket.Transaction txn0 = new Bucket.Transaction(prodId, timeFilter, null, null, false);
         long count0 = countTxnBkt(txn0);
-        Assert.assertEquals(count0, 2952);
 
-        AggregationFilter filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(500));
-        Bucket.Transaction txn1 = new Bucket.Transaction(prodId, timeFilter, filter1, null, false);
-        long count1 = countTxnBkt(txn1);
-        Assert.assertEquals(count1, 125);
+        // not within last month
+        TimeFilter timeFilter1 = new TimeFilter( //
+                ComparisonType.WITHIN, //
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(1));
+        Bucket.Transaction txn1 = new Bucket.Transaction(prodId, timeFilter1, null, null, true);
+        Restriction restriction1 = getTxnRestriction(txn1);
 
-        AggregationFilter filter2 = new AggregationFilter(ComparisonType.LESS_OR_EQUAL, Collections.singletonList(5));
-        Bucket.Transaction txn2 = new Bucket.Transaction(prodId, timeFilter, null, filter2, false);
-        long count2 = countTxnBkt(txn2);
-        Assert.assertEquals(count2, 141);
+        // prior to last month
+        TimeFilter timeFilter2 = new TimeFilter( //
+                ComparisonType.PRIOR, //
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(1));
+        Bucket.Transaction txn2 = new Bucket.Transaction(prodId, timeFilter2, null, null, false);
+        Restriction restriction2 = getTxnRestriction(txn2);
+        Restriction restriction = Restriction.builder().and(restriction1, restriction2).build();
 
-        Bucket.Transaction txn3 = new Bucket.Transaction(prodId, timeFilter, filter1, filter2, false);
-        long count3 = countTxnBkt(txn3);
-        Assert.assertEquals(count3, 115);
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertEquals(count0, count);
     }
 
     @Test(groups = "functional")
@@ -263,6 +280,20 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(count);
+        return count;
+    }
+
+    private long compareTgtCount(Bucket.Transaction txn) {
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction restriction = getTxnRestriction(txn);
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setTargetProductIds(Collections.singletonList("6368494B622E0CB60F9C80FEB1D0F95F"));
+        Long count = eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertNotNull(count);
         return count;
     }

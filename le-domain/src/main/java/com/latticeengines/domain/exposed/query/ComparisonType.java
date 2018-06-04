@@ -28,8 +28,8 @@ public enum ComparisonType {
     BEFORE, // only for exact date
     AFTER, // only for exact date
     BETWEEN_DATE, // only for exact date range
-    @Deprecated
-    PRIOR; //
+
+    PRIOR; // only for internal use, do not expose to UI
 
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;

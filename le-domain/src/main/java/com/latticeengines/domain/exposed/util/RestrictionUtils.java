@@ -24,6 +24,8 @@ import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.RestrictionBuilder;
+import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class RestrictionUtils {
@@ -75,33 +77,65 @@ public class RestrictionUtils {
     }
 
     private static Restriction convertTxnBucket(Bucket.Transaction transaction) {
-        TransactionRestriction transactionRestriction = new TransactionRestriction();
-        transactionRestriction.setProductId(transaction.getProductId());
-        transactionRestriction.setTimeFilter(transaction.getTimeFilter());
-        transactionRestriction.setNegate(Boolean.TRUE.equals(transaction.getNegate()));
+        if (transaction.getTimeFilter() != null && ComparisonType.PRIOR_ONLY.equals(transaction.getTimeFilter().getRelation())) {
+            return convertPriorOnlyTxnBucket(transaction);
+        } else {
+            TransactionRestriction transactionRestriction = new TransactionRestriction();
+            transactionRestriction.setProductId(transaction.getProductId());
+            transactionRestriction.setTimeFilter(transaction.getTimeFilter());
+            transactionRestriction.setNegate(Boolean.TRUE.equals(transaction.getNegate()));
 
-        AggregationFilter unitFilterInTxn = transaction.getUnitFilter();
-        if (unitFilterInTxn != null) {
-            AggregationType agg = AggregationType.SUM;
-            if (unitFilterInTxn.getAggregationType() != null) {
-                agg = unitFilterInTxn.getAggregationType();
+            AggregationFilter unitFilterInTxn = transaction.getUnitFilter();
+            if (unitFilterInTxn != null) {
+                AggregationType agg = AggregationType.SUM;
+                if (unitFilterInTxn.getAggregationType() != null) {
+                    agg = unitFilterInTxn.getAggregationType();
+                }
+                AggregationFilter unitFilter = new AggregationFilter(AggregationSelector.UNIT, agg, //
+                        unitFilterInTxn.getComparisonType(), unitFilterInTxn.getValues());
+                transactionRestriction.setUnitFilter(unitFilter);
             }
-            AggregationFilter unitFilter = new AggregationFilter(AggregationSelector.UNIT, agg, //
-                    unitFilterInTxn.getComparisonType(), unitFilterInTxn.getValues());
-            transactionRestriction.setUnitFilter(unitFilter);
-        }
 
-        AggregationFilter spentFilterInTxn = transaction.getSpentFilter();
-        if (spentFilterInTxn != null) {
-            AggregationType agg = AggregationType.SUM;
-            if (spentFilterInTxn.getAggregationType() != null) {
-                agg = spentFilterInTxn.getAggregationType();
+            AggregationFilter spentFilterInTxn = transaction.getSpentFilter();
+            if (spentFilterInTxn != null) {
+                AggregationType agg = AggregationType.SUM;
+                if (spentFilterInTxn.getAggregationType() != null) {
+                    agg = spentFilterInTxn.getAggregationType();
+                }
+                AggregationFilter spentFilter = new AggregationFilter(AggregationSelector.SPENT, agg, //
+                        spentFilterInTxn.getComparisonType(), spentFilterInTxn.getValues());
+                transactionRestriction.setSpentFilter(spentFilter);
             }
-            AggregationFilter spentFilter = new AggregationFilter(AggregationSelector.SPENT, agg, //
-                    spentFilterInTxn.getComparisonType(), spentFilterInTxn.getValues());
-            transactionRestriction.setSpentFilter(spentFilter);
+            return transactionRestriction;
         }
-        return transactionRestriction;
+    }
+
+    private static Restriction convertPriorOnlyTxnBucket(Bucket.Transaction transaction) {
+        boolean negate = Boolean.TRUE.equals(transaction.getNegate());
+        String period = transaction.getTimeFilter().getPeriod();
+        if (transaction.getTimeFilter().getValues().size() != 1) {
+            throw new RuntimeException("Prior only time filter should only have one value, but found " + transaction.getTimeFilter().getValues());
+        }
+        int val = Integer.valueOf(String.valueOf(transaction.getTimeFilter().getValues().get(0)));
+        TimeFilter ever = TimeFilter.prior(val, period);
+        TimeFilter within = TimeFilter.within(val, period);
+        Bucket.Transaction priorTxn, withinTxn;
+        if (negate) {
+            priorTxn = new Bucket.Transaction(transaction.getProductId(), ever, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
+            withinTxn = new Bucket.Transaction(transaction.getProductId(), within, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
+        } else {
+            priorTxn = new Bucket.Transaction(transaction.getProductId(), ever, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
+            withinTxn = new Bucket.Transaction(transaction.getProductId(), within, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
+        }
+        Restriction priorRst = convertTxnBucket(priorTxn);
+        Restriction withinRst = convertTxnBucket(withinTxn);
+        RestrictionBuilder builder = Restriction.builder();
+        if (negate) {
+            builder.or(priorRst, withinRst);
+        } else {
+            builder.and(priorRst, withinRst);
+        }
+        return builder.build();
     }
 
     private static Restriction convertPurchaseHistoryBucket(AttributeLookup attr, ComparisonType comparator,

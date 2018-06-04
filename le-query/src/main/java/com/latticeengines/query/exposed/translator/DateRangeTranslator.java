@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
@@ -45,10 +46,14 @@ public class DateRangeTranslator extends TranslatorCommon {
                     .build();
         } else {
             SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository);
-            return Restriction.builder() //
-                    .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
-                    .inSubquery(subQuery) //
-                    .build();
+            RestrictionBuilder builder = Restriction.builder() //
+                    .let(BusinessEntity.Account, InterfaceName.AccountId.name());
+            if (Boolean.TRUE.equals(txnRestriction.isNegate())) {
+                builder = builder.notInSubquery(subQuery);
+            } else {
+                builder = builder.inSubquery(subQuery);
+            }
+            return builder.build();
         }
     }
 

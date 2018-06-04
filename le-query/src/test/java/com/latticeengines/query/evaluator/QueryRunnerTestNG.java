@@ -15,6 +15,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
@@ -222,7 +223,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         // This query actually returns all accounts so it doesn't change over time
         Restriction restriction = Restriction.builder() //
             .let(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE)//
-                .prior(Period.Quarter.name(), 1) //
+                .prior(PeriodStrategy.Template.Quarter.name(), 1) //
                 .build();
         Query query = Query.builder() //
                 .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
@@ -232,7 +233,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testTransactionSelectWithTimeFilter() throws ParseException {
+    public void testTransactionSelectWithTimeFilter() {
         // adjust period offset based on current date
         LocalDate periodStart = LocalDate.of(2017, Month.APRIL, 1);
         LocalDate currentDate = LocalDate.now();

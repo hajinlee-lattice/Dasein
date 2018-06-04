@@ -62,7 +62,7 @@ public class TimeFilterTranslator {
                 return null;
             case WITHIN:
                 return translateWithIn(timeFilter.getPeriod(), timeFilter.getValues());
-            case PRIOR_ONLY:
+            case PRIOR:
                 return translatePrior(timeFilter.getPeriod(), timeFilter.getValues());
             case BETWEEN:
                 return translateBetween(timeFilter.getPeriod(), timeFilter.getValues());

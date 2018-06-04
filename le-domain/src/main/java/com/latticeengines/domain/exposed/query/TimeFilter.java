@@ -54,6 +54,14 @@ public class TimeFilter implements Serializable {
         return filter;
     }
 
+    public static TimeFilter prior(int val, String period) {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.PRIOR;
+        filter.period = period != null ? period : PeriodStrategy.Template.Month.name();
+        filter.values = Collections.singletonList(val);
+        return filter;
+    }
+
     public static TimeFilter within(int val, String period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.WITHIN;
@@ -121,7 +129,7 @@ public class TimeFilter implements Serializable {
         this.period = period;
     }
 
-    @Deprecated
+    @Deprecated // use PeriodStrategy.Template instead
     public static class Period {
 
         public static final Period Date = new Period("Date");
