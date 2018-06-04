@@ -174,31 +174,28 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     public void testAccountWithPriorOnly() {
         MultiTenantContext.setTenant(tenant);
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        String period =  PeriodStrategy.Template.Month.name();
 
         // prior only to last month
-        TimeFilter timeFilter = new TimeFilter( //
-                ComparisonType.PRIOR_ONLY, //
-                PeriodStrategy.Template.Month.name(), //
-                Collections.singletonList(1));
+        TimeFilter timeFilter = TimeFilter.priorOnly(1, period);
         Bucket.Transaction txn0 = new Bucket.Transaction(prodId, timeFilter, null, null, false);
         long count0 = countTxnBkt(txn0);
 
         // not within last month
-        TimeFilter timeFilter1 = new TimeFilter( //
-                ComparisonType.WITHIN, //
-                PeriodStrategy.Template.Month.name(), //
-                Collections.singletonList(1));
+        TimeFilter timeFilter1 = TimeFilter.within(1, period);
         Bucket.Transaction txn1 = new Bucket.Transaction(prodId, timeFilter1, null, null, true);
         Restriction restriction1 = getTxnRestriction(txn1);
 
-        // prior to last month
-        TimeFilter timeFilter2 = new TimeFilter( //
-                ComparisonType.PRIOR, //
-                PeriodStrategy.Template.Month.name(), //
-                Collections.singletonList(1));
-        Bucket.Transaction txn2 = new Bucket.Transaction(prodId, timeFilter2, null, null, false);
+        // not in current month
+        TimeFilter timeFilter2 = TimeFilter.inCurrent(period);
+        Bucket.Transaction txn2 = new Bucket.Transaction(prodId, timeFilter2, null, null, true);
         Restriction restriction2 = getTxnRestriction(txn2);
-        Restriction restriction = Restriction.builder().and(restriction1, restriction2).build();
+
+        // prior to last month
+        TimeFilter timeFilter3 = TimeFilter.prior(1, period);
+        Bucket.Transaction txn3 = new Bucket.Transaction(prodId, timeFilter3, null, null, false);
+        Restriction restriction3 = getTxnRestriction(txn3);
+        Restriction restriction = Restriction.builder().and(restriction1, restriction2, restriction3).build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);

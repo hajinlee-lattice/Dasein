@@ -117,23 +117,27 @@ public class RestrictionUtils {
             throw new RuntimeException("Prior only time filter should only have one value, but found " + transaction.getTimeFilter().getValues());
         }
         int val = Integer.valueOf(String.valueOf(transaction.getTimeFilter().getValues().get(0)));
-        TimeFilter ever = TimeFilter.prior(val, period);
+        TimeFilter ever = TimeFilter.ever();
         TimeFilter within = TimeFilter.within(val, period);
-        Bucket.Transaction priorTxn, withinTxn;
+        TimeFilter current = TimeFilter.inCurrent(period);
+        Bucket.Transaction everTxn, withinTxn, currentTxn;
         if (negate) {
-            priorTxn = new Bucket.Transaction(transaction.getProductId(), ever, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
+            everTxn = new Bucket.Transaction(transaction.getProductId(), ever, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
             withinTxn = new Bucket.Transaction(transaction.getProductId(), within, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
+            currentTxn = new Bucket.Transaction(transaction.getProductId(), current, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
         } else {
-            priorTxn = new Bucket.Transaction(transaction.getProductId(), ever, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
+            everTxn = new Bucket.Transaction(transaction.getProductId(), ever, transaction.getSpentFilter(), transaction.getUnitFilter(), false);
             withinTxn = new Bucket.Transaction(transaction.getProductId(), within, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
+            currentTxn = new Bucket.Transaction(transaction.getProductId(), current, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
         }
-        Restriction priorRst = convertTxnBucket(priorTxn);
+        Restriction everRst = convertTxnBucket(everTxn);
         Restriction withinRst = convertTxnBucket(withinTxn);
+        Restriction currentRst = convertTxnBucket(currentTxn);
         RestrictionBuilder builder = Restriction.builder();
         if (negate) {
-            builder.or(priorRst, withinRst);
+            builder.or(everRst, withinRst, currentRst);
         } else {
-            builder.and(priorRst, withinRst);
+            builder.and(everRst, withinRst, currentRst);
         }
         return builder.build();
     }

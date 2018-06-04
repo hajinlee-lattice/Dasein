@@ -70,6 +70,13 @@ public class TimeFilter implements Serializable {
         return filter;
     }
 
+    public static TimeFilter inCurrent(String period) {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.IN_CURRENT_PERIOD;
+        filter.period = period != null ? period : PeriodStrategy.Template.Month.name();
+        return filter;
+    }
+
     public static TimeFilter between(int begin, int end, String period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.BETWEEN;
