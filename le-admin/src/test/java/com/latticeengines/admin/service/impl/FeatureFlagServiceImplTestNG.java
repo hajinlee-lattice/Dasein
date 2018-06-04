@@ -75,7 +75,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.TARGET_MARKET, //
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, //
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
-                LatticeFeatureFlag.ENABLE_MATCH_DEBUG);
+                LatticeFeatureFlag.ENABLE_MATCH_DEBUG, //
+                LatticeFeatureFlag.VDB_MIGRATION);
         if (autoSchedule ^ true) {
             expectedDefaultFalseFlags = new ArrayList<>(expectedDefaultFalseFlags);
             expectedDefaultFalseFlags.add(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);

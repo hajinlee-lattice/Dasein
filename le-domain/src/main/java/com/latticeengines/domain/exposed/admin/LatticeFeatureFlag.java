@@ -7,7 +7,6 @@ import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
 
 public enum LatticeFeatureFlag {
 
-
     DANTE("Dante", "Dante"), //
     ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file"), //
     ENABLE_DATA_ENCRYPTION("EnableDataEncryption", "Enable data encryption"), //
@@ -16,7 +15,8 @@ public enum LatticeFeatureFlag {
     LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"), //
-    ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"),
+    ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"), //
+    VDB_MIGRATION("VDBMigration", "VDB Migration"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
