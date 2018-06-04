@@ -92,6 +92,8 @@ chmod a+w /var/log/ledp
 chmod +x /var/lib/jacocoagent.jar
 chown -R tomcat ${CATALINA_HOME}
 
+ulimit -n 10240
+
 if [ "${ENABLE_JACOCO}" == "true" ]; then
     pid=0
     export CATALINA_PID=/var/run/tomcat
