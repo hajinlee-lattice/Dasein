@@ -60,27 +60,27 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
         if (importingEntity.equals(BusinessEntity.Account)) {
-            importData(BusinessEntity.Account, "Account_0_350.csv");
-            importData(BusinessEntity.Account, "Account_350_500.csv");
-            importData(BusinessEntity.Account, "Account_400_1000.csv");
+            importData(BusinessEntity.Account, "Account_0_350.csv", "Account");
+            importData(BusinessEntity.Account, "Account_350_500.csv", "Account");
+            importData(BusinessEntity.Account, "Account_400_1000.csv", "Account");
         }
 
         if (importingEntity.equals(BusinessEntity.Contact)) {
-            importData(BusinessEntity.Contact, "Contact_0_350.csv");
-            importData(BusinessEntity.Contact, "Contact_350_500.csv");
-            importData(BusinessEntity.Contact, "Contact_400_1000.csv");
+            importData(BusinessEntity.Contact, "Contact_0_350.csv", "Contact");
+            importData(BusinessEntity.Contact, "Contact_350_500.csv", "Contact");
+            importData(BusinessEntity.Contact, "Contact_400_1000.csv", "Contact");
         }
 
         if (importingEntity.equals(BusinessEntity.Product)) {
-            importData(BusinessEntity.Product, "ProductBundles.csv");
-            importData(BusinessEntity.Product, "ProductHierarchies.csv");
-            importData(BusinessEntity.Product, "ProductVDB.csv");
+            importData(BusinessEntity.Product, "ProductBundles.csv", "ProductBundle");
+            importData(BusinessEntity.Product, "ProductHierarchies.csv", "ProductHierarchy");
+            importData(BusinessEntity.Product, "ProductVDB.csv", "ProductVDB");
         }
 
         if (importingEntity.equals(BusinessEntity.Transaction)) {
-            importData(BusinessEntity.Transaction, "Transaction_0_15K.csv");
-            importData(BusinessEntity.Transaction, "Transaction_15K_30K.csv");
-            importData(BusinessEntity.Transaction, "Transaction_20K_60K.csv");
+            importData(BusinessEntity.Transaction, "Transaction_0_15K.csv", "Transaction");
+            importData(BusinessEntity.Transaction, "Transaction_15K_30K.csv", "Transaction");
+            importData(BusinessEntity.Transaction, "Transaction_20K_60K.csv", "Transaction");
         }
     }
 
@@ -111,18 +111,29 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
     }
 
     private void saveImportTemplate(BusinessEntity entity) throws IOException {
-        String dataFeedType = entity.name() + "Schema";
+        if (BusinessEntity.Product.equals(entity)) {
+            saveImportTemplate(entity, "ProductBundle");
+            saveImportTemplate(entity, "ProductHierarchy");
+            saveImportTemplate(entity, "ProductVDB");
+        } else {
+            saveImportTemplate(entity, entity.name());
+            saveImportTemplate(entity, entity.name());
+            saveImportTemplate(entity, entity.name());
+        }
+    }
+
+    private void saveImportTemplate(BusinessEntity entity, String feedType) throws IOException {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SourceType.FILE.getName(),
-                dataFeedType, entity.name());
+                feedType, entity.name());
         if (dataFeedTask != null) {
             Table importTemplate = dataFeedTask.getImportTemplate();
-            File jsonFile = new File(uploadDir + "/" + entity + "_Template.json");
+            File jsonFile = new File(uploadDir + "/" + entity + "_" + feedType + ".json");
             FileUtils.touch(jsonFile);
             JsonUtils.serialize(importTemplate, new FileOutputStream(jsonFile));
             log.info("Saved " + entity + " template to upload folder");
         } else {
-            log.info("No data feed task for entity " + entity + " of type " + dataFeedType);
+            log.info("No data feed task for entity " + entity + " of type " + feedType);
         }
     }
 
