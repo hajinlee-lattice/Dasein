@@ -176,13 +176,15 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         String avroPath = jobConfiguration.getAvroPath();
         String inputBufferFile = FilenameUtils.getFullPath(avroPath) + "InputBuffer.json";
         try {
-            HdfsUtils.writeToFile(yarnConfiguration, inputBufferFile,
-                    JsonUtils.serialize(jobConfiguration.getMatchInput().getInputBuffer()));
+            if (jobConfiguration.getMatchInput().getInputBuffer() != null) {
+                HdfsUtils.writeToFile(yarnConfiguration, inputBufferFile,
+                        JsonUtils.serialize(jobConfiguration.getMatchInput().getInputBuffer()));
+            }
             jobConfiguration.setInputBufferPath(inputBufferFile);
             jobConfiguration.getMatchInput().setInputBuffer(null);
             log.info("Write InputBuffer on to hdfs, path=" + inputBufferFile);
         } catch (Exception e) {
-            log.warn("Can not write InputBuffer on hdfs, path=" + inputBufferFile);
+            log.warn("Can not write InputBuffer on hdfs, path=" + inputBufferFile + ", error=" + e.getMessage());
         }
 
     }
