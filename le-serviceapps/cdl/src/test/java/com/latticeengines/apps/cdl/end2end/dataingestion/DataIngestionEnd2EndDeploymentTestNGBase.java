@@ -389,8 +389,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         registerImportAction(feedTaskId, numRecords, tableNames);
     }
 
-    private Table getMockTemplate(BusinessEntity entity) {
-        String templateFileName = String.format("%s_Template.json", entity.name());
+    private Table getMockTemplate(BusinessEntity entity, String feedType) {
+        String templateFileName = String.format("%s_%s.json", entity.name(), feedType);
         InputStream templateIs = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, S3_AVRO_VERSION, templateFileName);
         ObjectMapper om = new ObjectMapper();
         try {
@@ -408,7 +408,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 entity.name());
         if (dataFeedTask == null) {
             dataFeedTask = new DataFeedTask();
-            Table importTemplate = getMockTemplate(entity);
+            Table importTemplate = getMockTemplate(entity, feedType);
             importTemplate.setTableType(TableType.IMPORTTABLE);
             importTemplate.setName(templateName);
             dataFeedTask.setImportTemplate(importTemplate);
@@ -449,10 +449,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     void importData(BusinessEntity entity, int offset, int limit) {
         String templateName = String.format("%s_%d_%d.csv", entity.name(), offset, limit);
-        importData(entity, templateName);
+        importData(entity, templateName, null);
     }
 
-    void importData(BusinessEntity entity, String s3FileName) {
+    void importData(BusinessEntity entity, String s3FileName, String feedType) {
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName), s3FileName);
         logger.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         SourceFile template = fileUploadProxy.uploadFile(s3FileName, false, s3FileName, entity.name(), csvResource);
@@ -464,8 +464,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 fieldMapping.setMappedToLatticeField(false);
             }
         }
+
+        if (StringUtils.isBlank(feedType)) {
+            feedType = entity.name() + "Schema";
+        }
+
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
-                SourceType.FILE.getName(),entity.name() + "Schema");
+                SourceType.FILE.getName(), feedType);
         logger.info("Modified field mapping document is saved, start importing ...");
         ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), entity.name() + "Schema",
                 template, template, INITIATOR);

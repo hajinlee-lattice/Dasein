@@ -41,7 +41,7 @@ public class ProcessAccountWithImportDeploymentTestNG extends DataIngestionEnd2E
         mockCSVImport(BusinessEntity.Account, 2, "Account");
         mockCSVImport(BusinessEntity.Contact, 2, "Contact");
         // TODO: (Yintao) should be changed to mock vdb import
-        mockCSVImport(BusinessEntity.Product, 3, "ProductBundle");
+        mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
