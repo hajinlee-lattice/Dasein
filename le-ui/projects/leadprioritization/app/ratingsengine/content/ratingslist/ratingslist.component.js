@@ -133,75 +133,77 @@ angular.module('lp.ratingsengine.ratingslist', [
 
         var referringRoute = StateHistory.lastFrom().name,
             lastRouteContainsSegmentOrAttributes = (referringRoute.split('.').indexOf("products") > -1 || referringRoute.split('.').indexOf("attributes") > -1);
-        
-        angular.forEach(vm.current.ratings, function(rating, key, array) {
-            if(rating.displayName === 'DS_Test_1stPur_0002_EV'){
-                console.log(JSON.stringify(rating.bucketMetadata));
-            }
-            if(rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
-                rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;
-            } else {
-                rating.tileClass = rating.type;
-            }
-
-            if(rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
-                rating.chartConfig = vm.barChartLiftConfig;
-            } else {
-                rating.chartConfig = vm.barChartConfig;
-            }        
-
-            var newBucketMetadata = [],
-                dummyNewBucketData = [{
-                    "bucket_name": "A",
-                    "num_leads": 11,
-                    "lift": "0.3",
-                    "dummy": true
-                },{
-                    "bucket_name": "B",
-                    "num_leads": 10,
-                    "lift": "1.3",
-                    "dummy": true
-                },{
-                    "bucket_name": "C",
-                    "num_leads": 16,
-                    "lift": "0.8",
-                    "dummy": true
-                },{
-                    "bucket_name": "D",
-                    "num_leads": 18,
-                    "lift": "0.9",
-                    "dummy": true
-                },{
-                    "bucket_name": "F",
-                    "num_leads": 14,
-                    "lift": "0.5",
-                    "dummy": true
-                }];
-
-            // if(rating.bucketMetadata && rating.bucketMetadata.length > 0) {
-            //     angular.forEach(rating.bucketMetadata, function(rating, key) {
-            //         rating.lift = (Math.round( rating.lift * 10) / 10).toString();
-            //         newBucketMetadata.push(rating);
-            //         if(newBucketMetadata.length === 0) {
-            //             newBucketMetadata = dummyNewBucketData;
-            //         }
-            //     });
-            // } else {
-            //     newBucketMetadata = dummyNewBucketData;
-            // }
-            
-            if(rating.bucketMetadata === undefined || rating.bucketMetadata.length === 0){
-                rating.bucketMetadata = dummyNewBucketData;
-            }
-
-            
-        });
 
         $scope.$watch('vm.current.ratings', function() {
             if(lastRouteContainsSegmentOrAttributes){
                 vm.isRatingsSet = RatingsEngineStore.ratingsSet;
             };
             vm.header.filter.unfiltered = vm.current.ratings;
+
+            angular.forEach(vm.current.ratings, function(rating, key, array) {
+                if(rating.displayName === 'DS_Test_1stPur_0002_EV'){
+                    console.log(JSON.stringify(rating.bucketMetadata));
+                }
+                if(rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
+                    rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;
+                } else {
+                    rating.tileClass = rating.type;
+                }
+
+                if(rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
+                    rating.chartConfig = vm.barChartLiftConfig;
+                } else {
+                    rating.chartConfig = vm.barChartConfig;
+                }        
+
+                var newBucketMetadata = [],
+                    dummyNewBucketData = [{
+                        "bucket_name": "A",
+                        "num_leads": 11,
+                        "lift": "0.3",
+                        "dummy": true
+                    },{
+                        "bucket_name": "B",
+                        "num_leads": 10,
+                        "lift": "1.3",
+                        "dummy": true
+                    },{
+                        "bucket_name": "C",
+                        "num_leads": 16,
+                        "lift": "0.8",
+                        "dummy": true
+                    },{
+                        "bucket_name": "D",
+                        "num_leads": 18,
+                        "lift": "0.9",
+                        "dummy": true
+                    },{
+                        "bucket_name": "F",
+                        "num_leads": 14,
+                        "lift": "0.5",
+                        "dummy": true
+                    }];
+
+                // if(rating.bucketMetadata && rating.bucketMetadata.length > 0) {
+                //     angular.forEach(rating.bucketMetadata, function(rating, key) {
+                //         rating.lift = (Math.round( rating.lift * 10) / 10).toString();
+                //         newBucketMetadata.push(rating);
+                //         if(newBucketMetadata.length === 0) {
+                //             newBucketMetadata = dummyNewBucketData;
+                //         }
+                //     });
+                // } else {
+                //     newBucketMetadata = dummyNewBucketData;
+                // }
+                
+                if(rating.bucketMetadata === undefined || rating.bucketMetadata.length === 0){
+                    rating.bucketMetadata = dummyNewBucketData;
+                }
+
+                
+            });
+
+
         });
 
 
