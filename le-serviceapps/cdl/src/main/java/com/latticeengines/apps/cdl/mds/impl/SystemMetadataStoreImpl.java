@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Enrichment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
@@ -143,13 +142,11 @@ public class SystemMetadataStoreImpl extends
                                     }
                                 }
 
-                                // only enabled a list of default attributes for Export
+                                // enable a list of default attributes for Export
                                 if (exportAttributes.contains(cm.getAttrName())) {
                                     cm.setCanEnrich(true);
-                                    cm.enableGroup(Enrichment);
+                                    cm.enableGroupIfNotPresent(Enrichment);
                                 }
-
-                                cm.unsetGroup(CompanyProfile);
 
                                 return cm;
                             }) //
