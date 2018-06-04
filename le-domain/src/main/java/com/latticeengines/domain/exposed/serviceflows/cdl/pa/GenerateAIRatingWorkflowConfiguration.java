@@ -60,8 +60,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         private MatchDataCloudWorkflowConfiguration.Builder match = new MatchDataCloudWorkflowConfiguration.Builder();
 
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
-        private RecalculatePercentileScoreDataFlowConfiguration recalculatePercentile =
-            new RecalculatePercentileScoreDataFlowConfiguration();
+        private RecalculatePercentileScoreDataFlowConfiguration recalculatePercentile = new RecalculatePercentileScoreDataFlowConfiguration();
         private ScoreAggregateFlowConfiguration scoreAgg = new ScoreAggregateFlowConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
@@ -123,6 +122,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder cdlMultiModel(boolean cdlMultiMode) {
             combineInputWithScores.setCdlMultiModel(cdlMultiMode);
+            return this;
+        }
+
+        public Builder idColumnName(String idColumnName) {
+            match.idColumnName(idColumnName);
             return this;
         }
 
@@ -235,6 +239,9 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         private void setMatchConfig() {
+            if (!CustomEventModelingType.LPI.equals(configuration.getCustomEventModelingType())) {
+                match.idColumnName(InterfaceName.__Composite_Key__.name());
+            }
             match.matchType(MatchStepConfiguration.LDC);
             match.excludePublicDomains(false);
             match.matchRequestSource(MatchRequestSource.SCORING);

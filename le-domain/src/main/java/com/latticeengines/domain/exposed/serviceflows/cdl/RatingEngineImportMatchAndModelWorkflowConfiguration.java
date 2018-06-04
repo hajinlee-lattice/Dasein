@@ -279,6 +279,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder cdlModel(boolean isCdlModel) {
             cdlModelWorkflowBuilder.cdlModel(isCdlModel);
+            cdlEventTable.setCrossSell(isCdlModel);
             return this;
         }
 
@@ -322,6 +323,13 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder setUniqueKeyColumn(String uniqueKeyColumn) {
             generateAIRating.uniqueKeyColumn(uniqueKeyColumn);
+            return this;
+        }
+
+        public Builder idColumnName(String idColumnName) {
+            cdlModelWorkflowBuilder.idColumnName(idColumnName);
+            matchDataCloudWorkflowBuilder.idColumnName(idColumnName);
+            generateAIRating.idColumnName(idColumnName);
             return this;
         }
 

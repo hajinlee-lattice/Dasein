@@ -153,6 +153,11 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
+        public Builder idColumnName(String idColumnName) {
+            ldcConfigurationBuilder.idColumnName(idColumnName);
+            return this;
+        }
+
         public Builder matchType(String matchType) {
             ldcConfigurationBuilder.matchType(matchType);
             return this;

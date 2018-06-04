@@ -25,25 +25,46 @@ import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchRe
 @Component("parseMatchResult")
 public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultParameters> {
 
-    private static final Logger log = LoggerFactory.getLogger(ParseMatchResult.class);
+    private static final Logger log = LoggerFactory.getLogger(PrepareMatchDataflow.class);
     private List<String> sourceCols;
 
     @Override
     public Node construct(ParseMatchResultParameters parameters) {
         sourceCols = parameters.sourceColumns;
-        Node source = addSource(parameters.sourceTableName);
-
-        source = resolveConflictingFields(source);
-
+        Node matchNode = addSource(parameters.matchTableName);
+        Node resultNode = resolveConflictingFields(matchNode);
         if (parameters.excludeDataCloudAttrs) {
             List<String> fieldFilter = new ArrayList<>(sourceCols);
-            addExtraAttrs(fieldFilter, source, parameters);
-            List<String> fieldsToRetain = new ArrayList<>(source.getFieldNames());
+            addExtraAttrs(fieldFilter, resultNode, parameters);
+            List<String> fieldsToRetain = new ArrayList<>(resultNode.getFieldNames());
             fieldsToRetain.retainAll(fieldFilter);
-            source = source.retain(new FieldList(fieldsToRetain));
+            resultNode = resultNode.retain(new FieldList(fieldsToRetain));
         }
 
-        return source;
+        if (StringUtils.isNotBlank(parameters.sourceTableName) && StringUtils.isNotBlank(parameters.idColumnName)) {
+            resultNode = joinSourceTable(parameters, resultNode);
+        }
+        return resultNode;
+
+    }
+
+    private Node joinSourceTable(ParseMatchResultParameters parameters, Node resultNode) {
+        Node sourceNode = addSource(parameters.sourceTableName);
+        List<String> retainFields = new ArrayList<>(sourceNode.getFieldNames());
+        Set<String> retainSet = new HashSet<>(retainFields);
+        List<String> matchFields = resultNode.getFieldNames();
+        matchFields.forEach(field -> {
+            if (!retainSet.contains(field)) {
+                retainFields.add(field);
+                retainSet.add(field);
+            }
+        });
+        String idColumnName = matchFields.contains(InterfaceName.InternalId.name()) ? InterfaceName.InternalId.name()
+                : parameters.idColumnName;
+        FieldList idColumn = new FieldList(idColumnName);
+        resultNode = sourceNode.leftJoin(idColumn, resultNode, idColumn);
+        resultNode = resultNode.retain(new FieldList(retainFields));
+        return resultNode;
     }
 
     private Node resolveConflictingFields(Node node) {
@@ -54,6 +75,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
             FieldList[] renameFieldLists = renameFields(conflictingFields);
             if (renameFieldLists[0].getFields().length > 0) {
                 node = node.rename(renameFieldLists[0], renameFieldLists[1]);
+                node = node.retain(new FieldList(node.getFieldNames()));
             }
         }
         return node;

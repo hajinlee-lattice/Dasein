@@ -7,6 +7,7 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
     private String sourceSchemaInterpretation;
     private String eventColumn;
     private DataCollection.Version dataCollectionVersion;
+    private boolean crossSell;
 
     public CreateCdlEventTableConfiguration() {
         setBeanName("createCdlEventTableFlow");
@@ -35,4 +36,13 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
     public void setDataCollectionVersion(DataCollection.Version dataCollectionVersion) {
         this.dataCollectionVersion = dataCollectionVersion;
     }
+
+    public boolean isCrossSell() {
+        return crossSell;
+    }
+
+    public void setCrossSell(boolean crossSell) {
+        this.crossSell = crossSell;
+    }
+
 }

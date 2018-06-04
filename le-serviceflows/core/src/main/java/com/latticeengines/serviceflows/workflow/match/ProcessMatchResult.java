@@ -46,10 +46,12 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         String eventTableName = resultTableName.replaceFirst(LDC_MATCH, EVENT);
         configuration.setTargetTableName(eventTableName);
         ParseMatchResultParameters parameters = new ParseMatchResultParameters();
-        parameters.sourceTableName = matchResultTable.getName();
+        parameters.matchTableName = matchResultTable.getName();
+        parameters.sourceTableName = preMatchTable.getName();
         parameters.sourceColumns = sourceCols(preMatchTable);
         parameters.excludeDataCloudAttrs = configuration.isExcludeDataCloudAttrs();
         parameters.keepLid = configuration.isKeepLid();
+        parameters.idColumnName = configuration.getIdColumnName();
         configuration.setDataFlowParams(parameters);
 
     }
@@ -61,6 +63,12 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         putObjectInContext(EVENT_TABLE, eventTable);
         putObjectInContext(MATCH_RESULT_TABLE, eventTable);
         metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), resultTableName);
+
+        Table upstreamTable = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
+        if (upstreamTable != null) {
+            metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), upstreamTable.getName());
+        }
+        removeObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE);
     }
 
     private Table createMatchResultTable() {
@@ -75,6 +83,12 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
     }
 
     private List<String> sourceCols(Table preMatchTable) {
+        Table upstreamTable = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
+        if (upstreamTable != null) {
+            List<String> cols = Arrays.asList(upstreamTable.getAttributeNames());
+            log.info("Found source columns: " + StringUtils.join(cols, ", "));
+            return cols;
+        }
         List<String> cols = Arrays.asList(preMatchTable.getAttributeNames());
         // String idCol = getIdColumn(preMatchTable);
         // cols.add(idCol);

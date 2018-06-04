@@ -47,7 +47,7 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
         uploadDataToSharedAvroInput(data, fields);
 
         ParseMatchResultParameters parameters = new ParseMatchResultParameters();
-        parameters.sourceTableName = AVRO_INPUT;
+        parameters.matchTableName = AVRO_INPUT;
         parameters.sourceColumns = Arrays.asList( //
                 "Domain", //
                 "Name", //

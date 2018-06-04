@@ -41,7 +41,7 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         Node inputTable = addSource(parameters.inputTable);
 
         Node apsTable = null;
-        if (inputTable.getFieldNames().contains(InterfaceName.PeriodId.name())) {
+        if (inputTable.getFieldNames().contains(InterfaceName.PeriodId.name()) && parameters.apsTable != null) {
             apsTable = addSource(parameters.apsTable);
         }
 

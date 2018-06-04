@@ -390,6 +390,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder idColumnName(String idColumnName) {
             modelWorkflowBuilder.idColumnName(idColumnName);
+            customEventMatchWorkflowConfigurationBuilder.idColumnName(idColumnName);
+            generateAIRating.idColumnName(idColumnName);
             return this;
         }
 

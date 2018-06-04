@@ -75,7 +75,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         Table accountTable = getAndSetAccountTable();
 
         CreateCdlEventTableParameters parameters = new CreateCdlEventTableParameters(inputTable.getName(),
-                apsTable.getName(), accountTable.getName());
+                apsTable != null ? apsTable.getName() : null, accountTable.getName());
         parameters.setEventColumn(configuration.getEventColumn());
         return parameters;
     }
@@ -138,6 +138,20 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     }
 
     private Table getAndSetApsTable() {
+        Table apsTable = getApsTable();
+        boolean hasCrossSell = configuration.isCrossSell()
+                || "true".equalsIgnoreCase(getStringValueFromContext(HAS_CROSS_SELL_MODEL));
+        if (hasCrossSell) {
+            if (apsTable == null) {
+                throw new RuntimeException("There's no AnalyticPurchaseState table!");
+            }
+        } else {
+            apsTable = null;
+        }
+        return apsTable;
+    }
+
+    private Table getApsTable() {
         String customerSpace = configuration.getCustomerSpace().toString();
         Table apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState,
                 version);
@@ -149,9 +163,6 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
             }
         } else {
             log.info("Found AnalyticPurchaseState table in version " + version);
-        }
-        if (apsTable == null) {
-            throw new RuntimeException("There's no AnalyticPurchaseState table!");
         }
         return apsTable;
     }

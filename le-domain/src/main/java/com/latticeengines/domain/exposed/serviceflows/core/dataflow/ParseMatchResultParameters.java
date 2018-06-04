@@ -10,6 +10,10 @@ public class ParseMatchResultParameters extends DataFlowParameters {
 
     @JsonProperty
     @SourceTableName
+    public String matchTableName;
+
+    @JsonProperty
+    @SourceTableName
     public String sourceTableName;
 
     @JsonProperty
@@ -20,5 +24,8 @@ public class ParseMatchResultParameters extends DataFlowParameters {
 
     @JsonProperty
     public boolean keepLid;
+
+    @JsonProperty()
+    public String idColumnName;
 
 }

@@ -194,6 +194,11 @@ public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration 
             return this;
         }
 
+        public Builder idColumnName(String idColumnName) {
+            model.setIdColumnName(idColumnName);
+            return this;
+        }
+
         public CdlModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);

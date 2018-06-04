@@ -15,7 +15,7 @@ public class ParseMatchResultRefineAndCloneTestNG extends ServiceFlowsDataFlowFu
     @Test(groups = "functional", enabled = false)
     public void test() {
         ParseMatchResultParameters parameters = new ParseMatchResultParameters();
-        parameters.sourceTableName = "EventTable";
+        parameters.matchTableName = "EventTable";
         parameters.sourceColumns = sourceCols();
         parameters.excludeDataCloudAttrs = true;
         executeDataFlow(parameters);
@@ -24,7 +24,7 @@ public class ParseMatchResultRefineAndCloneTestNG extends ServiceFlowsDataFlowFu
     @Test(groups = "functional")
     public void testNotExclude() {
         ParseMatchResultParameters parameters = new ParseMatchResultParameters();
-        parameters.sourceTableName = "EventTable";
+        parameters.matchTableName = "EventTable";
         parameters.sourceColumns = sourceCols();
         parameters.excludeDataCloudAttrs = false;
         executeDataFlow(parameters);

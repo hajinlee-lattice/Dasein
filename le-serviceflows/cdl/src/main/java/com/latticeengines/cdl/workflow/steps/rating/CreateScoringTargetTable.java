@@ -54,6 +54,7 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
         putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
         if (evaluationPeriod != null)
             putLongValueInContext(EVALUATION_PERIOD, evaluationPeriod.get());
+        putStringValueInContext(HAS_CROSS_SELL_MODEL, hasCrossSellModel + "");
     }
 
     @Override

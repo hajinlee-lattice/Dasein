@@ -137,6 +137,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .setUniqueKeyColumn(InterfaceName.__Composite_Key__.name()) //
                 .cdlMultiModel(true) //
                 .setEventColumn(InterfaceName.Target.name()) //
+                .idColumnName(InterfaceName.AnalyticPurchaseState_ID.name()) //
                 .setExpectedValue(parameters.isExpectedValue()) //
                 .setUseScorederivation(false) //
                 .dataCollectionVersion(version) //

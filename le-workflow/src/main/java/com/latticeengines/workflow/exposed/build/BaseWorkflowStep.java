@@ -114,6 +114,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
+    protected static final String HAS_CROSS_SELL_MODEL = "HAS_CROSS_SELL_MODEL";
     protected static final String RATING_LIFTS = "RATING_LIFTS";
     protected static final String BUCKETED_SCORE_SUMMARIES = "BUCKETED_SCORE_SUMMARIES";
     protected static final String BUCKET_METADATA_MAP = "BUCKET_METADATA_MAP";

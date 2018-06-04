@@ -27,7 +27,6 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -268,7 +267,7 @@ public class ModelingServiceExecutor {
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
-        model.setKeyCols(Arrays.asList(InterfaceName.AnalyticPurchaseState_ID.name()));
+        model.setKeyCols(Arrays.asList(builder.getKeyColumn()));
         model.setDataFormat("avro");
         model.setParallelEnabled(true);
         model.setFeaturesThreshold(50);

@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardA
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.PrepareMatchDataParameters;
 import com.latticeengines.domain.exposed.serviceflows.modeling.dataflow.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateScoreTableParameters;
@@ -61,6 +62,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.Recalcula
         @JsonSubTypes.Type(value = MatchCdlAccountParameters.class, name = "matchCdlAccountParameters"), //
         @JsonSubTypes.Type(value = MatchCdlSplitParameters.class, name = "MatchCdlSplitParameters"), //
         @JsonSubTypes.Type(value = MatchCdlMergeParameters.class, name = "MatchCdlMergeParameters"), //
+        @JsonSubTypes.Type(value = PrepareMatchDataParameters.class, name = "PrepareMatchDataParameters"), //
 })
 public class DataFlowParameters {
 

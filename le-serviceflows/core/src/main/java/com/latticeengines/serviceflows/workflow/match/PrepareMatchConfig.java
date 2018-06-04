@@ -39,12 +39,12 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-@Component("preMatchStep")
+@Component("preMatchConfigStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PrepareMatchConfig.class);
-    private static final Map<MatchKey, String> MATCH_KEYS_TO_DISPLAY_NAMES = new HashMap<>();
+    static final Map<MatchKey, String> MATCH_KEYS_TO_DISPLAY_NAMES = new HashMap<>();
 
     static {
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Name, InterfaceName.CompanyName.name());
@@ -67,7 +67,8 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
     public void execute() {
         log.info("Inside PreMatchStep execute()");
         Table preMatchEventTable = preMatchEventTable();
-        putObjectInContext(PREMATCH_EVENT_TABLE, preMatchEventTable);
+        if (getObjectFromContext(PREMATCH_EVENT_TABLE, Table.class) == null)
+            putObjectInContext(PREMATCH_EVENT_TABLE, preMatchEventTable);
         MatchInput input = prepareMatchInput(preMatchEventTable);
         BulkMatchWorkflowConfiguration configuration = matchProxy.getBulkConfig(input,
                 getConfiguration().getMatchHdfsPod());
