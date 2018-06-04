@@ -56,7 +56,6 @@ angular.module('common.datacloud.query.builder', [
         QueryStore.mode = vm.mode;
 
         if (vm.mode == 'rules' || vm.mode == 'dashboardrules') {
-            console.log('Rule ---', RatingEngineModel.rule);
             vm.ratingEngineModel = RatingEngineModel;
             vm.rating_rule = RatingEngineModel.rule.ratingRule;
             vm.rating_buckets = vm.rating_rule.bucketToRuleMap;
@@ -92,7 +91,6 @@ angular.module('common.datacloud.query.builder', [
                 if (vm.mode == 'rules' || vm.mode == 'dashboardrules') {
 
                     vm.setRulesTree();
-                    console.log('In timeout');
 
                     vm.rulesInputTree = {
                         'collapsed': false,
@@ -176,8 +174,6 @@ angular.module('common.datacloud.query.builder', [
     vm.setRulesTree = function() {
         vm.accountRulesTree = [vm.generateRulesTreeForEntity('Account')];
         vm.contactRulesTree = [vm.generateRulesTreeForEntity('Contact')];
-        console.log(vm.accountRulesTree);
-        console.log(vm.contactRulesTree);
         QueryStore.setAccountBucketTreeRoot(vm.accountRulesTree[0]);
         QueryStore.setContactBucketTreeRoot(vm.contactRulesTree[0]);
     }

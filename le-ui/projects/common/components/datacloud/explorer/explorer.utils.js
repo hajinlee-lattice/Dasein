@@ -81,7 +81,6 @@ angular.module('common.datacloud.explorer.utils', [])
      * @param {*} attr 
      */
     this.removeAddAttrFromRule = function(add, rule, entity, attr){
-        console.log(rule);
         var buckets = rule.ratingRule.bucketToRuleMap;
         var bucketsName = Object.keys(buckets);
         bucketsName.forEach(function(bucket){

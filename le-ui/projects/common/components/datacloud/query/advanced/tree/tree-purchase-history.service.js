@@ -221,11 +221,15 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
         }
 
         function getNumericalValue(bucketRestriction, position) {
-            return bucketRestriction.bkt.Vals[position];
+            if(bucketRestriction.ignored === false){
+                return bucketRestriction.bkt.Vals[position];
+            }
         }
 
         function getEnumValues(bucketRestriction) {
-            return bucketRestriction.bkt.Vals;
+            if(bucketRestriction.ignored === false){
+                return bucketRestriction.bkt.Vals;
+            }
         }
 
         this.getOperationValue = function (bucketRestriction, operatorType, position) {
