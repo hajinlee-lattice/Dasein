@@ -425,7 +425,8 @@ angular.module('lp.playbook')
                 descending: params.descending,
                 startTimestamp: 0,
                 offset: params.offset,
-                max: 10
+                max: 10000,
+                orgId: params.orgId
             };
 
             PlaybookWizardService.playLaunches(params).then(function(data){

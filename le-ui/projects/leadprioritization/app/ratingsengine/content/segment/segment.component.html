@@ -2,8 +2,9 @@
     <div class="inner-container">
         <form name="segment_form">
             <div class="header">
-                <h2 ng-if="vm.type.engineType != 'RULE_BASED'">Which segment do you want to sell into?</h2>
+                <h2 ng-if="vm.type.engineType != 'RULE_BASED' && vm.stateParams.wizard_steps != 'customevent'">Which segment do you want to sell into?</h2>
                 <h2 ng-if="vm.type.engineType === 'RULE_BASED'">Segments</h2>
+                <h2 ng-if="vm.stateParams.wizard_steps == 'customevent'">Which segment do you want to score?</h2>
             </div>
 
             <div class="content-body no-data" ng-if="!vm.hasSegments">

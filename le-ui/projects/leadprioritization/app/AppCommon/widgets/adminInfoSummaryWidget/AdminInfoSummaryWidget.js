@@ -10,6 +10,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
 	FeatureFlagService.GetAllFlags().then(function(result) {
 		var flags = FeatureFlagService.Flags();
 		$scope.showPivotMapping = FeatureFlagService.FlagIsEnabled(flags.ALLOW_PIVOT_FILE);
+        $scope.isCDL = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
 	});
 
     $scope.ResourceUtility = ResourceUtility;

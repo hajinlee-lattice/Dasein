@@ -56,7 +56,9 @@
                         <br/>
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/predictorcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
-                        {{ResourceUtility.getString('MODEL_ADMIN_SCORED_TRAINING_FILE')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span ng-if="isCDL">{{ResourceUtility.getString('MODEL_ADMIN_SCORED_ACCOUNT_FILE')}}</span>
+                        <span ng-if="!isCDL">{{ResourceUtility.getString('MODEL_ADMIN_SCORED_TRAINING_FILE')}}</span>
+                        :&nbsp;&nbsp;&nbsp;&nbsp;
                         <a data-ng-if="modelCreationJobFinished" href="/files/datafiles/scoredeventtablecsv/score?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a data-ng-if="!modelCreationJobFinished">N/A</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_BUCKET_TOOL')}}:&nbsp;&nbsp;&nbsp;&nbsp;
