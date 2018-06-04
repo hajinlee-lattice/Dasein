@@ -102,7 +102,13 @@
                                     ng-if="rating.status === 'INACTIVE' && !vm.enableDelete(rating.id) && !vm.disableCancelJob(rating.id)">
                                     <a href="javascript:void(0)">Cancel Job</a>
                                     <i class="fa fa-times"></i>
-                                </li>                     
+                                </li>
+                                <li
+                                    ng-if="rating.status === 'INACTIVE' && vm.isCancellingJob(rating.id)"
+                                    ng-disabled="true">
+                                    <a href="javascript:void(0)">Cancelling Job</a>
+                                    <i class="fa fa-spinner fa-spin fa-fw"></i>
+                                </li>
                             </ul>
                         </div>
 

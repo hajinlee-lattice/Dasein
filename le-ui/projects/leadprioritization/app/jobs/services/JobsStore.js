@@ -36,6 +36,7 @@ angular
         isModelState: false
     };
     this.inProgressModelJobs = {};
+    this.cancelledJobs = {};
 
     function isImportJob(job){
         if(job.jobType === 'processAnalyzeWorkflow'){
@@ -230,9 +231,11 @@ angular
 
     this.addModelJob = function(job) {
         var ratingEngineId = job.inputs.RATING_ENGINE_ID;
-        if (job.jobStatus != 'Failed' && job.jobStatus != 'Completed' && job.jobStatus != 'Cancelled') {
+        if (job.jobStatus != 'Failed' && job.jobStatus != 'Completed' && job.jobStatus != 'Cancelled' && JobsStore.cancelledJobs[ratingEngineId] == undefined) {
             console.log('in progress job.id', job.id);
             JobsStore.inProgressModelJobs[ratingEngineId] = job.id;
+        } else if (job.jobStatus == 'Cancelled' && JobsStore.cancelledJobs[ratingEngineId] != undefined) {
+            delete JobsStore.cancelledJobs[ratingEngineId];
         }
         JobsStore.data.jobs.push(job);
     }

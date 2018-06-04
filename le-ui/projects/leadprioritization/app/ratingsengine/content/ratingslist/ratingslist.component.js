@@ -378,7 +378,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     }
 
     vm.enableDelete = function(ratingId) {
-        return !JobsStore.inProgressModelJobs.hasOwnProperty(ratingId);
+        return !JobsStore.inProgressModelJobs.hasOwnProperty(ratingId) && !JobsStore.cancelledJobs.hasOwnProperty(ratingId);
     }
 
     vm.disableCancelJob = function(ratingId) {
@@ -388,16 +388,19 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.cancelJobClickConfirm = function ($event, ratingId) {
         $event.stopPropagation();
 
-        console.log(JobsStore.inProgressModelJobs);
         var jobId = JobsStore.inProgressModelJobs[ratingId];
         if (jobId) { //jobId can be null when status is pending
             JobsService.cancelJob(jobId).then(function (result) {
-                console.log('cancelling job', result);
-                $rootScope.$broadcast("updateAsCancelledJob", jobId);
+                JobsStore.cancelledJobs[ratingId] = jobId;
+                delete JobsStore.inProgressModelJobs[ratingId];
             });
         } else {
             console.log('jobid', jobId);
         }
+    }
+
+    vm.isCancellingJob = function(ratingId) {
+        return JobsStore.inProgressModelJobs[ratingId] == undefined && JobsStore.cancelledJobs[ratingId] != undefined;
     }
 
     function updateRating(rating, updatedRating) {

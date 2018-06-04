@@ -30,10 +30,15 @@ angular
             $scope.job.isDeleted = job.isDeleted;
             $scope.job.modelName = job.modelName;
             $scope.job.rating_id = job.inputs.RATING_ENGINE_ID;
-            job.cancelling = $scope.cancelling[job.id] ? true : false;
-            $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
             $scope.isRatingEngine = (job.inputs.RATING_ENGINE_ID != undefined);
             $scope.isPMML = job.modelType === 'PmmlModel';
+
+            if ($scope.job.rating_id && JobsStore.cancelledJobs[$scope.job.rating_id] != undefined) {
+                $scope.cancelling[job.id] = true;
+            }
+
+            job.cancelling = $scope.cancelling[job.id] ? true : false;
+            $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
 
             if ($scope.isRatingEngine) {
                 RatingsEngineStore.getRatingModel(job.inputs.RATING_ENGINE_ID, job.inputs.RATING_MODEL_ID).then(function(model){                    
@@ -75,7 +80,7 @@ angular
                 if ($event != null) {
                     $event.stopPropagation();
                 }
-                CancelJobModal.show(job.id);
+                CancelJobModal.show(job.id, {ratingId: $scope.job.rating_id});
             };
 
             $scope.$on("updateAsCancelledJob", function(event, args){

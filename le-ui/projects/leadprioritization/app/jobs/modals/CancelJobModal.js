@@ -26,7 +26,7 @@ angular.module('lp.jobs.modals.cancelmodal', [
         });
     };
 })
-.controller('CancelJobController', function ($scope, $state, $rootScope, ResourceUtility, JobsService,  ImportStore) {
+.controller('CancelJobController', function ($scope, $state, $rootScope, ResourceUtility, JobsService,  ImportStore, JobsStore) {
     
     $scope.ResourceUtility = ResourceUtility;
         
@@ -36,7 +36,8 @@ angular.module('lp.jobs.modals.cancelmodal', [
         }
         $("#modalContainer").modal('hide');
         JobsService.cancelJob($scope.jobId).then(function (result) {
-
+            JobsStore.cancelledJobs[$scope.opts.ratingId] = $scope.jobId;
+            delete JobsStore.inProgressModelJobs[$scope.opts.ratingId];
             $rootScope.$broadcast("updateAsCancelledJob", $scope.jobId);
         });
     };
