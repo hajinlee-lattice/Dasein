@@ -5,11 +5,13 @@ angular.module('lp.cg.talkingpoint.attributepane', [
         restrict: 'E',
         replace: true,
         scope: {
-            opts: '='
+            opts: '=',
+            entities: '='
         },
         templateUrl: 'app/cgtalkingpoint/attributepane/attributepane.component.html',
         controller: function($scope, $element, $window) {
-            $scope.selected = Object.keys($scope.opts)[0];
+            // console.log($scope.entities);
+            $scope.selected = $scope.entities[0];//Object.keys($scope.opts)[0];
 
             $window.addEventListener('scroll', handleWindowScroll);
 

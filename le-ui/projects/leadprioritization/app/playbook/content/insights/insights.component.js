@@ -1,13 +1,16 @@
 angular.module('lp.playbook.wizard.insights', [])
 .controller('PlaybookWizardInsights', function(
     $scope, $state, $stateParams, $document, $rootScope, $timeout,
-    PlaybookWizardStore, CgTalkingPointStore, TalkingPointPreviewResources, TalkingPointAttributes, TalkingPoints, BrowserStorageUtility
+    PlaybookWizardStore, CgTalkingPointStore, TalkingPointPreviewResources, 
+    TalkingPointAttributes, Entities, 
+    TalkingPoints, BrowserStorageUtility
 ) {
     var vm = this;
 
     angular.extend(vm, {
         previewResources: TalkingPointPreviewResources,
         attributes: TalkingPointAttributes,
+        entities: Entities,
         talkingPoints: TalkingPoints,
         saveOnBlur: CgTalkingPointStore.saveOnBlur,
         stateParams: $stateParams,

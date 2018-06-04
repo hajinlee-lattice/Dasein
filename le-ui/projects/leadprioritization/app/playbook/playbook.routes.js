@@ -151,12 +151,15 @@ angular
                 section: 'dashboard.insights'
             },
             resolve: {
+                Entities : function(){
+                    return ['account','recommendation','variable'];
+                },
                 TalkingPoints: function(CgTalkingPointStore, $stateParams) {
                     var play_name = $stateParams.play_name || '';
                     return CgTalkingPointStore.getTalkingPoints(play_name);
                 },
-                TalkingPointAttributes: function (CgTalkingPointStore) {
-                    return CgTalkingPointStore.getAttributes();
+                TalkingPointAttributes: function (CgTalkingPointStore, Entities) {
+                    return CgTalkingPointStore.getAttributes(Entities);
                 },
                 TalkingPointPreviewResources: function(CgTalkingPointStore) {
                     return CgTalkingPointStore.getTalkingPointsPreviewResources();
@@ -720,12 +723,15 @@ angular
                 pageTitle: 'Playbook'
             },
             resolve: {
+                Entities : function(){
+                    return ['account','recommendation','variable'];
+                },
                 TalkingPoints: function(CgTalkingPointStore, $stateParams) {
                     var play_name = $stateParams.play_name || '';
                     return CgTalkingPointStore.getTalkingPoints(play_name);
                 },
-                TalkingPointAttributes: function (CgTalkingPointStore) {
-                    return CgTalkingPointStore.getAttributes();
+                TalkingPointAttributes: function (CgTalkingPointStore, Entities) {
+                    return CgTalkingPointStore.getAttributes(Entities);
                 },
                 TalkingPointPreviewResources: function(CgTalkingPointStore) {
                     return CgTalkingPointStore.getTalkingPointsPreviewResources();

@@ -265,7 +265,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return array;
     }
 
-    this.getAttributes = function() {
+    this.getAttributes = function(entities) {
         var stub = false;
         var deferred = $q.defer();
 
@@ -278,8 +278,9 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
                     deferred.resolve(CgTalkingPointStore.attributes);
                 });
             } else {
-                var entities = ['account','recommendation','variable'];
+                
                 CgTalkingPointService.getAttributes(entities).then(function(response) {
+                    // console.log('Entities',JSON.stringify(response.notionAttributes));
                     CgTalkingPointStore.attributes = response.notionAttributes;
                     deferred.resolve(CgTalkingPointStore.attributes);
                 });
