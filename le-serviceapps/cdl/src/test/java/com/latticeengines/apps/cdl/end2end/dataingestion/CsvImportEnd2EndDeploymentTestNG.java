@@ -39,7 +39,7 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-        importingEntity = BusinessEntity.Account;
+        importingEntity = BusinessEntity.Product;
     }
 
     @Test(groups = "manual")

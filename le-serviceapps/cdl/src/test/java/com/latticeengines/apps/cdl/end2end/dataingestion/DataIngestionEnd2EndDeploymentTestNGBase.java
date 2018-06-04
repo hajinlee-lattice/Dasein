@@ -472,7 +472,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
                 SourceType.FILE.getName(), feedType);
         logger.info("Modified field mapping document is saved, start importing ...");
-        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), entity.name() + "Schema",
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType,
                 template, template, INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
