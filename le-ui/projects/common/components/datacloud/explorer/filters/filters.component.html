@@ -37,7 +37,7 @@
             <i class="fa fa-sliders"></i>
         </button>
     </li>
-    <li class="import show-tooltip title-tooltip top" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
+    <li class="import show-tooltip title-tooltip top" ng-if="vm.showFileImport() === true">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Import Data</span></div>
         <button class="button borderless-button" 
                 ui-sref="home.import.entry">

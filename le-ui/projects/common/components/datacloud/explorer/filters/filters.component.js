@@ -35,8 +35,10 @@ angular
 
             if (ClientSession) {
                 vm.hasDeleteAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
+                vm.hasImportAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
             } else {
                 vm.hasDeleteAccessRights = false;
+                vm.hasImportAccessRights = false;
             }
 
             // remove highlighting
@@ -310,6 +312,10 @@ angular
                 } 
                 
                 return ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
+            }
+
+            vm.showFileImport = function () {
+                return vm.hasImportAccessRights && ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
             }
 
             vm.init_filters();
