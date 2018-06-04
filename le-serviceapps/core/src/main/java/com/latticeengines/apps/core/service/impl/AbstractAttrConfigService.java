@@ -375,7 +375,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             // trim and save
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
                 String shortTenantId = MultiTenantContext.getTenantId();
-                attrConfigEntityMgr.save(shortTenantId, entity, trim(configList));
+                attrConfigEntityMgr.save(shortTenantId, entity, trim(configList, isAdmin));
 
                 // clear serving metadata cache
                 String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
@@ -611,13 +611,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @SuppressWarnings("unchecked")
-    public List<AttrConfig> trim(List<AttrConfig> customConfig) {
+    public List<AttrConfig> trim(List<AttrConfig> customConfig, boolean isAdmin) {
         List<AttrConfig> results = new ArrayList<>();
         for (AttrConfig config : customConfig) {
             config.setImpactWarnings(null);
             config.setValidationErrors(null);
             AttrState state = config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
-            if (AttrState.Active.equals(state)) {
+            if (isAdmin || AttrState.Active.equals(state)) {
                 AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) config
                         .getProperty(ColumnMetadataKey.State);
                 if (AttrState.Deprecated.equals(stateProp.getCustomValue())) {

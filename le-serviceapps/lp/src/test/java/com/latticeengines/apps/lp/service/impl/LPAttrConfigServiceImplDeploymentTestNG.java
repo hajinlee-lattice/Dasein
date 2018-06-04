@@ -28,13 +28,13 @@ public class LPAttrConfigServiceImplDeploymentTestNG extends LPDeploymentTestNGB
         List<AttrConfig> copiedList = new ArrayList<>();
         renderConfig.forEach(e -> copiedList.add(e.clone()));
 
-        List<AttrConfig> trimConfig = lpAttrConfigService.trim(renderConfig);
+        List<AttrConfig> trimConfig = lpAttrConfigService.trim(renderConfig, false);
         List<AttrConfig> renderConfig2 = lpAttrConfigService.render(systemMetadata, trimConfig);
 
         Assert.assertEquals(renderConfig.size(), renderConfig2.size());
         Assert.assertEquals(copiedList, renderConfig2);
 
-        List<AttrConfig> trimConfig2 = lpAttrConfigService.trim(renderConfig2);
+        List<AttrConfig> trimConfig2 = lpAttrConfigService.trim(renderConfig2, false);
         Assert.assertEquals(trimConfig.size(), trimConfig2.size());
         Assert.assertEquals(trimConfig, trimConfig2);
     }
