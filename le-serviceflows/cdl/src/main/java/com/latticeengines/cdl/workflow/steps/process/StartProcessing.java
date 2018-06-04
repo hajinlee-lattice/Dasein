@@ -349,6 +349,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Action> actionList = getImportActions();
         if (CollectionUtils.isNotEmpty(actionList)) {
             for (Action action : actionList) {
+                if (action.getActionConfiguration() == null) {
+                    log.warn(String.format("Action %d does not have a import configuration, may need re-import.",
+                            action.getPid()));
+                    continue;
+                }
                 ImportActionConfiguration importActionConfiguration =
                         (ImportActionConfiguration) action.getActionConfiguration();
                 String taskId = importActionConfiguration.getDataFeedTaskId();
