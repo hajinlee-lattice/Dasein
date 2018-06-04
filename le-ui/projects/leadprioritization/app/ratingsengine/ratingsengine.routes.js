@@ -395,6 +395,9 @@ angular
                         return RatingsEngineModels;
                     }
                 },
+                onEnter: function(QueryStore){
+                    QueryStore.clear();
+                },
                 views: {
                     "navigation@home": {
                         controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
@@ -603,6 +606,9 @@ angular
                             nextState: 'home.ratingsengine.dashboard'
                         };
                     }
+                },
+                onEnter: function(QueryStore){
+                    QueryStore.clear();
                 },
                 views: {
                     'summary@': {
