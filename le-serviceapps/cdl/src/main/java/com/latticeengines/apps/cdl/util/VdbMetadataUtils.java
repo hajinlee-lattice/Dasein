@@ -187,6 +187,8 @@ public class VdbMetadataUtils {
             vdbFundamentalType = "boolean";
         } else if ("EpochTime".equalsIgnoreCase(vdbFundamentalType)) {
             vdbFundamentalType = "date";
+        } else if ("VarChar".equalsIgnoreCase(vdbFundamentalType)) {
+            vdbFundamentalType = "alpha";
         } else if (unparsableFundamentalTypes.contains(vdbFundamentalType.toLowerCase())) {
             return null;
         }
