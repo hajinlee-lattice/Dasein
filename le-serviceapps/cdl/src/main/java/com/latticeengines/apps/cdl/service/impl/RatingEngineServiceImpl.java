@@ -34,6 +34,7 @@ import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.cache.exposed.service.CacheService;
@@ -118,6 +119,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private PlayService playService;
+
+    @Inject
+    private SegmentService segmentService;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -708,17 +712,17 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public boolean ratingEngineCyclicDependency(List<RatingEngine> ratingEngines) {
         boolean cyclicDependency = false;
-        // if (ratingEngines != null) {
-        // for (RatingEngine ratingEngine : ratingEngines) {
-        // if (ratingEngine.getId() != null) {
-        // cyclicDependency = ratingEngineCyclicDependency(ratingEngine, new
-        // ArrayList<>());
-        // if (cyclicDependency) {
-        // break;
-        // }
-        // }
-        // }
-        // }
+        if (ratingEngines != null) {
+            for (RatingEngine ratingEngine : ratingEngines) {
+                RatingEngine existing = getRatingEngineById(ratingEngine.getId(),false);
+                if (existing != null) {
+                    cyclicDependency = ratingEngineCyclicDependency(existing, new ArrayList<>());
+                    if (cyclicDependency) {
+                        break;
+                    }
+                }
+            }
+        }
 
         return cyclicDependency;
     }
@@ -726,17 +730,21 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private boolean ratingEngineCyclicDependency(RatingEngine ratingEngine, List<Long> ratingEngineList) {
         ratingEngineList.add((ratingEngine.getPid()));
         List<AttributeLookup> attributeLookups = getDependentAttrsInAllModels(ratingEngine.getId());
-        if (attributeLookups != null) {
-            for (AttributeLookup attributeLookup : attributeLookups) {
-                List<RatingEngine> childRatingEngines = getDependingRatingEngines(
-                        Collections.singletonList(sanitize(attributeLookup.toString())));
+        List<MetadataSegment> segments = segmentService.findDependingSegments(
+                ratingEngine.getTenant().getId(), convertAttributeLookupList(attributeLookups));
 
-                if (childRatingEngines != null) {
-                    for (RatingEngine childRatingEngine : childRatingEngines) {
-                        if (!ratingEngine.getPid().equals(childRatingEngine.getPid())) {
-                            return ratingEngineList.contains(childRatingEngine.getPid())
-                                    || ratingEngineCyclicDependency(childRatingEngine, ratingEngineList);
-                        }
+        if (segments != null) {
+            for (MetadataSegment segment : segments) {
+                List<AttributeLookup> segmentAttributeLookups = segmentService.findDependingAttributes(
+                        Collections.singletonList(segment));
+
+                List<RatingEngine> ratingEngines = getDependingRatingEngines(
+                        convertAttributeLookupList(segmentAttributeLookups));
+
+                for (RatingEngine re : ratingEngines) {
+                    if (!re.getPid().equals(ratingEngine.getPid())) {
+                        return ratingEngineList.contains(re.getPid()) ||
+                                ratingEngineCyclicDependency(re, ratingEngineList);
                     }
                 }
             }
@@ -769,4 +777,16 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         return replicaName;
     }
 
+
+    private List<String> convertAttributeLookupList(List<AttributeLookup> attributeLookups) {
+        List<String> attributes = null;
+        if (attributeLookups != null) {
+            attributes = new ArrayList<>();
+            for (AttributeLookup attributeLookup : attributeLookups) {
+                attributes.add(sanitize(attributeLookup.toString()));
+            }
+        }
+
+        return attributes;
+    }
 }

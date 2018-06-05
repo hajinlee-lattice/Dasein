@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
+import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.cache.exposed.service.CacheService;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -55,6 +57,9 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Inject
     private EntityProxy entityProxy;
+
+    @Inject
+    private RatingEngineService ratingEngineService;
 
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
@@ -249,39 +254,33 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public boolean segmentCyclicDependency(List<MetadataSegment> metadataSegments) {
         boolean cyclicDependency = false;
-//        if (metadataSegments != null) {
-//            for (MetadataSegment metadataSegment : metadataSegments) {
-//                MetadataSegment existing = findByName(metadataSegment.getName());
-//                if (existing != null) {
-//                    cyclicDependency = segmentCyclicDependency(MultiTenantContext.getCustomerSpace().toString(),
-//                            existing, new ArrayList<>());
-//                    if (cyclicDependency) {
-//                        break;
-//                    }
-//                }
-//            }
-//        }
+        if (metadataSegments != null) {
+            for (MetadataSegment metadataSegment : metadataSegments) {
+                MetadataSegment existing = findByName(metadataSegment.getName());
+                if (existing != null) {
+                    cyclicDependency = segmentCyclicDependency(existing, new ArrayList<>());
+                    if (cyclicDependency) {
+                        break;
+                    }
+                }
+            }
+        }
 
         return cyclicDependency;
     }
 
-    private boolean segmentCyclicDependency(String customerSpace, MetadataSegment metadataSegment,
-            List<Long> metadataSegmentList) {
+    private boolean segmentCyclicDependency(MetadataSegment metadataSegment, List<Long> metadataSegmentList) {
         metadataSegmentList.add((metadataSegment.getPid()));
         List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(metadataSegment));
-        if (attributeLookups != null) {
-            for (AttributeLookup attributeLookup : attributeLookups) {
-                List<MetadataSegment> childMetadataSegments = findDependingSegments(customerSpace,
-                        Collections.singletonList(sanitize(attributeLookup.toString())));
+        List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(
+                convertAttributeLookupList(attributeLookups));
 
-                if (childMetadataSegments != null) {
-                    for (MetadataSegment childMetadataSegment : childMetadataSegments) {
-                        if (!metadataSegment.getPid().equals(childMetadataSegment.getPid())) {
-                            return metadataSegmentList.contains(childMetadataSegment.getPid())
-                                    || segmentCyclicDependency(customerSpace, childMetadataSegment,
-                                            metadataSegmentList);
-                        }
-                    }
+        if (ratingEngines != null){
+            for (RatingEngine ratingEngine : ratingEngines) {
+                MetadataSegment segment = ratingEngine.getSegment();
+                if (!segment.getPid().equals(metadataSegment.getPid())) {
+                    return metadataSegmentList.contains(segment.getPid()) ||
+                            segmentCyclicDependency(segment, metadataSegmentList);
                 }
             }
         }
@@ -339,5 +338,17 @@ public class SegmentServiceImpl implements SegmentService {
             attribute = attribute.trim();
         }
         return attribute;
+    }
+
+    private List<String> convertAttributeLookupList(List<AttributeLookup> attributeLookups) {
+        List<String> attributes = null;
+        if (attributeLookups != null) {
+            attributes = new ArrayList<>();
+            for (AttributeLookup attributeLookup : attributeLookups) {
+                attributes.add(sanitize(attributeLookup.toString()));
+            }
+        }
+
+        return attributes;
     }
 }
