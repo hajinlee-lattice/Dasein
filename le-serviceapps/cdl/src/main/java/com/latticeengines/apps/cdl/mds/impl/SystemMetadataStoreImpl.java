@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Enrichment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
@@ -147,6 +148,9 @@ public class SystemMetadataStoreImpl extends
                                     cm.setCanEnrich(true);
                                     cm.enableGroupIfNotPresent(Enrichment);
                                 }
+
+                                // disable all company profile by PM's ask
+                                cm.disableGroup(CompanyProfile);
 
                                 return cm;
                             }) //
