@@ -11,7 +11,6 @@ import org.springframework.util.MultiValueMap;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -74,6 +73,17 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
     public FieldMappingDocument getFieldMappings(String sourceFileName, String entity) {
         String urlPattern = "/{sourceFileName}/fieldmappings?entity={entity}";
         String url = constructUrl(urlPattern, sourceFileName, entity);
+        ResponseDocument resp = post("get field mappings", url, null, ResponseDocument.class);
+        if (resp.isSuccess()) {
+            return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), FieldMappingDocument.class);
+        } else {
+            throw new RuntimeException("Failed to get filed mapping: " + StringUtils.join(resp.getErrors(), ","));
+        }
+    }
+
+    public FieldMappingDocument getFieldMappings(String sourceFileName, SchemaInterpretation schema) {
+        String urlPattern = "/{sourceFileName}/fieldmappings?schema={schema}";
+        String url = constructUrl(urlPattern, sourceFileName, schema);
         ResponseDocument resp = post("get field mappings", url, null, ResponseDocument.class);
         if (resp.isSuccess()) {
             return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), FieldMappingDocument.class);

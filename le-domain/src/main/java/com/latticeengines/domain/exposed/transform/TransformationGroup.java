@@ -33,8 +33,8 @@ public enum TransformationGroup {
     }
 
     public static TransformationGroup fromName(String name) {
-        if (nameMap.containsKey(name)) {
-            return nameMap.get(name);
+        if (nameMap.containsKey(name.toLowerCase())) {
+            return nameMap.get(name.toLowerCase());
         } else {
             throw new IllegalArgumentException("Cannot find a TransformationGroup with name " + name);
         }

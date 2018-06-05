@@ -301,8 +301,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     void mockVdbImport(BusinessEntity entity, int offset, int limit) throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
 
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.VISIDB.getName(), "Query",
-                entity.name());
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.VISIDB.getName(),
+                "Query", entity.name());
         Table importTemplate;
         if (dataFeedTask == null) {
             Schema schema = getVdbImportSchema(entity);
@@ -516,7 +516,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
         String source = SourceType.FILE.getName();
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
-        String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType, metaData);
+        String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType,
+                metaData);
         logger.info("Creating a data feed task for " + entity + " with id " + taskId);
         if (StringUtils.isEmpty(taskId)) {
             throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
@@ -619,8 +620,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
         long startTime = System.currentTimeMillis();
-        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), "e2etest", template,
-                data, INITIATOR);
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), "e2etest", template, data,
+                INITIATOR);
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(
                 applicationId.toString(), false);
         long endTime = System.currentTimeMillis();
@@ -640,8 +641,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 PathBuilder
                         .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
                         .toString(),
-                SourceType.FILE.getName(),
-                entity.name());
+                SourceType.FILE.getName(), entity.name());
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, targetPath);
         for (String file : files) {

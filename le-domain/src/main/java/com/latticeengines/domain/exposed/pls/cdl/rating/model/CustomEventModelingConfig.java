@@ -69,7 +69,7 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
         try {
             return TransformationGroup.fromName(transformationGroup);
         } catch (Exception e) {
-            return TransformationGroup.STANDARD;
+            return TransformationGroup.ALL;
         }
     }
 

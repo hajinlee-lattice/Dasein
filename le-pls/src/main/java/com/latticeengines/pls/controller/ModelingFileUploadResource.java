@@ -121,7 +121,6 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
             @RequestParam(value = "source", required = false, defaultValue = "") String source,
             @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType,
-            @RequestParam(value = "excludeCustomFileAttributes", required = false, defaultValue = "false") boolean excludeCustomFileAttributes,
             @RequestBody FieldMappingDocument fieldMappingDocument) {
         if (StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument);
@@ -183,16 +182,15 @@ public class ModelingFileUploadResource {
             throw new LedpException(LedpCode.LEDP_18173, new String[] { schemaInterpretation.name() });
         }
 
-        SourceFile sourceFile = uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                compressed, csvFileName, schemaInterpretation, "", file, false);
+        SourceFile sourceFile = uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName,
+                schemaInterpretation, "", file, false);
 
-        return ResponseDocument.successResponse(fileUploadService
-                .uploadCleanupFileTemplate(sourceFile, schemaInterpretation, cleanupOperationType));
+        return ResponseDocument.successResponse(
+                fileUploadService.uploadCleanupFileTemplate(sourceFile, schemaInterpretation, cleanupOperationType));
     }
 
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
-                                  SchemaInterpretation schemaInterpretation, String entity, MultipartFile file,
-                                  boolean checkHeaderFormat) {
+            SchemaInterpretation schemaInterpretation, String entity, MultipartFile file, boolean checkHeaderFormat) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             log.info(String.format("Uploading file %s (csvFileName=%s, compressed=%s)", fileName, csvFileName,
@@ -207,7 +205,8 @@ public class ModelingFileUploadResource {
                 stream = GzipUtils.decompressStream(stream);
             }
 
-            stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, csvFileName, checkHeaderFormat);
+            stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, csvFileName,
+                    checkHeaderFormat);
             if (!StringUtils.isEmpty(entity)) {
                 schemaInterpretation = SchemaInterpretation.getByName(entity);
             }
