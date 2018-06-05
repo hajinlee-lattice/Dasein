@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -25,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -35,7 +38,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1525220846205";
+    private static final String EXISTING_TENANT = "JLM1527869817257";
 
     private MetadataSegment testSegment;
     private RatingEngine testRatingEngine;
@@ -134,7 +137,8 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
                 Thread.currentThread().getContextClassLoader());
         testSourceFile = fileUploadProxy.uploadFile(testSourceFileName, false, "CustomEventModelTest.csv",
                 SchemaInterpretation.Account, "Account", csvResource);
-        FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(testSourceFileName, "Account");
+        FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(testSourceFileName, SchemaInterpretation.Account);
+        fmDoc.setIgnoredFields(new ArrayList<>());
         for (FieldMapping fm : fmDoc.getFieldMappings()) {
             if (fm.getUserField().equals("Event")) {
                 fm.setMappedField("Event");
@@ -143,6 +147,19 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
             if (fm.getUserField().equals("name")) {
                 fm.setMappedField("CompanyName");
                 fm.setMappedToLatticeField(true);
+            }
+            if (fm.getUserField().equals("SomeRandom")) {
+                fm.setMappedField("SomeRandom");
+                fm.setMappedToLatticeField(false);
+                fmDoc.getIgnoredFields().add("SomeRandom");
+            }
+            if (fm.getUserField().equals("Industry")) {
+                fm.setMappedToLatticeField(false);
+                fmDoc.getIgnoredFields().add("Industry");
+            }
+            if (fm.getUserField().equals("AnnualRevenue")) {
+                fm.setMappedToLatticeField(false);
+                fmDoc.getIgnoredFields().add("AnnualRevenue");
             }
         }
 
@@ -160,6 +177,20 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
         configureCustomEventModel(testAIModel);
         CustomEventModelingConfig advancedConf = CustomEventModelingConfig.getAdvancedModelingConfig(testAIModel);
         advancedConf.setSourceFileName(testSourceFile.getName());
+
+        advancedConf.setTransformationGroup("NONE");
+        TransformationGroup grp = advancedConf.getConvertedTransformationGroup();
+        Assert.assertEquals(TransformationGroup.NONE, grp);
+
+        advancedConf.setTransformationGroup(null);
+        advancedConf.setCustomEventModelingType(CustomEventModelingType.LPI);
+        grp = advancedConf.getConvertedTransformationGroup();
+        Assert.assertEquals(TransformationGroup.ALL, grp);
+
+        advancedConf.setCustomEventModelingType(CustomEventModelingType.CDL);
+        grp = advancedConf.getConvertedTransformationGroup();
+        Assert.assertEquals(TransformationGroup.ALL, grp);
+
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
                 testAIModel.getId(), testAIModel);
     }
