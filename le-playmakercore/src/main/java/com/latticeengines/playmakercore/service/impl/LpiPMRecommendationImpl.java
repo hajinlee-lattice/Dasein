@@ -1,6 +1,7 @@
 package com.latticeengines.playmakercore.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,14 +39,14 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    @Value("${playmaker.update.bulk.max:1000}")
-    private int maxUpdateRows;
-
     @Inject
     private RecommendationEntityMgr recommendationEntityMgr;
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private CleanupExecutor cleanupExecutor;
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum,
@@ -139,7 +140,6 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                                 : contactList);
 
                 accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
-
             }
 
         }
@@ -161,19 +161,88 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
     @Override
     public void cleanupRecommendations(String playId) {
-        boolean shouldLoop = true;
-        log.info(String.format("Begin cleanup recommendations for playId = ", playId));
-        try {
-            while (shouldLoop) {
-                int updatedCount = recommendationEntityMgr.deleteInBulkByPlayId(playId, null, true, maxUpdateRows);
-                shouldLoop = updatedCount > 0;
+        cleanupExecutor.cleanupRecommendations(playId);
+    }
+
+    @Override
+    public void cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate) {
+        cleanupExecutor.cleanupOldRecommendationsBeforeCutoffDate(cutoffDate);
+    }
+
+    @Component
+    class CleanupExecutor {
+
+        private Logger cleanupExecutorLog = LoggerFactory.getLogger(CleanupExecutor.class);
+
+        @Value("${playmaker.update.bulk.max:1000}")
+        private int maxUpdateRows;
+
+        public void cleanupRecommendations(String playId) {
+            String tenantId = MultiTenantContext.getCustomerSpace().toString();
+            boolean shouldLoop = true;
+            int count = 0;
+            int idx = 0;
+            try {
+                while (shouldLoop) {
+                    int updatedCount = recommendationEntityMgr.deleteInBulkByPlayId(playId, null, true, maxUpdateRows);
+                    shouldLoop = updatedCount > 0;
+                    count += updatedCount;
+                    if (shouldLoop) {
+                        cleanupExecutorLog.info(String.format(
+                                "cleanupRecommendations: Tenant = %s, Loop idx = %d, "
+                                        + "maxUpdateRows = %d, actualUpdatedCount = %d",
+                                tenantId, idx++, maxUpdateRows, updatedCount));
+                    }
+                }
+                if (count > 0) {
+                    cleanupExecutorLog.info(
+                            String.format("cleanupRecommendations: Tenant = %s, Completed cleanup recommendations "
+                                    + "(count = %d) for playId = %s", count, playId));
+                }
+
+                Play play = playProxy.getPlay(tenantId, playId);
+                play.setIsCleanupDone(true);
+                playProxy.createOrUpdatePlay(tenantId, play);
+                cleanupExecutorLog.info(String.format("cleanupRecommendations: Tenant = %s, Marked deleted playId = %s "
+                        + "with cleanupDone flag set to true", tenantId, playId));
+            } catch (Exception ex) {
+                cleanupExecutorLog.error(String.format(
+                        "cleanupRecommendations: Tenant = %s, Failed to cleanup recommendations for playId = %s",
+                        tenantId, playId), ex);
             }
-            log.info(String.format("Completed cleanup recommendations for playId = ", playId));
-            Play play = playProxy.getPlay(MultiTenantContext.getCustomerSpace().toString(), playId);
-            play.setIsCleanupDone(true);
-            playProxy.createOrUpdatePlay(MultiTenantContext.getCustomerSpace().toString(), play);
-        } catch (Exception ex) {
-            log.error(String.format("Failed to cleanup recommendations for playId = ", playId), ex);
+        }
+
+        public void cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate) {
+            String tenantId = MultiTenantContext.getCustomerSpace().toString();
+            boolean shouldLoop = true;
+            int count = 0;
+            int idx = 0;
+            try {
+                while (shouldLoop) {
+                    int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(cutoffDate, false,
+                            maxUpdateRows);
+                    shouldLoop = updatedCount > 0;
+                    count += updatedCount;
+                    if (shouldLoop) {
+                        cleanupExecutorLog.info(String.format(
+                                "cleanupOldRecommendationsBeforeCutoffDate: Tenant = %s, Loop idx = %d, "
+                                        + "maxUpdateRows = %d, actualUpdatedCount = %d",
+                                tenantId, idx++, maxUpdateRows, updatedCount));
+                    }
+                }
+
+                if (count > 0) {
+                    cleanupExecutorLog.info(String.format(
+                            "cleanupOldRecommendationsBeforeCutoffDate: Tenant = %s, Completed cleanup "
+                                    + "very old recommendations (count = %d) with cutoffDate = %s",
+                            tenantId, count, cutoffDate));
+                }
+            } catch (Exception ex) {
+                cleanupExecutorLog.error(
+                        String.format("cleanupOldRecommendationsBeforeCutoffDate: Tenant = %s, Failed to cleanup "
+                                + "very old recommendations with cutoffDate = %s", tenantId, cutoffDate),
+                        ex);
+            }
         }
     }
 

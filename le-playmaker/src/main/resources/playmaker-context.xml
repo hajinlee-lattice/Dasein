@@ -21,6 +21,7 @@
     <import resource="classpath:oauth2db-context.xml" />
     <import resource="classpath:oauth2db-auth-mgr-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
     
     <bean id="batonService" 
         class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl"/>

@@ -1,5 +1,6 @@
 package com.latticeengines.playmakercore.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -15,4 +16,6 @@ public interface LpiPMRecommendation {
     Recommendation getRecommendationById(String recommendationId);
 
     void cleanupRecommendations(String playId);
+
+    void cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate);
 }

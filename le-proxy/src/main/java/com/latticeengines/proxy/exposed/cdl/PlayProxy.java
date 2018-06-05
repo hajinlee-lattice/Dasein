@@ -65,8 +65,11 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
             url += "?" + StringUtils.join(params, "&");
         }
 
-        log.info("url is " + url);
-        List<?> list = get("get deleted play idss", url, List.class);
+        if (!forCleanupOnly) {
+            // avoid printing this log statement for quartz based cleanup
+            log.info("url is " + url);
+        }
+        List<?> list = get("get deleted play ids", url, List.class);
         return JsonUtils.convertList(list, String.class);
     }
 
