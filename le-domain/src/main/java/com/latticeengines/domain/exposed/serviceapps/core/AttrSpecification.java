@@ -7,7 +7,7 @@ public enum AttrSpecification {
 
     LDC_NON_PREMIUM("LDC Non-Premium Attributes", true, true, true, true, true, false, false, false, true, false, true), //
     LDC_PREMIUM("LDC Premium Attributes", true, true, true, true, true, false, false, false, true, false, true), //
-    LDC_INTERNAL("LDC Internal Attributes", false, true, false, true, true, false, false, false, true, false, true), //
+    LDC_INTERNAL("LDC Internal Attributes", false, true, true, false, true, false, false, false, true, false, true), //
     CDL_STD("CDL Standard Attributes", true, true, true, true, true, false, false, false, false, false, true), //
     CDL_LOOKUP_ID("CDL Lookup Ids", true, true, true, true, false, false, false, true, true, false, false), //
     CDL_ACCOUNT_EXTENSION("CDL Account Extensions", true, true, true, true, true, false, false, true, true, false,
