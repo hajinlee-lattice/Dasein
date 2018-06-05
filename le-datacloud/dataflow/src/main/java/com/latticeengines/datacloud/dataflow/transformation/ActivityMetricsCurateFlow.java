@@ -21,6 +21,7 @@ import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ActivityMetricsNullImputeFunc;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MetricsShareOfWalletFunc;
 import com.latticeengines.dataflow.runtime.cascading.propdata.StandardActivityMetricsAgg;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
@@ -94,7 +95,7 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
         }
 
         Node toReturn = join(base, toJoin);
-        toReturn = imputeNullDepivoted(toReturn);
+        toReturn = imputeNull(toReturn);
         toReturn = assignCompositeKey(toReturn);
         return toReturn;
     }
@@ -352,6 +353,14 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
                 String.format("%s + \"_\" + %s", InterfaceName.AccountId.name(), InterfaceName.ProductId.name()),
                 new FieldList(config.getGroupByFields()),
                 new FieldMetadata(InterfaceName.__Composite_Key__.name(), String.class));
+        return node;
+    }
+
+    private Node imputeNull(Node node) {
+        node = node.apply(
+                new ActivityMetricsNullImputeFunc(new Fields(node.getFieldNamesArray()), config.getMetrics(), null),
+                new FieldList(node.getFieldNames()), node.getSchema(), new FieldList(node.getFieldNames()),
+                Fields.REPLACE);
         return node;
     }
 

@@ -48,8 +48,9 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private GeneralSource reducedDepivotedMetrics = new GeneralSource("ReducedDepivotedMetrics");
     private GeneralSource expandedPivotMetrics = new GeneralSource("ExpandedPivotMetrics");
     private GeneralSource depivotedMetricsNoSegment = new GeneralSource("DepivotedMetricsNoSegment");
+    private GeneralSource loadTest = new GeneralSource("LoadTestMetrics");
 
-    private GeneralSource source = depivotedMetricsNoSegment;
+    private GeneralSource source = loadTest;
 
     private String MAX_TXN_DATE = "2018-01-01";
 
@@ -62,11 +63,13 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private ActivityMetrics everHP;
 
     private List<ActivityMetrics> metricsList;
+    private List<ActivityMetrics> metricsListLoadTest;
 
     private String AID_NO_TXN = "AID_NO_TXN";
 
     @Test(groups = "functional")
     public void testTransformation() {
+        prepareMetrics();
         prepareAccount();
         prepareProduct();
         prepareWeekTable();
@@ -111,7 +114,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step10.setBaseSources(baseSources);
         step10.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
         step10.setTargetSource(depivotedMetrics.getSourceName());
-        step10.setConfiguration(getActivityMetricsCuratorConfig(false, true));
+        step10.setConfiguration(getActivityMetricsCuratorConfig(metricsList, false, true));
 
         TransformationStepConfig step20 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -119,7 +122,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step20.setBaseSources(baseSources);
         step20.setTransformer(DataCloudConstants.ACTIVITY_METRICS_PIVOT);
         step20.setTargetSource(pivotMetrics.getSourceName());
-        step20.setConfiguration(getActivityMetricsPivotConfig(false));
+        step20.setConfiguration(getActivityMetricsPivotConfig(metricsList, false));
 
         TransformationStepConfig step30 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -129,7 +132,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step30.setBaseSources(baseSources);
         step30.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
         step30.setTargetSource(reducedDepivotedMetrics.getSourceName());
-        step30.setConfiguration(getActivityMetricsCuratorConfig(true, true));
+        step30.setConfiguration(getActivityMetricsCuratorConfig(metricsList, true, true));
 
         TransformationStepConfig step40 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -138,7 +141,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step40.setBaseSources(baseSources);
         step40.setTransformer(DataCloudConstants.ACTIVITY_METRICS_PIVOT);
         step40.setTargetSource(expandedPivotMetrics.getSourceName());
-        step40.setConfiguration(getActivityMetricsPivotConfig(true));
+        step40.setConfiguration(getActivityMetricsPivotConfig(metricsList, true));
 
         TransformationStepConfig step50 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -148,7 +151,26 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step50.setBaseSources(baseSources);
         step50.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
         step50.setTargetSource(depivotedMetricsNoSegment.getSourceName());
-        step50.setConfiguration(getActivityMetricsCuratorConfig(true, false));
+        step50.setConfiguration(getActivityMetricsCuratorConfig(metricsList, true, false));
+
+        TransformationStepConfig step60 = new TransformationStepConfig();
+        baseSources = new ArrayList<>();
+        baseSources.add(weekTable.getSourceName());
+        baseSources.add(account.getSourceName());
+        baseSources.add(product.getSourceName());
+        step60.setBaseSources(baseSources);
+        step60.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
+        step60.setConfiguration(getActivityMetricsCuratorConfig(metricsListLoadTest, true, true));
+
+        TransformationStepConfig step70 = new TransformationStepConfig();
+        List<Integer> inputSteps = Arrays.asList(5);
+        step70.setInputSteps(inputSteps);
+        baseSources = new ArrayList<>();
+        baseSources.add(account.getSourceName());
+        step70.setBaseSources(baseSources);
+        step70.setTransformer(DataCloudConstants.ACTIVITY_METRICS_PIVOT);
+        step70.setTargetSource(loadTest.getSourceName());
+        step70.setConfiguration(getActivityMetricsPivotConfig(metricsListLoadTest, true));
 
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
@@ -157,6 +179,8 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         steps.add(step30);
         steps.add(step40);
         steps.add(step50);
+        steps.add(step60);
+        steps.add(step70);
 
         // -----------
         configuration.setSteps(steps);
@@ -165,10 +189,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         return configuration;
     }
 
-    private String getActivityMetricsCuratorConfig(boolean reduced, boolean accountHasSegment) {
-        ActivityMetricsCuratorConfig conf = new ActivityMetricsCuratorConfig();
-        conf.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
-        conf.setCurrentDate(MAX_TXN_DATE);
+    private void prepareMetrics() {
         weekMG = new ActivityMetrics();
         weekMG.setMetrics(InterfaceName.Margin);
         weekMG.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
@@ -199,16 +220,37 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         everHP.setMetrics(InterfaceName.HasPurchased);
         everHP.setPeriodsConfig(Arrays.asList(TimeFilter.ever(PeriodStrategy.Template.Week.name())));
         metricsList = Arrays.asList(weekMG, weekSW, weekSWDepr, weekAS, weekTS, weekSC, everHP);
+
+        metricsListLoadTest = new ArrayList<>();
+        for (int i = 1; i <= 500; i++) {
+            ActivityMetrics metrics = new ActivityMetrics();
+            metrics.setMetrics(InterfaceName.TotalSpendOvertime);
+            metrics.setPeriodsConfig(Arrays.asList(TimeFilter.within(i, PeriodStrategy.Template.Week.name())));
+            metrics.setEOL(true);
+            metricsListLoadTest.add(metrics);
+        }
+    }
+
+    private String getActivityMetricsCuratorConfig(List<ActivityMetrics> metricsList, boolean reduced,
+            boolean accountHasSegment) {
+        ActivityMetricsCuratorConfig conf = new ActivityMetricsCuratorConfig();
+        conf.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
+        conf.setCurrentDate(MAX_TXN_DATE);
+
         conf.setMetrics(metricsList);
         conf.setPeriodStrategies(Arrays.asList(PeriodStrategy.CalendarWeek));
         conf.setType(ActivityType.PurchaseHistory);
         conf.setReduced(reduced);
         conf.setAccountHasSegment(accountHasSegment);
         conf.setPeriodTableCnt(1);
-        return JsonUtils.serialize(conf);
+        if (metricsList.size() > 500) {
+            return setDataFlowEngine(JsonUtils.serialize(conf), "TEZ");
+        } else {
+            return JsonUtils.serialize(conf);
+        }
     }
 
-    private String getActivityMetricsPivotConfig(boolean expanded) {
+    private String getActivityMetricsPivotConfig(List<ActivityMetrics> metricsList, boolean expanded) {
         ActivityMetricsPivotConfig config = new ActivityMetricsPivotConfig();
         config.setActivityType(ActivityType.PurchaseHistory);
         config.setGroupByField(InterfaceName.AccountId.name());
@@ -223,7 +265,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         if (config.isExpanded()) {
             config.setMetrics(metricsList);
         }
-        return JsonUtils.serialize(config);
+        if (metricsList.size() > 500) {
+            return setDataFlowEngine(JsonUtils.serialize(config), "TEZ");
+        } else {
+            return JsonUtils.serialize(config);
+        }
     }
 
     private Object[][] accountData = new Object[][] { //

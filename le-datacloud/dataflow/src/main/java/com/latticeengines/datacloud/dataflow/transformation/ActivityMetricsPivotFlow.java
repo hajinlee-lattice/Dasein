@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ActivityMetricsNullImputeFunc;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ActivityMetricsPivotAgg;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -94,8 +95,16 @@ public class ActivityMetricsPivotFlow extends ActivityMetricsBaseFlow<ActivityMe
         List<String> toRetain = new ArrayList<>(node.getFieldNames());
         node = account.join(new FieldList(InterfaceName.AccountId.name()), node,
                 new FieldList(InterfaceName.AccountId.name()), JoinType.LEFT).retain(new FieldList(toRetain));
-        prepareMetricsMetadata(config.getMetrics(), pivotValues);
-        return imputeNullPivoted(node, pivotValues);
+        return imputeNull(node);
+    }
+
+    private Node imputeNull(Node node) {
+        node = node.apply(
+                new ActivityMetricsNullImputeFunc(new Fields(node.getFieldNamesArray()), config.getMetrics(),
+                        pivotValues),
+                new FieldList(node.getFieldNames()), node.getSchema(), new FieldList(node.getFieldNames()),
+                Fields.REPLACE);
+        return node;
     }
 
     private boolean shouldLoadAccount() {
