@@ -19,7 +19,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 'tosort': true,
                 'sortBy': 'bucket_name',
                 'trim': true,
-                'top': 5,
+                'top': 6,
             },
             'chart': {
                 'header':'Value',
@@ -47,7 +47,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 'tosort': true,
                 'sortBy': 'bucket_name',
                 'trim': true,
-                'top': 5,
+                'top': 6,
             },
             'chart': {
                 'header':'Value',

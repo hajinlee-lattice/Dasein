@@ -39,22 +39,16 @@ angular.module('lp.playbook.wizard.crmselection', [])
         }
 
         vm.setExcludeItems = function(excludeItemsWithoutSalesforceId) {
-            QueryStore.setExcludeItems(excludeItemsWithoutSalesforceId);
+            console.log(excludeItemsWithoutSalesforceId)
+            PlaybookWizardStore.setExcludeItems(excludeItemsWithoutSalesforceId);
         }
 
         vm.checkValid = function(form, accountId) {
 
             if(vm.stored.crm_selection) {
-                // PlaybookWizardStore.setSettings({
-                //     destinationOrgId: vm.stored.crm_selection.orgId,
-                //     destinationSysType: vm.stored.crm_selection.externalSystemType,
-                //     destinationAccountId: vm.stored.crm_selection.accountId
-                // });
-
-                // This will be refactored in M21
-                QueryStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
-                QueryStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
-                QueryStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
+                PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
+                PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
+                PlaybookWizardStore.setDestinationAccountId(vm.stored.crm_selection.accountId);
             }
 
             var accountId = accountId;
@@ -63,32 +57,29 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 vm.nullCount = null;
                 vm.loadingCoverageCounts = true;
 
-                var countsQuery = { 
+                var allCountsQuery = { 
                         freeFormTextSearch: vm.search || '',
-                        restrictNotNullSalesforceId: true,
                         entityType: 'Account',
-                        selectedBuckets: QueryStore.getBucketsToLaunch(),
-                        lookupIdColumn: accountId
+                        selectedBuckets: PlaybookWizardStore.getBucketsToLaunch(),
                     },
                     engineId = vm.ratingEngine.id;
 
 
-                PlaybookWizardService.getTargetCount(engineId, countsQuery).then(function(result){
-                    
-                    console.log(result);
-
+                PlaybookWizardService.getTargetCount(engineId, allCountsQuery).then(function(result){
                     vm.totalCount = result;
-                    PlaybookWizardService.getLookupCounts(engineId, accountId).then(function(result){
 
-                        console.log(result);
-
+                    var accountIdCountQuery = { 
+                        freeFormTextSearch: vm.search || '',
+                        restrictNotNullSalesforceId: true,
+                        entityType: 'Account',
+                        selectedBuckets: PlaybookWizardStore.getBucketsToLaunch(),
+                        lookupIdColumn: accountId
+                    };
+                    PlaybookWizardService.getTargetCount(engineId, accountIdCountQuery).then(function(result){
                         PlaybookWizardStore.setValidation('crmselection', form.$valid);
 
                         vm.loadingCoverageCounts = false;
-                        vm.nonNullCount = 0;
-                        if(result.ratingIdLookupColumnPairsCoverageMap[accountId] && result.ratingIdLookupColumnPairsCoverageMap[accountId].accountCount){
-                            vm.nonNullCount = result.ratingIdLookupColumnPairsCoverageMap[accountId].accountCount;
-                        }
+                        vm.nonNullCount = result;
                         vm.nullCount = (vm.totalCount - vm.nonNullCount);
 
                     });

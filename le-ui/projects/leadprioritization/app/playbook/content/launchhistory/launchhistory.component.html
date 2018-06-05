@@ -148,9 +148,9 @@
     	</table>
 
         <pd-pagination-controls
-            ng-if="vm.showPagination"
             current="vm.currentPage"
             max="max = vm.header.filter.filtered.length / vm.pagesize"
+            ng-show="max > 1"
             class="pull-right">
         </pd-pagination-controls>
 

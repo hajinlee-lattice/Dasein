@@ -40,15 +40,6 @@ angular.module('common.datacloud.query')
             resetLabelIncrementor: false
         };
 
-        // Play Launch Data
-        this.bucketsToLaunch = null;
-        this.ratedTargetsLimit = null;
-        this.selectedBucket = 'A';
-        this.destinationOrgId = null;
-        this.destinationSysType = null;
-        this.destinationAccountId = null;
-        this.excludeItems = false;
-
         this.init = function() {
             this.initRestrictions();
         }
@@ -123,50 +114,6 @@ angular.module('common.datacloud.query')
             for (var key in this.counts) {
                 this.counts[key][property] = value;
             }
-        }
-
-        this.setBucketsToLaunch = function(buckets) {
-            this.bucketsToLaunch = buckets;
-        }
-
-        this.getBucketsToLaunch = function() {
-            return this.bucketsToLaunch;
-        }
-
-        this.setRatedTargetsLimit = function(limit) {
-            this.ratedTargetsLimit = limit;
-        }
-
-        this.getRatedTargetsLimit = function() {
-            return this.ratedTargetsLimit;
-        }
-
-        this.setDestinationOrgId = function(destinationOrgId) {
-            this.destinationOrgId = destinationOrgId;
-        }
-        this.getDestinationOrgId = function() {
-            return this.destinationOrgId;
-        }
-
-        this.setDestinationSysType = function(destinationSysType) {
-            this.destinationSysType = destinationSysType;
-        }
-        this.getDestinationSysType = function() {
-            return this.destinationSysType;
-        }
-
-        this.setDestinationAccountId = function(destinationAccountId) {
-            this.destinationAccountId = destinationAccountId;
-        }
-        this.getDestinationAccountId = function() {
-            return this.destinationAccountId;
-        }
-
-        this.setExcludeItems = function(excludeItems) {
-            this.excludeItems = excludeItems;
-        }
-        this.getExcludeItems = function() {
-            return this.excludeItems;
         }
 
         this.setPublicProperty = function(property, value) {

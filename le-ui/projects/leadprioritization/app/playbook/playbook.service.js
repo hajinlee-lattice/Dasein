@@ -1,5 +1,5 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, QueryStore, RatingsEngineStore){
+.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, RatingsEngineStore){
     var PlaybookWizardStore = this;
     
     this.current = {
@@ -17,6 +17,15 @@ angular.module('lp.playbook')
         this.playLaunches = null;
         this.savedTalkingPoints = null;
         this.targetData = null;
+
+        // Play Launch Data
+        this.bucketsToLaunch = null;
+        this.ratedTargetsLimit = null;
+        this.selectedBucket = 'A';
+        this.destinationOrgId = null;
+        this.destinationSysType = null;
+        this.destinationAccountId = null;
+        this.excludeItems = false;
 
         this.settings_form = {
             play_display_name: '',
@@ -252,9 +261,21 @@ angular.module('lp.playbook')
     // }
 
     this.nextLaunch = function() {
-        var play = PlaybookWizardStore.currentPlay;
 
-        PlaybookWizardStore.launchPlay(play).then(function(data) {
+
+        console.log(PlaybookWizardStore.getBucketsToLaunch());
+
+        var play = PlaybookWizardStore.currentPlay,
+            opts = {
+                bucketsToLaunch: PlaybookWizardStore.getBucketsToLaunch(),
+                ratedTargetsLimit: PlaybookWizardStore.getRatedTargetsLimit(),
+                destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
+                destinationSysType: PlaybookWizardStore.getDestinationSysType(),
+                destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
+                excludeItems: PlaybookWizardStore.getExcludeItems()
+            }
+
+        PlaybookWizardStore.launchPlay(play, opts).then(function(data) {
             $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
         });
     }
@@ -345,6 +366,50 @@ angular.module('lp.playbook')
 
     this.setValidation = function(type, value) {
         this.validation[type] = value;
+    }
+
+    this.setRatedTargetsLimit = function(limit) {
+        this.ratedTargetsLimit = limit;
+    }
+
+    this.getRatedTargetsLimit = function() {
+        return this.ratedTargetsLimit;
+    }
+
+    this.setBucketsToLaunch = function(buckets) {
+        this.bucketsToLaunch = buckets;
+    }
+
+    this.getBucketsToLaunch = function() {
+        return this.bucketsToLaunch;
+    }
+
+    this.setDestinationOrgId = function(destinationOrgId) {
+        this.destinationOrgId = destinationOrgId;
+    }
+    this.getDestinationOrgId = function() {
+        return this.destinationOrgId;
+    }
+
+    this.setDestinationSysType = function(destinationSysType) {
+        this.destinationSysType = destinationSysType;
+    }
+    this.getDestinationSysType = function() {
+        return this.destinationSysType;
+    }
+
+    this.setDestinationAccountId = function(destinationAccountId) {
+        this.destinationAccountId = destinationAccountId;
+    }
+    this.getDestinationAccountId = function() {
+        return this.destinationAccountId;
+    }
+
+    this.setExcludeItems = function(excludeItems) {
+        this.excludeItems = excludeItems;
+    }
+    this.getExcludeItems = function() {
+        return this.excludeItems;
     }
 
     this.setPlay = function(play) {
@@ -448,9 +513,9 @@ angular.module('lp.playbook')
         });
         return deferred.promise;        
     }
-    this.launchPlay = function(play) {
+    this.launchPlay = function(play, opts) {
         var deferred = $q.defer();
-        PlaybookWizardService.launchPlay(play).then(function(data){
+        PlaybookWizardService.launchPlay(play, opts).then(function(data){
             deferred.resolve(data);
             PlaybookWizardStore.setPlay(data);
         });
@@ -523,7 +588,7 @@ angular.module('lp.playbook')
     }
 
 })
-.service('PlaybookWizardService', function($q, $http, $state, $timeout, QueryStore) {
+.service('PlaybookWizardService', function($q, $http, $state, $timeout) {
     this.host = '/pls'; //default
 
     this.getPlays = function() {
@@ -638,19 +703,18 @@ angular.module('lp.playbook')
         return canceler.promise;
     }
 
-    this.launchPlay = function(play) {
+    this.launchPlay = function(play, opts) {
+
         var deferred = $q.defer(),
             play_name = play.name,
-            bucketsToLaunch = QueryStore.getBucketsToLaunch(),
-            ratedTargetsLimit = QueryStore.getRatedTargetsLimit(),
-            destinationOrgId = QueryStore.getDestinationOrgId()
-            destinationSysType = QueryStore.getDestinationSysType(),
-            destinationAccountId = QueryStore.getDestinationAccountId();
-            excludeItems = QueryStore.getExcludeItems();
+            bucketsToLaunch = opts.bucketsToLaunch,
+            ratedTargetsLimit = opts.ratedTargetsLimit,
+            destinationOrgId = opts.destinationOrgId,
+            destinationSysType = opts.destinationSysType,
+            destinationAccountId = opts.destinationAccountId,
+            excludeItems = opts.excludeItems;
 
-        // console.log(bucketsToLaunch);
-        // console.log(ratedTargetsLimit);
-        // console.log(excludeItems);
+        console.log(excludeItems);
 
         $http({
             method: 'POST',
