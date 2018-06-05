@@ -63,10 +63,25 @@ public class LimitationValidator extends AttrValidator {
         List<AttrConfig> existingConfigs = attrConfigEntityMgr.findAllByTenantId(tenantId);
         List<AttrConfig> existingActiveConfigs = getStateConfigsInDB(existingConfigs);
 
-        // append the user selected active configs to existing active in DB
-        existingActiveConfigs.addAll(userSelectedActiveConfigs);
-        checkDataLicense(existingActiveConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
-        checkSystemLimit(existingActiveConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
+        // dedup, since the configs has merged with the configs in DB, no need
+        // to count same configs in DB
+        List<AttrConfig> activeConfigs = generateActiveConfig(existingActiveConfigs, userSelectedActiveConfigs);
+        checkDataLicense(activeConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
+        checkSystemLimit(activeConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
+    }
+
+    private List<AttrConfig> generateActiveConfig(List<AttrConfig> existingActiveConfigs,
+            List<AttrConfig> userSelectedActiveConfigs) {
+        List<AttrConfig> result = new ArrayList<AttrConfig>();
+        result.addAll(userSelectedActiveConfigs);
+        Set<String> attrNames = userSelectedActiveConfigs.stream().map(config -> config.getAttrName())
+                .collect(Collectors.toSet());
+        existingActiveConfigs.forEach(config -> {
+            if (!attrNames.contains(config.getAttrName())) {
+                result.add(config);
+            }
+        });
+        return result;
     }
 
     private List<AttrConfig> returnStateConfigs(List<AttrConfig> attrConfigs, AttrState state) {
