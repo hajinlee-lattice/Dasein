@@ -701,6 +701,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductName.name()) //
                 .allowedDisplayNames(Sets.newHashSet("NAME", "PRODUCT_NAME", "PRODUCT NAME")) //
                 .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.ProductName)
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -709,6 +710,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Description.name()) //
                 .allowedDisplayNames(Sets.newHashSet("DESCRIPTION", "PRODUCT DESCRIPTION")) //
                 .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Description)
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -717,6 +719,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductBundle.name()) //
                 .allowedDisplayNames(Sets.newHashSet("BUNDLE", "PRODUCT_BUNDLE", "PRODUCT BUNDLE")) //
                 .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.ProductBundle)
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -725,6 +728,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductLine.name()) //
                 .allowedDisplayNames(Sets.newHashSet("LINE", "PRODUCT_LINE", "PRODUCT LINE")) //
                 .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.ProductLine)
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -733,6 +737,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductFamily.name()) //
                 .allowedDisplayNames(Sets.newHashSet("FAMILY", "PRODUCT_FAMILY", "PRODUCT FAMILY")) //
                 .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.ProductFamily)
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -741,6 +746,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductCategory.name()) //
                 .allowedDisplayNames(Sets.newHashSet("CATEGORY", "PRODUCT_CATEGORY", "PRODUCT CATEGORY")) //
                 .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.ProductCategory)
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
