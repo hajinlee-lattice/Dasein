@@ -37,7 +37,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                     { label: "Active", action: { status: 'ACTIVE' }, total: vm.activeCount },
                     { label: "Inactive", action: { status: 'INACTIVE' }, total: vm.inactiveCount },
                     { label: "Rules Based", action: { tileClass: 'RULE_BASED' }, total: vm.inactiveCount },
-                    { label: "First Purchase Cross-Sell", action: { tileClass: '"CROSS_SELL_FIRST_PURCHASE"' }, total: vm.inactiveCount },
+                    { label: "First Purchase Cross-Sell", action: { tileClass: 'CROSS_SELL_FIRST_PURCHASE' }, total: vm.inactiveCount },
                     { label: "Returning Purchase Cross-Sell", action: { tileClass: 'CROSS_SELL_REPEAT_PURCHASE' }, total: vm.inactiveCount },
                     { label: "Custom Event", action: { tileClass: 'CUSTOM_EVENT' }, total: vm.inactiveCount }
                 ]
@@ -134,7 +134,13 @@ angular.module('lp.ratingsengine.ratingslist', [
         var referringRoute = StateHistory.lastFrom().name,
             lastRouteContainsSegmentOrAttributes = (referringRoute.split('.').indexOf("products") > -1 || referringRoute.split('.').indexOf("attributes") > -1);
 
+        
+        $scope.$watch('vm.header.filter.filtered', function() {
+            vm.currentPage = 1;
+        });
+
         $scope.$watch('vm.current.ratings', function() {
+
             if(lastRouteContainsSegmentOrAttributes){
                 vm.isRatingsSet = RatingsEngineStore.ratingsSet;
             };
@@ -183,18 +189,6 @@ angular.module('lp.ratingsengine.ratingslist', [
                         "lift": "0.5",
                         "dummy": true
                     }];
-
-                // if(rating.bucketMetadata && rating.bucketMetadata.length > 0) {
-                //     angular.forEach(rating.bucketMetadata, function(rating, key) {
-                //         rating.lift = (Math.round( rating.lift * 10) / 10).toString();
-                //         newBucketMetadata.push(rating);
-                //         if(newBucketMetadata.length === 0) {
-                //             newBucketMetadata = dummyNewBucketData;
-                //         }
-                //     });
-                // } else {
-                //     newBucketMetadata = dummyNewBucketData;
-                // }
                 
                 if(rating.bucketMetadata === undefined || rating.bucketMetadata.length === 0){
                     rating.bucketMetadata = dummyNewBucketData;

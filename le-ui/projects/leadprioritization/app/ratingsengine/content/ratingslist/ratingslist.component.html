@@ -209,7 +209,8 @@
         <div class="twelve columns">
             <pd-pagination-controls 
                 current="vm.currentPage" 
-                max="max = (vm.header.filter.unfiltered | filter: vm.query).length / pagesize">
+                max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
+
             </pd-pagination-controls>
         </div>
     </div>
