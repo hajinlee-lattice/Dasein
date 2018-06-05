@@ -39,9 +39,9 @@ public class TimeFilterTranslatorUnitTestNG {
         TimeFilter within2Quarter = new TimeFilter( //
                 ComparisonType.WITHIN, TimeFilter.Period.Quarter.name(), Collections.singletonList(2));
         TimeFilter prior1Month = new TimeFilter( //
-                ComparisonType.PRIOR_ONLY, TimeFilter.Period.Month.name(), Collections.singletonList(1));
+                ComparisonType.PRIOR, TimeFilter.Period.Month.name(), Collections.singletonList(1));
         TimeFilter prior3Month = new TimeFilter( //
-                ComparisonType.PRIOR_ONLY, TimeFilter.Period.Month.name(), Collections.singletonList(3));
+                ComparisonType.PRIOR, TimeFilter.Period.Month.name(), Collections.singletonList(3));
         TimeFilter between1And3Month = new TimeFilter( //
                 ComparisonType.BETWEEN, TimeFilter.Period.Month.name(), Arrays.asList(1, 3));
         TimeFilter betweenDates = new TimeFilter( //
