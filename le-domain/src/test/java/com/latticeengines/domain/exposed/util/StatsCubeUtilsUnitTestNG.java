@@ -120,8 +120,6 @@ public class StatsCubeUtilsUnitTestNG {
             cmMap.put(entity.name(), cms);
         }
 
-        cubes = StatsCubeUtils.filterStatsCube(cubes, cmMap);
-
         TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
         verifyDateAttrInTopN(topNTree, cmMap);
         StatsCube cube = StatsCubeUtils.retainTop5Bkts(cubes.get(BusinessEntity.Account.name()));

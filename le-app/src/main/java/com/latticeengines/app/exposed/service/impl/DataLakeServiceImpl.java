@@ -388,8 +388,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
             Map<String, StatsCube> cubes = container.getStatsCubes();
-            Map<String, List<ColumnMetadata>> cmMap = getColumnMetadataMap(customerSpace, cubes);
-            return StatsCubeUtils.filterStatsCube(cubes, cmMap);
+            return cubes;
         }
         return null;
     }
