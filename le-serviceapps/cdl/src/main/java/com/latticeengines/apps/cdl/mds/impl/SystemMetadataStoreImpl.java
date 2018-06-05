@@ -149,9 +149,6 @@ public class SystemMetadataStoreImpl extends
                                     cm.enableGroupIfNotPresent(Enrichment);
                                 }
 
-                                // disable all company profile by PM's ask
-                                cm.disableGroup(CompanyProfile);
-
                                 return cm;
                             }) //
                             .doOnNext(cm -> {
