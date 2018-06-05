@@ -102,6 +102,20 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
+    public boolean resetImport(String customerSpace, BusinessEntity entity) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/reset", customerSpace);
+        if (entity != null) {
+            url += "?entity=" + entity.name();
+        }
+        ResponseDocument<Boolean> responseDoc = post("resetImport", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return false;
+        }
+        return responseDoc.isSuccess();
+    }
+
+    @SuppressWarnings("unchecked")
     public ApplicationId cleanupAll(String customerSpace, BusinessEntity entity, String initiator) {
         String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
         String url = constructUrl(urlPattern, customerSpace);

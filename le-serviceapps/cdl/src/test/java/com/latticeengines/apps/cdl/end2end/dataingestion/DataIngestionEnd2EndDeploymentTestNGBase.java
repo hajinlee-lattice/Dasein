@@ -221,7 +221,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     protected PeriodProxy periodProxy;
 
     @Inject
-    private ActionProxy actionProxy;
+    protected ActionProxy actionProxy;
 
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;

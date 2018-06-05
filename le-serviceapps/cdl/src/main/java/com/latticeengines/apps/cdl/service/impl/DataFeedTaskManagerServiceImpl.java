@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -23,6 +25,7 @@ import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -35,10 +38,14 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("dataFeedTaskManagerService")
@@ -56,6 +63,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private final CDLExternalSystemService cdlExternalSystemService;
 
+    private final ActionService actionService;
+
+    private final MetadataProxy metadataProxy;
+
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
@@ -63,12 +74,16 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
                                           DataFeedProxy dataFeedProxy, TenantService tenantService,
                                           DLTenantMappingService dlTenantMappingService,
-                                          CDLExternalSystemService cdlExternalSystemService) {
+                                          CDLExternalSystemService cdlExternalSystemService,
+                                          ActionService actionService,
+                                          MetadataProxy metadataProxy) {
         this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
         this.dataFeedProxy = dataFeedProxy;
         this.tenantService = tenantService;
         this.dlTenantMappingService = dlTenantMappingService;
         this.cdlExternalSystemService = cdlExternalSystemService;
+        this.actionService = actionService;
+        this.metadataProxy = metadataProxy;
     }
 
     @Override
@@ -179,6 +194,58 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo);
         return appId.toString();
+    }
+
+    @Override
+    public boolean resetImport(String customerSpaceStr, BusinessEntity entity) {
+        List<DataFeedTask> dfTasks = getAllDataFeedTask(customerSpaceStr, entity);
+        Set<String> taskIds = dfTasks.stream().map(DataFeedTask::getUniqueId).collect(Collectors.toSet());
+        List<Action> importActions = actionService.findAll().stream()
+                .filter(action -> action.getType().equals(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW))
+                .collect(Collectors.toList());
+        // delete action first
+        try {
+            if (CollectionUtils.isNotEmpty(importActions)) {
+                for (Action action : importActions) {
+                    if (action.getActionConfiguration() != null
+                            && action.getActionConfiguration() instanceof ImportActionConfiguration) {
+                        ImportActionConfiguration config = (ImportActionConfiguration) action.getActionConfiguration();
+                        if (taskIds.contains(config.getDataFeedTaskId())) {
+                            actionService.delete(action.getPid());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Cannot delete import action. " + e.getMessage());
+            return false;
+        }
+        // delete import template.
+        for (DataFeedTask dft : dfTasks) {
+            metadataProxy.deleteImportTable(customerSpaceStr, dft.getImportTemplate().getName());
+        }
+        return true;
+    }
+
+    private List<DataFeedTask> getAllDataFeedTask(String customerSpaceStr, BusinessEntity entity) {
+        List<DataFeedTask> allTasks = new ArrayList<>();
+        List<BusinessEntity> entityList = new ArrayList<>();
+        if (entity == null) {
+            entityList.add(BusinessEntity.Account);
+            entityList.add(BusinessEntity.Contact);
+            entityList.add(BusinessEntity.Transaction);
+            entityList.add(BusinessEntity.Product);
+        } else {
+            entityList.add(entity);
+        }
+        for (BusinessEntity businessEntity : entityList) {
+            List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpaceStr,
+                    businessEntity.name());
+            if (CollectionUtils.isNotEmpty(dataFeedTasks)) {
+                allTasks.addAll(dataFeedTasks);
+            }
+        }
+        return allTasks;
     }
 
     private CustomerSpace mapCustomerSpace(CustomerSpace customerSpace) {

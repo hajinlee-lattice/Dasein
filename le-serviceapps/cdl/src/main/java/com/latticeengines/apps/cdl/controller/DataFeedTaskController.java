@@ -107,4 +107,18 @@ public class DataFeedTaskController {
             return ResponseDocument.failedResponse(e);
         }
     }
+
+    @RequestMapping(value = "/reset", method = RequestMethod.POST, headers =
+            "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a data feed task")
+    public ResponseDocument<Boolean> resetImport(@PathVariable String customerSpace,
+                            @RequestParam(value = "entity", required = false) BusinessEntity entity) {
+        if (dataFeedTaskManagerService.resetImport(customerSpace, entity)) {
+            return ResponseDocument.successResponse(true);
+        } else {
+            return ResponseDocument.failedResponse(new RuntimeException("Cannot reset datafeed task."));
+        }
+
+    }
 }
