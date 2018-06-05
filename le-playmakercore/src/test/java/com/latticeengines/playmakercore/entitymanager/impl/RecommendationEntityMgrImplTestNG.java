@@ -85,10 +85,10 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         LAUNCH_1_DATE = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (5 * 1000L));
         LAUNCH_2_DATE = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (1 * 1000L));
 
-        T1 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L - 10L);
-        T2 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L + 10L);
-        T3 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_1_DATE.getTime() / 1000L + 10L);
-        T4 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_2_DATE.getTime() / 1000L + 10L);
+        T1 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L - 24*3600*10L);
+        T2 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L + 24*3600*10L);
+        T3 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_1_DATE.getTime() / 1000L + 24*3600*10L);
+        T4 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_2_DATE.getTime() / 1000L + 24*3600*10L);
 
         System.out.println(String.format(
                 "LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
