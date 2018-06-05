@@ -48,8 +48,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
-    private Date CURRENT_DATE = new Date(System.currentTimeMillis());
-
     private String PLAY_ID = "play__" + CURRENT_TIME_MILLIS;
     private String LAUNCH_ID = "launch__" + CURRENT_TIME_MILLIS;
     private String LAUNCH_ID_1 = "launch1__" + CURRENT_TIME_MILLIS;
@@ -83,14 +81,19 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        LAUNCH_DATE = new Date(CURRENT_TIME_MILLIS / 10);
-        LAUNCH_1_DATE = new Date(CURRENT_TIME_MILLIS / 5);
-        LAUNCH_2_DATE = new Date(CURRENT_TIME_MILLIS);
+        LAUNCH_DATE = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (10 * 1000L));
+        LAUNCH_1_DATE = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (5 * 1000L));
+        LAUNCH_2_DATE = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (1 * 1000L));
 
-        T1 = new Date(LAUNCH_DATE.getTime() - 10000L);
-        T2 = new Date(LAUNCH_DATE.getTime() + 10000L);
-        T3 = new Date(LAUNCH_1_DATE.getTime() + 10000L);
-        T4 = new Date(LAUNCH_2_DATE.getTime() + 10000L);
+        T1 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L - 10L);
+        T2 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_DATE.getTime() / 1000L + 10L);
+        T3 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_1_DATE.getTime() / 1000L + 10L);
+        T4 = PlaymakerUtils.dateFromEpochSeconds(LAUNCH_2_DATE.getTime() / 1000L + 10L);
+
+        System.out.println(String.format(
+                "LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
+                        + "T1 = %s, T2 = %s, T3 = %s, T4 = %s",
+                LAUNCH_DATE, LAUNCH_1_DATE, LAUNCH_2_DATE, T1, T2, T3, T4));
 
         recommendationWithoutOrgInfo = createRecommendationObject(LAUNCH_ID, LAUNCH_DATE, SFDC_ACCOUNT_ID, null, null,
                 "A");
@@ -189,7 +192,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         boolean shouldLoop = true;
         while (shouldLoop) {
             int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(T1, false, maxUpdateRows);
-            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            System.out.println(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
             shouldLoop = (updatedCount > 0);
         }
         verifyRecommendationCount(100, 100, 100);
@@ -197,7 +200,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         shouldLoop = true;
         while (shouldLoop) {
             int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(T2, false, maxUpdateRows);
-            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            System.out.println(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
             shouldLoop = (updatedCount > 0);
         }
         verifyRecommendationCount(0, 100, 100);
@@ -205,7 +208,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         shouldLoop = true;
         while (shouldLoop) {
             int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(T3, false, maxUpdateRows);
-            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            System.out.println(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
             shouldLoop = (updatedCount > 0);
         }
         verifyRecommendationCount(0, 0, 100);
@@ -213,7 +216,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         shouldLoop = true;
         while (shouldLoop) {
             int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(T4, false, maxUpdateRows);
-            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            System.out.println(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
             shouldLoop = (updatedCount > 0);
         }
         verifyRecommendationCount(0, 0, 0);
@@ -223,7 +226,8 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         boolean shouldLoop = true;
         while (shouldLoop) {
             int updatedCount = recommendationEntityMgr.deleteInBulkByLaunchId(launchId, hardDelete, maxUpdateRows);
-            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            System.out.println(String.format("bulkDeleteByLaunchId - launchId = %s, " //
+                    + "maxCount = %d, updatedCount = %d", launchId, maxUpdateRows, updatedCount));
             shouldLoop = (updatedCount > 0);
         }
     }
@@ -233,7 +237,9 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         while (shouldLoop) {
             int updatedCount = recommendationEntityMgr.deleteInBulkByPlayId(playId, cutoffTimestamp, hardDelete,
                     maxUpdateRows);
-            log.info(String.format("maxCount = %d, updatedCount = %d", maxUpdateRows, updatedCount));
+            System.out.println(
+                    String.format("bulkDeleteByPlayId - cutoffTimestamp = %s, maxCount = %d, updatedCount = %d",
+                            cutoffTimestamp, maxUpdateRows, updatedCount));
             shouldLoop = (updatedCount > 0);
         }
     }
@@ -283,7 +289,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Recommendation recommendation = new Recommendation();
         recommendation.setDescription(LAUNCH_DESCRIPTION);
         recommendation.setLaunchId(launchId);
-        recommendation.setLaunchDate(CURRENT_DATE);
         recommendation.setPlayId(PLAY_ID);
         recommendation.setAccountId(ACCOUNT_ID);
         recommendation.setSfdcAccountID(sfdcAccountID);
@@ -322,6 +327,8 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Assert.assertNotNull(recommendation.getPid());
         Assert.assertNotNull(recommendation.getPriorityDisplayName());
         Assert.assertNotNull(recommendation.getPriorityID());
+        System.out.println(String.format("Created Recommendation launchId = %s, pid = %d, launchDate = %s",
+                recommendation.getLaunchId(), recommendation.getPid(), recommendation.getLaunchDate()));
 
     }
 
