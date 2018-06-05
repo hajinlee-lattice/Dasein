@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import javax.inject.Inject;
 
@@ -45,6 +46,9 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     @Value("${dataplatform.queue.scheme}")
     private String queueScheme;
 
+    @Value("${pls.cdl.transform.cascading.partitions}")
+    protected int cascadingPartitions;
+
     private DataCollection.Version version;
 
     @Override
@@ -64,6 +68,13 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         }
         configuration.setApplyTableProperties(true);
         configuration.setDataFlowParams(createDataFlowParameters());
+        configuration.setJobProperties(getJobProperties());
+    }
+
+    private Properties getJobProperties() {
+        Properties jobProperties = new Properties();
+        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions));
+        return jobProperties;
     }
 
     private DataFlowParameters createDataFlowParameters() {
