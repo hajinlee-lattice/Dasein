@@ -41,7 +41,7 @@
 
     <bean name="playmakerRecommendationCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="recommendationCleanupJob" />
-        <property name="cronTrigger" value="${quartz.playmaker.recommendationcleanup.job.cron:0/15 * * * * ?}" />
+        <property name="cronTrigger" value="${quartz.playmaker.recommendationcleanup.job.cron:0 */2 * * * ?}" />
         <property name="destUrl" value="${quartz.playmaker.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.playmaker.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.playmaker.predefined.job.query.api:}" />
