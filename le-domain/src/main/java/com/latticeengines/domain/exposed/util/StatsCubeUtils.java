@@ -584,7 +584,7 @@ public class StatsCubeUtils {
     }
 
     public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap, Map<String, List<ColumnMetadata>> cmMap,
-            boolean includeTopBkt) {
+            boolean includeTopBkt, ColumnSelection.Predefined selectedGroup) {
         TopNTree topNTree = new TopNTree();
         for (Map.Entry<String, StatsCube> cubeEntry : cubeMap.entrySet()) {
             String key = cubeEntry.getKey();
@@ -593,7 +593,7 @@ public class StatsCubeUtils {
                 List<ColumnMetadata> cmList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(cmMap.get(key))) {
                     cmMap.get(key).forEach(cm -> {
-                        if (cm.isEnabledFor(ColumnSelection.Predefined.Segment)) {
+                        if (cm.isEnabledFor(selectedGroup)) {
                             cmList.add(cm);
                         }
                     });

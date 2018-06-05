@@ -1,5 +1,6 @@
 package com.latticeengines.matchapi.controller;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 
 public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
@@ -27,6 +29,9 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
     private static final String LDC_COUNTRY = "LDC_Country";
     private static final Logger log = LoggerFactory.getLogger(AMStatisticsResourceDeploymentTestNG.class);
     private int enrichmentOnlyCubeFieldsCount = 0;
+
+    private List<Category> amCats = Arrays.asList(Category.FIRMOGRAPHICS, Category.GROWTH_TRENDS, Category.INTENT,
+            Category.ONLINE_PRESENCE, Category.TECHNOLOGY_PROFILE, Category.WEBSITE_KEYWORDS, Category.WEBSITE_PROFILE);
 
     @Test(groups = { "deployment" }, enabled = true)
     public void testGetTopAttrTree() {
@@ -44,6 +49,14 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
                         attribute.getNonNullCount()));
             }
         }
+    }
+
+    @Test(groups = { "deployment" }, enabled = true)
+    public void testGetTopNTree() {
+        TopNTree topnTree = columnMetadataProxy.getTopNTree();
+        amCats.forEach(c -> {
+            Assert.assertTrue(topnTree.getCategories().containsKey(c));
+        });
     }
 
     @Test(groups = { "deployment" }, enabled = true)

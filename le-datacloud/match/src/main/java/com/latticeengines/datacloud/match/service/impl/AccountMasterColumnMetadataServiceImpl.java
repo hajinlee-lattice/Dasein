@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 
@@ -84,7 +85,7 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         TopNTree topNTree = StatsCubeUtils.constructTopNTree( //
                 ImmutableMap.of("LatticeAccount", statsCube), //
                 ImmutableMap.of("LatticeAccount", cms), //
-                true);
+                true, ColumnSelection.Predefined.Enrichment);
         return ImmutablePair.of(statsCube, topNTree);
     }
 

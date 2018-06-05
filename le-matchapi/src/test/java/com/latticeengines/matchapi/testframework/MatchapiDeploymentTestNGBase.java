@@ -26,6 +26,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.proxy.exposed.matchapi.AMStatsProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
@@ -44,6 +45,9 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
     @Autowired
     protected AMStatsProxy amStatsProxy;
+
+    @Autowired
+    protected ColumnMetadataProxy columnMetadataProxy;
 
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;

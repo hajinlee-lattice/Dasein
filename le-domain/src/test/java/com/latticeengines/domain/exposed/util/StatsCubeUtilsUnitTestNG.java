@@ -122,7 +122,7 @@ public class StatsCubeUtilsUnitTestNG {
 
         cubes = StatsCubeUtils.filterStatsCube(cubes, cmMap);
 
-        TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
+        TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
         verifyDateAttrInTopN(topNTree, cmMap);
         StatsCube cube = StatsCubeUtils.retainTop5Bkts(cubes.get(BusinessEntity.Account.name()));
         verifyFirmographicsTopN(topNTree.getCategories().get(Category.FIRMOGRAPHICS), cube);

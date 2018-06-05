@@ -379,7 +379,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
         try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
-            return StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
+            return StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
         }
     }
 
