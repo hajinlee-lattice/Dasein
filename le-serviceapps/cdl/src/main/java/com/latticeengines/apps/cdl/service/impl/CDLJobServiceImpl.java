@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -28,6 +30,8 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -52,6 +56,12 @@ public class CDLJobServiceImpl implements CDLJobService {
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
 
     @Inject
+    private DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr;
+
+    @Inject
+    private DataFeedEntityMgr dataFeedEntityMgr;
+
+    @Inject
     private BatonService batonService;
 
     @Inject
@@ -63,7 +73,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Value("${cdl.processAnalyze.concurrent.job.count:2}")
     private int concurrentProcessAnalyzeJobs;
 
-    @Value("${cdl.processAnalyze.job.retry.count:0}")
+    @Value("${cdl.processAnalyze.job.retry.count:1}")
     private int processAnalyzeJobRetryCount;
 
     @Value("${common.adminconsole.url:}")
@@ -105,9 +115,9 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.info("end submit import job");
         } else if (cdlJobType == CDLJobType.PROCESSANALYZE) {
             log.info("starting submit process analyze job");
-            int runningProcessAnalyzeJobs = checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
+            checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
-                orchestrateJob(runningProcessAnalyzeJobs);
+                orchestrateJob();
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;
@@ -120,7 +130,20 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Override
     public Date getNextInvokeTime(CustomerSpace customerSpace) {
+            Tenant tenantInContext = MultiTenantContext.getTenant();
+            try {
+                Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
+                MultiTenantContext.setTenant(tenant);
+                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
+                return getNextInvokeTime(customerSpace, tenant, processAnalyzeJobDetail);
+            } finally {
+                MultiTenantContext.setTenant(tenantInContext);
+            }
+    }
+
+    private Date getNextInvokeTime(CustomerSpace customerSpace, Tenant tenant, CDLJobDetail processAnalyzeJobDetail) {
         Date invokeTime = null;
+
         boolean allowAutoSchedule = false;
         try {
             allowAutoSchedule = batonService.isEnabled(customerSpace,LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
@@ -133,12 +156,11 @@ public class CDLJobServiceImpl implements CDLJobService {
 
             Tenant tenantInContext = MultiTenantContext.getTenant();
             try {
-                Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
                 MultiTenantContext.setTenant(tenant);
-                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                Date create_date = processAnalyzeJobDetail == null ? null : processAnalyzeJobDetail.getCreateDate();
-                invokeTime = getInvokeTime(invokeHour, create_date, new Date(tenant.getRegisteredTime()));
-                log.info(String.format("next invoke time for %s: %s", customerSpace.getTenantId(), invokeTime.toString()));
+                invokeTime = getInvokeTime(processAnalyzeJobDetail, invokeHour, new Date(tenant.getRegisteredTime()));
+                if (invokeTime != null) {
+                    log.info(String.format("next invoke time for %s: %s", customerSpace.getTenantId(), invokeTime.toString()));
+                }
             } finally {
                 MultiTenantContext.setTenant(tenantInContext);
             }
@@ -146,28 +168,41 @@ public class CDLJobServiceImpl implements CDLJobService {
         return invokeTime;
     }
 
-    private void orchestrateJob(int runningProcessAnalyzeJobs) {
+    private void orchestrateJob() {
         List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds();
         log.info(String.format("data feeds count: %d", allDataFeeds.size()));
+
+        int runningProcessAnalyzeJobs = 0;
+        for (SimpleDataFeed dataFeed : allDataFeeds) {
+            if (dataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
+                Tenant tenant = dataFeed.getTenant();
+                log.info(String.format("ProcessAnalyzing tenant : %s", tenant.getId()));
+                runningProcessAnalyzeJobs++;
+            }
+        }
+
+        if (runningProcessAnalyzeJobs >= concurrentProcessAnalyzeJobs) {
+            return;
+        }
 
         List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
         long currentTimeMillis = System.currentTimeMillis();
         log.info(String.format("current time: %s", (new Date(currentTimeMillis)).toString()));
 
         for (SimpleDataFeed dataFeed : allDataFeeds) {
+            if (dataFeed.getStatus() != DataFeed.Status.Active) {
+                continue;
+            }
+
             Tenant tenant = dataFeed.getTenant();
             MultiTenantContext.setTenant(tenant);
             log.info(String.format("tenant: %s", tenant.getId()));
-            if (runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs) {
-                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                if (processAnalyzeJobDetail == null || processAnalyzeJobDetail.getCdlJobStatus() != CDLJobStatus.RUNNING) {
-                    Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()));
-                    if (invokeTime!= null && currentTimeMillis > invokeTime.getTime()) {
-                        log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
-                        list.add(new HashMap.SimpleEntry<>(invokeTime,
-                                new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
-                    }
-                }
+            CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
+            Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
+            if (invokeTime!= null && currentTimeMillis > invokeTime.getTime()) {
+                log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
+                list.add(new HashMap.SimpleEntry<>(invokeTime,
+                new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
             }
         }
 
@@ -179,11 +214,10 @@ public class CDLJobServiceImpl implements CDLJobService {
             CDLJobDetail processAnalyzeJobDetail = entry.getValue().getValue();
             if (runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs)
             {
-                if (meetProcessAnalyzeRule(dataFeed, processAnalyzeJobDetail)) {
-                    submitProcessAnalyzeJob(dataFeed.getTenant(), processAnalyzeJobDetail);
+                if (submitProcessAnalyzeJob(dataFeed.getTenant(), processAnalyzeJobDetail)) {
                     runningProcessAnalyzeJobs++;
                     log.info(String.format("submitted invoke time: %s, tenant name: %s", entry.getKey(),
-                            dataFeed.getTenant().getName()));
+                             dataFeed.getTenant().getName()));
                 }
             } else {
                 break;
@@ -191,9 +225,9 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    private Date getInvokeTime(int invokeHour, Date createTime, Date tenantCreateDate) {
+    private Date getInvokeTime(CDLJobDetail processAnalyzeJobDetail, int invokeHour, Date tenantCreateDate) {
         Calendar calendar = Calendar.getInstance();
-        if (createTime == null) {
+        if (processAnalyzeJobDetail == null) {
             calendar.setTime(new Date(System.currentTimeMillis()));
 
             calendar.set(Calendar.HOUR_OF_DAY, invokeHour);
@@ -204,27 +238,36 @@ public class CDLJobServiceImpl implements CDLJobService {
             if (calendar.getTime().before(tenantCreateDate)) {
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
             }
+            return calendar.getTime();
+        } else if (processAnalyzeJobDetail.getCdlJobStatus() == CDLJobStatus.RUNNING) {
+            return null;
         } else {
-            calendar.setTime(createTime);
-            int hour_create = calendar.get(Calendar.HOUR_OF_DAY);
-            int day_create = calendar.get(Calendar.DAY_OF_YEAR);
+            if ((processAnalyzeJobDetail.getCdlJobStatus() == CDLJobStatus.FAIL) &&
+                (processAnalyzeJobDetail.getRetryCount() <= processAnalyzeJobRetryCount)) {
+                calendar.setTime(processAnalyzeJobDetail.getLastUpdateDate());
+                calendar.add(Calendar.HOUR_OF_DAY, 2);
+            } else {
+                calendar.setTime(processAnalyzeJobDetail.getCreateDate());
+                int hour_create = calendar.get(Calendar.HOUR_OF_DAY);
+                int day_create = calendar.get(Calendar.DAY_OF_YEAR);
 
-            calendar.set(Calendar.HOUR_OF_DAY, invokeHour);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
+                calendar.set(Calendar.HOUR_OF_DAY, invokeHour);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
 
-            if (invokeHour < hour_create) {
-                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                if (invokeHour < hour_create) {
+                    calendar.add(Calendar.DAY_OF_MONTH, 1);
+                }
+
+                int day_invoke = calendar.get(Calendar.DAY_OF_YEAR);
+                if ((day_invoke - day_create) * 24 + invokeHour - hour_create < 12) {
+                    calendar.add(Calendar.DAY_OF_MONTH, 1);
+                }
             }
-
-            int day_invoke = calendar.get(Calendar.DAY_OF_YEAR);
-            if ((day_invoke - day_create) * 24 + invokeHour - hour_create < 12) {
-                calendar.add(Calendar.DAY_OF_MONTH, 1);
-            }
+            return calendar.getTime();
         }
 
-        return calendar.getTime();
     }
 
     private int checkAndUpdateJobStatus(CDLJobType cdlJobType) {
@@ -245,71 +288,49 @@ public class CDLJobServiceImpl implements CDLJobService {
         return runningJobs;
     }
 
-    private boolean meetProcessAnalyzeRule(SimpleDataFeed dataFeed, CDLJobDetail processAnalyzeJobDetail) {
-        log.info(String.format("data feed status: %s", dataFeed.getStatus().toString()));
-        if (dataFeed.getStatus() == DataFeed.Status.Initing || dataFeed.getStatus() == DataFeed.Status.Initialized) {
-            return false;
-        }
-        if (processAnalyzeJobDetail == null) {
-            log.info(String.format("process analyze job is null"));
-            return true;
-        } else {
-            if (processAnalyzeJobDetail.isRunning()) {
-                log.info(String.format("process analyze job is running"));
-                return false;
-            } else if (processAnalyzeJobDetail.getCdlJobStatus() == CDLJobStatus.FAIL) {
-                if (processAnalyzeJobDetail.getRetryCount() < processAnalyzeJobRetryCount) {
-                    log.info(String.format("verify retry count, return true"));
-                    return true;
-                } else {
-                    log.info(String.format("verify retry count, return false"));
-                    return false;
-                }
-            } else {
-                log.info(String.format("process analyze job is complete"));
-                return true;
-            }
-        }
-    }
+    private boolean submitProcessAnalyzeJob(Tenant tenant, CDLJobDetail cdlJobDetail) {
+        MultiTenantContext.setTenant(tenant);
 
-    private void submitProcessAnalyzeJob(Tenant tenant, CDLJobDetail cdlJobDetail) {
-        if (cdlJobDetail != null
-                && cdlJobDetail.getCdlJobStatus() == CDLJobStatus.FAIL
-                && cdlJobDetail.getRetryCount() < processAnalyzeJobRetryCount) {
-            cdlJobDetail.setRetryCount(cdlJobDetail.getRetryCount() + 1);
+        try {
+            ApplicationId applicationId = null;
+            int retryCount;
+
+            if ((cdlJobDetail == null) || (cdlJobDetail.getCdlJobStatus() != CDLJobStatus.FAIL)) {
+                retryCount = 0;
+            } else {
+                retryCount = cdlJobDetail.getRetryCount() + 1;
+            }
+            boolean retry = retryProcessAnalyze(tenant, cdlJobDetail);
+            if (retry) {
+                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId());
+            } else {
+                applicationId = cdlProxy.processAnalyze(tenant.getId(), null);
+            }
+            cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
+            cdlJobDetail.setApplicationId(applicationId.toString());
+            cdlJobDetail.setRetryCount(retryCount);
             cdlJobDetail.setCdlJobStatus(CDLJobStatus.RUNNING);
             cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
-        } else {
-            cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
-        }
-        log.info(String.format("Submit process analyze job with job detail id: %d", cdlJobDetail.getPid()));
-        orchestrateJob(cdlJobDetail);
-    }
-
-    private boolean orchestrateJob(CDLJobDetail cdlJobDetail) {
-        log.info("start orchestrate job");
-        MultiTenantContext.setTenant(cdlJobDetail.getTenant());
-        try {
-            ApplicationId applicationId = startApplication(cdlJobDetail);
-            cdlJobDetail.setApplicationId(applicationId.toString());
-            cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
+            log.info(String.format("Submit process analyze job with job detail id: %d, retry : %s", cdlJobDetail.getPid(), retry ? "y" : "n"));
         } catch (Exception e) {
-            log.error("Orchestrate job failed");
-            cdlJobDetail.setCdlJobStatus(CDLJobStatus.FAIL);
-            cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
+            log.info(String.format("Failed to submit job for tenant name: %s", tenant.getName()));
             return false;
         }
         return true;
     }
 
-    private ApplicationId startApplication(CDLJobDetail cdlJobDetail) {
-        ProcessAnalyzeRequest request = null;
-        switch (cdlJobDetail.getCdlJobType()) {
-            case PROCESSANALYZE:
-                return cdlProxy.processAnalyze(cdlJobDetail.getTenant().getId(), request);
-            default:
-                return null;
-        }
+    private boolean retryProcessAnalyze(Tenant tenant, CDLJobDetail cdlJobDetail) {
+        DataFeed dataFeed = dataFeedEntityMgr.findDefaultFeed();
+        DataFeedExecution execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
+                DataFeedExecutionJobType.PA);
+        if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))) {
+            if ((cdlJobDetail == null) || (cdlJobDetail.getRetryCount() < processAnalyzeJobRetryCount)) {
+                return true;
+            } else {
+                log.info("Tenant %s exceeds retry limit and skip failed exeuction", tenant.getName());
+            }
+       }
+       return false;
     }
 
     private void submitImportJob(String jobArguments) {

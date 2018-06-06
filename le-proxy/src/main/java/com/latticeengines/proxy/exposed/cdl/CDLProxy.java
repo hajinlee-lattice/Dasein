@@ -53,6 +53,23 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
+    public ApplicationId restartProcessAnalyze(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze/restart",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<String> responseDoc = post("restart process and analyze", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to start processAnalyze job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public boolean reset(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/reset",
                 shortenCustomerSpace(customerSpace));
