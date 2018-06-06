@@ -54,16 +54,14 @@ angular.module('lp.jobs.chevron', [])
                 }
             };
             
+            /**
+             * We expect the list in Ascending order
+             * @param {*} listSteps 
+             */
             function getLatestEndTime(listSteps) {
                 var latest = '';
-                var value = 0;
-                listSteps.forEach(function(step){
-                    if(step.endTimestamp > value){
-                        value = step.endTimestamp;
-                    }
-                });
-                if(value > 0 ){
-                    latest = value;
+                if(listSteps.length > 0){
+                    latest = listSteps[listSteps.length - 1].endTimestamp;
                 }
                 return latest;
             }
@@ -74,7 +72,6 @@ angular.module('lp.jobs.chevron', [])
                 for (var i = 0; i < $scope.stepscompleted.length; i++) {
                     if ($scope.stepscompleted[i].name == stepName && $scope.stepscompleted[i].endTimestamp && $scope.stepscompleted[i].endTimestamp != null) {
                         listSteps.push($scope.stepscompleted[i]);
-                        // return $scope.stepscompleted[i].endTimestamp;
                     }
                 }
                 return getLatestEndTime(listSteps);
