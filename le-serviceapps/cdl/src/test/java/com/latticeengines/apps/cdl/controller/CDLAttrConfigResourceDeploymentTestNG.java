@@ -174,9 +174,9 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Assert.assertEquals(request.getAttrConfigs().size() > 0, true);
         AttrConfig config4 = request.getAttrConfigs().get(0);
         config4.setEntity(BusinessEntity.Rating);
-        AttrConfigProp<Boolean> talkingPointProp = new AttrConfigProp<>();
-        talkingPointProp.setCustomValue(Boolean.TRUE);
-        config4.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.TalkingPoint.name(), talkingPointProp));
+        AttrConfigProp<Boolean> SegmentProp = new AttrConfigProp<>();
+        SegmentProp.setCustomValue(Boolean.TRUE);
+        config4.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Segment.name(), SegmentProp));
         request.setAttrConfigs(Arrays.asList(config3, config4));
         cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request);
         Thread.sleep(500L);
@@ -188,9 +188,9 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         // db only has one rating object for the tenant, save one config with
         // entity Rating and TalkingPoint customer value null , at last verify
         // remove the config
-        talkingPointProp = new AttrConfigProp<>();
-        talkingPointProp.setCustomValue(null);
-        config4.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.TalkingPoint.name(), talkingPointProp));
+        SegmentProp = new AttrConfigProp<>();
+        SegmentProp.setCustomValue(null);
+        config4.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Segment.name(), SegmentProp));
         request.setAttrConfigs(Arrays.asList(config4));
         cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request);
         Thread.sleep(500L);
