@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import static com.latticeengines.apps.cdl.end2end.CheckpointService.CONTACT_IMPORT_SIZE_1;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;

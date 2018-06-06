@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.end2end;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -13,8 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
@@ -23,8 +20,6 @@ import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateTransactionDeploymentTestNG.class);
-
-    static final String CHECK_POINT = "update3";
 
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;
@@ -46,11 +41,7 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
 
         importData();
         processAnalyze();
-        try {
-            verifyProcess();
-        } finally {
-            saveCheckpoint(CHECK_POINT);
-        }
+        verifyProcess();
     }
 
     private void importData() throws Exception {
@@ -86,11 +77,11 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
                 SEGMENT_2_CONTACT_2_REBUILD);
         verifyTestSegment2Counts(segment2Counts);
         */
-        Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
-                RatingBucketName.A, RATING_A_COUNT_2_REBUILD, //
-                RatingBucketName.D, RATING_D_COUNT_2_REBUILD, //
-                RatingBucketName.F, RATING_F_COUNT_2_REBUILD
-        );
+//        Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
+//                RatingBucketName.A, RATING_A_COUNT_2_REBUILD, //
+//                RatingBucketName.D, RATING_D_COUNT_2_REBUILD, //
+//                RatingBucketName.F, RATING_F_COUNT_2_REBUILD
+//        );
         // TODO: use rating proxy
         // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
