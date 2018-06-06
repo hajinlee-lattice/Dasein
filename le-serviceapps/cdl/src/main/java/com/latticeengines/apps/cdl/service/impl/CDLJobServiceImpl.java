@@ -291,46 +291,54 @@ public class CDLJobServiceImpl implements CDLJobService {
     private boolean submitProcessAnalyzeJob(Tenant tenant, CDLJobDetail cdlJobDetail) {
         MultiTenantContext.setTenant(tenant);
 
-        try {
-            ApplicationId applicationId = null;
-            int retryCount;
+        ApplicationId applicationId = null;
+        int retryCount;
+        boolean success = true;
 
-            if ((cdlJobDetail == null) || (cdlJobDetail.getCdlJobStatus() != CDLJobStatus.FAIL)) {
-                retryCount = 0;
-            } else {
-                retryCount = cdlJobDetail.getRetryCount() + 1;
-            }
-            boolean retry = retryProcessAnalyze(tenant, cdlJobDetail);
+        if ((cdlJobDetail == null) || (cdlJobDetail.getCdlJobStatus() != CDLJobStatus.FAIL)) {
+            retryCount = 0;
+        } else {
+            retryCount = cdlJobDetail.getRetryCount() + 1;
+        }
+        boolean retry = retryProcessAnalyze(tenant, cdlJobDetail);
+        cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
+        try {
             if (retry) {
                 applicationId = cdlProxy.restartProcessAnalyze(tenant.getId());
             } else {
                 applicationId = cdlProxy.processAnalyze(tenant.getId(), null);
             }
-            cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
             cdlJobDetail.setApplicationId(applicationId.toString());
-            cdlJobDetail.setRetryCount(retryCount);
             cdlJobDetail.setCdlJobStatus(CDLJobStatus.RUNNING);
-            cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
-            log.info(String.format("Submit process analyze job with job detail id: %d, retry : %s", cdlJobDetail.getPid(), retry ? "y" : "n"));
         } catch (Exception e) {
+            cdlJobDetail.setCdlJobStatus(CDLJobStatus.FAIL);
             log.info(String.format("Failed to submit job for tenant name: %s", tenant.getName()));
-            return false;
+            success = false;
         }
+        cdlJobDetail.setRetryCount(retryCount);
+        cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
+        log.info(String.format("Submit process analyze job with job detail id: %d, retry: %s, success %s",
+                               cdlJobDetail.getPid(), retry ? "y" : "n", success ? "y" : "n"));
         return true;
     }
 
     private boolean retryProcessAnalyze(Tenant tenant, CDLJobDetail cdlJobDetail) {
-        DataFeed dataFeed = dataFeedEntityMgr.findDefaultFeed();
-        DataFeedExecution execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
+        DataFeedExecution execution = null;
+        try {
+            DataFeed dataFeed = dataFeedEntityMgr.findDefaultFeed();
+            execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
                 DataFeedExecutionJobType.PA);
+        } catch (Exception e) {
+            execution = null;
+        }
         if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))) {
             if ((cdlJobDetail == null) || (cdlJobDetail.getRetryCount() < processAnalyzeJobRetryCount)) {
                 return true;
             } else {
                 log.info("Tenant %s exceeds retry limit and skip failed exeuction", tenant.getName());
             }
-       }
-       return false;
+        }
+        return false;
     }
 
     private void submitImportJob(String jobArguments) {
