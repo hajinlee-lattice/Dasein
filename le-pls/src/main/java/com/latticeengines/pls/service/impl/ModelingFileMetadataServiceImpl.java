@@ -279,7 +279,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
         }
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
-        Collection<String> reservedWords = Arrays.asList(ReservedField.Rating.displayName);
+        Collection<String> reservedWords = Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName);
         Collection<String> reservedBeginings = Arrays.asList(DataCloudConstants.CEAttr, DataCloudConstants.EAttr);
         ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords,
                 reservedBeginings);
