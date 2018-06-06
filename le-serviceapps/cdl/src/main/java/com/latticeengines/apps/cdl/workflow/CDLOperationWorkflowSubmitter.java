@@ -58,14 +58,24 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
             throw new RuntimeException("We cannot start CDL maintenance right now!");
         }
 
-        log.info("generate Configuration");
+        DataFeed.Status initialStatus = getInitialDataFeedStatus(dataFeedStatus);
+        log.info(String.format("data feed %s initial status: %s", dataFeed.getName(), initialStatus.getName()));
+
         Action action = registerAction(customerSpace, maintenanceOperationConfiguration);
         log.info(String.format("Action=%s", action));
         CDLOperationWorkflowConfiguration configuration = generateConfiguration(customerSpace,
-                maintenanceOperationConfiguration, action.getPid(), dataFeedStatus);
+                maintenanceOperationConfiguration, action.getPid(), initialStatus);
 
-        log.info("submit Configuration");
+        log.info(String.format("Submitting CDL operation workflow for customer %s", customerSpace));
         return workflowJobService.submit(configuration);
+    }
+
+    private DataFeed.Status getInitialDataFeedStatus(DataFeed.Status status) {
+        if (status.equals(DataFeed.Status.ProcessAnalyzing)) {
+            return DataFeed.Status.Active;
+        } else {
+            return status;
+        }
     }
 
     private Action registerAction(CustomerSpace customerSpace,
