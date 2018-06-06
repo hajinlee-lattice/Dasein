@@ -133,7 +133,7 @@ public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
         bucketedScoreSummary = BucketedScoreSummaryUtils.generateBucketedScoreSummary(records);
         bucketedScoreSummary.setTotalNumConverted(bucketedScoreSummary.getTotalNumConverted() + 2.0);
         bucketedScoreService.createOrUpdateBucketedScoreSummary(modelSummary.getId(), bucketedScoreSummary);
-        Thread.sleep(500);
+        Thread.sleep(2000); // wait longer for update
         retrieved = bucketedScoreService.getBucketedScoreSummaryByModelGuid(modelSummary.getId());
         assertEquals(Math.round(retrieved.getTotalNumConverted()), 908);
 
