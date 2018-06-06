@@ -54,7 +54,7 @@ public class MatchInputValidatorUnitTestNG {
             failed = true;
         }
         Assert.assertTrue(failed, "Should failed on missing fields.");
-        input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country"));
+        input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country", "DUNS"));
 
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         input.setKeyMap(keyMap);
@@ -71,7 +71,7 @@ public class MatchInputValidatorUnitTestNG {
         keyMap.put(MatchKey.City, Collections.singletonList("City"));
         keyMap.put(MatchKey.State, Collections.singletonList("????"));
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
-
+        keyMap.put(MatchKey.DUNS, Collections.singletonList("DUNS"));
         failed = false;
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
@@ -85,7 +85,7 @@ public class MatchInputValidatorUnitTestNG {
         keyMap.put(MatchKey.City, Collections.singletonList("City"));
         keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
         keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
-
+        keyMap.put(MatchKey.DUNS, Collections.singletonList("DUNS"));
         failed = false;
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
@@ -105,6 +105,24 @@ public class MatchInputValidatorUnitTestNG {
 
         input.setData(generateMockData(100));
         MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
+
+        // validating duns only match
+        keyMap.clear();
+        keyMap.put(MatchKey.DUNS, Collections.singletonList("DUNS"));
+        input.setKeyMap(keyMap);
+        input.setData(generateMockDataForDuns(10));
+        input.setSkipKeyResolution(true);
+        MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
+    }
+
+    static List<List<Object>> generateMockDataForDuns(int rows) {
+        List<List<Object>> data = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            String duns = randomString(10);
+            List<Object> row = Arrays.asList((Object) i, duns);
+            data.add(row);
+        }
+        return data;
     }
 
     static List<List<Object>> generateMockData(int rows) {
@@ -115,7 +133,8 @@ public class MatchInputValidatorUnitTestNG {
             String city = randomString(20);
             String state = randomString(10);
             String country = "USA";
-            List<Object> row = Arrays.asList((Object) i, domain, name, city, state, country);
+            String duns = randomString(10);
+            List<Object> row = Arrays.asList((Object) i, domain, name, city, state, country, duns);
             data.add(row);
         }
         return data;
