@@ -145,6 +145,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                 vm.isRatingsSet = RatingsEngineStore.ratingsSet;
             };
             vm.header.filter.unfiltered = vm.current.ratings;
+            vm.header.filter.filtered = vm.current.ratings;
 
             angular.forEach(vm.current.ratings, function(rating, key, array) {
                 if(rating.displayName === 'DS_Test_1stPur_0002_EV'){
