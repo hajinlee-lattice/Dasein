@@ -110,19 +110,9 @@ public class MatchInputValidatorUnitTestNG {
         keyMap.clear();
         keyMap.put(MatchKey.DUNS, Collections.singletonList("DUNS"));
         input.setKeyMap(keyMap);
-        input.setData(generateMockDataForDuns(10));
+        input.setData(generateMockData(100));
         input.setSkipKeyResolution(true);
         MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-    }
-
-    static List<List<Object>> generateMockDataForDuns(int rows) {
-        List<List<Object>> data = new ArrayList<>();
-        for (int i = 0; i < rows; i++) {
-            String duns = randomString(10);
-            List<Object> row = Arrays.asList((Object) i, duns);
-            data.add(row);
-        }
-        return data;
     }
 
     static List<List<Object>> generateMockData(int rows) {
