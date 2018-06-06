@@ -77,7 +77,8 @@ angular
                             playName: '',
                             sortby: 'created',
                             descending: true,
-                            offset: 0
+                            offset: 0,
+                            max: 10
                         };
 
                     PlaybookWizardStore.getPlayLaunches(params).then(function(result){

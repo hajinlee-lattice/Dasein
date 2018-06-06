@@ -9,7 +9,8 @@ angular
     return {
         restrict: 'EA',
         scope: {
-            config:'='
+            config:'=',
+            callback: '&callbackFunction'
         },
         templateUrl: 'app/AppCommon/modules/menus/filterby/FilterByView.html',
         controller: function ($scope, $filter, $document) {
@@ -49,6 +50,14 @@ angular
                     $scope.label = item.label;
                     $scope.config.filtered = item.filtered;
                     $scope.config.value = item.action;
+
+                    $scope.callCallback = function () {
+                        if (typeof ($scope.callback) != undefined) {
+                            $scope.callback({args:Object.values(item)});
+                        }
+                    }
+
+                    $scope.callCallback();
                 }
             });
 

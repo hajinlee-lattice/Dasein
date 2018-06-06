@@ -2,7 +2,7 @@
 
 <section class="playbook playbook-launch-history container">
     <div 
-        ng-if="vm.launchesCount === 0"
+        ng-if="vm.noData"
         class="no-data">
         <h2>There are no plays launched. The launch history will be available once you launch plays.</h2>
         <a 
@@ -12,11 +12,14 @@
         </a>
     </div>
     <div
-        ng-if="vm.launchesCount > 0" 
+        ng-if="!vm.noData" 
         class="card-content" 
         ng-class="{'has-footer': !vm.allPlaysHistory}">
 
-        <menu-filter-by config="vm.header.filter"></menu-filter-by>
+        <menu-filter-by 
+            config="vm.header.filter"
+            callback-function="vm.filterChange(args)">
+        </menu-filter-by>
         <chips 
             ng-show="vm.allPlaysHistory"
             placeholder="All Launched Plays" 
@@ -124,12 +127,8 @@
                    </th>
     			</tr>
     		</thead>
-    		<tbody>
-    			<tr ng-repeat="
-                    launch in vm.launches.launchSummaries | 
-                    filter: vm.header.filter.value : true | 
-                    startFrom: (vm.currentPage - 1) * vm.pagesize | 
-                    limitTo: vm.pagesize">
+    		<tbody ng-if="!vm.noFilteredData">
+    			<tr ng-repeat="launch in vm.launches.launchSummaries">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
                     <td ng-if="vm.allPlaysHistory">{{launch.playDisplayName}}</td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
@@ -145,12 +144,17 @@
                     </td>
     			</tr>
     		</tbody>
+            <tbody ng-if="vm.noFilteredData">
+                <tr>
+                    <td colspan="8">No play launches matches your criteria.</td>
+                </tr>
+            </tbody>
     	</table>
 
         <pd-pagination-controls
             current="vm.currentPage"
-            max="max = vm.header.filter.filtered.length / vm.pagesize"
-            ng-show="max > 1"
+            max="max = vm.launchesCount / vm.pagesize"
+            ng-if="vm.launchesCount > 10"
             class="pull-right">
         </pd-pagination-controls>
 
