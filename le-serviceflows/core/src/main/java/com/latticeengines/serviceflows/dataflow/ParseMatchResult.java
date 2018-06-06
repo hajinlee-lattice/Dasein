@@ -62,7 +62,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         String idColumnName = matchFields.contains(InterfaceName.InternalId.name()) ? InterfaceName.InternalId.name()
                 : parameters.idColumnName;
         FieldList idColumn = new FieldList(idColumnName);
-        resultNode = sourceNode.leftJoin(idColumn, resultNode, idColumn);
+        resultNode = sourceNode.innerJoin(idColumn, resultNode, idColumn);
         resultNode = resultNode.retain(new FieldList(retainFields));
         return resultNode;
     }
