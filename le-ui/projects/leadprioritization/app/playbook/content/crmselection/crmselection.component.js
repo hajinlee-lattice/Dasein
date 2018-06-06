@@ -17,6 +17,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
             $scope.excludeItemsWithoutSalesforceId = false;
+            vm.setExcludeItems(false);
 
             PlaybookWizardStore.setValidation('crmselection', false);
 
@@ -39,7 +40,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
         }
 
         vm.setExcludeItems = function(excludeItemsWithoutSalesforceId) {
-            console.log(excludeItemsWithoutSalesforceId)
             PlaybookWizardStore.setExcludeItems(excludeItemsWithoutSalesforceId);
         }
 
