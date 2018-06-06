@@ -303,7 +303,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                                 // console.log('Starategy ', strategy);
                                 $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: strategy, fromList: true});
                             }else {
-                                $state.go('home.ratingsengine.customevent', {rating_id: rating.id});
+                                $state.go('home.ratingsengine.customevent', {rating_id: rating.id, fromList: true});
                             }
                         }
                     });

@@ -1138,7 +1138,8 @@ angular
                 url: '/custom/:rating_id/:wizard_steps',
                 params: {
                     rating_id: '',
-                    wizard_steps: 'customevent'
+                    wizard_steps: 'customevent',
+                    fromList: false
                 },
                 resolve: {
                     WizardValidationStore: function (RatingsEngineStore) {
@@ -1155,8 +1156,33 @@ angular
 
                         return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
                     },
-                    WizardHeaderTitle: function () {
-                        return 'Create Custom Event Model';
+                    CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer(),
+                            ratingId = $stateParams.rating_id;
+
+                        if (ratingId !== '') {
+                            RatingsEngineStore.getRating(ratingId).then(function(engine){
+                                deferred.resolve(engine);
+                            });
+                        } else {
+                            deferred.resolve();
+                        }
+
+                        return deferred.promise;
+                    },
+                    WizardHeaderTitle: function ($stateParams, CurrentRatingEngine) {
+                        var engineType = $stateParams.engineType,
+                            currentRating = CurrentRatingEngine,
+                            fromList = $stateParams.fromList,
+                            title = '';
+
+                        if (currentRating !== undefined && fromList){
+                            title = currentRating.displayName;
+                        } else {
+                            title = 'Create Custom Event Model';
+                        }
+
+                        return title;
                     },
                     WizardContainerId: function () {
                         return 'ratingsengine';
