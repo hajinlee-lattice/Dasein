@@ -862,17 +862,17 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 new AttributeLookup(BusinessEntity.Transaction, "AnyName"), purchaseBkt);
         Restriction accountRestriction = Restriction.builder().and(websiteRestriction, purchaseRestriction).build();
 
-        Bucket titleBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("Buyer"));
-        BucketRestriction titleRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
-        Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
+//        Bucket titleBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("Buyer"));
+//        BucketRestriction titleRestriction = new BucketRestriction(
+//                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
+//        Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
 
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_1);
         segment.setDisplayName("End2End Segment 1");
         segment.setDescription("A test segment for CDL end2end tests.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
-        segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
+//        segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
 
         return segment;
     }
@@ -887,17 +887,17 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 new AttributeLookup(BusinessEntity.Account, "SpendAnalyticsSegment"), techBkt);
         Restriction accountRestriction = Restriction.builder().or(stateRestriction, techRestriction).build();
 
-        Bucket titleBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
-        BucketRestriction titleRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
-        Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
+//        Bucket titleBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
+//        BucketRestriction titleRestriction = new BucketRestriction(
+//                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
+//        Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
 
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_2);
         segment.setDisplayName("End2End Segment 2");
         segment.setDescription("A test segment for CDL end2end tests.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
-        segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
+//        segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
 
         return segment;
     }

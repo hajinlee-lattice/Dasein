@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.end2end.dataingestion;
+package com.latticeengines.apps.cdl.end2end;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class ResetImportDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
+public class ResetImportDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ResetImportDeploymentTestNG.class);
 

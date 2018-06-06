@@ -19,7 +19,7 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 500);
 
         new Thread(this::createTestSegments).start();
 
