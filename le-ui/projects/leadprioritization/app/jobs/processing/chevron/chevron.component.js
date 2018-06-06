@@ -28,7 +28,8 @@ angular.module('lp.jobs.chevron', [])
                 } else {
                     return false;
                 }
-            }
+            };
+
             vm.isStepRunning = function (index) {
                 if ($scope.jobstatus === 'Running') {
                     if (isStepStatusMatching(vm.chevronConfig[index].name, 'Running') ) {
@@ -39,7 +40,8 @@ angular.module('lp.jobs.chevron', [])
                 } else {
                     return false;
                 }
-            }
+            };
+
             vm.isStepFailed = function (index) {
                 if ($scope.jobstatus === 'Failed') {
                     if (isStepStatusMatching(vm.chevronConfig[index].name, 'Failed') ) {
@@ -50,20 +52,33 @@ angular.module('lp.jobs.chevron', [])
                 } else {
                     return false;
                 }
+            };
+            
+            function getLatestEndTime(listSteps) {
+                var latest = '';
+                var value = 0;
+                listSteps.forEach(function(step){
+                    if(step.endTimestamp > value){
+                        value = step.endTimestamp;
+                    }
+                });
+                if(value > 0 ){
+                    latest = value;
+                }
+                return latest;
             }
+
             vm.getEndTime = function(index){
                 var stepName = vm.chevronConfig[index].name;
-                // console.log(vm.chevronConfig, ' == ', value, ' == ', stepName);
-                // console.log(stepName, $scope.stepscompleted);
+                var listSteps = [];
                 for (var i = 0; i < $scope.stepscompleted.length; i++) {
                     if ($scope.stepscompleted[i].name == stepName && $scope.stepscompleted[i].endTimestamp && $scope.stepscompleted[i].endTimestamp != null) {
-                        // console.log('!!!! ',$scope.stepscompleted[i].endTimestamp);
-                        return $scope.stepscompleted[i].endTimestamp;
+                        listSteps.push($scope.stepscompleted[i]);
+                        // return $scope.stepscompleted[i].endTimestamp;
                     }
                 }
-                // console.log('NONE');
-                return '';
-            }
+                return getLatestEndTime(listSteps);
+            };
         }];
 
         return {
