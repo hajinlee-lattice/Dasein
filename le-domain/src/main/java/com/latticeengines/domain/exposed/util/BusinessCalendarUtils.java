@@ -40,6 +40,12 @@ public final class BusinessCalendarUtils {
     }
 
     public static Pair<LocalDate, LocalDate> parseDateRangeFromStartDay(String startingDay, int evaluationYear) {
+        LocalDate startDate = parseLocalDateFromStartingDay(startingDay, evaluationYear);
+        LocalDate endDate = parseLocalDateFromStartingDay(startingDay, evaluationYear + 1).minusDays(1);
+        return Pair.of(startDate, endDate);
+    }
+
+    public static LocalDate parseLocalDateFromStartingDay(String startingDay, int evaluationYear) {
         if (StringUtils.isBlank(startingDay)) {
             String msg = "Cannot configure business calendar with empty starting day.";
             IllegalArgumentException exception = new IllegalArgumentException(msg);
@@ -52,7 +58,7 @@ public final class BusinessCalendarUtils {
 
         int idx = Arrays.asList("1st", "2nd", "3rd", "4th").indexOf(tokens[0].toLowerCase());
         if (idx < 0) {
-            String msg = "Only \"1st\", \"2nd\", \"3rd\", \"4th\" are allowed as the second token of a starting day.";
+            String msg = "Only \"1st\", \"2nd\", \"3rd\", \"4th\" are allowed as the first token of a starting day.";
             IllegalArgumentException exception = new IllegalArgumentException(msg);
             throw new LedpException(LedpCode.LEDP_40015, msg, exception);
         }
@@ -74,19 +80,20 @@ public final class BusinessCalendarUtils {
             throw new LedpException(LedpCode.LEDP_40015, e, new String[] { startingDay });
         }
 
-        LocalDate startDate, endDate;
         try {
-            startDate = parseDate(month, idx, dayOfWeek, evaluationYear);
-            endDate = parseDate(month, idx, dayOfWeek, evaluationYear + 1);
-            endDate = endDate.minusDays(1);
+            return parseDate(month, idx, dayOfWeek, evaluationYear);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_40015, e, new String[] { startingDay });
         }
-
-        return Pair.of(startDate, endDate);
     }
 
     public static Pair<LocalDate, LocalDate> parseDateRangeFromStartDate(String startingDate, int evaluationYear) {
+        LocalDate startDate = parseLocalDateFromStartingDate(startingDate, evaluationYear);
+        LocalDate endDate = parseLocalDateFromStartingDate(startingDate, evaluationYear + 1).minusDays(1);
+        return Pair.of(startDate, endDate);
+    }
+
+    public static LocalDate parseLocalDateFromStartingDate(String startingDate, int evaluationYear) {
         if (StringUtils.isBlank(startingDate)) {
             throw new LedpException(LedpCode.LEDP_40015, new String[] { startingDate });
         }
@@ -95,18 +102,15 @@ public final class BusinessCalendarUtils {
             IllegalArgumentException exception = new IllegalArgumentException(msg);
             throw new LedpException(LedpCode.LEDP_40015, msg, exception);
         }
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd");
         String formattedDate = startingDate.substring(0, 1).toUpperCase() + startingDate.substring(1).toLowerCase();
         String fullDate = String.format("%04d-%s", evaluationYear, formattedDate);
-        String fullDateNextYear = String.format("%04d-%s", evaluationYear + 1, formattedDate);
-        LocalDate startDate, endDate;
         try {
-            startDate = LocalDate.parse(fullDate, formatter);
-            endDate = LocalDate.parse(fullDateNextYear, formatter).minusDays(1);
+            return LocalDate.parse(fullDate, formatter);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_40015, e, new String[] { formattedDate });
         }
-        return Pair.of(startDate, endDate);
     }
 
     private static String validateStartingDay(String startingDay, int evaluationYear) {
@@ -161,7 +165,8 @@ public final class BusinessCalendarUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = LocalDate.parse(String.format("%04d-02-01", evaluationYear), formatter);
         int daysInLastWeek = localDate.isLeapYear() ? 9 : 8;
-        return String.format("The last week of Fiscal Year **%4d** will have **%d** days.", evaluationYear, daysInLastWeek);
+        return String.format("The last week of Fiscal Year **%4d** will have **%d** days.", evaluationYear,
+                daysInLastWeek);
     }
 
     private static int getCurrentYear() {

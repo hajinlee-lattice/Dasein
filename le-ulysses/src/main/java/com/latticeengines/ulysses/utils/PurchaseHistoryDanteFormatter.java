@@ -19,9 +19,11 @@ public class PurchaseHistoryDanteFormatter {
         private static final String notionName = "DantePurchaseHistory";
         private List<PeriodTransaction> periodTransactions;
         private String accountId;
+        private Date periodStartDate;
 
-        public PurchaseHistory(String accountId, List<PeriodTransaction> periodTransactions) {
+        public PurchaseHistory(String accountId, Date startDate, List<PeriodTransaction> periodTransactions) {
             this.accountId = accountId;
+            this.periodStartDate = startDate;
             this.periodTransactions = periodTransactions;
         }
 
@@ -37,7 +39,7 @@ public class PurchaseHistoryDanteFormatter {
             return accountId;
         }
 
-        @JsonProperty(value = "NotionName", index = 32)
+        @JsonProperty(value = "NotionName", index = 3)
         @JsonView(DanteFormatter.DanteFormat.class)
         public String getNotionName() {
             return notionName;
@@ -49,10 +51,10 @@ public class PurchaseHistoryDanteFormatter {
             return "M";
         }
 
-        @JsonProperty(value = "PurchaseHistoryAttributeID", index = 5)
+        @JsonProperty(value = "PeriodStartDate", index = 5)
         @JsonView(DanteFormatter.DanteFormat.class)
         public Date getPeriodStartDate() {
-            return new Date();
+            return periodStartDate;
         }
 
         @JsonProperty(value = "PurchaseHistoryAttributes", index = 6)
@@ -60,6 +62,12 @@ public class PurchaseHistoryDanteFormatter {
         public List<DantePurchaseHistoryAttribute> getDantePurchaseHistoryAttributes() {
             return periodTransactions.stream().map(x -> new DantePurchaseHistoryAttribute(accountId, x))
                     .collect(Collectors.toList());
+        }
+
+        @JsonProperty(value = "FinalTransactionDate", index = 8)
+        @JsonView(DanteFormatter.DanteFormat.class)
+        public Date getFinalTransactionDate() {
+            return new Date();
         }
 
         @JsonProperty(value = "PurchaseHistoryID", index = 7)
@@ -144,7 +152,7 @@ public class PurchaseHistoryDanteFormatter {
         }
     }
 
-    public String format(String accountId, List<PeriodTransaction> periodTransactions) {
-        return new PurchaseHistory(accountId, periodTransactions).toString();
+    public String format(String accountId, Date startDate, List<PeriodTransaction> periodTransactions) {
+        return new PurchaseHistory(accountId, startDate, periodTransactions).toString();
     }
 }
