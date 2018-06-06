@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -80,6 +81,8 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             pivotAvroDirPath = job.getOutputs().get(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH);
         }
 
+        // PLS-8796 get rid of the *.avro in the path
+        pivotAvroDirPath = StringUtils.remove(pivotAvroDirPath, "*.avro");
         log.info(String.format("Looking for pivoted score avro for model: %s at path: %s", modelSummary.getId(),
                 pivotAvroDirPath));
         if (pivotAvroDirPath == null) {
