@@ -33,30 +33,36 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
     private String localDir = "datafeed";
     private String downloadDir = localDir + "/download";
     private String uploadDir = localDir + "/upload";
-    private BusinessEntity importingEntity;
 
     @BeforeClass(groups = { "manual" })
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-        importingEntity = BusinessEntity.Transaction;
     }
 
     @Test(groups = "manual")
     public void runTest() throws Exception {
-        importData();
-
         FileUtils.deleteQuietly(new File(downloadDir));
         FileUtils.forceMkdirParent(new File(downloadDir));
-        downloadData();
-
         FileUtils.deleteQuietly(new File(uploadDir));
         FileUtils.forceMkdirParent(new File(uploadDir));
+        importAndDownload(BusinessEntity.Account);
+        clearHdfs();
+        importAndDownload(BusinessEntity.Contact);
+        clearHdfs();
+        importAndDownload(BusinessEntity.Product);
+        clearHdfs();
+        importAndDownload(BusinessEntity.Transaction);
+    }
+
+    private void importAndDownload(BusinessEntity importingEntity) throws IOException {
+        importData(importingEntity);
+        downloadData();
         collectAvroFilesForEntity(importingEntity);
         saveImportTemplate(importingEntity);
     }
 
-    private void importData() {
+    private void importData(BusinessEntity importingEntity) {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
         if (importingEntity.equals(BusinessEntity.Account)) {
@@ -92,6 +98,14 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, dataFeedDir, downloadDir);
         Collection<File> crcFiles = FileUtils.listFiles(new File(downloadDir), new String[] { "crc" }, true);
         crcFiles.forEach(FileUtils::deleteQuietly);
+    }
+
+    private void clearHdfs() throws IOException {
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        String dataFeedDir = String.format("%s/%s/DataFeed1",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
+                SourceType.FILE.getName());
+        HdfsUtils.rmdir(yarnConfiguration, dataFeedDir);
     }
 
     private void collectAvroFilesForEntity(BusinessEntity entity) throws IOException {
