@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.app.exposed.service.ActivityMetricsService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActivityMetricsWithAction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetricsValidation;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 
@@ -36,13 +38,15 @@ public class ActivityMetricsResource {
     private static final Logger log = LoggerFactory.getLogger(ActivityMetricsResource.class);
 
     private final ActivityMetricsProxy metricsProxy;
+    private final ActivityMetricsService activityMetricsService;
 
     @Inject
     private ActionService actionService;
 
     @Inject
-    public ActivityMetricsResource(ActivityMetricsProxy metricsProxy) {
+    public ActivityMetricsResource(ActivityMetricsProxy metricsProxy, ActivityMetricsService activityMetricsService) {
         this.metricsProxy = metricsProxy;
+        this.activityMetricsService = activityMetricsService;
     }
 
     @GetMapping(value = "/{type}/active")
@@ -59,6 +63,12 @@ public class ActivityMetricsResource {
         ActivityMetricsWithAction am = metricsProxy.save(customerSpace, type, metrics);
         registerAction(am.getAction(), MultiTenantContext.getTenant());
         return am.getMetrics();
+    }
+
+    @GetMapping(value = "/precheck")
+    @ApiOperation(value = "Check whether certain attributes exist in serving metadata or not.")
+    public ActivityMetricsValidation precheck() {
+        return activityMetricsService.validateActivityMetrics(MultiTenantContext.getCustomerSpace().toString());
     }
 
     private void registerAction(Action action, Tenant tenant) {

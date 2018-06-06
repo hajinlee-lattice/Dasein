@@ -5,9 +5,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -22,14 +23,19 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetricsValidation;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ActionService;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ActivityMetricsResourceDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private ActionService actionService;
+
+    @Inject
+    private CDLTestDataService cdlTestDataService;
 
     private List<ActivityMetrics> created, updated, secUpdated;
 
@@ -96,6 +102,24 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(active.size(), secUpdated.size());
 
         verifyActions(3);
+    }
+
+    @Test(groups = "deployment", priority = 4)
+    public void testPrecheck() {
+        ActivityMetricsValidation validation = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/datacollection/metrics/precheck", ActivityMetricsValidation.class);
+        Assert.assertNotNull(validation);
+        Assert.assertTrue(validation.getDisableAll());
+        Assert.assertTrue(validation.getDisableShareOfWallet());
+        Assert.assertTrue(validation.getDisableMargin());
+
+        cdlTestDataService.populateData(mainTestTenant.getId());
+        validation = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/datacollection/metrics/precheck", ActivityMetricsValidation.class);
+        Assert.assertNotNull(validation);
+        Assert.assertTrue(validation.getDisableAll());
+        Assert.assertTrue(validation.getDisableShareOfWallet());
+        Assert.assertTrue(validation.getDisableMargin());
     }
 
     private void verifyActions(int cnt) {
