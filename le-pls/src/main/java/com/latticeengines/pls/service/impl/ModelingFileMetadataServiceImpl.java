@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -22,13 +25,11 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -154,7 +155,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
             String source, String feedType) {
         decodeFieldMapping(fieldMappingDocument);
-        fulfillFieldMapping(fieldMappingDocument);
+        regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity));
         if (BusinessEntity.getByName(entity).equals(BusinessEntity.Account)) {
             setCDLExternalSystems(fieldMappingDocument);
         }
@@ -190,9 +191,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<String> otherIds = new ArrayList<>();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getCdlExternalSystemType() != null) {
-                if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
-                    fieldMapping.setMappedField(fieldMapping.getMappedField() + "ID");
-                }
                 fieldMapping.setMappedField(
                         ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
                 switch (fieldMapping.getCdlExternalSystemType()) {
@@ -220,18 +218,59 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 cdlExternalSystem);
     }
 
-    private void fulfillFieldMapping(FieldMappingDocument fieldMappingDocument) {
+    private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
                 || fieldMappingDocument.getFieldMappings().size() == 0) {
             return;
         }
+        // 1.set external system column name
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
-                log.warn(String.format("Mapped field for %s is null, set to user field", fieldMapping.getUserField()));
-                fieldMapping.setMappedField(fieldMapping.getUserField());
+            if (fieldMapping.getCdlExternalSystemType() != null) {
+                if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
+                    fieldMapping.setMappedField(fieldMapping.getMappedField() + "ID");
+                }
             }
         }
+        Table standardTable = SchemaRepository.instance().getSchema(entity);
+        Set<String> reservedName = standardTable.getAttributes().stream()
+                .map(Attribute::getName)
+                .collect(Collectors.toSet());
+        Set<String> mappedFieldName = new HashSet<>();
+        Set<String> pendingUserFieldName = new HashSet<>();
+        Set<String> mappedUserFieldName = new HashSet<>();
+        // 2.check if there's multiple mapping to standard field
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                pendingUserFieldName.add(fieldMapping.getUserField());
+            } else {
+                mappedUserFieldName.add(fieldMapping.getUserField());
+                if (reservedName.contains(fieldMapping.getMappedField())) {
+                    if (mappedFieldName.contains(fieldMapping.getMappedField())) {
+                        throw new RuntimeException(String.format("Cannot map two column to %s, please re-map column",
+                                fieldMapping.getMappedField()));
+                    } else {
+                        fieldMapping.setMappedToLatticeField(true);
+                        mappedFieldName.add(fieldMapping.getMappedField());
+                    }
+                }
+            }
+        }
+        // 3.remove extra unmapped field
+        Iterator<FieldMapping> fmIterator = fieldMappingDocument.getFieldMappings().iterator();
+        while (fmIterator.hasNext()) {
+            FieldMapping fieldMapping = fmIterator.next();
+            if (pendingUserFieldName.contains(fieldMapping.getUserField())) {
+                if (mappedUserFieldName.contains(fieldMapping.getUserField())) {
+                    if (fieldMapping.getMappedField() == null) {
+                        fmIterator.remove();
+                    }
+                } else {
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+                }
+            }
 
+        }
     }
 
     private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table,
