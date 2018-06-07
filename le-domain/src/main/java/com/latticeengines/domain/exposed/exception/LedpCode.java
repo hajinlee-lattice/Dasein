@@ -719,8 +719,8 @@ public enum LedpCode {
     LEDP_40021("Unable to set the default model name correctly, setting it to {0}"), //
     LEDP_40022("Serving store is empty or wrong customer config leads to empty store"), //
     LEDP_40023("Wrong customer config, system can't render these attrbutes {0} "), //
-    LEDP_40024("Dependency detection among rating engine"), //
-    LEDP_40025("Dependency detection among segment"), //
+    LEDP_40024("Dependency detection among rating engine. {0}"), //
+    LEDP_40025("Dependency detection among segment. {0}"), //
     LEDP_40026("invalid attribute config {0} after render"), //
     LEDP_40027("invalid attribute config {0} in DB"), //
 

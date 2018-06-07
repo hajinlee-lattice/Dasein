@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -229,9 +230,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             throw new NullPointerException("Entity is null when creating a rating engine.");
         }
 
-        if (ratingEngineCyclicDependency(Collections.singletonList(ratingEngine))) {
-            throw new LedpException(LedpCode.LEDP_40024);
-        }
+        verifyRatingEngineCyclicDependency(ratingEngine);
 
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingEngine.getSegment() != null) {
@@ -710,47 +709,54 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public boolean ratingEngineCyclicDependency(List<RatingEngine> ratingEngines) {
-        boolean cyclicDependency = false;
-        if (ratingEngines != null) {
-            for (RatingEngine ratingEngine : ratingEngines) {
-                RatingEngine existing = getRatingEngineById(ratingEngine.getId(),false);
-                if (existing != null) {
-                    cyclicDependency = ratingEngineCyclicDependency(existing, new ArrayList<>());
-                    if (cyclicDependency) {
-                        break;
+    public void verifyRatingEngineCyclicDependency(RatingEngine ratingEngine) {
+        RatingEngine existing = getRatingEngineById(ratingEngine.getId(),false);
+        if (existing != null) {
+            Map<Long, RatingEngine> ratingEngineMap = ratingEngineCyclicDependency(existing, new LinkedHashMap<>());
+            if (ratingEngineMap != null) {
+                StringBuilder message = new StringBuilder();
+                for (Map.Entry<Long, RatingEngine> entry : ratingEngineMap.entrySet()) {
+                    if (entry.getKey() != -1) {
+                        message.append(String.format("Rating engine '%s' --> ", entry.getValue().getDisplayName()));
+                    } else {
+                        message.append(String.format("Rating engine '%s'.", entry.getValue().getDisplayName()));
                     }
                 }
+
+                throw new LedpException(LedpCode.LEDP_40024, new String[] { message.toString() });
             }
         }
-
-        return cyclicDependency;
     }
 
-    private boolean ratingEngineCyclicDependency(RatingEngine ratingEngine, List<Long> ratingEngineList) {
-        ratingEngineList.add((ratingEngine.getPid()));
+    @SuppressWarnings("unchecked")
+    private Map<Long, RatingEngine> ratingEngineCyclicDependency(
+            RatingEngine ratingEngine, LinkedHashMap<Long, RatingEngine> map) {
+        LinkedHashMap<Long, RatingEngine> ratingEngineMap = (LinkedHashMap<Long, RatingEngine>)map.clone();
+        ratingEngineMap.put(ratingEngine.getPid(), ratingEngine);
         List<AttributeLookup> attributeLookups = getDependentAttrsInAllModels(ratingEngine.getId());
         List<MetadataSegment> segments = segmentService.findDependingSegments(
                 ratingEngine.getTenant().getId(), convertAttributeLookupList(attributeLookups));
 
-        if (segments != null) {
-            for (MetadataSegment segment : segments) {
-                List<AttributeLookup> segmentAttributeLookups = segmentService.findDependingAttributes(
-                        Collections.singletonList(segment));
+        for (MetadataSegment segment : segments) {
+            List<AttributeLookup> segmentAttributeLookups = segmentService.findDependingAttributes(
+                    Collections.singletonList(segment));
 
-                List<RatingEngine> ratingEngines = getDependingRatingEngines(
-                        convertAttributeLookupList(segmentAttributeLookups));
+            List<RatingEngine> ratingEngines = getDependingRatingEngines(
+                    convertAttributeLookupList(segmentAttributeLookups));
 
-                for (RatingEngine re : ratingEngines) {
-                    if (!re.getPid().equals(ratingEngine.getPid())) {
-                        return ratingEngineList.contains(re.getPid()) ||
-                                ratingEngineCyclicDependency(re, ratingEngineList);
+            for (RatingEngine re : ratingEngines) {
+                if (!re.getPid().equals(ratingEngine.getPid())) {
+                    if (ratingEngineMap.containsKey(re.getPid())) {
+                        ratingEngineMap.put(new Long(-1l), re);
+                        return ratingEngineMap;
+                    } else {
+                        return ratingEngineCyclicDependency(re, ratingEngineMap);
                     }
                 }
             }
         }
 
-        return false;
+        return null;
     }
 
     private String sanitize(String attribute) {

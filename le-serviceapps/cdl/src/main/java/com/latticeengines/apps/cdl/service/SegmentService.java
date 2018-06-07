@@ -37,5 +37,5 @@ public interface SegmentService {
 
     List<MetadataSegment> findDependingSegments (String customerSpace, List<String> attributes);
 
-    boolean segmentCyclicDependency(List<MetadataSegment> metadataSegments);
+    void verifySegmentCyclicDependency(MetadataSegment metadataSegment);
 }

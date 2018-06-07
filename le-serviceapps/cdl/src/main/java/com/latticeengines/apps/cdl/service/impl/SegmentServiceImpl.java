@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,9 +64,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
-        if (segmentCyclicDependency(Collections.singletonList(segment))) {
-            throw new LedpException(LedpCode.LEDP_40025);
-        }
+        verifySegmentCyclicDependency(segment);
         MetadataSegment segment1 = segmentEntityMgr.createOrUpdateSegment(segment);
         evictRatingMetadataCache();
         return segment1;
@@ -73,9 +72,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     @NoCustomerSpace
     private MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
-        if (segmentCyclicDependency(Collections.singletonList(segment))) {
-            throw new LedpException(LedpCode.LEDP_40025);
-        }
+        verifySegmentCyclicDependency(segment);
         MetadataSegment segment1 = segmentEntityMgr.createOrUpdateSegment(segment);
         evictRatingMetadataCache();
         return segment1;
@@ -252,40 +249,49 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public boolean segmentCyclicDependency(List<MetadataSegment> metadataSegments) {
-        boolean cyclicDependency = false;
-        if (metadataSegments != null) {
-            for (MetadataSegment metadataSegment : metadataSegments) {
-                MetadataSegment existing = findByName(metadataSegment.getName());
-                if (existing != null) {
-                    cyclicDependency = segmentCyclicDependency(existing, new ArrayList<>());
-                    if (cyclicDependency) {
-                        break;
+    public void verifySegmentCyclicDependency(MetadataSegment metadataSegment) {
+        if (metadataSegment != null) {
+            MetadataSegment existing = findByName(metadataSegment.getName());
+            if (existing != null) {
+                Map<Long, MetadataSegment> segmentMap = segmentCyclicDependency(existing, new LinkedHashMap<>());
+                if (segmentMap != null) {
+                    StringBuilder message = new StringBuilder();
+                    for (Map.Entry<Long, MetadataSegment> entry : segmentMap.entrySet()) {
+                        if (entry.getKey() != -1) {
+                            message.append(String.format("Segment '%s' --> ", entry.getValue().getName()));
+                        } else {
+                            message.append(String.format("Segment '%s'.", entry.getValue().getName()));
+                        }
                     }
+
+                    throw new LedpException(LedpCode.LEDP_40025, new String[] { message.toString() });
                 }
             }
         }
-
-        return cyclicDependency;
     }
 
-    private boolean segmentCyclicDependency(MetadataSegment metadataSegment, List<Long> metadataSegmentList) {
-        metadataSegmentList.add((metadataSegment.getPid()));
+    @SuppressWarnings("unchecked")
+    private Map<Long, MetadataSegment> segmentCyclicDependency(
+            MetadataSegment metadataSegment, LinkedHashMap<Long, MetadataSegment> map) {
+        LinkedHashMap<Long, MetadataSegment> segmentMap = (LinkedHashMap<Long, MetadataSegment>)map.clone();
+        segmentMap.put(metadataSegment.getPid(), metadataSegment);
         List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(metadataSegment));
         List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(
                 convertAttributeLookupList(attributeLookups));
 
-        if (ratingEngines != null){
-            for (RatingEngine ratingEngine : ratingEngines) {
-                MetadataSegment segment = ratingEngine.getSegment();
-                if (!segment.getPid().equals(metadataSegment.getPid())) {
-                    return metadataSegmentList.contains(segment.getPid()) ||
-                            segmentCyclicDependency(segment, metadataSegmentList);
+        for (RatingEngine ratingEngine : ratingEngines) {
+            MetadataSegment segment = ratingEngine.getSegment();
+            if (!segment.getPid().equals(metadataSegment.getPid())) {
+                if (segmentMap.containsKey(segment.getPid())) {
+                    segmentMap.put(new Long(-1l), segment);
+                    return segmentMap;
+                } else {
+                    return segmentCyclicDependency(segment, segmentMap);
                 }
             }
         }
 
-        return false;
+        return null;
     }
 
     @NoCustomerSpace
