@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,6 +189,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             workflowJob.setTenant(tenant);
             workflowJob.setUserId(user);
             workflowJob.setInputContext(workflowConfig.getInputProperties());
+            logInputContext(workflowJob);
             workflowJob.setStatus(JobStatus.PENDING.name());
             workflowJob.setStartTimeInMillis(currentTime);
             workflowJob.setType(workflowConfig.getWorkflowName());
@@ -216,6 +217,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             workflowJob.setTenant(tenant);
             workflowJob.setUserId(user);
             workflowJob.setInputContext(workflowConfig.getInputProperties());
+            logInputContext(workflowJob);
             workflowJob.setType(workflowConfig.getWorkflowName());
             workflowJobEntityMgr.update(workflowJob);
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
@@ -223,6 +225,14 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
 
             return workflowJob;
+        }
+    }
+
+    private void logInputContext(WorkflowJob workflowJob) {
+        String inputContextString = workflowJob.getInputContextString();
+        if (inputContextString != null && inputContextString.length() > 3500) {
+            log.warn("Workflow job's input context is too large, pid=" + workflowJob.getPid() + ", input context="
+                    + inputContextString);
         }
     }
 
