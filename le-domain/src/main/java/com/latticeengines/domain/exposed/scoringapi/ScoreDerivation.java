@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -8,7 +9,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 // Contains all the information necessary to construct score elements that
 // are derived from the probability.
-public class ScoreDerivation {
+public class ScoreDerivation implements Serializable {
     public ScoreDerivation(String target, double averageProbability, List<BucketRange> percentiles,
             List<BucketRange> buckets) {
         this.target = target;

@@ -1,12 +1,12 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.MapUtils;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
@@ -30,6 +31,8 @@ import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("pivotScoreAndEventDataFlow")
@@ -65,8 +68,50 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
                     ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID), configuration.isExpectedValue()
                             ? InterfaceName.ExpectedRevenue.name() : InterfaceName.RawScore.name()));
         }
+
+        // get score derivation and fit function params for model
+        dataFlowParams.setScoreDerivationMap(
+            getScoreDerivationMap(dataFlowParams.getScoreFieldMap().keySet()));
+        dataFlowParams.setFitFunctionParametersMap(
+            getFitFunctionParametersMap(dataFlowParams.getScoreFieldMap().keySet()));
+
         configuration.setDataFlowParams(dataFlowParams);
         configuration.setTargetTableName(scoreTableName + "_pivot");
+    }
+
+    private Map<String, String> getScoreDerivationMap(Collection<String> modelIds) {
+        String internalResourceHostPort = configuration.getInternalResourceHostPort();
+        InternalResourceRestApiProxy internalResourceRestApiProxy =
+            new InternalResourceRestApiProxy(internalResourceHostPort);
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(internalResourceRestApiProxy,
+                                                                                   yarnConfiguration);
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
+        Map<String, String> scoreDerivationMap = new HashMap<>();
+        for (String modelId : modelIds) {
+            String scoreDerivation = scoreArtifactRetriever.getScoreDerivation(customerSpace, modelId);
+            if (scoreDerivation != null) {
+                scoreDerivationMap.put(modelId, scoreDerivation);
+            }
+        }
+        return scoreDerivationMap;
+    }
+
+    private Map<String, String> getFitFunctionParametersMap(Collection<String> modelIds) {
+        String internalResourceHostPort = configuration.getInternalResourceHostPort();
+        InternalResourceRestApiProxy internalResourceRestApiProxy =
+            new InternalResourceRestApiProxy(internalResourceHostPort);
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(internalResourceRestApiProxy,
+                                                                                   yarnConfiguration);
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
+        Map<String, String> fitFunctionParametersMap = new HashMap<>();
+        for (String modelId : modelIds) {
+            String fitFunctionParameters =
+                scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId);
+            if (fitFunctionParameters != null) {
+                fitFunctionParametersMap.put(modelId, fitFunctionParameters);
+            }
+        }
+        return fitFunctionParametersMap;
     }
 
     @Override

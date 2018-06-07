@@ -9,6 +9,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
 public class PivotScoreAndEventParameters extends DataFlowParameters {
 
@@ -26,6 +28,12 @@ public class PivotScoreAndEventParameters extends DataFlowParameters {
 
     @JsonProperty("score_field_map")
     private Map<String, String> scoreFieldMap = new HashMap<>();
+
+    @JsonProperty("score_derivation_map")
+    private Map<String, String> scoreDerivationMap = new HashMap<>();
+
+    @JsonProperty("fit_function_parameters_map")
+    private Map<String, String> fitFunctionParametersMap = new HashMap<>();
 
     /**
      * Serialization constructor
@@ -68,6 +76,22 @@ public class PivotScoreAndEventParameters extends DataFlowParameters {
 
     public void setScoreFieldMap(Map<String, String> scoreFieldMap) {
         this.scoreFieldMap = scoreFieldMap;
+    }
+
+    public Map<String, String> getScoreDerivationMap() {
+        return scoreDerivationMap;
+    }
+
+    public void setScoreDerivationMap(Map<String, String> scoreDerivationMap) {
+        this.scoreDerivationMap = scoreDerivationMap;
+    }
+
+    public Map<String, String> getFitFunctionParametersMap() {
+        return fitFunctionParametersMap;
+    }
+
+    public void setFitFunctionParametersMap(Map<String, String> fitFunctionParametersMap) {
+        this.fitFunctionParametersMap = fitFunctionParametersMap;
     }
 
     @Override

@@ -97,6 +97,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 

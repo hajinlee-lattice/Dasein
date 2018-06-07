@@ -582,6 +582,7 @@ public enum LedpCode {
     LEDP_31024("Score a single record failed."), //
     LEDP_31025("Score a bulk record failed."), //
     LEDP_31026("Pmml file for model {0} too big to load into cache"), //
+    LEDP_31027("Fail to retrieve ModelSummary {0} from pls"), //
 
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //

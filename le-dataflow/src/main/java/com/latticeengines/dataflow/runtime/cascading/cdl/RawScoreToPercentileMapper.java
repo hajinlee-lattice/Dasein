@@ -1,0 +1,68 @@
+package com.latticeengines.dataflow.runtime.cascading.cdl;
+
+import java.io.Serializable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.scoringapi.BucketRange;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+
+public class RawScoreToPercentileMapper implements Serializable {
+    private static final int MIN_PERCENTILE = 5;
+    private static final int MAX_PERCENTILE = 99;
+
+    private static final Logger log = LoggerFactory.getLogger(RawScoreToPercentileMapper.class);
+
+    private ScoreDerivation derivation;
+
+    public RawScoreToPercentileMapper(ScoreDerivation scoreDerivation) {
+        this.derivation = checkDerivation(scoreDerivation);
+    }
+
+    private ScoreDerivation checkDerivation(ScoreDerivation scoreDerivation) {
+        if (scoreDerivation.percentiles == null) {
+            throw new IllegalArgumentException("No percentile buckets found");
+        } else if (scoreDerivation.percentiles.isEmpty()) {
+            throw new IllegalArgumentException(
+                String.format("No buckets in scoreDerivation. size:%d", scoreDerivation.percentiles.size()));
+        }
+        return scoreDerivation;
+    }
+
+    public int map(double rawScore) {
+
+        double lowest = 1.0;
+        double highest = 0.0;
+        Integer percentile = null;
+
+        for (int index = 0; index < derivation.percentiles.size(); index++) {
+            BucketRange percentileRange = derivation.percentiles.get(index);
+            if (percentileRange.lower < lowest) {
+                lowest = percentileRange.lower;
+            } else if (percentileRange.upper > highest) {
+                highest = percentileRange.upper;
+            }
+            if (withinRange(percentileRange, rawScore)) {
+                // Name of the percentile bucket is the percentile value.
+                percentile = Integer.valueOf(percentileRange.name);
+            }
+        }
+        // value out of range
+        if (percentile == null) {
+            if (rawScore <= lowest) {
+                percentile = MIN_PERCENTILE;
+            } else {
+                percentile = MAX_PERCENTILE;
+            }
+        }
+
+        return percentile;
+    }
+
+    private boolean withinRange(BucketRange range, //
+                                double value) {
+        return (range.lower == null || value >= range.lower) && (range.upper == null || value <= range.upper);
+    }
+}

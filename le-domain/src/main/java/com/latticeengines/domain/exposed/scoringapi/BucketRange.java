@@ -1,10 +1,12 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class BucketRange {
+public class BucketRange implements Serializable {
     // The user facing display name of this bucket.
     public String name;
 

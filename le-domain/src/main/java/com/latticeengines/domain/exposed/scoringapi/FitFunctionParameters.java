@@ -1,11 +1,14 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FitFunctionParameters {
+public class FitFunctionParameters implements Serializable {
+
     @JsonProperty("alpha")
     private double alpha;
 
@@ -18,14 +21,18 @@ public class FitFunctionParameters {
     @JsonProperty("maxRate")
     private double maxRate;
 
+    @JsonProperty("version")
+    private String version;
+
     public FitFunctionParameters() {
     }
 
-    public FitFunctionParameters(double alpha, double beta, double gamma, double maxRate) {
+    public FitFunctionParameters(double alpha, double beta, double gamma, double maxRate, String version) {
         this.alpha = alpha;
         this.beta = beta;
         this.gamma = gamma;
         this.maxRate = maxRate;
+        this.version = version;
     }
 
     public double getAlpha() {
@@ -42,6 +49,10 @@ public class FitFunctionParameters {
 
     public double getMaxRate() {
         return maxRate;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     @Override
