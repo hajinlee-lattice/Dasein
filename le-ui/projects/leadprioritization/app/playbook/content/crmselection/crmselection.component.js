@@ -45,6 +45,9 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
         vm.checkValid = function(form, accountId) {
 
+            $scope.excludeItemsWithoutSalesforceId = false;
+            vm.setExcludeItems(false);
+
             if(vm.stored.crm_selection) {
                 PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
                 PlaybookWizardStore.setDestinationSysType(vm.stored.crm_selection.externalSystemType);
