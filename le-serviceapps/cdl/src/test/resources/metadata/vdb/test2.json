@@ -68,7 +68,7 @@
     },
     {
       "approved_usage": null,
-      "column_name": "Name",
+      "column_name": "CName",
       "data_quality": null,
       "data_source": [
         "S_Account_Import"
