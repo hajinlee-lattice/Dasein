@@ -50,6 +50,7 @@
 		.text-container .query {
 			padding: 6px;
 			margin-top: 0;
+			margin-bottom: 0;
 		}
 	}
 
@@ -83,7 +84,8 @@
 
 .history-metadata {
 	display: flex;
-	margin-bottom: 20px;
+	margin-top: 14px;
+	margin-bottom: 14px;
 	background: #fff;
 	li {
 		width: 25%;

@@ -412,7 +412,8 @@ angular
                             playName: $stateParams.play_name,
                             sortBy: 'created',
                             descending: true,
-                            offset: 0
+                            offset: 0,
+                            max: 10
                         };
                     PlaybookWizardStore.getPlayLaunches(params).then(function(result){
                         deferred.resolve(result);

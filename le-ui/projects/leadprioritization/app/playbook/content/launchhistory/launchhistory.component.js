@@ -68,7 +68,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     vm.updateLaunchData = function() {
 
         var params = {
-                playName: vm.playName,
+                playName: vm.playName || $stateParams.play_name,
                 sortby: vm.sortBy,
                 descending: vm.sortDesc,
                 offset: vm.offset,
@@ -77,7 +77,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 externalSysType: vm.externalSystemType
             },
             countParams = {
-                playName: vm.playName,
+                playName: vm.playName || $stateParams.play_name,
                 offset: vm.offset,
                 startTimestamp: 0,
                 orgId: vm.orgId,
