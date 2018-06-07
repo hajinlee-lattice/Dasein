@@ -26,6 +26,9 @@
                 padding-top: 18px;
             }
         }
+    } 
+    input:hover, label:hover {
+        cursor: pointer;
     }
     .selected-total {
         margin-top: 20px;

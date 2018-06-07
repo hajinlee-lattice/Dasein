@@ -121,6 +121,10 @@
         padding-right: 1.25em;
         font-size: 14px;
         text-align: left;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         &:after {
             color: #bfbfbf;
             font-style: normal;

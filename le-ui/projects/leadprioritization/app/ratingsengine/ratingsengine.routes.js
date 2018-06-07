@@ -81,7 +81,8 @@ angular
                 url: '/ratingsenginetype',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models'
+                    pageTitle: 'Models',
+                    rating_id: ''
                 },
                 views: {
                     "summary@": {

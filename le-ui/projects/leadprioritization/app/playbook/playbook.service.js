@@ -489,8 +489,8 @@ angular.module('lp.playbook')
                 sortby: params.sortby,
                 descending: params.descending,
                 startTimestamp: 0,
-                offset: params.offset,
-                max: params.max,
+                offset: params.offset || 0,
+                max: params.max || 10,
                 orgId: params.orgId,
                 externalSysType: params.externalSysType
             };

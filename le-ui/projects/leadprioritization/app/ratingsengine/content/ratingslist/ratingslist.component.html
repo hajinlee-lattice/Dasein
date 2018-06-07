@@ -68,7 +68,7 @@
                     ng-class="{editing: vm.current.tileStates[rating.id].editRating, noRatings: ( rating.bucketMetadata[0].dummy)}">
 
                     <div class="tile-header" ng-if="!vm.current.tileStates[rating.id].editRating">
-                        <h2 title="{{rating.displayName}}">{{rating.displayName | limitTo: 27 }}{{rating.displayName.length > 27 ? '&hellip;' : ''}}</h2>
+                        <h2 title="{{rating.displayName}}">{{rating.displayName}}</h2>
                         <div class="edit">
                             <button
                                     type="button"
