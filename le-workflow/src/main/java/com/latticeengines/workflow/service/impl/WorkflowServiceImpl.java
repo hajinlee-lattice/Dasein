@@ -421,6 +421,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                     return true;
                 }
                 try {
+                    keepUpdate(workflowPid, jobUpdate);
                     Thread.sleep(checkInterval);
                 } catch (Exception e) {
                     if (isDone) {
@@ -430,10 +431,10 @@ public class WorkflowServiceImpl implements WorkflowService {
                     log.warn(
                             String.format("Getting exception when waiting for %s, exception=%s",
                                     workflowId.getId(), e.getMessage()));
-                    if (--retryOnException == 0)
+                    if (--retryOnException == 0) {
                         throw new RuntimeException(e);
+                    }
                 }
-                keepUpdate(workflowPid, jobUpdate);
                 log.info("Waiting workflow to finish. workflow Id=" + workflowId.getId());
             } while (System.currentTimeMillis() - start < maxWaitTime);
             return false;
