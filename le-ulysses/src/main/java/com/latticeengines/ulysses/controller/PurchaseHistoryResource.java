@@ -1,5 +1,6 @@
 package com.latticeengines.ulysses.controller;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +32,6 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
 import com.latticeengines.domain.exposed.util.BusinessCalendarUtils;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
@@ -48,9 +48,6 @@ public class PurchaseHistoryResource {
 
     @Inject
     private PeriodTransactionProxy periodTransactionProxy;
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
 
     @Inject
     private Oauth2RestApiProxy tenantProxy;
@@ -72,7 +69,7 @@ public class PurchaseHistoryResource {
     @RequestMapping(value = "/account/{crmAccountId}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the purchase history data for the given account")
-    public FrontEndResponse<String> getPurchaseHistoryAccountById(RequestEntity<String> requestEntity,
+    public FrontEndResponse<List<String>> getPurchaseHistoryAccountById(RequestEntity<String> requestEntity,
             @PathVariable String crmAccountId) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
 
@@ -84,14 +81,13 @@ public class PurchaseHistoryResource {
                 throw new LedpException(LedpCode.LEDP_39001, new String[] { crmAccountId, customerSpace });
             } else {
                 String accountId = accountData.getData().get(0).get(InterfaceName.AccountId.name()).toString();
-                List<PeriodTransaction> periodTransactions = periodTransactionProxy.getPeriodTransactionByAccountId(
-                        customerSpace, accountId, defaultPeriodName,
-                        dataCollectionProxy.getActiveVersion(customerSpace), ProductType.Spending);
+                List<PeriodTransaction> periodTransactions = periodTransactionProxy.getPeriodTransactionsByAccountId(
+                        customerSpace, accountId, defaultPeriodName, ProductType.Spending);
                 if (CollectionUtils.isEmpty(periodTransactions)) {
                     throw new LedpException(LedpCode.LEDP_39006, new String[] { crmAccountId, customerSpace });
                 }
                 BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
-                Date startDate = null;
+                Date startDate;
                 if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
                     startDate = java.sql.Date.valueOf(BusinessCalendarUtils
                             .parseLocalDateFromStartingDate(businessCalendar.getStartingDate(), DEFAULT_START_YEAR));
@@ -99,8 +95,8 @@ public class PurchaseHistoryResource {
                     startDate = java.sql.Date.valueOf(BusinessCalendarUtils
                             .parseLocalDateFromStartingDay(businessCalendar.getStartingDay(), DEFAULT_START_YEAR));
                 }
-                return new FrontEndResponse<>(purchaseHistoryDanteFormatter.format(crmAccountId, startDate,
-                        JsonUtils.convertList(periodTransactions, PeriodTransaction.class)));
+                return new FrontEndResponse<>(Arrays.asList(purchaseHistoryDanteFormatter.format(crmAccountId,
+                        startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
             }
         } catch (LedpException le) {
             log.error("Failed to get the purchase history data", le);
@@ -112,11 +108,30 @@ public class PurchaseHistoryResource {
 
     }
 
-    @RequestMapping(value = "/segment/{segmentName}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/spendanalyticssegment/{spendAnalyticsSegment}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the purchase history data for all the accounts in the given spend analytics segment")
-    public FrontEndResponse<List<String>> getPurchaseHistoryAccountBySegment(@PathVariable String segmentName) {
-        throw new UnsupportedOperationException();
+    public FrontEndResponse<List<String>> getPurchaseHistoryAccountBySegment(
+            @PathVariable String spendAnalyticsSegment) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        List<PeriodTransaction> periodTransactions = periodTransactionProxy
+                .getPeriodTransactionsForSegmentAccounts(customerSpace, spendAnalyticsSegment, defaultPeriodName);
+
+        if (CollectionUtils.isEmpty(periodTransactions)) {
+            throw new LedpException(LedpCode.LEDP_39006, new String[] { spendAnalyticsSegment, customerSpace });
+        }
+
+        BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
+        Date startDate;
+        if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
+            startDate = java.sql.Date.valueOf(BusinessCalendarUtils
+                    .parseLocalDateFromStartingDate(businessCalendar.getStartingDate(), DEFAULT_START_YEAR));
+        } else {
+            startDate = java.sql.Date.valueOf(BusinessCalendarUtils
+                    .parseLocalDateFromStartingDay(businessCalendar.getStartingDay(), DEFAULT_START_YEAR));
+        }
+        return new FrontEndResponse<>(Arrays.asList(purchaseHistoryDanteFormatter.format(spendAnalyticsSegment,
+                startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
     }
 
 }

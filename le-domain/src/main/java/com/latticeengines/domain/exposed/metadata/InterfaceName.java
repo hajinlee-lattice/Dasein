@@ -108,6 +108,7 @@ public enum InterfaceName {
     Type, //
     AnnualRevenueCurrency,
     SpendAnalyticsSegment,
+    RepresentativeAccounts,
     CustomerParentAccountID,
     DoNotCall,
     LeadStatus,

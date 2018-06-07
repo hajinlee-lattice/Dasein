@@ -1,5 +1,8 @@
 package com.latticeengines.ulysses.controller;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,12 +16,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
+import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 import com.latticeengines.ulysses.utils.AccountDanteFormatter;
 
 import io.swagger.annotations.Api;
@@ -31,11 +37,14 @@ public class DataLakeAccountResource {
     private static final Logger log = LoggerFactory.getLogger(DataLakeAccountResource.class);
     private final DataLakeService dataLakeService;
     private final Oauth2RestApiProxy tenantProxy;
+    private final PeriodTransactionProxy periodTransactionProxy;
 
     @Inject
-    public DataLakeAccountResource(DataLakeService dataLakeService, Oauth2RestApiProxy tenantProxy) {
+    public DataLakeAccountResource(DataLakeService dataLakeService, Oauth2RestApiProxy tenantProxy,
+            PeriodTransactionProxy periodTransactionProxy) {
         this.dataLakeService = dataLakeService;
         this.tenantProxy = tenantProxy;
+        this.periodTransactionProxy = periodTransactionProxy;
     }
 
     @Inject
@@ -73,18 +82,42 @@ public class DataLakeAccountResource {
         }
     }
 
-    @RequestMapping(value = "/accountsegments/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{accountId}/{attributeGroup}/danteformat/aslist", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
-    public FrontEndResponse<String> getAccountSegmentsInDanteFormat() {
+    public FrontEndResponse<List<String>> getAccountsByIdInDanteFormat(RequestEntity<String> requestEntity,
+            @PathVariable String accountId, //
+            @PathVariable Predefined attributeGroup) {
         try {
-            return new FrontEndResponse<>(tempData);
+            DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup);
+            if (accountRawData.getData().size() != 1) {
+                throw new LedpException(LedpCode.LEDP_39003,
+                        new String[] { "Account", "" + accountRawData.getData().size() });
+            }
+            return new FrontEndResponse<>(Arrays.asList(accountDanteFormatter.format(accountRawData.getData().get(0))));
         } catch (LedpException le) {
+            log.error("Failed to get account data for account id: " + accountId, le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
+            log.error("Failed to get account data for account id: " + accountId, e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }
 
-    private static final String tempData = "{\"BaseExternalID\":\"AllSegment\",\"NotionName\":\"DanteAccount\",\"Address1\":null,\"Address2\":null,\"BestLikelihood\":null,\"City\":null,\"Country\":null,\"DisplayName\":\"All Segment\",\"EstimatedRevenue\":null,\"IsSegment\":true,\"LastModified\":null,\"LeadCount\":null,\"NAICSCode\":null,\"NumberOfEmployees\":null,\"OwnerDisplayName\":null,\"RepresentativeAccounts\":1,\"SICCode\":null,\"SalesforceAccountID\":\"AllSegment\",\"Segment1Name\":\"AllSegment\",\"StateProvince\":null,\"Territory\":null,\"TopLeads\":null,\"TotalMonetaryValue\":null,\"URL\":null,\"Vertical\":null,\"Zip\":null}";
+    @RequestMapping(value = "/spendanalyticssegments/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
+    public FrontEndResponse<List<String>> getAccountSegmentsInDanteFormat() {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        try {
+            return new FrontEndResponse<>(accountDanteFormatter
+                    .format(periodTransactionProxy.getAllSpendAnalyticsSegments(customerSpace).getData()));
+        } catch (LedpException le) {
+            log.error("Failed to get spend analytics segments for customerspace : " + customerSpace, le);
+            return new FrontEndResponse<>(le.getErrorDetails());
+        } catch (Exception e) {
+            log.error("Failed to get spend analytics segments for customerSpace: " + customerSpace, e);
+            return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
+        }
+    }
 }

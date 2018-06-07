@@ -690,6 +690,7 @@ public enum LedpCode {
     LEDP_39004("No AccountId attribute found"), //
     LEDP_39005("Failed to compile the MetadataDocument for the CustomerSpace {0}"), //
     LEDP_39006("No Purchase History found for the AccountId {0} and CustomerSpace {1}"), //
+    LEDP_39007("No Purchase History found for the SpendAnalyticsSegment {0} and CustomerSpace {1}"), //
 
     // le-cdl
     LEDP_40000("CustomerSpace in CleanupByDateRangeConfig is null."), //

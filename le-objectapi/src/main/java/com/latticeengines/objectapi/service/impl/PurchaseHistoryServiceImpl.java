@@ -13,11 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
 import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
@@ -37,16 +39,16 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public List<PeriodTransaction> getPeriodTransactionByAccountId(String accountId, String periodName,
-            DataCollection.Version version, ProductType productType) {
+    public List<PeriodTransaction> getPeriodTransactionsByAccountId(String accountId, String periodName,
+            ProductType productType) {
         List<PeriodTransaction> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
         String periodTransactionTableName = dataCollectionProxy.getTableName(tenant.getId(),
                 BusinessEntity.PeriodTransaction.getServingStore());
 
         log.info(String.format(
-                "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s, version %s",
-                periodTransactionTableName, tenant.getId(), accountId, periodName, productType, version));
+                "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s",
+                periodTransactionTableName, tenant.getId(), accountId, periodName, productType));
 
         // For BIS use case, the product type is ProductType.Spending
         String baseQuery = "SELECT t.{0}, t.{1}, t.{2}, t.{3}, t.{4} FROM {5} t "
@@ -63,7 +65,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 InterfaceName.ProductType, // 8
                 productType.toString()); // 9
 
-        log.info("Query for getPeriodTransactionByAccountId " + query);
+        log.info("Query for getPeriodTransactionsByAccountId " + query);
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, accountId, periodName);
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
@@ -81,7 +83,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public List<PeriodTransaction> getPeriodTransactionForSegmentAccount(String segment, String periodName,
+    public List<PeriodTransaction> getPeriodTransactionsForSegmentAccounts(String segment, String periodName,
             ProductType productType) {
         List<PeriodTransaction> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
@@ -158,25 +160,23 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public List<String> getAllSegments() {
-        List<String> resultList = new ArrayList<>();
+    public DataPage getAllSpendAnalyticsSegments() {
         Tenant tenant = MultiTenantContext.getTenant();
         String accountTableName = dataCollectionProxy.getTableName(tenant.getId(),
                 BusinessEntity.Account.getServingStore());
-
         log.info(String.format("Get Account Table %s for %s", accountTableName, tenant.getId()));
-        String query = String.format("SELECT distinct %s FROM %s", InterfaceName.SpendAnalyticsSegment,
+        String query = MessageFormat.format(
+                "SELECT distinct {0}, count({1}) as {2}, True as IsSegment, {0} as AccountId FROM {3} WHERE {0} IS NOT NULL GROUP BY {0}",
+                InterfaceName.SpendAnalyticsSegment, InterfaceName.AccountId, InterfaceName.RepresentativeAccounts,
                 accountTableName);
-        log.info("query for getAllSegments " + query);
+        log.info("query for getAllSpendAnalyticsSegments " + query);
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
-        for (Map row : retList) {
-            String segment = ((String) row.get(InterfaceName.SpendAnalyticsSegment.toString().toLowerCase()));
-            if (segment != null) {
-                resultList.add(segment);
-            }
-        }
-        log.info("resultList for all segment is " + resultList);
-        return resultList;
+        return new DataPage(retList);
+    }
+
+    @VisibleForTesting
+    void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
+        this.dataCollectionProxy = dataCollectionProxy;
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.query.DataPage;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "entities", description = "REST resource for support Purchase History use cases")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/periodtransaction")
+@RequestMapping("/customerspaces/{customerSpace}/periodtransactions")
 public class PeriodTransactionResource {
 
     @Inject
@@ -30,30 +31,30 @@ public class PeriodTransactionResource {
 
     @GetMapping(value = "/accountid/{accountId}")
     @ResponseBody
-    @ApiOperation("Get Period Transaction by AccountID")
+    @ApiOperation("Get all PeriodTransactions for the given AccountID")
     public List<PeriodTransaction> getPeriodTransactionByAccountId(@PathVariable String customerSpace,
             @PathVariable String accountId, //
             @RequestParam(value = "periodname", required = false, defaultValue = "Month") String periodName, //
-            @RequestParam(value = "version", required = false) DataCollection.Version version, //
             @RequestParam(value = "producttype", required = false, defaultValue = "Spending") ProductType productType) {
-        return purchaseHistoryService.getPeriodTransactionByAccountId(accountId, periodName, version, productType);
+        return purchaseHistoryService.getPeriodTransactionsByAccountId(accountId, periodName, productType);
     }
 
-    @GetMapping(value = "/segments")
+    @GetMapping(value = "/spendanalyticssegments")
     @ResponseBody
     @ApiOperation("Get All Segments")
-    public List<String> getAllSegments(@PathVariable String customerSpace) {
-        return purchaseHistoryService.getAllSegments();
+    public DataPage getAllSegments(@PathVariable String customerSpace) {
+        return purchaseHistoryService.getAllSpendAnalyticsSegments();
     }
 
-    @GetMapping(value = "/segment/{segment}")
+    @GetMapping(value = "/spendanalyticssegment/{spendAnalyticsSegment}")
     @ResponseBody
-    @ApiOperation("Get Period Transaction for Segment Account")
-    public List<PeriodTransaction> getPeriodTransactionForSegmentAccount(@PathVariable String customerSpace,
-            @PathVariable String segment, //
+    @ApiOperation("Get Period Transactions for all accounts with the given spendAnalyticsSegment value")
+    public List<PeriodTransaction> getPeriodTransactionsForSegmentAccounts(@PathVariable String customerSpace,
+            @PathVariable String spendAnalyticsSegment, //
             @RequestParam(value = "periodname", required = false, defaultValue = "Month") String periodName, //
             @RequestParam(value = "producttype", required = false, defaultValue = "Spending") ProductType productType) {
-        return purchaseHistoryService.getPeriodTransactionForSegmentAccount(segment, periodName, productType);
+        return purchaseHistoryService.getPeriodTransactionsForSegmentAccounts(spendAnalyticsSegment, periodName,
+                productType);
     }
 
     @GetMapping(value = "/producthierarchy")

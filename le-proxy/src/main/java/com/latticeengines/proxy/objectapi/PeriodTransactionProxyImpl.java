@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
 import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -27,25 +27,21 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
     }
 
     @Override
-    public List<PeriodTransaction> getPeriodTransactionByAccountId(String customerSpace, String accountId,
-            String periodName, Version version, ProductType productType) {
-        String url = constructGetPeriodTransactionByAccountId(customerSpace, accountId, periodName, version,
-                productType);
+    public List<PeriodTransaction> getPeriodTransactionsByAccountId(String customerSpace, String accountId,
+            String periodName, ProductType productType) {
+        String url = constructGetPeriodTransactionByAccountId(customerSpace, accountId, periodName, productType);
         log.info("getPeriodTransactionByAccountId url " + url);
         return getList("getPeriodTransactionByAccountId", url, PeriodTransaction.class);
     }
 
     @VisibleForTesting
     String constructGetPeriodTransactionByAccountId(String customerSpace, String accountId, String periodName,
-            Version version, ProductType productType) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransaction/accountid/{accountId}",
+            ProductType productType) {
+        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/accountid/{accountId}",
                 ProxyUtils.shortenCustomerSpace(customerSpace), accountId);
         StringBuilder sb = new StringBuilder();
         if (periodName != null) {
             sb.append("periodname=").append(periodName).append("&");
-        }
-        if (version != null) {
-            sb.append("version=").append(version).append("&");
         }
         if (productType != null) {
             sb.append("producttype=").append(productType).append("&");
@@ -58,25 +54,35 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
     }
 
     @Override
-    public List<PeriodTransaction> getPeriodTransactionForSegmentAccount(String customerSpace, String accountId,
-            String periodName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransaction/segment/accountid/{accountId}",
-                ProxyUtils.shortenCustomerSpace(customerSpace), accountId);
+    public List<PeriodTransaction> getPeriodTransactionsForSegmentAccounts(String customerSpace,
+            String spendAnalyticsSegment, String periodName) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/periodtransactions/spendanalyticssegment/{spendAnalyticsSegment}",
+                ProxyUtils.shortenCustomerSpace(customerSpace), spendAnalyticsSegment);
         if (periodName != null) {
             url += ("?periodname=" + periodName);
         }
-        log.info("getPeriodTransactionForSegmentAccount url " + url);
-        return getList("getPeriodTransactionForSegmentAccount", url, PeriodTransaction.class);
+        log.info("getPeriodTransactionsForSegmentAccounts url " + url);
+        return getList("getPeriodTransactionsForSegmentAccounts", url, PeriodTransaction.class);
     }
 
     @Override
     public List<ProductHierarchy> getProductHierarchy(String customerSpace, DataCollection.Version version) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransaction/producthierarchy",
+        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/producthierarchy",
                 ProxyUtils.shortenCustomerSpace(customerSpace));
         if (version != null) {
             url += ("?version=" + version);
         }
         log.info("getProductHierarchy url " + url);
         return getList("getProductHierarchy", url, ProductHierarchy.class);
+    }
+
+    @Override
+    public DataPage getAllSpendAnalyticsSegments(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/spendanalyticssegments",
+                ProxyUtils.shortenCustomerSpace(customerSpace));
+
+        log.info("getProductHierarchy url " + url);
+        return get("getProductHierarchy", url, DataPage.class);
     }
 }
