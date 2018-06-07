@@ -268,7 +268,6 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         }
 
         public MatchCommandUpdaterImpl dnbCommands() {
-            log.info("### Inside dnbCommands()");
             // populating the list of DnBMatchCommand into MatchCommand
             List<DnBMatchCommand> dnbMatchList = dnbMatchCommandEntityMgr.findAllByField("RootOperationUID",
                     matchCommand.getRootOperationUid());
@@ -295,10 +294,6 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             matchCommand.setRowsMatchedByDnb(rowsMatchedByDnb);
             // average dnb duration
             matchCommand.setDnbDurationAvg(dnbDurationAvg);
-            String logMsg = String.format(
-                    "In dnbCommands(), RowsToDnb : [%d], RowsMatchedByDnB : [%d], DnBDurationAvg : [%d], jobType : [%s]",
-                    rowsToDnb, rowsMatchedByDnb, dnbDurationAvg, matchCommand.getJobType());
-            log.info("### logMsg : " + logMsg);
             return this;
         }
 
