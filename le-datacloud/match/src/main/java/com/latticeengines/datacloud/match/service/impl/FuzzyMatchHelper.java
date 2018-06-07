@@ -109,7 +109,7 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private void preLookup(MatchContext context) {
-        for (InternalOutputRecord record: context.getInternalResults()) {
+        for (InternalOutputRecord record : context.getInternalResults()) {
             String lookupIdKey = record.getLookupIdKey();
             String lookupIdValue = record.getLookupIdValue();
             if (StringUtils.isNotBlank(lookupIdValue)) {
@@ -225,8 +225,8 @@ public class FuzzyMatchHelper implements DbHelper {
         boolean latticeAccountIdOnly = context.isSeekingIdOnly();
         if (!latticeAccountIdOnly) {
             for (InternalOutputRecord record : context.getInternalResults()) {
-                updateInternalRecordByMatchedAccount(record, context.getColumnSelection(), context.getInput()
-                        .getDataCloudVersion());
+                updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
+                        context.getInput().getDataCloudVersion());
                 if (record.isMatched()) {
                     setMatchedValues(record);
                 }
@@ -276,13 +276,16 @@ public class FuzzyMatchHelper implements DbHelper {
         if (MapUtils.isNotEmpty(record.getCustomAccount())) {
             queryResult.putAll(record.getCustomAccount());
         }
+        if (record.getLatticeAccount() != null && record.getLatticeAccount().getId() != null) {
+            record.setMatched(true);
+        }
         record.setQueryResult(queryResult);
     }
 
     private Map<String, Object> parseLatticeAccount(LatticeAccount account, ColumnSelection columnSelection,
             String dataCloudVersion) {
-        Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService.getDecodeParameters(
-                columnSelection, dataCloudVersion);
+        Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService
+                .getDecodeParameters(columnSelection, dataCloudVersion);
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> amAttributes = (account == null) ? new HashMap<>() : account.getAttributes();
         amAttributes.put(MatchConstants.LID_FIELD, (account == null) ? null : account.getId());
@@ -320,10 +323,10 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private void setMatchedValues(InternalOutputRecord record) {
-        Map<String, Object> amAttributes = (record.getLatticeAccount() == null) ? new HashMap<>() : record
-                .getLatticeAccount().getAttributes();
-        amAttributes.put(MatchConstants.LID_FIELD, (record.getLatticeAccount() == null) ? null : record
-                .getLatticeAccount().getId());
+        Map<String, Object> amAttributes = (record.getLatticeAccount() == null) ? new HashMap<>()
+                : record.getLatticeAccount().getAttributes();
+        amAttributes.put(MatchConstants.LID_FIELD,
+                (record.getLatticeAccount() == null) ? null : record.getLatticeAccount().getId());
 
         record.setLatticeAccountId((String) amAttributes.get(MatchConstants.LID_FIELD));
         record.setMatchedDomain((String) amAttributes.get(MatchConstants.AM_DOMAIN_FIELD));

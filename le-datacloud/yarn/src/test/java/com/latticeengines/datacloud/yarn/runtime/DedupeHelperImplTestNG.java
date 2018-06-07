@@ -57,7 +57,7 @@ public class DedupeHelperImplTestNG {
         Assert.assertEquals(allValues.get(2), isRemoved);
     }
 
-    @DataProvider(name = "unit")
+    @DataProvider(name = "dataProvider")
     public Object[][] dataProvider() {
         return new Object[][] { //
                 new Object[] { false, true, "111", "112", "113", null, "lattice.com", "USA", "112", 0 }, //

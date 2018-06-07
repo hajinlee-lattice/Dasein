@@ -21,14 +21,15 @@ public class DedupeHelperImpl implements DedupeHelper {
 
     private static final Logger log = LoggerFactory.getLogger(DedupeHelperImpl.class);
 
-    private static Pattern junkNamePattern = Pattern
-            .compile("(^|\\s+)[\\[]*(none|no|not|delete|asd|sdf|unknown|undisclosed|null|dont|don't|n\\/a|n\\.a|abc|xyz|noname|nocompany)($|\\s+)");
+    private static Pattern junkNamePattern = Pattern.compile(
+            "(^|\\s+)[\\[]*(none|no|not|delete|asd|sdf|unknown|undisclosed|null|dont|don't|n\\/a|n\\.a|abc|xyz|noname|nocompany)($|\\s+)");
 
     @Autowired
     PublicDomainService publicDomainService;
 
     @Override
-    public void appendDedupeValues(ProcessorContext processorContext, List<Object> allValues, OutputRecord outputRecord) {
+    public void appendDedupeValues(ProcessorContext processorContext, List<Object> allValues,
+            OutputRecord outputRecord) {
 
         String latticeAccountId = outputRecord.getMatchedLatticeAccountId();
         allValues.add(latticeAccountId);
@@ -45,7 +46,7 @@ public class DedupeHelperImpl implements DedupeHelper {
             } else if (StringUtils.isNotEmpty(outputRecord.getMatchedDuns())) {
                 dedupeId = outputRecord.getMatchedDuns();
             } else {
-                dedupeId = domain;
+                dedupeId = outputRecord.getMatchedDomain() != null ? outputRecord.getMatchedDomain() : domain;
             }
             log.debug("Matched, domain=" + domain);
             addDedupeValues(allValues, dedupeId, isRemoved);
