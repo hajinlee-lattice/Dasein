@@ -296,8 +296,20 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     @Override
     public AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            ValidationDetails details = attrValidationService.validate(request.getAttrConfigs(), isAdmin);
-            request.setDetails(details);
+            Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs(),
+                    new ArrayList<>());
+            if (MapUtils.isNotEmpty(attrConfigGrpsForTrim)) {
+                List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
+                    if (CollectionUtils.isNotEmpty(list)) {
+                        return list.stream();
+                    } else {
+                        return Stream.empty();
+                    }
+                }).collect(Collectors.toList());
+                request.setAttrConfigs(renderedList);
+                ValidationDetails details = attrValidationService.validate(request.getAttrConfigs(), isAdmin);
+                request.setDetails(details);
+            }
             int count = CollectionUtils.isNotEmpty(request.getAttrConfigs()) ? request.getAttrConfigs().size() : 0;
             String msg = String.format("Validate %d attr configs", count);
             timer.setTimerMessage(msg);
@@ -309,8 +321,58 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     public AttrConfigRequest saveRequest(AttrConfigRequest request, boolean isAdmin) {
         AttrConfigRequest toReturn;
 
-        // split by entity
         List<AttrConfig> attrConfigs = request.getAttrConfigs();
+        List<AttrConfigEntity> toDeleteEntities = new ArrayList<>();
+        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs, toDeleteEntities);
+        if (MapUtils.isEmpty(attrConfigGrpsForTrim)) {
+            toReturn = request;
+        } else {
+            List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
+                if (CollectionUtils.isNotEmpty(list)) {
+                    return list.stream();
+                } else {
+                    return Stream.empty();
+                }
+            }).collect(Collectors.toList());
+
+            log.info("rendered List" + JsonUtils.serialize(renderedList));
+            toReturn = new AttrConfigRequest();
+            toReturn.setAttrConfigs(renderedList);
+            ValidationDetails details = attrValidationService.validate(renderedList, isAdmin);
+            toReturn.setDetails(details);
+            if (toReturn.hasError()) {
+                throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
+                        + JsonUtils.serialize(toReturn.getDetails()));
+            }
+
+            // after validation, delete the entities with empty props
+            if (CollectionUtils.isNotEmpty(toDeleteEntities)) {
+                attrConfigEntityMgr.deleteConfigs(toDeleteEntities);
+            }
+            log.info("AttrConfig before saving is " + JsonUtils.serialize(toReturn));
+            CacheService cacheService = CacheServiceBase.getCacheService();
+            // trim and save
+            attrConfigGrpsForTrim.forEach((entity, configList) -> {
+                String shortTenantId = MultiTenantContext.getTenantId();
+                attrConfigEntityMgr.save(shortTenantId, entity, trim(configList, isAdmin));
+
+                // clear serving metadata cache
+                String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
+                cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
+            });
+            cacheService.refreshKeysByPattern(MultiTenantContext.getTenantId(),
+                    CacheName.DataLakeStatsCubesCache);
+        }
+
+        return toReturn;
+    }
+
+    /*
+     * split configs by entity, then distribute thread to render separately
+     */
+    private Map<BusinessEntity, List<AttrConfig>> renderConfigs(List<AttrConfig> attrConfigs,
+            List<AttrConfigEntity> toDeleteEntities) {
+        // split by entity
         Map<BusinessEntity, List<AttrConfig>> attrConfigGrps = new HashMap<>();
         attrConfigs.forEach(attrConfig -> {
             BusinessEntity entity = attrConfig.getEntity();
@@ -321,10 +383,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         });
 
         if (MapUtils.isEmpty(attrConfigGrps)) {
-            toReturn = request;
+            return attrConfigGrps;
         } else {
             String tenantId = MultiTenantContext.getTenantId();
-            Map<String, List<String>> diffProperties = mergeConfigWithExisting(tenantId, attrConfigGrps);
+            Map<String, List<String>> diffProperties = mergeConfigWithExisting(tenantId, attrConfigGrps,
+                    toDeleteEntities);
 
             List<AttrConfig> renderedList;
             Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new HashMap<>();
@@ -360,44 +423,19 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     }
                 }).collect(Collectors.toList());
             }
-
-            log.info("rendered List" + JsonUtils.serialize(renderedList));
-            toReturn = new AttrConfigRequest();
-            toReturn.setAttrConfigs(renderedList);
-            AttrConfigRequest validated = validateRequest(toReturn, isAdmin);
-            if (validated.hasError()) {
-                throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
-                        + JsonUtils.serialize(validated.getDetails()));
-            }
-
-            log.info("AttrConfig before saving is " + JsonUtils.serialize(request));
-            CacheService cacheService = CacheServiceBase.getCacheService();
-            // trim and save
-            attrConfigGrpsForTrim.forEach((entity, configList) -> {
-                String shortTenantId = MultiTenantContext.getTenantId();
-                attrConfigEntityMgr.save(shortTenantId, entity, trim(configList, isAdmin));
-
-                // clear serving metadata cache
-                String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
-                cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
-            });
-            cacheService.refreshKeysByPattern(MultiTenantContext.getTenantId(),
-                    CacheName.DataLakeStatsCubesCache);
+            return attrConfigGrpsForTrim;
         }
 
-        return toReturn;
     }
 
     /**
      * Merge with existing configs in Document DB
      */
     private Map<String, List<String>> mergeConfigWithExisting(String tenantId,
-            Map<BusinessEntity, List<AttrConfig>> attrConfigGrps) {
+            Map<BusinessEntity, List<AttrConfig>> attrConfigGrps, List<AttrConfigEntity> toDeleteEntities) {
         // record the changes between user selected props and existing config
         // props
         Map<String, List<String>> diffProperties = new HashMap<>();
-        // attrConfig whose props is empty after merging
-        List<AttrConfigEntity> toDeleteEntities = new ArrayList<>();
 
         attrConfigGrps.forEach((entity, configList) -> {
             List<AttrConfigEntity> existingConfigEntities = attrConfigEntityMgr.findAllByTenantAndEntity(tenantId,
@@ -452,7 +490,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 }
             }
         });
-        attrConfigEntityMgr.deleteConfigs(toDeleteEntities);
         return diffProperties;
     }
 
@@ -553,6 +590,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             descriptionProp.setSystemValue(metadata.getDescription());
             descriptionProp.setAllowCustomization(attrSpec == null || attrSpec.descriptionChange());
             mergeConfig.putProperty(ColumnMetadataKey.Description, descriptionProp);
+
+            AttrConfigProp<String> approvedUsageProp = (AttrConfigProp<String>) attrProps
+                    .getOrDefault(ColumnMetadataKey.ApprovedUsage, new AttrConfigProp<String>());
+            approvedUsageProp.setSystemValue(metadata.getApprovedUsageString());
+            approvedUsageProp.setAllowCustomization(attrSpec == null || attrSpec.approvedUsageChange());
+            mergeConfig.putProperty(ColumnMetadataKey.ApprovedUsage, approvedUsageProp);
 
             for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
                 AttrConfigProp<Boolean> usageProp;
