@@ -246,7 +246,7 @@ angular
                                 bucketFieldName: 'ScoreBucket',
                                 maximum: 10,
                                 offset: 0,
-                                sortBy: 'LDC_Name',
+                                sortBy: 'CompanyName',
                                 descending: false
                             };
 
@@ -599,7 +599,7 @@ angular
                                     bucketFieldName: 'ScoreBucket',
                                     maximum: 10,
                                     offset: 0,
-                                    sortBy: 'LDC_Name',
+                                    sortBy: 'CompanyName',
                                     descending: false
                                 };
 
@@ -635,7 +635,7 @@ angular
                 //                 bucketFieldName: 'ScoreBucket',
                 //                 maximum: 1000000,
                 //                 offset: 0,
-                //                 sortBy: 'LDC_Name',
+                //                 sortBy: 'CompanyName',
                 //                 descending: false
                 //             };
 

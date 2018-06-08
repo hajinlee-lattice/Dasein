@@ -150,10 +150,10 @@
     <table ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
-                <th class="sortable" ng-click="sortType = 'LDC_Name'; sortReverse = !sortReverse">
+                <th class="sortable" ng-click="sortType = 'CompanyName'; sortReverse = !sortReverse">
                     Company Name
-                    <span ng-show="sortType == 'LDC_Name' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'LDC_Name' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="sortType == 'CompanyName' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'CompanyName' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <th>Web Address</th>
                 <th>SalesForce ID</th>
@@ -168,7 +168,7 @@
             <tr 
                 ng-repeat="account in (vm.tmpAccounts = (vm.accounts | 
                             orderBy:sortType:sortReverse))">
-                <td>{{account.LDC_Name}}</td>
+                <td>{{account.CompanyName}}</td>
                 <td>
                     <span ng-if="account.Website">{{account.Website}}</span>
                     <span ng-if="!account.Website" class="gray-text">N/A</span>
@@ -201,8 +201,8 @@
                 <!-- <th class="sortable" ng-click="sortType = 'CompanyName'; sortReverse = !sortReverse"> -->
                 <th>
                     Company Name
-                    <span ng-show="sortType == 'LDC_Name' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'LDC_Name' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="sortType == 'CompanyName' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'CompanyName' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <th>Email</th>
             </tr>

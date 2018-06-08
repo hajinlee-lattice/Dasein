@@ -35,7 +35,7 @@ angular.module('common.datacloud.query.results', [
         },
         accountsCoverage: AccountsCoverage,
         excludeNonSalesForce: false,
-        sortType: 'LDC_Name',
+        sortType: 'CompanyName',
         sortReverse: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
         saving: false,
@@ -201,7 +201,7 @@ angular.module('common.datacloud.query.results', [
                     bucketFieldName: 'ScoreBucket',
                     maximum: vm.pagesize,
                     offset: offset,
-                    sortBy: 'LDC_Name',
+                    sortBy: 'CompanyName',
                     descending: false,
                     selectedBuckets: vm.selectedBuckets
                 };
