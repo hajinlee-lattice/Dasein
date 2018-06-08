@@ -20,11 +20,15 @@ public class FittedConversionRateCalculatorImpl implements FittedConversionRateC
         double gamma = params.getGamma();
         double maxRate = params.getMaxRate();
 
+        if (Math.abs(alpha) < 1e-6) {
+            return Math.exp(beta);
+        }
+
         double mappedPercentile = (-percentile + 105) * 0.1;
         if (mappedPercentile >= 1) {
             return Math.exp(beta + Math.log(mappedPercentile + gamma) * alpha);
         }
         double rateAtOne = Math.exp(beta + Math.log(1 + gamma) * alpha);
-        return (maxRate > rateAtOne) ? rateAtOne + (mappedPercentile - 1) * (maxRate - rateAtOne) / 5 : rateAtOne;
+        return (maxRate > rateAtOne) ? rateAtOne + (1 - mappedPercentile) * 10 * (maxRate - rateAtOne) / 5 : rateAtOne;
     }
 }

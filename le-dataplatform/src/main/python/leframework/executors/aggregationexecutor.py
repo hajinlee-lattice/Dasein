@@ -76,7 +76,7 @@ class AggregationExecutor(Executor):
         # stateMachine.addState(RevenueModelImportanceSortingGenerator(), 22)
         stateMachine.addState(EnhancedSummaryGenerator(), 22)
         stateMachine.addState(ModelPredictorGenerator(), 23)
-        # stateMachine.addState(FitFunctionGenerator(), 24)
+        stateMachine.addState(FitFunctionGenerator(), 24)
         stateMachine.addState(Finalize(), 100)
         return stateMachine
 

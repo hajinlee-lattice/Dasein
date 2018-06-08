@@ -58,8 +58,13 @@ public class CdlPivotScoreAndEventWithScoreArtifactsTestNG extends ServiceFlowsD
     }
 
     @Override
+    protected String getScenarioName() {
+        return "CDLScoreOutputWithScoreArtifacts";
+    }
+
+    @Override
     protected Map<String, Table> getSources() {
-        URL url = ClassLoader.getSystemResource("pivotScoreAndEvent/CDLScoreOutput/InputTable");
+        URL url = ClassLoader.getSystemResource("pivotScoreAndEvent/CDLScoreOutputWithScoreArtifacts/InputTable");
         Configuration config = new Configuration();
         config.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
         Table t = MetadataConverter.getTable(config, url.getPath() + "/score_data.avro");

@@ -58,6 +58,11 @@ public class CdlPivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalT
         return "pivotScoreAndEvent";
     }
 
+    @Override
+    protected String getScenarioName() {
+        return "CDLScoreOutput";
+    }
+
     @Test(groups = "functional")
     public void execute() throws Exception {
         executeDataFlow(getStandardParameters());

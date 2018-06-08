@@ -17,11 +17,12 @@ class FitFunctionGeneratorTest(TestBase):
         self.fit.execute()
         fit_function_parameters = self.fit.getMediator().fit_function_parameters
         print(fit_function_parameters)
-        # validate alpha, beta, gamma, maxRate
-        self.assertAlmostEquals(fit_function_parameters['alpha'], -79274.90204082703, delta=1e-2)
-        self.assertAlmostEquals(fit_function_parameters['beta'], 912685.66540555377, delta=1e-2)
-        self.assertAlmostEquals(fit_function_parameters['gamma'], 100000, delta=1e-2)
-        self.assertAlmostEquals(fit_function_parameters['maxRate'], 0.36274509803921567, delta=1e-2)
+        # validate alpha, beta, gamma, maxRate, they are
+        # -63472.8123838 730757.154341 100000 0.544117647059
+        self.assertAlmostEquals(fit_function_parameters['alpha'], -63472.8123838, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['beta'], 730757.154341, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['gamma'], 100000, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['maxRate'], 0.544117647059, delta=1e-6)
 
     def _loadSegmentations(self):
         jsonStr = '''
