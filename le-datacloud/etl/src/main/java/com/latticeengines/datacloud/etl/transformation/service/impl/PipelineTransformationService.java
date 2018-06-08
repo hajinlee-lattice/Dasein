@@ -514,6 +514,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (converged && succeeded) {
                 log.info("Iterative step " + step.getName() + " converged, final count = "
                         + String.valueOf(step.getCount()));
+                // Disable hive table creation
                 //createSourceHiveTable(step.getTarget(), step.getTargetVersion());
                 return true;
             } else {

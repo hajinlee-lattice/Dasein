@@ -273,7 +273,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         boolean success = saveSourceVersionWithoutHive(progress, schema, source, version, workflowDir, count);
         if (success && !(source instanceof TableSource)) {
             try {
-                // register hive table
+                // Disable hive table creation
                 // createSourceHiveTable(source, version);
             } catch (Exception e) {
                 getLogger().error("Failed to create hive table.", e);
