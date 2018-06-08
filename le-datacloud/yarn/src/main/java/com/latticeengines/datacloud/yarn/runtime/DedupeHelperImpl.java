@@ -48,7 +48,7 @@ public class DedupeHelperImpl implements DedupeHelper {
             } else {
                 dedupeId = outputRecord.getMatchedDomain() != null ? outputRecord.getMatchedDomain() : domain;
             }
-            log.debug("Matched, domain=" + domain);
+            log.debug("Matched, domain=" + domain + " dedupeId=" + dedupeId);
             addDedupeValues(allValues, dedupeId, isRemoved);
             return;
         }
