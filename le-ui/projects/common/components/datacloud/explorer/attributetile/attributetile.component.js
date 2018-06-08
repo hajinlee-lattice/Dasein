@@ -173,6 +173,22 @@ angular
                     return querySnippet;
                 }
 
+                vm.showFreeTextAttributeCard = function(enrichment) {
+                    return vm.cube && vm.isBktEmpty(enrichment) && enrichment.FundamentalType == 'alpha' &&
+                          (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)
+                }
+
+                vm.showInvalidAttributeCard = function(enrichment) {
+                    return vm.cube && vm.isBktEmpty(enrichment) && enrichment.FundamentalType != 'alpha' &&
+                          (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)
+                }
+
+                vm.isBktEmpty = function(enrichment) {
+                    return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined || 
+                            !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length;
+                }
+
+
                 vm.NumberUtility = NumberUtility;
             }
         };

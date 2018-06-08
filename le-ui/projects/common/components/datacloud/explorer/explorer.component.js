@@ -1612,9 +1612,10 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.addFreeTextAttribute = function(enrichment, cube) {
+        var count = cube ? cube.Cnt : 0;
         var bkt = { //default bucket for free-text attributes added in My Data or Add step of rules-based rating engine
             'Cmp': 'IS_NOT_NULL',
-            'Cnt': cube.Cnt,
+            'Cnt': count,
             'Id': -1,
             'Lbl': '*',
             'Vals': [

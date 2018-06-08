@@ -161,9 +161,7 @@
         </div>
 
         <!--  -->
-        <div ng-if="vm.cube && (!vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List || 
-                                  !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length) && 
-                                  (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)" class="free-text-attribute"> 
+        <div ng-if="vm.showFreeTextAttributeCard(enrichment)" class="free-text-attribute"> 
                 {{'Free Text Attribute' | uppercase}}
                 <div>
                     <button class="{{vm.categoryClass(enrichment.Category)}} button attribute-count show-tooltip delay top left" ng-click="vm.addFreeTextAttribute(enrichment, vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId])">
@@ -173,6 +171,9 @@
                         Add To Query
                     </button>
                 </div>
+        </div> 
+        <div ng-if="vm.showInvalidAttributeCard(enrichment)" class="free-text-attribute"> 
+                {{'Invalid Attribute' | uppercase}}
         </div> 
     </span>
     <ul class="controls noselect" ng-if="!vm.lookupMode">
