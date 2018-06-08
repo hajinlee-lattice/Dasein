@@ -60,7 +60,8 @@ public class RatingQueryTranslator extends QueryTranslator {
 
         queryBuilder.from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
-                .page(frontEndQuery.getPageFilter());
+                .page(frontEndQuery.getPageFilter()) //
+                .distinct(frontEndQuery.getDistinct());
 
         if (CollectionUtils.isNotEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.getLookups().forEach(lookup -> {
@@ -230,8 +231,7 @@ public class RatingQueryTranslator extends QueryTranslator {
             if (forScoreCount) {
                 cases.put(String.valueOf(idx.getAndIncrement()), joinRestrictions(outerRestriction, innerRestriction));
             } else {
-                cases.put(key, addSubselectRestriction(entity, outerRestriction,
-                                                       innerEntity, innerRestriction));
+                cases.put(key, addSubselectRestriction(entity, outerRestriction, innerEntity, innerRestriction));
             }
         });
         if (forScoreCount) {

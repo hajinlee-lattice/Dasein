@@ -24,7 +24,7 @@ public class EntityQueryTranslator extends QueryTranslator {
     }
 
     public Query translateEntityQuery(FrontEndQuery frontEndQuery, QueryDecorator decorator, //
-                                      TimeFilterTranslator timeTranslator) {
+            TimeFilterTranslator timeTranslator) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
         if (BusinessEntity.Product.equals(mainEntity)) {
@@ -41,7 +41,8 @@ public class EntityQueryTranslator extends QueryTranslator {
 
         queryBuilder.from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
-                .page(frontEndQuery.getPageFilter());
+                .page(frontEndQuery.getPageFilter()) //
+                .distinct(frontEndQuery.getDistinct());
 
         if (CollectionUtils.isNotEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.getLookups().forEach(lookup -> {
@@ -63,18 +64,17 @@ public class EntityQueryTranslator extends QueryTranslator {
     }
 
     private Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-                                                  Restriction outerRestriction, QueryBuilder queryBuilder,
-                                                  TimeFilterTranslator timeTranslator) {
+            Restriction outerRestriction, QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
-            case Contact:
-                innerEntity = BusinessEntity.Account;
-                break;
-            case Account:
-                innerEntity = BusinessEntity.Contact;
-                break;
-            default:
-                break;
+        case Contact:
+            innerEntity = BusinessEntity.Account;
+            break;
+        case Account:
+            innerEntity = BusinessEntity.Contact;
+            break;
+        default:
+            break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
         Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction, queryBuilder,

@@ -62,6 +62,9 @@ public class FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.EVALUATION_DATE)
     private String evaluationDateStr;
 
+    @JsonProperty(FrontEndQueryConstants.DISTINCT)
+    private boolean distinct = false;
+
     public FrontEndRestriction getAccountRestriction() {
         return accountRestriction;
     }
@@ -116,6 +119,14 @@ public class FrontEndQuery {
 
     public void setRestrictNotNullSalesforceId(boolean restrictNotNullSalesforceId) {
         this.restrictNotNullSalesforceId = restrictNotNullSalesforceId;
+    }
+
+    public boolean getDistinct() {
+        return this.distinct;
+    }
+
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
     }
 
     public List<RatingModel> getRatingModels() {

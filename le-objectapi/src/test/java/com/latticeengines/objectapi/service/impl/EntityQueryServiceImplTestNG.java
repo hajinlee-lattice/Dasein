@@ -57,6 +57,21 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testDistinctCount() {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndQuery.addLookups(BusinessEntity.Product, InterfaceName.ProductId.name());
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Product);
+        frontEndQuery.setDistinct(true);
+
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count, new Long(1));
+    }
+
+    @Test(groups = "functional")
     public void testProductCountAndData() {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
@@ -96,8 +111,10 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Bucket bucket = Bucket.chgBkt(Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AS_MUCH_AS, Collections.singletonList(5));
-        Restriction restriction = new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_drZvmxtPAib4xI6tWtQobEvi6B9BeTQ3__M_1__M_2_3__SC", bucket);
+        Bucket bucket = Bucket.chgBkt(Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AS_MUCH_AS,
+                Collections.singletonList(5));
+        Restriction restriction = new BucketRestriction(BusinessEntity.PurchaseHistory,
+                "AM_drZvmxtPAib4xI6tWtQobEvi6B9BeTQ3__M_1__M_2_3__SC", bucket);
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -174,7 +191,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     public void testAccountWithPriorOnly() {
         MultiTenantContext.setTenant(tenant);
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
-        String period =  PeriodStrategy.Template.Month.name();
+        String period = PeriodStrategy.Template.Month.name();
 
         // prior only to last month
         TimeFilter timeFilter = TimeFilter.priorOnly(1, period);
@@ -306,7 +323,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction1 = new FrontEndRestriction();
         Bucket bucket = Bucket.valueBkt(ComparisonType.ENDS_WITH, Collections.singletonList("Acufocus, Inc."));
-        BucketRestriction endsWithRestriction = new BucketRestriction(BusinessEntity.Account, InterfaceName.LDC_Name.name(), bucket);
+        BucketRestriction endsWithRestriction = new BucketRestriction(BusinessEntity.Account,
+                InterfaceName.LDC_Name.name(), bucket);
         frontEndRestriction1.setRestriction(endsWithRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction1);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -410,8 +428,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         contactQuery.setContactRestriction(frontEndRestriction);
         contactQuery.setLookups(Arrays.asList( //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.AccountId.name()),
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name())
-        ));
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name())));
         contactQuery.setPageFilter(new PageFilter(0, 100));
         dataPage = entityQueryService.getData(contactQuery, DataCollection.Version.Blue);
         Assert.assertEquals(dataPage.getData().size(), 10);
@@ -422,8 +439,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery emptyContactQuery = new FrontEndQuery();
         emptyContactQuery.setMainEntity(BusinessEntity.Contact);
         emptyContactQuery.setContactRestriction(frontEndRestriction);
-        emptyContactQuery.setLookups(Collections.singletonList(
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name())));
+        emptyContactQuery.setLookups(
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name())));
         dataPage = entityQueryService.getData(emptyContactQuery, DataCollection.Version.Blue);
         Assert.assertEquals(dataPage.getData().size(), 10);
         for (Map<String, Object> contact : dataPage.getData()) {

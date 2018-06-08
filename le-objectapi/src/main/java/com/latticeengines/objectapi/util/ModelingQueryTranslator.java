@@ -30,7 +30,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
     }
 
     public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, EventType eventType,
-                                        TimeFilterTranslator timeTranslator) {
+            TimeFilterTranslator timeTranslator) {
 
         if (restrictionNotSpecified(frontEndQuery) && restrictionNotSpecified(frontEndQuery.getSegmentQuery())) {
             throw new IllegalArgumentException("No restriction specified for event query");
@@ -43,29 +43,26 @@ public class ModelingQueryTranslator extends QueryTranslator {
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
 
         if (frontEndQuery.getSegmentQuery() != null) {
-            Restriction segmentRestriction = translateSegmentQuery(
-                frontEndQuery.getSegmentQuery(), timeTranslator, queryBuilder);
+            Restriction segmentRestriction = translateSegmentQuery(frontEndQuery.getSegmentQuery(), timeTranslator,
+                    queryBuilder);
             restriction = Restriction.builder().and(segmentRestriction, restriction).build();
         }
 
         setTargetProducts(restriction, frontEndQuery.getTargetProductIds());
 
         switch (eventType) {
-            case Scoring:
-                queryBuilder = eventQueryTranslator.translateForScoring(queryFactory, repository, restriction,
-                        frontEndQuery,
-                        queryBuilder);
-                break;
-            case Training:
-                queryBuilder = eventQueryTranslator.translateForTraining(queryFactory, repository, restriction,
-                        frontEndQuery,
-                        queryBuilder);
-                break;
-            case Event:
-                queryBuilder = eventQueryTranslator.translateForEvent(queryFactory, repository, restriction,
-                        frontEndQuery,
-                        queryBuilder);
-                break;
+        case Scoring:
+            queryBuilder = eventQueryTranslator.translateForScoring(queryFactory, repository, restriction,
+                    frontEndQuery, queryBuilder);
+            break;
+        case Training:
+            queryBuilder = eventQueryTranslator.translateForTraining(queryFactory, repository, restriction,
+                    frontEndQuery, queryBuilder);
+            break;
+        case Event:
+            queryBuilder = eventQueryTranslator.translateForEvent(queryFactory, repository, restriction, frontEndQuery,
+                    queryBuilder);
+            break;
         }
 
         PageFilter pageFilter = new PageFilter(0, 0);
@@ -74,10 +71,11 @@ public class ModelingQueryTranslator extends QueryTranslator {
             pageFilter = frontEndQuery.getPageFilter();
         }
 
-        queryBuilder.page(pageFilter);
+        queryBuilder.page(pageFilter).distinct(frontEndQuery.getDistinct());
 
         if (pageFilter.getRowOffset() > 0 || pageFilter.getNumRows() > 0) {
-            // set sort order, or pagination will return different result each time
+            // set sort order, or pagination will return different result each
+            // time
             Sort sort = new Sort();
             sort.setLookups(queryBuilder.getLookups());
             queryBuilder.orderBy(sort);
@@ -94,13 +92,12 @@ public class ModelingQueryTranslator extends QueryTranslator {
         return frontEndRestriction == null || frontEndRestriction.getRestriction() == null;
     }
 
-    private Restriction translateSegmentQuery(FrontEndQuery segmentQuery,
-                                              TimeFilterTranslator timeTranslator,
-                                              QueryBuilder queryBuilder) {
+    private Restriction translateSegmentQuery(FrontEndQuery segmentQuery, TimeFilterTranslator timeTranslator,
+            QueryBuilder queryBuilder) {
         FrontEndRestriction segmentAccountRestriction = getEntityFrontEndRestriction(BusinessEntity.Account,
-                                                                                     segmentQuery);
-        Restriction segmentRestriction = translateFrontEndRestriction(
-            BusinessEntity.Account, segmentAccountRestriction, queryBuilder, timeTranslator);
+                segmentQuery);
+        Restriction segmentRestriction = translateFrontEndRestriction(BusinessEntity.Account, segmentAccountRestriction,
+                queryBuilder, timeTranslator);
         segmentRestriction = translateInnerRestriction(segmentQuery, BusinessEntity.Account, segmentRestriction);
         return segmentRestriction;
     }

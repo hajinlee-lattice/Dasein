@@ -67,13 +67,18 @@ public class QueryProcessor {
 
         if (query.getRestriction() != null) {
             BooleanExpression whereClause = processRestriction(query.getRestriction(), resolverFactory,
-                                                               query.getExistsJoins());
+                    query.getExistsJoins());
             sqlQuery = sqlQuery.where(whereClause);
         }
         if (StringUtils.isNotBlank(query.getFreeFormTextSearch())
-            && !query.getFreeFormTextSearchAttributes().isEmpty()) {
+                && !query.getFreeFormTextSearchAttributes().isEmpty()) {
             sqlQuery = sqlQuery.where(processFreeTextSearch(query));
         }
+
+        if (query.getDistinct() != null && query.getDistinct()) {
+            sqlQuery = sqlQuery.distinct();
+        }
+
         sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups()));
         if (query.getPageFilter() != null && !query.containEntityForExists()) {
             sqlQuery = addPaging(sqlQuery, query.getPageFilter());
@@ -146,7 +151,7 @@ public class QueryProcessor {
     }
 
     private Set<BusinessEntity> checkAndGetClusteredEntities(BusinessEntity mainEntity,
-                                                             List<JoinSpecification> lookupJoins) {
+            List<JoinSpecification> lookupJoins) {
         Set<BusinessEntity> clusteredEntities = new HashSet<>();
 
         if (mainEntity != null) {
@@ -157,12 +162,12 @@ public class QueryProcessor {
             BusinessEntity target = join.getDestinationEntity();
             // from all seen entities find one can join the current target
             clusteredEntities.stream() //
-                .map(e -> e.join(target)) //
-                .filter(Objects::nonNull) //
-                .findAny() //
-                .orElseThrow(() -> new QueryEvaluationException(
-                    "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity()
-                    + " to entity " + target + "."));
+                    .map(e -> e.join(target)) //
+                    .filter(Objects::nonNull) //
+                    .findAny() //
+                    .orElseThrow(() -> new QueryEvaluationException(
+                            "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity()
+                                    + " to entity " + target + "."));
 
             clusteredEntities.add(target);
         }
@@ -176,8 +181,8 @@ public class QueryProcessor {
         private Set<BusinessEntity> joinedEntities;
         private AttributeRepository repository;
 
-        JoinedEntityVisitor(SQLQuery<?> sqlQuery, BusinessEntity mainEntity,
-                            Set<BusinessEntity> joinedEntities, AttributeRepository repository) {
+        JoinedEntityVisitor(SQLQuery<?> sqlQuery, BusinessEntity mainEntity, Set<BusinessEntity> joinedEntities,
+                AttributeRepository repository) {
             this.sqlQuery = sqlQuery;
             this.mainEntity = mainEntity;
             this.joinedEntities = joinedEntities;
@@ -209,14 +214,16 @@ public class QueryProcessor {
     }
 
     private SQLQuery<?> addLookupJoins(SQLQuery<?> sqlQuery, AttributeRepository repository, Query query) {
-        // first, we make sure all joined entities are in a cluster and reachable, so we can do a valid join
+        // first, we make sure all joined entities are in a cluster and
+        // reachable, so we can do a valid join
         Set<BusinessEntity> joinedEntities = checkAndGetClusteredEntities(query.getMainEntity(),
-                                                                          query.getLookupJoins());
-        // generate join in bfs order, so relationships (join keys) appear only after the entities (tables) are defined
+                query.getLookupJoins());
+        // generate join in bfs order, so relationships (join keys) appear only
+        // after the entities (tables) are defined
         if (!joinedEntities.isEmpty()) {
             BreadthFirstSearch bfs = new BreadthFirstSearch();
-            bfs.run(query.getMainEntity(), new JoinedEntityVisitor(sqlQuery, query.getMainEntity(),
-                                                                   joinedEntities, repository));
+            bfs.run(query.getMainEntity(),
+                    new JoinedEntityVisitor(sqlQuery, query.getMainEntity(), joinedEntities, repository));
         }
         return sqlQuery;
     }

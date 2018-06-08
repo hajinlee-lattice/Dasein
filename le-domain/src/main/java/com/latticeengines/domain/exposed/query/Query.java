@@ -31,8 +31,8 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 /**
  * NOTE:
  *
- * SchemaInterpretation and ColumnLookup based implementation is deprecated
- * The new framework uses BusinessEntity and AttributeLookup.
+ * SchemaInterpretation and ColumnLookup based implementation is deprecated The
+ * new framework uses BusinessEntity and AttributeLookup.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -70,6 +70,9 @@ public class Query implements GraphNode {
     @JsonProperty("free_form_text_search")
     private String freeFormTextSearch;
 
+    @JsonProperty("distinct")
+    private Boolean distinct = Boolean.FALSE;
+
     @JsonProperty("free_form_text_search_attributes")
     private List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes = new ArrayList<>();
 
@@ -87,7 +90,6 @@ public class Query implements GraphNode {
 
     @JsonIgnore
     private List<JoinSpecification> commonTableJoins;
-
 
     public static QueryBuilder builder() {
         return new QueryBuilder();
@@ -173,6 +175,14 @@ public class Query implements GraphNode {
 
     public boolean hasPreprocessed() {
         return subQuery != null && subQuery.getSubQueryExpression() != null;
+    }
+
+    public Boolean getDistinct() {
+        return this.distinct;
+    }
+
+    public void setDistinct(Boolean distinct) {
+        this.distinct = distinct;
     }
 
     public void analyze() {

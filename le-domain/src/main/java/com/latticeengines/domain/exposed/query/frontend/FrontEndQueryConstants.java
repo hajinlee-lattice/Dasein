@@ -40,4 +40,6 @@ public class FrontEndQueryConstants {
     public static final String RATING_ENGINE_ID = "rating_engine_id";
 
     public static final String EVALUATION_DATE = "evaluation_date";
+
+    public static final String DISTINCT = "distinct";
 }

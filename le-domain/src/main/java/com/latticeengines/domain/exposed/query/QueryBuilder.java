@@ -21,6 +21,7 @@ public class QueryBuilder {
     private PageFilter pageFilter;
     private String freeFormTextSearch;
     private List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes = new ArrayList<>();
+    private Boolean distinct = Boolean.FALSE;
 
     QueryBuilder() {
     }
@@ -115,6 +116,12 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder distinct(Boolean distinct) {
+        this.distinct = distinct;
+        return this;
+    }
+
+    @SuppressWarnings("rawtypes")
     public List getSubQueryList() {
         return Collections.unmodifiableList(subQueryList);
     }
@@ -135,6 +142,7 @@ public class QueryBuilder {
         query.setSubQuery(subQuery);
         query.setCommonTableQueryList(subQueryList);
         query.setGroupBy(groupBy);
+        query.setDistinct(distinct);
         return query;
     }
 

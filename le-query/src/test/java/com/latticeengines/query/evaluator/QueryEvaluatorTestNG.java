@@ -39,26 +39,30 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     public void testLookup() {
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
+                .distinct(true) //
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
-        sqlContains(sqlQuery, String.format("select %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("select distinct %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
 
         // entity lookup
         query = Query.builder() //
                 .find(BusinessEntity.Account) //
+                .distinct(true) //
                 .build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, "select ?");
+        sqlContains(sqlQuery, "select distinct ?");
         sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
 
         // bucketed attribute
         query = Query.builder() //
                 .select(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR) //
-                .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME).build();
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
+                .distinct(true) //
+                .build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery,
-                String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, BUCKETED_NOMINAL_ATTR));
+        sqlContains(sqlQuery, String.format("select distinct (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR,
+                BUCKETED_NOMINAL_ATTR));
     }
 
     @Test(groups = "functional")
@@ -69,8 +73,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder().from(BusinessEntity.Contact)
                 .select(BusinessEntity.Contact, ATTR_CONTACT_ID, ATTR_CONTACT_EMAIL) //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
-            .select(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE) //
-            .select(BusinessEntity.Transaction, ATTR_PRODUCT_ID) //
+                .select(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE) //
+                .select(BusinessEntity.Transaction, ATTR_PRODUCT_ID) //
                 .where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery,
@@ -79,7 +83,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("join %s as %s", accountTableName, ACCOUNT));
         sqlContains(sqlQuery, String.format("on %s.%s = %s.%s", CONTACT, ATTR_ACCOUNT_ID, ACCOUNT, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("left join %s as %s", transactionTableName, TRANSACTION));
-        sqlContains(sqlQuery, String.format("on %s.%s = %s.%s", ACCOUNT, ATTR_ACCOUNT_ID, TRANSACTION, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery,
+                String.format("on %s.%s = %s.%s", ACCOUNT, ATTR_ACCOUNT_ID, TRANSACTION, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("where lower(%s.%s) = lower(?)", CONTACT, ATTR_CONTACT_ID));
     }
 
@@ -278,8 +283,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 { "bucket is not null", ComparisonType.NOT_EQUAL, new Object[] { null }, notNullPattern }, //
                 { "bucket is not null", ComparisonType.IS_NOT_NULL, null, notNullPattern }, //
                 { "bucket != label", ComparisonType.NOT_EQUAL, new Object[] { "Yes" }, notEqualPattern }, //
-                { "bucket in collection", ComparisonType.IN_COLLECTION, new Object[] { "YES", "no" }, inCollectionPattern }, //
-                { "bucket not in collection", ComparisonType.NOT_IN_COLLECTION, new Object[]{"yes", "no"}, notInCollectionPattern} //
+                { "bucket in collection", ComparisonType.IN_COLLECTION, new Object[] { "YES", "no" },
+                        inCollectionPattern }, //
+                { "bucket not in collection", ComparisonType.NOT_IN_COLLECTION, new Object[] { "yes", "no" },
+                        notInCollectionPattern } //
         };
     }
 
@@ -314,10 +321,11 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testTimeRestriction() {
-        // TODO: restriction based on Transaction (daily aggregated table) is to be deprecated.
+        // TODO: restriction based on Transaction (daily aggregated table) is to
+        // be deprecated.
         // time restriction
         Restriction inner = Restriction.builder() //
-            .let(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE)//
+                .let(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE)//
                 .inCurrentPeriod(Period.Quarter.name()) //
                 .build();
 
@@ -328,8 +336,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder().from(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("DATE_TRUNC('%s', TO_DATE(%s.%s, 'YYYY-MM-DD')) = ", Period.Quarter.name(),
-                                            TRANSACTION, ATTR_TRANSACTION_DATE));
-        sqlContains(sqlQuery, String.format("DATEADD('%1$s', %2$d, DATE_TRUNC('%1$s', GETDATE()))", Period.Quarter.name(), 0));
+                TRANSACTION, ATTR_TRANSACTION_DATE));
+        sqlContains(sqlQuery,
+                String.format("DATEADD('%1$s', %2$d, DATE_TRUNC('%1$s', GETDATE()))", Period.Quarter.name(), 0));
     }
 
     @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
@@ -416,7 +425,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testWindowFunction() {
-        // TODO: restriction based on Transaction (daily aggregated table) is to be deprecated.
+        // TODO: restriction based on Transaction (daily aggregated table) is to
+        // be deprecated.
         String accountTotalAmount = "AccountTotalAmount";
         String maxAmount = "MaxAmount";
         String caseAmount = "CaseAmount";
@@ -431,8 +441,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         WindowFunctionLookup maxLookup = WindowFunctionLookup.max(amount, maxAmount);
         Restriction accountRestriction = Restriction.builder().let(accountId).eq("0012400001DNJYKAA5").build();
         Query query = Query.builder().select(accountId, sumLookup, maxLookup, caseAmountLookup)
-                .from(BusinessEntity.Transaction)
-                .where(accountRestriction).build();
+                .from(BusinessEntity.Transaction).where(accountRestriction).build();
 
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery,
@@ -449,14 +458,14 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCaseLookup() {
         TreeMap<String, Restriction> cases = new TreeMap<>();
-        Restriction A = Restriction.builder().and(
-                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("c").build(),
-                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).lte("d").build()
-        ).build();
-        Restriction B = Restriction.builder().and(
-                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).gt("a").build(),
-                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).lt("b").build()
-        ).build();
+        Restriction A = Restriction.builder()
+                .and(Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("c").build(),
+                        Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).lte("d").build())
+                .build();
+        Restriction B = Restriction.builder()
+                .and(Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).gt("a").build(),
+                        Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).lt("b").build())
+                .build();
         Restriction C = Restriction.builder().let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("No").build();
 
         cases.put("B", B);
@@ -469,8 +478,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .select(caseLookup) //
                 .where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("when (%s.%s >= ? and %s.%s <= ?)", ACCOUNT, ATTR_ACCOUNT_NAME, ACCOUNT, ATTR_ACCOUNT_NAME));
-        sqlContains(sqlQuery, String.format("when (%s.%s > ? and %s.%s < ?)", ACCOUNT, ATTR_ACCOUNT_CITY, ACCOUNT, ATTR_ACCOUNT_CITY));
+        sqlContains(sqlQuery, String.format("when (%s.%s >= ? and %s.%s <= ?)", ACCOUNT, ATTR_ACCOUNT_NAME, ACCOUNT,
+                ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("when (%s.%s > ? and %s.%s < ?)", ACCOUNT, ATTR_ACCOUNT_CITY, ACCOUNT,
+                ATTR_ACCOUNT_CITY));
         sqlContains(sqlQuery, String.format("when (%s.%s>>?)&? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
         sqlContains(sqlQuery, "else ? end");
         sqlContains(sqlQuery, "as Score");
@@ -502,8 +513,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .groupBy(new AttributeLookup(null, "Score")) //
                 .build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("when (%s.%s >= ? and %s.%s <= ?)", ACCOUNT, ATTR_ACCOUNT_NAME, ACCOUNT, ATTR_ACCOUNT_NAME));
-        sqlContains(sqlQuery, String.format("when (%s.%s > ? and %s.%s < ?)", ACCOUNT, ATTR_ACCOUNT_CITY, ACCOUNT, ATTR_ACCOUNT_CITY));
+        sqlContains(sqlQuery, String.format("when (%s.%s >= ? and %s.%s <= ?)", ACCOUNT, ATTR_ACCOUNT_NAME, ACCOUNT,
+                ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("when (%s.%s > ? and %s.%s < ?)", ACCOUNT, ATTR_ACCOUNT_CITY, ACCOUNT,
+                ATTR_ACCOUNT_CITY));
         sqlContains(sqlQuery, String.format("when (%s.%s>>?)&? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
         sqlContains(sqlQuery, "else ? end");
         sqlContains(sqlQuery, "as Score");
