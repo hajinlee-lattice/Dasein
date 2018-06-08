@@ -42,7 +42,7 @@ public class PurchaseHistoryServiceImplTestNG extends AbstractTestNGSpringContex
         ((PurchaseHistoryServiceImpl) purchaseHistoryService).setDataCollectionProxy(proxy);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "manual")
     public void testGetAllSpendAnalyticsSegments() {
         DataPage result = purchaseHistoryService.getAllSpendAnalyticsSegments();
         Assert.assertNotNull(result);
