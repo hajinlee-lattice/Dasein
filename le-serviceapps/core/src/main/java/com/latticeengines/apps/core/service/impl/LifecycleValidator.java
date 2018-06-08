@@ -37,6 +37,7 @@ public class LifecycleValidator extends AttrValidator {
             return;
         }
         AttrConfigProp stateProp = attrConfig.getProperty(ColumnMetadataKey.State);
+        AttrState finalState = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
         if(stateProp != null) {
             if(stateProp.getCustomValue() != null) {
                 AttrState customState = AttrState.valueOf(stateProp.getCustomValue().toString());
@@ -52,28 +53,25 @@ public class LifecycleValidator extends AttrValidator {
                                 attrConfig);
                     }
                 }
-            } else {
-                if (stateProp.getSystemValue() != null) {
-                    AttrState systemState = AttrState.valueOf(stateProp.getSystemValue().toString());
-                    if (systemState.equals(AttrState.Inactive)) {
-                        for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
-                            AttrConfigProp groupUsageProp = attrConfig.getProperty(group.name());
-                            if (groupUsageProp != null) {
-                                if (groupUsageProp.getCustomValue() != null) {
+            }
+            // check customer value or system value is equal to Inactive
+            if (AttrState.Inactive.equals(finalState)) {
+                for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
+                    AttrConfigProp groupUsageProp = attrConfig.getProperty(group.name());
+                    if (groupUsageProp != null) {
+                        if (groupUsageProp.getCustomValue() != null) {
+                            addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
+                                    String.format(ValidationMsg.Errors.UPDATE_INACTIVE, group.name(),
+                                            attrConfig.getAttrName()),
+                                    attrConfig);
+                        }
+                        if (groupUsageProp.getSystemValue() != null) {
+                            Boolean groupUsage = Boolean.valueOf(groupUsageProp.getSystemValue().toString());
+                            if (groupUsage) {
                                     addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                            String.format(ValidationMsg.Errors.UPDATE_INACTIVE,
-                                                    group.name(), attrConfig.getAttrName()),
+                                        String.format(ValidationMsg.Errors.INACTIVE_USAGE, attrConfig.getAttrName(),
+                                                group.name()),
                                             attrConfig);
-                                }
-                                if (groupUsageProp.getSystemValue() != null) {
-                                    Boolean groupUsage = Boolean.valueOf(groupUsageProp.getSystemValue().toString());
-                                    if (groupUsage) {
-                                        addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                                String.format(ValidationMsg.Errors.INACTIVE_USAGE,
-                                                        attrConfig.getAttrName(), group.name()),
-                                                attrConfig);
-                                    }
-                                }
                             }
                         }
                     }

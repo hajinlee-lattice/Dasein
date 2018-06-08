@@ -578,6 +578,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             stateProp.setAllowCustomization(attrSpec == null || attrSpec.stateChange());
             mergeConfig.putProperty(ColumnMetadataKey.State, stateProp);
             modifyDeprecatedAttrState(mergeConfig, metadata);
+            modifyInactivateState(mergeConfig);
 
             AttrConfigProp<String> displayNameProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.DisplayName, new AttrConfigProp<String>());
@@ -622,6 +623,22 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             throw new LedpException(LedpCode.LEDP_40023, new String[] { renderedAttrNames.toString() });
         }
         return new ArrayList<>(map.values());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void modifyInactivateState(AttrConfig attrConfig) {
+        AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) attrConfig
+                .getProperty(ColumnMetadataKey.State);
+        AttrState customVal = stateProp.getCustomValue();
+        // set allow customization to false when customer value of state prop is
+        // inactive
+        if (AttrState.Inactive.equals(customVal)) {
+            attrConfig.getAttrProps().entrySet().forEach(entry -> {
+                if (!entry.getKey().equals(ColumnMetadataKey.State))
+                    entry.getValue().setAllowCustomization(false);
+            });
+        }
+
     }
 
     @SuppressWarnings("unchecked")
