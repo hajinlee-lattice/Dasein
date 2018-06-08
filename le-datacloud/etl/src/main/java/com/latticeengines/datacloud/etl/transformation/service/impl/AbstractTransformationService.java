@@ -274,7 +274,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         if (success && !(source instanceof TableSource)) {
             try {
                 // register hive table
-                createSourceHiveTable(source, version);
+                // createSourceHiveTable(source, version);
             } catch (Exception e) {
                 getLogger().error("Failed to create hive table.", e);
             }
