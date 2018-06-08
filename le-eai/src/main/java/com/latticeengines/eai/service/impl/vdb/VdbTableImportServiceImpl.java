@@ -403,6 +403,9 @@ public class VdbTableImportServiceImpl extends ImportService {
             ImportVdbTableConfiguration importVdbTableConfiguration = vdbConnectorConfiguration
                     .getVdbTableConfiguration(table.getName());
             if (importVdbTableConfiguration == null || importVdbTableConfiguration.getTotalRows() <= 0) {
+                context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.FALSE);
+                context.getProperty(ImportProperty.IGNORED_ROWS, Map.class).put(table.getName(), 0L);
+                context.getProperty(ImportProperty.DUPLICATE_ROWS, Map.class).put(table.getName(), 0L);
                 continue;
             }
 
