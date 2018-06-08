@@ -98,9 +98,10 @@
                             </span>
                         </p> -->
 
-                        <p ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index" class="attributesDisplay">
+                        <p ng-if="!vm.invalidSegments.has(segment.name)" ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index" class="attributesDisplay">
                             {{attr}}
                         </p>
+                        <p ng-if="vm.invalidSegments.has(segment.name)" class="attributesDisplay centered italicized"> <i class="fa fa-exclamation-triangle" style="color:#ca2b2b"></i> This segment contains invalid or deleted attributes. </p>
                     </div>
                     <div class="tile-footer segments">
                         <div class="account-count columns six">

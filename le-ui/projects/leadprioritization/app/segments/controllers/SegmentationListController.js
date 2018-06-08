@@ -45,7 +45,8 @@ angular.module('lp.segments.segments', [
                 name: {fieldname: 'display_name', visible: true, maxLength: 50},
                 description: {fieldname: 'description', visible: true, maxLength: 1000}
           }
-        }
+        },
+        invalidSegments: new Set()
     });
 
     vm.init = function() {
@@ -134,7 +135,7 @@ angular.module('lp.segments.segments', [
             // $state.go('home.segment.accounts', {segment: segment.name}, { reload: true } );
             if (segment.is_master_segment) {
                 $state.go('home.segment.explorer.attributes', {segment: "Create"}, {reload: true});
-            } else {
+            } else if (!vm.invalidSegments.has(segment.name)){
                 $state.go('home.segment.explorer.builder', {segment: segment.name}, {reload: true});
             }
         } else {
@@ -234,7 +235,7 @@ angular.module('lp.segments.segments', [
                 bucketColumnId = restriction.bucketRestriction.attr.split('.')[1],
                 enrichment = vm.enrichments[vm.enrichmentsMap[bucketColumnId]];
 
-            if (enrichment) {
+            if (enrichment && vm.cube[bucketEntity] != undefined) {
                 var cube = vm.cube[bucketEntity].Stats[bucketColumnId];
                 
                 if (cube.Bkts) {
@@ -282,6 +283,8 @@ angular.module('lp.segments.segments', [
                     // for pure string attributes
                     attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationLabel('String', restriction.bucketRestriction) + " '" + QueryTreeService.getOperationValue(restriction.bucketRestriction, 'String') + "'");
                 }
+            } else {
+                vm.invalidSegments.add(segment.name);
             }
         });
 
