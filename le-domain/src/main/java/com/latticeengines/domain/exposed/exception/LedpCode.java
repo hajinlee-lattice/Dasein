@@ -306,6 +306,7 @@ public enum LedpCode {
     LEDP_18182("Submit {0} job failed: {1}"), //
     LEDP_18183("Column name {0} has potential conflict with system defined name, Please don't begin with {1}"), //
     LEDP_18184("Job cannot be null or incomplete"), //
+    LEDP_18185("User {0} does not have the right to deactivate attribute"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

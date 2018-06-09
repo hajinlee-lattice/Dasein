@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -42,6 +44,8 @@ import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.AttrConfigService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.UserService;
 
 @Component("attrConfigService")
 public class AttrConfigServiceImpl implements AttrConfigService {
@@ -62,6 +66,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private UserService userService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -228,11 +235,20 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         }
         if (request.getDeselect() != null) {
+            verifyAccessLevel();
             for (String attr : request.getDeselect()) {
                 updateAttrConfigsForState(category, attrConfigs, attr, ColumnMetadataKey.State, AttrState.Inactive);
             }
         }
         return attrConfigRequest;
+    }
+
+    private void verifyAccessLevel() {
+        AccessLevel accessLevel = userService.getAccessLevel(MultiTenantContext.getTenantId(),
+                MultiTenantContext.getEmailAddress());
+        if (AccessLevel.SUPER_ADMIN != accessLevel && AccessLevel.INTERNAL_ADMIN != accessLevel) {
+            throw new LedpException(LedpCode.LEDP_18185, new String[] { MultiTenantContext.getEmailAddress() });
+        }
     }
 
     @VisibleForTesting

@@ -2,6 +2,8 @@ package com.latticeengines.pls.service.impl;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
@@ -40,6 +44,8 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class AttrConfigServiceImplUnitTestNG {
@@ -48,6 +54,9 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Mock
     private CDLAttrConfigProxy cdlAttrConfigProxy;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     @Spy
@@ -69,6 +78,10 @@ public class AttrConfigServiceImplUnitTestNG {
     private static final Long activeForContact = 5000L;
     private static final Long inactiveForContact = 4000L;
     private static final Long totalContactAttrs = 90000L;
+    private static final Long websiteKeywordLimit = 500L;
+    private static final Long activeForWebsiteKeyword = 5000L;
+    private static final Long inactiveForWebsiteKeyword = 4000L;
+    private static final Long totalWebsiteKeywordAttrs = 90000L;
     private static Tenant tenant;
 
     private static final String[] select = { "attr1", "attr2", "attr3" };
@@ -121,6 +134,11 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalContactAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), contactLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForContact);
+
+        categoryOverview = result.get(Category.WEBSITE_KEYWORDS.getName());
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalWebsiteKeywordAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), websiteKeywordLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), activeForWebsiteKeyword);
 
     }
 
@@ -209,6 +227,7 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGenerateAttrConfigRequestForActivation() {
+        doReturn(AccessLevel.SUPER_ADMIN).when(userService).getAccessLevel(anyString(), nullable(String.class));
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
         request.setDeselect(Arrays.asList(deselect));
         request.setSelect(Arrays.asList(select));
@@ -221,6 +240,15 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Contact);
             Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.State));
             log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
+        }
+
+        doReturn(AccessLevel.INTERNAL_USER).when(userService).getAccessLevel(anyString(), nullable(String.class));
+        try {
+            attrConfigRequest = attrConfigService
+                    .generateAttrConfigRequestForActivation(Category.CONTACT_ATTRIBUTES.getName(), request);
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof LedpException);
+            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18185);
         }
     }
 
@@ -374,6 +402,17 @@ public class AttrConfigServiceImplUnitTestNG {
         valueCountMap = new HashMap<>();
         valueCountMap.put(AttrState.Active, activeForContact);
         valueCountMap.put(AttrState.Inactive, inactiveForContact);
+        propSummary.put(ColumnMetadataKey.State, valueCountMap);
+
+        AttrConfigCategoryOverview<AttrState> websiteKeywordCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
+        map.put(Category.WEBSITE_KEYWORDS.getName(), websiteKeywordCategoryAttrConfigOverview);
+        websiteKeywordCategoryAttrConfigOverview.setLimit(websiteKeywordLimit);
+        websiteKeywordCategoryAttrConfigOverview.setTotalAttrs(totalWebsiteKeywordAttrs);
+        propSummary = new HashMap<>();
+        websiteKeywordCategoryAttrConfigOverview.setPropSummary(propSummary);
+        valueCountMap = new HashMap<>();
+        valueCountMap.put(AttrState.Active, activeForWebsiteKeyword);
+        valueCountMap.put(AttrState.Inactive, inactiveForWebsiteKeyword);
         propSummary.put(ColumnMetadataKey.State, valueCountMap);
 
         log.info("map is " + map);
