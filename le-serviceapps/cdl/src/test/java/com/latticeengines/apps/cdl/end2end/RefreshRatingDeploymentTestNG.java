@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
@@ -74,7 +75,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private String uuid2;
     private String uuid3;
 
-    @BeforeClass(groups =  "end2end")
+    @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
         setup(USE_EXISTING_TENANT, ENABLE_AI_RATINGS);
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
@@ -180,7 +181,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         log.info("Created rating engine " + newEngine.getId());
 
         AIModel model = (AIModel) newEngine.getActiveModel();
-        configureCustomEventModel(model);
+        configureCustomEventModel(model, "SomeFileName", CustomEventModelingType.CDL);
         model.setModelSummaryId(modelSummary.getId());
 
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);

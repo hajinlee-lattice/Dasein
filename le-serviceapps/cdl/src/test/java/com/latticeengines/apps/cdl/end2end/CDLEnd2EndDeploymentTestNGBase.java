@@ -175,9 +175,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final long RATING_D_COUNT_2_REBUILD = 31;
     static final long RATING_F_COUNT_2_REBUILD = 4;
 
-    static final String SEGMENT_PRODUCT_ID = "A80D4770376C1226C47617C071324C0B";
-    static final String TARGET_PRODUCT = "B0829F745A42D18FE77050EC05A51D2F";
-    static final String TRAINING_PRODUCT = "6368494B622E0CB60F9C80FEB1D0F95F";
+    static final String SEGMENT_PRODUCT_ID = "snB31hdBFDT9bcNvGMltIgsagzR15io";
+    static final String TARGET_PRODUCT = "9IfG2T5joqw0CIJva0izeZXSCwON1S";
+    static final String TRAINING_PRODUCT = "650050C066EF46905EC469E9CC2921E0";
 
     static final int EARLIEST_TRANSACTION = 48033;
     static final int LATEST_TRANSACTION = 48929;
@@ -293,7 +293,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type,
-                               Resource source) {
+            Resource source) {
         logger.info("Upload file " + fileName + ", operation type is " + type.name() + ", Schema is " + schema.name());
         return fileUploadProxy.uploadDeleteFile(false, fileName, schema.name(), type.name(), source);
     }
@@ -309,30 +309,30 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             importTemplate = MetadataConverter.getTable(schema, new ArrayList<>(), null, null, false);
             importTemplate.setTableType(TableType.IMPORTTABLE);
             switch (entity) {
-                case Account:
-                    importTemplate.getAttributes().forEach(attr -> {
-                        attr.setGroupsViaList(Arrays.asList( //
-                                ColumnSelection.Predefined.TalkingPoint, //
-                                ColumnSelection.Predefined.CompanyProfile));
-                        if (attr.getName().equals("Id") || attr.getName().equals("AccountId")) {
-                            attr.setInterfaceName(InterfaceName.AccountId);
-                        }
-                    });
-                    importTemplate.setName(SchemaInterpretation.Account.name());
-                    break;
-                case Contact:
-                    importTemplate.setName(SchemaInterpretation.Contact.name());
-                    importTemplate.getAttributes().forEach(attr -> {
-                        if (attr.getName().equals("Id") || attr.getName().equals("ContactId")) {
-                            attr.setInterfaceName(InterfaceName.ContactId);
-                        }
-                    });
-                    break;
-                case Product:
-                    importTemplate.setName(SchemaInterpretation.Product.name());
-                    break;
-                default:
-                    importTemplate.setName(SchemaInterpretation.Transaction.name());
+            case Account:
+                importTemplate.getAttributes().forEach(attr -> {
+                    attr.setGroupsViaList(Arrays.asList( //
+                            ColumnSelection.Predefined.TalkingPoint, //
+                            ColumnSelection.Predefined.CompanyProfile));
+                    if (attr.getName().equals("Id") || attr.getName().equals("AccountId")) {
+                        attr.setInterfaceName(InterfaceName.AccountId);
+                    }
+                });
+                importTemplate.setName(SchemaInterpretation.Account.name());
+                break;
+            case Contact:
+                importTemplate.setName(SchemaInterpretation.Contact.name());
+                importTemplate.getAttributes().forEach(attr -> {
+                    if (attr.getName().equals("Id") || attr.getName().equals("ContactId")) {
+                        attr.setInterfaceName(InterfaceName.ContactId);
+                    }
+                });
+                break;
+            case Product:
+                importTemplate.setName(SchemaInterpretation.Product.name());
+                break;
+            default:
+                importTemplate.setName(SchemaInterpretation.Transaction.name());
             }
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setImportTemplate(importTemplate);
@@ -385,13 +385,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         extract.setPath(extractPath);
         extract.setProcessedRecords(numRecords);
         extract.setExtractionTimestamp(now.getTime());
-        List<String> tableNames = dataFeedProxy.registerExtract(customerSpace.toString(), feedTaskId, templateName, extract);
+        List<String> tableNames = dataFeedProxy.registerExtract(customerSpace.toString(), feedTaskId, templateName,
+                extract);
         registerImportAction(feedTaskId, numRecords, tableNames);
     }
 
     private Table getMockTemplate(BusinessEntity entity, String feedType) {
         String templateFileName = String.format("%s_%s.json", entity.name(), feedType);
-        InputStream templateIs = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, S3_AVRO_VERSION, templateFileName);
+        InputStream templateIs = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, S3_AVRO_VERSION,
+                templateFileName);
         ObjectMapper om = new ObjectMapper();
         try {
             return om.readValue(templateIs, Table.class);
@@ -404,8 +406,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String feedTaskId;
         String templateName = NamingUtils.timestamp(entity.name());
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(), feedType,
-                entity.name());
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(),
+                feedType, entity.name());
         if (dataFeedTask == null) {
             dataFeedTask = new DataFeedTask();
             Table importTemplate = getMockTemplate(entity, feedType);
@@ -472,8 +474,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
                 SourceType.FILE.getName(), feedType);
         logger.info("Modified field mapping document is saved, start importing ...");
-        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType,
-                template, template, INITIATOR);
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType, template, template,
+                INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         logger.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
@@ -481,10 +483,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     private void modifyFieldMappings(BusinessEntity entity, FieldMappingDocument fieldMappingDocument) {
         switch (entity) {
-            case Account:
-                modifyFieldMappingsForAccount(fieldMappingDocument);
-                break;
-            default:
+        case Account:
+            modifyFieldMappingsForAccount(fieldMappingDocument);
+            break;
+        default:
         }
     }
 
@@ -513,7 +515,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private ApplicationId submitImport(String customerSpace, String entity, String feedType,
-                                       SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
+            SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
         String source = SourceType.FILE.getName();
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
         String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType,
@@ -526,7 +528,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private CSVImportConfig generateImportConfig(String customerSpace, SourceFile templateSourceFile,
-                                                 SourceFile dataSourceFile, String email) {
+            SourceFile dataSourceFile, String email) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         templateSourceFile.setTableName("SourceFile_" + templateSourceFile.getName().replace(".", "_"));
         importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
@@ -903,15 +905,20 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     MetadataSegment constructTargetSegment() {
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Arrays.asList("VT"));
-        BucketRestriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
+        Bucket countryBkt = Bucket.valueBkt(ComparisonType.EQUAL, Arrays.asList("USA"));
+        BucketRestriction countryRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "LDC_Country"), countryBkt);
+
+        Bucket spendAnalyticsSegmentBkt = Bucket.valueBkt(ComparisonType.EQUAL, Arrays.asList("General Practice"));
+        BucketRestriction spendAnalyticsSegmentRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "SpendAnalyticsSegment"), spendAnalyticsSegmentBkt);
+
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_MODELING);
         segment.setDisplayName("End2End Segment Modeling");
         segment.setDescription("A test segment for CDL end2end modeling test.");
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
-        segment.setAccountRestriction(accountRestriction);
+        segment.setAccountRestriction(
+                Restriction.builder().or(countryRestriction, spendAnalyticsSegmentRestriction).build());
         return segment;
     }
 
@@ -1104,7 +1111,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void configureCrossSellModel(AIModel testAIModel, PredictionType predictionType, String targetProductId,
-                                 String trainingProductId) {
+            String trainingProductId) {
         testAIModel.setPredictionType(predictionType);
 
         CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
@@ -1118,13 +1125,20 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         config.setTrainingProducts(Collections.singletonList(trainingProductId));
     }
 
-    void configureCustomEventModel(AIModel testAIModel) {
+    void configureCustomEventModel(AIModel testAIModel, String sourceFileName, CustomEventModelingType type) {
         CustomEventModelingConfig advancedConf = CustomEventModelingConfig.getAdvancedModelingConfig(testAIModel);
-        advancedConf.setDataStores(
-                Arrays.asList(CustomEventModelingConfig.DataStore.CDL, CustomEventModelingConfig.DataStore.DataCloud));
-        advancedConf.setCustomEventModelingType(CustomEventModelingType.CDL);
+        if (type == CustomEventModelingType.CDL)
+            advancedConf.setDataStores(Arrays.asList(CustomEventModelingConfig.DataStore.CDL,
+                    CustomEventModelingConfig.DataStore.DataCloud));
+        else {
+            advancedConf.setDataStores(Arrays.asList(CustomEventModelingConfig.DataStore.CustomFileAttributes,
+                    CustomEventModelingConfig.DataStore.DataCloud));
+        }
+        advancedConf.setCustomEventModelingType(type);
         advancedConf.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
         advancedConf.setExcludePublicDomains(false);
+        advancedConf.setSourceFileName(sourceFileName);
+        advancedConf.setTransformationGroup(null); // TransformationGroup.ALL
     }
 
     void verifyRatingEngineCount(String engineId, Map<RatingBucketName, Long> expectedCounts) {

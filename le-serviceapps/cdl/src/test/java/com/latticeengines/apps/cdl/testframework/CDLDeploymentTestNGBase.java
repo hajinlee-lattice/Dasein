@@ -172,7 +172,8 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
             if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
                 if (job.getJobStatus() == JobStatus.FAILED) {
-                    log.error(applicationId + "Failed with ErrorCode" + job.getErrorCode() + "!\n" + job.getErrorMsg());
+                    log.error(
+                            applicationId + "Failed with ErrorCode " + job.getErrorCode() + ". \n" + job.getErrorMsg());
                 }
                 return job.getJobStatus();
             }
@@ -226,7 +227,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         pattern = Pattern.compile(patternStr);
         matcher = pattern.matcher(modelSummaryContent);
         String eventTable = "";
-        String uuid = "";
+        String uuid;
         if (matcher.find()) {
             String lookupId = matcher.group(0);
             eventTable = matcher.group(1);
