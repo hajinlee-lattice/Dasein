@@ -7,7 +7,7 @@ angular
             vm:'='
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore, BrowserStorageUtility) {
+        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore, BrowserStorageUtility, FeatureFlagService) {
             var vm = $scope.vm;
 
             angular.extend(vm, {
@@ -314,8 +314,12 @@ angular
                 return ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
             }
 
-            vm.showFileImport = function () {
-                return vm.hasImportAccessRights && ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
+            vm.showFileImport = function() {
+                var flags = FeatureFlagService.Flags();
+
+                var vdbMigration = FeatureFlagService.FlagIsEnabled(flags.VDB_MIGRATION);
+                return vm.hasImportAccessRights && !vdbMigration && 
+                                    ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
             }
 
             vm.init_filters();
