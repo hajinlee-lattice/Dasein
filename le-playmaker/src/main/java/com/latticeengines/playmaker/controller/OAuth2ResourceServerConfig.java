@@ -66,11 +66,10 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/playmaker/swagger-ui.html", //
                         "/playmaker/webjars/**", //
                         "/playmaker/swagger-resources", //
-                        "/playmaker/quartzjob", //
                         "/playmaker/configuration/**")
                 .and().authorizeRequests() //
                 .antMatchers("/health", //
-                        "/playmaker/quartzjob", //
+                        "/playmaker/quartzjob/**", //
                         "/playmaker/health", //
                         "/playmaker/v2/api-docs/**", //
                         "/**/favicon.ico", //
