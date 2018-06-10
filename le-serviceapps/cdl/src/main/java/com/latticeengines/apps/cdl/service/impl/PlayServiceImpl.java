@@ -87,12 +87,21 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public Play createOrUpdate(Play play, String tenantId) {
-        log.info(String.format("Creating play with name: %s, on tenant %s", play.getName(), tenantId));
+        return createOrUpdate(play, true, tenantId);
+    }
+
+    @Override
+    public Play createOrUpdate(Play play, boolean shouldLoadCoverage, String tenantId) {
+        log.info(String.format("%s play %sfor tenant %s", //
+                play.getName() == null ? "Creating" : "Updating", //
+                play.getName() == null //
+                        ? "" : String.format("with name: %s, ", play.getName()),
+                tenantId));
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
         play.setTenant(tenant);
         Play retrievedPlay = playEntityMgr.createOrUpdatePlay(play);
-        return getFullPlay(retrievedPlay, true, null);
+        return getFullPlay(retrievedPlay, shouldLoadCoverage, null);
     }
 
     @Override

@@ -160,13 +160,13 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     }
 
     @Override
-    public void cleanupRecommendations(String playId) {
-        cleanupExecutor.cleanupRecommendations(playId);
+    public int cleanupRecommendations(String playId) {
+        return cleanupExecutor.cleanupRecommendations(playId);
     }
 
     @Override
-    public void cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate) {
-        cleanupExecutor.cleanupOldRecommendationsBeforeCutoffDate(cutoffDate);
+    public int cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate) {
+        return cleanupExecutor.cleanupOldRecommendationsBeforeCutoffDate(cutoffDate);
     }
 
     @Component
@@ -177,16 +177,16 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
         @Value("${playmaker.update.bulk.max:1000}")
         private int maxUpdateRows;
 
-        public void cleanupRecommendations(String playId) {
+        public int cleanupRecommendations(String playId) {
             String tenantId = MultiTenantContext.getCustomerSpace().toString();
             boolean shouldLoop = true;
-            int count = 0;
+            int deletedCount = 0;
             int idx = 0;
             try {
                 while (shouldLoop) {
                     int updatedCount = recommendationEntityMgr.deleteInBulkByPlayId(playId, null, true, maxUpdateRows);
                     shouldLoop = updatedCount > 0;
-                    count += updatedCount;
+                    deletedCount += updatedCount;
                     if (shouldLoop) {
                         cleanupExecutorLog.info(String.format(
                                 "cleanupRecommendations: Tenant = %s, Loop idx = %d, "
@@ -194,15 +194,15 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                                 tenantId, idx++, maxUpdateRows, updatedCount));
                     }
                 }
-                if (count > 0) {
+                if (deletedCount > 0) {
                     cleanupExecutorLog.info(
                             String.format("cleanupRecommendations: Tenant = %s, Completed cleanup recommendations "
-                                    + "(count = %d) for playId = %s", count, playId));
+                                    + "(count = %d) for playId = %s", tenantId, deletedCount, playId));
                 }
 
-                Play play = playProxy.getPlay(tenantId, playId);
+                Play play = playProxy.getPlay(tenantId, playId, true, false);
                 play.setIsCleanupDone(true);
-                playProxy.createOrUpdatePlay(tenantId, play);
+                playProxy.createOrUpdatePlay(tenantId, play, false);
                 cleanupExecutorLog.info(String.format("cleanupRecommendations: Tenant = %s, Marked deleted playId = %s "
                         + "with cleanupDone flag set to true", tenantId, playId));
             } catch (Exception ex) {
@@ -210,19 +210,22 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                         "cleanupRecommendations: Tenant = %s, Failed to cleanup recommendations for playId = %s",
                         tenantId, playId), ex);
             }
+
+            return deletedCount;
         }
 
-        public void cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate) {
+        public int cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate) {
             String tenantId = MultiTenantContext.getCustomerSpace().toString();
             boolean shouldLoop = true;
-            int count = 0;
+            int deletedCount = 0;
             int idx = 0;
             try {
+                long timestamp = System.currentTimeMillis();
                 while (shouldLoop) {
                     int updatedCount = recommendationEntityMgr.deleteInBulkByCutoffDate(cutoffDate, false,
                             maxUpdateRows);
                     shouldLoop = updatedCount > 0;
-                    count += updatedCount;
+                    deletedCount += updatedCount;
                     if (shouldLoop) {
                         cleanupExecutorLog.info(String.format(
                                 "cleanupOldRecommendationsBeforeCutoffDate: Tenant = %s, Loop idx = %d, "
@@ -231,11 +234,11 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                     }
                 }
 
-                if (count > 0) {
+                if (deletedCount > 0) {
                     cleanupExecutorLog.info(String.format(
                             "cleanupOldRecommendationsBeforeCutoffDate: Tenant = %s, Completed cleanup "
-                                    + "very old recommendations (count = %d) with cutoffDate = %s",
-                            tenantId, count, cutoffDate));
+                                    + "very old recommendations (count = %d) with cutoffDate = %s in %d milliseconds",
+                            tenantId, deletedCount, cutoffDate, (System.currentTimeMillis() - timestamp)));
                 }
             } catch (Exception ex) {
                 cleanupExecutorLog.error(
@@ -243,6 +246,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                                 + "very old recommendations with cutoffDate = %s", tenantId, cutoffDate),
                         ex);
             }
+            return deletedCount;
         }
     }
 

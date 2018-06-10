@@ -15,7 +15,7 @@ public interface LpiPMRecommendation {
 
     Recommendation getRecommendationById(String recommendationId);
 
-    void cleanupRecommendations(String playId);
+    int cleanupRecommendations(String playId);
 
-    void cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate);
+    int cleanupOldRecommendationsBeforeCutoffDate(Date cutoffDate);
 }

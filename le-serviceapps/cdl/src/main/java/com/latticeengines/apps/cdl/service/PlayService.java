@@ -13,6 +13,8 @@ public interface PlayService {
 
     Play createOrUpdate(Play play, String tenantId);
 
+    Play createOrUpdate(Play play, boolean shouldLoadCoverage, String tenantId);
+
     void deleteByName(String name, Boolean hardDelete);
 
     List<Play> getAllFullPlays(boolean shouldLoadCoverage, String ratingEngineId);

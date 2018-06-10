@@ -50,33 +50,45 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
     private void cleanupForTenant(Tenant tenant) {
         try {
             MultiTenantContext.setTenant(tenant);
-            cleanupRecommendationsDueToDeletedPlays(tenant);
-            cleanupVeryOldRecommendations(tenant);
+            cleanupRecommendationsDueToDeletedPlays();
+            cleanupVeryOldRecommendations();
         } finally {
             MultiTenantContext.setTenant(null);
         }
     }
 
-    private void cleanupVeryOldRecommendations(Tenant tenant) {
+    int cleanupVeryOldRecommendations() {
         try {
             Date cutoffDate = PlaymakerUtils.dateFromEpochSeconds(System.currentTimeMillis() / 1000L
                     - TimeUnit.DAYS.toSeconds(Math.round(365 * YEARS_TO_KEEP_RECOMMENDATIONS)));
-            lpiPMRecommendation.cleanupOldRecommendationsBeforeCutoffDate(cutoffDate);
+            return lpiPMRecommendation.cleanupOldRecommendationsBeforeCutoffDate(cutoffDate);
         } catch (Exception ex) {
-            log.error(String.format("Failed to cleanup very old recommendations for tenant: %s", tenant), ex);
+            log.error(String.format("Failed to cleanup very old recommendations for tenant: %s",
+                    MultiTenantContext.getTenant().getId()), ex);
+            return 0;
         }
     }
 
-    private void cleanupRecommendationsDueToDeletedPlays(Tenant tenant) {
+    int cleanupRecommendationsDueToDeletedPlays() {
+        String tenantId = MultiTenantContext.getTenant().getId();
+        int totalDeletedCount = 0;
         try {
-            List<String> deletedPlayIdsForCleanup = playProxy
-                    .getDeletedPlayIds(MultiTenantContext.getCustomerSpace().toString(), true);
+            List<String> deletedPlayIdsForCleanup = playProxy.getDeletedPlayIds(tenantId, true);
 
             if (CollectionUtils.isNotEmpty(deletedPlayIdsForCleanup)) {
-                deletedPlayIdsForCleanup.stream().forEach(id -> lpiPMRecommendation.cleanupRecommendations(id));
+                long timestamp = System.currentTimeMillis();
+                log.info(String.format("Initiating cleanup for recommendations of %d deleted plays for tenant %s", //
+                        deletedPlayIdsForCleanup.size(), tenantId));
+                totalDeletedCount = deletedPlayIdsForCleanup.stream()
+                        .map(id -> lpiPMRecommendation.cleanupRecommendations(id)).reduce(0, (x, y) -> x + y);
+                log.info(String.format(
+                        "Finished cleanup for recommendations of %d deleted plays for tenant %s in %d milliseconds", //
+                        deletedPlayIdsForCleanup.size(), tenantId, (System.currentTimeMillis() - timestamp)));
             }
         } catch (Exception ex) {
-            log.error(String.format("Failed to cleanup recommendations for tenant: %s", tenant), ex);
+            log.error(String.format("Failed to cleanup recommendations for tenant: %s", tenantId), ex);
         }
+
+        return totalDeletedCount;
     }
 }

@@ -147,13 +147,25 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public Play getPlay(String customerSpace, String playName) {
+        return getPlay(customerSpace, playName, false, true);
+    }
+
+    public Play getPlay(String customerSpace, String playName, boolean considerDeleted, boolean shouldLoadCoverage) {
         String url = constructUrl(URL_PREFIX + "/{playName}", shortenCustomerSpace(customerSpace), playName);
+        url += "?consider-deleted=" + considerDeleted;
+        url += "&should-load-coverage=" + shouldLoadCoverage;
+
         log.info("url is " + url);
         return get("get Play", url, Play.class);
     }
 
     public Play createOrUpdatePlay(String customerSpace, Play play) {
+        return createOrUpdatePlay(customerSpace, play, true);
+    }
+
+    public Play createOrUpdatePlay(String customerSpace, Play play, boolean shouldLoadCoverage) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+        url += "?should-load-coverage=" + shouldLoadCoverage;
         log.info("url is " + url);
         return post("create or update play", url, play, Play.class);
     }

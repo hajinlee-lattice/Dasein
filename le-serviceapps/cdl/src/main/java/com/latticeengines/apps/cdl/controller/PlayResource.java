@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,8 +164,15 @@ public class PlayResource {
     public Play getPlay(//
             @PathVariable String customerSpace, //
             @PathVariable String playName, //
+            @RequestParam(value = "should-load-coverage", required = false, defaultValue = "true") Boolean shouldLoadCoverage, //
             @RequestParam(value = "consider-deleted", required = false, defaultValue = "false") Boolean considerDeleted) {
-        return playService.getFullPlayByName(playName, considerDeleted);
+        Play play;
+        if (shouldLoadCoverage) {
+            play = playService.getFullPlayByName(playName, considerDeleted);
+        } else {
+            play = playService.getPlayByName(playName, considerDeleted);
+        }
+        return play;
     }
 
     @PostMapping(value = "")
@@ -174,6 +180,7 @@ public class PlayResource {
     @ApiOperation(value = "Register a play")
     public Play createOrUpdate(//
             @PathVariable String customerSpace, //
+            @RequestParam(value = "should-load-coverage", required = false, defaultValue = "true") Boolean shouldLoadCoverage, //
             @RequestBody Play play) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
@@ -183,7 +190,7 @@ public class PlayResource {
         if (play == null) {
             throw new NullPointerException("Play is null");
         }
-        return playService.createOrUpdate(play, tenant.getId());
+        return playService.createOrUpdate(play, shouldLoadCoverage, tenant.getId());
     }
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.DELETE, headers = "Accept=application/json")

@@ -19,7 +19,6 @@ public class RecommendationCleanupCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        log.info("Received call for cleanup");
         recommendationCleanupService.cleanup();
         return true;
     }
