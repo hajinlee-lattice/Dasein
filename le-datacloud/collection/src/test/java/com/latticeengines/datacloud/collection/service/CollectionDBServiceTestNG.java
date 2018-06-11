@@ -27,12 +27,12 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         List<String> domains = new ArrayList<String>(Arrays.asList((testDomains).split(",")));
         collectionDBService.addNewDomains(domains, "builtwith", UUID.randomUUID().toString().toUpperCase());
 
-        /*
+
         while (true)
         {
             collectionDBService.service();
 
             Thread.sleep(15000);
-        }*/
+        }
     }
 }

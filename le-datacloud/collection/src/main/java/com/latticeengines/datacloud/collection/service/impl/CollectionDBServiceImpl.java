@@ -36,11 +36,11 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.aws.ecs.ECSService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.collection.entitymgr.CollectionRequestMgr;
-import com.latticeengines.datacloud.collection.entitymgr.CollectionWorkerMgr;
-import com.latticeengines.datacloud.collection.entitymgr.RawCollectionRequestMgr;
 import com.latticeengines.datacloud.collection.service.CollectionDBService;
-import com.latticeengines.datacloud.collection.util.CollectionDBUtil;
+import com.latticeengines.datacloud.collection.service.CollectionRequestService;
+import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
+import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
+import com.latticeengines.datacloud.collection.service.VendorConfigService;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
@@ -50,15 +50,17 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private static final Logger log = LoggerFactory.getLogger(CollectionDBServiceImpl.class);
     private static final int LATENCY_GAP_MS = 3000;
     @Inject
-    RawCollectionRequestMgr rawCollectionRequestMgr;
+    RawCollectionRequestService rawCollectionRequestService;
     @Inject
-    CollectionWorkerMgr collectionWorkerMgr;
+    CollectionWorkerService collectionWorkerService;
     @Inject
-    CollectionRequestMgr collectionRequestMgr;
+    CollectionRequestService collectionRequestService;
     @Inject
     S3Service s3Service;
     @Inject
     ECSService ecsService;
+    @Inject
+    VendorConfigService vendorConfigService;
     //@Inject
     //AmazonECS ecsClient;
     //@Inject
@@ -87,13 +89,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     String collectorHdfsDir;
 
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
-        return rawCollectionRequestMgr.addNewDomains(domains, vendor, reqId);
+        return rawCollectionRequestService.addNewDomains(domains, vendor, reqId);
     }
 
     public int transferRawRequests(boolean deleteFilteredReqs) {
-        List<RawCollectionRequest> rawReqs = rawCollectionRequestMgr.getNonTransferred();
-        BitSet filter = collectionRequestMgr.addNonTransferred(rawReqs);
-        rawCollectionRequestMgr.updateTransferredStatus(rawReqs, filter, deleteFilteredReqs);
+        List<RawCollectionRequest> rawReqs = rawCollectionRequestService.getNonTransferred();
+        BitSet filter = collectionRequestService.addNonTransferred(rawReqs);
+        rawCollectionRequestService.updateTransferredStatus(rawReqs, filter, deleteFilteredReqs);
 
         return rawReqs.size() - filter.cardinality();
     }
@@ -190,28 +192,34 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     public int spawnCollectionWorker() throws Exception {
         int spawnedTasks = 0;
-        List<String> vendors = CollectionDBUtil.getVendors();
+        List<String> vendors = vendorConfigService.getVendors();
+        int maxRetries = vendorConfigService.getDefMaxRetries();
+        int collectingBatch = vendorConfigService.getDefCollectionBatch();
         for (int i = 0; i < vendors.size(); ++i) {
             String vendor = vendors.get(i);
 
             //fixme: is the earliest time of collecting reqs enough? may be ready reqs should also be considered?
             //get earliest active request time
-            Timestamp earliestReqTime = collectionRequestMgr.getEarliestRequestedTime(vendor, CollectionRequest.STATUS_COLLECTING);
+            Timestamp earliestReqTime = collectionRequestService.getEarliestTime(vendor, CollectionRequest.STATUS_COLLECTING);
 
             //get stopped worker since that time
-            List<CollectionWorker> stoppedWorkers = collectionWorkerMgr.getWorkerStopped(vendor, earliestReqTime);
+            List<CollectionWorker> stoppedWorkers = collectionWorkerService.getWorkerStopped(vendor, earliestReqTime);
 
             //modify req status to READY | FAILED based on retry times
-            int modified = collectionRequestMgr.getPending(vendor, CollectionDBUtil.DEF_MAX_RETRIES, stoppedWorkers);
+            int modified = collectionRequestService.handlePending(vendor, maxRetries, stoppedWorkers);
+            if (modified > 0) {
+                log.info("find " + stoppedWorkers.size() + " workers recently stopped");
+                log.info(modified + " pending collection requests reset to ready");
+            }
 
             //check rate limit
-            int activeTasks = collectionWorkerMgr.getActiveWorkerCount(vendor);
-            int taskLimit = CollectionDBUtil.getMaxActiveTasks(vendor);
+            int activeTasks = collectionWorkerService.getActiveWorkerCount(vendor);
+            int taskLimit = vendorConfigService.getMaxActiveTasks(vendor);
             if (activeTasks >= taskLimit)
                 continue;
 
             //get ready reqs
-            List<CollectionRequest> readyReqs = collectionRequestMgr.getReady(vendor, CollectionDBUtil.DEF_COLLECTION_BATCH);
+            List<CollectionRequest> readyReqs = collectionRequestService.getReady(vendor, collectingBatch);
             if (readyReqs == null || readyReqs.size() == 0)
                 continue;
 
@@ -249,10 +257,10 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             worker.setStatus(CollectionWorker.STATUS_NEW);
             worker.setSpawnTime(ts);
             worker.setTaskArn(taskArn);
-            collectionWorkerMgr.create(worker);
+            collectionWorkerService.getEntityMgr().create(worker);
 
             //update request status
-            collectionRequestMgr.beginCollecting(readyReqs, worker);
+            collectionRequestService.beginCollecting(readyReqs, worker);
 
             readyReqs.clear();
 
@@ -308,8 +316,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains) throws Exception {
         long ret = 0;
-        String domainField = CollectionDBUtil.getDomainField(vendor);
-        String domainCheckField = CollectionDBUtil.getDomainCheckField(vendor);
+        String domainField = vendorConfigService.getDomainField(vendor);
+        String domainCheckField = vendorConfigService.getDomainCheckField(vendor);
 
         CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
                 .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
@@ -378,8 +386,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         }
         worker.setRecordsCollected(recordsCollected);
 
-        //consume reqs
-        collectionRequestMgr.consumeRequests(workerId, domains);
+        //consumeFinished reqs
+        collectionRequestService.consumeFinished(workerId, domains);
         domains.clear();
 
         //clean tmp files
@@ -407,7 +415,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         statusList.add(CollectionWorker.STATUS_NEW);
         statusList.add(CollectionWorker.STATUS_RUNNING);
         statusList.add(CollectionWorker.STATUS_FINISHED);
-        List<CollectionWorker> activeWorkers = collectionWorkerMgr.getWorkerByStatus(statusList);
+        List<CollectionWorker> activeWorkers = collectionWorkerService.getWorkerByStatus(statusList);
         if (activeWorkers == null || activeWorkers.size() == 0)
             return 0;
 
@@ -424,7 +432,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                     (task.getLastStatus().equals("RUNNING") || task.getLastStatus().equals("STOPPED"))) {
                 log.info("task " + worker.getWorkerId() + " starts running");
                 worker.setStatus(CollectionWorker.STATUS_RUNNING);
-                collectionWorkerMgr.update(worker);
+                collectionWorkerService.getEntityMgr().update(worker);
             }
 
             if (!task.getLastStatus().equals("STOPPED"))
@@ -434,7 +442,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             if (worker.getStatus().equals(CollectionWorker.STATUS_RUNNING)) {
                 log.info("task " + worker.getWorkerId() + " finished running");
                 worker.setStatus(CollectionWorker.STATUS_FINISHED);
-                collectionWorkerMgr.update(worker);
+                collectionWorkerService.getEntityMgr().update(worker);
             }
 
             //consuming output
@@ -449,7 +457,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 //status => consumed/failed
                 worker.setTerminationTime(new Timestamp(task.getStoppedAt().getTime()));
                 worker.setStatus(succ ? CollectionWorker.STATUS_CONSUMED : CollectionWorker.STATUS_FAILED);
-                collectionWorkerMgr.update(worker);
+                collectionWorkerService.getEntityMgr().update(worker);
 
                 ++stoppedTasks;
                 log.info("task " + worker.getWorkerId() + (succ ? " consumed" : " failed"));
@@ -464,7 +472,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         statusList.add(CollectionWorker.STATUS_NEW);
         statusList.add(CollectionWorker.STATUS_RUNNING);
         statusList.add(CollectionWorker.STATUS_FINISHED);
-        List<CollectionWorker> activeWorkers = collectionWorkerMgr.getWorkerByStatus(statusList);
+        List<CollectionWorker> activeWorkers = collectionWorkerService.getWorkerByStatus(statusList);
 
         return activeWorkers == null ? 0 : activeWorkers.size();
     }
