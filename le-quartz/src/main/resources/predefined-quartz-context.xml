@@ -151,7 +151,7 @@
 
     <bean name="cdlOrchestrationJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="cdlOrchestrationJob" />
-        <property name="cronTrigger" value="${quartz.cdl.orchestration.job.cron:0/15 * * * * ?}" />
+        <property name="cronTrigger" value="${quartz.cdl.orchestration.job.cron:0 0/10 * * * ?}" />
         <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}" />
@@ -162,7 +162,7 @@
 
     <bean name="cdlDateFeedExecutionCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="cdlDateFeedExecutionCleanupJob" />
-        <property name="cronTrigger" value="${quartz.cdl.execution.cleanup.job.cron:0 0/1 * * * ?}" />
+        <property name="cronTrigger" value="${quartz.cdl.execution.cleanup.job.cron:0 0/30 * * * ?}" />
         <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}" />
