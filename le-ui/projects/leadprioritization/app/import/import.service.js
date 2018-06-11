@@ -1,5 +1,5 @@
 angular.module('lp.import')
-.service('ImportWizardStore', function($q, $state, ImportWizardService){
+.service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils){
     var ImportWizardStore = this;
 
     this.init = function() {
@@ -23,6 +23,7 @@ angular.module('lp.import')
         }
 
         this.saveObjects = {};
+        this.fieldDocumentSaved = {};
 
         this.thirdpartyidFields = {
             fields: [],
@@ -65,6 +66,7 @@ angular.module('lp.import')
                 state: 'accounts.ids.thirdpartyids.latticefields', 
                 nextLabel: 'Next, Add Custom Fields',
                 nextFn: function(nextState) {
+                    ImportWizardStore.removeSavedDocumentFieldsAfter($state.current);
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
@@ -233,11 +235,7 @@ angular.module('lp.import')
     }
 
     this.nextSaveMapping = function(nextState) {
-        // for(var i in this.saveObjects) {
-        //     var item = this.saveObjects[i];
-
-        //     ImportWizardStore.remapMap(item.userField, item.mappedField, item.cdlExternalSystemType, item.unmap);
-        // };
+        this.saveDocumentFields($state.current.name);
         $state.go(nextState);
     }
 
@@ -368,7 +366,7 @@ angular.module('lp.import')
     };
 
     this.getFieldDocument = function() {
-        return this.fieldDocument;
+        return angular.copy(this.fieldDocument);
     };
 
     this.getFieldDocumentAttr = function(name) {
@@ -427,13 +425,40 @@ angular.module('lp.import')
         this.saveObjects[key] = object;
     }
 
+    this.saveDocumentFields = function(state){
+        var copy = this.getFieldDocument(true).fieldMappings;
+        ImportUtils.updateDocumentMapping(this.saveObjects[state], copy);
+        this.fieldDocumentSaved[state] = copy;
+    };
+
+    this.getSavedDocumentFields = function(state){
+        return this.fieldDocumentSaved[state];
+    };
+
+    this.removeSavedDocumentFields = function(state){
+        delete this.fieldDocumentSaved[state];
+    };
+    
+    this.removeSavedDocumentFieldsAfter = function(state){
+        var keys = Object.keys(this.fieldDocumentSaved);
+        if(keys){
+            keys.forEach(function(key){
+                if(key.includes(state)){
+                    delete ImportWizardStore.fieldDocumentSaved[key];
+                }
+            });
+        }
+    };
+
+
+
     this.getSaveObjects = function(key) {
         if(key) {
             return this.saveObjects[key];
         }
         return this.saveObjects;
     }
-
+    
     this.setThirdpartyidFields = function(fields, map) {
         this.thirdpartyidFields = {
             fields: fields,
@@ -523,7 +548,7 @@ angular.module('lp.import')
         this.calendar = calendar;
     };
 })
-.service('ImportWizardService', function($q, $http, $state, ResourceUtility) {
+.service('ImportWizardService', function($q, $http, $state, ResourceUtility, ImportUtils) {
 
 	this.GetSchemaToLatticeFields = function(csvFileName, entity, feedType) {
 	        var deferred = $q.defer();
@@ -542,6 +567,7 @@ angular.module('lp.import')
 	            params: params,
 	            headers: { 'Content-Type': 'application/json' }
 	        }).then(function(data) {
+            ImportUtils.setLatticeSchema(data.data.Result);
 	            deferred.resolve(data.data.Result);
 	        });
 

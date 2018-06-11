@@ -18,7 +18,9 @@
                         ng-required="true"
                         ng-class="{'required': true}">
                         <option value="" hidden disabled>-- Choose Unique Identifier --</option>
-                        <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
+                        <option ng-repeat="AvailableField in vm.AvailableFields" 
+                                value="{{AvailableField.userField}}" 
+                                ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
                             {{AvailableField.userField}}
     				    </option>
                    </select>

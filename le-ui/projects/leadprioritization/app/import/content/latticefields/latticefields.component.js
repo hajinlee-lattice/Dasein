@@ -1,10 +1,16 @@
 angular.module('lp.import.wizard.latticefields', [])
 .controller('ImportWizardLatticeFields', function(
     $state, $stateParams,$timeout, $scope, 
-    ResourceUtility, ImportWizardService, ImportWizardStore, FieldDocument, UnmappedFields, Type, MatchingFields, AnalysisFields
+    ResourceUtility, ImportWizardService, 
+    ImportWizardStore, FieldDocument, 
+    UnmappedFields, Type, MatchingFields, 
+    AnalysisFields
 ) {
     var vm = this;
-
+    var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
+    if(alreadySaved){
+        FieldDocument.fieldMappings = alreadySaved;
+    }
     var makeList = function(object) {
         var list = [];
         for(var i in object) {
@@ -49,10 +55,11 @@ angular.module('lp.import.wizard.latticefields', [])
             case 'Transactions': return "Please provide the following attributes Lattice platform should use to analyze your customer purchase behavior.  The data provided in this file will override the existing data.";
             case 'Products': return "Please provide product bundle names Lattice platform should use aggregate your products into logical grouping that marketings and sales team would like to use to run their plays and campaigns. The data provided in this file override existing data.";
         }
-        return 
+        return ;
     }
 
     vm.init = function() {
+        
         ImportWizardStore.setValidation('latticefields', false);
 
         vm.matchingFieldsArr = [];
@@ -84,7 +91,7 @@ angular.module('lp.import.wizard.latticefields', [])
             });
         }
     };
-
+    
     var makeObject = function(string, delimiter) {
         var delimiter = delimiter || ':',
             string = string || '',

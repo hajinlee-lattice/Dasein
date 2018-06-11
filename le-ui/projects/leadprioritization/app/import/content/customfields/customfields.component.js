@@ -1,6 +1,8 @@
 angular.module('lp.import.wizard.customfields', [])
 .controller('ImportWizardCustomFields', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, FieldDocument, mergedFieldDocument
+    $state, $stateParams, $scope, ResourceUtility, 
+    ImportWizardStore, FieldDocument, mergedFieldDocument,
+    ImportUtils
 ) {
     var vm = this;
     angular.extend(vm, {
@@ -8,7 +10,8 @@ angular.module('lp.import.wizard.customfields', [])
         ignoredFields: FieldDocument.ignoredFields || [],
         fieldMappings: FieldDocument.fieldMappings,
         mergedFields: mergedFieldDocument.main || mergedFieldDocument,
-        fieldMappingIgnore: {}
+        fieldMappingIgnore: {},
+        defaultsIgnored: []
     });
 
     vm.init = function() {
@@ -29,13 +32,37 @@ angular.module('lp.import.wizard.customfields', [])
                     }
                 }
             });
+            setTimeout(function(){
+                setDefaultIgnore();
+            },0);
         }
     };
 
+    function setDefaultIgnore(){
+        vm.AvailableFields.forEach(function(element){
+            
+            var ignore = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), element.userField, vm.fieldMappings);
+            if(ignore === true){
+                var name = element.userField;
+                $scope.fieldMapping[name].ignore = true;
+                element.defaultIgnored = true;
+                vm.defaultsIgnored.push(element);
+                vm.changeIgnore($scope.fieldMapping);
+            }
+        });
+        setTimeout(function(){
+            $scope.$apply();
+        },100);
+
+    }
+
     vm.toggleIgnores = function(checked, fieldMapping) {
-        angular.element(".ignoreCheckbox").prop('checked', checked);
+        // angular.element('.ignoreCheckbox').prop('checked', checked);
         for(var i in fieldMapping) {
-            fieldMapping[i].ignore = checked;
+            var blocked = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), i, vm.fieldMappings);
+            if(!blocked){
+                fieldMapping[i].ignore = checked;
+            }
         }
         vm.changeIgnore(fieldMapping);
     }
@@ -60,6 +87,15 @@ angular.module('lp.import.wizard.customfields', [])
 
             ImportWizardStore.remapType(userField, item.fieldType);
         }
+    }
+
+    vm.getNumberDroppedFields = function(){
+        if(vm.defaultsIgnored && vm.defaultsIgnored != null){
+            return vm.defaultsIgnored.length;
+        } else{
+            return 0;
+        }
+        
     }
 
     vm.filterStandardList = function(input) {

@@ -5,7 +5,10 @@
             You can add custom fields by adding columns in your CSV file with whatever data you wish to provide. All unmapped fields (non-ID and non-Lattice fields) are considered Custom Fields unless you choose to ignore them. You can always add more Custom Fields later.
         </p>
     </div>
-    <div class="alert">{{filtered.length}} new Custom Fields have been found.</div>
+    <div class="alert">
+        <p> New Custom Field(s) found: {{filtered.length - vm.getNumberDroppedFields()}}</p>
+        <p ng-if="vm.getNumberDroppedFields() > 0"> Field(s) dropped by default: {{vm.getNumberDroppedFields()}}</p>
+    </div>
     <form name="form">
         <ul class="customfields" ng-init="fieldMapping = fieldMapping || {}" ng-show="filtered.length">
             <li class="customfield customfield-header">
@@ -52,7 +55,7 @@
                 <ul class="field">
                     <li class="field-name">{{field.userField}}</li>
                     <li class="type">
-                        <select
+                        <select ng-disabled="fieldMapping[field.userField].ignore === true"
     							class="form-control"
     							name="columnType_{{ ::field.userField }}"
     							ng-model="fieldMapping[field.userField].fieldType"
@@ -67,7 +70,7 @@
     					</select>
                     </li>
                     <li class="ignore">
-                        <input type="checkbox" class="ignoreCheckbox" id="{{field.userField}}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)"/> 
+                        <input type="checkbox" id="{{field.userField}}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)" ng-disabled="field.defaultIgnored === true"/> 
                         <label for="{{field.userField}}">Ignore</label>
                     </li>
                 </ul>

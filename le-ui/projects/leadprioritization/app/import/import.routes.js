@@ -12,7 +12,8 @@ angular
     'lp.import.wizard.transactionids',
     'lp.import.wizard.productids',
     'lp.import.wizard.producthierarchyids',
-    'lp.import.wizard.producthierarchy'
+    'lp.import.wizard.producthierarchy',
+    'lp.import.utils'
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -212,6 +213,12 @@ angular
         })
         .state('home.import.data.accounts.ids.thirdpartyids.latticefields', {
             url: '/latticefields',
+            onEnter: function($state, ImportWizardStore, $transition$){
+                var from = $transition$._targetState._definition.parent.name;
+                if(from.includes('thirdpartyids')){
+                    ImportWizardStore.removeSavedDocumentFieldsAfter($state.current.name);
+                }
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
                     return ImportWizardStore.getFieldDocument();
@@ -257,6 +264,14 @@ angular
         })
         .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields', {
             url: '/customfields',
+            onExit: function($transition$, ImportWizardStore){
+                ImportWizardStore.setIgnore([]);
+                var to = $transition$._targetState._definition.name;
+                if(to === 'home.import.data.accounts.ids.thirdpartyids.latticefields'){
+                    ImportWizardStore.saveDocumentFields('home.import.data.accounts.ids.thirdpartyids.latticefields');
+                }
+                
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
                     return ImportWizardStore.getFieldDocument();

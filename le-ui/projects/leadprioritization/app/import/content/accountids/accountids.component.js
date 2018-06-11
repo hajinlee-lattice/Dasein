@@ -1,6 +1,8 @@
 angular.module('lp.import.wizard.accountids', [])
 .controller('ImportWizardAccountIDs', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields
+    $state, $stateParams, $scope, $timeout, 
+    ResourceUtility, ImportWizardStore, FieldDocument, 
+    UnmappedFields
 ) {
     var vm = this;
 
@@ -29,7 +31,6 @@ angular.module('lp.import.wizard.accountids', [])
 
     vm.init = function() {
         vm.UnmappedFields = UnmappedFields;
-
         ImportWizardStore.setUnmappedFields(UnmappedFields);
         ImportWizardStore.setValidation('ids', false);
 
