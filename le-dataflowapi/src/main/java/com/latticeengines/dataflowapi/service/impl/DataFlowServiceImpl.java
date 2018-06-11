@@ -43,6 +43,9 @@ public class DataFlowServiceImpl implements DataFlowService {
     @Value("${dataplatform.trustore.jks}")
     private String trustStoreJks;
 
+    @Value("${dataflowapi.am.mem}")
+    private String amMemory;
+
     @Override
     public ApplicationId submitDataFlow(DataFlowConfiguration dataFlowConfig) {
         DataFlowJob dataFlowJob = createJob(dataFlowConfig);
@@ -69,7 +72,7 @@ public class DataFlowServiceImpl implements DataFlowService {
         Properties containerProperties = new Properties();
         containerProperties.put("dataflowapiConfig", dataFlowConfig.toString());
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
+        containerProperties.put(ContainerProperty.MEMORY.name(), amMemory);
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         if ("FLINK".equalsIgnoreCase(cascadingEngine) && (dataFlowConfig.getDataFlowParameters() != null
