@@ -53,6 +53,8 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
     @Value("${playmaker.update.bulk.max:1000}")
     private int maxUpdateRows;
 
+    private int maxOldRecommendations = 3;
+
     private Tenant tenant;
 
     private Play play;
@@ -179,17 +181,17 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
 
     @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsWhenNoVeryOldRecommendations" })
     public void cleanupVeryOldRecommendations() throws Exception {
-        createDummyRecommendations(maxUpdateRows * 2, new Date(System.currentTimeMillis() / 2));
+        createDummyRecommendations(maxOldRecommendations, new Date(System.currentTimeMillis() / 2));
 
         List<Recommendation> recommendations = recommendationEntityMgr//
                 .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
                         syncDestination, null, orgInfo);
         Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
         int countOfNonDeletedRecommendations = recommendations.size();
-        Assert.assertEquals(countOfNonDeletedRecommendations, maxUpdateRows * 2);
+        Assert.assertEquals(countOfNonDeletedRecommendations, maxOldRecommendations);
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService).cleanupVeryOldRecommendations();
-        Assert.assertEquals(count, maxUpdateRows * 2);
+        Assert.assertEquals(count, maxOldRecommendations);
 
         recommendations = recommendationEntityMgr//
                 .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
