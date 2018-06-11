@@ -48,8 +48,12 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
 
     private String ruleBaseRawRating;
     private String aiBaseRawRating;
+    private String inactiveRating;
     private boolean hasRuleRating = false;
     private boolean hasAIRating = false;
+    private int ruleSrcIdx = -1;
+    private int aiSrcIdx = -1;
+    private int inactiveSrcIdx = -1;
 
     private String ratingTablePrefix;
     private String statsTablePrefix;
@@ -96,6 +100,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
             throw new IllegalStateException("Cannot find any raw rating table");
         }
 
+        inactiveRating = getStringValueFromContext(INACTIVE_RATINGS_TABLE_NAME);
         modelContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
     }
 
@@ -172,11 +177,21 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         if (hasAIRating) {
             baseSources.add(aiSourceName);
             baseTables.put(aiSourceName, aiSourceTable);
+            aiSrcIdx = baseSources.size() - 1;
         }
         if (hasRuleRating) {
             baseSources.add(ruleSourceName);
             baseTables.put(ruleSourceName, ruleSourceTable);
+            ruleSrcIdx = baseSources.size() - 1;
         }
+        if (StringUtils.isNotBlank(inactiveRating)) {
+            String inactiveSourceName = "InactiveRating";
+            SourceTable inactiveSourceTable = new SourceTable(inactiveRating, customerSpace);
+            baseSources.add(inactiveSourceName);
+            baseTables.put(inactiveSourceName, inactiveSourceTable);
+            inactiveSrcIdx = baseSources.size() - 1;
+        }
+
         step.setBaseSources(baseSources);
         step.setBaseTables(baseTables);
     }
@@ -203,13 +218,14 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         config.setEvModelIds(evModelIds);
         config.setAiModelIds(aiModelIds);
         config.setIdAttrsMap(modelIdToEngineIdMap);
-        if (hasAIRating) {
-            config.setAiSourceIdx(0);
-            if (hasRuleRating) {
-                config.setRuleSourceIdx(1);
-            }
-        } else if (hasRuleRating) {
-            config.setRuleSourceIdx(0);
+        if (aiSrcIdx > -1) {
+            config.setAiSourceIdx(aiSrcIdx);
+        }
+        if (ruleSrcIdx > -1) {
+            config.setRuleSourceIdx(ruleSrcIdx);
+        }
+        if (inactiveSrcIdx > -1) {
+            config.setInactiveSourceIdx(inactiveSrcIdx);
         }
         return config;
     }

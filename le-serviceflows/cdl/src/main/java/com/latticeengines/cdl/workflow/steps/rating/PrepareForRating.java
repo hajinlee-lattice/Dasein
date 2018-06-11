@@ -1,6 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -14,6 +17,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -25,9 +30,12 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 import reactor.core.publisher.Flux;
@@ -41,6 +49,12 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     private String customerSpace;
 
@@ -77,6 +91,16 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                     return aiModel.getModelSummaryId();
                 }).collect(Collectors.toList());
                 putStringValueInContext(SCORING_MODEL_ID, StringUtils.join(modelGuids, "|"));
+            }
+            List<String> inactiveEngineIds = Flux.fromIterable(summaries) //
+                    .filter(summary -> !RatingEngineStatus.ACTIVE.equals(summary.getStatus())
+                            && !Boolean.TRUE.equals(summary.getDeleted())) //
+                    .map(RatingEngineSummary::getId) //
+                    .collectList().block();
+            log.info("Found " + CollectionUtils.size(inactiveEngineIds) + " inactive rating engines.");
+            if (CollectionUtils.isNotEmpty(inactiveEngineIds)) {
+                List<String> queryAttrs = getQueryAttributes(inactiveEngineIds);
+                putObjectInContext(INACTIVE_ENGINE_ATTRIBUTES, queryAttrs);
             }
         } else {
             log.info("There is no rating engine summaries");
@@ -130,17 +154,16 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         if (Boolean.TRUE.equals(engine.getDeleted())) {
             log.info("Skip rating engine " + engineId + " : " + engineName + " because it is deleted.");
             valid = false;
-        } else if (RatingEngineStatus.INACTIVE.equals(engine.getStatus())
-                && Boolean.TRUE.equals(engine.getJustCreated())) {
-            log.info("Skip rating engine " + engineId + " : " + engineName + " because it is just created.");
+        } else if (RatingEngineStatus.INACTIVE.equals(engine.getStatus())) {
+            log.info("Skip rating engine " + engineId + " : " + engineName + " because it is inactive.");
             valid = false;
         } else if (engine.getSegment() == null) {
-            log.info(
-                    "Skip rating engine " + engineId + " : " + engineName + " because it belongs to an invalid segment.");
+            log.info("Skip rating engine " + engineId + " : " + engineName
+                    + " because it belongs to an invalid segment.");
             valid = false;
         } else if (engine.getActiveModel() == null) {
-            log.info(
-                    "Skip rating engine " + engineId + " : " + engineName + " because it does not have an active model.");
+            log.info("Skip rating engine " + engineId + " : " + engineName
+                    + " because it does not have an active model.");
             valid = false;
         }
         return valid;
@@ -173,6 +196,30 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             return false;
         }
         return true;
+    }
+
+    private List<String> getQueryAttributes(List<String> engineIds) {
+        List<String> attrs = new ArrayList<>();
+        String customerSpace = configuration.getCustomerSpace().toString();
+        DataCollection.Version version = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        String tableName = dataCollectionProxy.getTableName(customerSpace, BusinessEntity.Rating.getServingStore(), version);
+        if (StringUtils.isBlank(tableName)) {
+            log.info("There is no previous rating table to ingest");
+        } else {
+            List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, tableName);
+            Set<String> possibleAttrs = new HashSet<>();
+            engineIds.forEach(engineId -> {
+                for (RatingEngine.ScoreType scoreType: RatingEngine.ScoreType.values()) {
+                    possibleAttrs.add(RatingEngine.toRatingAttrName(engineId, scoreType));
+                }
+            });
+            cms.forEach(cm -> {
+                if (possibleAttrs.contains(cm.getAttrName())) {
+                    attrs.add(cm.getAttrName());
+                }
+            });
+        }
+        return attrs;
     }
 
 }

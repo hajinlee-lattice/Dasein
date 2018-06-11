@@ -23,6 +23,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IngestRuleBasedRating extends BaseRedshiftIngestStep<GenerateRatingStepConfiguration> {
 
+    private ThreadLocal<Long> ingestTimestamp = new ThreadLocal<>();
+
     protected void postIngestion() {
         super.postIngestion();
         putStringValueInContext(RULE_RAW_RATING_TABLE_NAME, targetTableName);
@@ -40,23 +42,22 @@ public class IngestRuleBasedRating extends BaseRedshiftIngestStep<GenerateRating
     }
 
     @Override
-    protected List<GenericRecord> dataPageToRecords(String modelId, String modelGuid, List<Map<String, Object>> data) {
-        List<GenericRecord> records = new ArrayList<>();
-        data.forEach(map -> {
-            long currentTime = System.currentTimeMillis();
-            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            String accountIdAttr = InterfaceName.AccountId.name();
+    protected GenericRecord parseDataForModel(String modelId, String modelGuid, Map<String, Object> data) {
+        if (ingestTimestamp.get() == null || ingestTimestamp.get() == 0L) {
+            ingestTimestamp.set(System.currentTimeMillis());
+        }
+        long currentTime = ingestTimestamp.get();
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        String accountIdAttr = InterfaceName.AccountId.name();
 
-            String accountId = (String) map.get(accountIdAttr);
-            String compositeKey = String.format("%s_%s", accountId, modelId);
-            builder.set(InterfaceName.__Composite_Key__.name(), compositeKey);
-            builder.set(accountIdAttr, map.get(accountIdAttr));
-            builder.set(InterfaceName.ModelId.name(), modelId);
-            builder.set(InterfaceName.Rating.name(), map.get(modelId));
-            builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
-            records.add(builder.build());
-        });
-        return records;
+        String accountId = (String) data.get(accountIdAttr);
+        String compositeKey = String.format("%s_%s", accountId, modelId);
+        builder.set(InterfaceName.__Composite_Key__.name(), compositeKey);
+        builder.set(accountIdAttr, data.get(accountIdAttr));
+        builder.set(InterfaceName.ModelId.name(), modelId);
+        builder.set(InterfaceName.Rating.name(), data.get(modelId));
+        builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
+        return builder.build();
     }
 
     @Override

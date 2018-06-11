@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
@@ -88,11 +89,7 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
                 pivoted = pivoted.join(idCol, aiPivoted, aiIdCol, JoinType.OUTER);
                 List<String> fields = new ArrayList<>(pivoted.getFieldNames());
                 fields.addAll(aiPivoted.getFieldNames());
-                String mergedIdCol = "Merged_" + idCol;
-                pivoted = pivoted.apply(String.format("%s == null ? %s : %s", idCol, aiIdCol, idCol),
-                        new FieldList(idCol, aiIdCol), new FieldMetadata(mergedIdCol, String.class));
-                pivoted = pivoted.discard(aiIdCol, idCol);
-                pivoted = pivoted.rename(new FieldList(mergedIdCol), new FieldList(idCol));
+                pivoted = mergeJoinedCol(pivoted, idCol, aiIdCol, String.class);
                 pivoted = pivoted.discard(findFieldsToDiscard(pivoted));
                 fields = pivoted.getFieldNames();
                 Collections.sort(fields);
@@ -104,8 +101,20 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
             throw new IllegalStateException("Must have either rule ratings or ai ratings input.");
         }
 
+        Integer inactiveSrcIdx = config.getInactiveSourceIdx();
+        if (inactiveSrcIdx != null) {
+            Node inactive = addSource(parameters.getBaseTables().get(inactiveSrcIdx));
+            inactive = inactive.discard(InterfaceName.CDLCreatedTime.name(), InterfaceName.CDLUpdatedTime.name());
+            String idCol2 = idCol + "_2";
+            inactive = inactive.rename(new FieldList(idCol), new FieldList(idCol2));
+            pivoted = pivoted.outerJoin(idCol, inactive, idCol2);
+            pivoted = mergeJoinedCol(pivoted, idCol, idCol2, String.class);
+            pivoted = pivoted.discard(findFieldsToDiscard(pivoted));
+        }
+
         pivoted = pivoted.addTimestamp(InterfaceName.CDLCreatedTime.name());
         pivoted = pivoted.addTimestamp(InterfaceName.CDLUpdatedTime.name());
+
         return pivoted;
     }
 
@@ -165,6 +174,15 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
                 .filter(f -> f.contains(idCol) && !f.equals(idCol)) //
                 .collect(Collectors.toList());
         return new FieldList(toDiscard);
+    }
+
+    private Node mergeJoinedCol(Node node, String tgtCol, String tgtCol2, Class<?> clz) {
+        String mergedCol = NamingUtils.uuid(tgtCol);
+        node = node.apply(String.format("%s == null ? %s : %s", tgtCol, tgtCol2, tgtCol),
+                new FieldList(tgtCol, tgtCol2), new FieldMetadata(mergedCol, clz));
+        node = node.discard(tgtCol2, tgtCol);
+        node = node.rename(new FieldList(mergedCol), new FieldList(tgtCol));
+        return node;
     }
 
     @Override

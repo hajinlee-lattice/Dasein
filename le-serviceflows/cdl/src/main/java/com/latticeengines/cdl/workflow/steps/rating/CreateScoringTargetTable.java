@@ -28,7 +28,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRatingStepConfiguration> {
 
-    private AtomicLong evaluationPeriod = null;
+    private ThreadLocal<Long> ingestTimestamp = new ThreadLocal<>();
+    private AtomicLong evaluationPeriod = new AtomicLong(0L);
 
     private Map<String, RatingEngineType> ratingEngineTypeMap = new HashMap<>();
     private boolean hasCrossSellModel = false;
@@ -70,49 +71,47 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
     }
 
     @Override
-    protected List<GenericRecord> dataPageToRecords(String modelId, String modelGuid, List<Map<String, Object>> data) {
-        List<GenericRecord> records = new ArrayList<>();
-        long currentTime = System.currentTimeMillis();
-        data.forEach(map -> {
-            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            String accountIdAttr = InterfaceName.AccountId.name();
-            RatingEngineType ratingEngineType = ratingEngineTypeMap.get(modelGuid);
-            try {
-                String accountId;
-                if (RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
-                    accountId = (String) map.get(accountIdAttr.toLowerCase());
-                } else {
-                    accountId = (String) map.get(accountIdAttr);
-                }
-                if (StringUtils.isBlank(accountId)) {
-                    throw new IllegalArgumentException("Found null account id: " + JsonUtils.serialize(map));
-                }
-                String compositeKey = String.format("%s_%s", accountId, modelId);
-                builder.set(InterfaceName.__Composite_Key__.name(), compositeKey);
-                builder.set(accountIdAttr, accountId);
-                builder.set(InterfaceName.ModelId.name(), modelId);
-                builder.set(MODEL_GUID, modelGuid);
-                builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
-
-                String periodIdAttr = InterfaceName.PeriodId.name();
-                if (RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
-                    if (evaluationPeriod == null) {
-                        Long periodId = Long
-                                .valueOf(String.valueOf(map.get(InterfaceName.PeriodId.name().toLowerCase())));
-                        evaluationPeriod = new AtomicLong();
-                        evaluationPeriod.set(periodId);
-                    }
-                    builder.set(periodIdAttr, evaluationPeriod.get());
-                } else {
-                    builder.set(periodIdAttr, null);
-                }
-
-                records.add(builder.build());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse redshift result: " + map, e);
+    protected GenericRecord parseDataForModel(String modelId, String modelGuid, Map<String, Object> data) {
+        if (ingestTimestamp.get() == null || ingestTimestamp.get() == 0L) {
+            ingestTimestamp.set(System.currentTimeMillis());
+        }
+        long currentTime = ingestTimestamp.get();
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        String accountIdAttr = InterfaceName.AccountId.name();
+        RatingEngineType ratingEngineType = ratingEngineTypeMap.get(modelGuid);
+        try {
+            String accountId;
+            if (RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
+                accountId = (String) data.get(accountIdAttr.toLowerCase());
+            } else {
+                accountId = (String) data.get(accountIdAttr);
             }
-        });
-        return records;
+            if (StringUtils.isBlank(accountId)) {
+                throw new IllegalArgumentException("Found null account id: " + JsonUtils.serialize(data));
+            }
+            String compositeKey = String.format("%s_%s", accountId, modelId);
+            builder.set(InterfaceName.__Composite_Key__.name(), compositeKey);
+            builder.set(accountIdAttr, accountId);
+            builder.set(InterfaceName.ModelId.name(), modelId);
+            builder.set(MODEL_GUID, modelGuid);
+            builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
+
+            String periodIdAttr = InterfaceName.PeriodId.name();
+            if (RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
+                if (evaluationPeriod.get() == 0L) {
+                    Long periodId = Long
+                            .valueOf(String.valueOf(data.get(InterfaceName.PeriodId.name().toLowerCase())));
+                    evaluationPeriod.set(periodId);
+                }
+                builder.set(periodIdAttr, evaluationPeriod.get());
+            } else {
+                builder.set(periodIdAttr, null);
+            }
+
+            return builder.build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse redshift result: " + data, e);
+        }
     }
 
     @Override

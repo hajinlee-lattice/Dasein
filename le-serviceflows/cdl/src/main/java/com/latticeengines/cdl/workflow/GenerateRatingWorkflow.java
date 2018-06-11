@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.rating.IngestInactiveRatings;
 import com.latticeengines.cdl.workflow.steps.rating.IngestRuleBasedRating;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -24,11 +25,15 @@ public class GenerateRatingWorkflow extends AbstractWorkflow<GenerateRatingWorkf
     @Inject
     private IngestRuleBasedRating ingestRatingFromRedshift;
 
+    @Inject
+    private IngestInactiveRatings ingestInactiveRatings;
+
     @Override
     public Workflow defineWorkflow(GenerateRatingWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(generateAIRatingWorkflow) //
                 .next(ingestRatingFromRedshift) //
+                .next(ingestInactiveRatings) //
                 .build();
     }
 

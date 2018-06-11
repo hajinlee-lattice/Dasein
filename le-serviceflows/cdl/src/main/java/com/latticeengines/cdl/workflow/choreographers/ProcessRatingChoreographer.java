@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.INACTIVE_ENGINE_ATTRIBUTES;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_MODELS;
 
 import java.util.Collection;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.GenerateAIRatingWorkflow;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
+import com.latticeengines.cdl.workflow.steps.rating.IngestInactiveRatings;
 import com.latticeengines.cdl.workflow.steps.rating.IngestRuleBasedRating;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
@@ -45,6 +47,9 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     @Inject
     private IngestRuleBasedRating ingestRuleBasedRating;
+
+    @Inject
+    private IngestInactiveRatings ingestInactiveRatings;
 
     @Inject
     private ProcessAccountChoreographer accountChoreographer;
@@ -77,6 +82,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean shouldReset = false;
     private boolean shouldProcessAI = false;
     private boolean shouldProcessRuleBased = false;
+    private boolean shouldProcessInactive = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -103,6 +109,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                 skip = !shouldProcessAI;
             } else if (isIngestRuleRatingStep(step)) {
                 skip = !shouldProcessRuleBased;
+            } else if (isIngestInactiveRatingsStep(step)) {
+                skip = !shouldProcessInactive;
             }
         }
         return skip;
@@ -112,6 +120,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         if (!initialized) {
             List<RatingModelContainer> containers = step.getListObjectFromContext(RATING_MODELS,
                     RatingModelContainer.class);
+            List<String> inactiveRatingAttrs = step.getListObjectFromContext(INACTIVE_ENGINE_ATTRIBUTES,
+                    String.class);
             hasDataChange = hasDataChange();
             checkActionImpactedEngines(step);
             hasCrossSellModels = hasCrossSellModels(containers);
@@ -121,6 +131,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             shouldReset = shouldReset();
             shouldProcessAI = shouldProcessAI();
             shouldProcessRuleBased = shouldProcessRuleBased();
+            shouldProcessInactive = (shouldProcessAI || shouldProcessRuleBased) && CollectionUtils.isNotEmpty(inactiveRatingAttrs);
             String[] msgs = new String[] { //
                     " enforced=" + enforceRebuild, //
                     " hasDataChange=" + hasDataChange, //
@@ -133,6 +144,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                     " shouldReset=" + shouldReset, //
                     " shouldProcessAI=" + shouldProcessAI, //
                     " shouldProcessRuleBased=" + shouldProcessRuleBased, //
+                    "shouldProcessInactive=" + shouldProcessInactive, //
             };
             log.info(StringUtils.join(msgs, ", "));
             initialized = true;
@@ -149,6 +161,10 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean isIngestRuleRatingStep(AbstractStep<? extends BaseStepConfiguration> step) {
         return step.name().endsWith(ingestRuleBasedRating.name());
+    }
+
+    private boolean isIngestInactiveRatingsStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(ingestInactiveRatings.name());
     }
 
     private boolean isAIWorkflow(int seq) {

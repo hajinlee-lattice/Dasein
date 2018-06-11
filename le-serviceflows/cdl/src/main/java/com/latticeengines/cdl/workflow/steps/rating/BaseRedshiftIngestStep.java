@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -25,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.cdl.workflow.steps.callable.RedshiftIngestCallable;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -42,7 +41,6 @@ import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
@@ -91,8 +89,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
 
     protected abstract String getTargetTableName();
 
-    protected abstract List<GenericRecord> dataPageToRecords(String modelId, String modelGuid,
-            List<Map<String, Object>> data);
+    protected abstract GenericRecord parseDataForModel(String modelId, String modelGuid, Map<String, Object> data);
 
     @Override
     public void execute() {
@@ -183,24 +180,18 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
         HdfsUtils.writeToFile(yarnConfiguration, hdfsPath + "/_SUCCESS", "");
     }
 
-    private class RedshiftIngest implements Callable<RatingModel> {
+    private class RedshiftIngest extends RedshiftIngestCallable<RatingModel> {
 
-        private final int PAGE_SIZE = 100_000;
-        private final int ROWS_PER_FILE = 1_000_000;
         private final RatingModel ratingModel;
         private final RatingEngineSummary engineSummary;
         private final RatingEngineType engineType;
-        private final String hdfsPath;
-
-        private long totalCount;
-        private long ingestedCount = 0L;
-
         private String modelId;
         private String modelGuid = null;
-
         private MetadataSegment segment;
+        private FrontEndQuery frontEndQuery = null;
 
         RedshiftIngest(RatingModelContainer container, String hdfsPath) {
+            super(yarnConfiguration, hdfsPath);
             this.ratingModel = container.getModel();
             this.modelId = this.ratingModel.getId();
             this.engineSummary = container.getEngineSummary();
@@ -208,7 +199,55 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             if (this.ratingModel instanceof AIModel) {
                 this.modelGuid = ((AIModel) this.ratingModel).getModelSummaryId();
             }
-            this.hdfsPath = hdfsPath;
+        }
+
+        @Override
+        protected long getTotalCount() {
+            long totalCount = totalCountInSegment();
+            log.info("There are in total " + totalCount + " accounts in the segment of rating model " //
+                    + ratingModel.getId());
+            return totalCount;
+        }
+
+        @Override
+        protected DataPage fetchPage(long ingestedCount, long pageSize) {
+            if (frontEndQuery == null) {
+                frontEndQuery = dataQuery();
+            }
+            DataPage dataPage;
+            if (RatingEngineType.CROSS_SELL.equals(engineType)) {
+                dataPage = eventProxy.getScoringTuples(customerSpace.toString(), (EventFrontEndQuery) frontEndQuery,
+                        version);
+            } else {
+                dataPage = ratingProxy.getData(customerSpace.getTenantId(), frontEndQuery, version);
+            }
+            return dataPage;
+        }
+
+        @Override
+        protected GenericRecord parseData(Map<String, Object> data) {
+            return parseDataForModel(modelId, modelGuid, data);
+        }
+
+        @Override
+        protected Schema getAvroSchema() {
+            return generateSchema();
+        }
+
+        @Override
+        protected String prepareTargetFile(int fileId) {
+            return prepareTargetFile(modelId, fileId);
+        }
+
+        @Override
+        protected void preIngest() {
+            String segmentName = engineSummary.getSegmentName();
+            segment = segmentProxy.getMetadataSegmentByName(customerSpace.toString(), segmentName);
+        }
+
+        @Override
+        protected RatingModel postIngest() {
+            return ratingModel;
         }
 
         private long totalCountInSegment() {
@@ -236,52 +275,6 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             } else {
                 throw new UnsupportedOperationException("Unknown rating engine type " + engineType);
             }
-        }
-
-        private void ingestPageByPage() {
-            int recordsInCurrentFile = 0;
-            int fileId = 0;
-            String targetFile = prepareTargetFile(hdfsPath, ratingModel.getId(), fileId);
-            FrontEndQuery frontEndQuery = dataQuery();
-            List<Map<String, Object>> data = new ArrayList<>();
-            do {
-                frontEndQuery.setPageFilter(new PageFilter(ingestedCount, PAGE_SIZE));
-                DataPage dataPage;
-                if (RatingEngineType.CROSS_SELL.equals(engineType)) {
-                    dataPage = eventProxy.getScoringTuples(customerSpace.toString(), (EventFrontEndQuery) frontEndQuery,
-                            version);
-                } else {
-                    dataPage = ratingProxy.getData(customerSpace.getTenantId(), frontEndQuery, version);
-                }
-                if (dataPage != null) {
-                    data = dataPage.getData();
-                }
-                if (CollectionUtils.isNotEmpty(data)) {
-                    List<GenericRecord> records = dataPageToRecords(modelId, modelGuid, data);
-                    recordsInCurrentFile += records.size();
-                    synchronized (this) {
-                        try {
-                            if (!HdfsUtils.fileExists(yarnConfiguration, targetFile)) {
-                                log.info("Start dumping " + records.size() + " records to " + targetFile);
-                                AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, records, true);
-                            } else {
-                                log.info("Appending " + records.size() + " records to " + targetFile);
-                                AvroUtils.appendToHdfsFile(yarnConfiguration, targetFile, records, true);
-                                if (recordsInCurrentFile >= ROWS_PER_FILE) {
-                                    fileId++;
-                                    targetFile = prepareTargetFile(hdfsPath, ratingModel.getId(), fileId);
-                                    recordsInCurrentFile = 0;
-                                }
-                            }
-                        } catch (Exception e) {
-                            throw new RuntimeException("Failed to write to avro file " + targetFile, e);
-                        }
-                    }
-                    ingestedCount += records.size();
-                    log.info(String.format("Ingested %d / %d records for rating model %s", ingestedCount, totalCount,
-                            ratingModel.getId()));
-                }
-            } while (ingestedCount < totalCount && CollectionUtils.isNotEmpty(data));
         }
 
         private FrontEndQuery dataQuery() {
@@ -321,8 +314,8 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             return frontEndQuery;
         }
 
-        private String prepareTargetFile(String hdfsPath, String modelId, int fileId) {
-            String targetFile = String.format("%s/%s-%05d.avro", hdfsPath, modelId, fileId);
+        private String prepareTargetFile(String modelId, int fileId) {
+            String targetFile = String.format("%s/%s-%05d.avro", getHdfsPath(), modelId, fileId);
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, targetFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, targetFile);
@@ -331,17 +324,6 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                 throw new RuntimeException("Failed to cleanup target file " + targetFile);
             }
             return targetFile;
-        }
-
-        @Override
-        public RatingModel call() {
-            String segmentName = engineSummary.getSegmentName();
-            segment = segmentProxy.getMetadataSegmentByName(customerSpace.toString(), segmentName);
-            totalCount = totalCountInSegment();
-            log.info("There are in total " + totalCount + " accounts in the segment of rating model " //
-                    + ratingModel.getId());
-            ingestPageByPage();
-            return ratingModel;
         }
 
     }

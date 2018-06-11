@@ -23,6 +23,9 @@ public class PivotRatingsConfig extends TransformerConfig {
     @JsonProperty("ai_source_idx")
     private Integer aiSourceIdx;
 
+    @JsonProperty("inactive_source_idx")
+    private Integer inactiveSourceIdx;
+
     @JsonProperty("ev_model_ids")
     private List<String> evModelIds;
 
@@ -51,6 +54,14 @@ public class PivotRatingsConfig extends TransformerConfig {
 
     public void setAiSourceIdx(Integer aiSourceIdx) {
         this.aiSourceIdx = aiSourceIdx;
+    }
+
+    public Integer getInactiveSourceIdx() {
+        return inactiveSourceIdx;
+    }
+
+    public void setInactiveSourceIdx(Integer inactiveSourceIdx) {
+        this.inactiveSourceIdx = inactiveSourceIdx;
     }
 
     public List<String> getEvModelIds() {
