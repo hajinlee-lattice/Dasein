@@ -28,9 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ecs.model.KeyValuePair;
-import com.amazonaws.services.ecs.model.LogConfiguration;
-import com.amazonaws.services.ecs.model.LogDriver;
 import com.amazonaws.services.ecs.model.Task;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.aws.ecs.ECSService;
@@ -236,8 +233,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             //spawn worker in aws, '-v vendor -w worker_id'
             String cmdLine = "-v " + vendor + " -w " + workerId;
-            //String taskArn = spawnECSTask(ecsClusterName, vendor, ecrImageName, cmdLine, workerId);
-            String taskArn = ecsService.spawECSTask(
+            /*String taskArn = ecsService.spawECSTask(
                     ecsClusterName, "python", vendor, ecrImageName,
                     cmdLine, workerId, "ecsTaskExecutionRole", "ecsTaskExecutionRole",
                     Integer.valueOf(ecsTaskCpu), Integer.valueOf(ecsTaskMemory),
@@ -247,7 +243,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                             .withOptions(constructLogOptions()),
                     new KeyValuePair()
                             .withName("DATA_CLOUD_USE_CONSUL")
-                            .withValue("true"));
+                            .withValue("true"));*/
+            String taskArn = ecsService.spawECSTask(
+                    ecsClusterName,
+                    vendor,
+                    "python",
+                    cmdLine,
+                    ecsTaskSubnets);
 
             //create worker record in
             Timestamp ts = new Timestamp(System.currentTimeMillis());

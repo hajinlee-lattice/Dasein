@@ -23,6 +23,8 @@ import com.amazonaws.services.ecs.model.DescribeTasksResult;
 import com.amazonaws.services.ecs.model.Failure;
 import com.amazonaws.services.ecs.model.KeyValuePair;
 import com.amazonaws.services.ecs.model.LaunchType;
+import com.amazonaws.services.ecs.model.ListTaskDefinitionsRequest;
+import com.amazonaws.services.ecs.model.ListTaskDefinitionsResult;
 import com.amazonaws.services.ecs.model.LogConfiguration;
 import com.amazonaws.services.ecs.model.NetworkConfiguration;
 import com.amazonaws.services.ecs.model.NetworkMode;
@@ -43,7 +45,7 @@ public class ECSServiceImpl implements ECSService {
     @Inject
     private AmazonECR ecrClient;
 
-    @Override
+    //@Override
     public String spawECSTask(String clusterName, String containerName, String taskDefName,
                               String dockerImageName, String cmdLine, String workerId,
                               String taskRole, String execRole,
@@ -70,7 +72,10 @@ public class ECSServiceImpl implements ECSService {
                         .withImage(dockerImageRef)
                         .withCpu(cpu)
                         .withMemory(memory)
-                        .withCommand(cmdLine).withLogConfiguration(logConf)));
+                        .withCommand(cmdLine)
+                        .withLogConfiguration(logConf)
+                        .withEnvironment(envVars)
+                ));
         log.info(ret1.getTaskDefinition().getFamily() + ", " + ret1.getTaskDefinition().getTaskDefinitionArn());
 
         RunTaskResult ret2 = ecsClient.runTask(new RunTaskRequest()
@@ -79,10 +84,54 @@ public class ECSServiceImpl implements ECSService {
                 .withCount(1)
                 .withLaunchType(LaunchType.FARGATE)
                 .withStartedBy(workerId)
+//                .withOverrides(new TaskOverride()
+//                        .withContainerOverrides(new ContainerOverride()
+//                                .withName(containerName)
+//                                .withEnvironment(envVars)))
+                .withNetworkConfiguration(new NetworkConfiguration()
+                        .withAwsvpcConfiguration(new AwsVpcConfiguration()
+                                .withSubnets(taskSubnets.split(","))
+                                .withAssignPublicIp(AssignPublicIp.DISABLED))));
+
+        List<Failure> failures = ret2.getFailures();
+        if (failures.size() != 0) {
+            log.error(failures.get(0).getArn() + ", " + failures.get(0).getReason());
+            throw new Exception("request to spawn ECS task failed");
+        }
+        log.info(ret2.getTasks().get(0).getTaskArn() + ", " + ret2.getTasks().get(0).getLastStatus());
+
+        return ret2.getTasks().get(0).getTaskArn();
+    }
+
+    @Override
+    public String spawECSTask(String clusterName, String taskDefName,
+                              String containerName, String cmdLine,
+                              String taskSubnets) throws Exception {
+        CreateClusterResult ret0 = ecsClient.createCluster(new CreateClusterRequest().withClusterName(clusterName));
+        log.info(ret0.getCluster().getClusterName() + ", " + ret0.getCluster().getClusterArn());
+
+        ListTaskDefinitionsResult ret1 = ecsClient.listTaskDefinitions(new ListTaskDefinitionsRequest()
+                .withFamilyPrefix(taskDefName));
+        if (ret1.getTaskDefinitionArns().size() <= 0)
+        {
+            log.error("task definition " + taskDefName + " not found");
+            throw new Exception("task definition " + taskDefName + " not found");
+        }
+        else
+            log.info(taskDefName + ", " + ret1.getTaskDefinitionArns().get(0));
+
+        RunTaskResult ret2 = ecsClient.runTask(new RunTaskRequest()
+                .withCluster(clusterName)
+                .withTaskDefinition(taskDefName)
+                .withCount(1)
+                .withLaunchType(LaunchType.FARGATE)
+                //.withStartedBy(workerId)
                 .withOverrides(new TaskOverride()
                         .withContainerOverrides(new ContainerOverride()
                                 .withName(containerName)
-                                .withEnvironment(envVars)))
+                                .withCommand(cmdLine)
+                        )
+                )
                 .withNetworkConfiguration(new NetworkConfiguration()
                         .withAwsvpcConfiguration(new AwsVpcConfiguration()
                                 .withSubnets(taskSubnets.split(","))
