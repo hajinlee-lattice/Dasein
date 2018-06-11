@@ -195,6 +195,12 @@
     }
     .attributesDisplay {
         font-size: 12px;
+        &.centered {
+            text-align: center;
+        }
+        &.italicized {
+            font-style: italic;
+        }
     }
 }
 .tile-footer {
