@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -209,13 +210,42 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 }
             }
         }
-        CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-        cdlExternalSystem.setCRMIdList(crmIds);
-        cdlExternalSystem.setMAPIdList(mapIds);
-        cdlExternalSystem.setERPIdList(erpIds);
-        cdlExternalSystem.setOtherIdList(otherIds);
-        cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
-                cdlExternalSystem);
+        CDLExternalSystem originalSystem = cdlExternalSystemProxy.getCDLExternalSystem(
+                MultiTenantContext.getCustomerSpace().toString());
+        if (originalSystem == null) {
+            CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+            cdlExternalSystem.setCRMIdList(crmIds);
+            cdlExternalSystem.setMAPIdList(mapIds);
+            cdlExternalSystem.setERPIdList(erpIds);
+            cdlExternalSystem.setOtherIdList(otherIds);
+            cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
+                    cdlExternalSystem);
+        } else {
+            originalSystem.setCRMIdList(mergeList(originalSystem.getCRMIdList(), crmIds));
+            originalSystem.setMAPIdList(mergeList(originalSystem.getMAPIdList(), mapIds));
+            originalSystem.setERPIdList(mergeList(originalSystem.getERPIdList(), erpIds));
+            originalSystem.setOtherIdList(mergeList(originalSystem.getOtherIdList(), otherIds));
+            cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
+                    originalSystem);
+        }
+    }
+
+    private List<String> mergeList(List<String> list1, List<String> list2) {
+        if (CollectionUtils.isEmpty(list1)) {
+            return list2;
+        } else if (CollectionUtils.isEmpty(list2)) {
+            return list1;
+        }
+        List<String> merged = new ArrayList<>();
+        merged.addAll(list1);
+        Set<String> list1Set = new HashSet<>(list1);
+        list2.forEach(item -> {
+            if (!list1Set.contains(item)) {
+                list1Set.add(item);
+                merged.add(item);
+            }
+        });
+        return merged;
     }
 
     private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity) {
