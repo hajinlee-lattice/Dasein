@@ -1,5 +1,6 @@
 export NODE_APPS={{NODE_APPS}}
 export NODE_ENV=production
+export DANTE_URL=${AWS_PUBLIC_LB}
 export ULYSSES_URL=${AWS_PUBLIC_LB}
 export API_URL=${AWS_PUBLIC_LB}
 export API_CON_URL=${AWS_PUBLIC_LB}

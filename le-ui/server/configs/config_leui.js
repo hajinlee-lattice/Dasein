@@ -24,6 +24,12 @@ module.exports = {
             'remote_path': '/ulysses',
             'type': 'pipe'
         },
+        '/DanteService.svc': {
+            'local_path': '/dante',
+            'remote_host': process.env.DANTE_URL || 'http://localhost:8081',
+            'remote_path': '/',
+            'type': 'pipe'
+        },
         '/score': {
             'local_path': '/score',
             'remote_host': process.env.API_CON_URL || 'http://localhost:8073',

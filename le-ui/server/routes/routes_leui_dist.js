@@ -69,6 +69,15 @@ module.exports = [{
     folders: {
         '/insights': '/assets'
     }
+},{
+    path: '/projects/dante',
+    pages: {
+        '/dante/': 'assets/index.html',
+        '/dante/index': 'assets/index.html'
+    },
+    folders: {
+        '/dante': '/assets'
+    }
 },{  
     path: '/projects/demo',
     folders: {

@@ -1,0 +1,6 @@
+{
+	"HDFSNameServerAddress":"webhdfs.prod.lattice.local",
+	"HDFSNameServerPort":"14000",
+	"HDFSUserName":"yarn",
+	"CustomersDirectory":"/user/s-analytics/customers/"
+}

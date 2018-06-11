@@ -1516,6 +1516,86 @@ angular
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }
             }
+        })
+        .state('home.dante', {
+            url: '/dante',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'BIS Dante iFrame Testing',
+                iframe: true
+            },
+            views: {
+                "summary@": {
+                    template: '<br><br>'
+                },
+                "main@": {
+                    controller: 'LookupController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/lookup/lookup.component.html'
+                }
+            }
+        })
+        .state('home.dante.iframe', {
+            url: '/iframe',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Dante Migration Testbed'
+            },
+            views: {
+                "summary@": {
+                    template: '<br>'
+                },
+                "main@": {
+                    controller: function($scope, LookupStore, $stateParams) {
+                        // var sin  = '?sin=33b905c6-faa8-42f8-af3a-4e2eaf64ca61';
+                        // var surl = '&serverurl=https://internal-public-lpi-b-507116299.us-east-1.elb.amazonaws.com';
+                        // var rec  = '&Recommendation=df0b96b0-4f22-4854-9b95-e8e98e379fc6';
+                        // var ulnk = '&userlink=ACCT0002';
+                        // var hsp  = '&HasSalesprism=false&CustomSettings=';
+                        // var settings = {
+                        //     ShowScore: false,
+                        //     ShowLift: false,
+                        //     ShowPurchaseHistory: false,
+                        //     NoPlaysMessage: 'No Plays Found.',
+                        //     NoDataMessage: 'No Data Found.',
+                        //     hideNavigation: true,
+                        //     HideTabs: true,
+                        //     HideHeader: true,
+                        //     DefaultTab: '',
+                        //     SupportEmail: 'smeng@lattice-engines.com'
+                        // };
+
+                        // var host = '/dante' + sin + surl + rec + ulnk + hsp + 
+                        //                     JSON.stringify(settings);
+
+                        var host = '/dante?sin=04dd8ffa-2dfe-4e20-b687-c6aaa2c05d10&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=00561000002sfm8AAA&Recommendation=76b4a228-ba12-4c47-801d-dc8aeb3365fd&HasSalesprism=false&CustomSettings=%7B"SupportEmail"%3A"pliu%40lattice-engines.com"%2C"ShowScore"%3A%20false%2C"ShowLift"%3A%20false%2C"ShowPurchaseHistory"%3A%20true%2C"NoPlaysMessage"%3A"No%20Plays%20Found."%2C"NoDataMessage"%3A"No%20Data%20Found."%2C"hideNavigation"%3A%20false%2C"HideTabs"%3A%20false%2C"HideHeader"%3A%20true%2C"DefaultTab"%3A"TalkingPoints"%7D&PurchaseHistoryAccount=0016100001RU35QAAT'
+
+                        $('#sureshot_iframe_container')
+                            .html("<iframe id='dante_iframe' src='" + host + "'></iframe>");
+
+                        var childWindow = document.getElementById('dante_iframe').contentWindow;
+
+                        window.addEventListener('message', handleMessage, false);
+
+                        function handleMessage(event) {
+                            var split = event.data.split('=');
+                            console.log('receiving from Dante:', split);
+                            // setTimeout(function() {
+                            //     console.log('posting to Dante:', 'CrmTabSelectedEvent=TalkingPoints');
+                            //     childWindow.postMessage('CrmTabSelectedEvent=TalkingPoints','*');
+                            // },5000);
+                            if (split[0] == 'IFrameResizeEvent') {
+                                document.getElementById('dante_iframe').style.height = split[1] + 'px';
+                            }
+                        }
+
+                        $scope.$on('$destroy', function() {
+                            window.removeEventListener('message', handleMessage);
+                        });
+                    },
+                    templateUrl: 'app/marketo/views/SureshotTemplateView.html'
+                }
+            }
         });
 });
 function ShowSpinner(LoadingString, selector) {

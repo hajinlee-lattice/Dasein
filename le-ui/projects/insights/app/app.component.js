@@ -28,10 +28,9 @@ var mainApp = angular.module('insightsApp', [
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('authInterceptor');
 })
-.service('SegmentService', function() {
-})
-.service('SegmentStore', function() {
-})
+.service('SegmentService', function() {})
+.service('SegmentStore', function() {})
+.service('RatingsEngineStore', function(){})
 .service('AuthStore', function($q) {
     this.Authorization = '';
     
@@ -43,7 +42,6 @@ var mainApp = angular.module('insightsApp', [
         this.Authorization = value;
     }
 })
-.service('RatingsEngineStore', function(){})
 .factory('authInterceptor', function ($q, AuthStore) {
     return {
         request: function(config) {

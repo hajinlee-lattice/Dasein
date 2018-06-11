@@ -124,6 +124,16 @@ module.exports = [{
         '/websocket/assets': '/assets',
         '/websocket/lib': '/lib',
     }
+},{
+    path: '/projects/dante',
+    pages: {
+        '/dante/': 'index.html',
+        '/dante/index': 'index.html'
+    },
+    folders: {
+        '/dante/app': '/app',
+        '/dante/assets': '/assets'
+    }
 },{    
     path: '/projects/widgets',
     html5mode: true,

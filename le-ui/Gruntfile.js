@@ -24,6 +24,7 @@ module.exports = function (grunt) {
             devall: { // all populated, qa stack a
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'development',
+                DANTE_URL: 'https://bis-awstest.lattice-engines.com',
                 API_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
                 API_CON_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
                 ULYSSES_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
@@ -44,6 +45,7 @@ module.exports = function (grunt) {
             dev: { // qa stack a
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
+                DANTE_URL: 'https://bis-awstest.lattice-engines.com',
                 ULYSSES_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
                 API_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
                 API_CON_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
@@ -73,6 +75,7 @@ module.exports = function (grunt) {
             devb: { // qa stack b
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
+                DANTE_URL: 'https://bis-awstest.lattice-engines.com',
                 ULYSSES_URL: 'https://internal-public-lpi-b-507116299.us-east-1.elb.amazonaws.com',
                 API_URL: 'https://internal-public-lpi-b-507116299.us-east-1.elb.amazonaws.com',
                 API_CON_URL: 'https://internal-public-lpi-b-507116299.us-east-1.elb.amazonaws.com',

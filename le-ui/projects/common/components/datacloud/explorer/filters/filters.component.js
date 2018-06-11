@@ -203,11 +203,11 @@ angular
                 } else {
                     vm.metadata.toggle.show.enabled = '';
                 }
-            }
+            };
 
             vm.hideMessage = function() {
                 vm.saved = false;
-            }
+            };
 
             vm.isFilterSelected = function() {
                 return  (vm.section !== 'insights'          && vm.metadata.toggle.show.enabled)     ||
@@ -216,7 +216,7 @@ angular
                         vm.metadata.toggle.hide.enabled     || vm.metadata.toggle.show.highlighted  ||
                         vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls        ||
                         vm.metadata.toggle.show.internal;
-            }
+            };
 
             vm.sortOrder = function() {
                 var sortPrefix = vm.sortPrefix.replace('+','');
@@ -231,7 +231,7 @@ angular
                         return handleFilterOrder(vm.orders.attribute);
                     }
                 }
-            }
+            };
 
             var handleFilterOrder = function(order, sortPrefix) {
                 var sortPrefix = sortPrefix || vm.sortPrefix.replace('+','');
@@ -246,7 +246,7 @@ angular
                     return retArr;
                 }
                 return sortPrefix + order;
-            }
+            };
 
             vm.enrichmentsFilter = function() {
                 var filter = {};
@@ -289,7 +289,7 @@ angular
                 }
 
                 return filter;
-            }
+            };
 
             vm.subcategoryFilter = function(subcategory) {
                 if(!vm.enrichments_completed) {
@@ -299,20 +299,26 @@ angular
                     count = vm.subcategoryCount(category, subcategory);
 
                 return (count ? true : false);
-            }
+            };
 
             vm.goBackToModelRules = function() {
                 SegmentStore.sanitizeRuleBuckets( RatingsEngineStore.getRule().rule, true)
                 $state.go('home.ratingsengine.dashboard.segment.attributes.rules');
-            }
+            };
 
-            vm.showAtributeAdmin = function(){
+            vm.showAtributeAdmin = function() {
+                var session = BrowserStorageUtility.getSessionDocument();
+
+                if (session === null || session.User === null || session.User.AccessLevel == "EXTERNAL_USER") {
+                    return false;
+                }
+
                 if (vm.section == 'insight' || vm.section == 'wizard.ratingsengine_segment'){
                     return false;
                 } 
                 
                 return ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
-            }
+            };
 
             vm.showFileImport = function() {
                 var flags = FeatureFlagService.Flags();

@@ -1,5 +1,6 @@
 export NODE_APPS=leui,leadmin
 export NODE_ENV=development
+export DANTE_URL=https://bis-awstest.lattice-engines.com
 export API_URL=http://localhost:8081
 export API_CON_URL=http://localhost:8073
 export API_ADMIN_URL=http://localhost:8085
