@@ -218,49 +218,8 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.ratingEngine.chartConfig = vm.barChartConfig;
         }        
 
-        var newBucketMetadata = [],
-            dummyNewBucketData = [{
-                "bucket_name": "A",
-                "num_leads": 11,
-                "lift": "0.3",
-                "dummy": true
-            },{
-                "bucket_name": "B",
-                "num_leads": 10,
-                "lift": "1.3",
-                "dummy": true
-            },{
-                "bucket_name": "C",
-                "num_leads": 16,
-                "lift": "0.8",
-                "dummy": true
-            },{
-                "bucket_name": "D",
-                "num_leads": 18,
-                "lift": "0.9",
-                "dummy": true
-            },{
-                "bucket_name": "F",
-                "num_leads": 14,
-                "lift": "0.5",
-                "dummy": true
-            }];
 
-        if(vm.dashboard.summary.bucketMetadata && vm.dashboard.summary.bucketMetadata.length > 0) {
-            angular.forEach(vm.dashboard.summary.bucketMetadata, function(rating, key) {
-                rating.lift = (Math.round( rating.lift * 10) / 10).toString();
-                newBucketMetadata.push(rating);
-
-                if(newBucketMetadata.length === 0) {
-                    newBucketMetadata = dummyNewBucketData;
-                }
-            });
-        } else {
-            newBucketMetadata = dummyNewBucketData;
-        }
-        vm.ratingEngine.newBucketMetadata = newBucketMetadata;
-
-                if (vm.isRulesBased) {
+        if (vm.isRulesBased) {
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {

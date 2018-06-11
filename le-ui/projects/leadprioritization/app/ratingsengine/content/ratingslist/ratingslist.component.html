@@ -65,7 +65,7 @@
                     ng-mouseleave="vm.current.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
                     ng-if="vm.current.ratings.length > 0"
                     class="{{ rating.tileClass }}"
-                    ng-class="{editing: vm.current.tileStates[rating.id].editRating, noRatings: ( rating.bucketMetadata[0].dummy)}">
+                    ng-class="{editing: vm.current.tileStates[rating.id].editRating, noRatings: (rating.bucketMetadata === undefined || rating.bucketMetadata.length === 0)}">
 
                     <div class="tile-header" ng-if="!vm.current.tileStates[rating.id].editRating">
                         <h2 title="{{rating.displayName}}">{{rating.displayName}}</h2>
@@ -134,14 +134,11 @@
                         </ul>
                     </div><!-- End .tile-metadata -->
                     <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
-                        <div 
-                            class="no-ratings"
-                            ng-if="rating.bucketMetadata[0].dummy">
-                            <h4>No Ratings Available</h4>
-                        </div>
+                        <h4 ng-if="rating.bucketMetadata === undefined || rating.bucketMetadata === null || rating.bucketMetadata.length === 0">No Ratings Available</h4>
                         <bar-chart
                             config="rating.chartConfig" 
-                            bktlist="rating.bucketMetadata">
+                            bktlist="rating.bucketMetadata"
+                            ng-if="rating.bucketMetadata != undefined || rating.bucketMetadata != null || rating.bucketMetadata.length > 0">
                         </bar-chart>
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">

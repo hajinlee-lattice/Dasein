@@ -20,44 +20,13 @@
         }
     }
     &.noRatings {
-            .attribute-stats {
-                .row-container{
-                    color: #bbb;
-                    &:nth-child(even) {
-                        background-color: #f7f7f7;
-                    }
-                }
-                .vlines-container .vline {
-                    & > div {
-                        border-color: #e2e2e2;
-                    }
-                    & > span {
-                        color: #bbb;
-                    }
-                }
-            }
-            .bar-graph {
-                background-color: #eaeaea !important;
-            }
-            .no-ratings {
-                position: absolute;
-                text-align: center;
-                z-index: 2;
-                display: block;
-                left: 50%;
-                width: 200px;
-                margin-top: 54px;
-                margin-left: -100px;
-                padding: 20px 14px;
-                background: rgba(255,255,255,0.8);
-                border-radius: 4px;
-                box-shadow: 0px 0px 4px rgba(0,0,0,0.4);
-                h4 {
-                    font-size: 12px;
-                    text-transform: uppercase;
-                }
+        .content {
+            h4 {
+                font-size: 12px;
+                text-transform: uppercase;
             }
         }
+    }
     .header {
         margin-bottom: 20px;
         &:after {

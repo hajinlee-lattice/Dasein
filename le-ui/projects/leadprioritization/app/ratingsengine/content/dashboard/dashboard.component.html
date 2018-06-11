@@ -6,7 +6,7 @@
 
 <section 
     class="rating-engine dashboard {{ vm.modelingStrategy }}"
-    ng-class="{noRatings: (!vm.ratingEngine.newBucketMetadata || vm.ratingEngine.newBucketMetadata[0].dummy)}">
+    ng-class="{noRatings: (vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0)}">
     <div class="container row">
         <div class="ten columns offset-one">
 
@@ -111,14 +111,11 @@
                 </div>
                 <div>
                     <h3>Ratings</h3>
-                    <div 
-                        class="no-ratings"
-                        ng-if="vm.ratingEngine.newBucketMetadata[0].dummy">
-                        <h4>No Ratings Available</h4>
-                    </div>
+                    <h4 ng-if="vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0">No Ratings Available</h4>
                     <bar-chart
                         config="vm.ratingEngine.chartConfig" 
-                        bktlist="vm.ratingEngine.newBucketMetadata">
+                        bktlist="vm.dashboard.summary.bucketMetadata"
+                        ng-if="vm.dashboard.summary.bucketMetadata.bucketMetadata != undefined || vm.dashboard.summary.bucketMetadata.bucketMetadata != null || vm.dashboard.summary.bucketMetadata.length > 0">
                     </bar-chart>
                 </div>
                 <div>

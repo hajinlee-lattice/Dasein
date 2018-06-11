@@ -18,8 +18,7 @@
 
         <menu-filter-by 
             config="vm.header.filter"
-            callback-function="vm.filterChange(args)"
-            ng-if="vm.launchesCount > 1">
+            callback-function="vm.filterChange(args)">
         </menu-filter-by>
         <chips 
             ng-show="vm.allPlaysHistory"
@@ -131,7 +130,7 @@
     		<tbody ng-if="!vm.noFilteredData">
     			<tr ng-repeat="launch in vm.launches.launchSummaries">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
-                    <td ng-if="vm.allPlaysHistory">{{launch.playDisplayName}}</td>
+                    <td ng-if="vm.allPlaysHistory" class="text-ellipsis">{{launch.playDisplayName}}</td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
     				<td class="red-text">{{launch.stats.suppressed | number}}</td>
     				<td class="red-text">{{launch.stats.errors | number}}</td>

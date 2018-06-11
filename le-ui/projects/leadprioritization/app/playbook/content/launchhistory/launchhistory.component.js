@@ -32,6 +32,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         console.log(vm.launches);
         console.log(vm.launchesCount);
 
+        vm.allPlayLaunchesCount = vm.launchesCount;
         vm.noData = (vm.launchesCount === 0 && vm.orgId === '' && vm.externalSystemType === '' && vm.playName === '') ? true : false;
 
         vm.offset = (vm.currentPage - 1) * vm.pagesize;
@@ -155,16 +156,14 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
     // Create list of items for filter
     vm.updateFilterData = function() {
+
         vm.header.filter.items = [
             { 
                 label: "All", 
-                action: {
-                    destinationOrgId: ''
-                },
-                total: vm.launchesCount
+                action: { destinationOrgId: '' },
+                total: vm.allPlayLaunchesCount
             }
         ];
-
         angular.forEach(vm.launches.uniqueLookupIdMapping, function(value, key) {
             angular.forEach(value, function(val, index) {
    
@@ -177,7 +176,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                     }, 
                     action: {
                         destinationOrgId: val.orgId
-                    }
+                    },
+                    total: vm.allPlayLaunchesCount
                 });
 
             });
