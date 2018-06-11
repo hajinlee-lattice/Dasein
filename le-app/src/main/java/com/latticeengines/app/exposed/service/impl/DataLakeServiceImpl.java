@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -31,6 +36,7 @@ import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -60,6 +66,7 @@ import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 import reactor.core.publisher.Flux;
@@ -91,6 +98,9 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private MetadataProxy metadataProxy;
+
     private final DataLakeServiceImpl _dataLakeService;
 
     private final List<String> LOOKUP_FIELDS;
@@ -98,6 +108,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private LocalCacheManager<String, Map<String, StatsCube>> statsCubesCache;
     private LocalCacheManager<String, List<ColumnMetadata>> cmCache;
+    private ExecutorService workers = null;
 
     @Inject
     public DataLakeServiceImpl(DataLakeServiceImpl dataLakeService) {
@@ -394,13 +405,36 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     private Map<String, List<ColumnMetadata>> getColumnMetadataMap(String customerSpace, Map<String, StatsCube> cubes) {
+        List<Runnable> runnables = new ArrayList<>();
+        ConcurrentMap<BusinessEntity, List<ColumnMetadata>> metadataMap = new ConcurrentHashMap<>();
+        ConcurrentMap<BusinessEntity, Set<String>> columnNamesMap = new ConcurrentHashMap<>();
+        cubes.keySet().forEach(key -> {
+            final BusinessEntity entity = BusinessEntity.valueOf(key);
+            final String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
+            Runnable metadataRunnable = //
+                    () -> {
+                        List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
+                        metadataMap.put(entity, cms);
+                    };
+            Runnable columnNamesRunnable = //
+                    () -> {
+                Set<String> attrs = _dataLakeService.getServingTableColumns(customerSpace, entity);
+                columnNamesMap.put(entity, attrs);
+                    };
+            runnables.add(metadataRunnable);
+            runnables.add(columnNamesRunnable);
+        });
+        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 30, 1);
+
         Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
         cubes.keySet().forEach(key -> {
             BusinessEntity entity = BusinessEntity.valueOf(key);
-            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
-            List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
+            List<ColumnMetadata> cms = metadataMap.get(entity);
+            Set<String> attrs = columnNamesMap.getOrDefault(entity, Collections.emptySet());
             if (CollectionUtils.isNotEmpty(cms)) {
-                cmMap.put(key, cms);
+                List<ColumnMetadata> attrsInTable = Flux.fromIterable(cms)
+                        .filter(cm -> attrs.contains(cm.getAttrName())).collectList().block();
+                cmMap.put(key, attrsInTable);
             }
         });
         return cmMap;
@@ -435,8 +469,39 @@ public class DataLakeServiceImpl implements DataLakeService {
         return cms;
     }
 
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|servingtable\", #customerSpace, #entity)", unless = "#result == null")
+    public Set<String> getServingTableColumns(String customerSpace, BusinessEntity entity) {
+        Set<String> result = null;
+        if (entity != null) {
+            String tableName = dataCollectionProxy.getTableName(customerSpace, entity.getServingStore());
+            if (StringUtils.isBlank(tableName)) {
+                log.info("Cannot find serving table for " + entity + " in " + customerSpace);
+            } else {
+                try (PerformanceTimer timer = new PerformanceTimer()) {
+                    Set<String> attrSet = new HashSet<>();
+                    List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, tableName);
+                    cms.forEach(cm -> attrSet.add(cm.getAttrName()));
+                    result = attrSet;
+                    timer.setTimerMessage("Fetched " + attrSet.size() + " attr names for " + entity + " in " + customerSpace);
+                }
+            }
+        }
+        return result;
+    }
+
     @VisibleForTesting
     void setMatchProxy(MatchProxy matchProxy) {
         this.matchProxy = matchProxy;
+    }
+
+    private ExecutorService getWorkers() {
+        if (workers == null) {
+            synchronized (this) {
+                if (workers == null) {
+                    workers = ThreadPoolUtils.getFixedSizeThreadPool("datalake-svc", 8);
+                }
+            }
+        }
+        return workers;
     }
 }

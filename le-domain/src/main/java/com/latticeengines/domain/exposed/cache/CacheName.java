@@ -59,7 +59,7 @@ public enum CacheName {
     public static class Constants {
         public static final String PLSCacheName = "PLSCache";
         public static final String DataLakeTopNTreeCache = "DataLakeTopNTreeCache";
-        public static final String DataLakeCMCacheName = "DataLakeCMCacheM19";
+        public static final String DataLakeCMCacheName = "DataLakeCMCache";
         public static final String DataLakeStatsCubesCache = "DataLakeStatsCubesCache";
         public static final String EntityCountCacheName = "EntityCountCache";
         public static final String EntityDataCacheName = "EntityDataCache";

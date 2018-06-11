@@ -160,7 +160,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         return getCountFromObjectApi(tenantId, frontEndQuery);
     }
 
-    private Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
+    public Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
         String url;
         if (version != null) {
             url = constructUrl("/{customerSpace}/entity/count?version={version}", tenantId, version);

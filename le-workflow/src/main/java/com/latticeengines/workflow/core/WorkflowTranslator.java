@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -80,6 +81,7 @@ public class WorkflowTranslator {
         Choreographer choreographer = workflow.getChoreographer();
         choreographer.linkStepNamespaces(workflow.getStepNamespaces());
         FailingStep failingStep = workflow.getFailingStep();
+        log.info("Need to inject failing step " + JsonUtils.serialize(failingStep));
         Map<String, Integer> stepOccurrences = new HashMap<>();
         if (CollectionUtils.isNotEmpty(workflow.getSteps())) {
             SimpleJobBuilder simpleJobBuilder = null;

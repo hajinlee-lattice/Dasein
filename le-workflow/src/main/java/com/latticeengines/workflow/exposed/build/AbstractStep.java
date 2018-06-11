@@ -206,6 +206,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     protected void putStringValueInContext(String key, String val) {
+        log.info("Updating " + key + " in context to " + val);
         executionContext.put(key, val);
     }
 
