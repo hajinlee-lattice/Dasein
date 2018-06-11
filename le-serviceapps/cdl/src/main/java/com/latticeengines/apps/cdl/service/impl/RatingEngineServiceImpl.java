@@ -712,14 +712,16 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public void verifyRatingEngineCyclicDependency(RatingEngine ratingEngine) {
         RatingEngine existing = getRatingEngineById(ratingEngine.getId(),false);
         if (existing != null) {
-            Map<Long, RatingEngine> ratingEngineMap = ratingEngineCyclicDependency(existing, new LinkedHashMap<>());
+//            Map<Long, String> ratingEngineMap = ratingEngineCyclicDependency(existing, new LinkedHashMap<>(), new ArrayList<>());
+//            Map<Long, String> ratingEngineMap = ratingEngineCyclicDependency1(existing, new LinkedHashMap<>());
+            Map<Long, String> ratingEngineMap = null;
             if (ratingEngineMap != null) {
                 StringBuilder message = new StringBuilder();
-                for (Map.Entry<Long, RatingEngine> entry : ratingEngineMap.entrySet()) {
+                for (Map.Entry<Long, String> entry : ratingEngineMap.entrySet()) {
                     if (entry.getKey() != -1) {
-                        message.append(String.format("Rating engine '%s' --> ", entry.getValue().getDisplayName()));
+                        message.append(String.format("Rating engine '%s' --> ", entry.getValue()));
                     } else {
-                        message.append(String.format("Rating engine '%s'.", entry.getValue().getDisplayName()));
+                        message.append(String.format("Rating engine '%s'.", entry.getValue()));
                     }
                 }
 
@@ -729,15 +731,25 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Long, RatingEngine> ratingEngineCyclicDependency(
-            RatingEngine ratingEngine, LinkedHashMap<Long, RatingEngine> map) {
-        LinkedHashMap<Long, RatingEngine> ratingEngineMap = (LinkedHashMap<Long, RatingEngine>)map.clone();
-        ratingEngineMap.put(ratingEngine.getPid(), ratingEngine);
+    private Map<Long, String> ratingEngineCyclicDependency(
+            RatingEngine ratingEngine, LinkedHashMap<Long, String> map, ArrayList<Long> list) {
+        LinkedHashMap<Long, String> ratingEngineMap = (LinkedHashMap<Long, String>)map.clone();
+        ArrayList<Long> segmentsPid = (ArrayList<Long>)list.clone();
+
+        ratingEngineMap.put(ratingEngine.getPid(), ratingEngine.getDisplayName());
         List<AttributeLookup> attributeLookups = getDependentAttrsInAllModels(ratingEngine.getId());
         List<MetadataSegment> segments = segmentService.findDependingSegments(
                 ratingEngine.getTenant().getId(), convertAttributeLookupList(attributeLookups));
 
+        List<MetadataSegment> unRepeatSegments = new ArrayList<>();
         for (MetadataSegment segment : segments) {
+            if (!segmentsPid.contains(segment.getPid())) {
+                segmentsPid.add(segment.getPid());
+                unRepeatSegments.add(segment);
+            }
+        }
+
+        for (MetadataSegment segment : unRepeatSegments) {
             List<AttributeLookup> segmentAttributeLookups = segmentService.findDependingAttributes(
                     Collections.singletonList(segment));
 
@@ -747,11 +759,37 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             for (RatingEngine re : ratingEngines) {
                 if (!re.getPid().equals(ratingEngine.getPid())) {
                     if (ratingEngineMap.containsKey(re.getPid())) {
-                        ratingEngineMap.put(new Long(-1l), re);
+                        ratingEngineMap.put(new Long(-1l), re.getDisplayName());
                         return ratingEngineMap;
                     } else {
-                        return ratingEngineCyclicDependency(re, ratingEngineMap);
+                        return ratingEngineCyclicDependency(re, ratingEngineMap, segmentsPid);
                     }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Long, String> ratingEngineCyclicDependency1(
+            RatingEngine ratingEngine, LinkedHashMap<Long, String> map) {
+        LinkedHashMap<Long, String> ratingEngineMap = (LinkedHashMap<Long, String>)map.clone();
+        ratingEngineMap.put(ratingEngine.getPid(), ratingEngine.getDisplayName());
+
+        List<AttributeLookup> segmentAttributeLookups = segmentService.findDependingAttributes(
+                Collections.singletonList(ratingEngine.getSegment()));
+
+        List<RatingEngine> ratingEngines = getDependingRatingEngines(
+                convertAttributeLookupList(segmentAttributeLookups));
+
+        for (RatingEngine re : ratingEngines) {
+            if (!re.getPid().equals(ratingEngine.getPid())) {
+                if (ratingEngineMap.containsKey(re.getPid())) {
+                    ratingEngineMap.put(new Long(-1l), re.getDisplayName());
+                    return ratingEngineMap;
+                } else {
+                    return ratingEngineCyclicDependency1(re, ratingEngineMap);
                 }
             }
         }

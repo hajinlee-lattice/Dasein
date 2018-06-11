@@ -253,14 +253,15 @@ public class SegmentServiceImpl implements SegmentService {
         if (metadataSegment != null) {
             MetadataSegment existing = findByName(metadataSegment.getName());
             if (existing != null) {
-                Map<Long, MetadataSegment> segmentMap = segmentCyclicDependency(existing, new LinkedHashMap<>());
+//                Map<Long, String> segmentMap = segmentCyclicDependency(existing, new LinkedHashMap<>(), new ArrayList<>());
+                Map<Long, String> segmentMap = null;
                 if (segmentMap != null) {
                     StringBuilder message = new StringBuilder();
-                    for (Map.Entry<Long, MetadataSegment> entry : segmentMap.entrySet()) {
+                    for (Map.Entry<Long, String> entry : segmentMap.entrySet()) {
                         if (entry.getKey() != -1) {
-                            message.append(String.format("Segment '%s' --> ", entry.getValue().getName()));
+                            message.append(String.format("Segment '%s' --> ", entry.getValue()));
                         } else {
-                            message.append(String.format("Segment '%s'.", entry.getValue().getName()));
+                            message.append(String.format("Segment '%s'.", entry.getValue()));
                         }
                     }
 
@@ -271,22 +272,32 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Long, MetadataSegment> segmentCyclicDependency(
-            MetadataSegment metadataSegment, LinkedHashMap<Long, MetadataSegment> map) {
-        LinkedHashMap<Long, MetadataSegment> segmentMap = (LinkedHashMap<Long, MetadataSegment>)map.clone();
-        segmentMap.put(metadataSegment.getPid(), metadataSegment);
+    private Map<Long, String> segmentCyclicDependency(
+            MetadataSegment metadataSegment, LinkedHashMap<Long, String> map, ArrayList<Long> list) {
+        LinkedHashMap<Long, String> segmentMap = (LinkedHashMap<Long, String>)map.clone();
+        ArrayList<Long> ratingEnginesPid = (ArrayList<Long>)list.clone();
+
+        segmentMap.put(metadataSegment.getPid(), metadataSegment.getName());
         List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(metadataSegment));
         List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(
                 convertAttributeLookupList(attributeLookups));
 
+        List<RatingEngine> unRepeatRatingEngines = new ArrayList<>();
         for (RatingEngine ratingEngine : ratingEngines) {
+            if (!ratingEnginesPid.contains(ratingEngine.getPid())) {
+                ratingEnginesPid.add(ratingEngine.getPid());
+                unRepeatRatingEngines.add(ratingEngine);
+            }
+        }
+
+        for (RatingEngine ratingEngine : unRepeatRatingEngines) {
             MetadataSegment segment = ratingEngine.getSegment();
             if (!segment.getPid().equals(metadataSegment.getPid())) {
                 if (segmentMap.containsKey(segment.getPid())) {
-                    segmentMap.put(new Long(-1l), segment);
+                    segmentMap.put(new Long(-1l), segment.getName());
                     return segmentMap;
                 } else {
-                    return segmentCyclicDependency(segment, segmentMap);
+                    return segmentCyclicDependency(segment, segmentMap, ratingEnginesPid);
                 }
             }
         }
