@@ -79,6 +79,7 @@ mod = angular.module('mainApp.core.services.FeatureFlagService', [
         ALLOW_PIVOT_FILE:'AllowPivotFile',
         ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES: 'EnableInternalEnrichmentAttributes',
         LATTICE_INSIGHTS: 'LatticeInsights',
+        VDB_MIGRATION: 'VDBMigration',
 
         //TODO: deprecated flags
         CAMPAIGNS_PAGE: 'EnableCampaignUI',
