@@ -22,6 +22,9 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("dataFeedExecutionCleanupService")
 public class DataFeedExecutionCleanupServiceImpl implements DataFeedExecutionCleanupService {
@@ -33,6 +36,9 @@ public class DataFeedExecutionCleanupServiceImpl implements DataFeedExecutionCle
 
     @Inject
     private DataFeedEntityMgr dataFeedEntityMgr;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @Value("${cdl.datafeed.execution.stuck.min:30}")
     private int stuckMin;
@@ -65,6 +71,7 @@ public class DataFeedExecutionCleanupServiceImpl implements DataFeedExecutionCle
                     log.info("Cannot find datafeed Execution for data feed: " + dataFeed.getName());
                     continue;
                 }
+                // 1. cleanup stuck execution
                 if (dataFeedExecution.getWorkflowId() == null
                         && DataFeedExecution.Status.Started.equals(dataFeedExecution.getStatus())) {
                     Date lastUpdated = dataFeedExecution.getUpdated() == null ? dataFeedExecution.getCreated() :
@@ -75,6 +82,25 @@ public class DataFeedExecutionCleanupServiceImpl implements DataFeedExecutionCle
                         dataFeedExecutionEntityMgr.update(dataFeedExecution);
 
                         log.info(String.format("Reset datafeed status from %s to Active", dataFeed.getStatus().name()));
+                        dataFeed.setStatus(DataFeed.Status.Active);
+                        dataFeedEntityMgr.update(dataFeed);
+                    }
+                }
+                // 2. cleanup laze update ones
+                if (dataFeedExecution.getWorkflowId() != null) {
+                    Job job = workflowProxy.getWorkflowExecution(String.valueOf(dataFeedExecution.getWorkflowId()),
+                            MultiTenantContext.getCustomerSpace().toString());
+                    if (job != null && job.getJobStatus().isTerminated()) {
+                        DataFeedExecution.Status dfeStatus = DataFeedExecution.Status.Failed;
+                        if (JobStatus.COMPLETED.equals(job.getJobStatus())) {
+                            dfeStatus = DataFeedExecution.Status.Completed;
+                        }
+                        log.info("Reset datafeed_execution status from Started to " + dfeStatus.name());
+                        dataFeedExecution.setStatus(dfeStatus);
+                        dataFeedExecutionEntityMgr.update(dataFeedExecution);
+
+                        log.info(String.format("Reset datafeed %s status from %s to Active (Lazy update)",
+                                dataFeed.getName(), dataFeed.getStatus().name()));
                         dataFeed.setStatus(DataFeed.Status.Active);
                         dataFeedEntityMgr.update(dataFeed);
                     }
