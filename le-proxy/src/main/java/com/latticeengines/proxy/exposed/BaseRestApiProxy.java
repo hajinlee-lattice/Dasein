@@ -61,7 +61,8 @@ public abstract class BaseRestApiProxy {
             org.apache.commons.httpclient.util.TimeoutController.TimeoutException.class, //
             io.netty.handler.timeout.TimeoutException.class, //
             org.apache.http.NoHttpResponseException.class,
-            org.springframework.web.client.ResourceAccessException.class);
+            org.springframework.web.client.ResourceAccessException.class,
+            java.io.IOException.class);
 
     private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset");
 
