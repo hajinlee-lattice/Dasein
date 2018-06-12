@@ -92,6 +92,11 @@ angular.module('lp.import.wizard.latticefields', [])
         }
     };
     
+    /**
+     * NOTE: The delimiter could cause a problem if the column name has : as separator 
+     * @param {*} string 
+     * @param {*} delimiter 
+     */
     var makeObject = function(string, delimiter) {
         var delimiter = delimiter || ':',
             string = string || '',

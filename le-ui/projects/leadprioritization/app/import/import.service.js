@@ -104,6 +104,7 @@ angular.module('lp.import')
                 state: 'contacts.ids.latticefields', 
                 nextLabel: 'Next, Add Custom Fields', 
                 nextFn: function(nextState) {
+                    ImportWizardStore.removeSavedDocumentFieldsAfter($state.current);
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
