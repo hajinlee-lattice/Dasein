@@ -23,8 +23,8 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
-import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 import com.latticeengines.proxy.exposed.cdl.CDLDependenciesProxy;
 
 @Component("cdlImpactValidator")
@@ -50,18 +50,20 @@ public class CDLImpactValidator extends AttrValidator {
 
     private void checkImpact(AttrConfig attrConfig, boolean isAdmin) {
         if (attrConfig.getEntity() != null && hasCustomValue(attrConfig)) {
-            List<String> attributes = Collections.singletonList(String.format("%s.%s", attrConfig.getEntity().name(),
-                    attrConfig.getAttrName()));
+            List<String> attributes = Collections
+                    .singletonList(String.format("%s.%s", attrConfig.getEntity().name(), attrConfig.getAttrName()));
             if (MultiTenantContext.getCustomerSpace() == null) {
                 log.error("MultiTenancy Framework error. Null CustomerSpace!");
                 return;
             }
             String customerSpace = MultiTenantContext.getCustomerSpace().toString();
             List<MetadataSegment> impactSegments = cdlDependenciesProxy.getDependingSegments(customerSpace, attributes);
-            List<RatingEngine> impactRatingEngines = cdlDependenciesProxy.getDependingRatingEngines(customerSpace, attributes);
-            List<RatingModel> impactRatingModels = cdlDependenciesProxy.getDependingRatingModels(customerSpace, attributes);
+            List<RatingEngine> impactRatingEngines = cdlDependenciesProxy.getDependingRatingEngines(customerSpace,
+                    attributes);
+            List<RatingModel> impactRatingModels = cdlDependenciesProxy.getDependingRatingModels(customerSpace,
+                    attributes);
             List<Play> impactPlays = cdlDependenciesProxy.getDependingPlays(customerSpace, attributes);
-            AttrConfigProp stateProp = attrConfig.getProperty(ColumnMetadataKey.State);
+            AttrConfigProp<?> stateProp = attrConfig.getProperty(ColumnMetadataKey.State);
             if (CollectionUtils.isNotEmpty(impactSegments)) {
                 if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
                     addErrorMsg(ValidationErrors.Type.IMPACTED_SEGMENTS,
@@ -104,15 +106,13 @@ public class CDLImpactValidator extends AttrValidator {
             if (CollectionUtils.isNotEmpty(impactPlays)) {
                 if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
                     addErrorMsg(ValidationErrors.Type.IMPACTED_PLAYS, String.format(ValidationMsg.Errors.IMPACT_PLAYS,
-                            attrConfig.getAttrName(), getImpactPlayNames(impactPlays)),
-                            attrConfig);
+                            attrConfig.getAttrName(), getImpactPlayNames(impactPlays)), attrConfig);
                 } else {
                     addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, String.format(ValidationMsg.Warnings.IMPACT_PLAYS,
                             attrConfig.getAttrName(), getImpactPlayNames(impactPlays)), attrConfig);
                 }
             }
         }
-
 
     }
 

@@ -323,7 +323,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName) {
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
-        return generateSelectionDetails(categoryName, attrConfigRequest, ColumnMetadataKey.State, false, false);
+        return generateSelectionDetails(categoryName, attrConfigRequest, ColumnMetadataKey.State, false);
     }
 
     @Override
@@ -331,12 +331,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         String property = translateUsageToProperty(usage);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
-        return generateSelectionDetails(categoryName, attrConfigRequest, property, true, true);
+        return generateSelectionDetails(categoryName, attrConfigRequest, property, true);
     }
 
     @SuppressWarnings("unchecked")
     AttrConfigSelectionDetail generateSelectionDetails(String categoryName, AttrConfigRequest attrConfigRequest,
-            String property, boolean applyActivationFilter, boolean filterOutNonCustomizedAttrs) {
+            String property, boolean applyActivationFilter) {
         AttrConfigSelectionDetail attrConfigSelectionDetail = new AttrConfigSelectionDetail();
         long totalAttrs = 0L;
         long selected = 0L;
@@ -358,21 +358,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                             includeCurrentAttr = false;
                         }
                     }
-                    // PLS-8199 --------------
-                    if (includeCurrentAttr && filterOutNonCustomizedAttrs) {
-                        if (usagePropertySet.contains(property)) {
-                            AttrConfigProp<Boolean> attrConfigProp = (AttrConfigProp<Boolean>) attrProps.get(property);
-                            if (!attrConfigProp.isAllowCustomization()
-                                    && (Boolean) attrConfigProp.getSystemValue() == Boolean.FALSE) {
-                                log.warn(String.format("property %s by default cannot be shown in UI", property));
-                                includeCurrentAttr = false;
-                            }
-                        } else {
-                            log.warn(String.format("Current property %s cannot apply filterOutNonCustomizedAttrs",
-                                    property));
-                        }
-                    }
-                    // --------------
 
                     if (includeCurrentAttr) {
                         // check subcategory property

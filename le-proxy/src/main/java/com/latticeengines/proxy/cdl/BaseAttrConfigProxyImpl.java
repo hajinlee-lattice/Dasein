@@ -13,7 +13,6 @@ import org.springframework.lang.Nullable;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -35,22 +34,6 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         AttrConfigRequest result = getKryo("get attr config by entity", url.toString(), AttrConfigRequest.class);
         result.fixJsonDeserialization();
         return result;
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    public List<AttrConfigOverview<?>> getAttrConfigOverview(String customerSpace, String categoryName,
-            @NonNull String propertyName) {
-        log.info("customerSpace is " + customerSpace + ", categoryName is " + categoryName + ", propertyName is "
-                + propertyName);
-        StringBuilder url = new StringBuilder();
-        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig", //
-                shortenCustomerSpace(customerSpace)));
-        url.append("?property=").append(propertyName);
-        if (categoryName != null) {
-            url.append("&category=").append(categoryName);
-        }
-        log.info("url is " + url);
-        return getKryo("get Attribute Configuration Overview", url.toString(), List.class);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -87,7 +70,7 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace));
         url += categoryName;
         log.info("getAttrConfigByCategory url is " + url);
-        AttrConfigRequest result =  getKryo("get attr config by category", url, AttrConfigRequest.class);
+        AttrConfigRequest result = getKryo("get attr config by category", url, AttrConfigRequest.class);
         result.fixJsonDeserialization();
         return result;
     }
@@ -95,7 +78,7 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
     public AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/", //
                 shortenCustomerSpace(customerSpace));
-        AttrConfigRequest result =  post("save attr config", url, request, AttrConfigRequest.class);
+        AttrConfigRequest result = post("save attr config", url, request, AttrConfigRequest.class);
         result.fixJsonDeserialization();
         return result;
     }
@@ -103,7 +86,7 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
     public AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/validate", //
                 shortenCustomerSpace(customerSpace));
-        AttrConfigRequest result =  post("validate attr config request", url, request, AttrConfigRequest.class);
+        AttrConfigRequest result = post("validate attr config request", url, request, AttrConfigRequest.class);
         result.fixJsonDeserialization();
         return result;
     }

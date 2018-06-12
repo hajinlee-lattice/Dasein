@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 
 import io.swagger.annotations.Api;
@@ -59,18 +58,6 @@ public class AttrConfigResource {
         return request;
     }
 
-    @Deprecated
-    @GetMapping(value = "")
-    @ResponseBody
-    @ApiOperation("get cdl attribute management overview")
-    public List<AttrConfigOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
-            @RequestParam(value = "category", required = false) String categoryName, //
-            @RequestParam(value = "property", required = true) String propertyName) {
-        Category category = categoryName != null ? resolveCategory(categoryName) : null;
-        List<AttrConfigOverview<?>> list = attrConfigService.getAttrConfigOverview(category, propertyName);
-        return list;
-    }
-
     @PostMapping(value = "/overview")
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
             @RequestParam(value = "category", required = false) List<String> categoryNames, //
@@ -86,8 +73,7 @@ public class AttrConfigResource {
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation("save cdl attribute config request")
-    public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace,
-            @RequestBody AttrConfigRequest request,
+    public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace, @RequestBody AttrConfigRequest request,
             @RequestParam(value = "isAdmin", required = false, defaultValue = "0") boolean isAdmin) {
         request.fixJsonDeserialization();
         return attrConfigService.saveRequest(request, isAdmin);

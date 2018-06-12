@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
@@ -69,23 +68,6 @@ public class AbstractAttrConfigServiceUnitTestNG {
         actualValue = cdlAttrConfigServiceImpl
                 .getActualValue(generateDisplayNamePropertyAllowedForCustomizationWithCustomValue());
         Assert.assertEquals(actualValue, displayName2);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = "unit")
-    public void testGetAttrConfigOverview() {
-        AttrConfigOverview overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(generateRenderedList(),
-                Category.INTENT, ColumnMetadataKey.State);
-        Assert.assertEquals(overview.getCategory(), Category.INTENT);
-        Assert.assertEquals((overview.getTotalAttrs() - generateRenderedList().size()), 0L);
-        Assert.assertNotNull(overview.getLimit());
-        Map<String, Map<?, Long>> propSummary = overview.getPropSummary();
-        Assert.assertNotNull(propSummary);
-
-        Assert.assertTrue(propSummary.containsKey(ColumnMetadataKey.State));
-        Map<?, Long> map = propSummary.get(ColumnMetadataKey.State);
-        Assert.assertEquals(map.get(AttrState.Inactive).longValue() - 1, 0L);
-        Assert.assertEquals(map.get(AttrState.Active).longValue() - 4, 0L);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -149,6 +131,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
             Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40023);
         }
     }
+
     private List<String> getPropertyNames() {
         return Arrays.asList(ColumnSelection.Predefined.Segment.getName(),
                 ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.TalkingPoint.getName(),

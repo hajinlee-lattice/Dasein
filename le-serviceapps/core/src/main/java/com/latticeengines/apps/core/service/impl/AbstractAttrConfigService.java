@@ -45,7 +45,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSpecification;
@@ -91,22 +90,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             timer.setTimerMessage(msg);
         }
         return renderedList;
-    }
-
-    @Override
-    public List<AttrConfigOverview<?>> getAttrConfigOverview(Category category, String propertyName) {
-        List<AttrConfigOverview<?>> results = new ArrayList<>();
-        log.info("category is " + category);
-        if (category == null) {
-            // get attrConfigOverview for each category. can be improved by
-            // multithreading
-            for (Category ele : Category.values()) {
-                results.add(getAttrConfigOverview(getRenderedList(ele), ele, propertyName));
-            }
-        } else {
-            results.add(getAttrConfigOverview(getRenderedList(category), category, propertyName));
-        }
-        return results;
     }
 
     @Override
@@ -211,58 +194,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return overview;
     }
 
-    @SuppressWarnings("unchecked")
-    @VisibleForTesting
-    <T extends Serializable> AttrConfigOverview<T> getAttrConfigOverview(@NonNull List<AttrConfig> renderedList,
-            Category category, String propertyName) {
-        AttrConfigOverview<T> overview = new AttrConfigOverview<T>();
-        Map<String, Map<T, Long>> propSummary = new HashMap<>();
-        overview.setPropSummary(propSummary);
-        Map<T, Long> valueNumberMap = new HashMap<>();
-        propSummary.put(propertyName, valueNumberMap);
-        overview.setCategory(category);
-        overview.setTotalAttrs((long) renderedList.size());
-        if (category.isPremium()) {
-            switch (category) {
-            case INTENT:
-                overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
-                        MultiTenantContext.getTenantId(), DataLicense.BOMBORA));
-                break;
-            case TECHNOLOGY_PROFILE:
-                overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
-                        MultiTenantContext.getTenantId(), DataLicense.HG));
-            case ACCOUNT_ATTRIBUTES:
-                overview.setLimit(DEFAULT_LIMIT);
-                break;
-            case CONTACT_ATTRIBUTES:
-                overview.setLimit(DEFAULT_LIMIT);
-                break;
-            default:
-                log.warn("Unsupported" + category);
-                break;
-            }
-        }
-
-        for (AttrConfig attrConfig : renderedList) {
-            Map<String, AttrConfigProp<?>> attrProps = attrConfig.getAttrProps();
-            AttrConfigProp<?> configProp = attrProps.get(propertyName);
-            if (configProp != null) {
-                Object actualValue = getActualValue(configProp);
-                if (actualValue == null) {
-                    log.warn(String.format("configProp %s does not have proper value", configProp));
-                    continue;
-                }
-                Long count = valueNumberMap.get(actualValue);
-                if (count == null) {
-                    valueNumberMap.put((T) actualValue, 1L);
-                } else {
-                    valueNumberMap.put((T) actualValue, count + 1);
-                }
-            }
-        }
-        return overview;
-    }
-
     @VisibleForTesting
     <T extends Serializable> Object getActualValue(AttrConfigProp<T> configProp) {
         if (configProp.isAllowCustomization() && configProp.getCustomValue() != null) {
@@ -360,8 +291,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
                 cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
             });
-            cacheService.refreshKeysByPattern(MultiTenantContext.getTenantId(),
-                    CacheName.DataLakeStatsCubesCache);
+            cacheService.refreshKeysByPattern(MultiTenantContext.getTenantId(), CacheName.DataLakeStatsCubesCache);
         }
 
         return toReturn;

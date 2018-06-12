@@ -311,8 +311,8 @@ public class AttrConfigServiceImplUnitTestNG {
                 "Segmentation");
         log.info("testGetDetailAttrForUsageWithNonPremiumCategory selectionDetail is " + selectionDetail);
         Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
-        Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
-        Assert.assertEquals(selectionDetail.getSubcategories().size(), 1);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 4L, 0);
+        Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
         Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
                 .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 1);
     }
@@ -334,8 +334,8 @@ public class AttrConfigServiceImplUnitTestNG {
                 .getAttrConfigSelectionDetails(Category.INTENT.getName(), "Segmentation");
         log.info("testGetDetailAttrForUsageWithPremiumCategoru selectionDetail is " + selectionDetail);
         Assert.assertEquals(selectionDetail.getSelected() - 1L, 0);
-        Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
-        Assert.assertEquals(selectionDetail.getSubcategories().size(), 1);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 4L, 0);
+        Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
         Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
                 .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 1);
     }
