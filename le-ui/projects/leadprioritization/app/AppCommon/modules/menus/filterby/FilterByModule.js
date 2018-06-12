@@ -23,12 +23,15 @@ angular
                     }
                 },
                 toggle: function($event) {
+
                     $scope.visible = !$scope.visible;
 
                     if ($scope.visible) {
                         $scope.items.forEach(function(item, i) {
-                            item.filtered = $filter('filter')($scope.config.unfiltered, item.action, true);
-                            item.total = item.filtered.length;
+                            if(typeof ($scope.callback) === undefined) {
+                                item.filtered = $filter('filter')($scope.config.unfiltered, item.action, true);
+                                item.total = item.filtered.length;
+                            }
                         });
                     }
                     if($event && $event.target) {

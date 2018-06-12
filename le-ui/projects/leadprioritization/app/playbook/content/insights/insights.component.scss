@@ -18,10 +18,12 @@
         margin-right: calc(-2em - 1px);
     }
     &.dashboard-content.container {
+        padding-right: 20px;
         .inner-container {
             padding-right: 0;
             .tp-attribute-pane {
                 right: -1px;
+                margin-right: 0;
             }
         }
     }

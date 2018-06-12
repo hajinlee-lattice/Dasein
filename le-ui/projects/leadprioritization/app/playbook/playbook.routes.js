@@ -97,6 +97,62 @@ angular
                         deferred.resolve(result);
                     });
                     return deferred.promise;
+                },
+                FilterData: function($q, $timeout, $stateParams, PlaybookWizardStore, LaunchHistoryData) {
+
+                    var deferred = $q.defer(),
+                        filterItems = [],
+                        launches = LaunchHistoryData,
+                        uniqueLookupIdMapping = launches.uniqueLookupIdMapping,
+                        allCountQuery = {
+                            offset: 0,
+                            startTimestamp: 0,
+                            orgId: '',
+                            externalSystemType: ''
+                        }
+
+                    PlaybookWizardStore.getPlayLaunchCount(allCountQuery).then(function(result) {
+                        filterItems.push({ 
+                            label: "All", 
+                            action: { destinationOrgId: '' },
+                            total: result.toString()
+                        });
+                    });
+
+                    $timeout(function(){
+                    
+                        angular.forEach(uniqueLookupIdMapping, function(value, key) {
+                            angular.forEach(value, function(val, index) {
+
+                                var countParams = {
+                                    playName: $stateParams.play_name,
+                                    offset: 0,
+                                    startTimestamp: 0,
+                                    orgId: val.orgId,
+                                    externalSysType: val.externalSystemType
+                                }
+                                PlaybookWizardStore.getPlayLaunchCount(countParams).then(function(result) {
+                                    filterItems.push({ 
+                                        label: val.orgName,
+                                        data: {
+                                            orgName: val.orgName,
+                                            externalSystemType: val.externalSystemType,
+                                            destinationOrgId: val.orgId
+                                        }, 
+                                        action: {
+                                            destinationOrgId: val.orgId
+                                        },
+                                        total: result.toString()
+                                    });
+                                });
+                            });
+                        });
+                    }, 250);
+
+                    deferred.resolve(filterItems);
+
+                    return deferred.promise;
+
                 }
             },
             views: {
@@ -431,7 +487,10 @@ angular
                         deferred.resolve(result);
                     });
                     return deferred.promise;
-                }
+                },
+                FilterData: [function () {
+                    return null;
+                }],
             },
             views: {
                 "summary@": {

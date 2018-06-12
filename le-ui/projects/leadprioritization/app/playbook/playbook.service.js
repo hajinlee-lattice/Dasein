@@ -506,9 +506,10 @@ angular.module('lp.playbook')
         var deferred = $q.defer(),
             params = {
                 playName: params.playName,
-                startTimestamp: params.startTimestamp,
-                orgId: params.orgId,
-                externalSysType: params.externalSysType
+                startTimestamp: params.startTimestamp || 0,
+                offset: params.offset || 0,
+                orgId: params.orgId || '',
+                externalSysType: params.externalSysType || ''
             };
 
         PlaybookWizardService.getPlayLaunchCount(params).then(function(data){

@@ -1,6 +1,6 @@
 angular.module('lp.playbook.dashboard.launchhistory', [])
 .controller('PlaybookDashboardLaunchHistory', function(
-    $scope, $state, $stateParams, $filter, $timeout, ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount
+    $scope, $state, $stateParams, $filter, $timeout, $q, ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount, FilterData
 ) {
     var vm = this;
 
@@ -10,6 +10,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         launches: LaunchHistoryData,
         launchesCount: LaunchHistoryCount,
         summaryData: {},
+        stateParams: $stateParams,
         launching: false,
         currentPage: 1,
         pagesize: 10,
@@ -22,23 +23,20 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         header: {
             filter: {
                 label: 'Filter By',
-                value: {}
+                value: {},
+                items: FilterData
             }
         }
     });
 
     vm.init = function() {
 
-        console.log(vm.launches);
-        console.log(vm.launchesCount);
-
-        vm.allPlayLaunchesCount = vm.launchesCount;
         vm.noData = (vm.launchesCount === 0 && vm.orgId === '' && vm.externalSystemType === '' && vm.playName === '') ? true : false;
 
         vm.offset = (vm.currentPage - 1) * vm.pagesize;
+        
         vm.updateLaunchData();
         vm.parseLaunchData();
-        vm.updateFilterData();
 
     };
 
@@ -79,7 +77,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             },
             countParams = {
                 playName: vm.playName || $stateParams.play_name,
-                offset: vm.offset,
+                offset: 0,
                 startTimestamp: 0,
                 orgId: vm.orgId,
                 externalSysType: vm.externalSystemType
@@ -87,18 +85,10 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
         PlaybookWizardStore.getPlayLaunches(params).then(function(result){
             vm.launches = result;
-            $timeout(function(){
-                vm.parseLaunchData();
-            }, 1000);
-            
+            vm.parseLaunchData();
         });
-        PlaybookWizardStore.getPlayLaunchCount(countParams).then(function(result){
+        PlaybookWizardStore.getPlayLaunchCount(countParams).then(function(result) {
             vm.launchesCount = result;
-            if(result > vm.pagesize){
-                vm.showPagination = true;
-            } else {
-                vm.showPagination = false;
-            }
         });
 
     };
@@ -132,6 +122,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             recommendationsLaunched: stats.recommendationsLaunched,
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
+
     }
 
     // Watch for change in pagination
@@ -152,38 +143,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.currentPage = 1;
         vm.offset = 0;
         vm.updateLaunchData();
-    }
-
-    // Create list of items for filter
-    vm.updateFilterData = function() {
-
-        vm.header.filter.items = [
-            { 
-                label: "All", 
-                action: { destinationOrgId: '' },
-                total: vm.allPlayLaunchesCount
-            }
-        ];
-        angular.forEach(vm.launches.uniqueLookupIdMapping, function(value, key) {
-            angular.forEach(value, function(val, index) {
-   
-                vm.header.filter.items.push({ 
-                    label: val.orgName,
-                    data: {
-                        orgName: val.orgName,
-                        externalSystemType: val.externalSystemType,
-                        destinationOrgId: val.orgId
-                    }, 
-                    action: {
-                        destinationOrgId: val.orgId
-                    },
-                    total: vm.allPlayLaunchesCount
-                });
-
-            });
-        });
-
-    }
+    }    
 
     vm.relaunchPlay = function() {
 
