@@ -650,9 +650,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         boolean deprecate = Boolean.TRUE.equals(metadata.getShouldDeprecate());
         AttrState finalVal = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
         if (deprecate) {
-            // freeze the attribute in either case
-            stateProp.setAllowCustomization(false);
             if (AttrState.Active.equals(finalVal)) {
+                // allow customer to deactivate it
+                stateProp.setAllowCustomization(true);
                 // should be deprecated but is active
                 if (AttrState.Active.equals(customVal)) {
                     // activated by user -> this value will be changed back to
@@ -663,6 +663,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     // database
                     systemVal = AttrState.Deprecated;
                 }
+            } else {
+                // cannot activate
+                stateProp.setAllowCustomization(false);
             }
         }
         stateProp.setSystemValue(systemVal);
