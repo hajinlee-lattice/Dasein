@@ -79,6 +79,9 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.stores.PurchaseH
             self.purchaseHistoryList.push(accountId);
 
             var segments = PurchaseHistoryService.getAccountSegments(metadata, danteAccount, segmentAccounts);
+
+            console.log('initPurchaseHistory', accountId, self.accountId, results[1], segments)
+
             self.segment = segments[0];
             if (self.segment) {
                 return NotionService.findOneByKey('DantePurchaseHistory', self.segment.segmentAccountId, 'AccountID');

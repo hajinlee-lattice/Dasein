@@ -82,11 +82,11 @@ module.exports = function (grunt) {
                     dest: '<%= dante.dist %>/assets/' 
                 }
             ]
-        },
-        tmpIndex: {
-            src: '<%= dante.app %>/index.html',
-            dest: '.tmp/index.html'
-        }
+        }//,
+        // tmpIndex: {
+        //     src: '<%= dante.app %>/index.html',
+        //     dest: '.tmp/index.html'
+        // }
     },
 
     // runs error checking on all of our (not already minified) javascript code
@@ -244,7 +244,7 @@ module.exports = function (grunt) {
         app: {
             files: {
                 '<%= dante.dist %>/assets/production.js': ['<%= dante.dist %>/assets/production.js']
-            },
+            }
         }
     },
 
@@ -284,7 +284,7 @@ module.exports = function (grunt) {
 
     // Executes the replacement for any js/sass files in our index.html page
     usemin: {
-        html: '<%= dante.dist %>/index.html',
+        html: '<%= dante.dist %>/assets/index.html',
         options: {
             blockReplacements: {
                 sass: function(block) {
@@ -297,9 +297,9 @@ module.exports = function (grunt) {
     // inspects our (temporary) index.html page, and collects all the needed JS
     // files for minificaiton. Also generates the uglify and concat grunt commands
     useminPrepare: {
-        html: '.tmp/index.html',
+        html: '<%= dante.app %>/index.html',
         options: {
-            dest: '<%= dante.dist %>',
+            dest: '<%= dante.dist %>/assets',
             flow: {
                 html: {
                     steps: {
@@ -367,18 +367,18 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-html2js');
 
   var defaultText = 'The default grunt build task. Runs a full build for everything including: file linting and minification (including css), running unit tests, and versioning for production. This website ready for distribution will be placed in the <SVN Directory>\<Product>\Projects\dist directory. This can be called just with the grunt command. The production files will then be named production_.js and production_.css.';
-  grunt.registerTask('default', defaultText, [
+  grunt.registerTask('build', defaultText, [
     //'clean:dist',
     'sass:dist',
     'html2js',
     //'copy:tmpIndex',
     //'jshint:dist',
     //'karma:unit',
-    'ngAnnotate:app',
     'copy:main',
+    'usemin',
     'concat:generated',
-    'uglify:app',
-    'usemin'//,
+    'ngAnnotate:app',
+    'uglify:app'
     //'clean:post'
   ]);
 

@@ -54,6 +54,8 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.controllers.Purc
         $scope.periodStartIndex = periodRangeLen - $scope.colsize;
       }
 
+      console.log('update();', periodRange, $scope)
+
       $scope.$broadcast('purchaseHistorySpendTableChange');
     };
 

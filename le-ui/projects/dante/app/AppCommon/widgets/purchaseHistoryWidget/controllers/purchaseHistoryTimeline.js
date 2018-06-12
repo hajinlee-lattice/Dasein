@@ -21,6 +21,7 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.directives.Purch
           var render = function () {
             var colsize = scope.colsize;
             var data = scope.periods.slice(scope.periodStartIndex, scope.periodStartIndex + colsize);
+console.log(scope.periodStartIndex, scope.periodStartIndex, colsize);
 
             var container = element.find('#ph-chart')[0];
             $(container).empty();
@@ -40,7 +41,6 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.directives.Purch
                         .attr("height", height + margin.top + margin.bottom);
             var chart = svg.append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
             var x = d3.scale.ordinal()
                       .rangeRoundBands([0, width], (1/3), (1/6));
             var y = d3.scale.linear()
@@ -54,10 +54,7 @@ angular.module('mainApp.appCommon.widgets.PurchaseHistoryWidget.directives.Purch
             y.domain([0, maxY]);
             var rangeBand = x.rangeBand();
 
-            if (rangeBand == Infinity) {
-              return;
-            }
-            
+
             var bars = chart.append("g")
               .selectAll(".bar")
                 .data(data)

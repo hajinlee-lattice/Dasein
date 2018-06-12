@@ -110,18 +110,6 @@ angular.module('mainApp.core.services.NotionService', [
                 getNotionUrl = "/ulysses/recommendations/"+id+"/danteformat";
                 
                 break;
-
-            case "DanteTalkingPoint":
-                getNotionUrl = "/ulysses/talkingpoints/playid/"+id+"/danteformat";
-                
-                break;
-            
-            case "DanteAccount":
-                if (idKey === "IsSegment") {
-                    getNotionUrl = "/ulysses/datacollection/accounts/spendanalyticssegments/danteformat";
-                }
-
-                break;
             
             case "DantePurchaseHistory":
                 getNotionUrl = "/ulysses/purchasehistory/account/"+id+"/danteformat";
@@ -184,8 +172,20 @@ angular.module('mainApp.core.services.NotionService', [
             getNotionUrl += "&value=" + id;
             getNotionUrl += "&limit=" + (limit || -1);
 
-            var getNotionUrl = "/ulysses/talkingpoints/playid/"+id+"/danteformat";
-            
+            switch (notionName) {
+                case "DanteTalkingPoint":
+                    getNotionUrl = "/ulysses/talkingpoints/playid/"+id+"/danteformat";
+                    
+                    break;
+                
+                case "DanteAccount":
+                    if (idKey === "IsSegment") {
+                        getNotionUrl = "/ulysses/datacollection/accounts/spendanalyticssegments/danteformat";
+                    }
+
+                    break;
+            }
+        
             $http({
                 method: "GET", 
                 url: getNotionUrl
@@ -226,13 +226,16 @@ angular.module('mainApp.core.services.NotionService', [
         };
 
         var localData = $.jStorage.get(notionName);
-        if (localData == null || localData.listData == null || localData.listData.length === 0) {
+        if (localData === null || localData.listData === null || localData.listData.length === 0) {
+        //if (false) {
             var storedNotionList = {
                 listData: []
             };
             storedNotionList.listData.push(storedNotionObject);
+            console.log('new storeNotionData();', notionName, storedNotionList);
             $.jStorage.set(notionName, storedNotionList);
         } else {
+            console.log('cached storeNotionData();', notionName, notionId, storedNotionObject);
             var foundNotion = false;
             var notion;
             for (var i = 0; i < localData.listData.length; i++) {
@@ -268,15 +271,15 @@ angular.module('mainApp.core.services.NotionService', [
         } else {
             console.log('GetAllItems', notionName);
             
-            var getNotionUrl = "./DanteService.svc/GetAllItems?notionName=" + notionName;
+            //var getNotionUrl = "./DanteService.svc/GetAllItems?notionName=" + notionName;
             var getNotionUrl = "/ulysses/producthierarchy/danteformat";
-            
+
             $http({
                 method: "GET", 
                 url: getNotionUrl
             })
             .success(function(data, status, headers, config) {
-                if (data == null) {
+                if (data === null) {
                     deferred.resolve(ServiceErrorUtility.HandleFriendlyNoResponseFailure());
                 }
                 
