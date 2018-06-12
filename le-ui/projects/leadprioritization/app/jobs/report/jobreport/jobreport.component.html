@@ -18,12 +18,13 @@
                     report="vm.summaries[entity]" entity="entity" count="vm.counts[entity]" actions="vm.actions">
                 </li>
 
-<!--                 <li class="curated-attributes-summary-tile">
+                <li class="curated-attributes-summary-tile" ng-if="vm.curatedAttributeSubJobs.length">
                     <div class="jobs-tile-body columns two panel ">
                         <h2> Curated Attributes </h2>
                         <h2> 
-                            <img ng-src="/assets/images/ico-system-actions.png"/>
+                            <img ng-src="/assets/images/ico-curated-attributes.png"/>
                         </h2>
+                        <h2> {{ vm.curatedAttributeSubJobs.length }} </h2>
                     </div>
                     <div class="tile-body wrap-body columns ten panel">
                         <div class="job-subactions le-row">
@@ -34,21 +35,21 @@
                                     <div class="le-cell le-col-start-6 le-col-span-3">User</div>
                                 </div>
                                 
-                                <div class="le-row" ng-repeat="action in vm.curatedAttributeActions">
+                                <div class="le-row" ng-repeat="curatedAttribute in vm.curatedAttributeSubJobs | orderBy:'-startTimestamp'">
                                     <div class="le-cell le-col-start-1 le-col-span-2">
-                                        {{vm.systemActionTimestamp | date : 'MM/dd/yyyy h:mma'}}
+                                        {{curatedAttribute.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
                                     </div>
-                                    <div class="le-cell le-col-start-3 le-col-span-10">
-                                        Activated
+                                    <div class="le-cell le-col-start-3 le-col-span-3">
+                                        {{curatedAttribute.name}}
                                     </div>
-                                    <div class="le-cell le-col-start-3 le-col-span-10">
-                                        user@lattice-engines.com
+                                    <div class="le-cell le-col-start-6 le-col-span-3">
+                                        {{curatedAttribute.user}}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </li>  -->
+                </li>
                 <li class="system-action-summary-tile" ng-if="vm.systemActions.length">
                     <div class="jobs-tile-body columns two panel ">
                         <h2> System Actions </h2>

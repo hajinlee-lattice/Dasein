@@ -9,6 +9,7 @@ angular
         jobId: $stateParams.jobId,
         job: InitJob,
         systemActions: [],
+        curatedAttributeSubJobs: [],
         entities: [
         	'Account',
         	'Contact',
@@ -34,6 +35,7 @@ angular
 	vm.init = function() {
 		vm.actions = vm.job.subJobs;
 		vm.reports = vm.job['reports'];
+		vm.curatedAttributeSubJobs = vm.getCuratedAttributesMetrics(vm.actions);
 		vm.reports.forEach(function(report) {
 			var payload = JSON.parse(report['json']['Payload']);
 			if (report['purpose'] == 'PROCESS_ANALYZE_RECORDS_SUMMARY') {
@@ -53,6 +55,16 @@ angular
 			}
 		});
 
+	}
+
+	vm.getCuratedAttributesMetrics = function(actions) {
+		var result = [];
+		actions.forEach(function(action) {
+			if (action.jobType == 'purchaseMetricsChange') {
+				result.push(action);
+			}
+		});
+		return result;
 	}
 
 
