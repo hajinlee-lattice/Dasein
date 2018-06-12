@@ -135,6 +135,12 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MATCH_DEBUG, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.VDB_MIGRATION, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.SCORE_EXTERNAL_FILE, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_FILE_IMPORT, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_PRODUCT_BUNDLE_IMPORT, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, lpi);
 
         // CG flags
         Collection<LatticeProduct> cg = Collections.singleton(LatticeProduct.CG);

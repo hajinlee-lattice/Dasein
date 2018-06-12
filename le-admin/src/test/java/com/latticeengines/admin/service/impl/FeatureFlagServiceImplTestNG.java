@@ -76,7 +76,13 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, //
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG, //
-                LatticeFeatureFlag.VDB_MIGRATION);
+                LatticeFeatureFlag.VDB_MIGRATION, //
+                LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
+                LatticeFeatureFlag.ENABLE_FILE_IMPORT, //
+                LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, //
+                LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, //
+                LatticeFeatureFlag.ENABLE_PRODUCT_BUNDLE_IMPORT, //
+                LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT);
         if (autoSchedule ^ true) {
             expectedDefaultFalseFlags = new ArrayList<>(expectedDefaultFalseFlags);
             expectedDefaultFalseFlags.add(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);

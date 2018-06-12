@@ -30,7 +30,7 @@ public class ConfigurationMultiCache<T extends ConfigurationScope> {
         ConfigurationCache<T> cache = getCache(scope, p);
         Document doc = cache.get();
         if (StringUtils.isEmpty(doc.getData())) {
-            throw new RuntimeException("Cannot deserialize emtry string to a type safe document.");
+            throw new RuntimeException("Cannot deserialize empty string to a type safe document.");
         }
         return DocumentUtils.toTypesafeDocument(doc, clazz);
     }

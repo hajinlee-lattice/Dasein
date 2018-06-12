@@ -17,6 +17,12 @@ public enum LatticeFeatureFlag {
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"), //
     ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"), //
     VDB_MIGRATION("VDBMigration", "VDB Migration"), //
+    SCORE_EXTERNAL_FILE("ScoreExternalFile", "Score External File"), //
+    ENABLE_FILE_IMPORT("EnableFileImport", "Enable File Import"), //
+    ENABLE_CROSS_SELL_MODELING("EnableCrossSellModeling", "Enable Cross Sell Modeling"), //
+    ENABLE_PRODUCT_PURCHASE_IMPORT("EnableProductPurchaseImport", "Enable Product Purchase Import"), //
+    ENABLE_PRODUCT_BUNDLE_IMPORT("EnableProductBundleImport", "Enable Product Bundle Import"), //
+    ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport", "Enable Product Hierarchy Import"), //    
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
