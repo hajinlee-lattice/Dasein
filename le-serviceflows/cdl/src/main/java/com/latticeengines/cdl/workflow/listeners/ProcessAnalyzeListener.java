@@ -113,19 +113,6 @@ public class ProcessAnalyzeListener extends LEJobListener {
                         });
                     }
                 }
-                /*
-                String tableName = dataCollectionProxy.getTableName(customerSpace, role, inactive);
-                if (StringUtils.isNotBlank(tableName)) {
-                    String tableInActive = dataCollectionProxy.getTableName(customerSpace, role, inactive.complement());
-                    if (!tableName.equals(tableInActive)) {
-                        log.info("Removing table " + tableName + " as " + role + " in " + inactive);
-                        metadataProxy.deleteTable(customerSpace, tableName);
-                    } else {
-                        log.info("Unlinking table " + tableName + " as " + role + " from " + inactive);
-                        dataCollectionProxy.unlinkTable(customerSpace, tableName, role, inactive);
-                    }
-                }
-                */
             }
         }
     }

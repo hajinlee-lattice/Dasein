@@ -2,6 +2,7 @@ package com.latticeengines.app.exposed.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -161,9 +162,24 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private Flux<ColumnMetadata> getAllSegmentAttributes() {
         String tenantId = MultiTenantContext.getTenantId();
+        Map<BusinessEntity, List<ColumnMetadata>> metadataMap = new HashMap<>();
+        Map<BusinessEntity, Set<String>> columnNamesMap = new HashMap<>();
+        Set<BusinessEntity> entities = new HashSet<>(BusinessEntity.SEGMENT_ENTITIES);
+        collectMetadataInParallel(tenantId, entities, metadataMap, columnNamesMap);
         return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES) //
-                .flatMap(entity -> Flux
-                        .fromIterable(_dataLakeService.getCachedServingMetadataForEntity(tenantId, entity))) //
+                .flatMap(entity -> {
+                    List<ColumnMetadata> cms = metadataMap.getOrDefault(entity, Collections.emptyList());
+                    if (CollectionUtils.isEmpty(cms)) {
+                        return Flux.empty();
+                    } else {
+                        Flux<ColumnMetadata> flux = Flux.fromIterable(cms);
+                        Set<String> availableAttrs = columnNamesMap.get(entity);
+                        if (CollectionUtils.isNotEmpty(availableAttrs)) {
+                            flux = flux.filter(cm -> availableAttrs.contains(cm.getAttrName()));
+                        }
+                        return flux;
+                    }
+                }) //
                 .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
                 .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm));
     }
@@ -405,27 +421,10 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     private Map<String, List<ColumnMetadata>> getColumnMetadataMap(String customerSpace, Map<String, StatsCube> cubes) {
-        List<Runnable> runnables = new ArrayList<>();
-        ConcurrentMap<BusinessEntity, List<ColumnMetadata>> metadataMap = new ConcurrentHashMap<>();
-        ConcurrentMap<BusinessEntity, Set<String>> columnNamesMap = new ConcurrentHashMap<>();
-        cubes.keySet().forEach(key -> {
-            final BusinessEntity entity = BusinessEntity.valueOf(key);
-            final String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
-            Runnable metadataRunnable = //
-                    () -> {
-                        List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
-                        metadataMap.put(entity, cms);
-                    };
-            Runnable columnNamesRunnable = //
-                    () -> {
-                Set<String> attrs = _dataLakeService.getServingTableColumns(customerSpace, entity);
-                columnNamesMap.put(entity, attrs);
-                    };
-            runnables.add(metadataRunnable);
-            runnables.add(columnNamesRunnable);
-        });
-        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 30, 1);
-
+        Map<BusinessEntity, List<ColumnMetadata>> metadataMap = new HashMap<>();
+        Map<BusinessEntity, Set<String>> columnNamesMap = new HashMap<>();
+        Set<BusinessEntity> entities = cubes.keySet().stream().map(BusinessEntity::valueOf).collect(Collectors.toSet());
+        collectMetadataInParallel(customerSpace, entities, metadataMap, columnNamesMap);
         Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
         cubes.keySet().forEach(key -> {
             BusinessEntity entity = BusinessEntity.valueOf(key);
@@ -438,6 +437,30 @@ public class DataLakeServiceImpl implements DataLakeService {
             }
         });
         return cmMap;
+    }
+
+    private void collectMetadataInParallel(String customerSpace, Collection<BusinessEntity> entities, Map<BusinessEntity, List<ColumnMetadata>> metadataMap, Map<BusinessEntity, Set<String>> columnNamesMap) {
+        List<Runnable> runnables = new ArrayList<>();
+        ConcurrentMap<BusinessEntity, List<ColumnMetadata>> concurrentMetadataMap = new ConcurrentHashMap<>();
+        ConcurrentMap<BusinessEntity, Set<String>> concurrentColumnNamesMap = new ConcurrentHashMap<>();
+        entities.forEach(entity -> {
+            final String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
+            Runnable metadataRunnable = //
+                    () -> {
+                        List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
+                        concurrentMetadataMap.put(entity, cms);
+                    };
+            Runnable columnNamesRunnable = //
+                    () -> {
+                        Set<String> attrs = _dataLakeService.getServingTableColumns(customerSpace, entity);
+                        concurrentColumnNamesMap.put(entity, attrs);
+                    };
+            runnables.add(metadataRunnable);
+            runnables.add(columnNamesRunnable);
+        });
+        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 30, 1);
+        metadataMap.putAll(concurrentMetadataMap);
+        columnNamesMap.putAll(concurrentColumnNamesMap);
     }
 
     public List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
