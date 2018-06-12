@@ -47,6 +47,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
+            generateRatingStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processRatingStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             exportDataToRedshiftConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
