@@ -436,6 +436,17 @@ angular.module('lp.import')
         return this.fieldDocumentSaved[state];
     };
 
+    this.removeSavedObjectAfter = function(state){
+        var keys = Object.keys(this.saveObjects);
+        if(keys){
+            keys.forEach(function(key){
+                if(key.includes(state)){
+                    delete ImportWizardStore.saveObjects[key];
+                }
+            });
+        }
+    };
+
     this.removeSavedDocumentFields = function(state){
         delete this.fieldDocumentSaved[state];
     };

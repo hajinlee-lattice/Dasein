@@ -223,6 +223,7 @@ angular
                 var from = $transition$._targetState._definition.parent.name;
                 if(from.includes('thirdpartyids')){
                     ImportWizardStore.removeSavedDocumentFieldsAfter($state.current.name);
+                    ImportWizardStore.removeSavedObjectAfter($state.current.name);
                 }
             },
             resolve: {
@@ -373,6 +374,7 @@ angular
                 var from = $transition$._targetState._definition.parent.name;
                 if(from.includes('ids')){
                     ImportWizardStore.removeSavedDocumentFieldsAfter($state.current.name);
+                    ImportWizardStore.removeSavedObjectAfter($state.current.name);
                 }
             },
             resolve: {
