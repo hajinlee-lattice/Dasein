@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 
+@Deprecated
 public interface ModelSummaryService {
 
     ModelSummary createModelSummary(String rawModelSummary, String tenantId);

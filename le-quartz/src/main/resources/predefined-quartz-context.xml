@@ -6,26 +6,26 @@
     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
     http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-    <bean name="plsModelSummaryDownload" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+    <bean name="lpModelSummaryDownload" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="modelSummaryDownload" />
-        <property name="cronTrigger" value="${quartz.pls.modelsummarydownload.job.cron:0/15 * * * * ?}" />
-        <property name="destUrl" value="${quartz.pls.predefined.job.primary.url:}" />
-        <property name="secondaryDestUrl" value="${quartz.pls.predefined.job.secondary.url:}" />
-        <property name="queryApi" value="${quartz.pls.predefined.job.query.api:}" />
-        <property name="checkJobBeanUrl" value="${quartz.pls.predefined.job.check.bean.url:}" />
+        <property name="cronTrigger" value="${quartz.lp.modelsummarydownload.job.cron}" />
+        <property name="destUrl" value="${quartz.lp.predefined.job.primary.url}" />
+        <property name="secondaryDestUrl" value="${quartz.lp.predefined.job.secondary.url}" />
+        <property name="queryApi" value="${quartz.lp.predefined.job.query.api}" />
+        <property name="checkJobBeanUrl" value="${quartz.lp.predefined.job.check.bean.url}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;modelSummaryDownload&quot;}" />
-        <property name="jobTimeout" value="${quartz.pls.modelsummarydownload.job.timeout:3600}" />
+        <property name="jobTimeout" value="${quartz.lp.modelsummarydownload.job.timeout}" />
     </bean>
 
-    <bean name="plsModelSummaryFullDownload" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+    <bean name="lpModelSummaryFullDownload" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="modelSummaryFullDownload" />
-        <property name="cronTrigger" value="${quartz.pls.modelsummaryfulldownload.job.cron:0 0/20 * * * ?}" />
-        <property name="destUrl" value="${quartz.pls.predefined.job.primary.url:}" />
-        <property name="secondaryDestUrl" value="${quartz.pls.predefined.job.secondary.url:}" />
-        <property name="queryApi" value="${quartz.pls.predefined.job.query.api:}" />
-        <property name="checkJobBeanUrl" value="${quartz.pls.predefined.job.check.bean.url:}" />
+        <property name="cronTrigger" value="${quartz.lp.modelsummaryfulldownload.job.cron:0 0/20 * * * ?}" />
+        <property name="destUrl" value="${quartz.lp.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.lp.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.lp.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.lp.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;modelSummaryFullDownload&quot;}" />
-        <property name="jobTimeout" value="${quartz.pls.modelsummaryfulldownload.job.timeout:3600}" />
+        <property name="jobTimeout" value="${quartz.lp.modelsummaryfulldownload.job.timeout:3600}" />
     </bean>
 
     <bean name="plsSegmentExportCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
@@ -183,8 +183,8 @@
     </bean>
 
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
-        <ref bean="plsModelSummaryFullDownload"/>
-        <ref bean="plsModelSummaryDownload"/>
+        <ref bean="lpModelSummaryFullDownload"/>
+        <ref bean="lpModelSummaryDownload"/>
         <ref bean="plsSegmentExportCleanupJob"/>
         <ref bean="playmakerRecommendationCleanupJob"/>
         <ref bean="dataplatformDLOrchestration"/>

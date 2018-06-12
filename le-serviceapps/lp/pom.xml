@@ -32,6 +32,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-quartzclient</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
             <version>${spring.security.version}</version>

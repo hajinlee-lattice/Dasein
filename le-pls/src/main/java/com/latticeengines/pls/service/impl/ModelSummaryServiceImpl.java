@@ -36,6 +36,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 
+@Deprecated
 @DisallowConcurrentExecution
 @Component("modelSummaryService")
 public class ModelSummaryServiceImpl implements ModelSummaryService {

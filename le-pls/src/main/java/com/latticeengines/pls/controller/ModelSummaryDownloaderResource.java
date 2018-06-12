@@ -15,13 +15,13 @@ import io.swagger.annotations.Api;
 @RequestMapping("/msdownload")
 public class ModelSummaryDownloaderResource {
 
-    @Autowired
-    private ModelSummaryDownloaderEntityMgr modelSummaryDownloaderEntityMgr;
-
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    public String startDownload() {
-        return modelSummaryDownloaderEntityMgr.downloadModel();
-    }
+//    @Autowired
+//    private ModelSummaryDownloaderEntityMgr modelSummaryDownloaderEntityMgr;
+//
+//    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+//    @ResponseBody
+//    public String startDownload() {
+//        return modelSummaryDownloaderEntityMgr.downloadModel();
+//    }
 
 }
