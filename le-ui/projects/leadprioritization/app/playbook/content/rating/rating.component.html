@@ -28,14 +28,14 @@
                 <li class="item header rating_">
                     <ul>
                         <li class="name">Segment</li>
-                        <li class="ratingengine">Rating</li>
+                        <li class="ratingengine">Model</li>
                         <li class="accounts">Accounts</li> 
                         <li class="contacts">Contacts</li>
                     </ul>
                 </li>
                 <li 
                     ng-repeat="rating in (filteredList = (vm.ratings| filter: vm.searchFields)) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
-                    ng-class="{selected: vm.stored.rating_selection == rating.id}"
+                    ng-class="{'selected': vm.stored.rating_selection == rating.id}"
                     ng-disabled="vm.block_user"
                     class="item rating_"
                     ng-if="filteredList.length">

@@ -51,9 +51,11 @@ section.playbook.container {
                     border-bottom: 2px solid #d8d9d8; 
                 }
                 &.selected {
-                    label {
-                        color: #498ad4;
-                        background-color: transparent;
+                    ul {
+                        background-color: #498ad4;
+                    }
+                    li {
+                        color: #fff;
                     }
                 }
                 &.centered-info-message {
@@ -68,6 +70,7 @@ section.playbook.container {
                         width: 10%;
                         margin-left: 10px;
                         padding: 10px 5px;
+                        transition: all 0ms ease-in-out;
                         @include text-ellipsis();
                         input[type="radio"] {
                             vertical-align: middle;
