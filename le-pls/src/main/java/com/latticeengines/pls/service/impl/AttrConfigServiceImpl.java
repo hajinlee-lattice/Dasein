@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -72,21 +71,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public AttrConfigActivationOverview getAttrConfigActivationOverview(Category category) {
-        List<AttrConfigOverview<?>> list = cdlAttrConfigProxy.getAttrConfigOverview(MultiTenantContext.getTenantId(),
-                category.getName(), ColumnMetadataKey.State);
-        AttrConfigOverview<AttrState> attrCategoryOverview = (AttrConfigOverview<AttrState>) list.get(0);
-        AttrConfigActivationOverview categoryOverview = new AttrConfigActivationOverview();
-        categoryOverview.setCategory(attrCategoryOverview.getCategory());
-        categoryOverview.setLimit(attrCategoryOverview.getLimit());
-        categoryOverview.setTotalAttrs(attrCategoryOverview.getTotalAttrs());
-        categoryOverview
-                .setSelected(attrCategoryOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active));
-        return categoryOverview;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
     public Map<String, AttrConfigActivationOverview> getOverallAttrConfigActivationOverview() {
         Map<String, AttrConfigActivationOverview> result = new HashMap<>();
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
@@ -106,49 +90,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             result.put(category.getName(), categoryOverview);
         }
         return result;
-    }
-
-    @Override
-    public AttrConfigUsageOverview getAttrConfigUsageOverview() {
-        AttrConfigUsageOverview usageOverview = new AttrConfigUsageOverview();
-        Map<String, Long> attrNums = new HashMap<>();
-        Map<String, Map<String, Long>> selections = new HashMap<>();
-        usageOverview.setAttrNums(attrNums);
-        usageOverview.setSelections(selections);
-        // TODO can be improved by multithreading
-        int count = 0;
-        for (String property : usageProperties) {
-            List<AttrConfigOverview<?>> list = cdlAttrConfigProxy
-                    .getAttrConfigOverview(MultiTenantContext.getTenantId(), null, property);
-            log.info("list is " + list);
-            Map<String, Long> detailedSelections = new HashMap<>();
-            if (property.equals(ColumnSelection.Predefined.Enrichment.getName())) {
-                detailedSelections.put(AttrConfigUsageOverview.LIMIT, defaultExportLimit);
-            }
-            selections.put(property, detailedSelections);
-            long num = 0L;
-            for (AttrConfigOverview<?> attrConfigOverview : list) {
-                // For each category, update its total attrNums
-                if (count == 0) {
-                    if (attrConfigOverview.getCategory().isPremium()) {
-                        AttrConfigActivationOverview categoryOverview = getAttrConfigActivationOverview(
-                                attrConfigOverview.getCategory());
-                        attrNums.put(attrConfigOverview.getCategory().getName(), categoryOverview.getSelected());
-                    } else {
-                        attrNums.put(attrConfigOverview.getCategory().getName(), attrConfigOverview.getTotalAttrs());
-                    }
-                }
-
-                // Synthesize the properties for all the categories
-                Map<?, Long> propertyDetail = attrConfigOverview.getPropSummary().get(property);
-                if (propertyDetail != null && propertyDetail.get(Boolean.TRUE) != null) {
-                    num += propertyDetail.get(Boolean.TRUE);
-                }
-                detailedSelections.put(AttrConfigUsageOverview.SELECTED, num);
-            }
-            count++;
-        }
-        return usageOverview;
     }
 
     @Override

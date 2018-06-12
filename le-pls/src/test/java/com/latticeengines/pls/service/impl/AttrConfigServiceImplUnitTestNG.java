@@ -97,18 +97,6 @@ public class AttrConfigServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testGetAttrConfigActivationOverview() {
-        when(cdlAttrConfigProxy.getAttrConfigOverview(anyString(), anyString(), anyString()))
-                .thenReturn(Arrays.asList(generateIntentAttrConfigOverview()));
-        AttrConfigActivationOverview categoryOverview = attrConfigService
-                .getAttrConfigActivationOverview(Category.INTENT);
-        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalIntentAttrs);
-        Assert.assertEquals(categoryOverview.getCategory(), Category.INTENT);
-        Assert.assertEquals(categoryOverview.getLimit(), intentLimit);
-        Assert.assertEquals(categoryOverview.getSelected(), activeForIntent);
-    }
-
-    @Test(groups = "unit")
     public void testGetOverallAttrConfigActivationOverview() {
         when(cdlAttrConfigProxy.getAttrConfigOverview(anyString(), Matchers.anyList(), Matchers.anyList(),
                 anyBoolean())).thenReturn(generatePremiumCategoryAttrConfigActivationOverview());
@@ -140,34 +128,6 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(categoryOverview.getLimit(), websiteKeywordLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForWebsiteKeyword);
 
-    }
-
-    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigActivationOverview" })
-    public void testGetAttrConfigUsageOverview() {
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.Segment.getName()))
-                        .thenReturn(generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Segment.getName()));
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.Enrichment.getName())).thenReturn(
-                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Enrichment.getName()));
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.CompanyProfile.getName())).thenReturn(
-                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.CompanyProfile.getName()));
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.TalkingPoint.getName())).thenReturn(
-                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.TalkingPoint.getName()));
-        AttrConfigUsageOverview usageOverview = attrConfigService.getAttrConfigUsageOverview();
-        log.info("usageOverview is " + usageOverview);
-        Map<String, Long> attrNums = usageOverview.getAttrNums();
-        Assert.assertEquals(attrNums.size(), 6);
-        Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - activeForIntent, 0);
-        Map<String, Map<String, Long>> selections = usageOverview.getSelections();
-        Assert.assertEquals(
-                selections.get(ColumnSelection.Predefined.Segment.getName()).get(AttrConfigUsageOverview.SELECTED)
-                        - 3677,
-                0);
-        Assert.assertNotNull(
-                selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT));
     }
 
     @Test(groups = "unit", dependsOnMethods = { "testGetOverallAttrConfigActivationOverview" })
