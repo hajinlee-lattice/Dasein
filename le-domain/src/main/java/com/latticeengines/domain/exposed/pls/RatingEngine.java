@@ -424,6 +424,12 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return attr;
     }
 
+    public static String toEngineId(String attrName) {
+        String uuid = attrName.replace(RATING_ENGINE_PREFIX + "_", "");
+        uuid = uuid.substring(0, 22);
+        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
+    }
+
     @JsonProperty("bucketMetadata")
     @Transient
     public List<BucketMetadata> getBucketMetadata() {
