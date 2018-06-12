@@ -174,12 +174,12 @@ angular
                 }
 
                 vm.showFreeTextAttributeCard = function(enrichment) {
-                    return vm.cube && vm.isBktEmpty(enrichment) && enrichment.FundamentalType == 'alpha' &&
+                    return vm.cube && vm.isBktEmpty(enrichment) &&  DataCloudStore.validFreeTextTypes.indexOf(enrichment.FundamentalType) >= 0 &&
                           (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)
                 }
 
                 vm.showInvalidAttributeCard = function(enrichment) {
-                    return vm.cube && vm.isBktEmpty(enrichment) && enrichment.FundamentalType != 'alpha' &&
+                    return vm.cube && vm.isBktEmpty(enrichment) && DataCloudStore.validFreeTextTypes.indexOf(enrichment.FundamentalType) == -1 &&
                           (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)
                 }
 

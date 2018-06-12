@@ -56,6 +56,7 @@ angular.module('common.datacloud')
             context: null
         };
         this.attributesCount = null;
+        this.validFreeTextTypes = ['alpha', 'enum', 'email', 'phone', 'uri']; //PLS-8870
     }
 
     this.init();
