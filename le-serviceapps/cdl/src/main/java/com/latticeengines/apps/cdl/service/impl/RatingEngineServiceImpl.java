@@ -71,6 +71,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
@@ -369,7 +370,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public RatingModel getRatingModel(String ratingEngineId, String ratingModelId) {
         RatingEngine ratingEngine = validateRatingEngine(ratingEngineId);
         RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
-        return ratingModelService.geRatingModelById(ratingModelId);
+        return ratingModelService.getRatingModelById(ratingModelId);
     }
 
     @SuppressWarnings("unchecked")
@@ -527,6 +528,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         aiModel.setModelingJobId(jobId.toString());
+        aiModel.setModelingJobStatus(JobStatus.RUNNING);
         updateRatingModel(ratingEngine.getId(), aiModel.getId(), aiModel);
         return jobId.toString();
     }
@@ -710,10 +712,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public void verifyRatingEngineCyclicDependency(RatingEngine ratingEngine) {
-        RatingEngine existing = getRatingEngineById(ratingEngine.getId(),false);
+        RatingEngine existing = getRatingEngineById(ratingEngine.getId(), false);
         if (existing != null) {
-//            Map<Long, String> ratingEngineMap = ratingEngineCyclicDependency(existing, new LinkedHashMap<>(), new ArrayList<>());
-//            Map<Long, String> ratingEngineMap = ratingEngineCyclicDependency1(existing, new LinkedHashMap<>());
+            // Map<Long, String> ratingEngineMap =
+            // ratingEngineCyclicDependency(existing, new LinkedHashMap<>(), new
+            // ArrayList<>());
+            // Map<Long, String> ratingEngineMap =
+            // ratingEngineCyclicDependency1(existing, new LinkedHashMap<>());
             Map<Long, String> ratingEngineMap = null;
             if (ratingEngineMap != null) {
                 StringBuilder message = new StringBuilder();
@@ -731,15 +736,23 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Long, String> ratingEngineCyclicDependency(
-            RatingEngine ratingEngine, LinkedHashMap<Long, String> map, ArrayList<Long> list) {
-        LinkedHashMap<Long, String> ratingEngineMap = (LinkedHashMap<Long, String>)map.clone();
-        ArrayList<Long> segmentsPid = (ArrayList<Long>)list.clone();
+    @Override
+    public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
+        RatingModelService<AIModel> aiModelService = getRatingModelService(ratingEngine.getType());
+        ((AIModelService) aiModelService).updateModelingJobStatus(ratingEngineId, aiModelId, newStatus);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Long, String> ratingEngineCyclicDependency(RatingEngine ratingEngine, LinkedHashMap<Long, String> map,
+            ArrayList<Long> list) {
+        LinkedHashMap<Long, String> ratingEngineMap = (LinkedHashMap<Long, String>) map.clone();
+        ArrayList<Long> segmentsPid = (ArrayList<Long>) list.clone();
 
         ratingEngineMap.put(ratingEngine.getPid(), ratingEngine.getDisplayName());
         List<AttributeLookup> attributeLookups = getDependentAttrsInAllModels(ratingEngine.getId());
-        List<MetadataSegment> segments = segmentService.findDependingSegments(
-                ratingEngine.getTenant().getId(), convertAttributeLookupList(attributeLookups));
+        List<MetadataSegment> segments = segmentService.findDependingSegments(ratingEngine.getTenant().getId(),
+                convertAttributeLookupList(attributeLookups));
 
         List<MetadataSegment> unRepeatSegments = new ArrayList<>();
         for (MetadataSegment segment : segments) {
@@ -750,8 +763,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         for (MetadataSegment segment : unRepeatSegments) {
-            List<AttributeLookup> segmentAttributeLookups = segmentService.findDependingAttributes(
-                    Collections.singletonList(segment));
+            List<AttributeLookup> segmentAttributeLookups = segmentService
+                    .findDependingAttributes(Collections.singletonList(segment));
 
             List<RatingEngine> ratingEngines = getDependingRatingEngines(
                     convertAttributeLookupList(segmentAttributeLookups));
@@ -772,13 +785,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Long, String> ratingEngineCyclicDependency1(
-            RatingEngine ratingEngine, LinkedHashMap<Long, String> map) {
-        LinkedHashMap<Long, String> ratingEngineMap = (LinkedHashMap<Long, String>)map.clone();
+    private Map<Long, String> ratingEngineCyclicDependency1(RatingEngine ratingEngine,
+            LinkedHashMap<Long, String> map) {
+        LinkedHashMap<Long, String> ratingEngineMap = (LinkedHashMap<Long, String>) map.clone();
         ratingEngineMap.put(ratingEngine.getPid(), ratingEngine.getDisplayName());
 
-        List<AttributeLookup> segmentAttributeLookups = segmentService.findDependingAttributes(
-                Collections.singletonList(ratingEngine.getSegment()));
+        List<AttributeLookup> segmentAttributeLookups = segmentService
+                .findDependingAttributes(Collections.singletonList(ratingEngine.getSegment()));
 
         List<RatingEngine> ratingEngines = getDependingRatingEngines(
                 convertAttributeLookupList(segmentAttributeLookups));
@@ -820,7 +833,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
         return replicaName;
     }
-
 
     private List<String> convertAttributeLookupList(List<AttributeLookup> attributeLookups) {
         List<String> attributes = null;

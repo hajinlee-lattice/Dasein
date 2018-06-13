@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -43,7 +44,10 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
         if (job != null) {
             String modelName = job.getInputContextValue(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME);
             String ratingEngineId = job.getInputContextValue(WorkflowContextConstants.Inputs.RATING_ENGINE_ID);
+            String aiModelId = job.getInputContextValue(WorkflowContextConstants.Inputs.RATING_MODEL_ID);
             if (ratingEngineId != null) {
+                ratingEngineProxy.updateModelingStatus(tenantId, ratingEngineId, aiModelId,
+                        JobStatus.fromString(job.getStatus()));
                 RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenantId, ratingEngineId);
                 emailInfo.setModelId(ratingEngine != null ? ratingEngine.getDisplayName() : modelName);
             } else {

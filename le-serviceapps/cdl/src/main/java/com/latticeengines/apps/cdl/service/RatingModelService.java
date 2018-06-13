@@ -6,7 +6,7 @@ public interface RatingModelService<RatingModel> {
 
     List<RatingModel> getAllRatingModelsByRatingEngineId(String ratingEngineId);
 
-    RatingModel geRatingModelById(String id);
+    RatingModel getRatingModelById(String id);
 
     RatingModel createOrUpdate(RatingModel ratingModel, String ratingEngineId);
 

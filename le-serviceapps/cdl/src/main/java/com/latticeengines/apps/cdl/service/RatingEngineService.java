@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public interface RatingEngineService {
 
@@ -71,4 +72,6 @@ public interface RatingEngineService {
     List<RatingEngine> getDependingRatingEngines(List<String> attributes);
 
     void verifyRatingEngineCyclicDependency(RatingEngine ratingEngine);
+
+    void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
 }

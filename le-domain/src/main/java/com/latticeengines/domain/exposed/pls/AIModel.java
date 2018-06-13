@@ -30,6 +30,7 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 import io.swagger.annotations.ApiModel;
 
@@ -48,6 +49,8 @@ public class AIModel extends RatingModel {
     private PredictionType predictionType;
 
     private String modelingJobId;
+
+    private JobStatus modelingJobStatus = JobStatus.PENDING;
 
     private MetadataSegment trainingSegment;
 
@@ -90,6 +93,16 @@ public class AIModel extends RatingModel {
     @Column(name = "MODELING_JOBID")
     public String getModelingJobId() {
         return modelingJobId;
+    }
+
+    @JsonProperty("modelingJobStatus")
+    @Column(name = "MODELING_JOB_STATUS")
+    public JobStatus getModelingJobStatus() {
+        return modelingJobStatus;
+    }
+
+    public void setModelingJobStatus(JobStatus status) {
+        modelingJobStatus = status;
     }
 
     @Lob

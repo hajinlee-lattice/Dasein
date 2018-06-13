@@ -10,6 +10,11 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
@@ -27,8 +32,11 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
+
+import io.swagger.annotations.ApiOperation;
 
 @Component("ratingEngineProxy")
 public class RatingEngineProxy extends MicroserviceRestApiProxy implements ProxyInterface {
@@ -265,6 +273,19 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("modelRatingEngine", url, null, String.class);
     }
 
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
+    public void updateModelingStatus(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestParam(value = "newStatus", required = true) JobStatus newStatus) {
+        String url = constructUrl(
+                URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus?newStatus={newStatus}",
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, newStatus);
+        post("updateModelingStatus", url, null, Object.class);
+    }
+
     public RatingsCountResponse getRatingEngineCoverageInfo(String customerSpace,
             RatingsCountRequest ratingModelSegmentIds) {
         String url = constructUrl(URL_PREFIX + "/coverage", shortenCustomerSpace(customerSpace));
@@ -300,7 +321,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public Long getEntityPreviewCount(String customerSpace, String ratingEngineId, BusinessEntity entityType,
-            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets, String lookupIdColumn) {
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets,
+            String lookupIdColumn) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL_PREFIX);
         sb.append("/{ratingEngineId}/entitypreview/count?entityType={entityType}");

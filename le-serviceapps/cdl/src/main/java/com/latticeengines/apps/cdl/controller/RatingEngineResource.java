@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -142,8 +143,7 @@ public class RatingEngineResource {
     @PostMapping(value = "/replicate/{engineId}")
     @ResponseBody
     @ApiOperation(value = "Replicate a Rating Engine")
-    public RatingEngine replicateRatingEngine(@PathVariable String customerSpace,
-                                              @PathVariable String engineId) {
+    public RatingEngine replicateRatingEngine(@PathVariable String customerSpace, @PathVariable String engineId) {
         return ratingEngineService.replicateRatingEngine(engineId);
     }
 
@@ -267,9 +267,9 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
-    public EventFrontEndQuery getModelingQueryByRatingId(@PathVariable String customerSpace,
-            @PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestParam(value = "querytype") ModelingQueryType modelingQueryType,
+    public EventFrontEndQuery getModelingQueryByRatingId(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
+            @RequestParam(value = "querytype") ModelingQueryType modelingQueryType, //
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
         return getModelingQueryByRating(customerSpace, ratingEngineId, ratingModelId, modelingQueryType, version,
@@ -279,10 +279,10 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
-    public EventFrontEndQuery getModelingQueryByRating(@PathVariable String customerSpace,
-            @PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestParam(value = "querytype") ModelingQueryType modelingQueryType,
-            @RequestParam(value = "version", required = false) DataCollection.Version version,
+    public EventFrontEndQuery getModelingQueryByRating(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId, //
+            @RequestParam(value = "querytype") ModelingQueryType modelingQueryType, //
+            @RequestParam(value = "version", required = false) DataCollection.Version version, //
             @RequestBody RatingEngine ratingEngine) {
         RatingModel ratingModel;
         if (ratingEngine == null) {
@@ -297,9 +297,10 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
-    public Long getModelingQueryCountByRatingId(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId,
-            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
+    public Long getModelingQueryCountByRatingId(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType, //
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
         return getModelingQueryCountByRating(customerSpace, ratingEngineId, ratingModelId, modelingQueryType, version,
@@ -309,8 +310,10 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
-    public Long getModelingQueryCountByRating(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId, @RequestParam(value = "querytype") ModelingQueryType modelingQueryType,
+    public Long getModelingQueryCountByRating(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestParam(value = "querytype") ModelingQueryType modelingQueryType,
 
             @RequestParam(value = "version", required = false) DataCollection.Version version,
             @RequestBody RatingEngine ratingEngine) {
@@ -328,8 +331,10 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
-    public String modelRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId, @RequestParam(value = "useremail", required = true) String userEmail) {
+    public String modelRatingEngine(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestParam(value = "useremail", required = true) String userEmail) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
         RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
 
@@ -338,6 +343,16 @@ public class RatingEngineResource {
         }
 
         return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, (AIModel) ratingModel, userEmail);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
+    public void updateModelingStatus(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestParam(value = "newStatus", required = true) JobStatus newStatus) {
+        ratingEngineService.updateModelingJobStatus(ratingEngineId, ratingModelId, newStatus);
     }
 
     @PostMapping(value = "/coverage")

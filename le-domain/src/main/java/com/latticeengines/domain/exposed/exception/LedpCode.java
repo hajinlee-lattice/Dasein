@@ -724,6 +724,7 @@ public enum LedpCode {
     LEDP_40025("Dependency detection among segment. {0}"), //
     LEDP_40026("invalid attribute config {0} after render"), //
     LEDP_40027("invalid attribute config {0} in DB"), //
+    LEDP_40028("Cannot change job Status for ai model {0} since the current status is already terminal"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

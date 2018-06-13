@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
@@ -80,7 +81,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     }
 
     @Override
-    public AIModel geRatingModelById(String id) {
+    public AIModel getRatingModelById(String id) {
         return aiModelEntityMgr.findById(id);
     }
 
@@ -130,5 +131,14 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             segments.add(ratingModel.getTrainingSegment());
         }
         ratingModel.setRatingModelAttributes(new HashSet(segmentService.findDependingAttributes(segments)));
+    }
+
+    public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
+        AIModel aiModel = getRatingModelById(aiModelId);
+        if (aiModel.getModelingJobStatus().isTerminated()) {
+            throw new LedpException(LedpCode.LEDP_40028, new String[] { aiModelId });
+        }
+        aiModel.setModelingJobStatus(newStatus);
+        createOrUpdate(aiModel, ratingEngineId);
     }
 }

@@ -22,6 +22,9 @@ CREATE PROCEDURE `UpdateCDLTables`()
 
     UPDATE `PLS_MultiTenant`.`PLAY_LAUNCH`
     SET `DELETED` = 0;
+
+    ALTER TABLE `PLS_MultiTenant`.`AI_MODEL`
+    ADD `MODELING_JOB_STATUS` integer not null DEFAULT 0;
   END;
 //
 DELIMITER ;

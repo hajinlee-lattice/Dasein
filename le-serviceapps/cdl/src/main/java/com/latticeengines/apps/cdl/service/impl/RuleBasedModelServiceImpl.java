@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.service.RuleBasedModelService;
-import com.latticeengines.common.exposed.graph.GraphNode;
-import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -40,7 +38,7 @@ public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedM
     }
 
     @Override
-    public RuleBasedModel geRatingModelById(String id) {
+    public RuleBasedModel getRatingModelById(String id) {
         return ruleBasedModelEntityMgr.findById(id);
     }
 
