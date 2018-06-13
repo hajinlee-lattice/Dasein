@@ -66,7 +66,7 @@ public class ActivityMetricsResource {
     }
 
     @GetMapping(value = "/precheck")
-    @ApiOperation(value = "Check whether certain attributes exist in serving metadata or not.")
+    @ApiOperation(value = "Check whether Account, Product, Transaction and their attributes exist in serving store.")
     public ActivityMetricsValidation precheck() {
         return activityMetricsService.validateActivityMetrics(MultiTenantContext.getCustomerSpace().toString());
     }

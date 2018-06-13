@@ -104,7 +104,7 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         verifyActions(3);
     }
 
-    @Test(groups = "deployment", priority = 4)
+    @Test(groups = "deployment")
     public void testPrecheck() {
         ActivityMetricsValidation validation = restTemplate.getForObject(
                 getRestAPIHostPort() + "/pls/datacollection/metrics/precheck", ActivityMetricsValidation.class);
