@@ -157,12 +157,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                     rating.tileClass = rating.type;
                 }
 
-                if(rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
-                    rating.chartConfig = vm.barChartLiftConfig;
-                } else {
-                    rating.chartConfig = vm.barChartConfig;
-                }
-
+                vm.setChartConfig(rating);
                 
             });
 
@@ -175,6 +170,16 @@ angular.module('lp.ratingsengine.ratingslist', [
         console.log(arr.slice(Math.max(arr.length - 10, 1)));
         // console.log('inProgressModelJobs', JobsStore.inProgressModelJobs);
 
+    }
+
+    vm.setChartConfig = function(rating) {
+        if(rating.bucketMetadata && (rating.bucketMetadata != undefined || rating.bucketMetadata != null || rating.bucketMetadata.length != 0)) {
+            if(rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
+                rating.chartConfig = vm.barChartLiftConfig;
+            } else {
+                rating.chartConfig = vm.barChartConfig;
+            }
+        }
     }
 
     vm.setData = function() {}

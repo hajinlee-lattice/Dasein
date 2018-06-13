@@ -136,9 +136,9 @@
                     <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
                         <h4 ng-if="rating.bucketMetadata === undefined || rating.bucketMetadata === null || rating.bucketMetadata.length === 0">No Ratings Available</h4>
                         <bar-chart
+                            ng-hide="rating.bucketMetadata === undefined || rating.bucketMetadata === null || rating.bucketMetadata.length === 0"
                             config="rating.chartConfig" 
-                            bktlist="rating.bucketMetadata"
-                            ng-if="rating.bucketMetadata != undefined || rating.bucketMetadata != null || rating.bucketMetadata.length > 0">
+                            bktlist="rating.bucketMetadata">
                         </bar-chart>
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">

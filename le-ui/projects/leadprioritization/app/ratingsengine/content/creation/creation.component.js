@@ -110,17 +110,14 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         }
 
-        $scope.$on('$destroy', function(){
-            $interval.cancel(vm.checkJobStatus)
-        });
-
     };
 
-    vm.checkJobStatus = $interval(function() { 
+    vm.checkJobStatus = function() {
+
         var appId = vm.ratingEngine.activeModel.AI.modelingJobId ? vm.ratingEngine.activeModel.AI.modelingJobId : RatingsEngineStore.getApplicationId(); // update once backend sets modelingjobId for CE
         if (appId) {
             JobsStore.getJobFromApplicationId(appId).then(function(result) {
-                // console.log(result);
+
                 if(result.id) {
                     vm.status = result.jobStatus;
 
@@ -140,13 +137,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                             tmp = 99;
                         }
                         vm.progress = tmp + '%';
-
-                        console.log(vm.progress);
                     }
                     // Cancel $interval when completed
                     if(vm.status === 'Completed'){
                         vm.progress = 100 + '%';
-                        console.log(vm.progress);
                         $interval.cancel(vm.checkJobStatus);
                     } else if (vm.status == 'Failed') {
                         $interval.cancel(vm.checkJobStatus);
@@ -154,7 +148,13 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                 }
             });
         }
-    }, 10 * 1000);
+    }
+    var promise = $interval(vm.checkJobStatus, 10000);
+    $scope.$on('$destroy', function(){
+        if(promise) {
+            $interval.cancel(promise);
+        }
+    });
 
     vm.returnProductNameFromId = function(productId) {
         var products = vm.products,

@@ -1259,7 +1259,7 @@ angular
                 url: '/segment',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_segment'
                 },
                 resolve: {
@@ -1292,7 +1292,7 @@ angular
                 url: '/attributes',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_segment'
                 },
                 resolve: {
@@ -1360,7 +1360,7 @@ angular
                 url: '/creation',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                 },
                 resolve: {
                     Rating: function ($q, $stateParams, RatingsEngineStore) {
@@ -1380,7 +1380,7 @@ angular
                     }
                 },
                 views: {
-                    'wizard_progress@home.ratingsengine.productpurchase': {
+                    'wizard_progress@home.ratingsengine.customevent': {
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'

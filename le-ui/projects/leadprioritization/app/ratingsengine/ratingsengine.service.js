@@ -207,7 +207,6 @@ angular.module('lp.ratingsengine')
                     state:'segment',
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
-                        console.log('nextState', nextState);
                         RatingsEngineStore.nextSaveCustomEventRatingEngine(nextState);
                     }
                 },
@@ -216,7 +215,6 @@ angular.module('lp.ratingsengine')
                     state:'segment.attributes',
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
-                        console.log('nextState', nextState);
                         RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);
                     }
                 },
@@ -242,8 +240,8 @@ angular.module('lp.ratingsengine')
                     secondaryLink: 'home.ratingsengine',
                     lastRoute: true,
                     nextLabel: 'Create another Model',
-                    nextFn: function(nextState) {
-                        $state.go('home.ratingsengine.ratingsenginetype');
+                    nextFn: function() {
+                        $state.go('home.ratingsengine.ratingsenginetype', {}, {reload: true});
                     } 
                 }
 
@@ -830,9 +828,10 @@ angular.module('lp.ratingsengine')
     }
 
     this.saveFieldMapping = function(nextState) {
-        var ratingId = $stateParams.rating_id;
-        
+
+        var ratingId = $stateParams.rating_id;        
         var FieldDocument = RatingsEngineStore.getFieldDocument();
+
         FieldDocument.fieldMappings.forEach(function(fieldMapping) {
             if (fieldMapping.ignored) {
                 FieldDocument.ignoredFields.push(fieldMapping.userField);
@@ -847,19 +846,17 @@ angular.module('lp.ratingsengine')
             }
         });
 
-        ImportWizardService.SaveFieldDocuments(RatingsEngineStore.getCSVFileName(), FieldDocument, {
-            excludeCustomFileAttributes: RatingsEngineStore.getCustomEventModelingType() == 'CDL'
-            }, true).then(function(result) {
+
+        ImportWizardService.SaveFieldDocuments(RatingsEngineStore.getCSVFileName(), FieldDocument, {excludeCustomFileAttributes: RatingsEngineStore.getCustomEventModelingType() === 'CDL'}, true).then(function(result) {
                 RatingsEngineStore.getRating(ratingId).then(function(rating) {
                     RatingsEngineStore.nextLaunchAIModel(nextState, rating.activeModel);
                 });
         });
-        $state.go(nextState);
     }
 
     this.nextSaveRatingEngineAI = function(nextState){
         var ratingId = $stateParams.rating_id;
-        console.log('ID ', ratingId);
+        // console.log('ID ', ratingId);
         var engineType = RatingsEngineStore.getModelingStrategy(),
             opts =  {
                 type: "CROSS_SELL",
@@ -978,9 +975,12 @@ angular.module('lp.ratingsengine')
         RatingsEngineService.createAIModel(currentRating.id, obj.id).then(function(applicationid) {
             RatingsEngineStore.setApplicationId(applicationid);
             JobsStore.inProgressModelJobs[currentRating.id] = null;
-            var id = applicationid.Result;
+
+            var id = applicationid;
             // console.log('Model Launched', id, nextState);
-            $state.go(nextState, { ai_model_job_id: id });
+            if(nextState) {
+                $state.go(nextState, { ai_model_job_id: id });
+            }
         });
     }
 
