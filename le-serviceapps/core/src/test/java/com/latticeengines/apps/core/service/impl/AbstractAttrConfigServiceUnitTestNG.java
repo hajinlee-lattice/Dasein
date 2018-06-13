@@ -52,10 +52,10 @@ public class AbstractAttrConfigServiceUnitTestNG {
         tenant.setPid(1L);
         MultiTenantContext.setTenant(tenant);
         doReturn(intentLimit).when(limitationValidator).getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
-                DataLicense.BOMBORA);
+                DataLicense.BOMBORA.getDataLicense());
         MultiTenantContext.setTenant(tenant);
         doReturn(technologyLimit).when(limitationValidator)
-                .getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(), DataLicense.HG);
+                .getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(), DataLicense.HG.getDataLicense());
     }
 
     @Test(groups = "unit")

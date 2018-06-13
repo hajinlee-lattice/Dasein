@@ -127,11 +127,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             switch (category) {
             case INTENT:
                 overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
-                        MultiTenantContext.getTenantId(), DataLicense.BOMBORA));
+                        MultiTenantContext.getTenantId(), DataLicense.BOMBORA.getDataLicense()));
                 break;
             case TECHNOLOGY_PROFILE:
                 overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
-                        MultiTenantContext.getTenantId(), DataLicense.HG));
+                        MultiTenantContext.getTenantId(), DataLicense.HG.getDataLicense()));
                 break;
             case ACCOUNT_ATTRIBUTES:
                 overview.setLimit(DEFAULT_LIMIT);
@@ -258,17 +258,15 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         if (MapUtils.isEmpty(attrConfigGrpsForTrim)) {
             toReturn = request;
         } else {
-            List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
-                if (CollectionUtils.isNotEmpty(list)) {
-                    return list.stream();
-                } else {
-                    return Stream.empty();
-                }
-            }).collect(Collectors.toList());
+            List<AttrConfig> renderedList = generateListFromMap(attrConfigGrpsForTrim);
 
             log.info("rendered List" + JsonUtils.serialize(renderedList));
             toReturn = new AttrConfigRequest();
             toReturn.setAttrConfigs(renderedList);
+            List<AttrConfig> dbConfigs = attrConfigEntityMgr.findAllByTenantId(MultiTenantContext.getTenantId());
+            dbConfigs = generateListFromMap(renderConfigs(dbConfigs, new ArrayList<>()));
+            log.info("current db configs " + JsonUtils.serialize(dbConfigs));
+            attrValidationService.setValidateParam(dbConfigs);
             ValidationDetails details = attrValidationService.validate(renderedList, isAdmin);
             toReturn.setDetails(details);
             if (toReturn.hasError()) {
@@ -297,6 +295,15 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return toReturn;
     }
 
+    private List<AttrConfig> generateListFromMap(Map<BusinessEntity, List<AttrConfig>> map) {
+        return map.values().stream().flatMap(list -> {
+            if (CollectionUtils.isNotEmpty(list)) {
+                return list.stream();
+            } else {
+                return Stream.empty();
+            }
+        }).collect(Collectors.toList());
+    }
     /*
      * split configs by entity, then distribute thread to render separately
      */

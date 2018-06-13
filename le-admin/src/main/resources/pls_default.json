@@ -11,7 +11,7 @@
         { "Node": "MaxEnrichAttributes", "Data": 100},
         { "Node": "HG", "Data": 12},
         { "Node": "Bombora", "Data": 20},
-        { "Node": "WebsiteKeyword", "Data": 20}
+        { "Node": "WebsiteKeywords", "Data": 200}
       ]
     }
   ]

@@ -1,7 +1,6 @@
 package com.latticeengines.apps.core.service.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,32 +8,26 @@ import java.util.List;
 
 
 import org.apache.hadoop.util.StringUtils;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
-import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 
 public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTestNGBase {
 
     private static final int LIMIT = 500;
     private static final int mockHGLimit = 10;
-    @Mock
-    private AttrConfigEntityMgr attrConfigEntityMgr;
+
     @Spy
     private LimitationValidator limitationValidator;
 
@@ -43,10 +36,10 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         MockitoAnnotations.initMocks(this);
         setupTestEnvironment();
         MultiTenantContext.setTenant(mainTestTenant);
-        ReflectionTestUtils.setField(limitationValidator, "attrConfigEntityMgr", attrConfigEntityMgr);
+        limitationValidator.setDBConfigs(new ArrayList<>());
         Mockito.doReturn(mockHGLimit).when(limitationValidator).getMaxPremiumLeadEnrichmentAttributesByLicense(
                 anyString(),
-                any(DataLicense.class));
+                anyString());
     }
 
 
@@ -74,6 +67,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         limitationValidator.validate(attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size());
 
+        resetConfigs(attrConfigs);
         // set state equal to inactive
         AttrConfig inactiveConfig = new AttrConfig();
         inactiveConfig.setAttrName("Attr_inactive");
@@ -85,22 +79,24 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         attrConfigs.add(inactiveConfig);
         limitationValidator.validate(attrConfigs, false);
         // the inactive config should not have error message
-        assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
+        assertEquals(getErrorNumber(attrConfigs), 0);
     }
 
     @Test(groups = "functional")
     public void testSystemLimit() throws Exception {
         List<AttrConfig> attrConfigs = new ArrayList<>();
-        AttrConfigProp<AttrState> prop = new AttrConfigProp<>();
-        prop.setAllowCustomization(Boolean.TRUE);
-        prop.setCustomValue(AttrState.Active);
+        AttrConfigProp<AttrState> stateProp = new AttrConfigProp<>();
+        stateProp.setAllowCustomization(Boolean.TRUE);
+        stateProp.setCustomValue(AttrState.Active);
+        AttrConfigProp<Category> cateProp = new AttrConfigProp<>();
+        cateProp.setAllowCustomization(Boolean.TRUE);
+        cateProp.setCustomValue(Category.ACCOUNT_ATTRIBUTES);
         for (int i = 0; i < LIMIT; i++) {
             AttrConfig config = new AttrConfig();
             config.setAttrName(StringUtils.format("Attr%d", i));
             config.setEntity(BusinessEntity.Account);
-            config.setAttrType(AttrType.Custom);
-            config.setAttrSubType(AttrSubType.Extension);
-            config.putProperty(ColumnMetadataKey.State, prop);
+            config.putProperty(ColumnMetadataKey.Category, cateProp);
+            config.putProperty(ColumnMetadataKey.State, stateProp);
             attrConfigs.add(config);
         }
         limitationValidator.validate(attrConfigs, false);
@@ -109,18 +105,18 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         AttrConfig activeConfig = new AttrConfig();
         activeConfig.setAttrName("Attr_active1");
         activeConfig.setEntity(BusinessEntity.Account);
-        activeConfig.setAttrType(AttrType.Custom);
-        activeConfig.setAttrSubType(AttrSubType.Extension);
-        activeConfig.putProperty(ColumnMetadataKey.State, prop);
+        activeConfig.putProperty(ColumnMetadataKey.Category, cateProp);
+        activeConfig.putProperty(ColumnMetadataKey.State, stateProp);
         attrConfigs.add(activeConfig);
         limitationValidator.validate(attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size());
 
+        resetConfigs(attrConfigs);
         AttrConfig inactiveConfig = new AttrConfig();
         inactiveConfig.setAttrName("Attr_inactive1");
         inactiveConfig.setEntity(BusinessEntity.Account);
-        inactiveConfig.setAttrType(AttrType.Custom);
-        inactiveConfig.setAttrSubType(AttrSubType.Extension);
+        inactiveConfig.putProperty(ColumnMetadataKey.Category, cateProp);
+
         AttrConfigProp<AttrState> inactiveProp = new AttrConfigProp<>();
         inactiveProp.setAllowCustomization(Boolean.TRUE);
         inactiveProp.setCustomValue(AttrState.Inactive);
@@ -128,7 +124,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         attrConfigs.add(inactiveConfig);
         limitationValidator.validate(attrConfigs, false);
         // the new config should not have error message
-        assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
+        assertEquals(getErrorNumber(attrConfigs), 0);
     }
 
     private int getErrorNumber(List<AttrConfig> configs) {
@@ -139,5 +135,9 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
             }
         }
         return numErrors;
+    }
+
+    private void resetConfigs(List<AttrConfig> configs) {
+        configs.forEach(e -> e.setValidationErrors(null));
     }
 }

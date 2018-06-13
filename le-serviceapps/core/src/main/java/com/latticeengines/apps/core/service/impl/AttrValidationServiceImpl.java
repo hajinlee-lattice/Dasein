@@ -18,6 +18,12 @@ public class AttrValidationServiceImpl implements AttrValidationService {
 
     private List<String> validatorList = new ArrayList<>();
 
+    public void setValidateParam(List<AttrConfig> existingConfigs) {
+        LimitationValidator limitationValidator = (LimitationValidator) AttrValidator
+                .getValidator(LimitationValidator.VALIDATOR_NAME);
+        limitationValidator.setDBConfigs(existingConfigs);
+    }
+
     @PostConstruct
     private void initializeValidator() {
         validatorList.add(CDLImpactValidator.VALIDATOR_NAME);

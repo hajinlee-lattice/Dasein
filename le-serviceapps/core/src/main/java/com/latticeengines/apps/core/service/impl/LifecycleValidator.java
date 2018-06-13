@@ -57,23 +57,11 @@ public class LifecycleValidator extends AttrValidator {
             // check customer value or system value is equal to Inactive
             if (AttrState.Inactive.equals(finalState)) {
                 for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
-                    AttrConfigProp<?> groupUsageProp = attrConfig.getProperty(group.name());
-                    if (groupUsageProp != null) {
-                        if (groupUsageProp.getCustomValue() != null) {
-                            addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                    String.format(ValidationMsg.Errors.UPDATE_INACTIVE, group.name(),
-                                            attrConfig.getAttrName()),
-                                    attrConfig);
-                        }
-                        if (groupUsageProp.getSystemValue() != null) {
-                            Boolean groupUsage = Boolean.valueOf(groupUsageProp.getSystemValue().toString());
-                            if (groupUsage) {
-                                addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                        String.format(ValidationMsg.Errors.INACTIVE_USAGE, attrConfig.getAttrName(),
-                                                group.name()),
-                                        attrConfig);
-                            }
-                        }
+                    Boolean finalUsageValue = attrConfig.getPropertyFinalValue(group.name(), Boolean.class);
+                    if (Boolean.TRUE.equals((finalUsageValue))) {
+                        addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE, String
+                                .format(ValidationMsg.Errors.UPDATE_INACTIVE, group.name(), attrConfig.getAttrName()),
+                                attrConfig);
                     }
                 }
             }

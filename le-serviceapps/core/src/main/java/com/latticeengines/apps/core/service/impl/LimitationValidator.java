@@ -1,12 +1,11 @@
 package com.latticeengines.apps.core.service.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.zookeeper.KeeperException;
@@ -14,24 +13,22 @@ import org.apache.zookeeper.ZooDefs;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.DataLicense;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
@@ -43,34 +40,44 @@ public class LimitationValidator extends AttrValidator {
     private static final String PLS = "PLS";
     private static final String EXPORT = "Export";
     private static final int DEFAULT_LIMIT = 500;
-    @Inject
-    private AttrConfigEntityMgr attrConfigEntityMgr;
+
+    private List<AttrConfig> dbConfigs;
+
 
     protected LimitationValidator() {
         super(VALIDATOR_NAME);
+    }
+
+    public void setDBConfigs(List<AttrConfig> existingConfigs) {
+        this.dbConfigs = existingConfigs;
     }
 
     @Override
     public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
         // make sure user selected attr don't have two same attribute
         checkAmbiguityInFieldNames(attrConfigs);
-        String tenantId = MultiTenantContext.getTenantId();
         // split user selected configs into active and inactive, props always
         // are not empty after render method
-        List<AttrConfig> userSelectedActiveConfigs = returnStateConfigs(attrConfigs, AttrState.Active);
-        List<AttrConfig> userSelectedInactiveConfigs = returnStateConfigs(attrConfigs, AttrState.Inactive);
+        List<AttrConfig> userSelectedActiveConfigs = returnPropertyConfigs(attrConfigs, ColumnMetadataKey.State,
+                AttrState.Active);
+        List<AttrConfig> userSelectedInactiveConfigs = returnPropertyConfigs(attrConfigs, ColumnMetadataKey.State,
+                AttrState.Inactive);
 
-        List<AttrConfig> existingConfigs = attrConfigEntityMgr.findAllByTenantId(tenantId);
-        List<AttrConfig> existingActiveConfigs = getStateConfigsInDB(existingConfigs);
 
-        // dedup, since the configs has merged with the configs in DB, no need
-        // to count same configs in DB
-        List<AttrConfig> activeConfigs = generateActiveConfig(existingActiveConfigs, userSelectedActiveConfigs);
+        List<AttrConfig> existingActiveConfigs = getPropertyConfigsInDB(dbConfigs, ColumnMetadataKey.State,
+                AttrState.Active);
+
+        // dedup, since the user selected configs has merged with the configs in
+        // DB, no need to count same configs in DB
+        List<AttrConfig> activeConfigs = generateDedupConfig(existingActiveConfigs, userSelectedActiveConfigs);
         checkDataLicense(activeConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
         checkSystemLimit(activeConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
+
+        List<AttrConfig> dedupConfigs = generateDedupConfig(attrConfigs, dbConfigs);
+        checkCategoryLimit(dedupConfigs, attrConfigs);
     }
 
-    private List<AttrConfig> generateActiveConfig(List<AttrConfig> existingActiveConfigs,
+    private List<AttrConfig> generateDedupConfig(List<AttrConfig> existingActiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs) {
         List<AttrConfig> result = new ArrayList<AttrConfig>();
         result.addAll(userSelectedActiveConfigs);
@@ -84,12 +91,15 @@ public class LimitationValidator extends AttrValidator {
         return result;
     }
 
-    private List<AttrConfig> returnStateConfigs(List<AttrConfig> attrConfigs, AttrState state) {
+
+
+    private <T extends Serializable> List<AttrConfig> returnPropertyConfigs(List<AttrConfig> attrConfigs,
+            String propName, T value) {
         List<AttrConfig> stateConfigs = new ArrayList<>();
         for (AttrConfig config : attrConfigs) {
             try {
-                if (Boolean.TRUE.equals(config.getAttrProps().get(ColumnMetadataKey.State).isAllowCustomization())
-                        && state.equals(config.getAttrProps().get(ColumnMetadataKey.State).getCustomValue())) {
+                if (Boolean.TRUE.equals(config.getAttrProps().get(propName).isAllowCustomization())
+                        && value.equals(config.getAttrProps().get(propName).getCustomValue())) {
                     stateConfigs.add(config);
                 }
             } catch (NullPointerException e) {
@@ -99,12 +109,13 @@ public class LimitationValidator extends AttrValidator {
         return stateConfigs;
     }
 
-    private List<AttrConfig> getStateConfigsInDB(List<AttrConfig> attrConfigs) {
+    private <T extends Serializable> List<AttrConfig> getPropertyConfigsInDB(List<AttrConfig> attrConfigs,
+            String propName, T value) {
         List<AttrConfig> stateConfigs = new ArrayList<>();
         for (AttrConfig config : attrConfigs) {
             try {
-                if (config.getAttrProps().get(ColumnMetadataKey.State) != null
-                        && AttrState.Active.equals(config.getAttrProps().get(ColumnMetadataKey.State).getCustomValue())) {
+                if (config.getAttrProps().get(propName) != null
+                        && value.equals(config.getAttrProps().get(propName).getCustomValue())) {
                     stateConfigs.add(config);
                 }
             } catch (NullPointerException e) {
@@ -133,7 +144,7 @@ public class LimitationValidator extends AttrValidator {
         String tenantId = MultiTenantContext.getTenantId();
         int totalSelectedPremiumNumber = 0;
         for (DataLicense license : DataLicense.values()) {
-            int limit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, license);
+            int limit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, license.getDataLicense());
             List<AttrConfig> premiumActiveConfigs = configs.stream()
                     .filter(entity -> (license.getDataLicense().equals(entity.getDataLicense())))
                     .collect(Collectors.toList());
@@ -166,39 +177,62 @@ public class LimitationValidator extends AttrValidator {
         }
     }
 
+    private void checkCategoryLimit(List<AttrConfig> dedupConfigs, List<AttrConfig> userSelectedConfigs) {
+        String tenantId = MultiTenantContext.getTenantId();
+        int totalLimit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId,
+                Category.WEBSITE_KEYWORDS.getName().replaceAll(" ", ""));
+        checkDetailCategoryLimit(dedupConfigs, userSelectedConfigs, Category.WEBSITE_KEYWORDS, totalLimit);
+    }
+
+    private void checkDetailCategoryLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedConfigs,
+            Category category, int limit) {
+        List<AttrConfig> list = configs.stream()
+                .filter(e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
+                .collect(Collectors.toList());
+        int number = list.size();
+        if (number > limit) {
+            userSelectedConfigs.forEach(config -> {
+                if (category.equals(config.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class))) {
+                    addErrorMsg(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT,
+                            String.format(ValidationMsg.Errors.EXCEED_LIMIT, number, category.name(), limit), config);
+                }
+            });
+
+        }
+    }
+
+    // check category limit
     private void checkSystemLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs) {
-        checkDetailLimit(configs, userSelectedInactiveConfigs, userSelectedActiveConfigs, AttrType.Custom,
-                AttrSubType.Extension, BusinessEntity.Account,
+        checkDetailSystemLimit(configs, userSelectedInactiveConfigs, userSelectedActiveConfigs,
+                Category.ACCOUNT_ATTRIBUTES,
                 DEFAULT_LIMIT);
-        checkDetailLimit(configs, userSelectedInactiveConfigs, userSelectedActiveConfigs, AttrType.Custom,
-                AttrSubType.Extension, BusinessEntity.Contact,
+        checkDetailSystemLimit(configs, userSelectedInactiveConfigs, userSelectedActiveConfigs,
+                Category.CONTACT_ATTRIBUTES,
                 DEFAULT_LIMIT);
     }
 
-    private void checkDetailLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
-            List<AttrConfig> userSelectedActiveConfigs, AttrType type,
-            AttrSubType subType, BusinessEntity entity, int limit) {
+    private void checkDetailSystemLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
+            List<AttrConfig> userSelectedActiveConfigs, Category category, int limit) {
         List<AttrConfig> list = configs.stream().filter(
-                e -> type.equals(e.getAttrType()) && subType.equals(e.getAttrSubType()) && entity.equals(e.getEntity()))
+                e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
                 .collect(Collectors.toList());
         List<AttrConfig> inactiveList = userSelectedInactiveConfigs.stream().filter(
-                e -> type.equals(e.getAttrType()) && subType.equals(e.getAttrSubType()) && entity.equals(e.getEntity()))
+                e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
                 .collect(Collectors.toList());
         int number = list.size() - inactiveList.size();
         if (number > limit) {
             userSelectedActiveConfigs.forEach(config -> {
-                if (type.equals(config.getAttrType()) && subType.equals(config.getAttrSubType())
-                        && entity.equals(config.getEntity())) {
+                if (category.equals(config.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class))) {
                     addErrorMsg(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT,
-                            String.format(ValidationMsg.Errors.EXCEED_LIMIT, number, entity.name(), limit), config);
+                            String.format(ValidationMsg.Errors.EXCEED_LIMIT, number, category.name(), limit), config);
                 }
             });
         }
     }
 
     @VisibleForTesting
-    public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, DataLicense dataLicense) {
+    public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense) {
         String maxPremiumLeadEnrichmentAttributes;
         Camille camille = CamilleEnvironment.getCamille();
         Path contractPath = null;
@@ -209,7 +243,7 @@ public class LimitationValidator extends AttrValidator {
             if (dataLicense == null) {
                 path = contractPath.append(DATA_CLOUD_LICENSE).append(MAX_ENRICH_ATTRIBUTES);
             } else {
-                path = contractPath.append(DATA_CLOUD_LICENSE).append("/" + dataLicense.getDataLicense());
+                path = contractPath.append(DATA_CLOUD_LICENSE).append("/" + dataLicense);
             }
             maxPremiumLeadEnrichmentAttributes = camille.get(path).getData();
         } catch (KeeperException.NoNodeException ex) {
@@ -219,7 +253,7 @@ public class LimitationValidator extends AttrValidator {
                         .append(new Path(DATA_CLOUD_LICENSE).append(new Path(MAX_ENRICH_ATTRIBUTES)));
             } else {
                 defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
-                        .append(new Path(DATA_CLOUD_LICENSE).append(new Path("/" + dataLicense.getDataLicense())));
+                        .append(new Path(DATA_CLOUD_LICENSE).append(new Path("/" + dataLicense)));
             }
 
             try {
