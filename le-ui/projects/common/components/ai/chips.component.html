@@ -16,15 +16,22 @@
     <div 
         class="text-container dropdown" 
         ng-class="(showQueryList) ?'show-dropdown' : ''">
-        <input 
-            class="query" 
-            type="text" 
-            placeholder="{{placeholder}}" 
-            ng-keyup="queryKeyPressed($event)" 
-            ng-model="query" 
-            ng-blur="blurText()"
-            ng-show="!isSelectionDone()"
-            >
+        <div ng-class="{'ng-search': showIcon}" ng-show="!isSelectionDone()">
+            <a class="button icon-button white-button" ng-if="showIcon">
+                <span class="fa fa-search"></span>
+            </a>
+            <input 
+                class="query"
+                ng-class="{'search-icon': showIcon}"
+                type="text" 
+                placeholder="{{placeholder}}" 
+                ng-keyup="queryKeyPressed($event)" 
+                ng-model="query" 
+                ng-blur="blurText()"
+                ng-show="!isSelectionDone()"
+                >
+        </div>
+
         <div 
             class="dropdown-content" 
             ng-class="(showQueryList) ?'show-dropdown' : ''">
@@ -39,5 +46,6 @@
             </div>
         </div>
     </div>
+
 
 </div>

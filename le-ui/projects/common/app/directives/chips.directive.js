@@ -11,7 +11,8 @@ angular.module('mainApp.appCommon.directives.chips', [])
             id: '@', 
             displayname: '@' ,
             model: '@',
-            queryscope: '@'
+            queryscope: '@',
+            showicon: '@'
         },
         link: function (scope, element, attrs, ctrl) {
             scope.showClass = ''
@@ -27,6 +28,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.queryItems = scope.datasource;
             scope.queryScope = scope.queryscope;
             scope.isSelectionDone = false;
+            scope.showIcon = scope.showicon;
 
             scope.filterFunction = function(item) {
                 return item[scope.queryScope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
