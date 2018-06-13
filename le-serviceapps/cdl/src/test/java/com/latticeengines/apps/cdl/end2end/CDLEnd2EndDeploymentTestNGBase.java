@@ -175,9 +175,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final long RATING_D_COUNT_2_REBUILD = 31;
     static final long RATING_F_COUNT_2_REBUILD = 4;
 
-    static final String SEGMENT_PRODUCT_ID = "snB31hdBFDT9bcNvGMltIgsagzR15io";
-    static final String TARGET_PRODUCT = "9IfG2T5joqw0CIJva0izeZXSCwON1S";
-    static final String TRAINING_PRODUCT = "650050C066EF46905EC469E9CC2921E0";
+    static final String SEGMENT_PRODUCT_ID = "CEC1F504FE9683F5FE518BACB9409CAC";
+    static final String TARGET_PRODUCT = "6368494B622E0CB60F9C80FEB1D0F95F";
+    static final String TRAINING_PRODUCT = "B0829F745A42D18FE77050EC05A51D2F";
 
     static final int EARLIEST_TRANSACTION = 48033;
     static final int LATEST_TRANSACTION = 48929;
@@ -729,6 +729,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return dataCollectionProxy.getTableName(customerSpace.toString(), role);
     }
 
+    void resumeCrossSellCheckpoint(String checkpoint) throws IOException {
+        checkpointService.resumeCrossSellCheckpoint(checkpoint);
+        initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+    }
+
     void resumeCheckpoint(String checkpoint) throws IOException {
         checkpointService.resumeCheckpoint(checkpoint);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
@@ -905,20 +910,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     MetadataSegment constructTargetSegment() {
-        Bucket countryBkt = Bucket.valueBkt(ComparisonType.EQUAL, Arrays.asList("USA"));
-        BucketRestriction countryRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "LDC_Country"), countryBkt);
-
-        Bucket spendAnalyticsSegmentBkt = Bucket.valueBkt(ComparisonType.EQUAL, Arrays.asList("General Practice"));
-        BucketRestriction spendAnalyticsSegmentRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "SpendAnalyticsSegment"), spendAnalyticsSegmentBkt);
-
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Arrays.asList("VT"));
+        BucketRestriction accountRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_MODELING);
         segment.setDisplayName("End2End Segment Modeling");
         segment.setDescription("A test segment for CDL end2end modeling test.");
-        segment.setAccountRestriction(
-                Restriction.builder().or(countryRestriction, spendAnalyticsSegmentRestriction).build());
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+        segment.setAccountRestriction(accountRestriction);
         return segment;
     }
 
@@ -1117,7 +1117,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
         Map<CrossSellModelingConfigKeys, ModelingConfigFilter> myMap = new HashMap<>();
         myMap.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, new ModelingConfigFilter(
-                CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 6));
+                CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 3));
         config.setFilters(myMap);
 
         config.setModelingStrategy(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE);

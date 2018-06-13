@@ -84,6 +84,7 @@ public class CheckpointService {
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
     private static final String S3_CHECKPOINTS_VERSION = "15";
+    private static final String S3_CROSS_SELL_CHECKPOINTS_VERSION = "14";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 400;
@@ -148,9 +149,17 @@ public class CheckpointService {
         this.mainTestTenant = mainTestTenant;
     }
 
-    void resumeCheckpoint(String checkpoint) throws IOException {
-        unzipCheckpoint(checkpoint);
+    void resumeCrossSellCheckpoint(String checkpoint) throws IOException {
+        unzipCheckpoint(checkpoint, true);
+        cloneAnUploadTables(checkpoint);
+    }
 
+    void resumeCheckpoint(String checkpoint) throws IOException {
+        unzipCheckpoint(checkpoint, false);
+        cloneAnUploadTables(checkpoint);
+    }
+
+    void cloneAnUploadTables(String checkpoint) throws IOException {
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
         String[] tenantNames = new String[1];
 
@@ -187,7 +196,8 @@ public class CheckpointService {
                                         dynamoDataUnit.setLinkedTenant(dynamoDataUnit.getTenant());
                                     }
                                     dynamoDataUnit.setName(table.getName());
-                                    dynamoDataUnit.setTenant(CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
+                                    dynamoDataUnit
+                                            .setTenant(CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
                                     logger.info("Creating data unit " + JsonUtils.serialize(dynamoDataUnit));
                                     dataUnitProxy.create(mainTestTenant.getId(), dynamoDataUnit);
                                 }
@@ -259,10 +269,10 @@ public class CheckpointService {
         executorService.shutdown();
     }
 
-    private void unzipCheckpoint(String checkpoint) throws IOException {
+    private void unzipCheckpoint(String checkpoint, boolean isCrossSell) throws IOException {
         checkpointDir = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
-        File downloadedFile = testArtifactService.downloadTestArtifact(S3_CHECKPOINTS_DIR, S3_CHECKPOINTS_VERSION,
-                checkpoint + ".zip");
+        File downloadedFile = testArtifactService.downloadTestArtifact(S3_CHECKPOINTS_DIR,
+                isCrossSell ? S3_CROSS_SELL_CHECKPOINTS_VERSION : S3_CHECKPOINTS_VERSION, checkpoint + ".zip");
         String zipFilePath = downloadedFile.getPath();
         try {
             ZipFile zipFile = new ZipFile(zipFilePath);
@@ -352,7 +362,8 @@ public class CheckpointService {
         return DataCollection.Version.valueOf(version);
     }
 
-    private DynamoDataUnit parseDynamoDataUnit(String checkpoint, String roleName, DataCollection.Version version) throws IOException {
+    private DynamoDataUnit parseDynamoDataUnit(String checkpoint, String roleName, DataCollection.Version version)
+            throws IOException {
         DynamoDataUnit dynamoDataUnit = null;
         String jsonFilePath = String.format("%s/%s/%s/%s_Dynamo.json", checkpointDir, checkpoint, version.name(),
                 roleName);
@@ -584,13 +595,16 @@ public class CheckpointService {
         }
     }
 
-    private void saveDynamoTableIfExists(String checkpoint, TableRoleInCollection role, DataCollection.Version version) throws IOException {
+    private void saveDynamoTableIfExists(String checkpoint, TableRoleInCollection role, DataCollection.Version version)
+            throws IOException {
         String tableName = dataCollectionProxy.getTableName(mainTestTenant.getId(), role, version);
         if (StringUtils.isNotBlank(tableName)) {
-            DataUnit dataUnit = dataUnitProxy.getByNameAndType(mainTestTenant.getId(), tableName, DataUnit.StorageType.Dynamo);
+            DataUnit dataUnit = dataUnitProxy.getByNameAndType(mainTestTenant.getId(), tableName,
+                    DataUnit.StorageType.Dynamo);
             if (dataUnit != null) {
                 DynamoDataUnit dynamoDataUnit = (DynamoDataUnit) dataUnit;
-                String jsonFile = String.format("checkpoints/%s/%s/%s_Dynamo.json", checkpoint, version.name(), role.name());
+                String jsonFile = String.format("checkpoints/%s/%s/%s_Dynamo.json", checkpoint, version.name(),
+                        role.name());
                 om.writeValue(new File(jsonFile), dynamoDataUnit);
                 logger.info("Save DynamoDataUnit for " + role + " at version " + version + " to " + jsonFile);
             }
