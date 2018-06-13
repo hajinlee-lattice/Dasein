@@ -166,8 +166,8 @@ angular.module('lp.ratingsengine.ratingslist', [
 
 
 
-        var arr = vm.current.ratings;
-        console.log(arr.slice(Math.max(arr.length - 10, 1)));
+        // var arr = vm.current.ratings;
+        // console.log(arr.slice(Math.max(arr.length - 10, 1)));
         // console.log('inProgressModelJobs', JobsStore.inProgressModelJobs);
 
     }

@@ -22,7 +22,7 @@
                 </div>
 
                 <div class="filters">
-                    <div class="ng-search">
+                    <div class="ng-search" ng-class="{'disabled': vm.scoreTrainingFile}">
                         <input type="text" class="form-control" placeholder="Search {{vm.segments.length}} Segments" ng-model="vm.search" ng-disabled="vm.scoreTrainingFile"/>
                         <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
                             <span class="fa fa-search" ng-show="!vm.search.length"></span>

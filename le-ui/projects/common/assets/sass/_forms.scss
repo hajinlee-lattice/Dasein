@@ -376,6 +376,10 @@ input[type="search"] {
       //height: calc(100% + 2px); // fixes ff and ie, doesn't break chrome
     }
   }
+  &.disabled, &.disabled a.button {
+      background-color: #eee;
+      color: #676767;
+  }
 }
 
 

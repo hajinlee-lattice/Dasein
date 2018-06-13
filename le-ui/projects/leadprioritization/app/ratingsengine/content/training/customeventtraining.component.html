@@ -6,10 +6,7 @@
             
                 <div class="header">
                     <h2>How do you want to train the model?</h2>
-                </div>
-
-                <div class="row" style="margin:15px 0px">
-                    <span style="font-size:12px;"> Upload a CSV file containing one record per account/contact, a column for the predictive event (i.e. product purchase), and additional columns for any predictive attributes that you want to use that will be available for scoring. </span>
+                    <p>Upload a CSV file containing one record per account/contact, a column for the predictive event (i.e. product purchase), and additional columns for any predictive attributes that you want to use that will be available for scoring.</p>
                 </div>
 
                 <div 
@@ -26,22 +23,43 @@
                     ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
                 </div>
 
-                <div class="row" style="margin-top:25px">
-                    <span> Account Model Training Options </span>
-                </div>
+                <h3>Account Model Training Options</h3>
 
-                <div class="row">
+                <div class="advanced-options">
                     <label id="oneLeadPerDomainCheckbox">
                         <input type="checkbox" id="cbox1" data-ng-checked="vm.modelTrainingOptions.deduplicationType == 'ONELEADPERDOMAIN'" ng-click="vm.setTrainingOptions('deduplicationType')"> One record per account
-                    </label><br />
+                        <i class="fa fa-exclamation-circle show-tooltip delay top left">
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>Dedupe your Accounts before training the model. Only uncheck when your first party account data is highly site specific, or you prefer to use your own dedupe logic prior to loading.</p>
+                                </div>
+                            </div>
+                        </i>
+                    </label>
                     <label id="includePersonalEmailDomainsCheckbox">
                         <input type="checkbox" id="cbox2" data-ng-checked="!vm.modelTrainingOptions.excludePublicDomains" ng-click="vm.setTrainingOptions('excludePublicDomains')"> Include personal email domains 
-                    </label><br />
+                        <i class="fa fa-exclamation-circle show-tooltip delay top left">
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>Use all records for training the model, including those with personal email domains. Try unchecking this when you are supplementing your training data with lead records where personal domains also have missing or incorrect Company information.</p>
+                                </div>
+                            </div>
+                        </i>
+                    </label>
                     <label id="transformationGroup">
                         <input type="checkbox" id="cbox3" data-ng-checked="!vm.modelTrainingOptions.transformationGroup" ng-click="vm.setTrainingOptions('transformationGroup')"> Use curated attributes 
-                    </label><br />
-                </div>
+                        <i class="fa fa-exclamation-circle show-tooltip delay top left">
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>Use data transformations to curate better predictors and enhance your model. Try unchecking when you see curated predictors in your model that don’t make business sense for your use case (e.g., curated territories when your sales teams are split by territory).</p>
+                                </div>
+                            </div>
+                        </i>
+                    </label>
+
+                </div><!-- End .row -->
             </form>
         </div>
     </div>
+
 </section>

@@ -5,7 +5,24 @@
     .header {
         h2 {
             padding-left: 0;
+            margin-bottom: 4px;
             // background-image: url('/assets/images/ico-segments.png');
+        }
+        p {
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+    }
+    h3 {
+        font-size: 16px;
+        text-transform: none;
+        font-weight: normal;
+        color: #000;
+        margin-top: 20px;
+    }
+    .advanced-options {
+        label {
+            font-size: 14px;
         }
     }
     .content-body {
