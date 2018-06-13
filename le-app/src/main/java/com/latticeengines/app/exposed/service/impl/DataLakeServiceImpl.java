@@ -386,7 +386,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Override
     public synchronized TopNTree getTopNTree(String customerSpace) {
-        return  _dataLakeService.getTopNTreeFromCache(customerSpace);
+        return _dataLakeService.getTopNTreeFromCache(customerSpace);
     }
 
     @Override
@@ -439,7 +439,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         return cmMap;
     }
 
-    private void collectMetadataInParallel(String customerSpace, Collection<BusinessEntity> entities, Map<BusinessEntity, List<ColumnMetadata>> metadataMap, Map<BusinessEntity, Set<String>> columnNamesMap) {
+    private void collectMetadataInParallel(String customerSpace, Collection<BusinessEntity> entities,
+            Map<BusinessEntity, List<ColumnMetadata>> metadataMap, Map<BusinessEntity, Set<String>> columnNamesMap) {
         List<Runnable> runnables = new ArrayList<>();
         ConcurrentMap<BusinessEntity, List<ColumnMetadata>> concurrentMetadataMap = new ConcurrentHashMap<>();
         ConcurrentMap<BusinessEntity, Set<String>> concurrentColumnNamesMap = new ConcurrentHashMap<>();
@@ -448,12 +449,16 @@ public class DataLakeServiceImpl implements DataLakeService {
             Runnable metadataRunnable = //
                     () -> {
                         List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
-                        concurrentMetadataMap.put(entity, cms);
+                        if (CollectionUtils.isNotEmpty(cms)) {
+                            concurrentMetadataMap.put(entity, cms);
+                        }
                     };
             Runnable columnNamesRunnable = //
                     () -> {
                         Set<String> attrs = _dataLakeService.getServingTableColumns(customerSpace, entity);
-                        concurrentColumnNamesMap.put(entity, attrs);
+                        if (CollectionUtils.isNotEmpty(attrs)) {
+                            concurrentColumnNamesMap.put(entity, attrs);
+                        }
                     };
             runnables.add(metadataRunnable);
             runnables.add(columnNamesRunnable);
@@ -505,7 +510,8 @@ public class DataLakeServiceImpl implements DataLakeService {
                     List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, tableName);
                     cms.forEach(cm -> attrSet.add(cm.getAttrName()));
                     result = attrSet;
-                    timer.setTimerMessage("Fetched " + attrSet.size() + " attr names for " + entity + " in " + customerSpace);
+                    timer.setTimerMessage(
+                            "Fetched " + attrSet.size() + " attr names for " + entity + " in " + customerSpace);
                 }
             }
         }

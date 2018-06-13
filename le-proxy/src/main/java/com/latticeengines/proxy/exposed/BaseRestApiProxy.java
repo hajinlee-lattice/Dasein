@@ -59,6 +59,7 @@ public abstract class BaseRestApiProxy {
             java.sql.SQLTimeoutException.class, //
             com.mchange.v2.resourcepool.TimeoutException.class, //
             org.apache.commons.httpclient.util.TimeoutController.TimeoutException.class, //
+            org.springframework.web.context.request.async.AsyncRequestTimeoutException.class, //
             io.netty.handler.timeout.TimeoutException.class, //
             org.apache.http.NoHttpResponseException.class,
             org.springframework.web.client.ResourceAccessException.class,
