@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
-import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 import com.latticeengines.proxy.exposed.cdl.CDLDependenciesProxy;
 
 @Component("cdlImpactValidator")
@@ -65,79 +64,63 @@ public class CDLImpactValidator extends AttrValidator {
             List<Play> impactPlays = cdlDependenciesProxy.getDependingPlays(customerSpace, attributes);
             AttrConfigProp<?> stateProp = attrConfig.getProperty(ColumnMetadataKey.State);
             if (CollectionUtils.isNotEmpty(impactSegments)) {
+                List<String> names = getImpactSegmentNames(impactSegments);
                 if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
-                    addErrorMsg(ValidationErrors.Type.IMPACTED_SEGMENTS,
-                            String.format(ValidationMsg.Errors.IMPACT_SEGMENTS, attrConfig.getAttrName(),
-                                    getImpactSegmentNames(impactSegments)),
-                            attrConfig);
+                    names.forEach(name -> addErrorMsg(ValidationErrors.Type.IMPACTED_SEGMENTS, name, attrConfig));
                 } else {
-                    addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS,
-                            String.format(ValidationMsg.Warnings.IMPACT_SEGMENTS, attrConfig.getAttrName(),
-                                    getImpactSegmentNames(impactSegments)),
-                            attrConfig);
+                    names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS, name, attrConfig));
                 }
             }
             if (CollectionUtils.isNotEmpty(impactRatingEngines)) {
+                List<String> names = getImpactRatingEngineNames(impactRatingEngines);
                 if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
-                    addErrorMsg(ValidationErrors.Type.IMPACTED_RATING_ENGINES,
-                            String.format(ValidationMsg.Errors.IMPACT_RATING_ENGINES, attrConfig.getAttrName(),
-                                    getImpactRatingEngineNames(impactRatingEngines)),
-                            attrConfig);
+                    names.forEach(name -> addErrorMsg(ValidationErrors.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
                 } else {
-                    addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES,
-                            String.format(ValidationMsg.Warnings.IMPACT_RATING_ENGINES, attrConfig.getAttrName(),
-                                    getImpactRatingEngineNames(impactRatingEngines)),
-                            attrConfig);
+                    names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
                 }
             }
             if (CollectionUtils.isNotEmpty(impactRatingModels)) {
+                List<String> names = getImpactRatingModleNames(impactRatingModels);
                 if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
-                    addErrorMsg(ValidationErrors.Type.IMPACTED_RATING_MODELS,
-                            String.format(ValidationMsg.Errors.IMPACT_RATING_MODELS, attrConfig.getAttrName(),
-                                    getImpactRatingModleNames(impactRatingModels)),
-                            attrConfig);
+                    names.forEach(name -> addErrorMsg(ValidationErrors.Type.IMPACTED_RATING_MODELS, name, attrConfig));
                 } else {
-                    addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS,
-                            String.format(ValidationMsg.Warnings.IMPACT_RATING_MODELS, attrConfig.getAttrName(),
-                                    getImpactRatingModleNames(impactRatingModels)),
-                            attrConfig);
+                    names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS, name, attrConfig));
                 }
             }
             if (CollectionUtils.isNotEmpty(impactPlays)) {
+                List<String> names = getImpactPlayNames(impactPlays);
                 if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
-                    addErrorMsg(ValidationErrors.Type.IMPACTED_PLAYS, String.format(ValidationMsg.Errors.IMPACT_PLAYS,
-                            attrConfig.getAttrName(), getImpactPlayNames(impactPlays)), attrConfig);
+                    names.forEach(name -> addErrorMsg(ValidationErrors.Type.IMPACTED_PLAYS, name, attrConfig));
                 } else {
-                    addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, String.format(ValidationMsg.Warnings.IMPACT_PLAYS,
-                            attrConfig.getAttrName(), getImpactPlayNames(impactPlays)), attrConfig);
+                    names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, name, attrConfig));
                 }
             }
         }
 
     }
 
-    private String getImpactSegmentNames(List<MetadataSegment> impactSegments) {
+    private List<String> getImpactSegmentNames(List<MetadataSegment> impactSegments) {
         List<String> segmentNames = new ArrayList<>();
         impactSegments.forEach(segment -> segmentNames.add(segment.getDisplayName()));
-        return String.join(",", segmentNames);
+        return segmentNames;
     }
 
-    private String getImpactRatingEngineNames(List<RatingEngine> impactRatingEngines) {
+    private List<String> getImpactRatingEngineNames(List<RatingEngine> impactRatingEngines) {
         List<String> ratingEngineNames = new ArrayList<>();
         impactRatingEngines.forEach(ratingEngine -> ratingEngineNames.add(ratingEngine.getDisplayName()));
-        return String.join(",", ratingEngineNames);
+        return ratingEngineNames;
     }
 
-    private String getImpactRatingModleNames(List<RatingModel> impactRatingModels) {
+    private List<String> getImpactRatingModleNames(List<RatingModel> impactRatingModels) {
         List<String> ratingModelNames = new ArrayList<>();
         impactRatingModels.forEach(ratingModel -> ratingModelNames.add(ratingModel.getId()));
-        return String.join(",", ratingModelNames);
+        return ratingModelNames;
     }
 
-    private String getImpactPlayNames(List<Play> impactPlays) {
+    private List<String> getImpactPlayNames(List<Play> impactPlays) {
         List<String> playNames = new ArrayList<>();
         impactPlays.forEach(play -> playNames.add(play.getDisplayName()));
-        return String.join(",", playNames);
+        return playNames;
     }
 
     private boolean hasCustomValue(AttrConfig attrConfig) {
