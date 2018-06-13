@@ -15,7 +15,10 @@ angular
                     });
                     
                     return deferred.promise;
-                }]
+                }],
+                Segment: function(){
+                    return {};
+                }
             },
             views: {
                 "main@": {

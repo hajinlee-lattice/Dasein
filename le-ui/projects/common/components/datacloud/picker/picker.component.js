@@ -1,7 +1,7 @@
 angular.module('common.datacloud.valuepicker', [])
 .controller('ValuePickerController', function (
     $state, $stateParams, $timeout, DataCloudStore, QueryStore, 
-    QueryTreeService, PickerBuckets, SegmentStore
+    QueryTreeService, PickerBuckets, SegmentStore, Segment
 ) {
     var vm = this;
 
@@ -17,7 +17,6 @@ angular.module('common.datacloud.valuepicker', [])
     });
 
     vm.init = function() {
-
         vm.picker_object = QueryTreeService.getPickerObject() || {
             item: null,
             restriction: null
@@ -126,7 +125,7 @@ angular.module('common.datacloud.valuepicker', [])
         }
 
         //if (vals && vals.length > 0) {
-            vm.controller.updateBucketCount();
+            vm.controller.updateBucketCount(Segment.name);
         //}
     }
 

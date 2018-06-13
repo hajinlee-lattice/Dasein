@@ -470,12 +470,16 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return deferred.promise;
         }
 
-        this.updateBucketCount = function (bucketRestriction) {
+        this.updateBucketCount = function (bucketRestriction, segmentName) {
             var deferred = $q.defer();
 
             var segment = {
                 "free_form_text_search": ""
             };
+            if(segmentName){
+                segment.preexisting_segment_name = segmentName;
+                // segment.contact_restriction = {};
+            }
 
             this.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
             //This call is done to associate some mode to account

@@ -508,7 +508,7 @@ angular.module('common.datacloud.query')
                     'restrict_without_sfdcid': query.restrict_without_sfdcid
                 };
             };
-
+            
             queryWithRestriction = SegmentStore.sanitizeSegment(queryWithRestriction);
 
             QueryService.GetEntitiesCounts(queryWithRestriction).then(function(data) {

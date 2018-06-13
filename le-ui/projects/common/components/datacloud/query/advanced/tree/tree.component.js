@@ -217,11 +217,11 @@ angular
                 } 
             }
 
-            vm.updateBucketCount = function() {
+            vm.updateBucketCount = function(segmentName) {
                 if (vm.root.mode != 'rules' || vm.root.mode != 'dashboardrules') {
                     vm.records_updating = true;
 
-                    QueryTreeService.updateBucketCount(angular.copy(vm.tree.bucketRestriction)).then(function(data) {
+                    QueryTreeService.updateBucketCount(angular.copy(vm.tree.bucketRestriction), segmentName).then(function(data) {
                         if (typeof data == 'number') {
                             vm.tree.bucketRestriction.bkt.Cnt = data;
                         }

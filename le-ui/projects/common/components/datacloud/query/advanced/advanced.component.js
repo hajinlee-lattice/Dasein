@@ -44,7 +44,6 @@ angular.module('common.datacloud.query.builder', [
 
     vm.init = function() {
         // console.log('[AQB] RatingEngineModel:', RatingEngineModel);
-        
         if ($state.current.name === 'home.ratingsengine.rulesprospects.segment.attributes.rules') {
             vm.mode = 'rules';
         } else if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.rules') {

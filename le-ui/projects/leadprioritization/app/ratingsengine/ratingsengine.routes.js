@@ -424,6 +424,19 @@ angular
                     mode: 'dashboardrules'
                 },
                 resolve: {
+                    Segment: ['$q', '$stateParams', 'RatingsEngineStore',function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        if (!$stateParams.rating_id) {
+                            deferred.resolve(RatingsEngineStore.currentRating.segment);
+                        } else {
+                            RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                                deferred.resolve(result.segment);
+                            });
+                        }
+
+                        return deferred.promise;
+                    }],
                     PickerBuckets: ['$q', '$stateParams', 'QueryTreeService', 'DataCloudStore', function($q, $stateParams, QueryTreeService, DataCloudStore){
                         var deferred = $q.defer();
                         var entity = $stateParams.entity;
@@ -842,6 +855,19 @@ angular
                             deferred.resolve(result.data);
                         });
                         
+                        return deferred.promise;
+                    }],
+                    Segment: ['$q', '$stateParams', 'RatingsEngineStore',function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        if (!$stateParams.rating_id) {
+                            deferred.resolve(RatingsEngineStore.currentRating.segment);
+                        } else {
+                            RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                                deferred.resolve(result.segment);
+                            });
+                        }
+
                         return deferred.promise;
                     }]
                 },
