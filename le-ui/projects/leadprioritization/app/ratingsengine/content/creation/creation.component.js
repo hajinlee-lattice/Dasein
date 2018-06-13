@@ -110,7 +110,9 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         }
 
-        console.log(vm.hasSettingsInfo);
+        $scope.$on('$destroy', function(){
+            $interval.cancel(vm.checkJobStatus)
+        });
 
     };
 
@@ -153,10 +155,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             });
         }
     }, 10 * 1000);
-
-    $scope.$on('$destroy', function(){
-        $interval.cancel(vm.checkJobStatus)
-    });
 
     vm.returnProductNameFromId = function(productId) {
         var products = vm.products,
