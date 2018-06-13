@@ -115,7 +115,12 @@ public abstract class BaseFrontEndEntityResource {
                             .and(frontEndAccountRestriction, segmentAccountRestriction).build();
                     frontEndQuery.getAccountRestriction().setRestriction(totalRestriction);
                 } else {
-                    frontEndQuery.getAccountRestriction().setRestriction(segmentAccountRestriction);
+                    FrontEndRestriction feRestriction = frontEndQuery.getAccountRestriction();
+                    if (feRestriction == null) {
+                        feRestriction = new FrontEndRestriction();
+                    }
+                    feRestriction.setRestriction(segmentAccountRestriction);
+                    frontEndQuery.setAccountRestriction(feRestriction);
                 }
             }
 
@@ -128,7 +133,12 @@ public abstract class BaseFrontEndEntityResource {
                             .and(frontEndContactRestriction, segmentContactRestriction).build();
                     frontEndQuery.getContactRestriction().setRestriction(totalRestriction);
                 } else {
-                    frontEndQuery.getContactRestriction().setRestriction(segmentContactRestriction);
+                    FrontEndRestriction feRestriction = frontEndQuery.getContactRestriction();
+                    if (feRestriction == null) {
+                        feRestriction = new FrontEndRestriction();
+                    }
+                    feRestriction.setRestriction(segmentContactRestriction);
+                    frontEndQuery.setContactRestriction(feRestriction);
                 }
             }
         }
