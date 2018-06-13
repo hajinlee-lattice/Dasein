@@ -3,9 +3,11 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -13,6 +15,7 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +28,9 @@ import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
+import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -43,6 +48,9 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -67,6 +75,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private final MetadataProxy metadataProxy;
 
+    private final AttrConfigEntityMgr attrConfigEntityMgr;
+
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
@@ -76,7 +86,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                                           DLTenantMappingService dlTenantMappingService,
                                           CDLExternalSystemService cdlExternalSystemService,
                                           ActionService actionService,
-                                          MetadataProxy metadataProxy) {
+                                          MetadataProxy metadataProxy, AttrConfigEntityMgr attrConfigEntityMgr) {
         this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
         this.dataFeedProxy = dataFeedProxy;
         this.tenantService = tenantService;
@@ -84,6 +94,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         this.cdlExternalSystemService = cdlExternalSystemService;
         this.actionService = actionService;
         this.metadataProxy = metadataProxy;
+        this.attrConfigEntityMgr = attrConfigEntityMgr;
     }
 
     @Override
@@ -100,7 +111,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
         }
         MultiTenantContext.setTenant(tenant);
-        Table newMeta = dataFeedMetadataService.getMetadata(importConfig, entity);
+        Pair<Table, List<AttrConfig>> metadataPair = dataFeedMetadataService.getMetadata(importConfig, entity);
+        Table newMeta = metadataPair.getLeft();
+        List<AttrConfig> attrConfigs = metadataPair.getRight();
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
@@ -119,6 +132,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
+                updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
             }
             dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta, customerSpace.toString());
             return dataFeedTask.getUniqueId();
@@ -139,6 +153,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
+            updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);
             if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
                 DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
                 if (dataFeed.getStatus().equals(DataFeed.Status.Initing)) {
@@ -364,6 +379,44 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
         }
         return true;
+    }
+
+    private void updateAttrConfig(Table templateTable, List<AttrConfig> attrConfigs, String entity, CustomerSpace customerSpace) {
+        try {
+            if (CollectionUtils.isEmpty(attrConfigs)
+                    || templateTable == null
+                    || CollectionUtils.isEmpty(templateTable.getAttributes())) {
+                return;
+            }
+            List<AttrConfig> originalAttrConfigs = attrConfigEntityMgr.findAllForEntity(customerSpace.getTenantId(),
+                    BusinessEntity.getByName(entity));
+
+            Map<String, Attribute> attributeMap = templateTable.getAttributes()
+                    .stream().collect(Collectors.toMap(Attribute::getSourceAttrName, attr -> attr));
+            attrConfigs.forEach(attrConfig -> {
+                if (attributeMap.containsKey(attrConfig.getAttrName())) {
+                    attrConfig.setAttrName(attributeMap.get(attrConfig.getAttrName()).getName());
+                } else {
+                    throw new RuntimeException("Template table doesn't contains source Attribute: " + attrConfig.getAttrName());
+                }
+            });
+
+            Map<String, AttrConfig> originalAttrConfigMap = originalAttrConfigs.stream()
+                    .collect(Collectors.toMap(AttrConfig::getAttrName, attrConfig -> attrConfig));
+
+            // remove attr config that already has custom value.
+            Iterator<AttrConfig> attrConfigIterator = attrConfigs.iterator();
+            while (attrConfigIterator.hasNext()) {
+                AttrConfig attrConfig = attrConfigIterator.next();
+                if (originalAttrConfigMap.containsKey(attrConfig.getAttrName())) {
+                    attrConfigIterator.remove();
+                }
+            }
+
+            attrConfigEntityMgr.save(customerSpace.getTenantId(), BusinessEntity.getByName(entity), attrConfigs);
+        } catch (Exception e) {
+            log.error("We cannot auto set the AttrConfig for import, please set AttrConfig manually!");
+        }
     }
 
     private boolean compareAttribute(Attribute attr1, Attribute attr2) {

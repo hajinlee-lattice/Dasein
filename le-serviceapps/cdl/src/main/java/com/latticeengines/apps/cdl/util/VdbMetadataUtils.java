@@ -16,15 +16,18 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
-import com.latticeengines.domain.exposed.pls.VdbMetadataExtension;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 public class VdbMetadataUtils {
 
@@ -59,9 +62,8 @@ public class VdbMetadataUtils {
                     && Sets.newHashSet("TIME", "TIMESTAMP").contains(attr.getSourceLogicalDataType().toUpperCase())) {
                 attr.setLogicalDataType(LogicalDataType.Timestamp);
             }
-            setAttributeExtensions(attr, metadata.getExtensions());
             if (BusinessEntity.getByName(entity) == BusinessEntity.Account) {
-                setAttributeGroup(attr);
+                setAttributeGroup(attr, metadata.getTags());
             }
             return attr;
         } catch (Exception e) {
@@ -71,11 +73,64 @@ public class VdbMetadataUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static AttrConfig getAttrConfig(VdbSpecMetadata metadata, String entity) {
+        if (CollectionUtils.isEmpty(metadata.getTags()) && CollectionUtils.isEmpty(metadata.getApprovedUsage())) {
+            return null;
+        }
+        AttrConfig attrConfig = new AttrConfig();
+        attrConfig.setAttrName(metadata.getColumnName());
+        attrConfig.setEntity(BusinessEntity.getByName(entity));
+        boolean[] excludeFlag = getExcludeFlags(metadata.getTags());
+        if (excludeFlag[0]) {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(false);
+            attrConfig.putProperty(ColumnSelection.Predefined.Segment.getName(), prop);
+        }
+        if (excludeFlag[1]) {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(false);
+            attrConfig.putProperty(ColumnSelection.Predefined.Enrichment.getName(), prop);
+        }
+        if (excludeFlag[2]) {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(false);
+            attrConfig.putProperty(ColumnSelection.Predefined.TalkingPoint.getName(), prop);
+        }
+        if (excludeFlag[3]) {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(false);
+            attrConfig.putProperty(ColumnSelection.Predefined.CompanyProfile.getName(), prop);
+        }
+
+        if (excludeFlag[4]) {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(AttrState.Inactive);
+            attrConfig.putProperty(ColumnMetadataKey.State, prop);
+        }
+
+        if (CollectionUtils.isNotEmpty(metadata.getApprovedUsage())) {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(JsonUtils.serialize(metadata.getApprovedUsage()));
+            attrConfig.putProperty(ColumnMetadataKey.ApprovedUsage, prop);
+            for (String approvedUsage : metadata.getApprovedUsage()) {
+                if (ApprovedUsage.isUsedByModeling(approvedUsage)) {
+                    AttrConfigProp modelProp = new AttrConfigProp();
+                    modelProp.setCustomValue(true);
+                    attrConfig.putProperty(ColumnSelection.Predefined.Model.getName(), modelProp);
+                    break;
+                }
+            }
+        }
+        return attrConfig;
+
+    }
+
     private static List<String> getTags(List<String> tags) {
         List<String> defaultTags = new ArrayList<>(Arrays.asList(Tag.INTERNAL.getName()));
         if (CollectionUtils.isNotEmpty(tags)) {
             tags.forEach(tag -> {
-                if (!tag.equalsIgnoreCase(Tag.INTERNAL.getName())) {
+                if (!tag.equalsIgnoreCase(Tag.INTERNAL.getName()) && Tag.availableNames().contains(tag)) {
                     defaultTags.add(tag);
                 }
             });
@@ -83,33 +138,64 @@ public class VdbMetadataUtils {
         return defaultTags;
     }
 
-    private static void setAttributeExtensions(Attribute attribute, List<VdbMetadataExtension> vdbMetadataExtensions) {
-        if (vdbMetadataExtensions == null) {
-            return;
+    private static boolean[] getExcludeFlags(List<String> tags) {
+        final boolean[] excludeFlag = new boolean[5];
+        if (CollectionUtils.isNotEmpty(tags)) {
+            tags.forEach(tag -> {
+                if (tag.equalsIgnoreCase("ExcludeFromFiltering")) {
+                    excludeFlag[0] = true;
+                } else if (tag.equalsIgnoreCase("ExcludeFromPlaymakerExport")) {
+                    excludeFlag[1] = true;
+                } else if (tag.equalsIgnoreCase("ExcludeFromTalkingPoints")) {
+                    excludeFlag[2] = true;
+                } else if (tag.equalsIgnoreCase("ExcludeFromListView")) {
+                    excludeFlag[3] = true;
+                } else if (tag.equalsIgnoreCase("ExcludeFromDetailView")) {
+                    excludeFlag[3] = true;
+                } else if (tag.equalsIgnoreCase("ExcludeFromAll")) {
+                    excludeFlag[4] = true;
+                }
+            });
         }
-        for (VdbMetadataExtension extension : vdbMetadataExtensions) {
-            if (extension.getKey().equalsIgnoreCase("ExcludeFromFiltering")) {
-                attribute.setExcludeFromFiltering(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromPlaymakerExport")) {
-                attribute.setExcludeFromPlaymakerExport(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromTalkingPoints")) {
-                attribute.setExcludeFromTalkingPoints(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromListView")) {
-                attribute.setExcludeFromListView(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromDetailView")) {
-                attribute.setExcludeFromDetailView(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromAll")) {
-                attribute.setExcludeFromAll(extension.getValue());
-            }
-        }
+        return excludeFlag;
     }
 
-    private static void setAttributeGroup(Attribute attribute) {
+    private static void setAttributeGroup(Attribute attribute, List<String> tags) {
         List<ColumnSelection.Predefined> groups = new ArrayList<>();
-        if (!attribute.getExcludeFromTalkingPoints()) {
+        final boolean[] excludeFlag = new boolean[5];
+        if (CollectionUtils.isNotEmpty(tags)) {
+            tags.forEach(tag -> {
+                if (tag.equalsIgnoreCase("ExcludeFromFiltering")) {
+                    excludeFlag[0] = true;
+                    attribute.setExcludeFromFiltering("True");
+                } else if (tag.equalsIgnoreCase("ExcludeFromPlaymakerExport")) {
+                    excludeFlag[1] = true;
+                    attribute.setExcludeFromPlaymakerExport("True");
+                } else if (tag.equalsIgnoreCase("ExcludeFromTalkingPoints")) {
+                    excludeFlag[2] = true;
+                    attribute.setExcludeFromTalkingPoints("True");
+                } else if (tag.equalsIgnoreCase("ExcludeFromListView")) {
+                    excludeFlag[3] = true;
+                    attribute.setExcludeFromListView("True");
+                } else if (tag.equalsIgnoreCase("ExcludeFromDetailView")) {
+                    excludeFlag[3] = true;
+                    attribute.setExcludeFromDetailView("True");
+                } else if (tag.equalsIgnoreCase("ExcludeFromAll")) {
+                    excludeFlag[4] = true;
+                    attribute.setExcludeFromAll("True");
+                }
+            });
+        }
+        if (!excludeFlag[0]) {
+            groups.add(ColumnSelection.Predefined.Segment);
+        }
+        if (!excludeFlag[1]) {
+            groups.add(ColumnSelection.Predefined.Enrichment);
+        }
+        if (!excludeFlag[2]) {
             groups.add(ColumnSelection.Predefined.TalkingPoint);
         }
-        if (!attribute.getExcludeFromDetailView()) {
+        if (!excludeFlag[3]) {
             groups.add(ColumnSelection.Predefined.CompanyProfile);
         }
         attribute.setGroupsViaList(groups);

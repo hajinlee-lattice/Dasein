@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import org.apache.avro.Schema.Type;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,10 +34,10 @@ import com.latticeengines.domain.exposed.eai.ImportVdbTableMergeRule;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 @Component("vdbDataFeedMetadataService")
@@ -55,18 +57,23 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         super(SourceType.VISIDB.getName());
     }
 
-    public Table getMetadata(CDLImportConfig importConfig, String entity) {
+    public Pair<Table, List<AttrConfig>> getMetadata(CDLImportConfig importConfig, String entity) {
         VdbLoadTableConfig vdbLoadTableConfig = ((VdbImportConfig) importConfig).getVdbLoadTableConfig();
         Table metaTable = new Table();
+        List<AttrConfig> attrConfigs = new ArrayList<>();
         for (VdbSpecMetadata metadata : vdbLoadTableConfig.getMetadataList()) {
             Attribute attr = VdbMetadataUtils.convertToAttribute(metadata, entity);
+            AttrConfig attrConfig = VdbMetadataUtils.getAttrConfig(metadata, entity);
+            if (attrConfig != null) {
+                attrConfigs.add(attrConfig);
+            }
             metaTable.addAttribute(attr);
         }
         metaTable.setPrimaryKey(null);
         metaTable.setName(vdbLoadTableConfig.getTableName());
         metaTable.setDisplayName(vdbLoadTableConfig.getTableName());
         if (VdbMetadataUtils.validateVdbTable(metaTable) && validateOriginalTable(metaTable)) {
-            return metaTable;
+            return new ImmutablePair<>(metaTable, attrConfigs);
         } else {
             throw new RuntimeException("The metadata from vdb is not valid!");
         }

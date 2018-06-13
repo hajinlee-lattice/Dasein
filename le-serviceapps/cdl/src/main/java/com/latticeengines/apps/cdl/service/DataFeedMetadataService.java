@@ -1,15 +1,18 @@
 package com.latticeengines.apps.cdl.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema.Type;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
 public abstract class DataFeedMetadataService {
 
@@ -23,7 +26,7 @@ public abstract class DataFeedMetadataService {
         return services.get(serviceName);
     }
 
-    public abstract Table getMetadata(CDLImportConfig importConfig, String entity);
+    public abstract Pair<Table, List<AttrConfig>> getMetadata(CDLImportConfig importConfig, String entity);
 
     public abstract Table resolveMetadata(Table original, Table schemaTable);
 

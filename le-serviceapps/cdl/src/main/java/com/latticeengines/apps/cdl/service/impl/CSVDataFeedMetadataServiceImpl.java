@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("csvDataFeedMetadataService")
@@ -41,7 +44,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         super(SourceType.FILE.getName());
     }
 
-    public Table getMetadata(CDLImportConfig importConfig, String entity) {
+    public Pair<Table, List<AttrConfig>> getMetadata(CDLImportConfig importConfig, String entity) {
         CSVImportConfig csvImportConfig = (CSVImportConfig) importConfig;
         log.info("Template table name: " + csvImportConfig.getCsvToHdfsConfiguration().getTemplateName());
         Table metaTable = metadataProxy.getTable(
@@ -55,7 +58,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         }
         if (validateOriginalTable(metaTable)) {
-            return metaTable;
+            return new ImmutablePair<>(metaTable, new ArrayList<>());
         } else {
             throw new RuntimeException("The metadata from csv import is not valid!");
         }

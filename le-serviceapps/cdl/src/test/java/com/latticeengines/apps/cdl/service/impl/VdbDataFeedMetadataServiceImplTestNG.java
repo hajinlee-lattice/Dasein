@@ -84,8 +84,8 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void mergeTest() {
-        Table test1Table = vdbDataFeedMetadataService.getMetadata(vdbMetadata1, "Account");
-        Table test2Table = vdbDataFeedMetadataService.getMetadata(vdbMetadata2, "Account");
+        Table test1Table = vdbDataFeedMetadataService.getMetadata(vdbMetadata1, "Account").getLeft();
+        Table test2Table = vdbDataFeedMetadataService.getMetadata(vdbMetadata2, "Account").getLeft();
 
         Table schemaTable1 = SchemaRepository.instance().getSchema(BusinessEntity.Account);
         Table schemaTable2 = SchemaRepository.instance().getSchema(BusinessEntity.Account);
@@ -100,7 +100,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional", expectedExceptions = RuntimeException.class)
     public void testGetMetadata() {
-        testTable = vdbDataFeedMetadataService.getMetadata(testVdbMetadata, "Account");
+        testTable = vdbDataFeedMetadataService.getMetadata(testVdbMetadata, "Account").getLeft();
         Assert.assertNotNull(testTable);
         Assert.assertEquals(testTable.getName(), "FS_Data_For_Dante_Accounts_1000");
         Attribute requiredField = testTable.getAttribute("account");
@@ -115,7 +115,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(urlField.getGroupsAsList(), Arrays.asList(ColumnSelection.Predefined.CompanyProfile));
         Assert.assertEquals(verticalField.getGroupsAsList(),
                 Arrays.asList(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.CompanyProfile));
-        Table error = vdbDataFeedMetadataService.getMetadata(errorVdbMetadata, "Account");
+        Table error = vdbDataFeedMetadataService.getMetadata(errorVdbMetadata, "Account").getLeft();
     }
 
     @Test(groups = "functional")
