@@ -177,11 +177,11 @@ public class DataLakeServiceImpl implements DataLakeService {
                         if (CollectionUtils.isNotEmpty(availableAttrs)) {
                             flux = flux.filter(cm -> availableAttrs.contains(cm.getAttrName()));
                         }
-                        return flux;
+                        return flux //
+                                .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
+                                .filter(cm -> !StatsCubeUtils.shouldHideAttr(entity, cm));
                     }
-                }) //
-                .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
-                .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm));
+                });
     }
 
     @Override

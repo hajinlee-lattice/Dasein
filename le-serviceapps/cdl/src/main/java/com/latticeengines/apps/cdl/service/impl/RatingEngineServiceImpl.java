@@ -330,8 +330,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             checkFeasibilityForDelete(id);
             List<Play> relatedPlays = playService.getAllFullPlays(false, id);
             if (CollectionUtils.isNotEmpty(relatedPlays)) {
-                relatedPlays.stream() //
-                        .forEach(p -> playService.deleteByName(p.getName(), hardDelete));
+                relatedPlays.forEach(p -> playService.deleteByName(p.getName(), hardDelete));
             }
         }
         ratingEngineEntityMgr.deleteById(id, hardDelete);

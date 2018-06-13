@@ -10,10 +10,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -24,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -40,8 +42,8 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
@@ -70,15 +72,7 @@ public class StatsCubeUtils {
     );
     static final String HASEVER_PURCHASED_SUFFIX = String.format("%s_%s", NamedPeriod.HASEVER.getName(), "Purchased");
 
-    private static final Set<String> SYSTEM_ATTRS = Sets.newHashSet( //
-            InterfaceName.LatticeAccountId.name(), //
-            InterfaceName.AccountId.name(), //
-            InterfaceName.ContactId.name(), //
-            InterfaceName.ProductId.name(), //
-            InterfaceName.InternalId.name(), //
-            InterfaceName.CustomerParentAccountID.name(), //
-            InterfaceName.CDLCreatedTime.name(), //
-            InterfaceName.CDLUpdatedTime.name());
+    private static final ConcurrentMap<BusinessEntity, Set<String>> SYSTEM_ATTRS = new ConcurrentHashMap<>();
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);
@@ -480,8 +474,8 @@ public class StatsCubeUtils {
         return newCube;
     }
 
-    public static boolean shouldHideAttr(ColumnMetadata cm) {
-        return isDateAttribute(cm) || isSystemAttribute(cm);
+    public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm) {
+        return isDateAttribute(cm) || isSystemAttribute(entity, cm);
     }
 
     private static boolean isDateAttribute(ColumnMetadata cm) {
@@ -490,8 +484,21 @@ public class StatsCubeUtils {
                 || LogicalDataType.Timestamp.equals(cm.getLogicalDataType());
     }
 
-    private static boolean isSystemAttribute(ColumnMetadata cm) {
-        return SYSTEM_ATTRS.contains(cm.getAttrName());
+    private static boolean isSystemAttribute(BusinessEntity entity, ColumnMetadata cm) {
+        return getSystemAttrs(entity).contains(cm.getAttrName());
+    }
+
+    private static Set<String> getSystemAttrs(BusinessEntity entity) {
+        if (!SYSTEM_ATTRS.containsKey(entity)) {
+            synchronized (StringUtils.class) {
+                if (!SYSTEM_ATTRS.containsKey(entity)) {
+                    Set<String> systemAttrs = new HashSet<>();
+                    SchemaRepository.getSystemAttributes(entity).forEach(interfaceName -> systemAttrs.add(interfaceName.name()));
+                    SYSTEM_ATTRS.put(entity, systemAttrs);
+                }
+            }
+        }
+        return SYSTEM_ATTRS.get(entity);
     }
 
     private static boolean isNumericalAttribute(ColumnMetadata cm) {
@@ -619,7 +626,7 @@ public class StatsCubeUtils {
                 //log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity + ", skipping it.");
                 continue;
             }
-            if (shouldHideAttr(cm)) {
+            if (shouldHideAttr(entity, cm)) {
                 continue;
             }
             AttributeStats statsInCube = attrStatsMap.get(name);

@@ -1372,7 +1372,9 @@ public class SchemaRepository {
             sysAttrs.add(InterfaceName.IsMatched);
         } else {
             // common
-            sysAttrs.add(InterfaceName.AccountId);
+            if (!BusinessEntity.Account.equals(entity)) {
+                sysAttrs.add(InterfaceName.AccountId);
+            }
             sysAttrs.add(InterfaceName.InternalId);
             sysAttrs.add(InterfaceName.CDLCreatedTime);
             sysAttrs.add(InterfaceName.CDLUpdatedTime);
@@ -1382,9 +1384,6 @@ public class SchemaRepository {
                 sysAttrs.add(InterfaceName.LatticeAccountId);
                 sysAttrs.add(InterfaceName.IsMatched);
                 sysAttrs.add(InterfaceName.CustomerParentAccountID);
-                break;
-            case Contact:
-                sysAttrs.add(InterfaceName.ContactId);
                 break;
             }
         }
@@ -1408,9 +1407,11 @@ public class SchemaRepository {
             // special
             switch (entity) {
             case Account:
+                stdAttrs.add(InterfaceName.AccountId);
                 stdAttrs.add(InterfaceName.Website);
                 break;
             case Contact:
+                stdAttrs.add(InterfaceName.ContactId);
                 stdAttrs.add(InterfaceName.Email);
                 break;
             }
