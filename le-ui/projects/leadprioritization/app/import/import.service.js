@@ -66,7 +66,7 @@ angular.module('lp.import')
                 state: 'accounts.ids.thirdpartyids.latticefields', 
                 nextLabel: 'Next, Add Custom Fields',
                 nextFn: function(nextState) {
-                    ImportWizardStore.removeSavedDocumentFieldsAfter($state.current);
+                    ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
@@ -104,7 +104,7 @@ angular.module('lp.import')
                 state: 'contacts.ids.latticefields', 
                 nextLabel: 'Next, Add Custom Fields', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.removeSavedDocumentFieldsAfter($state.current);
+                    ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
@@ -424,19 +424,21 @@ angular.module('lp.import')
     this.setSaveObjects = function(object, key) {
         var key = key || $state.current.name || 'unknown';
         this.saveObjects[key] = object;
-    }
+    };
 
     this.saveDocumentFields = function(state){
         var copy = this.getFieldDocument(true).fieldMappings;
         ImportUtils.updateDocumentMapping(this.saveObjects[state], copy);
         this.fieldDocumentSaved[state] = copy;
     };
+    
 
     this.getSavedDocumentFields = function(state){
         return this.fieldDocumentSaved[state];
     };
+    
 
-    this.removeSavedObjectAfter = function(state){
+    this.removeSavedObjectFrom = function(state){
         var keys = Object.keys(this.saveObjects);
         if(keys){
             keys.forEach(function(key){
@@ -451,7 +453,7 @@ angular.module('lp.import')
         delete this.fieldDocumentSaved[state];
     };
     
-    this.removeSavedDocumentFieldsAfter = function(state){
+    this.removeSavedDocumentFieldsFrom = function(state){
         var keys = Object.keys(this.fieldDocumentSaved);
         if(keys){
             keys.forEach(function(key){
@@ -462,6 +464,10 @@ angular.module('lp.import')
         }
     };
 
+    this.removeFromState = function(state){
+        ImportWizardStore.removeSavedObjectFrom(state);
+        ImportWizardStore.removeSavedDocumentFieldsFrom(state);
+    };
 
 
     this.getSaveObjects = function(key) {

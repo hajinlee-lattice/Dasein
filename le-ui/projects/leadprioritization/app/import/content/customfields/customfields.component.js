@@ -2,9 +2,16 @@ angular.module('lp.import.wizard.customfields', [])
 .controller('ImportWizardCustomFields', function(
     $state, $stateParams, $scope, ResourceUtility, 
     ImportWizardStore, FieldDocument, mergedFieldDocument,
-    ImportUtils
+    ImportUtils, $transition$
 ) {
     var vm = this;
+    var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
+    if(alreadySaved){
+        FieldDocument.fieldMappings = alreadySaved;
+    }else{
+        var from = $transition$._targetState._definition.parent.name;
+        FieldDocument.fieldMappings = ImportWizardStore.getSavedDocumentFields(from);
+    }
     angular.extend(vm, {
         AvailableFields: [],
         ignoredFields: FieldDocument.ignoredFields || [],
@@ -42,6 +49,9 @@ angular.module('lp.import.wizard.customfields', [])
         vm.AvailableFields.forEach(function(element){
             
             var ignore = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), element.userField, vm.fieldMappings);
+            if(ignore == false){
+                ignore = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), element.userField, ImportWizardStore.fieldDocument.fieldMappings);
+            }
             if(ignore === true){
                 var name = element.userField;
                 $scope.fieldMapping[name].ignore = true;

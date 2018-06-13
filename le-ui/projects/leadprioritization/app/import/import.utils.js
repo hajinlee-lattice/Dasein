@@ -44,7 +44,7 @@ angular.module('lp.import.utils', [])
                 }
             });
         }
-
+       
         return mapped;
     }
 
