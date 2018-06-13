@@ -99,6 +99,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            generateAIRating.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
