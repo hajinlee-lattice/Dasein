@@ -43,7 +43,7 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final String NAME = "LATTICE ENGINES";
     private static final String DUNS = "028675958";
     private static final int CONFIDENCE_CODE = 7;
-    private static final String MATCH_GRADE = "AZZFAZZAFBF";
+    private static final String MATCH_GRADE = "AZZFAZZAFAF";
 
     @Autowired
     private MatchActorSystem actorSystem;
