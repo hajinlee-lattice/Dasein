@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -24,14 +25,16 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -55,6 +58,8 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -66,6 +71,7 @@ import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
@@ -98,6 +104,9 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     @Inject
     private ActivityMetricsProxy metricsProxy;
+
+    @Inject
+    private ActionProxy actionProxy;
 
     @Override
     protected BusinessEntity getEntity() {
@@ -508,8 +517,30 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 consolidateSummaryNode = ((ObjectNode) entityNode)
                         .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             }
-            ((ObjectNode) consolidateSummaryNode).put(ReportConstants.PRODUCT, productMap.size());
-            ((ObjectNode) consolidateSummaryNode).put(ReportConstants.METRICS, purchaseMetrics.size());
+
+            ObjectMapper mapper = new ObjectMapper();
+            ArrayNode actionNode = mapper.createArrayNode();
+            List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds());
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+            if (actions != null) {
+                actions.forEach(action -> {
+                    if (action.getType() == ActionType.ACTIVITY_METRICS_CHANGE) {
+                        ObjectNode on = mapper.createObjectNode();
+                        on.put(ReportConstants.TIME, sdf.format(action.getCreated()));
+                        on.put(ReportConstants.ACTION, JsonUtils.serialize(action.getActionConfiguration()));
+                        on.put(ReportConstants.USER, action.getActionInitiator());
+                        actionNode.add(on);
+                    }
+                });
+            }
+            ((ObjectNode) consolidateSummaryNode).set(ReportConstants.ACTIONS, actionNode);
+
+            JsonNode entityStatsSummaryNode = entityNode.get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
+            if (entityStatsSummaryNode == null) {
+                entityStatsSummaryNode = ((ObjectNode) entityNode)
+                        .putObject(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
+            }
+            ((ObjectNode) entityStatsSummaryNode).put(ReportConstants.TOTAL, String.valueOf(purchaseMetrics.size()));
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
         }

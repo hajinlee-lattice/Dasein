@@ -13,4 +13,8 @@ public class ReportConstants {
     public static final String PRODUCT_BUNDLE = "PRODUCT_BUNDLE";
     public static final String PRODUCT = "PRODUCT";
     public static final String METRICS = "METRICS";
+    public static final String ACTIONS = "ACTIONS";
+    public static final String TIME = "TIME";
+    public static final String ACTION = "ACTION";
+    public static final String USER = "USER";
 }

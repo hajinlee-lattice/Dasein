@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,6 +17,11 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
         private ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
         private UpdateTransactionWorkflowConfiguration.Builder updateTransactionWorkflowBuilder = new UpdateTransactionWorkflowConfiguration.Builder();
         private RebuildTransactionWorkflowConfiguration.Builder rebuildTransactionWorkflowBuilder = new RebuildTransactionWorkflowConfiguration.Builder();
+
+        public Builder actionIds(List<Long> actionIds) {
+            processTransactionStepConfiguration.setActionIds(actionIds);
+            return this;
+        }
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);

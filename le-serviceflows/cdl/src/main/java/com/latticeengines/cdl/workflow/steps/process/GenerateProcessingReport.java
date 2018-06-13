@@ -139,14 +139,14 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         }
 
         BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
-                BusinessEntity.Transaction };
+                BusinessEntity.Transaction, BusinessEntity.PurchaseHistory };
         for (BusinessEntity entity : entities) {
             ObjectNode entityNode = entitiesSummaryNode.get(entity.name()) != null
                     ? (ObjectNode) entitiesSummaryNode.get(entity.name())
                     : PAReportUtils.initEntityReport(entity);
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
-            if (entity != BusinessEntity.Product) {
+            if (entity != BusinessEntity.Product && entity != BusinessEntity.PurchaseHistory) {
                 long newCnt = consolidateSummaryNode.get(ReportConstants.NEW).asLong();
                 long deleteCnt = newCnt - (currentCnts.get(entity) - previousCnts.get(entity));
                 log.info(String.format(
@@ -280,6 +280,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
+                    // do nothing
                 }
             }
         }

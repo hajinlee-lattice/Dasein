@@ -110,6 +110,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder actionIds(List<Long> actionIds) {
             processStepConfiguration.setActionIds(actionIds);
+            processTransactionWorkflowBuilder.actionIds(actionIds);
             return this;
         }
 
@@ -139,7 +140,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder rebuildSteps(List<String> steps) {
-            HashSet<String> rebuildSteps = new HashSet<String>();
+            HashSet<String> rebuildSteps = new HashSet<>();
             if (CollectionUtils.isNotEmpty(steps)) {
                 steps.forEach(s -> rebuildSteps.add(s.toLowerCase()));
             }
