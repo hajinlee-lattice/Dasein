@@ -9,6 +9,8 @@ public class PrepareMatchDataConfiguration extends BaseCoreDataFlowStepConfigura
     private String inputTableName;
     @JsonProperty("id_column_name")
     private String idColumnName = InterfaceName.Id.name();
+    @JsonProperty("match_group_id")
+    private String matchGroupId;
 
     public PrepareMatchDataConfiguration() {
         setBeanName("prepareMatchDataflow");
@@ -28,6 +30,14 @@ public class PrepareMatchDataConfiguration extends BaseCoreDataFlowStepConfigura
 
     public void setIdColumnName(String idColumnName) {
         this.idColumnName = idColumnName;
+    }
+
+    public String getMatchGroupId() {
+        return matchGroupId;
+    }
+
+    public void setMatchGroupId(String matchGroupId) {
+        this.matchGroupId = matchGroupId;
     }
 
 }

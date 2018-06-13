@@ -121,6 +121,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder matchGroupId(String matchGroupId) {
+            match.matchGroupId(matchGroupId);
+            return this;
+        }
+
         public Builder cdlMultiModel(boolean cdlMultiMode) {
             combineInputWithScores.setCdlMultiModel(cdlMultiMode);
             return this;

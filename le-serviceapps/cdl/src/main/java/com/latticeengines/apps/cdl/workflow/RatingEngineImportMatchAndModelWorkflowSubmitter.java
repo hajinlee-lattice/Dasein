@@ -138,6 +138,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .cdlMultiModel(true) //
                 .setEventColumn(InterfaceName.Target.name()) //
                 .idColumnName(InterfaceName.AnalyticPurchaseState_ID.name()) //
+                .matchGroupId(InterfaceName.AccountId.name()) //
                 .setExpectedValue(parameters.isExpectedValue()) //
                 .setUseScorederivation(false) //
                 .dataCollectionVersion(version) //

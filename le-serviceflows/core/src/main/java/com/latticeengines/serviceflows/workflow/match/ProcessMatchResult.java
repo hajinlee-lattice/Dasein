@@ -52,6 +52,7 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         parameters.excludeDataCloudAttrs = configuration.isExcludeDataCloudAttrs();
         parameters.keepLid = configuration.isKeepLid();
         parameters.idColumnName = configuration.getIdColumnName();
+        parameters.matchGroupId = configuration.getMatchGroupId();
         configuration.setDataFlowParams(parameters);
 
     }

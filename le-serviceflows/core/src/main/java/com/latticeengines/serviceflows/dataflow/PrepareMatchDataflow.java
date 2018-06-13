@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.dataflow;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,11 @@ public class PrepareMatchDataflow extends TypesafeDataFlowBuilder<PrepareMatchDa
     @Override
     public Node construct(PrepareMatchDataParameters parameters) {
         Node source = addSource(parameters.sourceTableName);
-        source = source.retain(new FieldList(parameters.matchFields));
-        return source;
+        Node result = source.retain(new FieldList(parameters.matchFields));
+        if (StringUtils.isNotEmpty(parameters.matchGroupId)) {
+            result = result.groupByAndLimit(new FieldList(parameters.matchGroupId), 1);
+        }
+        return result;
     }
 
 }

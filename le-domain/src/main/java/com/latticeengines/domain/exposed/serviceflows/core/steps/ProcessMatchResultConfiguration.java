@@ -17,6 +17,9 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
     @JsonProperty("id_column_name")
     private String idColumnName = InterfaceName.Id.name();
 
+    @JsonProperty("match_group_id")
+    private String matchGroupId;
+
     public ProcessMatchResultConfiguration() {
         setBeanName("parseMatchResult");
     }
@@ -51,6 +54,14 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
 
     public void setIdColumnName(String idColumnName) {
         this.idColumnName = idColumnName;
+    }
+
+    public String getMatchGroupId() {
+        return matchGroupId;
+    }
+
+    public void setMatchGroupId(String matchGroupId) {
+        this.matchGroupId = matchGroupId;
     }
 
 }

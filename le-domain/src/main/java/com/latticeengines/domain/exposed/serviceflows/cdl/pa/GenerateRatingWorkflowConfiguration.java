@@ -61,6 +61,11 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder matchGroupId(String matchGroupId) {
+            generateAIRating.matchGroupId(matchGroupId);
+            return this;
+        }
+
         public Builder setUseScorederivation(boolean useScorederivation) {
             generateAIRating.setUseScorederivation(useScorederivation);
             return this;
@@ -72,7 +77,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder transformationGroup(TransformationGroup transformationGroup,
-                            List<TransformDefinition> stdTransformDefns) {
+                List<TransformDefinition> stdTransformDefns) {
             generateAIRating.transformationGroup(transformationGroup, stdTransformDefns);
             return this;
         }

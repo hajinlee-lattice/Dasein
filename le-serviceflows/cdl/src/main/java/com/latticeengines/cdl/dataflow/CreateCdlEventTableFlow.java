@@ -74,7 +74,7 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
             if (inputTable.getFieldNames().contains(attr))
                 retainFields.add(attr);
         });
-        retainFields.removeAll(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.CDLCreatedTime.name(),
+        retainFields.removeAll(Arrays.asList(InterfaceName.CDLCreatedTime.name(),
                 InterfaceName.CDLUpdatedTime.name()));
         return retainFields;
     }

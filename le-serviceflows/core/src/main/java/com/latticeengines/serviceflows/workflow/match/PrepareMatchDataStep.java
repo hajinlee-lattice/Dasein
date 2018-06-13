@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -46,6 +47,7 @@ public class PrepareMatchDataStep extends RunDataFlow<PrepareMatchDataConfigurat
         PrepareMatchDataParameters parameters = new PrepareMatchDataParameters();
         parameters.sourceTableName = preMatchEventTable.getName();
         parameters.matchFields = matchFields;
+        parameters.matchGroupId = configuration.getMatchGroupId();
 
         configuration.setDataFlowParams(parameters);
         String targetTableName = NamingUtils.uuid(LDC_PAREPARE_MATCH_DATA);
@@ -63,8 +65,10 @@ public class PrepareMatchDataStep extends RunDataFlow<PrepareMatchDataConfigurat
                 allFields.addAll(keyMap.get(matchKey));
             }
         }
-        if (fields.contains(configuration.getIdColumnName()) && !allFields.contains(configuration.getIdColumnName())) {
-            allFields.add(configuration.getIdColumnName());
+        String idColumn = StringUtils.isNotEmpty(configuration.getMatchGroupId()) ? configuration.getMatchGroupId()
+                : configuration.getIdColumnName();
+        if (fields.contains(idColumn) && !allFields.contains(idColumn)) {
+            allFields.add(idColumn);
         }
         if (fields.contains(InterfaceName.Id.name()) && !allFields.contains(InterfaceName.Id.name())) {
             allFields.add(InterfaceName.Id.name());

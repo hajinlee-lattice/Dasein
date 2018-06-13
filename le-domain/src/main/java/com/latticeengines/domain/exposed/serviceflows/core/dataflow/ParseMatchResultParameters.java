@@ -28,4 +28,7 @@ public class ParseMatchResultParameters extends DataFlowParameters {
     @JsonProperty()
     public String idColumnName;
 
+    @JsonProperty()
+    public String matchGroupId;
+
 }

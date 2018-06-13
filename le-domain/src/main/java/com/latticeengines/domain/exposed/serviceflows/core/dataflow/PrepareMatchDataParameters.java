@@ -15,4 +15,7 @@ public class PrepareMatchDataParameters extends DataFlowParameters {
     @JsonProperty
     public List<String> matchFields;
 
+    @JsonProperty
+    public String matchGroupId;
+
 }

@@ -328,8 +328,12 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder idColumnName(String idColumnName) {
             cdlModelWorkflowBuilder.idColumnName(idColumnName);
-            matchDataCloudWorkflowBuilder.idColumnName(idColumnName);
-            generateAIRating.idColumnName(idColumnName);
+            return this;
+        }
+
+        public Builder matchGroupId(String matchGroupId) {
+            matchDataCloudWorkflowBuilder.matchGroupId(matchGroupId);
+            generateAIRating.matchGroupId(matchGroupId);
             return this;
         }
 

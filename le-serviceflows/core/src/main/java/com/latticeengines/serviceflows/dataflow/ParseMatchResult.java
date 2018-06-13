@@ -41,7 +41,8 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
             resultNode = resultNode.retain(new FieldList(fieldsToRetain));
         }
 
-        if (StringUtils.isNotBlank(parameters.sourceTableName) && StringUtils.isNotBlank(parameters.idColumnName)) {
+        if (StringUtils.isNotEmpty(parameters.sourceTableName) && (StringUtils.isNotEmpty(parameters.idColumnName)
+                || StringUtils.isNotEmpty(parameters.idColumnName))) {
             resultNode = joinSourceTable(parameters, resultNode);
         }
         return resultNode;
@@ -61,6 +62,9 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         });
         String idColumnName = matchFields.contains(InterfaceName.InternalId.name()) ? InterfaceName.InternalId.name()
                 : parameters.idColumnName;
+        if (StringUtils.isNotEmpty(parameters.matchGroupId)) {
+            idColumnName = parameters.matchGroupId;
+        }
         FieldList idColumn = new FieldList(idColumnName);
         resultNode = sourceNode.innerJoin(idColumn, resultNode, idColumn);
         resultNode = resultNode.retain(new FieldList(retainFields));

@@ -80,6 +80,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
 
         public ProcessRatingWorkflowConfiguration build() {
             generateRatingWorfklow.uniqueKeyColumn(InterfaceName.__Composite_Key__.name());
+            generateRatingWorfklow.matchGroupId(InterfaceName.AccountId.name());
             generateRatingWorfklow.setUseScorederivation(false);
             generateRatingWorfklow.cdlMultiModel(true);
             generateRatingWorfklow.fetchOnly(true);
