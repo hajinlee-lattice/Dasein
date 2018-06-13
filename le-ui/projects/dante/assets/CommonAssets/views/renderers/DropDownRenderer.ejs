@@ -1,0 +1,8 @@
+<%== $.View('assets/CommonAssets/views/renderers/BaseRenderer.ejs',{itemValue: selectedValue, renderType: RenderWorker.DROPDOWN_RENDERER}) %>
+<select>
+        <% for(var i=0; i< dataProvider.length; i++) {%>
+          <option value= <%=dataProvider[i].Key%> <% if (selectedValue == dataProvider[i].Key) { %> selected <% } %>>
+            <%=dataProvider[i].Value%>
+          </option>
+        <% } %>
+</select>

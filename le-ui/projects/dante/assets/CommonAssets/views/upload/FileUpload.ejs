@@ -1,0 +1,20 @@
+<div class="file-uploader">
+    <div class="file-upload-buttons">
+        <div class="js-file-select-button btn">
+            <%= ResourceUtil.getString('BUTTON_UPLOAD_BROWSE_TARGET_LIST_LABEL') %>
+        </div>
+        <div class="btn disabled uploadButton js-file-upload-button">
+            <div class="js-file-upload-button-text">
+                <%= ResourceUtil.getString('BUTTON_UPLOAD_TEMPLATE_LABEL') %>
+            </div>
+            <img class="js-file-upload-button-spinner is-hidden" width="18" src="assets/CommonAssets/images/loading_spinner.gif"/>
+        </div>
+    </div>
+    <div class="file-uploader-input">
+        <p class="file-upload-format-message"><%= ResourceUtil.getString('UPLOAD_FORMAT_MESSAGE') %></p>
+        <%
+            var dynamicID = "fileUploadInput_" + new Date().getTime();
+        %>
+        <%== $.View('//../assets/CommonAssets/views/TextInput.ejs',{message: ResourceUtil.getString('PLAYMAKER_UPLOAD_ATTACH_LABEL'), required: true, id: dynamicID, name:'', value:'', maxlength:100, readonly:true, additionalText:'', classNames: 'js-file-upload-text-input', title: ""}) %>
+    </div>
+</div>
