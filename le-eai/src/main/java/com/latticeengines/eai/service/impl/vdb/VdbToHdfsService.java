@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
@@ -185,6 +187,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
             case APPEND:
                 return;
             case REPLACE:
+                waitForDataFeed(customerSpace);
                 applicationId = cdlProxy.cleanupAllData(customerSpace, entity,
                         CDLConstants.DEFAULT_VISIDB_USER);
                 break;
@@ -192,6 +195,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
             case UPSERT_ACPD:
             case UPSERT_MINDATE:
             case UPSERT_MINDATEANDACCOUNT:
+                waitForDataFeed(customerSpace);
                 applicationId = cdlProxy.cleanupByUpload(customerSpace, tempTables.get(0), entity,
                         getCleanupTypeFromMergeRule(mergeRule), CDLConstants.DEFAULT_VISIDB_USER);
                 break;
@@ -200,6 +204,22 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
         }
         if (applicationId != null) {
             waitForWorkflowStatus(applicationId.toString(), false);
+        }
+    }
+
+    private void waitForDataFeed(String customerSpace) {
+        try {
+            DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+            int idleCounter = 0;
+            while (DataFeed.Status.RUNNING_STATUS.contains(dataFeed.getStatus())) {
+                Thread.sleep(TimeUnit.MINUTES.toMillis(3));
+                dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+                if (++idleCounter > 60) {
+                    throw new RuntimeException("Cannot stlart cleanup job! Please try again later.");
+                }
+            }
+        } catch (InterruptedException e) {
+
         }
     }
 
