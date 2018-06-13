@@ -148,7 +148,7 @@ public class VdbMetadataUtilsUnitTestNG {
         };
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testMetadataExtension() {
         VdbSpecMetadata metadata = createVdbMetadata();
         Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata, "Account");
