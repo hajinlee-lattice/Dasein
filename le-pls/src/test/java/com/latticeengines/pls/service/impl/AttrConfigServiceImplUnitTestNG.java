@@ -228,7 +228,7 @@ public class AttrConfigServiceImplUnitTestNG {
         attrConfigs.add(config);
     }
 
-    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    @Test(groups = "unit")
     public void testGetDetailAttrForActivation() {
         AttrConfigRequest request = new AttrConfigRequest();
         request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.CONTACT_ATTRIBUTES, true),
@@ -244,7 +244,7 @@ public class AttrConfigServiceImplUnitTestNG {
                 .thenReturn(request);
         AttrConfigSelectionDetail activationDetail = attrConfigService
                 .getAttrConfigSelectionDetailForState(Category.CONTACT_ATTRIBUTES.getName());
-        log.info("testGetAttrConfigUsageOverview activationDetail is " + activationDetail);
+        log.info("testGetDetailAttrForActivation activationDetail is " + activationDetail);
         Assert.assertEquals(activationDetail.getEntity(), CategoryUtils.getEntity(Category.CONTACT_ATTRIBUTES));
         Assert.assertEquals(activationDetail.getSelected() - 4L, 0);
         Assert.assertEquals(activationDetail.getTotalAttrs() - 9L, 0);
@@ -253,7 +253,7 @@ public class AttrConfigServiceImplUnitTestNG {
                 .allMatch(entry -> entry.getHasFrozenAttrs() == false));
     }
 
-    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    @Test(groups = "unit")
     public void testGetDetailAttrForUsageWithNonPremiumCategory() {
         AttrConfigRequest request = new AttrConfigRequest();
         request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.FIRMOGRAPHICS, true),
@@ -277,7 +277,7 @@ public class AttrConfigServiceImplUnitTestNG {
                 .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 1);
     }
 
-    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    @Test(groups = "unit")
     public void testGetDetailAttrForUsageWithPremiumCategory() {
         AttrConfigRequest request = new AttrConfigRequest();
         request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.INTENT, true, true),
