@@ -38,7 +38,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1528446110928";
+    private static final String EXISTING_TENANT = "LETest1528844192916";
 
     private MetadataSegment testSegment;
     private RatingEngine lpiCERatingEngine;
@@ -153,9 +153,10 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private void setupSourceFile(CustomEventModelingType type) {
         Resource csvResource = new ClassPathResource("end2end/csv/CustomEventModelTest.csv",
                 Thread.currentThread().getContextClassLoader());
-        testSourceFile = fileUploadProxy.uploadFile(type.name() + testSourceFileName, false, "CustomEventModelTest.csv",
+        testSourceFile = fileUploadProxy.uploadFile(getSourceFileName(type), false, "CustomEventModelTest.csv",
                 SchemaInterpretation.Account, "Account", csvResource);
-        FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(testSourceFileName, "Account");
+
+        FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(getSourceFileName(type), "Account");
         fmDoc.setIgnoredFields(new ArrayList<>());
         for (FieldMapping fm : fmDoc.getFieldMappings()) {
             if (fm.getUserField().equals("Event")) {
@@ -183,7 +184,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             }
         }
 
-        fileUploadProxy.saveFieldMappingDocument(testSourceFileName, fmDoc);
+        fileUploadProxy.saveFieldMappingDocument(getSourceFileName(type), fmDoc);
     }
 
     private void setupTestRatingEngine(CustomEventModelingType type) {
@@ -199,7 +200,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                 ratingEngine);
 
         AIModel testAIModel = (AIModel) testRatingEngine.getActiveModel();
-        configureCustomEventModel(testAIModel, testSourceFileName, type);
+        configureCustomEventModel(testAIModel, getSourceFileName(type), type);
         CustomEventModelingConfig advancedConf = CustomEventModelingConfig.getAdvancedModelingConfig(testAIModel);
         advancedConf.setSourceFileName(testSourceFile.getName());
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
@@ -213,6 +214,10 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             lpiCEAIModel = testAIModel;
         }
 
+    }
+
+    private String getSourceFileName(CustomEventModelingType type) {
+        return type.name() + "_" + testSourceFileName;
     }
 
 }
