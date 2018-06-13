@@ -1,14 +1,16 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -392,6 +394,13 @@ public class RatingEngineResource {
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false, false);
 
         descending = descending == null ? false : descending;
+        if (StringUtils.isNotBlank(freeFormTextSearch)) {
+            try {
+                freeFormTextSearch = URLDecoder.decode(freeFormTextSearch, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                log.warn("Failed to decode free form text search " + freeFormTextSearch, e);
+            }
+        }
 
         return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
                 descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,

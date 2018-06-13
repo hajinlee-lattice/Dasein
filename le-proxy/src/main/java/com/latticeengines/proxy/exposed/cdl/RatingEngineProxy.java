@@ -303,8 +303,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         StringBuilder sb = new StringBuilder();
         sb.append(URL_PREFIX);
         sb.append("/{ratingEngineId}/entitypreview?offset={offset}&maximum={maximum}&entityType={entityType}");
-        List<Object> paramObjects = new ArrayList<>();
-        paramObjects.addAll(
+        List<Object> paramObjects = new ArrayList<>(
                 Arrays.asList(shortenCustomerSpace(customerSpace), ratingEngineId, offset, maximum, entityType));
 
         addParam("sortBy", sortBy, sb, paramObjects);
