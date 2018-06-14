@@ -14,8 +14,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -43,14 +41,15 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 @Component
 public class FrontEndQueryCreator {
 
-    private static final Logger log = LoggerFactory.getLogger(FrontEndQueryCreator.class);
-
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
     private Map<BusinessEntity, List<String>> accountLookupFields;
 
     private Map<BusinessEntity, List<String>> contactLookupFields;
+
+    @Value("${playmaker.workflow.contact.shouldapply.launch.flag.sfdcid.exclusion:true}")
+    private Boolean applyExcludeItemsWithoutSalesforceIdOnContacts;
 
     @PostConstruct
     public void init() {
@@ -77,11 +76,20 @@ public class FrontEndQueryCreator {
             throw new NullPointerException(String.format("Rating Engine is not set for the play %s", play.getName()));
         }
 
-        contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
+        if (applyExcludeItemsWithoutSalesforceIdOnContacts != Boolean.FALSE) {
+            contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
+        }
 
+        addSort(playLaunchContext, accountFrontEndQuery, contactFrontEndQuery);
+    }
+
+    private void addSort(PlayLaunchContext playLaunchContext, FrontEndQuery accountFrontEndQuery,
+            FrontEndQuery contactFrontEndQuery) {
+        String ratingId = playLaunchContext.getRatingId();
+
+        setSortField(BusinessEntity.Rating, Arrays.asList(ratingId), false, accountFrontEndQuery);
         setSortField(BusinessEntity.Account, Arrays.asList(InterfaceName.AccountId.name()), false,
                 accountFrontEndQuery);
-
         setSortField(BusinessEntity.Contact, Arrays.asList(InterfaceName.ContactId.name()), false,
                 contactFrontEndQuery);
     }
@@ -135,7 +143,16 @@ public class FrontEndQueryCreator {
                 .map(sort -> new AttributeLookup(entityType, sort)) //
                 .collect(Collectors.toList());
 
-        FrontEndSort sort = new FrontEndSort(lookups, descending);
+        FrontEndSort sort;
+        FrontEndSort existingSort = entityFrontEndQuery.getSort();
+        if (existingSort == null) {
+            sort = new FrontEndSort(lookups, descending);
+        } else {
+            List<AttributeLookup> combinedLookups = new ArrayList<>();
+            combinedLookups.addAll(existingSort.getAttributes());
+            combinedLookups.addAll(lookups);
+            sort = new FrontEndSort(combinedLookups, descending);
+        }
         entityFrontEndQuery.setSort(sort);
     }
 

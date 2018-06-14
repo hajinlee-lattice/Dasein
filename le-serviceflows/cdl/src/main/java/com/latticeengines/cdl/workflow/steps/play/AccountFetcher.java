@@ -20,7 +20,7 @@ public class AccountFetcher {
     @Autowired
     private EntityProxy entityProxy;
 
-    @Value("${playmaker.workflow.segment.pagesize:100}")
+    @Value("${playmaker.workflow.segment.pagesize:5000}")
     private long pageSize;
 
     public long getCount(PlayLaunchContext playLaunchContext) {

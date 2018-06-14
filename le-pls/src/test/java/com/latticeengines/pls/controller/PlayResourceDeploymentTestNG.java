@@ -79,6 +79,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private boolean shouldSkipCdlTestDataPopulation = false;
 
+    private long totalRatedAccounts;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         if (shouldSkipAutoTenantCreation) {
@@ -258,6 +260,19 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 createDefaultPlayLaunch(), PlayLaunch.class);
 
         assertPlayLaunch(playLaunch, isDryRunMode);
+
+    }
+
+    public void createPlayLaunch(boolean isDryRunMode, Set<RatingBucketName> bucketsToLaunch,
+            Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
+        logInterceptor();
+
+        playLaunch = restTemplate.postForObject(
+                getRestAPIHostPort() + //
+                        "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
+                createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount), PlayLaunch.class);
+
+        assertPlayLaunch(playLaunch, bucketsToLaunch, isDryRunMode);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
@@ -290,7 +305,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunchFail2" })
-    private void searchPlayLaunch() {
+    public void searchPlayLaunch() {
         List<PlayLaunch> launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Failed, List.class);
 
@@ -298,8 +313,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(launchList.size(), 0);
 
         playProxy.updatePlayLaunch(tenant.getId(), name, playLaunch.getLaunchId(), LaunchState.Launched);
-        playProxy.updatePlayLaunchProgress(tenant.getId(), name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L, 0L,
-                2L);
+        playProxy.updatePlayLaunchProgress(tenant.getId(), name, playLaunch.getLaunchId(), 100.0D, 8L, 25L, 0L,
+                (totalRatedAccounts - 8L - 0L));
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Canceled + "&launchStates="
@@ -330,11 +345,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId(), PlayLaunch.class);
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
-        assertLaunchStats(retrievedLaunch.getAccountsSelected(), 10L);
+        assertLaunchStats(retrievedLaunch.getAccountsSelected(), totalRatedAccounts);
         assertLaunchStats(retrievedLaunch.getAccountsLaunched(), 8L);
         assertLaunchStats(retrievedLaunch.getContactsLaunched(), 25L);
         assertLaunchStats(retrievedLaunch.getAccountsErrored(), 0L);
-        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), 2L);
+        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), (totalRatedAccounts - 8L - 0L));
     }
 
     private void assertLaunchStats(Long count, long expectedVal) {
@@ -408,6 +423,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private void assertPlayLaunch(PlayLaunch playLaunch, boolean isDryRunMode) {
+        assertPlayLaunch(playLaunch, null, isDryRunMode);
+    }
+
+    private void assertPlayLaunch(PlayLaunch playLaunch, Set<RatingBucketName> expectedBucketsForLaunch,
+            boolean isDryRunMode) {
         Assert.assertNotNull(playLaunch);
         Assert.assertNotNull(playLaunch.getLaunchId());
         Assert.assertNotNull(playLaunch.getPid());
@@ -419,16 +439,26 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             Assert.assertNotNull(playLaunch.getApplicationId());
         }
         Assert.assertNotNull(playLaunch.getLaunchState());
-        assertBucketsToLaunch(playLaunch.getBucketsToLaunch());
+        assertBucketsToLaunch(playLaunch.getBucketsToLaunch(), expectedBucketsForLaunch);
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
+        Assert.assertNotNull(playLaunch.getAccountsSelected());
+        Assert.assertNotNull(playLaunch.getAccountsLaunched());
+        Assert.assertNotNull(playLaunch.getContactsLaunched());
+        Assert.assertNotNull(playLaunch.getAccountsErrored());
+        Assert.assertNotNull(playLaunch.getAccountsSuppressed());
+
+        totalRatedAccounts = playLaunch.getAccountsSelected();
     }
 
-    private void assertBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
+    private void assertBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch,
+            Set<RatingBucketName> expectedBucketsForLaunch) {
         Assert.assertNotNull(playLaunch.getBucketsToLaunch());
-        Set<RatingBucketName> defaultBucketsToLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
-        Assert.assertEquals(bucketsToLaunch.size(), defaultBucketsToLaunch.size());
+        if (expectedBucketsForLaunch == null) {
+            expectedBucketsForLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
+        }
+        Assert.assertEquals(bucketsToLaunch.size(), expectedBucketsForLaunch.size());
         for (RatingBucketName bucket : bucketsToLaunch) {
-            Assert.assertTrue(defaultBucketsToLaunch.contains(bucket));
+            Assert.assertTrue(expectedBucketsForLaunch.contains(bucket));
         }
     }
 
@@ -481,11 +511,18 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private PlayLaunch createDefaultPlayLaunch() {
+        return createDefaultPlayLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null);
+    }
+
+    private PlayLaunch createDefaultPlayLaunch(Set<RatingBucketName> bucketsToLaunch,
+            Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())));
+        playLaunch.setBucketsToLaunch(bucketsToLaunch);
         playLaunch.setDestinationOrgId("O_" + System.currentTimeMillis());
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
+        playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
+        playLaunch.setTopNCount(topNCount);
         return playLaunch;
     }
 

@@ -47,6 +47,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private RatingEngine ratingEngine;
 
+    private long totalRatedAccounts;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         if (USE_EXISTING_TENANT) {
@@ -76,6 +78,13 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         playCreationHelper.createPlayLaunch();
         play = playCreationHelper.getPlay();
         playLaunch = playCreationHelper.getPlayLaunch();
+        Assert.assertNotNull(playLaunch.getAccountsSelected());
+        Assert.assertNotNull(playLaunch.getAccountsLaunched());
+        Assert.assertNotNull(playLaunch.getContactsLaunched());
+        Assert.assertNotNull(playLaunch.getAccountsErrored());
+        Assert.assertNotNull(playLaunch.getAccountsSuppressed());
+
+        totalRatedAccounts = playLaunch.getAccountsSelected();
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
@@ -87,8 +96,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(launchList.size(), 0);
 
         playProxy.updatePlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), LaunchState.Launched);
-        playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), 100.0D, 10L, 8L,
-                25L, 0L, 2L);
+        playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), 100.0D, 8L, 25L,
+                0L, (totalRatedAccounts - 8L - 0L));
 
         launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Arrays.asList(LaunchState.Canceled, LaunchState.Failed, LaunchState.Launched));
@@ -118,11 +127,11 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
-        assertLaunchStats(retrievedLaunch.getAccountsSelected(), 10L);
+        assertLaunchStats(retrievedLaunch.getAccountsSelected(), totalRatedAccounts);
         assertLaunchStats(retrievedLaunch.getAccountsLaunched(), 8L);
         assertLaunchStats(retrievedLaunch.getContactsLaunched(), 25L);
         assertLaunchStats(retrievedLaunch.getAccountsErrored(), 0L);
-        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), 2L);
+        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), (totalRatedAccounts - 8L - 0L));
     }
 
     private void assertLaunchStats(Long count, long expectedVal) {

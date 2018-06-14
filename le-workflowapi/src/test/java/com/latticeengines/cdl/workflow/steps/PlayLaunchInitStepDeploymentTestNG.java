@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +34,7 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
@@ -118,9 +121,21 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     private CustomerSpace customerSpace;
 
+    private Set<RatingBucketName> bucketsToLaunch;
+
+    private Boolean excludeItemsWithoutSalesforceId;
+
+    private Long topNCount;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenantAndCreatePlay();
+
+        bucketsToLaunch = new HashSet<RatingBucketName>(Arrays.asList(RatingBucketName.A, RatingBucketName.B));
+        excludeItemsWithoutSalesforceId = true;
+        topNCount = 5L;
+
+        testPlayCreationHelper.setupTenantAndCreatePlay(bucketsToLaunch, //
+                excludeItemsWithoutSalesforceId, topNCount);
 
         tenant = testPlayCreationHelper.getTenant();
         play = testPlayCreationHelper.getPlay();
@@ -164,7 +179,12 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     @Test(groups = "deployment")
     public void testExecute() {
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
-        Assert.assertNull(playLaunch.getAccountsLaunched());
+        Assert.assertNotNull(playLaunch.getAccountsSelected());
+        Assert.assertTrue(playLaunch.getAccountsSelected().longValue() > 0L);
+        Assert.assertEquals(playLaunch.getAccountsLaunched().longValue(), 0L);
+        Assert.assertEquals(playLaunch.getContactsLaunched().longValue(), 0L);
+        Assert.assertEquals(playLaunch.getAccountsErrored().longValue(), 0L);
+        Assert.assertEquals(playLaunch.getAccountsSuppressed().longValue(), 0L);
         Assert.assertEquals(playLaunch.getLaunchCompletionPercent(), 0.0D);
 
         List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());

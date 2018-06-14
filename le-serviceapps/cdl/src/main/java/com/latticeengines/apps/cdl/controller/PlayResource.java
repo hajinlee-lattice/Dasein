@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -215,7 +216,7 @@ public class PlayResource {
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         Play play = playService.getPlayByName(playName, false);
-        PlayUtils.validatePlayBeforeLaunch(play);
+        PlayUtils.validatePlayBeforeLaunch(playName, play);
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
 
         if (play != null) {
@@ -226,12 +227,24 @@ public class PlayResource {
             playLaunch.setPlay(play);
             playLaunch.setTableName(createTable(playLaunch));
             playLaunchService.create(playLaunch);
+
             // this dry run flag is useful in writing robust testcases
             if (!isDryRunMode) {
                 String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
                 playLaunch.setApplicationId(appId);
-                playLaunchService.update(playLaunch);
             }
+
+            List<String> allAvailableBuckets = Arrays.asList(RatingBucketName.values()).stream().map(b -> b.name())
+                    .collect(Collectors.toList());
+            Long totalAvailableRatedAccounts = ratingEntityPreviewService.getEntityPreviewCount(play.getRatingEngine(),
+                    BusinessEntity.Account, false, null, allAvailableBuckets, null);
+            playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
+            playLaunch.setAccountsSuppressed(0L);
+            playLaunch.setAccountsErrored(0L);
+            playLaunch.setAccountsLaunched(0L);
+            playLaunch.setContactsLaunched(0L);
+
+            playLaunchService.update(playLaunch);
         } else {
             log.error("Invalid playName: " + playName);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -298,7 +311,6 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @RequestParam("launchCompletionPercent") Double launchCompletionPercent, //
-            @RequestParam("accountsSelected") Long accountsSelected, //
             @RequestParam("accountsLaunched") Long accountsLaunched, //
             @RequestParam("contactsLaunched") Long contactsLaunched, //
             @RequestParam("accountsErrored") Long accountsErrored, //
@@ -306,7 +318,6 @@ public class PlayResource {
         log.debug(String.format("Record play launch progress for %s launchId", launchId));
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
-        playLaunch.setAccountsSelected(accountsSelected);
         playLaunch.setAccountsLaunched(accountsLaunched);
         playLaunch.setAccountsErrored(accountsErrored);
         playLaunch.setContactsLaunched(contactsLaunched);

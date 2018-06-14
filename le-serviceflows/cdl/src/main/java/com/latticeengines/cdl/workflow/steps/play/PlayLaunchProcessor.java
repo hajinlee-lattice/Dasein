@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -43,7 +42,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -110,7 +108,7 @@ public class PlayLaunchProcessor {
     @Value("${datadb.datasource.type}")
     private String dataDbType;
 
-    @Value("${playmaker.workflow.segment.pagesize:100}")
+    @Value("${playmaker.workflow.segment.pagesize:5000}")
     private long pageSize;
 
     @Value("${common.pls.url}")
@@ -122,57 +120,100 @@ public class PlayLaunchProcessor {
     public void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config) throws IOException {
         // initialize play launch context
         PlayLaunchContext playLaunchContext = initPlayLaunchContext(tenant, config);
+        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
 
-        // prepare account and contact front end queries
-        frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
+        try {
+            long totalRatedAccountsInSegment = playLaunchContext.getPlayLaunch().getAccountsSelected();
+            log.info(String.format("Total available rated accounts: %d", totalRatedAccountsInSegment));
 
-        long totalAccountsCount = accountFetcher.getCount(playLaunchContext);
+            long totalAccountsCount = prepareQueriesNCalculateAccCountForLaunch(playLaunchContext);
 
-        // do handling of SFDC id based suppression
-        totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount);
+            Long currentTimeMillis = System.currentTimeMillis();
 
-        log.info(String.format("Effective records count for launch: %d", totalAccountsCount));
+            String avroFileName = String.format("%s.avro", playLaunchContext.getPlayLaunchId());
 
-        playLaunchContext.getPlayLaunch().setAccountsSelected(totalAccountsCount);
+            File localFile = new File(String.format("%s_%s_%s", tenant.getName(), currentTimeMillis, avroFileName));
 
-        Long currentTimeMillis = System.currentTimeMillis();
+            if (totalAccountsCount > 0) {
+                // process accounts that exists in segment
+                long processedSegmentAccountsCount = 0;
+                // find total number of pages needed
+                int pages = (int) Math.ceil((totalAccountsCount * 1.0D) / pageSize);
+                log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
-        String avroFileName = String.format("%s.avro", playLaunchContext.getPlayLaunchId());
+                try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
+                        new GenericDatumWriter<GenericRecord>(playLaunchContext.getSchema()))) {
+                    dataFileWriter.create(playLaunchContext.getSchema(), localFile);
 
-        File localFile = new File(String.format("%s_%s_%s", tenant.getName(), currentTimeMillis, avroFileName));
-
-        if (totalAccountsCount > 0) {
-            // process accounts that exists in segment
-            long processedSegmentAccountsCount = 0;
-            // find total number of pages needed
-            int pages = (int) Math.ceil((totalAccountsCount * 1.0D) / pageSize);
-            log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
-
-            try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
-                    new GenericDatumWriter<GenericRecord>(playLaunchContext.getSchema()))) {
-                dataFileWriter.create(playLaunchContext.getSchema(), localFile);
-
-                // loop over to required number of pages
-                for (int pageNo = 0; pageNo < pages; pageNo++) {
-                    // fetch and process a single page
-                    processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, totalAccountsCount,
-                            processedSegmentAccountsCount, pageNo, dataFileWriter);
+                    // loop over to required number of pages
+                    for (int pageNo = 0; pageNo < pages; pageNo++) {
+                        // fetch and process a single page
+                        processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, totalAccountsCount,
+                                processedSegmentAccountsCount, pageNo, dataFileWriter);
+                    }
                 }
+
             }
 
-        }
+            // as per PM requirement, we need to fail play launch if 0
+            // recommendations were created. In future this may be enhanced for
+            // %based failure rate to decide if play launch failed or not
+            if (playLaunch.getAccountsLaunched() == null || playLaunch.getAccountsLaunched().longValue() == 0L) {
+                throw new LedpException(LedpCode.LEDP_18159,
+                        new Object[] { playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored() });
+            } else {
+                runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis, avroFileName, localFile);
+                long suppressedAccounts = (totalRatedAccountsInSegment - playLaunch.getAccountsLaunched()
+                        - playLaunch.getAccountsErrored());
+                playLaunch.setAccountsSuppressed(suppressedAccounts);
+                updateLaunchProgress(playLaunchContext);
+                log.info(String.format("Total launched accounts count: %d", playLaunch.getAccountsLaunched()));
+                log.info(String.format("Total errored accounts count: %d", playLaunch.getAccountsErrored()));
+                log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
+            }
+        } catch (Exception ex) {
+            log.info(String.format("Setting all counts to 0L as we encountered critical exception: %s",
+                    ex.getMessage()));
 
-        // as per PM requirement, we need to fail play launch if 0
-        // recommendations were created. In future this may be enhanced for
-        // %based failure rate to decide if play launch failed or not
-        if (playLaunchContext.getPlayLaunch().getAccountsLaunched() == null
-                || playLaunchContext.getPlayLaunch().getAccountsLaunched().longValue() == 0L) {
-            throw new LedpException(LedpCode.LEDP_18159,
-                    new Object[] { playLaunchContext.getPlayLaunch().getAccountsLaunched(),
-                            playLaunchContext.getPlayLaunch().getAccountsErrored() });
-        } else {
-            runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis, avroFileName, localFile);
+            playLaunch.setAccountsSuppressed(0L);
+            playLaunch.setAccountsErrored(0L);
+            playLaunch.setAccountsLaunched(0L);
+            playLaunch.setContactsLaunched(0L);
+            updateLaunchProgress(playLaunchContext);
+
+            throw ex;
         }
+    }
+
+    private long prepareQueriesNCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext) {
+        long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext);
+
+        totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount);
+
+        totalAccountsCount = handleTopNLimit(playLaunchContext, totalAccountsCount);
+
+        log.info(String.format("Total accounts count for launch: %d", totalAccountsCount));
+        return totalAccountsCount;
+    }
+
+    private long handleBasicConfigurationAndBucketSelection(PlayLaunchContext playLaunchContext) {
+        // prepare account and contact front end queries
+        frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
+        return accountFetcher.getCount(playLaunchContext);
+    }
+
+    private long handleTopNLimit(PlayLaunchContext playLaunchContext, long totalAccountsCount) {
+        Long topNCount = playLaunchContext.getPlayLaunch().getTopNCount();
+
+        if (topNCount != null) {
+            log.info(String.format("Handling Top N Count: %d", topNCount));
+            // if top n count is smaller than count in segment then update the
+            // count for launch
+            if (topNCount < totalAccountsCount) {
+                totalAccountsCount = topNCount;
+            }
+        }
+        return totalAccountsCount;
     }
 
     private void runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
@@ -247,7 +288,8 @@ public class PlayLaunchProcessor {
     }
 
     private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount) {
-        long suppressedAccounts = 0;
+        // do handling of SFDC id based suppression
+
         long effectiveAccountCount = totalAccountsCount;
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
         if (launch.getExcludeItemsWithoutSalesforceId()) {
@@ -262,12 +304,7 @@ public class PlayLaunchProcessor {
             accountFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
 
             effectiveAccountCount = accountFetcher.getCount(playLaunchContext);
-            suppressedAccounts = totalAccountsCount - effectiveAccountCount;
-            playLaunchContext.getPlayLaunch().setAccountsSuppressed(suppressedAccounts);
-        } else {
-            launch.setAccountsSuppressed(suppressedAccounts);
         }
-        playLaunchContext.getCounter().getAccountSuppressed().set(suppressedAccounts);
 
         return effectiveAccountCount;
     }
@@ -354,7 +391,6 @@ public class PlayLaunchProcessor {
         playLaunch.setAccountsLaunched(playLaunchContext.getCounter().getAccountLaunched().get());
         playLaunch.setContactsLaunched(playLaunchContext.getCounter().getContactLaunched().get());
         playLaunch.setAccountsErrored(playLaunchContext.getCounter().getAccountErrored().get());
-        playLaunch.setAccountsSuppressed(playLaunchContext.getCounter().getAccountSuppressed().get());
 
         updateLaunchProgress(playLaunchContext);
         log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
@@ -395,8 +431,7 @@ public class PlayLaunchProcessor {
 
             playProxy.updatePlayLaunchProgress(playLaunchContext.getCustomerSpace().toString(), //
                     playLaunch.getPlay().getName(), playLaunch.getLaunchId(), playLaunch.getLaunchCompletionPercent(),
-                    playLaunch.getAccountsSelected(), playLaunch.getAccountsLaunched(),
-                    playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
+                    playLaunch.getAccountsLaunched(), playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
                     playLaunch.getAccountsSuppressed());
         } catch (Exception e) {
             log.error("Unable to update launch progress.", e);

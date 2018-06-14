@@ -27,7 +27,7 @@ public class ContactFetcher {
     @Autowired
     private EntityProxy entityProxy;
 
-    @Value("${playmaker.workflow.segment.pagesize:100}")
+    @Value("${playmaker.workflow.segment.pagesize:5000}")
     private long pageSize;
 
     public Map<Object, List<Map<String, String>>> fetch(PlayLaunchContext playLaunchContext) {

@@ -146,9 +146,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
                     restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField,
                     lookupIdColumnWithDefaultSfdcAccId);
 
-            count = entityProxy.getCount( //
-                    tenant.getId(), //
-                    entityFrontEndQuery);
+            count = entityProxy.getCount(tenant.getId(), entityFrontEndQuery);
             log.info(String.format("Entity query => %s, count = %s", JsonUtils.serialize(entityFrontEndQuery), count));
         } catch (Exception ex) {
             log.info("Ignoring exception and trying without lookup Id now", ex);

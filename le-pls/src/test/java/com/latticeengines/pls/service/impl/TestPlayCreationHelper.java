@@ -4,7 +4,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -121,16 +123,27 @@ public class TestPlayCreationHelper {
     }
 
     public void createPlayLaunch(boolean isDryRunMode) {
-        playResourceDeploymentTestNG.createPlayLaunch(isDryRunMode);
+        createPlayLaunch(isDryRunMode, new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null);
+    }
+
+    public void createPlayLaunch(boolean isDryRunMode, Set<RatingBucketName> bucketsToLaunch,
+            Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
+        playResourceDeploymentTestNG.createPlayLaunch(isDryRunMode, bucketsToLaunch, excludeItemsWithoutSalesforceId,
+                topNCount);
         playLaunch = playResourceDeploymentTestNG.getPlayLaunch();
         Assert.assertNotNull(playLaunch);
     }
 
     public void setupTenantAndCreatePlay() throws Exception {
+        setupTenantAndCreatePlay(new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null);
+    }
+
+    public void setupTenantAndCreatePlay(Set<RatingBucketName> bucketsToLaunch, Boolean excludeItemsWithoutSalesforceId,
+            Long topNCount) throws Exception {
         setupTenant();
         setupPlayTestEnv();
         createPlay();
-        createPlayLaunch(true);
+        createPlayLaunch(true, bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount);
     }
 
     public void createPlayOnly() {
