@@ -293,6 +293,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         if (StringUtils.isNotBlank(model.getModelSummaryId())) {
             String tenantId = MultiTenantContext.getTenant().getId();
             String replicatedModelGUID = modelCopyProxy.copyModel(tenantId, tenantId, model.getModelSummaryId());
+            modelSummaryProxy.setDownloadFlag(tenantId);
             model.setModelSummaryId(replicatedModelGUID);
         }
         RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
