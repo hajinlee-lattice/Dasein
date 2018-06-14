@@ -42,7 +42,6 @@ public class DataFeedTaskImportListener extends LEJobListener {
     private final static Logger log = LoggerFactory.getLogger(DataFeedTaskImportListener.class);
 
     private static final String ERROR_FILE = "error.csv";
-    private static final String DUPLICATE_FILE = "duplicate.csv";
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
@@ -180,7 +179,6 @@ public class DataFeedTaskImportListener extends LEJobListener {
 
     private void setErrorFileContext(List<String> pathList, WorkflowJob job) {
         List<String> errorFiles = new ArrayList<>();
-        List<String> duplicateFiles = new ArrayList<>();
 
         pathList.forEach(path -> {
             try {
@@ -188,9 +186,6 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 log.info("Diagnostic file path: " + dirPath);
                 if (HdfsUtils.fileExists(yarnConfiguration, dirPath + ERROR_FILE)) {
                     errorFiles.add(dirPath + ERROR_FILE);
-                }
-                if (HdfsUtils.fileExists(yarnConfiguration, dirPath + DUPLICATE_FILE)) {
-                    duplicateFiles.add(dirPath + DUPLICATE_FILE);
                 }
             } catch (IOException e) {
                 log.error("Check error file existence error.");
@@ -202,12 +197,6 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     JsonUtils.serialize(errorFiles));
         } else {
             log.info("Error file list empty.");
-        }
-        if (CollectionUtils.isNotEmpty(duplicateFiles)) {
-            job.setOutputContextValue(WorkflowContextConstants.Outputs.DATAFEEDTASK_IMPORT_DUPLICATE_FILES,
-                    JsonUtils.serialize(duplicateFiles));
-        } else {
-            log.info("Duplicate file list empty.");
         }
     }
 

@@ -33,7 +33,6 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
 
     private static final Logger log = LoggerFactory.getLogger(VdbDataProcessCallable.class);
     private static final String ERROR_FILE = "error.csv";
-    private static final String DUPLICATE_FILE = "duplicate.csv";
 
     private static final int MAX_RETRIES = 3;
 
@@ -56,7 +55,6 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
     Integer[] result = new Integer[3];
 
     private CSVPrinter errorRecordPrinter;
-    private CSVPrinter duplicateRecordPrinter;
     private Map<String, String> errorMap;
     private Map<String, String> duplicateMap;
     private String idColumnName;
@@ -116,10 +114,6 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
         try {
             errorRecordPrinter = new CSVPrinter(new FileWriter(processorId + ERROR_FILE),
                     LECSVFormat.format.withHeader("ColumnName", "ErrorMessage"));
-            if (needDedup) {
-                duplicateRecordPrinter = new CSVPrinter(new FileWriter(processorId + DUPLICATE_FILE),
-                        LECSVFormat.format.withHeader("ColumnName", "ErrorMessage"));
-            }
         } catch (IOException e) {
             log.error("Can not create csv printer: " + e.getMessage());
         }
@@ -138,11 +132,8 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
     private void copyCSVReport() {
         try {
             errorRecordPrinter.close();
-            if (errorRecord > 0) {
+            if (errorRecord > 0 || (needDedup && duplicateRecord > 0)) {
                 HdfsUtils.copyLocalToHdfs(yarnConfiguration, processorId + ERROR_FILE, extractPath + "/" + ERROR_FILE);
-            }
-            if (needDedup && duplicateRecord > 0) {
-                HdfsUtils.copyLocalToHdfs(yarnConfiguration, processorId + DUPLICATE_FILE, extractPath + "/" + DUPLICATE_FILE);
             }
         } catch (IOException e) {
             log.error("Error copy csv report file to HDFS!");
@@ -223,9 +214,9 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
             try {
                 for (Map.Entry<String, String> dupEntry : duplicateMap.entrySet()) {
                     duplicateRecord++;
-                    duplicateRecordPrinter.printRecord(dupEntry.getKey(), dupEntry.getValue());
+                    errorRecordPrinter.printRecord(dupEntry.getKey(), dupEntry.getValue());
                 }
-                duplicateRecordPrinter.flush();
+                errorRecordPrinter.flush();
                 duplicateMap.clear();
             } catch (IOException e) {
                 log.error("Error write duplicate info to CSV file!");

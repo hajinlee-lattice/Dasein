@@ -65,8 +65,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final String ERROR_FILE = "error.csv";
 
-    private static final String DUPLICATE_FILE = "duplicate.csv";
-
     private static final String NULL = "null";
 
     private Schema schema;
@@ -90,8 +88,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private Set<String> uniqueIds = new HashSet<>();
 
     private CSVPrinter csvFilePrinter;
-
-    private CSVPrinter duplicateRecordPrinter;
 
     private String idColumnName;
 
@@ -126,11 +122,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
                 LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
-
-        if (deduplicate) {
-            duplicateRecordPrinter = new CSVPrinter(new FileWriter(DUPLICATE_FILE),
-                    LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
-        }
 
         if (StringUtils.isEmpty(table.getName())) {
             avroFileName = "file.avro";
@@ -224,8 +215,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         LOG.info("Handle duplicate record in line: " + String.valueOf(lineNumber));
         context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).increment(1);
         id = id != null ? id : "";
-        duplicateRecordPrinter.printRecord(lineNumber, id, duplicateMap.values().toString());
-        duplicateRecordPrinter.flush();
+        csvFilePrinter.printRecord(lineNumber, id, duplicateMap.values().toString());
+        csvFilePrinter.flush();
 
         duplicateMap.clear();
     }
@@ -391,16 +382,18 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).setValue(0);
         }
 
-        if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() == 0) {
+        if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() == 0
+                && context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue() == 0) {
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).setValue(0);
-        } else {
-            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
-        }
-
-        if (context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue() == 0) {
             context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).setValue(0);
         } else {
-            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), DUPLICATE_FILE, outputPath + "/" + DUPLICATE_FILE);
+            if (context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue() == 0) {
+                context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).setValue(0);
+            }
+            if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() == 0) {
+                context.getCounter(RecordImportCounter.IGNORED_RECORDS).setValue(0);
+            }
+            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
         }
 
         if (context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue() == 0) {
