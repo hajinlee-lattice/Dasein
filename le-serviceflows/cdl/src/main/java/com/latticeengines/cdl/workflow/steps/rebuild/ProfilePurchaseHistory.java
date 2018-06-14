@@ -164,7 +164,9 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         dataCollectionProxy.upsertTable(customerSpace.toString(), curatedMetricsTableName,
                 BusinessEntity.DepivotedPurchaseHistory.getServingStore(), inactive);
 
+        publishToRedshift = false;
         super.onPostTransformationCompleted();
+        publishToRedshift = true;
         generateReport();
     }
 
