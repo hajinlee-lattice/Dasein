@@ -189,7 +189,7 @@ WHERE SourceName = 'DnBCacheSeedRaw';
 UPDATE AccountMasterColumn
 SET Groups = REPLACE(REPLACE(Groups, ',Segment', ''), 'Segment', '')
 WHERE Groups LIKE '%Segment%'
-AND (AMColumnID LIKE 'Bmbr30%' OR AMColumnID LIKE 'Feature%');
+AND (AMColumnID LIKE 'Bmbr30%');
 
 INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, Status, Mode, MetadataRefreshDate, RefreshVersion)
 VALUES
