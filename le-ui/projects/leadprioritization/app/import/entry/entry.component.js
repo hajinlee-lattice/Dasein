@@ -10,6 +10,7 @@ angular.module('lp.import.entry', [
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
+    
 
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
@@ -26,6 +27,7 @@ angular.module('lp.import.entry', [
 
     vm.init = function() {
         ImportWizardStore.clear();
+        vm.changingEntity = false;    
         var state = $state.current.name;
         switch (state) {
             case 'home.import.entry.accounts': vm.changeEntityType('Account', 'accounts'); break;
@@ -44,6 +46,10 @@ angular.module('lp.import.entry', [
         vm.goState = goState || type.toLowerCase();
         ImportWizardStore.setEntityType(type);
         ImportWizardStore.setFeedType(feedType || null);
+        if(vm.clearFileImport){
+            vm.clearFileImport();
+            vm.next = false;
+        }
     }
 
     vm.fileLoad = function(headers) {

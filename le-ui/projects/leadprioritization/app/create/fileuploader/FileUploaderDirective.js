@@ -4,6 +4,7 @@ angular
     return {
         restrict: 'A',
         scope: {
+            parent:'=?',
             params:'=',
             label:'@',
             inputName:'@',
@@ -33,7 +34,9 @@ angular
         link: function(scope, element, attrs, ngModel) {
             var model = $parse(attrs.fileUploader);
             var modelSetter = model.assign;
-
+            if(scope.parent){
+                scope.parent.clearFileImport = scope.vm_uploader.cancel;
+            }
             element.bind('change', function(){
                 scope.$apply(function(){
                     modelSetter(scope, element[0].files[0]);
@@ -61,7 +64,7 @@ angular
                 element = this.element = $element[0],
                 GB = 1073741824,
                 GBLimit = 2;
-
+           
             vm.file = {};
 
             vm.init = function() {
@@ -69,6 +72,7 @@ angular
                 vm.fileRequired = typeof vm.fileRequired == "undefined" 
                     ? true
                     : vm.fileRequired;
+                
             }
 
             vm.startUpload = function() {
@@ -508,6 +512,8 @@ angular
                 if (typeof vm.fileCancel == 'function') {
                     vm.fileCancel({ data: data });
                 }
+                setTimeout(function(){$scope.$apply();}, 100);
+                
             }
 
             vm.showFileDisplayName = function() {
