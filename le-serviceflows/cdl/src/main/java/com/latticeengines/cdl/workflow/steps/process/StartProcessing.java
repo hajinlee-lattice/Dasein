@@ -230,6 +230,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     protected List<Action> getActions() {
+        if (CollectionUtils.isEmpty(configuration.getActionIds())) {
+            return Collections.emptyList();
+        }
         List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds());
         if (actions == null) {
             actions = Collections.emptyList();
