@@ -3,6 +3,7 @@ package com.latticeengines.serviceflows.workflow.dataflow;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -10,6 +11,7 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -34,6 +36,9 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
     @Autowired
     protected MetadataProxy metadataProxy;
 
+    @Value("${pls.cdl.transform.cascading.partitions}")
+    protected int cascadingPartitions;
+
     @Override
     public void execute() {
         log.info("Inside RunDataFlow execute() [" + configuration.getBeanName() + "]");
@@ -52,7 +57,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setTargetTableName(configuration.getTargetTableName());
         dataFlowConfig.setTargetPath(configuration.getTargetPath());
         dataFlowConfig.setPartitions(configuration.getPartitions());
-        dataFlowConfig.setJobProperties(configuration.getJobProperties());
+        setJobProperties(dataFlowConfig);
         dataFlowConfig.setEngine(configuration.getEngine());
         dataFlowConfig.setQueue(configuration.getQueue());
         dataFlowConfig.setSwlib(configuration.getSwlib());
@@ -64,6 +69,18 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setApplyTableProperties(configuration.isApplyTableProperties());
 
         return dataFlowConfig;
+    }
+
+    private void setJobProperties(DataFlowConfiguration dataFlowConfig) {
+        if (configuration.getJobProperties() == null) {
+            Properties jobProperties = new Properties();
+            jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions));
+            jobProperties.put("mapred.reduce.tasks", String.valueOf(cascadingPartitions));
+            dataFlowConfig.setJobProperties(jobProperties);
+            dataFlowConfig.setPartitions(cascadingPartitions);
+        } else {
+            dataFlowConfig.setJobProperties(configuration.getJobProperties());
+        }
     }
 
     private List<DataFlowSource> createDataFlowSources(DataFlowParameters parameters) {
