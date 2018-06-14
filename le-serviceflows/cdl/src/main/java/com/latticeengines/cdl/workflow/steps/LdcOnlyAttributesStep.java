@@ -30,7 +30,7 @@ public class LdcOnlyAttributesStep extends BaseWorkflowStep<LdcOnlyAttributesCon
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
 
         for (Attribute attribute : eventTable.getAttributes()) {
-            if (attribute.getTags() == null || attribute.isInternalAndInternalTransformField())
+            if (attribute.getTags() == null || attribute.isInternalPredictor())
                 attribute.setApprovedUsage(ApprovedUsage.NONE);
         }
 
