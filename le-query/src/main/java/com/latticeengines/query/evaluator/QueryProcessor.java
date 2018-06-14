@@ -55,15 +55,15 @@ public class QueryProcessor {
         return queryFactory;
     }
 
-    public SQLQuery<?> process(AttributeRepository repository, Query query) {
+    public SQLQuery<?> process(AttributeRepository repository, Query query, String sqlUser) {
         query.analyze();
 
-        LookupResolverFactory resolverFactory = new LookupResolverFactory(repository, this);
+        LookupResolverFactory resolverFactory = new LookupResolverFactory(repository, this, sqlUser);
         RestrictionResolverFactory rrFactory = new RestrictionResolverFactory(resolverFactory, query.getExistsJoins(),
                 queryFactory, this);
         resolverFactory.setRestrictionResolverFactory(rrFactory);
 
-        SQLQuery<?> sqlQuery = from(repository, query);
+        SQLQuery<?> sqlQuery = from(repository, query, sqlUser);
 
         if (query.getRestriction() != null) {
             BooleanExpression whereClause = processRestriction(query.getRestriction(), resolverFactory,
@@ -97,14 +97,14 @@ public class QueryProcessor {
     /**
      * FROM TABLE or FROM (sub query) AS alias
      */
-    private SQLQuery<?> from(AttributeRepository repository, Query query) {
+    private SQLQuery<?> from(AttributeRepository repository, Query query, String sqlUser) {
         SubQuery subQuery = query.getSubQuery();
         SQLQuery<?> sqlQuery = null;
 
         if (query.hasPreprocessed()) {
             sqlQuery = (SQLQuery<?>) query.getSubQuery().getSubQueryExpression();
         } else {
-            sqlQuery = queryFactory.getQuery(repository);
+            sqlQuery = queryFactory.getQuery(repository, sqlUser);
         }
 
         for (SubQuery sq : query.getCommonTableQueryList()) {
@@ -113,16 +113,16 @@ public class QueryProcessor {
                     .toArray(StringPath[]::new);
             if (projectedColumns.length != 0) {
                 sqlQuery = sqlQuery.with(aliasTable, projectedColumns)
-                        .as(processSubueryExpression(repository, sq, false));
+                        .as(processSubueryExpression(repository, sq, sqlUser,false));
             } else {
-                sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, false));
+                sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, sqlUser,false));
             }
         }
         if (query.hasPreprocessed()) {
             return sqlQuery;
         }
         if (subQuery != null) {
-            Expression<?> subQueryExpression = processSubueryExpression(repository, subQuery, true);
+            Expression<?> subQueryExpression = processSubueryExpression(repository, subQuery, sqlUser,true);
             sqlQuery = sqlQuery.from(subQueryExpression);
         } else {
             BusinessEntity mainEntity = query.getMainEntity();
@@ -132,13 +132,13 @@ public class QueryProcessor {
         return addJoins(sqlQuery, repository, query);
     }
 
-    private Expression<?> processSubueryExpression(AttributeRepository repository, SubQuery subQuery,
+    private Expression<?> processSubueryExpression(AttributeRepository repository, SubQuery subQuery, String sqlUser,
             boolean setAlias) {
         if (subQuery.getSubQueryExpression() != null) {
             return (SubQueryExpression) subQuery.getSubQueryExpression();
         } else {
-            return (setAlias) ? process(repository, subQuery.getQuery()).as(subQuery.getAlias())
-                    : process(repository, subQuery.getQuery());
+            return (setAlias) ? process(repository, subQuery.getQuery(), sqlUser).as(subQuery.getAlias())
+                    : process(repository, subQuery.getQuery(), sqlUser);
         }
     }
 

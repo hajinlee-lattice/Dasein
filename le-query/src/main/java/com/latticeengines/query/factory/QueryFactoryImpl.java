@@ -17,20 +17,20 @@ public class QueryFactoryImpl implements QueryFactory {
     @Inject
     private List<QueryProvider> queryProviders;
 
-    public SQLQuery<?> getQuery(AttributeRepository repository) {
+    public SQLQuery<?> getQuery(AttributeRepository repository, String sqlUser) {
         for (QueryProvider provider : queryProviders) {
             if (provider.providesQueryAgainst(repository)) {
-                return provider.getQuery(repository);
+                return provider.getQuery(repository, sqlUser);
             }
         }
         throw new RuntimeException(String.format("Could not find QueryProvider for specified data collection %s",
                 repository.getCollectionName()));
     }
 
-    public SQLQueryFactory getSQLQueryFactory(AttributeRepository repository) {
+    public SQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser) {
         for (QueryProvider provider : queryProviders) {
             if (provider.providesQueryAgainst(repository)) {
-                return provider.getCachedSQLQueryFactory(repository);
+                return provider.getCachedSQLQueryFactory(repository, sqlUser);
             }
         }
         throw new RuntimeException(String.format("Could not find QueryProvider for specified data collection %s",

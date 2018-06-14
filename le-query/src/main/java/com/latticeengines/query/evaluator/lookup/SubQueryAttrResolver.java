@@ -20,10 +20,12 @@ import com.querydsl.sql.SQLQuery;
 public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
         implements LookupResolver<SubQueryAttrLookup> {
     private QueryProcessor queryProcessor;
+    private String sqlUser;
 
-    public SubQueryAttrResolver(AttributeRepository repository, QueryProcessor queryProcessor) {
+    public SubQueryAttrResolver(AttributeRepository repository, QueryProcessor queryProcessor, String sqlUser) {
         super(repository);
         this.queryProcessor = queryProcessor;
+        this.sqlUser = sqlUser;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
         SubQuery subQuery = lookup.getSubQuery();
         SQLQuery<?> sqlSubQuery;
         if (subQuery.getSubQueryExpression() == null) {
-            sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery());
+            sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery(), sqlUser);
         } else {
             sqlSubQuery = (SQLQuery<?>) subQuery.getSubQueryExpression();
         }
@@ -43,7 +45,7 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
         SubQuery subQuery = lookup.getSubQuery();
         SQLQuery<?> sqlSubQuery;
         if (subQuery.getSubQueryExpression() == null) {
-            sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery());
+            sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery(), sqlUser);
         } else {
             sqlSubQuery = (SQLQuery<?>) subQuery.getSubQueryExpression();
         }

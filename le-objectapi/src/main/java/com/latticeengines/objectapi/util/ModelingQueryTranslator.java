@@ -30,7 +30,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
     }
 
     public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, EventType eventType,
-            TimeFilterTranslator timeTranslator) {
+            TimeFilterTranslator timeTranslator, String sqlUser) {
 
         if (restrictionNotSpecified(frontEndQuery) && restrictionNotSpecified(frontEndQuery.getSegmentQuery())) {
             throw new IllegalArgumentException("No restriction specified for event query");
@@ -44,7 +44,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
 
         if (frontEndQuery.getSegmentQuery() != null) {
             Restriction segmentRestriction = translateSegmentQuery(frontEndQuery.getSegmentQuery(), timeTranslator,
-                    queryBuilder);
+                    sqlUser);
             restriction = Restriction.builder().and(segmentRestriction, restriction).build();
         }
 
@@ -53,15 +53,15 @@ public class ModelingQueryTranslator extends QueryTranslator {
         switch (eventType) {
         case Scoring:
             queryBuilder = eventQueryTranslator.translateForScoring(queryFactory, repository, restriction,
-                    frontEndQuery, queryBuilder);
+                    frontEndQuery, queryBuilder, sqlUser);
             break;
         case Training:
             queryBuilder = eventQueryTranslator.translateForTraining(queryFactory, repository, restriction,
-                    frontEndQuery, queryBuilder);
+                    frontEndQuery, queryBuilder, sqlUser);
             break;
         case Event:
             queryBuilder = eventQueryTranslator.translateForEvent(queryFactory, repository, restriction, frontEndQuery,
-                    queryBuilder);
+                    queryBuilder, sqlUser);
             break;
         }
 
@@ -92,12 +92,11 @@ public class ModelingQueryTranslator extends QueryTranslator {
         return frontEndRestriction == null || frontEndRestriction.getRestriction() == null;
     }
 
-    private Restriction translateSegmentQuery(FrontEndQuery segmentQuery, TimeFilterTranslator timeTranslator,
-            QueryBuilder queryBuilder) {
+    private Restriction translateSegmentQuery(FrontEndQuery segmentQuery, TimeFilterTranslator timeTranslator, String sqlUser) {
         FrontEndRestriction segmentAccountRestriction = getEntityFrontEndRestriction(BusinessEntity.Account,
                 segmentQuery);
-        Restriction segmentRestriction = translateFrontEndRestriction(BusinessEntity.Account, segmentAccountRestriction,
-                queryBuilder, timeTranslator);
+        Restriction segmentRestriction = translateFrontEndRestriction(segmentAccountRestriction, timeTranslator,
+                sqlUser);
         segmentRestriction = translateInnerRestriction(segmentQuery, BusinessEntity.Account, segmentRestriction);
         return segmentRestriction;
     }

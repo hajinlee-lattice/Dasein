@@ -6,6 +6,7 @@ import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_R
 
 import java.io.InputStream;
 
+import com.latticeengines.query.factory.RedshiftQueryProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -74,6 +75,8 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     protected static final String ATTR_TRANSACTION_DATE = InterfaceName.TransactionDate.name();
     protected static final String ATTR_PRODUCT_ID = InterfaceName.ProductId.name();
+
+    protected static final String SQL_USER = RedshiftQueryProvider.USER_SEGMENT;
 
     @BeforeClass(groups = "functional")
     public void setupBase() {

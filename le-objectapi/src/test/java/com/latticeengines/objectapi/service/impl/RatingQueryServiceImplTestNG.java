@@ -70,7 +70,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setSort(new FrontEndSort(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
 
-        DataPage dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue);
+        DataPage dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
@@ -85,7 +85,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setLookups(Arrays.asList(new AttributeLookup(BusinessEntity.Account, "AccountId"),
                 new AttributeLookup(BusinessEntity.Rating, model.getId())));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue);
+        dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
         data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
@@ -105,7 +105,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction2);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
-        dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue);
+        dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
         data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
@@ -138,7 +138,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setSort(new FrontEndSort(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
 
-        Map<String, Long> ratingCounts = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
+        Map<String, Long> ratingCounts = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
@@ -164,13 +164,13 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
-        long totalCount = queryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        long totalCount = queryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
 
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setSort(new FrontEndSort(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
 
-        Map<String, Long> ratingCounts = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
+        Map<String, Long> ratingCounts = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         AtomicLong sumAgg = new AtomicLong(0L);
@@ -190,7 +190,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setSort(new FrontEndSort(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
-        Map<String, Long> ratingCounts = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
+        Map<String, Long> ratingCounts = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
@@ -249,16 +249,16 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
-        Long count = queryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = queryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
 
-        Map<String, Long> coverage = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
+        Map<String, Long> coverage = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertTrue(MapUtils.isNotEmpty(coverage));
         Assert.assertEquals(coverage.size(), 1);
         Assert.assertTrue(coverage.keySet().contains(RatingBucketName.C.name()));
         Assert.assertEquals(coverage.get(RatingBucketName.C.name()), count);
 
-        DataPage dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue);
+        DataPage dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());

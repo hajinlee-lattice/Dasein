@@ -11,12 +11,10 @@ import reactor.core.publisher.Flux;
 
 public interface EntityQueryService {
 
-    long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version);
+    long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
 
-    DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version);
+    DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
 
-    Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version);
-
-    Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version);
+    Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
 
 }

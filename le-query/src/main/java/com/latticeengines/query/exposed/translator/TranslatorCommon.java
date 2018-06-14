@@ -1,23 +1,13 @@
 package com.latticeengines.query.exposed.translator;
 
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.toAggregatedBooleanExpression;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.querydsl.core.types.EntityPath;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.core.types.dsl.StringExpression;
-import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.sql.SQLExpressions;
-import com.querydsl.sql.SQLQuery;
-import com.querydsl.sql.SQLQueryFactory;
-import com.querydsl.sql.WindowFunction;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -28,10 +18,19 @@ import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.query.exposed.factory.QueryFactory;
-
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.toAggregatedBooleanExpression;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.sql.SQLExpressions;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.WindowFunction;
 
 public class TranslatorCommon {
     static final int NUM_ADDITIONAL_PERIOD = 2;
@@ -266,8 +265,9 @@ public class TranslatorCommon {
     @SuppressWarnings("unchecked")
     protected SubQuery translateAPSUnionAll(QueryFactory queryFactory,
                                             AttributeRepository repository,
-                                            SubQuery[] apsSubQueryList) {
-        SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository);
+                                            SubQuery[] apsSubQueryList,
+                                            String sqlUser) {
+        SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository, sqlUser);
         SQLQuery[] apsSelectAlls = Stream.of(apsSubQueryList)
                 .map(apsQuery -> factory.query().select(SQLExpressions.all).from(
                         new PathBuilder<>(String.class, apsQuery.getAlias())))
@@ -285,8 +285,8 @@ public class TranslatorCommon {
     @SuppressWarnings("unchecked")
     protected SubQuery translateAPSUnionAllReplaceNull(QueryFactory queryFactory,
                                                        AttributeRepository repository,
-                                                       String apsTableName) {
-        SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository);
+                                                       String apsTableName, String sqlUser) {
+        SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository, sqlUser);
 
         EntityPath<String> apsUnionAllPath = new PathBuilder<>(String.class, apsTableName);
         NumberPath amountNumberPath = Expressions.numberPath(BigDecimal.class, amountAggr.getMetadata());

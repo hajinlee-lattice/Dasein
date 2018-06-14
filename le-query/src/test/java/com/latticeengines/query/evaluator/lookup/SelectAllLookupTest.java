@@ -11,7 +11,7 @@ public class SelectAllLookupTest extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testSelectAllLookup() {
         SelectAllLookup selectAll = new SelectAllLookup("tableName");
-        LookupResolverFactory resolverFactory = new LookupResolverFactory(attrRepo, queryProcessor);
+        LookupResolverFactory resolverFactory = new LookupResolverFactory(attrRepo, queryProcessor, "segment");
         LookupResolver<SelectAllLookup> resolver = resolverFactory.getLookupResolver(SelectAllLookup.class);
         SQLQuery<?> query = resolver.resolveForFrom(selectAll);
 

@@ -26,16 +26,16 @@ public abstract class QueryProvider implements ApplicationContextAware {
 
     public abstract boolean providesQueryAgainst(AttributeRepository repository);
 
-    public SQLQuery<?> getQuery(AttributeRepository repository) {
-        return getCachedSQLQueryFactory(repository).query();
+    public SQLQuery<?> getQuery(AttributeRepository repository, String sqlUser) {
+        return getCachedSQLQueryFactory(repository, sqlUser).query();
     }
 
-    public SQLQueryFactory getCachedSQLQueryFactory(AttributeRepository repository) {
+    public SQLQueryFactory getCachedSQLQueryFactory(AttributeRepository repository, String sqlUser) {
         SQLQueryFactory factory = factoryCache.getIfPresent(repository.getIdentifier());
         if (factory != null) {
             return factory;
         } else {
-            factory = getSQLQueryFactory();
+            factory = getSQLQueryFactory(sqlUser);
             factoryCache.put(repository.getIdentifier(), factory);
             return factory;
         }

@@ -2,6 +2,7 @@ package com.latticeengines.objectapi.controller;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.service.EntityQueryService;
+import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +29,9 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/entity")
 public class EntityResource {
+
+    private static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
+    private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
 
     private final EntityQueryService entityQueryService;
 
@@ -39,19 +44,25 @@ public class EntityResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-                         @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return entityQueryService.getCount(frontEndQuery, version);
+                         @RequestParam(value = "version", required = false) DataCollection.Version version,
+                         @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+        if (StringUtils.isBlank(sqlUser)) {
+            sqlUser = SEGMENT_USER;
+        }
+        return entityQueryService.getCount(frontEndQuery, version, sqlUser);
     }
 
     @PostMapping(value = "/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Mono<DataPage> getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-                            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+                            @RequestParam(value = "version", required = false) DataCollection.Version version,
+                                  @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+        final String finalSqlUser = StringUtils.isBlank(sqlUser) ? BATCH_USER : sqlUser;
         final Tenant tenant = MultiTenantContext.getTenant();
         return Mono.fromCallable(() -> {
             MultiTenantContext.setTenant(tenant);
-            return entityQueryService.getData(frontEndQuery, version);
+            return entityQueryService.getData(frontEndQuery, version, finalSqlUser);
         });
 
     }
@@ -61,8 +72,12 @@ public class EntityResource {
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
                                             @RequestBody RatingEngineFrontEndQuery frontEndQuery,
-                                            @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return entityQueryService.getRatingCount(frontEndQuery, version);
+                                            @RequestParam(value = "version", required = false) DataCollection.Version version,
+                                            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+        if (StringUtils.isBlank(sqlUser)) {
+            sqlUser = SEGMENT_USER;
+        }
+        return entityQueryService.getRatingCount(frontEndQuery, version, sqlUser);
     }
 
 }

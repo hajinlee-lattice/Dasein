@@ -64,7 +64,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     @Override
-    public long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+    public long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -74,23 +74,22 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                                                                                             frontEndQuery);
-            Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
+            Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
-            return queryEvaluatorService.getCount(attrRepo, query);
+            return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
     @Override
-    public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version);
+    public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+        Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version, sqlUser);
         List<Map<String, Object>> data = flux.toStream().collect(Collectors.toList());
         return new DataPage(data);
     }
 
-    @Override
-    public Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -100,12 +99,12 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                                                                                             frontEndQuery);
-            Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
+            Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             if (query.getLookups() == null || query.getLookups().isEmpty()) {
                 query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
             }
             query = preProcess(frontEndQuery.getMainEntity(), query);
-            return queryEvaluatorService.getDataFlux(attrRepo, query) //
+            return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser) //
                     .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
@@ -113,14 +112,14 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     @Override
-    public Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version) {
+    public Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         String ratingEngineId = frontEndQuery.getRatingEngineId();
         if (StringUtils.isNotBlank(ratingEngineId)) {
             try {
                 String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
                 CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-                Query query = ratingCountQuery(customerSpace, ratingField, frontEndQuery, version);
-                List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
+                Query query = ratingCountQuery(customerSpace, ratingField, frontEndQuery, version, sqlUser);
+                List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query, sqlUser)
                         .getData();
                 TreeMap<String, Long> counts = new TreeMap<>();
                 data.forEach(map -> {
@@ -142,7 +141,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     private Query ratingCountQuery(CustomerSpace customerSpace, String ratingField,
-            RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version) {
+            RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
                 : frontEndQuery.getAccountRestriction().getRestriction();
         Restriction restriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNotNull().build();
@@ -156,7 +155,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService, frontEndQuery);
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, null, timeTranslator);
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, null, timeTranslator, sqlUser);
         query.setPageFilter(null);
         query.setSort(null);
         AttributeLookup ratingLookup = new AttributeLookup(BusinessEntity.Rating, ratingField);

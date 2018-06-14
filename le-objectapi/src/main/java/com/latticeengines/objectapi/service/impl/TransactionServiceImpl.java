@@ -43,6 +43,7 @@ import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 @Component("transactionService")
 public class TransactionServiceImpl implements TransactionService {
@@ -105,7 +106,7 @@ public class TransactionServiceImpl implements TransactionService {
         retry.setThrowLastExceptionOnExhausted(true);
 
         return retry.execute(context -> {
-            DataPage dataPage = queryEvaluatorService.getData(attrRepo, query);
+            DataPage dataPage = queryEvaluatorService.getData(attrRepo, query, RedshiftQueryProvider.USER_SEGMENT);
             return (String) dataPage.getData().get(0).get(InterfaceName.TransactionDate.name().toLowerCase());
         });
     }

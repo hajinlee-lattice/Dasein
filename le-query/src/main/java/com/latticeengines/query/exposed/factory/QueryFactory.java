@@ -6,8 +6,8 @@ import com.querydsl.sql.SQLQueryFactory;
 
 public interface QueryFactory {
 
-    SQLQuery<?> getQuery(AttributeRepository repository);
+    SQLQuery<?> getQuery(AttributeRepository repository, String sqlUser);
 
-    SQLQueryFactory getSQLQueryFactory(AttributeRepository repository);
+    SQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser);
 
 }

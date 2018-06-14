@@ -8,10 +8,10 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
 public interface RatingQueryService {
 
-    long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version);
+    long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
 
-    DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version);
+    DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
 
-    Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version);
+    Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
 
 }

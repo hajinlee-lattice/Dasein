@@ -28,10 +28,12 @@ public final class LookupResolverFactory {
     private Map<String, LookupResolver<?>> resolvers = new HashMap<>();
     private RestrictionResolverFactory restrictionResolverFactory;
     private QueryProcessor queryProcessor;
+    private String sqlUser;
 
-    public LookupResolverFactory(AttributeRepository attrRepo, QueryProcessor queryProcessor) {
+    public LookupResolverFactory(AttributeRepository attrRepo, QueryProcessor queryProcessor, String sqlUser) {
         this.attrRepo = attrRepo;
         this.queryProcessor = queryProcessor;
+        this.sqlUser = sqlUser;
     }
 
     @SuppressWarnings("unchecked")
@@ -45,7 +47,7 @@ public final class LookupResolverFactory {
     @SuppressWarnings("rawtypes")
     private <T extends Lookup> void initializeResolver(Class<T> lookupType) {
         if (lookupType.isAssignableFrom(AttributeLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new AttributeResolver<AttributeLookup>(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new AttributeResolver<>(attrRepo));
             return;
         }
         if (lookupType.isAssignableFrom(DateAttributeLookup.class)) {
@@ -53,7 +55,7 @@ public final class LookupResolverFactory {
             return;
         }
         if (lookupType.isAssignableFrom(SubQueryAttrLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new SubQueryAttrResolver(attrRepo, queryProcessor));
+            resolvers.put(lookupType.getSimpleName(), new SubQueryAttrResolver(attrRepo, queryProcessor, sqlUser));
             return;
         }
         if (lookupType.isAssignableFrom(EntityLookup.class)) {
@@ -69,7 +71,7 @@ public final class LookupResolverFactory {
             return;
         }
         if (lookupType.isAssignableFrom(ValueLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new ValueResolver<ValueLookup>(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new ValueResolver<>(attrRepo));
             return;
         }
         if (lookupType.isAssignableFrom(DateValueLookup.class)) {
@@ -94,7 +96,7 @@ public final class LookupResolverFactory {
         }
         if (lookupType.isAssignableFrom(SelectAllLookup.class)) {
             resolvers.put(lookupType.getSimpleName(),
-                    new SelectAllResolver(attrRepo, queryProcessor.getQueryFactory()));
+                    new SelectAllResolver(attrRepo, queryProcessor.getQueryFactory(), sqlUser));
             return;
         }
 
@@ -103,6 +105,10 @@ public final class LookupResolverFactory {
 
     public AttributeRepository getAttrRepo() {
         return attrRepo;
+    }
+
+    public String getSqlUser() {
+        return sqlUser;
     }
 
     public void setRestrictionResolverFactory(RestrictionResolverFactory restrictionResolverFactory) {

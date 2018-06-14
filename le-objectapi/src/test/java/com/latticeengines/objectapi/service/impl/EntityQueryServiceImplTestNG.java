@@ -66,7 +66,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Product);
         frontEndQuery.setDistinct(true);
 
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(1));
     }
@@ -81,11 +81,11 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Product);
 
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(149L));
 
-        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue);
+        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         for (Map<String, Object> product : dataPage.getData()) {
             Assert.assertTrue(product.containsKey(InterfaceName.ProductId.name()));
             Assert.assertTrue(product.containsKey(InterfaceName.ProductName.name()));
@@ -101,7 +101,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(3165L));
     }
@@ -118,7 +118,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(716L));
     }
@@ -220,7 +220,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertEquals(count0, count);
     }
 
@@ -249,7 +249,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setContactRestriction(contactFERestriction);
 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(43));
     }
@@ -280,7 +280,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setContactRestriction(contactFERestriction);
 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(287));
     }
@@ -293,7 +293,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         return count;
     }
@@ -328,7 +328,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction1.setRestriction(endsWithRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction1);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(1L));
     }
@@ -355,7 +355,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setContactRestriction(frontEndRestriction2);
 
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(15L));
 
@@ -378,12 +378,12 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setContactRestriction(frontEndRestriction2);
 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(43L));
 
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
-        count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(44L));
     }
@@ -411,7 +411,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name())),
                 false));
         queryFromSegment.setPageFilter(new PageFilter(0, 10));
-        DataPage dataPage = entityQueryService.getData(queryFromSegment, DataCollection.Version.Blue);
+        DataPage dataPage = entityQueryService.getData(queryFromSegment, DataCollection.Version.Blue, SEGMENT_USER);
         List<Object> accountIds = dataPage.getData().stream().map(m -> m.get(InterfaceName.AccountId.name())) //
                 .collect(Collectors.toList());
         Assert.assertEquals(accountIds.size(), 10);
@@ -430,7 +430,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.AccountId.name()),
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name())));
         contactQuery.setPageFilter(new PageFilter(0, 100));
-        dataPage = entityQueryService.getData(contactQuery, DataCollection.Version.Blue);
+        dataPage = entityQueryService.getData(contactQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertEquals(dataPage.getData().size(), 10);
         for (Map<String, Object> contact : dataPage.getData()) {
             Object accountId = contact.get(InterfaceName.AccountId.name());
@@ -441,7 +441,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         emptyContactQuery.setContactRestriction(frontEndRestriction);
         emptyContactQuery.setLookups(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name())));
-        dataPage = entityQueryService.getData(emptyContactQuery, DataCollection.Version.Blue);
+        dataPage = entityQueryService.getData(emptyContactQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertEquals(dataPage.getData().size(), 10);
         for (Map<String, Object> contact : dataPage.getData()) {
             Assert.assertTrue(contact.containsKey(InterfaceName.Email.toString()));
@@ -460,7 +460,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(Restriction.builder().or(restriction1, restriction2).build());
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertEquals(count, 1226L);
     }
 
@@ -492,7 +492,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 new AttributeLookup(BusinessEntity.Rating, scoreField),
                 new AttributeLookup(BusinessEntity.Rating, evField)));
 
-        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue);
+        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
@@ -512,7 +512,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction2);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
-        dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue);
+        dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
         data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
@@ -542,7 +542,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setRatingEngineId(engineId);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
 
-        Map<String, Long> ratingCounts = entityQueryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
+        Map<String, Long> ratingCounts = entityQueryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {

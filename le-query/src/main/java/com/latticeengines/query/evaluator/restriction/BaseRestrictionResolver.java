@@ -24,6 +24,10 @@ public abstract class BaseRestrictionResolver<T extends Restriction> {
         return this.lookupFactory.getAttrRepo();
     }
 
+    protected String getSqlUser() {
+        return this.lookupFactory.getSqlUser();
+    }
+
     protected AttributeStats findAttributeStats(AttributeLookup attributeLookup) {
         ColumnMetadata attribute = findAttributeMetadata(attributeLookup);
         return attribute.getStats();

@@ -39,7 +39,7 @@ public class RatingQueryTranslator extends QueryTranslator {
     }
 
     public Query translateRatingQuery(FrontEndQuery frontEndQuery, QueryDecorator decorator, //
-            TimeFilterTranslator timeTranslator) {
+            TimeFilterTranslator timeTranslator, String sqlUser) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
         if (BusinessEntity.Product.equals(mainEntity)) {
@@ -50,13 +50,12 @@ public class RatingQueryTranslator extends QueryTranslator {
         QueryBuilder queryBuilder = Query.builder();
 
         Map<String, Lookup> ruleBasedModels = ruleBasedModels(mainEntity, frontEndQuery.getRatingModels(), //
-                queryBuilder, timeTranslator);
-        restriction = translateFrontEndRestriction(mainEntity, getEntityFrontEndRestriction(mainEntity, frontEndQuery),
-                queryBuilder, timeTranslator);
+                queryBuilder, timeTranslator, sqlUser);
+        restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), timeTranslator, sqlUser);
         translateRatingRuleRestriction(ruleBasedModels, restriction);
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
         restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, queryBuilder, ruleBasedModels,
-                timeTranslator);
+                timeTranslator, sqlUser);
 
         queryBuilder.from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
@@ -68,7 +67,7 @@ public class RatingQueryTranslator extends QueryTranslator {
                 AttributeLookup attributeLookup = (AttributeLookup) lookup;
                 if (BusinessEntity.Rating.equals(attributeLookup.getEntity())) {
                     queryBuilder.select(parseRatingLookup(frontEndQuery.getMainEntity(), attributeLookup,
-                            frontEndQuery.getRatingModels(), queryBuilder, timeTranslator));
+                            frontEndQuery.getRatingModels(), queryBuilder, timeTranslator, sqlUser));
                 } else {
                     queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
                 }
@@ -78,7 +77,7 @@ public class RatingQueryTranslator extends QueryTranslator {
         if (decorator != null) {
             if (decorator.isDataQuery()) {
                 if (frontEndQuery.getRatingModels() != null) {
-                    appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator);
+                    appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator, sqlUser);
                 }
             }
             queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
@@ -92,7 +91,7 @@ public class RatingQueryTranslator extends QueryTranslator {
 
     private Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
             Restriction outerRestriction, QueryBuilder queryBuilder, Map<String, Lookup> ruleBasedModels,
-            TimeFilterTranslator timeTranslator) {
+            TimeFilterTranslator timeTranslator, String sqlUser) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
         case Contact:
@@ -105,8 +104,7 @@ public class RatingQueryTranslator extends QueryTranslator {
             break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction, queryBuilder,
-                timeTranslator);
+        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser);
         translateRatingRuleRestriction(ruleBasedModels, innerRestriction);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
@@ -142,7 +140,7 @@ public class RatingQueryTranslator extends QueryTranslator {
     }
 
     private Map<String, Lookup> ruleBasedModels(BusinessEntity mainEntity, List<RatingModel> models,
-            QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
+            QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator, String sqlUser) {
         Map<String, Lookup> lookupMap = new ConcurrentHashMap<>();
         if (models != null) {
             BusinessEntity entity = mainEntity != null ? mainEntity : BusinessEntity.Account;
@@ -151,7 +149,7 @@ public class RatingQueryTranslator extends QueryTranslator {
                     RatingRule ratingRule = ((RuleBasedModel) model).getRatingRule();
                     String modelId = model.getId();
                     Lookup lookup = translateRatingRule(entity, ratingRule, modelId, false, queryBuilder,
-                            timeTranslator);
+                            timeTranslator, sqlUser);
                     lookupMap.put(modelId, lookup);
                 }
             });
@@ -160,7 +158,7 @@ public class RatingQueryTranslator extends QueryTranslator {
     }
 
     private void appendRuleLookups(FrontEndQuery frontEndQuery, QueryBuilder queryBuilder,
-            TimeFilterTranslator timeTranslator) {
+            TimeFilterTranslator timeTranslator, String sqlUser) {
         frontEndQuery.getRatingModels().forEach(model -> {
             if (model instanceof RuleBasedModel) {
                 String alias = model.getId();
@@ -168,7 +166,7 @@ public class RatingQueryTranslator extends QueryTranslator {
                     alias = "Score";
                 }
                 Lookup ruleLookup = translateRatingRule(frontEndQuery.getMainEntity(),
-                        ((RuleBasedModel) model).getRatingRule(), alias, false, queryBuilder, timeTranslator);
+                        ((RuleBasedModel) model).getRatingRule(), alias, false, queryBuilder, timeTranslator, sqlUser);
                 queryBuilder.select(ruleLookup);
             } else {
                 log.warn("Cannot not handle rating model of type " + model.getClass().getSimpleName());
@@ -177,7 +175,7 @@ public class RatingQueryTranslator extends QueryTranslator {
     }
 
     private Lookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup, List<RatingModel> models, //
-            QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
+            QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator, String sqlUser) {
         if (models == null) {
             throw new RuntimeException(
                     "You specified a rating lookup " + lookup + " but no rating models, cannot parse the lookup.");
@@ -188,7 +186,7 @@ public class RatingQueryTranslator extends QueryTranslator {
             if (models.get(0) instanceof RuleBasedModel) {
                 RatingRule ratingRule = ((RuleBasedModel) models.get(0)).getRatingRule();
                 return translateRatingRule(entity, ratingRule, lookup.getAttribute(), false, queryBuilder,
-                        timeTranslator);
+                        timeTranslator, sqlUser);
             } else {
                 throw new UnsupportedOperationException("Only support rule based model now.");
             }
@@ -198,21 +196,19 @@ public class RatingQueryTranslator extends QueryTranslator {
     }
 
     public Lookup translateRatingRule(BusinessEntity entity, RatingRule ratingRule, String alias, boolean forScoreCount,
-            QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
+            QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator, String sqlUser) {
         TreeMap<String, Restriction> cases = new TreeMap<>();
         AtomicInteger idx = new AtomicInteger(0);
         ratingRule.getBucketToRuleMap().forEach((key, val) -> {
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
             // do not support nested ratings for now
-            Restriction accountRestriction = translateFrontEndRestriction(BusinessEntity.Account, frontEndRestriction,
-                    queryBuilder, timeTranslator);
+            Restriction accountRestriction = translateFrontEndRestriction(frontEndRestriction, timeTranslator, sqlUser);
 
             frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.CONTACT_RESTRICTION));
             // do not support nested ratings for now
-            Restriction contactRestriction = translateFrontEndRestriction(BusinessEntity.Contact, frontEndRestriction,
-                    queryBuilder, timeTranslator);
+            Restriction contactRestriction = translateFrontEndRestriction(frontEndRestriction, timeTranslator, sqlUser);
 
             BusinessEntity innerEntity;
             Restriction outerRestriction, innerRestriction;

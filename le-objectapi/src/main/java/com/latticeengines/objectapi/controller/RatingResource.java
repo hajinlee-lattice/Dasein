@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.service.RatingQueryService;
+import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,6 +32,9 @@ public class RatingResource {
 
     private final RatingQueryService ratingQueryService;
 
+    private static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
+    private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
+
     @Inject
     public RatingResource(RatingQueryService ratingQueryService) {
         this.ratingQueryService = ratingQueryService;
@@ -39,19 +44,25 @@ public class RatingResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-            @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return ratingQueryService.getCount(frontEndQuery, version);
+            @RequestParam(value = "version", required = false) DataCollection.Version version,
+                         @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+        if (StringUtils.isBlank(sqlUser)) {
+            sqlUser = SEGMENT_USER;
+        }
+        return ratingQueryService.getCount(frontEndQuery, version, sqlUser);
     }
 
     @PostMapping(value = "/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Mono<DataPage> getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+            @RequestParam(value = "version", required = false) DataCollection.Version version,
+                                  @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+        final String finalSqlUser = StringUtils.isBlank(sqlUser) ? BATCH_USER : sqlUser;
         final Tenant tenant = MultiTenantContext.getTenant();
         return Mono.fromCallable(() -> {
             MultiTenantContext.setTenant(tenant);
-            return ratingQueryService.getData(frontEndQuery, version);
+            return ratingQueryService.getData(frontEndQuery, version, finalSqlUser);
         });
     }
 
@@ -60,8 +71,12 @@ public class RatingResource {
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
             @RequestBody FrontEndQuery frontEndQuery,
-            @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return ratingQueryService.getRatingCount(frontEndQuery, version);
+            @RequestParam(value = "version", required = false) DataCollection.Version version,
+                                            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+        if (StringUtils.isBlank(sqlUser)) {
+            sqlUser = SEGMENT_USER;
+        }
+        return ratingQueryService.getRatingCount(frontEndQuery, version, sqlUser);
     }
 
 }

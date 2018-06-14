@@ -22,11 +22,13 @@ import com.latticeengines.objectapi.util.ModelingQueryTranslator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.factory.RedshiftQueryProvider;
 
 @Service("eventQueryService")
 public class EventQueryServiceImpl implements EventQueryService {
 
     private static final Logger log = LoggerFactory.getLogger(EventQueryServiceImpl.class);
+    private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
 
     private final QueryEvaluatorService queryEvaluatorService;
 
@@ -78,8 +80,8 @@ public class EventQueryServiceImpl implements EventQueryService {
                     queryEvaluatorService.getQueryFactory(), attrRepo);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(
                     transactionService, frontEndQuery.getSegmentQuery());
-            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator);
-            return queryEvaluatorService.getCount(attrRepo, query);
+            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
+            return queryEvaluatorService.getCount(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
@@ -94,8 +96,8 @@ public class EventQueryServiceImpl implements EventQueryService {
                     queryEvaluatorService.getQueryFactory(), attrRepo);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(
                     transactionService, frontEndQuery.getSegmentQuery());
-            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator);
-            return queryEvaluatorService.getData(attrRepo, query);
+            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
+            return queryEvaluatorService.getData(attrRepo, query, BATCH_USER);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }

@@ -17,8 +17,8 @@ import com.querydsl.sql.SQLTemplates;
 
 @Component("redshiftQueryProvider")
 public class RedshiftQueryProvider extends QueryProvider {
-    private static final String USER_SEGMENT = "segment";
-    private static final String USER_BATCH = "batch";
+    public static final String USER_SEGMENT = "segment";
+    public static final String USER_BATCH = "batch";
 
     private static final Map<String, DataSource> redshiftDataStores = new HashMap<>();
 

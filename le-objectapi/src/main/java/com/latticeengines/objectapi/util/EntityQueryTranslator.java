@@ -24,7 +24,7 @@ public class EntityQueryTranslator extends QueryTranslator {
     }
 
     public Query translateEntityQuery(FrontEndQuery frontEndQuery, QueryDecorator decorator, //
-            TimeFilterTranslator timeTranslator) {
+            TimeFilterTranslator timeTranslator, String sqlUser) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
         if (BusinessEntity.Product.equals(mainEntity)) {
@@ -34,10 +34,10 @@ public class EntityQueryTranslator extends QueryTranslator {
         Restriction restriction;
         QueryBuilder queryBuilder = Query.builder();
 
-        restriction = translateFrontEndRestriction(mainEntity, getEntityFrontEndRestriction(mainEntity, frontEndQuery),
-                queryBuilder, timeTranslator);
+        restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery),
+                timeTranslator, sqlUser);
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
-        restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, queryBuilder, timeTranslator);
+        restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, timeTranslator, sqlUser);
 
         queryBuilder.from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
@@ -64,7 +64,7 @@ public class EntityQueryTranslator extends QueryTranslator {
     }
 
     private Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-            Restriction outerRestriction, QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
+            Restriction outerRestriction, TimeFilterTranslator timeTranslator, String sqlUser) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
         case Contact:
@@ -77,8 +77,7 @@ public class EntityQueryTranslator extends QueryTranslator {
             break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction, queryBuilder,
-                timeTranslator);
+        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 

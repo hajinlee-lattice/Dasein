@@ -6,7 +6,6 @@ import java.util.Collections;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.querydsl.sql.SQLQuery;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
@@ -19,6 +18,7 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
+import com.querydsl.sql.SQLQuery;
 
 public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGBase {
 
@@ -423,10 +423,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getHasEngagedPriorToFive(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 5966);
     }
 
@@ -437,10 +437,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getEngagedInCurrentPeriod(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 2862);
     }
 
@@ -451,10 +451,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getHasNotPurchasedWithin(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 76987);
     }
 
@@ -465,10 +465,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getHasNotEngagedProd1(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 68680);
     }
 
@@ -481,10 +481,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getPriorSevenEngaged(prodIdList);
         txRestriction.setNegate(true);
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 88959);
     }
 
@@ -495,10 +495,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getTotalAmountLessThan1M(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 96058);
     }
 
@@ -510,10 +510,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 210);
     }
 
@@ -525,10 +525,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 13985);
     }
 
@@ -539,10 +539,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getTotalQuantityGTE10Once(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 1196);
 
     }
@@ -555,10 +555,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 3795);
     }
 
@@ -570,10 +570,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 318);
     }
 
@@ -585,10 +585,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 6023);
     }
 
@@ -600,10 +600,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 4464);
     }
 
@@ -615,10 +615,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 2881);
     }
 
@@ -632,10 +632,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, logicalRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 85989);
     }
 
@@ -647,10 +647,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 82723);
     }
 
@@ -662,10 +662,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 776);
     }
 
@@ -677,10 +677,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 95895);
     }
 
@@ -692,10 +692,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 95949);
     }
 
@@ -707,10 +707,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 97);
     }
 
@@ -722,10 +722,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 596);
     }
 
@@ -737,10 +737,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 317);
     }
 
@@ -752,10 +752,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 89763);
     }
 

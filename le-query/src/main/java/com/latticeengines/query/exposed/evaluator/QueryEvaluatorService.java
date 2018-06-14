@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -18,7 +19,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.querydsl.sql.SQLQuery;
@@ -48,23 +48,23 @@ public class QueryEvaluatorService {
         return queryFactory;
     }
 
-    public long getCount(AttributeRepository attrRepo, Query query) {
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+    public long getCount(AttributeRepository attrRepo, Query query, String sqlUser) {
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
             return sqlQuery.fetchCount();
         }
     }
 
-    public DataPage getData(String customerSpace, DataCollection.Version version, Query query) {
-        return getData(dataCollectionProxy.getAttrRepo(customerSpace, version), query);
+    public DataPage getData(String customerSpace, DataCollection.Version version, Query query, String sqlUser) {
+        return getData(dataCollectionProxy.getAttrRepo(customerSpace, version), query, sqlUser);
     }
 
-    public DataPage getData(AttributeRepository attrRepo, Query query) {
-        List<Map<String, Object>> results = getDataFlux(attrRepo, query).collectList().block();
+    public DataPage getData(AttributeRepository attrRepo, Query query, String sqlUser) {
+        List<Map<String, Object>> results = getDataFlux(attrRepo, query, sqlUser).collectList().block();
         return new DataPage(results);
     }
 
-    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query) {
+    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser) {
         List<Lookup> filteredLookups = new ArrayList<>();
         for (Lookup lookup : query.getLookups()) {
             if (lookup instanceof AttributeLookup) {
@@ -79,7 +79,7 @@ public class QueryEvaluatorService {
             }
         }
         query.setLookups(filteredLookups);
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         AtomicLong startTime = new AtomicLong();
         AtomicLong counter = new AtomicLong(0);
         return queryEvaluator.pipe(sqlQuery, query) //

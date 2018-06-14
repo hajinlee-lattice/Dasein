@@ -69,7 +69,7 @@ public class RatingQueryServiceImpl implements RatingQueryService {
     }
 
     @Override
-    public long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+    public long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -78,22 +78,22 @@ public class RatingQueryServiceImpl implements RatingQueryService {
                     attrRepo);
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
             TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
-            return queryEvaluatorService.getCount(attrRepo, query);
+            return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
     @Override
-    public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version);
+    public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+        Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version, sqlUser);
         List<Map<String, Object>> data = flux.collectList().block();
         return new DataPage(data);
     }
 
-    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -102,12 +102,12 @@ public class RatingQueryServiceImpl implements RatingQueryService {
                     attrRepo);
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
             TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             if (query.getLookups() == null || query.getLookups().isEmpty()) {
                 query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
             }
             query = preProcess(frontEndQuery.getMainEntity(), query);
-            return queryEvaluatorService.getDataFlux(attrRepo, query) //
+            return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser) //
                     .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
@@ -115,11 +115,11 @@ public class RatingQueryServiceImpl implements RatingQueryService {
     }
 
     @Override
-    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         try {
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-            Query query = ratingCountQuery(customerSpace, frontEndQuery, version);
-            List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
+            Query query = ratingCountQuery(customerSpace, frontEndQuery, version, sqlUser);
+            List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query, sqlUser)
                     .getData();
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
@@ -138,7 +138,7 @@ public class RatingQueryServiceImpl implements RatingQueryService {
     }
 
     private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery,
-                                   DataCollection.Version version) {
+                                   DataCollection.Version version, String sqlUser) {
         List<RatingModel> models = frontEndQuery.getRatingModels();
         if (models != null && models.size() == 1) {
             Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
@@ -155,14 +155,14 @@ public class RatingQueryServiceImpl implements RatingQueryService {
             RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
                     queryEvaluatorService.getAttributeRepository(customerSpace.toString(), version));
             TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, null, timeTranslator);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, null, timeTranslator, sqlUser);
             query.setPageFilter(null);
             query.setSort(null);
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
                 Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
-                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, null, timeTranslator);
+                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, null, timeTranslator, sqlUser);
                 AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
                 query.setLookups(Arrays.asList(idLookup, ruleLookup));
                 GroupBy groupBy = new GroupBy();

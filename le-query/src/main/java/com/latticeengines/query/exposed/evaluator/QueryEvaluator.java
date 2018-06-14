@@ -25,8 +25,6 @@ import reactor.core.scheduler.Schedulers;
 @Component("queryEvaluator")
 public class QueryEvaluator {
 
-    private static final Logger log = LoggerFactory.getLogger(QueryEvaluator.class);
-
     public static final String SCORE = "Score";
     private static final int MAX_CARDINALITY = 1_000_000;
 
@@ -35,11 +33,11 @@ public class QueryEvaluator {
     @Autowired
     private QueryProcessor processor;
 
-    public SQLQuery<?> evaluate(AttributeRepository repository, Query query) {
+    public SQLQuery<?> evaluate(AttributeRepository repository, Query query, String sqlUser) {
         if (processor == null) {
             throw new RuntimeException("processor is null.");
         }
-        return processor.process(repository, query);
+        return processor.process(repository, query, sqlUser);
     }
 
     Flux<Map<String, Object>> pipe(SQLQuery<?> sqlquery, Query query) {
