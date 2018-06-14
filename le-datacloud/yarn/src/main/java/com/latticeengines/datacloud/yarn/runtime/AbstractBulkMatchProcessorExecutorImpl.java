@@ -293,6 +293,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         }
         processorContext.getDataCloudProcessor().setProgress(1f);
         try {
+            domainCollectService.setDrainMode();
             domainCollectService.dumpQueue();
         } catch (Exception e) {
             log.error("Failed to dump domains to SQL.", e);

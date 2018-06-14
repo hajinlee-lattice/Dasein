@@ -47,6 +47,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
     private static final int BUFFER_SIZE = 800;
     private static final int MAX_DUMP_SIZE = 40000;
+    private static final long MS_IN_MIN = 1000 * 60;
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -62,6 +63,8 @@ public class DomainCollectServiceImpl implements DomainCollectService {
 
     @Value("${datacloud.collector.enabled}")
     private boolean domainCollectEnabled;
+
+    private boolean drainMode = false;
 
     @PostConstruct
     public void postConstruct() {
@@ -96,6 +99,11 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                 Set<String> domainBuffer = new HashSet<>();
                 String transferId = UUID.randomUUID().toString();
                 log.info("Splitting " + domains.size() + " domains to be inserted into collector's url stream.");
+                long timestamp = System.currentTimeMillis();
+                int dumpCnt = 0;
+                if (drainMode) {
+                    log.info("In draining mode, only dump domains for 2 mins and drop remaining domains");
+                }
                 for (String domain : domains) {
                     domainBuffer.add(domain);
                     if (domainBuffer.size() >= BUFFER_SIZE) {
@@ -103,14 +111,19 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                                 "Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
                         putDomainsInAccountTransferTable(transferId, domainBuffer);
                         domainBuffer = new HashSet<>();
+                        dumpCnt += domainBuffer.size();
+                    }
+                    if (drainMode && System.currentTimeMillis() - timestamp > 2 * MS_IN_MIN) {
+                        break;
                     }
                 }
-                if (!domainBuffer.isEmpty()) {
+                if (!domainBuffer.isEmpty() && !(drainMode && System.currentTimeMillis() - timestamp > 2 * MS_IN_MIN)) {
                     log.info("Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
                     putDomainsInAccountTransferTable(transferId, domainBuffer);
+                    dumpCnt += domainBuffer.size();
                 }
                 executeDomainCollectionTransfer(transferId);
-                log.info("Finished dumping " + domains.size() + " domains to collector's url stream.");
+                log.info("Finished dumping " + dumpCnt + " domains to collector's url stream.");
             }
         }
     }
@@ -164,6 +177,10 @@ public class DomainCollectServiceImpl implements DomainCollectService {
 
     public int getQueueSize() {
         return domainSet.size();
+    }
+
+    public void setDrainMode() {
+        drainMode = true;
     }
 
 }
