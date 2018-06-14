@@ -20,7 +20,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(DeprecatedProcessAccountDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
 
         new Thread(() -> {
             createTestSegment1();
