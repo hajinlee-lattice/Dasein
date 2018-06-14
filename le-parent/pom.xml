@@ -63,7 +63,7 @@
         <hdp.guava.version>16.0</hdp.guava.version>
         <avro.version>1.7.7</avro.version>
         <parquet.avro.version>1.4.3</parquet.avro.version> <!-- remove ? -->
-        <aws.version>1.11.271</aws.version>
+        <aws.version>1.11.343</aws.version>
         <cascading.version>3.2.1</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <cascading.redshift.version>3.0.0</cascading.redshift.version>

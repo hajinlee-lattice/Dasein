@@ -25,6 +25,7 @@ import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodbv2.model.SSESpecification;
 import com.amazonaws.services.dynamodbv2.model.Tag;
 import com.amazonaws.services.dynamodbv2.model.TagResourceRequest;
 import com.amazonaws.services.dynamodbv2.model.TagResourceResult;
@@ -103,14 +104,12 @@ public class DynamoServiceImpl implements DynamoService {
         ArrayList<KeySchemaElement> keySchema = new ArrayList<>();
         ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
 
-        keySchema.add(new KeySchemaElement().withAttributeName(partitionKeyName).withKeyType(KeyType.HASH)); // Partition
-                                                                                                             // key
+        keySchema.add(new KeySchemaElement().withAttributeName(partitionKeyName).withKeyType(KeyType.HASH)); // Partition key
         attributeDefinitions
                 .add(new AttributeDefinition().withAttributeName(partitionKeyName).withAttributeType(partitionKeyType));
 
         if (sortKeyName != null) {
-            keySchema.add(new KeySchemaElement().withAttributeName(sortKeyName).withKeyType(KeyType.RANGE)); // Sort
-                                                                                                             // key
+            keySchema.add(new KeySchemaElement().withAttributeName(sortKeyName).withKeyType(KeyType.RANGE)); // Sort key
             attributeDefinitions
                     .add(new AttributeDefinition().withAttributeName(sortKeyName).withAttributeType(sortKeyType));
         }
@@ -121,18 +120,33 @@ public class DynamoServiceImpl implements DynamoService {
                 .withTableName(tableName) //
                 .withKeySchema(keySchema) //
                 .withAttributeDefinitions(attributeDefinitions) //
-                .withProvisionedThroughput(provisionedThroughput);
+                .withProvisionedThroughput(provisionedThroughput) //
+                .withSSESpecification(new SSESpecification().withEnabled(true));
 
         try {
             log.info("Creating table " + tableName);
             TableUtils.createTableIfNotExists(client, request);
             Table table = dynamoDB.getTable(tableName);
             log.info("Waiting for table " + tableName + " to become active. This may take a while.");
-            table.waitForActive();
+            waitForTableActivated(table);
             return table;
         } catch (InterruptedException e) {
             throw new RuntimeException("Failed to create table " + tableName, e);
         }
+    }
+
+    // waitForActive AWS API sometimes doesn't wait for long enough time until
+    // table to be active
+    private void waitForTableActivated(Table table) throws InterruptedException {
+        int retries = 0;
+        while (retries < 2) {
+            try {
+                table.waitForActive();
+                return;
+            } catch (InterruptedException e) {
+            }
+        }
+        table.waitForActive();
     }
 
     @Override
