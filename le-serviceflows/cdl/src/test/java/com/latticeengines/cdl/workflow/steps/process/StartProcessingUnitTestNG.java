@@ -90,7 +90,7 @@ public class StartProcessingUnitTestNG {
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
-        config.setActionIds(Collections.emptyList());
+        config.setActionIds(Arrays.asList(1111L));
         startProcessing.setConfiguration(config);
         Set<BusinessEntity> entities = startProcessing.new RebuildOnDeleteJobTemplate().getRebuildEntities();
         assertTrue(entities.contains(BusinessEntity.Contact));
