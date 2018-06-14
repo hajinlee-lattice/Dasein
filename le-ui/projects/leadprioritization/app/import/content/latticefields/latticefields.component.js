@@ -59,7 +59,6 @@ angular.module('lp.import.wizard.latticefields', [])
     }
 
     vm.init = function() {
-        
         ImportWizardStore.setValidation('latticefields', false);
 
         vm.matchingFieldsArr = [];

@@ -237,6 +237,7 @@ angular.module('lp.import')
 
     this.nextSaveMapping = function(nextState) {
         this.saveDocumentFields($state.current.name);
+        this.saveDocumentFields(nextState);
         $state.go(nextState);
     }
 
@@ -431,7 +432,15 @@ angular.module('lp.import')
         ImportUtils.updateDocumentMapping(this.saveObjects[state], copy);
         this.fieldDocumentSaved[state] = copy;
     };
-    
+
+    this.getSavedDocumentCopy = function(state){
+        var copy = angular.copy(this.fieldDocumentSaved[state]);
+        return copy;
+    };
+
+    this.setSavedDocumentInState = function(state, fieldDocumentSaved){
+        this.fieldDocumentSaved[state] = fieldDocumentSaved;
+    };
 
     this.getSavedDocumentFields = function(state){
         return this.fieldDocumentSaved[state];

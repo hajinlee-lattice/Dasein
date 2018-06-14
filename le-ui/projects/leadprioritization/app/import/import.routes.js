@@ -222,7 +222,9 @@ angular
             onEnter: function($state, ImportWizardStore, $transition$){
                 var from = $transition$._targetState._definition.parent.name;
                 if(from.includes('thirdpartyids')){
-                    ImportWizardStore.removeFromState($state.current.name);
+                    ImportWizardStore.removeFromState('home.import.data.accounts.ids.thirdpartyids.latticefields');
+                    var startWith = ImportWizardStore.getSavedDocumentCopy('home.import.data.accounts.ids.thirdpartyids');
+                    ImportWizardStore.setSavedDocumentInState('home.import.data.accounts.ids.thirdpartyids.latticefields', startWith);
                     // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current.name);
                     // ImportWizardStore.removeSavedObjectFrom($state.current.name);
                 }

@@ -82,9 +82,11 @@ angular.module('lp.import.utils', [])
                 savedObj.userField !== fieldsMapped[mapped].userField){
                 fieldsMapped[mapped].mappedField =  null;
                 fieldsMapped[mapped].mappedToLatticeField = false;
+                fieldsMapped[mapped].cdlExternalSystemType = null;
             }
             if(savedObj.userField === fieldsMapped[mapped].userField){
                 fieldsMapped[mapped].mappedField = savedObj.mappedField;
+                fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
             }
         });
     }
