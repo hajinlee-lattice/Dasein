@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
@@ -27,6 +28,8 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
     @Value("${common.test.pls.url}")
     private String deployedHostPort;
 
+    private RatingEngine ratingEngine;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
@@ -37,7 +40,11 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), 1000);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 1000);
 
-        new Thread(this::createTestSegments).start();
+        new Thread(() -> {
+            createTestSegments();
+            ratingEngine = createRuleBasedRatingEngine();
+            activateRatingEngine(ratingEngine.getId());
+        }).start();
 
         importData();
         processAnalyze();

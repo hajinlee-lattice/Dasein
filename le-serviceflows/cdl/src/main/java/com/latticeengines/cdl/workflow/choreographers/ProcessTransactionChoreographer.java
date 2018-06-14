@@ -250,7 +250,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         boolean purchaseMetricsChanged = grapherContext.isPurchaseMetricsChanged();
 
         if (hasProducts && hasAccounts) {
-            if (hasRawStore && (accountChoreographer.update || (accountChoreographer.commonRebuild))) {
+            if (hasRawStore && (accountChoreographer.update || (accountChoreographer.rebuildNotForDataCloudChange))) {
                 log.info("Need to rebuild purchase history due to Account changes.");
                 shouldCalc = true;
             }

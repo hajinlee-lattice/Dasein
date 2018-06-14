@@ -28,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -37,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -51,7 +53,6 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -179,7 +180,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         // TODO: separate out actions by entity
         List<Action> attrMgmtActions = getAttrManagementActions(actions);
-        grapherContext.setHasAttrActivation(CollectionUtils.isNotEmpty(attrMgmtActions));
+        List<Action> accountAttrActions = getAttrManagementActionsForAccount(attrMgmtActions);
+        List<Action> contactAttrActions = getAttrManagementActionsForContact(attrMgmtActions);
+        grapherContext.setHasAccountAttrLifeCycleChange(CollectionUtils.isNotEmpty(accountAttrActions));
+        grapherContext.setHasContactAttrLifeCycleChange(CollectionUtils.isNotEmpty(contactAttrActions));
         List<Action> purchaseMetricsActions = getPurchaseMetricsActions(actions);
         grapherContext.setPurchaseMetricsChanged(CollectionUtils.isNotEmpty(purchaseMetricsActions));
 
@@ -233,9 +237,27 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         return actions;
     }
 
-    protected List<Action> getAttrManagementActions(List<Action> actions) {
+    private List<Action> getAttrManagementActions(List<Action> actions) {
         return actions.stream().filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
                 .collect(Collectors.toList());
+    }
+
+    private List<Action> getAttrManagementActionsForAccount(List<Action> actions) {
+        return actions.stream().filter(action -> {
+            AttrConfigLifeCycleChangeConfiguration lifeCycleChangeConfiguration =
+                    (AttrConfigLifeCycleChangeConfiguration) action.getActionConfiguration();
+            String categoryName = lifeCycleChangeConfiguration.getCategoryName();
+            return !Category.CONTACT_ATTRIBUTES.equals(Category.fromName(categoryName));
+        }).collect(Collectors.toList());
+    }
+
+    private List<Action> getAttrManagementActionsForContact(List<Action> actions) {
+        return actions.stream().filter(action -> {
+            AttrConfigLifeCycleChangeConfiguration lifeCycleChangeConfiguration =
+                    (AttrConfigLifeCycleChangeConfiguration) action.getActionConfiguration();
+            String categoryName = lifeCycleChangeConfiguration.getCategoryName();
+            return Category.CONTACT_ATTRIBUTES.equals(Category.fromName(categoryName));
+        }).collect(Collectors.toList());
     }
 
     protected List<Action> getRatingRelatedActions(List<Action> actions) {
@@ -243,7 +265,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 .collect(Collectors.toList());
     }
 
-    protected List<Action> getPurchaseMetricsActions(List<Action> actions) {
+    private List<Action> getPurchaseMetricsActions(List<Action> actions) {
         return actions.stream().filter(action -> action.getType() == ActionType.ACTIVITY_METRICS_CHANGE)
                 .collect(Collectors.toList());
     }
@@ -405,14 +427,13 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     public static class RebuildEntitiesProvider {
-        public static Set<BusinessEntity> getRebuildEntities(StartProcessing st) {
+        static Set<BusinessEntity> getRebuildEntities(StartProcessing st) {
             Set<BusinessEntity> rebuildEntities = new HashSet<>();
-            Collection<Class<? extends RebuildEntitiesTemplate>> decrators = Arrays
-                    .asList(RebuildOnDeleteJobTemplate.class);
+            Collection<Class<? extends RebuildEntitiesTemplate>> decrators =
+                    Collections.singletonList(RebuildOnDeleteJobTemplate.class);
             for (Class<? extends RebuildEntitiesTemplate> c : decrators) {
                 try {
-                    RebuildEntitiesTemplate template = ((RebuildEntitiesTemplate) c
-                            .getDeclaredConstructor(StartProcessing.class).newInstance(st));
+                    RebuildEntitiesTemplate template = c.getDeclaredConstructor(StartProcessing.class).newInstance(st);
                     rebuildEntities.addAll(template.getRebuildEntities());
                     if (template.hasEntityToRebuild()) {
                         template.executeRebuildAction();

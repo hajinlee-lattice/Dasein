@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +33,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -76,6 +77,8 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     private static int segmentProfileStep;
     private static int segmentBucketStep;
 
+    private List<ColumnMetadata> allAttrs;
+
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
@@ -97,6 +100,11 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     protected PipelineTransformationRequest getTransformRequest() {
         String masterTableName = masterTable.getName();
         try {
+            allAttrs = servingStoreProxy
+                    .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive)
+                    .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()))
+                    .collectList().block();
+
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("ProfileAccountStep");
             request.setSubmitter(customerSpace.getTenantId());
@@ -157,28 +165,28 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(customerSpace.toString()));
 
-        List<ColumnMetadata> segmentColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment);
-        List<ColumnMetadata> modelColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model);
+
+        String dataCloudVersion = "";
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (detail != null) {
+            try {
+                dataCloudVersion = DataCloudVersion.parseBuildNumber(detail.getDataCloudBuildNumber()).getVersion();
+            } catch (Exception e) {
+                log.warn("Failed to read datacloud version from collection status " + JsonUtils.serialize(detail));
+            }
+        }
+
+        List<ColumnMetadata> dcCols = columnMetadataProxy.getAllColumns(dataCloudVersion);
+        Set<String> allAttrNames = allAttrs.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
         List<Column> cols = new ArrayList<>();
+        for (ColumnMetadata cm : dcCols) {
+            if (allAttrNames.contains(cm.getAttrName())) {
+                cols.add(new Column(cm.getAttrName()));
+            }
+        }
         ColumnSelection cs = new ColumnSelection();
-        Set<String> uniqueNames = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(segmentColumns)) {
-            for (ColumnMetadata cm : segmentColumns) {
-                if (!uniqueNames.contains(cm.getAttrName())) {
-                    cols.add(new Column(cm.getAttrName()));
-                    uniqueNames.add(cm.getAttrName());
-                }
-            }
-        }
-        if (CollectionUtils.isNotEmpty(modelColumns)) {
-            for (ColumnMetadata cm : modelColumns) {
-                if (!uniqueNames.contains(cm.getAttrName())) {
-                    cols.add(new Column(cm.getAttrName()));
-                    uniqueNames.add(cm.getAttrName());
-                }
-            }
-        }
         cs.setColumns(cols);
+
         matchInput.setCustomSelection(cs);
         matchInput.setUnionSelection(null);
         matchInput.setPredefinedSelection(null);

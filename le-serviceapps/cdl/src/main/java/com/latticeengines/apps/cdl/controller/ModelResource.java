@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.proxy.exposed.lp.ModelMetadataProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
@@ -66,6 +67,9 @@ public class ModelResource {
     @Inject
     private MetadataProxy metadataProxy;
 
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
+
     @PostConstruct
     public void init() {
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
@@ -82,7 +86,7 @@ public class ModelResource {
             log.error(message);
             throw new RuntimeException(message);
         }
-        internalResourceProxy.setModelSummaryDownloadFlag(customerSpace);
+        modelSummaryProxy.setDownloadFlag(customerSpace);
         log.info(String.format("model called with parameters %s", parameters.toString()));
         return customEventModelingWorkflowSubmitter.submit(customerSpace, parameters).toString();
     }
@@ -97,7 +101,7 @@ public class ModelResource {
             log.error(message);
             throw new RuntimeException(message);
         }
-        internalResourceProxy.setModelSummaryDownloadFlag(customerSpace);
+        modelSummaryProxy.setDownloadFlag(customerSpace);
         log.info(String.format("Rating Engine model endpoint called with parameters %s",
                 ratingEngineModelingParameters.toString()));
         return ratingEngineImportMatchAndModelWorkflowSubmitter.submit(ratingEngineModelingParameters).toString();
@@ -126,7 +130,7 @@ public class ModelResource {
         Table eventTable = metadataProxy.getTable(customerSpace, modelSummary.getEventTableName());
         List<Attribute> userRefinedAttributes = modelMetadataProxy.getAttributesFromFields(customerSpace,
                 eventTable.getAttributes(), parameters.getAttributes());
-        internalResourceProxy.setModelSummaryDownloadFlag(customerSpace);
+        modelSummaryProxy.setDownloadFlag(customerSpace);
         return ratingEngineModelWorkflowSubmitter
                 .submit(trainingTargetTableNames, parameters, userRefinedAttributes, modelSummary).toString();
 

@@ -1,7 +1,11 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
+
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.RebuildContactWorkflow;
@@ -9,6 +13,7 @@ import com.latticeengines.cdl.workflow.UpdateContactWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeContact;
 import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.cdl.workflow.steps.update.CloneContact;
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -17,6 +22,8 @@ import com.latticeengines.workflow.exposed.build.Choreographer;
 
 @Component
 public class ProcessContactChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessContactChoreographer.class);
 
     @Inject
     private MergeContact mergeContact;
@@ -32,6 +39,8 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private RebuildContactWorkflow rebuildContactWorkflow;
+
+    private boolean hasAttrLifeCycleChange = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -66,6 +75,25 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected BusinessEntity mainEntity() {
         return BusinessEntity.Contact;
+    }
+
+    @Override
+    protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
+        super.doInitialize(step);
+        checkAttrLifeCycleChange(step);
+    }
+
+    private void checkAttrLifeCycleChange(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        hasAttrLifeCycleChange = grapherContext.isHasContactAttrLifeCycleChange();
+        log.info("Has life cycle change related to Contact attributes.");
+    }
+
+    @Override
+    protected boolean shouldRebuild() {
+        boolean commonRebuild = super.shouldRebuild();
+        return commonRebuild || (hasAttrLifeCycleChange && !reset);
     }
 
 }

@@ -1,23 +1,58 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
-import java.util.ArrayList;
-import java.util.List;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component(ProcessAccountDiff.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessAccountStepConfiguration> {
 
+    private static final Logger log = LoggerFactory.getLogger(ProcessAccountDiff.class);
+
     static final String BEAN_NAME = "processAccountDiff";
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
+
+    private List<ColumnMetadata> allAttrs;
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
@@ -51,6 +86,58 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
         registerDynamoExport();
+    }
+
+    private TransformationStepConfig match() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_MATCH);
+
+        useDiffTableAsSource(step);
+
+        // Match Input
+        MatchTransformerConfig config = new MatchTransformerConfig();
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant(customerSpace.toString()));
+
+        String dataCloudVersion = "";
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (detail != null) {
+            try {
+                dataCloudVersion = DataCloudVersion.parseBuildNumber(detail.getDataCloudBuildNumber()).getVersion();
+            } catch (Exception e) {
+                log.warn("Failed to read datacloud version from collection status " + JsonUtils.serialize(detail));
+            }
+        }
+
+        allAttrs = servingStoreProxy
+                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive)
+                .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()))
+                .collectList().block();
+
+        List<ColumnMetadata> dcCols = columnMetadataProxy.getAllColumns(dataCloudVersion);
+        Set<String> allAttrNames = allAttrs.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+        List<Column> cols = new ArrayList<>();
+        for (ColumnMetadata cm : dcCols) {
+            if (allAttrNames.contains(cm.getAttrName())) {
+                cols.add(new Column(cm.getAttrName()));
+            }
+        }
+        ColumnSelection cs = new ColumnSelection();
+        cs.setColumns(cols);
+        matchInput.setCustomSelection(cs);
+
+        Map<MatchKey, List<String>> keyMap = new TreeMap<>();
+        keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
+        matchInput.setKeyMap(keyMap);
+
+        matchInput.setDataCloudVersion(getDataCloudVersion());
+        matchInput.setSkipKeyResolution(true);
+        matchInput.setFetchOnly(true);
+        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
+        config.setMatchInput(matchInput);
+
+        step.setConfiguration(JsonUtils.serialize(config));
+        return step;
     }
 
     private void registerDynamoExport() {

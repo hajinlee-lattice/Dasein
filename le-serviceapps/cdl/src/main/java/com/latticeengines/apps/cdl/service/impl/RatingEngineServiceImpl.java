@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -75,9 +74,9 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 import reactor.core.publisher.ParallelFlux;
 
@@ -125,18 +124,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Inject
     private SegmentService segmentService;
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
-    @PostConstruct
-    public void postConstruct() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -466,7 +458,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 throw new LedpException(LedpCode.LEDP_40012,
                         new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() });
             }
-            internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
+            modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
             DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpace);
             RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
             parameters.setName(aiModel.getId());
@@ -514,7 +506,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     .setExcludeCDLAttributes(!config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
             modelingParameters.setExcludeCustomFileAttributes(
                     !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
-            internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
+            modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
 
             log.info(String.format("Custom event modelling job submitted with parameters %s",
                     modelingParameters.toString()));

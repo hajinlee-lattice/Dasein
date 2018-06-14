@@ -28,7 +28,10 @@ public class ChoreographerContext {
     private List<String> actionImpactedRuleRatingEngines;
 
     @JsonProperty
-    private boolean hasAttrActivation;
+    private boolean hasAccountAttrLifeCycleChange;
+
+    @JsonProperty
+    private boolean hasContactAttrLifeCycleChange;
 
     @JsonProperty
     private boolean hasRatingEngineChange;
@@ -69,12 +72,20 @@ public class ChoreographerContext {
         this.actionImpactedRuleRatingEngines = actionImpactedRuleRatingEngines;
     }
 
-    public boolean isHasAttrActivation() {
-        return hasAttrActivation;
+    public boolean isHasAccountAttrLifeCycleChange() {
+        return hasAccountAttrLifeCycleChange;
     }
 
-    public void setHasAttrActivation(boolean hasAttrActivation) {
-        this.hasAttrActivation = hasAttrActivation;
+    public void setHasAccountAttrLifeCycleChange(boolean hasAccountAttrLifeCycleChange) {
+        this.hasAccountAttrLifeCycleChange = hasAccountAttrLifeCycleChange;
+    }
+
+    public boolean isHasContactAttrLifeCycleChange() {
+        return hasContactAttrLifeCycleChange;
+    }
+
+    public void setHasContactAttrLifeCycleChange(boolean hasContactAttrLifeCycleChange) {
+        this.hasContactAttrLifeCycleChange = hasContactAttrLifeCycleChange;
     }
 
     public boolean isHasRatingEngineChange() {

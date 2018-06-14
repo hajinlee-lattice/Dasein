@@ -63,9 +63,6 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
     @Inject
     private MetadataProxy metadataProxy;
 
-    @Inject
-    private ColumnMetadataProxy columnMetadataProxy;
-
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initializeConfiguration();
@@ -108,56 +105,6 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
     private TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getTransformRequest();
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
-    }
-
-    protected TransformationStepConfig match() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(TRANSFORMER_MATCH);
-
-        useDiffTableAsSource(step);
-
-        // Match Input
-        MatchTransformerConfig config = new MatchTransformerConfig();
-        MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant(customerSpace.toString()));
-
-        List<ColumnMetadata> segmentColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment);
-        List<ColumnMetadata> modelColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model);
-        List<Column> cols = new ArrayList<>();
-        ColumnSelection cs = new ColumnSelection();
-        Set<String> uniqueNames = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(segmentColumns)) {
-            for (ColumnMetadata cm : segmentColumns) {
-                if (!uniqueNames.contains(cm.getAttrName())) {
-                    cols.add(new Column(cm.getAttrName()));
-                    uniqueNames.add(cm.getAttrName());
-                }
-            }
-        }
-        if (CollectionUtils.isNotEmpty(modelColumns)) {
-            for (ColumnMetadata cm : modelColumns) {
-                if (!uniqueNames.contains(cm.getAttrName())) {
-                    cols.add(new Column(cm.getAttrName()));
-                    uniqueNames.add(cm.getAttrName());
-                }
-            }
-        }
-
-        cs.setColumns(cols);
-        matchInput.setCustomSelection(cs);
-
-        Map<MatchKey, List<String>> keyMap = new TreeMap<>();
-        keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
-        matchInput.setKeyMap(keyMap);
-
-        matchInput.setDataCloudVersion(getDataCloudVersion());
-        matchInput.setSkipKeyResolution(true);
-        matchInput.setFetchOnly(true);
-        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
-        config.setMatchInput(matchInput);
-
-        step.setConfiguration(JsonUtils.serialize(config));
-        return step;
     }
 
     protected TransformationStepConfig bucket(boolean heavyEngine) {
@@ -243,7 +190,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         return step;
     }
 
-    private void useDiffTableAsSource(TransformationStepConfig step) {
+    protected void useDiffTableAsSource(TransformationStepConfig step) {
         String sourceName = entity.name() + "Diff";
         SourceTable sourceTable = new SourceTable(diffTableName, customerSpace);
         List<String> baseSources = step.getBaseSources();

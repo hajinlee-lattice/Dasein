@@ -1,7 +1,11 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
+
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
@@ -9,6 +13,7 @@ import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -17,6 +22,8 @@ import com.latticeengines.workflow.exposed.build.Choreographer;
 
 @Component
 public class ProcessAccountChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessAccountChoreographer.class);
 
     @Inject
     private MergeAccount mergeAccount;
@@ -33,7 +40,9 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     @Inject
     private RebuildAccountWorkflow rebuildAccountWorkflow;
 
-    protected boolean commonRebuild = false;
+    protected boolean rebuildNotForDataCloudChange = false;
+    protected boolean dataCloudChanged = false;
+    private boolean hasAttrLifeCycleChange = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -71,9 +80,31 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
+    protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
+        super.doInitialize(step);
+        checkDataCloudChange(step);
+        checkAttrLifeCycleChange(step);
+    }
+
+    void checkDataCloudChange(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        dataCloudChanged = grapherContext.isDataCloudChanged();
+        log.info("Data cloud verision changed=" + dataCloudChanged + " for " + mainEntity());
+    }
+
+    private void checkAttrLifeCycleChange(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        hasAttrLifeCycleChange = grapherContext.isHasAccountAttrLifeCycleChange();
+        log.info("Has life cycle change related to Account attributes.");
+    }
+
+    @Override
     protected boolean shouldRebuild() {
-        commonRebuild = super.shouldRebuild();
-        return commonRebuild || (dataCloudChanged && !reset);
+        rebuildNotForDataCloudChange = super.shouldRebuild();
+        rebuildNotForDataCloudChange = rebuildNotForDataCloudChange || (hasAttrLifeCycleChange && !reset);
+        return rebuildNotForDataCloudChange || (dataCloudChanged && !reset);
     }
 
 }

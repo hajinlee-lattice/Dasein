@@ -40,7 +40,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     protected boolean hasActiveServingStore = false;
     protected boolean hasImports = false;
     protected boolean hasManyUpdate = false;
-    protected boolean dataCloudChanged = false;
     protected boolean jobImpacted = false;
 
     boolean rebuild = false;
@@ -124,22 +123,17 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     private void initialize(AbstractStep<? extends BaseStepConfiguration> step) {
         if (!initialized) {
-            checkEnforcedRebuild(step);
-            checkImports(step);
-            checkActiveServingStore(step);
-            checkHasBatchStore(step);
-            checkDataCloudChange(step);
-            checkJobImpactedEntity(step);
+            doInitialize(step);
             initialized = true;
         }
     }
 
-    void checkDataCloudChange(AbstractStep<? extends BaseStepConfiguration> step) {
-        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
-                ChoreographerContext.class);
-        dataCloudChanged = grapherContext.isDataCloudChanged();
-        log.info("Data cloud verision changed=" + dataCloudChanged + " for " + mainEntity());
-
+    protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
+        checkEnforcedRebuild(step);
+        checkImports(step);
+        checkActiveServingStore(step);
+        checkHasBatchStore(step);
+        checkJobImpactedEntity(step);
     }
 
     void checkJobImpactedEntity(AbstractStep<? extends BaseStepConfiguration> step) {
