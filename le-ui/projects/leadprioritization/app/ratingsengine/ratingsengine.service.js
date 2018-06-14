@@ -157,7 +157,8 @@ angular.module('lp.ratingsengine')
             "productpurchase": [
                 { 
                     label: 'Segment', 
-                    state: 'segment', 
+                    state: 'segment',
+                    progressDisabled: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveRatingEngineAI(nextState);
@@ -166,6 +167,7 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Products', 
                     state: 'segment.products', 
+                    progressDisabled: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveAIRatingModel(nextState);
@@ -174,6 +176,7 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Prioritization', 
                     state: 'segment.products.prioritization',
+                    progressDisabled: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveAIRatingModel(nextState);
@@ -182,6 +185,7 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Training', 
                     state: 'segment.products.prioritization.training', 
+                    progressDisabled: true,
                     nextLabel: 'Next',
                     showNextSpinner: true,
                     nextFn: function(nextState) {
@@ -191,6 +195,7 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Creation', 
                     state: 'segment.products.prioritization.training.creation', 
+                    progressDisabled: true,
                     hideBack: true,
                     secondaryLinkLabel: 'Go to Model List',
                     secondaryLink: 'home.ratingsengine',
@@ -205,6 +210,7 @@ angular.module('lp.ratingsengine')
                 {
                     label:'Segment',
                     state:'segment',
+                    progressDisabled: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveCustomEventRatingEngine(nextState);
@@ -213,6 +219,7 @@ angular.module('lp.ratingsengine')
                 {
                     label:'Attributes',
                     state:'segment.attributes',
+                    progressDisabled: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);
@@ -221,6 +228,7 @@ angular.module('lp.ratingsengine')
                 {
                     label:'Training',
                     state:'segment.attributes.training',
+                    progressDisabled: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);
@@ -228,6 +236,7 @@ angular.module('lp.ratingsengine')
                 }, {
                     label:'Field Mapping',
                     state:'segment.attributes.training.mapping',
+                    progressDisabled: true,
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.saveFieldMapping(nextState);
@@ -235,6 +244,7 @@ angular.module('lp.ratingsengine')
                 },{
                     label:'Model Creation',
                     state:'segment.attributes.training.mapping.creation',
+                    progressDisabled: true,
                     hideBack: true,
                     secondaryLinkLabel: 'Go to Model List',
                     secondaryLink: 'home.ratingsengine',

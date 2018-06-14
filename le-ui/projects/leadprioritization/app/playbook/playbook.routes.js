@@ -552,12 +552,12 @@ angular
                 },
                 WizardProgressItems: function(PlaybookWizardStore) {
                     return [
-                        { label: 'Rating', state: 'rating', nextFn: PlaybookWizardStore.nextSaveGeneric },
-                        { label: 'Targets', state: 'rating.targets' },
-                        { label: 'CRM System', state: 'rating.targets.crmselection', nextFn: PlaybookWizardStore.nextSaveGeneric },
-                        { label: 'Insights', state: 'rating.targets.crmselection.insights'},
-                        { label: 'Preview', state: 'rating.targets.crmselection.insights.preview' },
-                        { label: 'Launch', state: 'rating.targets.crmselection.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
+                        { label: 'Rating', state: 'rating', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true },
+                        { label: 'Targets', state: 'rating.targets', progressDisabled: true },
+                        { label: 'CRM System', state: 'rating.targets.crmselection', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true },
+                        { label: 'Insights', state: 'rating.targets.crmselection.insights', progressDisabled: true},
+                        { label: 'Preview', state: 'rating.targets.crmselection.insights.preview', progressDisabled: true },
+                        { label: 'Launch', state: 'rating.targets.crmselection.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch, progressDisabled: true }
                     ];
                 },
                 WizardControlsOptions: function() {
