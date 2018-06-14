@@ -8,4 +8,6 @@ public interface ZKConfigService {
 
     int getInvokeTime(CustomerSpace customerSpace);
 
+    boolean isInternalEnrichmentEnabled(CustomerSpace customerSpace);
+
 }

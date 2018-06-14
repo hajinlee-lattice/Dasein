@@ -1,18 +1,28 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.ZKConfigService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 
 @Service("zKConfigService")
 public class ZKConfigServiceImpl implements ZKConfigService {
 
+    private static final Logger log = LoggerFactory.getLogger(ZKConfigServiceImpl.class);
+
+    @Inject
+    private BatonService batonService;
 
     @Override
     public String getFakeCurrentDate(CustomerSpace customerSpace) {
@@ -45,6 +55,16 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             return invokeTime;
         } catch (Exception e) {
             throw new RuntimeException("Failed to get InvokeTime from ZK for " + customerSpace.getTenantId(), e);
+        }
+    }
+
+    @Override
+    public boolean isInternalEnrichmentEnabled(CustomerSpace customerSpace) {
+        try {
+            return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
+        } catch (Exception e) {
+            log.warn("Failed to tell if InternalEnrichment is enabled in ZK for " + customerSpace.getTenantId() + ": " + e.getMessage());
+            return false;
         }
     }
 

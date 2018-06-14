@@ -25,8 +25,10 @@ import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.apps.core.mds.AMMetadataStore;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -58,14 +60,14 @@ public class SystemMetadataStoreImpl extends
     public SystemMetadataStoreImpl(DataCollectionService dataCollectionService, TableRoleTemplate tableRoleTemplate,
             AMMetadataStore amMetadataStore, CDLNamespaceService cdlNamespaceService,
             RatingDisplayMetadataStore ratingDisplayMetadataStore,
-            ExternalSystemMetadataStore externalSystemMetadataStore) {
-        super(getBaseMds(dataCollectionService, tableRoleTemplate, amMetadataStore, cdlNamespaceService),
-                getDecoratorChain(ratingDisplayMetadataStore, externalSystemMetadataStore));
+            ExternalSystemMetadataStore externalSystemMetadataStore, ZKConfigService zkConfigService) {
+        super(getBaseMds(dataCollectionService, tableRoleTemplate, amMetadataStore, cdlNamespaceService,
+                zkConfigService), getDecoratorChain(ratingDisplayMetadataStore, externalSystemMetadataStore));
     }
 
     private static MetadataStore<Namespace2<BusinessEntity, DataCollection.Version>> getBaseMds(
             DataCollectionService dataCollectionService, TableRoleTemplate tableRoleTemplate,
-            AMMetadataStore amMetadataStore, CDLNamespaceService cdlNamespaceService) {
+            AMMetadataStore amMetadataStore, CDLNamespaceService cdlNamespaceService, ZKConfigService zkConfigService) {
 
         return new MetadataStore<Namespace2<BusinessEntity, DataCollection.Version>>() {
 
@@ -123,7 +125,8 @@ public class SystemMetadataStoreImpl extends
                                     // enabled/disabled for Segmentation
                                     cm.setCanSegment(true);
 
-                                    // all non-LDC attributes are enabled for Segmentation
+                                    // all non-LDC attributes are enabled for
+                                    // Segmentation
                                     // unless otherwise specified in upstream
                                     cm.enableGroupIfNotPresent(Segment);
 
@@ -134,7 +137,8 @@ public class SystemMetadataStoreImpl extends
                                         cm.setCanEnrich(true);
                                     }
 
-                                    // all custom account attributes enabled for following groups
+                                    // all custom account attributes enabled for
+                                    // following groups
                                     // unless otherwise specified in upstream
                                     if (BusinessEntity.Account.equals(entity)) {
                                         cm.enableGroupIfNotPresent(Model);
@@ -147,7 +151,8 @@ public class SystemMetadataStoreImpl extends
                                     }
                                 }
 
-                                // enable a list of default attributes for Export
+                                // enable a list of default attributes for
+                                // Export
                                 if (exportAttributes.contains(cm.getAttrName())) {
                                     cm.setCanEnrich(true);
                                     cm.enableGroupIfNotPresent(Enrichment);
@@ -177,12 +182,18 @@ public class SystemMetadataStoreImpl extends
                 if (BusinessEntity.Account.equals(entity)) {
                     // merge serving store and AM, for Account
                     Namespace1<String> amNs = cdlNamespaceService.resolveDataCloudVersion();
+                    boolean internalEnrichEnabled = zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(customerSpace));
                     ParallelFlux<ColumnMetadata> amFlux = amMetadataStore.getMetadataInParallel(amNs) //
                             .filter(cm -> !InterfaceName.LatticeAccountId.name().equals(cm.getAttrName())) //
                             .map(cm -> {
                                 cm.setEntity(BusinessEntity.Account);
 
-                                if (Category.FIRMOGRAPHICS.equals(cm.getCategory())
+                                // Initial status for Export: enabled for Firmographics and premium
+                                if (!internalEnrichEnabled && Boolean.TRUE.equals(cm.getCanInternalEnrich())) {
+                                    cm.disableGroup(Enrichment);
+                                    cm.disableGroup(TalkingPoint);
+                                    cm.setCanEnrich(false);
+                                } else if (Category.FIRMOGRAPHICS.equals(cm.getCategory())
                                         || StringUtils.isNotBlank(cm.getDataLicense())) {
                                     cm.enableGroup(Enrichment);
                                 } else {
