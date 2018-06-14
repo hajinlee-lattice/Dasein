@@ -71,7 +71,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     protected abstract List<ColumnMetadata> getSystemMetadata(Category category);
 
-    private static final long DEFAULT_LIMIT = 500L;
+    public static final long DEFAULT_LIMIT = 500L;
 
     @Override
     public List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render) {
@@ -304,6 +304,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
         }).collect(Collectors.toList());
     }
+
     /*
      * split configs by entity, then distribute thread to render separately
      */

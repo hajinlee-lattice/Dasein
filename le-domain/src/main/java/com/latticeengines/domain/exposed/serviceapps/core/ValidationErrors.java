@@ -20,15 +20,16 @@ public class ValidationErrors {
     }
 
     public enum Type {
-        EXCEED_SYSTEM_LIMIT,
-        EXCEED_DATA_LICENSE,
-        INVALID_ACTIVATION,
-        INVALID_USAGE_CHANGE,
-        INVALID_PROP_CHANGE,
-        IMPACTED_SEGMENTS,
+        EXCEED_SYSTEM_LIMIT, //
+        EXCEED_DATA_LICENSE, //
+        EXCEED_USAGE_LIMIT, //
+        INVALID_ACTIVATION, //
+        INVALID_USAGE_CHANGE, //
+        INVALID_PROP_CHANGE, //
+        IMPACTED_SEGMENTS, //
         IMPACTED_RATING_ENGINES, //
         IMPACTED_RATING_MODELS, //
-        IMPACTED_PLAYS,
+        IMPACTED_PLAYS, //
         OTHER;
     }
 }

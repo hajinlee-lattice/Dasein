@@ -12,6 +12,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 public class AttrConfigUsageOverview {
     public static final String SELECTED = "Selected";
     public static final String LIMIT = "Limit";
+    public static final long defaultExportLimit = 1000L;
+    public static final long defaultCompanyProfileLimit = 200L;
 
     @JsonProperty("AttrNums")
     private Map<String, Long> attrNums;

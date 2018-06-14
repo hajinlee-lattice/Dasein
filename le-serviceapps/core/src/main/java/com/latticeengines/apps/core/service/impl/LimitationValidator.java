@@ -1,13 +1,8 @@
 package com.latticeengines.apps.core.service.impl;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.stereotype.Component;
@@ -21,8 +16,6 @@ import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.DataLicense;
@@ -38,10 +31,8 @@ public class LimitationValidator extends AttrValidator {
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
     private static final String PLS = "PLS";
     private static final String EXPORT = "Export";
-    private static final int DEFAULT_LIMIT = 500;
 
     private List<AttrConfig> dbConfigs;
-
 
     protected LimitationValidator() {
         super(VALIDATOR_NAME);
@@ -54,85 +45,25 @@ public class LimitationValidator extends AttrValidator {
     @Override
     public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
         // make sure user selected attr don't have two same attribute
-        checkAmbiguityInFieldNames(attrConfigs);
+        LimitValidatorUtils.checkAmbiguityInFieldNames(attrConfigs);
         // split user selected configs into active and inactive, props always
         // are not empty after render method
-        List<AttrConfig> userSelectedActiveConfigs = returnPropertyConfigs(attrConfigs, ColumnMetadataKey.State,
-                AttrState.Active);
-        List<AttrConfig> userSelectedInactiveConfigs = returnPropertyConfigs(attrConfigs, ColumnMetadataKey.State,
-                AttrState.Inactive);
+        List<AttrConfig> userSelectedActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(attrConfigs,
+                ColumnMetadataKey.State, AttrState.Active);
+        List<AttrConfig> userSelectedInactiveConfigs = LimitValidatorUtils.returnPropertyConfigs(attrConfigs,
+                ColumnMetadataKey.State, AttrState.Inactive);
 
-
-        List<AttrConfig> existingActiveConfigs = getPropertyConfigsInDB(dbConfigs, ColumnMetadataKey.State,
-                AttrState.Active);
+        List<AttrConfig> existingActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(dbConfigs,
+                ColumnMetadataKey.State, AttrState.Active);
 
         // dedup, since the user selected configs has merged with the configs in
         // DB, no need to count same configs in DB
-        List<AttrConfig> activeConfigs = generateDedupConfig(existingActiveConfigs, userSelectedActiveConfigs);
-        checkDataLicense(activeConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
-        checkSystemLimit(activeConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
-    }
-
-    private List<AttrConfig> generateDedupConfig(List<AttrConfig> existingActiveConfigs,
-            List<AttrConfig> userSelectedActiveConfigs) {
-        List<AttrConfig> result = new ArrayList<AttrConfig>();
-        result.addAll(userSelectedActiveConfigs);
-        Set<String> attrNames = userSelectedActiveConfigs.stream().map(config -> config.getAttrName())
-                .collect(Collectors.toSet());
-        existingActiveConfigs.forEach(config -> {
-            if (!attrNames.contains(config.getAttrName())) {
-                result.add(config);
-            }
-        });
-        return result;
-    }
-
-
-
-    private <T extends Serializable> List<AttrConfig> returnPropertyConfigs(List<AttrConfig> attrConfigs,
-            String propName, T value) {
-        List<AttrConfig> stateConfigs = new ArrayList<>();
-        for (AttrConfig config : attrConfigs) {
-            try {
-                if (Boolean.TRUE.equals(config.getAttrProps().get(propName).isAllowCustomization())
-                        && value.equals(config.getAttrProps().get(propName).getCustomValue())) {
-                    stateConfigs.add(config);
-                }
-            } catch (NullPointerException e) {
-                throw new LedpException(LedpCode.LEDP_40026, new String[] { config.getAttrName() });
-            }
-        }
-        return stateConfigs;
-    }
-
-    private <T extends Serializable> List<AttrConfig> getPropertyConfigsInDB(List<AttrConfig> attrConfigs,
-            String propName, T value) {
-        List<AttrConfig> stateConfigs = new ArrayList<>();
-        for (AttrConfig config : attrConfigs) {
-            try {
-                if (config.getAttrProps().get(propName) != null
-                        && value.equals(config.getAttrProps().get(propName).getCustomValue())) {
-                    stateConfigs.add(config);
-                }
-            } catch (NullPointerException e) {
-                throw new LedpException(LedpCode.LEDP_40027, new String[] { config.getAttrName() });
-            }
-        }
-        return stateConfigs;
-    }
-
-    private void checkAmbiguityInFieldNames(List<AttrConfig> attrConfigs) {
-        Set<String> attrSet = new HashSet<>();
-        if (!CollectionUtils.isEmpty(attrConfigs)) {
-            for (AttrConfig config : attrConfigs) {
-                String attrName = config.getAttrName();
-                if (attrSet.contains(attrName)) {
-                    throw new LedpException(LedpCode.LEDP_18113, new String[] { attrName });
-                }
-                attrSet.add(attrName);
-            }
-        }
-
+        List<AttrConfig> activeConfigs = LimitValidatorUtils.generateUnionConfig(existingActiveConfigs,
+                userSelectedActiveConfigs);
+        List<AttrConfig> inactiveConfigs = LimitValidatorUtils.generateInterceptionConfig(existingActiveConfigs,
+                userSelectedInactiveConfigs);
+        checkDataLicense(activeConfigs, inactiveConfigs, userSelectedActiveConfigs);
+        checkSystemLimit(activeConfigs, inactiveConfigs, userSelectedActiveConfigs);
     }
 
     private void checkDataLicense(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
@@ -173,25 +104,22 @@ public class LimitationValidator extends AttrValidator {
         }
     }
 
-
     // check category limit
     private void checkSystemLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs) {
         checkDetailSystemLimit(configs, userSelectedInactiveConfigs, userSelectedActiveConfigs,
-                Category.ACCOUNT_ATTRIBUTES,
-                DEFAULT_LIMIT);
+                Category.ACCOUNT_ATTRIBUTES, (int) AbstractAttrConfigService.DEFAULT_LIMIT);
         checkDetailSystemLimit(configs, userSelectedInactiveConfigs, userSelectedActiveConfigs,
-                Category.CONTACT_ATTRIBUTES,
-                DEFAULT_LIMIT);
+                Category.CONTACT_ATTRIBUTES, (int) AbstractAttrConfigService.DEFAULT_LIMIT);
     }
 
     private void checkDetailSystemLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs, Category category, int limit) {
-        List<AttrConfig> list = configs.stream().filter(
-                e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
+        List<AttrConfig> list = configs.stream()
+                .filter(e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
                 .collect(Collectors.toList());
-        List<AttrConfig> inactiveList = userSelectedInactiveConfigs.stream().filter(
-                e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
+        List<AttrConfig> inactiveList = userSelectedInactiveConfigs.stream()
+                .filter(e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
                 .collect(Collectors.toList());
         int number = list.size() - inactiveList.size();
         if (number > limit) {

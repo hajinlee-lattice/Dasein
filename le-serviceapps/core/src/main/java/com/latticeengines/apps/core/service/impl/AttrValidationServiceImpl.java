@@ -22,6 +22,9 @@ public class AttrValidationServiceImpl implements AttrValidationService {
         LimitationValidator limitationValidator = (LimitationValidator) AttrValidator
                 .getValidator(LimitationValidator.VALIDATOR_NAME);
         limitationValidator.setDBConfigs(existingConfigs);
+        UsageLimitValidator usageLimitationValidator = (UsageLimitValidator) AttrValidator
+                .getValidator(UsageLimitValidator.VALIDATOR_NAME);
+        usageLimitationValidator.setDBConfigs(existingConfigs);
     }
 
     @PostConstruct
@@ -31,6 +34,7 @@ public class AttrValidationServiceImpl implements AttrValidationService {
         validatorList.add(LifecycleValidator.VALIDATOR_NAME);
         validatorList.add(LimitationValidator.VALIDATOR_NAME);
         validatorList.add(UsageValidator.VALIDATOR_NAME);
+        validatorList.add(UsageLimitValidator.VALIDATOR_NAME);
     }
 
     @Override

@@ -42,50 +42,52 @@ public class UsageValidator extends AttrValidator {
                     attrConfig.getAttrName(), attrConfig.getAttrType().name(), attrConfig.getAttrSubType().name()));
             return;
         }
-        for (ColumnSelection.Predefined group: ColumnSelection.Predefined.values()) {
-            AttrConfigProp groupUsageProp = attrConfig.getProperty(group.name());
+        for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
+            AttrConfigProp<?> groupUsageProp = attrConfig.getProperty(group.name());
             if (groupUsageProp != null && groupUsageProp.getCustomValue() != null) {
                 switch (group) {
-                    case Segment:
-                        if (!attrSpec.segmentationChange()) {
-                            addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                    String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
-                                            attrSpec.getSpecification()),
-                                    attrConfig);
-                        }
-                        break;
-                    case Enrichment:
-                        if (!attrSpec.enrichmentChange()) {
-                            addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                    String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
-                                            attrSpec.getSpecification()),
-                                    attrConfig);
-                        }
-                        break;
-                    case CompanyProfile:
-                        if (!attrSpec.companyProfileChange()) {
-                            addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                    String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
-                                            attrSpec.getSpecification()),
-                                    attrConfig);
-                        }
-                        break;
-                    case TalkingPoint:
-                        if (!attrSpec.talkingPointChange()) {
-                            addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                    String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
-                                            attrSpec.getSpecification()),
-                                    attrConfig);
-                        }
-                        break;
-                    case Model:
-                        if (!attrSpec.modelChange()) {
-                            addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
-                                    String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
-                                            attrSpec.getSpecification()),
-                                    attrConfig);
-                        }
-                        break;
+                case Segment:
+                    if (!attrSpec.segmentationChange()) {
+                        addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
+                                String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
+                                        attrSpec.getSpecification()),
+                                attrConfig);
+                    }
+                    break;
+                case Enrichment:
+                    if (!attrSpec.enrichmentChange()) {
+                        addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
+                                String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
+                                        attrSpec.getSpecification()),
+                                attrConfig);
+                    }
+                    break;
+                case CompanyProfile:
+                    if (!attrSpec.companyProfileChange()) {
+                        addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
+                                String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
+                                        attrSpec.getSpecification()),
+                                attrConfig);
+                    }
+                    break;
+                case TalkingPoint:
+                    if (!attrSpec.talkingPointChange()) {
+                        addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
+                                String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
+                                        attrSpec.getSpecification()),
+                                attrConfig);
+                    }
+                    break;
+                case Model:
+                    if (!attrSpec.modelChange()) {
+                        addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
+                                String.format(ValidationMsg.Errors.INVALID_ATTRIBUTE_USAGE_CHANGE, group.name(),
+                                        attrSpec.getSpecification()),
+                                attrConfig);
+                    }
+                    break;
+                default:
+                    return;
                 }
             }
         }

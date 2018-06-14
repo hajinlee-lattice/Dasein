@@ -2,10 +2,10 @@ package com.latticeengines.apps.core.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 
 import org.apache.hadoop.util.StringUtils;
 import org.mockito.Mockito;
@@ -37,11 +37,9 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         setupTestEnvironment();
         MultiTenantContext.setTenant(mainTestTenant);
         limitationValidator.setDBConfigs(new ArrayList<>());
-        Mockito.doReturn(mockHGLimit).when(limitationValidator).getMaxPremiumLeadEnrichmentAttributesByLicense(
-                anyString(),
-                anyString());
+        Mockito.doReturn(mockHGLimit).when(limitationValidator)
+                .getMaxPremiumLeadEnrichmentAttributesByLicense(anyString(), anyString());
     }
-
 
     @Test(groups = "functional")
     public void testDataLicense() throws Exception {
@@ -79,7 +77,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         attrConfigs.add(inactiveConfig);
         limitationValidator.validate(attrConfigs, false);
         // the inactive config should not have error message
-        assertEquals(getErrorNumber(attrConfigs), 0);
+        assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
 
     @Test(groups = "functional")
@@ -124,7 +122,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         attrConfigs.add(inactiveConfig);
         limitationValidator.validate(attrConfigs, false);
         // the new config should not have error message
-        assertEquals(getErrorNumber(attrConfigs), 0);
+        assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
 
     private int getErrorNumber(List<AttrConfig> configs) {

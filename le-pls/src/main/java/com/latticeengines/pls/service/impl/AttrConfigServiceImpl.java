@@ -57,8 +57,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private static final Set<String> usagePropertySet = new HashSet<>(Arrays.asList(usageProperties));
     private static final String defaultDisplayName = "Default Name";
     private static final String defaultDescription = "Default Description";
-    private static final long defaultExportLimit = 1000L;
-    private static final long defaultCompanyProfileLimit = 200L;
 
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
@@ -106,9 +104,10 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         for (String property : usageProperties) {
             Map<String, Long> detailedSelections = new HashMap<>();
             if (property.equals(ColumnSelection.Predefined.Enrichment.getName())) {
-                detailedSelections.put(AttrConfigUsageOverview.LIMIT, defaultExportLimit);
+                detailedSelections.put(AttrConfigUsageOverview.LIMIT, AttrConfigUsageOverview.defaultExportLimit);
             } else if (property.equals(ColumnSelection.Predefined.CompanyProfile.getName())) {
-                detailedSelections.put(AttrConfigUsageOverview.LIMIT, defaultCompanyProfileLimit);
+                detailedSelections.put(AttrConfigUsageOverview.LIMIT,
+                        AttrConfigUsageOverview.defaultCompanyProfileLimit);
             }
             selections.put(property, detailedSelections);
             long num = 0L;
