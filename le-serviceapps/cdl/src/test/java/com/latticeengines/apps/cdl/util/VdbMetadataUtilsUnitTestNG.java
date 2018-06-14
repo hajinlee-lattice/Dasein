@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.util;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -166,7 +167,7 @@ public class VdbMetadataUtilsUnitTestNG {
         metadata.setDataSource(Collections.singletonList("HGData_Source"));
         metadata.setMostRecentUpdateDate("3/24/2017 1:36:00 AM +00:00");
         metadata.setLastTimeSourceUpdated(Collections.singletonList("3/24/2017 1:36:00 AM +00:00"));
-        metadata.setTags(Collections.singletonList("External"));
+        metadata.setTags(Arrays.asList("External", "ExcludeFromAll"));
         VdbMetadataExtension vdbMetadataExtension = new VdbMetadataExtension();
         vdbMetadataExtension.setKey("ExcludeFromAll");
         vdbMetadataExtension.setValue("true");

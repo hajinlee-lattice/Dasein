@@ -6595,7 +6595,11 @@
       "last_time_source_updated": null,
       "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
       "statistical_type": null,
-      "tags": null
+      "tags": [
+	    "ExcludeFromFiltering",
+	    "ExcludeFromPlaymakerExport",
+	    "ExcludeFromTalkingPoints"
+	  ]
     },
     {
       "approved_usage": null,
@@ -6614,7 +6618,10 @@
       "last_time_source_updated": null,
       "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
       "statistical_type": null,
-      "tags": null
+      "tags": [
+	    "ExcludeFromFiltering",
+	    "ExcludeFromPlaymakerExport"
+	  ]
     },
     {
       "approved_usage": null,
@@ -6642,7 +6649,12 @@
       "last_time_source_updated": null,
       "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
       "statistical_type": null,
-      "tags": null
+      "tags": [
+	    "ExcludeFromFiltering",
+	    "ExcludeFromPlaymakerExport",
+	    "ExcludeFromTalkingPoints",
+	    "ExcludeFromDetailView"
+	  ]
     },
     {
       "approved_usage": null,
