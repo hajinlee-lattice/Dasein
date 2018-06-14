@@ -125,7 +125,7 @@ angular.module('lp.ratingsengine.dashboard', [
     }
     
     vm.deactivate = function(){
-        if(vm.dashboard.plays && vm.dashboard.plays.length > 0){
+        if(vm.dashboard.plays && vm.dashboard.plays.length > 0 && vm.ratingEngine.status === 'ACTIVE'){
             vm.toggleModal();
         }else{
             vm.deactivateRating();
