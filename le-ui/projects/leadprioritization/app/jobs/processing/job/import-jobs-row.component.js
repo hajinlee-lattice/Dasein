@@ -1,9 +1,8 @@
-angular.module('lp.jobs.import.row', [])
+angular.module('lp.jobs.import.row', ['mainApp.appCommon.directives.modal.window'])
 
     .directive('importJobRow', [function () {
-        var controller = ['$scope', '$q', '$timeout', 'JobsStore', function ($scope, $q, $timeout, JobsStore) {
+        var controller = ['$scope', '$q', '$timeout', 'JobsStore', 'ModalStore', function ($scope, $q, $timeout, JobsStore, ModalStore) {
             $scope.thejob = $scope.job;
-            $scope.clicked = false;
             $scope.disableButton = false;
             $scope.maxRowsTooltip = 3;
             $scope.expanded = false;
@@ -12,7 +11,8 @@ angular.module('lp.jobs.import.row', [])
                 1: { name: 'Analyzing', lable: 'Analyzing' },
                 2: { name: 'Publishing', lable: 'Loading' },
                 3: { name: 'Scoring', lable: 'Scoring' }
-            }
+            };
+
             $scope.stepsConfig = {
                 "Merging, De-duping & matching to Lattice Data Cloud": { position: 1, label: 'Merging, De-duping & Matching' },
                 'Analyzing': { position: 2, label: 'Analyzing' },
@@ -23,27 +23,26 @@ angular.module('lp.jobs.import.row', [])
 
             function callbackModalWindow(action) {
                 if (action && action.action === 'run') {
-                    // console.log(action);
-                    // console.log('Job ', action.obj);
                     if(action.obj){
                         action.obj.jobStatus = 'Waiting';
                     }
                     $scope.disableButton = true;
                     JobsStore.runJob($scope.job).then(function (result) {
                         $scope.disableButton = true;
-                        // console.log('Result ~~~~~~~> ', result);
                         if(result.Success === true && action.obj) {
                             action.obj.jobStatus = 'Pending';
                         }
                     });
+                }else{
+                    $scope.disableButton = false;
                 }
             }
+            
             function init() {
 
                 if ($scope.vm.rowStatus[$scope.index] != undefined && $scope.vm.rowStatus[$scope.index] == true) {
                     $scope.expanded = true;
                 }
-                $scope.vm.callback = callbackModalWindow;
                 $scope.loading = false;
             }
 
@@ -73,12 +72,11 @@ angular.module('lp.jobs.import.row', [])
                     var found = getRecordFound($scope.job.subJobs[i]);
                     var uploaded = getRecordUploaded($scope.job.subJobs[i]);
                     if (found != uploaded && $scope.job.subJobs[i].inputs != undefined) {
-                        // var fileName = $scope.job.subJobs[i].inputs.SOURCE_DISPLAY_NAME;
                         listPartialSuccess.push($scope.job.subJobs[i]);
                     }
                 }
                 return listPartialSuccess;
-            }
+            };
 
             $scope.getSubjobActionName = function (index, subjob) {
                 if (subjob.inputs != undefined) {
@@ -86,7 +84,7 @@ angular.module('lp.jobs.import.row', [])
                 } else {
                     return index + '. Unknown';
                 }
-            }
+            };
 
             $scope.isOneActionCompleted = function (job) {
                 var subJobs = job.subJobs;
@@ -103,7 +101,7 @@ angular.module('lp.jobs.import.row', [])
                     job.jobStatus = 'Waiting';
                 }
                 return oneCompleted;
-            }
+            };
 
             $scope.expandRow = function () {
                 $scope.loading = false;
@@ -112,16 +110,15 @@ angular.module('lp.jobs.import.row', [])
             };
 
             $scope.vm.run = function (job) {
-                $scope.clicked = true;
+                // $scope.clicked = true;
                 var show = $scope.showWarningRun(job);
                 if (show) {
                     $scope.vm.toggleModal(job);
-
                 } else {
                     // var obj = JSON.stringify(job);
                     $scope.vm.callback({ 'action': 'run', 'obj': job });
                 }
-            }
+            };
 
             $scope.showWarningRun = function (job) {
                 var subJobs = job.subJobs;
@@ -136,7 +133,7 @@ angular.module('lp.jobs.import.row', [])
                     }
                 }
                 return !allCompleted;
-            }
+            };
 
             $scope.showScheduleTime = function(job){
                 if(!$scope.disableRunButton(job) && $scope.showRunButton(job)){
@@ -144,46 +141,40 @@ angular.module('lp.jobs.import.row', [])
                 }else{
                     return false;
                 }
-            }
+            };
+            
             $scope.mouseDownRun  = function(job){
-                $scope.clicked = true;
-                // console.log('DOWN =====> ', $scope.clicked);
-                $scope.vm.run(job);
-            }
-            $scope.getJobStatus = function(job){
-                switch(job.jobStatus){
-                    case 'Ready' : {
-                        var canRun = $scope.vm.canLastJobRun();
-                        if(canRun === false){
-                            return 'Blocked';
-                        }
+                var formerFailed = $scope.vm.isLastOneFailed();
+                $scope.vm.callback = callbackModalWindow;
+                $scope.disableButton = true;
+                
+                if(formerFailed === true){
+                    var someIncompleted = $scope.showWarningRun(job);
+                    if(someIncompleted){
+                        $scope.vm.msgUrl = 'app/jobs/processing/actions.failed.incomplete.message.html';
+                    }else{
+                        $scope.vm.msgUrl = 'app/jobs/processing/actions.failed.message.html';
                     }
-                    default:
-                        return job.jobStatus;
+                    $scope.vm.toggleModal(job);
+                }else{
+                    $scope.vm.run(job);
                 }
-            }
+            };
 
-            $scope.isJobBlocked = function(job){
-                if('Blocked' === $scope.getJobStatus(job)){
-                    return true;
-                }else {
-                    return false;
-                }
-            }
+            $scope.getJobStatus = function(job){
+                return job.jobStatus;
+            
+            };
 
             $scope.disableRunButton = function (job) {
-                // console.log('=================');
-                // console.log('Clicked ', $scope.clicked);
                 var oneCompleted = $scope.isOneActionCompleted(job);
                 var canRun = $scope.vm.canLastJobRun();
                 var disable = false;
-                if ($scope.clicked || $scope.disableButton || !canRun || !oneCompleted) {
+                if ($scope.disableButton || !canRun || !oneCompleted) {
                     disable = true;
                 }
-                // console.log('Disabled ===> ', disable);
-
                 return disable;
-            }
+            };
 
             $scope.showRunButton = function (job) {
                 switch(job.jobStatus){
@@ -197,7 +188,7 @@ angular.module('lp.jobs.import.row', [])
                         return true;
                     }
                 }
-            }
+            };
 
             $scope.showReport = function (job) {
                 if($scope.showRunButton(job)){
@@ -214,7 +205,7 @@ angular.module('lp.jobs.import.row', [])
                     }
                 }
 
-            }
+            };
 
             $scope.showChevron = function(job){
                 switch(job.jobStatus){
@@ -231,7 +222,7 @@ angular.module('lp.jobs.import.row', [])
                         }
                     }
                 }
-            }
+            };
 
             $scope.isJonInState = function(job, status){
                 if(job.jobStatus === status){
@@ -239,14 +230,15 @@ angular.module('lp.jobs.import.row', [])
                 }else{
                     return false;
                 }
-            }
+            };
+
             $scope.isJobReady = function(job){
                 if (job.jobStatus === 'Ready') {
                     return true;
                 } else {
                     return false;
                 }
-            }
+            };
 
             $scope.isJobPending = function (job) {
                 if (job.jobStatus === 'Pending') {
@@ -255,14 +247,14 @@ angular.module('lp.jobs.import.row', [])
                     return false;
                 }
 
-            }
+            };
             $scope.isJobCompleted = function (job) {
                 if ('Completed' === job.jobStatus) {
                     return true;
                 } else {
                     return true;
                 }
-            }
+            };
 
             $scope.isJobFailed = function (job) {
                 if (job.jobStatus === 'Failed') {
@@ -270,14 +262,15 @@ angular.module('lp.jobs.import.row', [])
                 } else {
                     return false;
                 }
-            }
+            };
+
             $scope.isJobRunning = function (job) {
                 if (job.jobStatus === 'Running' || job.jobStatus === 'Pending') {
                     return true;
                 } else {
                     return false;
                 }
-            }
+            };
 
             $scope.getActionsCount = function () {
                 if ($scope.job.subJobs) {
@@ -287,7 +280,8 @@ angular.module('lp.jobs.import.row', [])
                 } else {
                     return '-';
                 }
-            }
+            };
+
             init();
 
         }];

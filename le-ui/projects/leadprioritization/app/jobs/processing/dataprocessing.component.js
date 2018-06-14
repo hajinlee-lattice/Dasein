@@ -54,6 +54,7 @@ angular.module('lp.jobs.import', [
         vm.pagesize = 10;
         vm.query = '';
         vm.currentPage = 1;
+        vm.msgUrl = 'app/jobs/processing/actions.incompleted.message.html';
         vm.header = {
             filter: {
                 label: 'Filter By',
@@ -91,7 +92,7 @@ angular.module('lp.jobs.import', [
                     { label: 'Job Status', icon: 'alpha', property: 'status' }
                 ]
             }
-        }
+        };
 
         angular.extend(vm, {
             jobs: JobsStore.data.importJobs,
@@ -119,33 +120,42 @@ angular.module('lp.jobs.import', [
             };
 
             vm.modalCallback = function (args) {
-                if (vm.config.dischargeaction === args.action) {
-                    vm.toggleModal();
-                } else if (vm.config.confirmaction === args.action) {
-                    vm.toggleModal();
+                // if (vm.config.dischargeaction === args.action) {
+                //     vm.toggleModal();
+                // } else 
+                if (vm.config.confirmaction === args.action) {
                     vm.callback({ 'action': 'run', 'obj': args.data });
+                }else{
+                    var data = ModalStore.getData(vm.config.name);
+                    vm.callback({ 'action': 'cancel', 'obj': data });
                 }
-            }
+                vm.toggleModal();
+                vm.msgUrl = 'app/jobs/processing/actions.incompleted.message.html';
+            };
             vm.toggleModal = function (data) {
                 var modal = ModalStore.get(vm.config.name);
                 if (modal) {
                     modal.toggle(data);
                 }
-            }
+            };
 
             vm.rowExpanded = function(row, state){
                 vm.rowStatus[row] = state;
-            }
+            };
 
             $scope.$on("$destroy", function () {
                 ModalStore.remove(vm.config.name);
             });
-        }
+        };
 
         vm.init = function () {
             vm.jobs = JobsStore.getList('import');
             vm.initModalWindow();
-        }
+        };
+
+        vm.viewUrl = function () {
+            return vm.msgUrl;
+        };
 
         this.init();
 
@@ -161,16 +171,6 @@ angular.module('lp.jobs.import', [
             }
         }
 
-        function isOneFailed() {
-            var isFailed = false;
-            vm.jobs.forEach(function (element) {
-                if (element.jobStatus === 'Failed') {
-                    isFailed = true;
-                    return isFailed;
-                }
-            });
-            return isFailed;
-        }
 
         function isOneRunning() {
             var isOneRunning = false;
@@ -183,16 +183,19 @@ angular.module('lp.jobs.import', [
             return isOneRunning;
         }
 
+        vm.isLastOneFailed = function(){
+            return isLastOneFailed();
+        };
+
         vm.canLastJobRun = function () {
             var canRun = false;
-            var oneFailed = isLastOneFailed();//isOneFailed();
             var oneRunnig = isOneRunning();
 
-            if (!oneFailed && !oneRunnig) {
+            if (!oneRunnig) {
                 canRun = true;
             }
             return canRun;
-        }
+        };
 
         vm.clearMessages = function () {
             vm.successMsg = null;
