@@ -30,10 +30,6 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         }
     }
 
-    @Override
-    protected void updateDataCloudBuildNumber() {
-    }
-
     private void importData() throws Exception {
         mockCSVImport(BusinessEntity.Contact, 3, "Contact");
         Thread.sleep(2000);
