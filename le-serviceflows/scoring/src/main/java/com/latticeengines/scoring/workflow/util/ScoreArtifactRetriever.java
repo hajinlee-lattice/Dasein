@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,14 @@ public class ScoreArtifactRetriever {
     }
 
     private String getModelAppIdSubfolder(CustomerSpace customerSpace, ModelSummary modelSummary) {
-        String appId;
+        String appId = modelSummary.getApplicationId();
+        if (!StringUtils.isBlank(appId) && appId.length() > "application_".length()) {
+            appId = appId.substring("application_".length());
+            if (!StringUtils.isBlank(appId)) {
+                log.info("Parsed appId foldername from modelsummary:" + appId);
+                return appId;
+            }
+        }
 
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);
         String hdfsScoreArtifactAppIdDir = String.format(HDFS_SCORE_ARTIFACT_APPID_DIR, customerSpace.toString(),
