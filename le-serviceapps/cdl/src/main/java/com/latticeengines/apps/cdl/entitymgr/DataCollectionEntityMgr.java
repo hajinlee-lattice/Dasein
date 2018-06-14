@@ -10,17 +10,15 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
-    DataCollection findOrCreateDefaultCollection();
+    DataCollection createDefaultCollection();
 
-    DataCollection findDefaultCollectionReadOnly();
+    DataCollection findDefaultCollection();
 
     DataCollection.Version findActiveVersion();
 
     DataCollection.Version findInactiveVersion();
 
     DataCollection getDataCollection(String name);
-
-    void removeDataCollection(String name);
 
     List<Table> findTablesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version);
 

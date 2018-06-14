@@ -67,7 +67,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     public void create(DataFeed datafeed) {
         DataCollection dataCollection;
         if (datafeed.getDataCollection() == null || StringUtils.isBlank(datafeed.getDataCollection().getName())) {
-            dataCollection = dataCollectionEntityMgr.findOrCreateDefaultCollection();
+            dataCollection = dataCollectionEntityMgr.findDefaultCollection();
         } else {
             dataCollection = dataCollectionEntityMgr.getDataCollection(datafeed.getDataCollection().getName());
         }
@@ -154,7 +154,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findDefaultFeed() {
-        DataCollection collection = dataCollectionEntityMgr.findDefaultCollectionReadOnly();
+        DataCollection collection = dataCollectionEntityMgr.findDefaultCollection();
         if (collection == null) {
             throw new IllegalStateException("Default collection has not been initialized.");
         }
@@ -166,7 +166,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     public DataFeed findDefaultFeedReadOnly() {
         DataCollection collection = null;
         try {
-            collection = dataCollectionEntityMgr.findDefaultCollectionReadOnly();
+            collection = dataCollectionEntityMgr.findDefaultCollection();
         } catch (RuntimeException e) {
             collection = null;
         }

@@ -84,7 +84,7 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findInMasterSegment(String collectionName, DataCollection.Version version) {
         collectionName = StringUtils.isBlank(collectionName)
-                ? dataCollectionEntityMgr.findOrCreateDefaultCollection().getName() : collectionName;
+                ? dataCollectionEntityMgr.findDefaultCollection().getName() : collectionName;
         StatisticsContainer container = statisticsContainerDao.findInMasterSegment(collectionName, version);
         return copyStatisticsToStatsCubes(container);
     }

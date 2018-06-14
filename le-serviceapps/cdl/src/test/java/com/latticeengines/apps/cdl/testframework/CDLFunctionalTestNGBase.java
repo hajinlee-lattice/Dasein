@@ -67,7 +67,7 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected GlobalAuthFunctionalTestBed testBed;
 
     @Inject
-    public SegmentService segmentService;
+    protected SegmentService segmentService;
 
     @Inject
     protected TenantEntityMgr tenantEntityMgr;
@@ -132,7 +132,7 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private void createDataCollection() {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(mainTestTenant.getId()));
-        dataCollection = dataCollectionEntityMgr.findOrCreateDefaultCollection();
+        dataCollection = dataCollectionEntityMgr.createDefaultCollection();
         collectionName = dataCollection.getName();
     }
 
@@ -142,11 +142,6 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tableEntityMgr.create(table);
         }
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(), role, version);
-    }
-
-    protected List<Table> getTablesInCollection() {
-        DataCollection.Version version = dataCollectionEntityMgr.findActiveVersion();
-        return dataCollectionEntityMgr.findTablesOfRole(collectionName, null, version);
     }
 
     private Restriction createAccountRestriction() {

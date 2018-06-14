@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -28,6 +29,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     @Inject
     private DataUnitEntityMgr dataUnitEntityMgr;
 
+    @Inject
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
+
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
         String camilleTenantId = space.getTenantId();
@@ -35,9 +39,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         String camilleSpaceId = space.getSpaceId();
         String customerSpace = String.format("%s.%s.%s", camilleContractId, camilleTenantId, camilleSpaceId);
         log.info(String.format("Provisioning tenant %s", customerSpace));
+        dataCollectionEntityMgr.createDefaultCollection();
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
-        log.info("Initialized data collection " + dataFeed.getDataCollection().getName()
-                + " and data feed " + dataFeed.getName());
+        log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
     }
 
     public void discardTenant(String customerSpace) {

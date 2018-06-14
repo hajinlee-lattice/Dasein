@@ -209,7 +209,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public DataFeed createDataFeed(String customerSpace, String collectionName, DataFeed datafeed) {
         if (StringUtils.isBlank(collectionName)) {
-            collectionName = dataCollectionService.getOrCreateDefaultCollection(customerSpace).getName();
+            collectionName = dataCollectionService.getDefaultCollection(customerSpace).getName();
         }
         DataFeed existing = datafeedEntityMgr.findByName(datafeed.getName());
         if (existing != null) {
@@ -226,7 +226,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public synchronized DataFeed getOrCreateDataFeed(String customerSpace) {
-        dataCollectionService.getOrCreateDefaultCollection(customerSpace);
+        dataCollectionService.getDefaultCollection(customerSpace);
         DataFeed dataFeed = datafeedEntityMgr.findDefaultFeed();
         return findDataFeedByName(customerSpace, dataFeed.getName());
     }

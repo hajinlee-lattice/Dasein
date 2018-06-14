@@ -66,7 +66,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public DataCollection getDataCollection(String customerSpace, String collectionName) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
         return dataCollectionEntityMgr.getDataCollection(collectionName);
@@ -91,15 +91,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollection getOrCreateDefaultCollection(String customerSpace) {
-        return dataCollectionEntityMgr.findOrCreateDefaultCollection();
+    public DataCollection getDefaultCollection(String customerSpace) {
+        return dataCollectionEntityMgr.findDefaultCollection();
     }
 
     @Override
     public void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role,
             DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
 
@@ -138,7 +138,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     public void upsertTables(String customerSpace, String collectionName, String[] tableNames,
             TableRoleInCollection role, DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
         if (version == null) {
@@ -178,7 +178,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     public void removeTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role,
             DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
 
@@ -204,7 +204,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public void resetTable(String customerSpace, String collectionName, TableRoleInCollection role) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
 
@@ -220,7 +220,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public void addStats(String customerSpace, String collectionName, StatisticsContainer container) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
         DataCollection dataCollection = getDataCollection(customerSpace, collectionName);
@@ -243,7 +243,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public StatisticsContainer getStats(String customerSpace, String collectionName, DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
         if (version == null) {
@@ -257,7 +257,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole,
             DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
         if (version == null) {
@@ -272,7 +272,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     public List<String> getTableNames(String customerSpace, String collectionName, TableRoleInCollection tableRole,
             DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
         if (version == null) {
@@ -290,7 +290,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     public AttributeRepository getAttrRepo(String customerSpace, String collectionName,
             DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
         final String notNullCollectionName = collectionName;
@@ -397,7 +397,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         DataCollectionStatus status = dataCollectionStatusEntityMgr.findByTenantAndVersion(tenant, version);
         if (status == null) {
-            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            DataCollection collection = getDefaultCollection(customerSpace);
             status = new DataCollectionStatus();
             status.setDataCollection(collection);
             status.setTenant(tenant);

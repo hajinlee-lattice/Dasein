@@ -89,17 +89,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return dataCollectionDao.findByField("name", name);
     }
 
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    @Override
-    public void removeDataCollection(String name) {
-        DataCollection dataCollection = getDataCollection(name);
-
-        List<Table> tablesInCollection = findTablesOfRole(name, null, null);
-        tablesInCollection.forEach(t -> removeTableFromCollection(name, t.getName(), null));
-
-        dataCollectionDao.delete(dataCollection);
-    }
-
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<Table> findTablesOfRole(String collectionName, TableRoleInCollection tableRole,
@@ -170,36 +159,20 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public DataCollection findOrCreateDefaultCollection() {
+    public DataCollection findDefaultCollection() {
         List<DataCollection> collections = dataCollectionDao.findAll();
-        if (collections == null || collections.isEmpty()) {
-            return createDefaultCollection();
-        }
-        if (collections.size() == 1) {
+        if (CollectionUtils.size(collections) != 1) {
+            throw new RuntimeException("There are " + CollectionUtils.size(collections) + " data collections in current tenant. "
+                    + "Cannot determine which one is the default.");
+        } else {
             return collections.get(0);
         }
-        throw new RuntimeException("There are " + collections.size() + " data collections in current tenant. "
-                + "Cannot determine which one is the default.");
-    }
-
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    @Override
-    public DataCollection findDefaultCollectionReadOnly() {
-        List<DataCollection> collections = dataCollectionDao.findAll();
-        if (collections == null || collections.isEmpty()) {
-            throw new RuntimeException("Default collection has not been created yet.");
-        }
-        if (collections.size() == 1) {
-            return collections.get(0);
-        }
-        throw new RuntimeException("There are " + collections.size() + " data collections in current tenant. "
-                + "Cannot determine which one is the default.");
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection.Version findActiveVersion() {
-        return findDefaultCollectionReadOnly().getVersion();
+        return findDefaultCollection().getVersion();
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -209,7 +182,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return activeVersion.complement();
     }
 
-    private DataCollection createDefaultCollection() {
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public DataCollection createDefaultCollection() {
         DataCollection dataCollection = new DataCollection();
         return createDataCollection(dataCollection);
     }

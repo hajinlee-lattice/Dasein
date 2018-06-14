@@ -18,7 +18,7 @@ public interface DataCollectionService {
     DataCollection.Version switchDataCollectionVersion(String customerSpace, String collectionName,
                                                        DataCollection.Version version);
 
-    DataCollection getOrCreateDefaultCollection(String customerSpace);
+    DataCollection getDefaultCollection(String customerSpace);
 
     void addStats(String customerSpace, String collectionName, StatisticsContainer container);
 

@@ -72,7 +72,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
         segment.setTenant(MultiTenantContext.getTenant());
         if (segment.getDataCollection() == null) {
-            DataCollection defaultCollection = dataCollectionEntityMgr.findOrCreateDefaultCollection();
+            DataCollection defaultCollection = dataCollectionEntityMgr.findDefaultCollection();
             segment.setDataCollection(defaultCollection);
         }
         MetadataSegment master = findMasterSegment(segment.getDataCollection().getName());
