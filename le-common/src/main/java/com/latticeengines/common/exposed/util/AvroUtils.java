@@ -1067,4 +1067,11 @@ public class AvroUtils {
         }
         writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records);
     }
+
+    public static boolean isValidColumn(String column) {
+        if (StringUtils.isBlank(column)) {
+            return false;
+        }
+        return column.matches("^[A-Za-z\\d][A-Za-z\\d\\_]*$");
+    }
 }

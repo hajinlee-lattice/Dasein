@@ -141,4 +141,38 @@ public class AvroUtilsUnitTestNG {
         });
     }
 
+    @Test(groups = "unit", dataProvider = "columnProvider")
+    public void testIsValidColumn(String column, boolean isValid) {
+        Assert.assertEquals(AvroUtils.isValidColumn(column), isValid);
+    }
+
+    @DataProvider(name = "columnProvider")
+    public Object[][] getColumnProvider() {
+        return new Object[][] {
+                { "", false }, //
+                { " ", false }, //
+                { "_", false }, //
+                { "^?", false }, //
+
+                { "_A", false }, //
+                { "_a", false }, //
+                { "_9", false }, //
+
+                { "A_", true }, //
+                { "a_", true }, //
+                { "9_", true }, //
+
+                { "A_A", true }, //
+                { "a_a", true }, //
+                { "9_9", true }, //
+
+                { "A A", false }, //
+                { "a a", false }, //
+                { "9 9", false }, //
+
+                { "AA ", false }, //
+                { "aa ", false }, //
+                { "99 ", false }, //
+        };
+    }
 }
