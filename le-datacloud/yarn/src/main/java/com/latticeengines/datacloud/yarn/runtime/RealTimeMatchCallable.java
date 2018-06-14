@@ -32,6 +32,7 @@ public class RealTimeMatchCallable implements Callable<MatchContext> {
     @MatchStep
     private MatchContext matchBlock(MatchInput input) {
         MatchContext matchContext = new MatchContext();
+        matchContext.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         matchContext.setInput(input);
         try {
             MatchOutput output = matchProxy.matchRealTime(input);

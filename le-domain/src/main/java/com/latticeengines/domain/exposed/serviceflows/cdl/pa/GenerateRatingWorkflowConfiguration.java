@@ -41,6 +41,11 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            generateAIRating.internalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
         public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
             generateAIRating.dataCloudVersion(dataCloudVersion.getVersion());
             return this;

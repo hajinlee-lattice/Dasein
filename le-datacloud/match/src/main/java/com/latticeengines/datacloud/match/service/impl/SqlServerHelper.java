@@ -270,7 +270,7 @@ public class SqlServerHelper implements DbHelper {
         MatchInput dummyInput = new MatchInput();
         dummyInput.setDataCloudVersion(dataCloudVersion);
         mergedContext.setInput(dummyInput);
-
+        mergedContext.setMatchEngine(matchContextList.get(0).getMatchEngine());
         Set<String> domainSet = new HashSet<>();
         Set<NameLocation> nameLocationSet = new HashSet<>();
         Map<String, Set<String>> srcColSetMap = new HashMap<>();

@@ -239,6 +239,7 @@ public class FuzzyMatchHelper implements DbHelper {
     public MatchContext mergeContexts(List<MatchContext> matchContextList, String dataCloudVersion) {
         MatchContext mergedContext = new MatchContext();
         mergedContext.setInput(matchContextList.get(0).getInput());
+        mergedContext.setMatchEngine(matchContextList.get(0).getMatchEngine());
         List<InternalOutputRecord> internalOutputRecords = new ArrayList<>();
         for (MatchContext matchContext : matchContextList) {
             String contextId = UUID.randomUUID().toString();

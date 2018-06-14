@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
-import scala.concurrent.Future;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
@@ -16,7 +13,10 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+
+import scala.concurrent.Future;
 
 public class MatchContext implements Fact, Dimension {
 
@@ -118,6 +118,10 @@ public class MatchContext implements Fact, Dimension {
 
     public void setSeekingIdOnly(boolean seekingIdOnly) {
         this.seekingIdOnly = seekingIdOnly;
+    }
+
+    public MatchEngine getMatchEngine() {
+        return matchEngine;
     }
 
     public void setMatchEngine(MatchEngine matchEngine) {
