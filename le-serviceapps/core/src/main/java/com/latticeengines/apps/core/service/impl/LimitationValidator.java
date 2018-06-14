@@ -18,7 +18,6 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -72,9 +71,6 @@ public class LimitationValidator extends AttrValidator {
         List<AttrConfig> activeConfigs = generateDedupConfig(existingActiveConfigs, userSelectedActiveConfigs);
         checkDataLicense(activeConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
         checkSystemLimit(activeConfigs, userSelectedInactiveConfigs, userSelectedActiveConfigs);
-
-        List<AttrConfig> dedupConfigs = generateDedupConfig(attrConfigs, dbConfigs);
-        checkCategoryLimit(dedupConfigs, attrConfigs);
     }
 
     private List<AttrConfig> generateDedupConfig(List<AttrConfig> existingActiveConfigs,
@@ -177,29 +173,6 @@ public class LimitationValidator extends AttrValidator {
         }
     }
 
-    private void checkCategoryLimit(List<AttrConfig> dedupConfigs, List<AttrConfig> userSelectedConfigs) {
-        String tenantId = MultiTenantContext.getTenantId();
-        int totalLimit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId,
-                Category.WEBSITE_KEYWORDS.getName().replaceAll(" ", ""));
-        checkDetailCategoryLimit(dedupConfigs, userSelectedConfigs, Category.WEBSITE_KEYWORDS, totalLimit);
-    }
-
-    private void checkDetailCategoryLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedConfigs,
-            Category category, int limit) {
-        List<AttrConfig> list = configs.stream()
-                .filter(e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
-                .collect(Collectors.toList());
-        int number = list.size();
-        if (number > limit) {
-            userSelectedConfigs.forEach(config -> {
-                if (category.equals(config.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class))) {
-                    addErrorMsg(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT,
-                            String.format(ValidationMsg.Errors.EXCEED_LIMIT, number, category.name(), limit), config);
-                }
-            });
-
-        }
-    }
 
     // check category limit
     private void checkSystemLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
