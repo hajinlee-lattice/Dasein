@@ -485,6 +485,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             mergeConfig.setAttrSubType(subType);
             mergeConfig.setEntity(metadata.getEntity());
             mergeConfig.setDataLicense(metadata.getDataLicense());
+            modifyAccordingToFlags(attrSpec, metadata);
 
             Map<String, AttrConfigProp<?>> attrProps = mergeConfig.getAttrProps();
             if (attrProps == null) {
@@ -515,7 +516,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             stateProp.setAllowCustomization(attrSpec == null || attrSpec.stateChange());
             mergeConfig.putProperty(ColumnMetadataKey.State, stateProp);
             modifyDeprecatedAttrState(mergeConfig, metadata);
-            modifyInactivateState(mergeConfig);
 
             AttrConfigProp<String> displayNameProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.DisplayName, new AttrConfigProp<String>());
@@ -553,6 +553,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 }
                 mergeConfig.putProperty(group.name(), usageProp);
             }
+
+            modifyInactivateState(mergeConfig);
             map.put(metadata.getAttrName(), mergeConfig);
         }
         // make sure the system metadata include the customer config
@@ -560,6 +562,18 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             throw new LedpException(LedpCode.LEDP_40023, new String[] { renderedAttrNames.toString() });
         }
         return new ArrayList<>(map.values());
+    }
+
+    private void modifyAccordingToFlags(AttrSpecification attrSpec, ColumnMetadata cm) {
+        if (!Boolean.TRUE.equals(cm.getCanEnrich())) {
+            attrSpec.setEnrichmentChange(false);
+            attrSpec.setTalkingPointChange(false);
+            attrSpec.setCompanyProfileChange(false);
+        }
+
+        if (!Boolean.TRUE.equals(cm.getCanSegment())) {
+            attrSpec.setSegmentationChange(false);
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -163,6 +163,22 @@ public enum AttrSpecification {
         return approvedUsageChange;
     }
 
+    public void setSegmentationChange(boolean segmentationChange) {
+        this.segmentationChange = segmentationChange;
+    }
+
+    public void setEnrichmentChange(boolean enrichmentChange) {
+        this.enrichmentChange = enrichmentChange;
+    }
+
+    public void setCompanyProfileChange(boolean companyProfileChange) {
+        this.companyProfileChange = companyProfileChange;
+    }
+
+    public void setTalkingPointChange(boolean talkingPointChange) {
+        this.talkingPointChange = talkingPointChange;
+    }
+
     public boolean allowChange(ColumnSelection.Predefined group) {
         if (group == null) {
             return true;
