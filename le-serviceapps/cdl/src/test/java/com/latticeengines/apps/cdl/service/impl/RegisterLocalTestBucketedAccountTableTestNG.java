@@ -85,6 +85,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends CDLFunctionalTe
     }
 
     private void bootstrapDataCollection() throws IOException {
+        dataCollectionService.createDefaultCollection();
         DataCollection collection = dataCollectionService.getDataCollection(customerSpace, "");
         InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, "stats_container.json");
         ObjectMapper om = new ObjectMapper();

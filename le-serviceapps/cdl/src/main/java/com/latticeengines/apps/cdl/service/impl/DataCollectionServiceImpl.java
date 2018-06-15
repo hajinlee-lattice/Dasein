@@ -416,5 +416,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         dataCollectionStatusEntityMgr.createOrUpdate(currentStatus);
     }
 
-
+    @Override
+    public DataCollection createDefaultCollection() {
+        return dataCollectionEntityMgr.createDefaultCollection();
+    }
 }

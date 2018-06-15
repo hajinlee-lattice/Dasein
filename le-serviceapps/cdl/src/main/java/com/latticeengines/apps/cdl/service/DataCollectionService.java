@@ -53,4 +53,6 @@ public interface DataCollectionService {
 
     void saveOrUpdateStatus(String customerSpace, DataCollectionStatus detail, DataCollection.Version version);
 
+    DataCollection createDefaultCollection();
+
 }
