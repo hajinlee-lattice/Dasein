@@ -165,7 +165,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             updateStatusToFailed(progress, "Failed to initiate transform steps", null);
         } else {
             succeeded = executeTransformSteps(progress, steps, workflowDir, transConf);
-            if (!transConf.getKeepTemp()) {
+            if (succeeded || !transConf.getKeepTemp()) {
                 cleanupTempSources(steps);
             }
         }
