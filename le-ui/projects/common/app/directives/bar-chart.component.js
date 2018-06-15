@@ -317,29 +317,31 @@ angular
                     if ($scope.vertcalLines === undefined) {
                         var lines = [];
                         var max = $scope.highest;//getMaxRounded();
-                        if ($scope.bktlist.length == 1) {
-                            lines.push({
-                                'perc': Number(100 / 2) + '%',
-                                'label': (max / 2) + $scope.vlinesSuffix
-                            });
-                            lines.push({
-                                'perc': 100 + '%',
-                                'label': max + $scope.vlinesSuffix
-                            });
-                        } else {
-                            var intervallRange = Number(max / $scope.maxVLines);
-
-                            for (var u = 0; u < $scope.maxVLines; u++) {
-                                var val = (intervallRange * (u + 1));
-                                val = Number(Math.round(val * 2) / 2);
-                                val = val.toFixed(1);
-                                var per = (100 * val) / max;
+                        if(max > 0) {
+                            if ($scope.bktlist.length == 1) {
                                 lines.push({
-                                    'perc': per + '%',
-                                    'label': val + $scope.vlinesSuffix
+                                    'perc': Number(100 / 2) + '%',
+                                    'label': (max / 2) + $scope.vlinesSuffix
                                 });
-                            }
+                                lines.push({
+                                    'perc': 100 + '%',
+                                    'label': max + $scope.vlinesSuffix
+                                });
+                            } else {
+                                var intervallRange = Number(max / $scope.maxVLines);
 
+                                for (var u = 0; u < $scope.maxVLines; u++) {
+                                    var val = (intervallRange * (u + 1));
+                                    val = Number(Math.round(val * 2) / 2);
+                                    val = val.toFixed(1);
+                                    var per = (100 * val) / max;
+                                    lines.push({
+                                        'perc': per + '%',
+                                        'label': val + $scope.vlinesSuffix
+                                    });
+                                }
+
+                            }
                         }
                         $scope.vertcalLines = lines;
                     }
