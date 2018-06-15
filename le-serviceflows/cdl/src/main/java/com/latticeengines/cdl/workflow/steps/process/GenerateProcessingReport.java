@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,9 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -39,6 +43,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
@@ -65,6 +70,9 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     @Inject
     private CloneTableService cloneTableService;
+
+    @Inject
+    private ActionProxy actionProxy;
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
@@ -287,6 +295,45 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         log.error("Fail to get count from serving store for entity " + entity.name() + " with version "
                 + inactive.name());
         return 0L;
+    }
+
+    private Map<BusinessEntity, Long> getDeletedCount() {
+        List<Action> deleteActions = getDeleteActions();
+        if (CollectionUtils.isEmpty(deleteActions)) {
+            return Collections.emptyMap();
+        }
+        Map<BusinessEntity, Long> deleteCounts = new HashMap<>();
+        for (Action deleteAction : deleteActions) {
+            CleanupActionConfiguration config = (CleanupActionConfiguration) deleteAction.getActionConfiguration();
+            if (config != null) {
+                config.getDeletedRecords().forEach((entity, deleteCount) -> {
+                    if (deleteCounts.containsKey(entity)) {
+                        deleteCounts.put(entity, deleteCounts.get(entity) + deleteCount);
+                    } else {
+                        deleteCounts.put(entity, deleteCount);
+                    }
+                });
+            }
+        }
+        return deleteCounts;
+    }
+
+    private List<Action> getDeleteActions() {
+        List<Action> actionList = getActions();
+        return actionList.stream()
+                .filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Action> getActions() {
+        if (CollectionUtils.isEmpty(configuration.getActionIds())) {
+            return Collections.emptyList();
+        }
+        List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds());
+        if (actions == null) {
+            actions = Collections.emptyList();
+        }
+        return actions;
     }
 
 }
