@@ -576,7 +576,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             attrSpec.setTalkingPointChange(false);
             attrSpec.setCompanyProfileChange(false);
         }
-
         if (!Boolean.TRUE.equals(cm.getCanSegment())) {
             attrSpec.setSegmentationChange(false);
         }
@@ -584,18 +583,15 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @SuppressWarnings("unchecked")
     private void modifyInactivateState(AttrConfig attrConfig) {
-        AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) attrConfig
-                .getProperty(ColumnMetadataKey.State);
-        AttrState customVal = stateProp.getCustomValue();
-        // set allow customization to false when customer value of state prop is
-        // inactive
-        if (AttrState.Inactive.equals(customVal)) {
-            attrConfig.getAttrProps().entrySet().forEach(entry -> {
-                if (!entry.getKey().equals(ColumnMetadataKey.State))
-                    entry.getValue().setAllowCustomization(false);
+        // set allow customization to false when final value of state prop is inactive
+        // in other words, active and deprecated states will not change allow customization
+        AttrState state = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
+        if (AttrState.Inactive.equals(state)) {
+            attrConfig.getAttrProps().forEach((key, value) -> {
+                if (!key.equals(ColumnMetadataKey.State))
+                    value.setAllowCustomization(false);
             });
         }
-
     }
 
     @SuppressWarnings("unchecked")

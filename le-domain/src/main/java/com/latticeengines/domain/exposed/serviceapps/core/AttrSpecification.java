@@ -3,27 +3,62 @@ package com.latticeengines.domain.exposed.serviceapps.core;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public enum AttrSpecification {
+public class AttrSpecification {
 
-    LDC_NON_PREMIUM("LDC Non-Premium Attributes", true, true, true, true, true, false, false, false, true, false, true,
-            false), //
-    LDC_PREMIUM("LDC Premium Attributes", true, true, true, true, true, false, false, false, true, false, true, false), //
-    LDC_INTERNAL("LDC Internal Attributes", false, true, true, false, true, false, false, false, true, false, true,
-            false), //
-    CDL_STD("CDL Standard Attributes", true, true, true, true, true, false, false, false, false, false, true, false), //
-    CDL_LOOKUP_ID("CDL Lookup Ids", true, true, true, true, false, false, false, true, true, false, false, false), //
-    CDL_ACCOUNT_EXTENSION("CDL Account Extensions", true, true, true, true, true, false, false, true, true, false,
-            false, true), //
-    CDL_CONTACT_EXTENSION("CDL Contact Extensions", true, true, true, true, true, false, false, true, true, false,
-            false, false), //
-    CDL_DERIVED_PB("CDL Derived Attributes for Product Bundles", true, true, false, false, false, false, false, false,
-            false, false, true, false), //
-    CDL_DERIVED_WBC("CDL Derived Attributes for Website Behavior Categories", true, true, true, true, false, false,
-            false, true, false, false, true, false), //
-    CDL_RATING("CDL Rating Attributes", true, true, false, false, false, false, false, false, false, false, false,
-            false), //
-    CDL_SEGMENTS("CDL Segments as Attributes", true, true, true, true, false, false, false, true, true, false, true,
-            false); //
+    public static AttrSpecification LDC_NON_PREMIUM() {
+        return new AttrSpecification("LDC Non-Premium Attributes", true, true, true, true, true, false, false, false,
+                true, false, true, false); //
+    }
+
+    public static AttrSpecification LDC_PREMIUM() {
+        return new AttrSpecification("LDC Premium Attributes", true, true, true, true, true, false, false, false, true,
+                false, true, false);
+    }
+
+    public static AttrSpecification LDC_INTERNAL() {
+        return new AttrSpecification("LDC Internal Attributes", false, true, true, false, true, false, false, false,
+                true, false, true, false);
+    }
+
+    public static AttrSpecification CDL_STD() {
+        return new AttrSpecification("CDL Standard Attributes", true, true, true, true, true, false, false, false,
+                false, false, true, false);
+    }
+
+    public static AttrSpecification CDL_LOOKUP_ID() {
+        return new AttrSpecification("CDL Lookup Ids", true, true, true, true, false, false, false, true, true, false,
+                false, false);
+    }
+
+    public static AttrSpecification CDL_ACCOUNT_EXTENSION() {
+        return new AttrSpecification("CDL Account Extensions", true, true, true, true, true, false, false, true, true,
+                false, false, true);
+    }
+
+    public static AttrSpecification CDL_CONTACT_EXTENSION() {
+        return new AttrSpecification("CDL Contact Extensions", true, true, true, true, true, false, false, true, true,
+                false, false, false);
+    }
+
+    public static AttrSpecification CDL_DERIVED_PB() {
+        return new AttrSpecification("CDL Derived Attributes for Product Bundles", true, true, false, false, false,
+                false, false, false, false, false, true, false);
+    }
+
+    public static AttrSpecification CDL_DERIVED_WBC() {
+        return new AttrSpecification("CDL Derived Attributes for Website Behavior Categories", true, true, true, true,
+                false, false, false, true, false, false, true, false);
+    }
+
+    public static AttrSpecification CDL_RATING() {
+        return new AttrSpecification("CDL Rating Attributes", true, true, false, false, false, false, false, false,
+                false, false, false, false);
+    }
+
+    public static AttrSpecification CDL_SEGMENTS() {
+        return new AttrSpecification("CDL Segments as Attributes", true, true, true, true, false, false, false, true,
+                true, false, true, false);
+    }
 
     private String specification;
     private boolean segmentationChange;
@@ -39,10 +74,10 @@ public enum AttrSpecification {
     private boolean stateChange;
     private boolean approvedUsageChange;
 
-    AttrSpecification(String specification, boolean segmentationChange, boolean enrichmentChange,
-                      boolean companyProfileChange, boolean talkingPointChange, boolean modelChange,
-                      boolean typeChange, boolean displayNameChange, boolean descriptionChange,
-            boolean categoryNameChange, boolean iconChange, boolean stateChange, boolean approvedUsageChange) {
+    private AttrSpecification(String specification, boolean segmentationChange, boolean enrichmentChange,
+            boolean companyProfileChange, boolean talkingPointChange, boolean modelChange, boolean typeChange,
+            boolean displayNameChange, boolean descriptionChange, boolean categoryNameChange, boolean iconChange,
+            boolean stateChange, boolean approvedUsageChange) {
         this.specification = specification;
         this.segmentationChange = segmentationChange;
         this.enrichmentChange = enrichmentChange;
@@ -59,7 +94,7 @@ public enum AttrSpecification {
     }
 
     public static AttrSpecification getAttrSpecification(AttrType attrType, AttrSubType attrSubType,
-                                                          BusinessEntity entity) {
+            BusinessEntity entity) {
         if (attrType == null) {
             throw new IllegalArgumentException("AttrType cannot be null!");
         }
@@ -67,46 +102,46 @@ public enum AttrSpecification {
             throw new IllegalArgumentException("AttrSubType cannot be null!");
         }
         switch (attrType) {
-            case DataCloud:
-                switch (attrSubType) {
-                    case Normal:
-                        return AttrSpecification.LDC_NON_PREMIUM;
-                    case Premium:
-                        return AttrSpecification.LDC_PREMIUM;
-                    case InternalEnrich:
-                        return AttrSpecification.LDC_INTERNAL;
-                    default:
-                        break;
-                }
-                break;
-            case Custom:
-                switch (attrSubType) {
-                    case Standard:
-                        return AttrSpecification.CDL_STD;
-                    case LookupId:
-                        return AttrSpecification.CDL_LOOKUP_ID;
-                    case Extension:
-                        if (entity != null && entity == BusinessEntity.Account) {
-                            return AttrSpecification.CDL_ACCOUNT_EXTENSION;
-                        } else if (entity != null && entity == BusinessEntity.Contact) {
-                            return AttrSpecification.CDL_CONTACT_EXTENSION;
-                        }
-                    default:
-                        break;
-                }
-                break;
-            case Curated:
-                switch (attrSubType) {
-                    case ProductBundle:
-                        return AttrSpecification.CDL_DERIVED_PB;
-                    case Rating:
-                        return AttrSpecification.CDL_RATING;
-                    default:
-                        break;
-                }
-                break;
+        case DataCloud:
+            switch (attrSubType) {
+            case Normal:
+                return AttrSpecification.LDC_NON_PREMIUM();
+            case Premium:
+                return AttrSpecification.LDC_PREMIUM();
+            case InternalEnrich:
+                return AttrSpecification.LDC_INTERNAL();
             default:
                 break;
+            }
+            break;
+        case Custom:
+            switch (attrSubType) {
+            case Standard:
+                return AttrSpecification.CDL_STD();
+            case LookupId:
+                return AttrSpecification.CDL_LOOKUP_ID();
+            case Extension:
+                if (entity != null && entity == BusinessEntity.Account) {
+                    return AttrSpecification.CDL_ACCOUNT_EXTENSION();
+                } else if (entity != null && entity == BusinessEntity.Contact) {
+                    return AttrSpecification.CDL_CONTACT_EXTENSION();
+                }
+            default:
+                break;
+            }
+            break;
+        case Curated:
+            switch (attrSubType) {
+            case ProductBundle:
+                return AttrSpecification.CDL_DERIVED_PB();
+            case Rating:
+                return AttrSpecification.CDL_RATING();
+            default:
+                break;
+            }
+            break;
+        default:
+            break;
         }
         return null;
     }
@@ -184,18 +219,18 @@ public enum AttrSpecification {
             return true;
         }
         switch (group) {
-            case Segment:
-                return segmentationChange;
-            case Enrichment:
-                return enrichmentChange;
-            case CompanyProfile:
-                return companyProfileChange;
-            case TalkingPoint:
-                return talkingPointChange;
-            case Model:
-                return modelChange;
-            default:
-                return true;
+        case Segment:
+            return segmentationChange;
+        case Enrichment:
+            return enrichmentChange;
+        case CompanyProfile:
+            return companyProfileChange;
+        case TalkingPoint:
+            return talkingPointChange;
+        case Model:
+            return modelChange;
+        default:
+            return true;
         }
     }
 }
