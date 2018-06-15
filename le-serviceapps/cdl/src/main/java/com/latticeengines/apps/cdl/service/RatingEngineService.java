@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -32,9 +33,9 @@ public interface RatingEngineService {
 
     RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate);
 
-    RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId);
+    RatingEngine createOrUpdate(RatingEngine ratingEngine);
 
-    RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment);
+    RatingEngine createOrUpdate(RatingEngine ratingEngine, Boolean unlinkSegment);
 
     RatingEngine replicateRatingEngine(String id);
 
@@ -74,4 +75,6 @@ public interface RatingEngineService {
     void verifyRatingEngineCyclicDependency(RatingEngine ratingEngine);
 
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
+
+    void setScoringIteration(String ratingEngineId, String ratingModelId, List<BucketMetadata> bucketMetadatas);
 }

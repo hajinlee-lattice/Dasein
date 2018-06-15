@@ -80,8 +80,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             if (CollectionUtils.isNotEmpty(activeModels)) {
                 log.info("Found " + activeModels.size() + " active rating models.");
                 putObjectInContext(RATING_MODELS, activeModels);
-            }
-            if (CollectionUtils.isNotEmpty(activeModels)) {
+
                 List<String> modelGuids = activeModels.stream().filter(container -> {
                     RatingEngineType engineType = container.getEngineSummary().getType();
                     return RatingEngineType.CUSTOM_EVENT.equals(engineType)
@@ -113,7 +112,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         String engineName = summary.getDisplayName();
         RatingEngine engine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
         if (isValidRatingEngine(engine)) {
-            RatingModel ratingModel = engine.getActiveModel();
+            RatingModel ratingModel = engine.getScoringIteration();
             boolean isValid = false;
             if (RatingEngineType.CROSS_SELL.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
@@ -165,6 +164,10 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             log.info("Skip rating engine " + engineId + " : " + engineName
                     + " because it does not have an active model.");
             valid = false;
+        } else if (engine.getScoringIteration() == null) {
+            log.info("Skip rating engine " + engineId + " : " + engineName
+                    + " because it does not have a scoring iteration set.");
+            valid = false;
         }
         return valid;
     }
@@ -202,14 +205,15 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         List<String> attrs = new ArrayList<>();
         String customerSpace = configuration.getCustomerSpace().toString();
         DataCollection.Version version = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        String tableName = dataCollectionProxy.getTableName(customerSpace, BusinessEntity.Rating.getServingStore(), version);
+        String tableName = dataCollectionProxy.getTableName(customerSpace, BusinessEntity.Rating.getServingStore(),
+                version);
         if (StringUtils.isBlank(tableName)) {
             log.info("There is no previous rating table to ingest");
         } else {
             List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, tableName);
             Set<String> possibleAttrs = new HashSet<>();
             engineIds.forEach(engineId -> {
-                for (RatingEngine.ScoreType scoreType: RatingEngine.ScoreType.values()) {
+                for (RatingEngine.ScoreType scoreType : RatingEngine.ScoreType.values()) {
                     possibleAttrs.add(RatingEngine.toRatingAttrName(engineId, scoreType));
                 }
             });

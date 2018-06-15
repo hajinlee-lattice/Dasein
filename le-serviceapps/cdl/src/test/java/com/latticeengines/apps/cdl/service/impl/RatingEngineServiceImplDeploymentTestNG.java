@@ -109,7 +109,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         ratingEngine.setType(type);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
         // test basic creation
-        ratingEngine = createOrUpdate(ratingEngine, mainTestTenant.getId());
+        ratingEngine = createOrUpdate(ratingEngine);
 
         return ratingEngine;
     }
@@ -247,7 +247,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(segment);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
         Assert.assertEquals(ratingEngine.getType(), type);
-        String createdRatingEngineStr = ratingEngine.getId().toString();
+        String createdRatingEngineStr = ratingEngine.getId();
         ratingEngine = getRatingEngineById(ratingEngineId, true, true);
         Assert.assertNotNull(ratingEngine);
         log.info("String is " + createdRatingEngineStr);
@@ -326,7 +326,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         ratingEngine.setDisplayName(RATING_ENGINE_NAME);
         ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
         ratingEngine.setNote(RATING_ENGINE_NEW_NOTE);
-        RatingEngine updatedRatingEngine = createOrUpdate(ratingEngine, mainTestTenant.getId());
+        RatingEngine updatedRatingEngine = createOrUpdate(ratingEngine);
         Assert.assertEquals(RATING_ENGINE_NAME, updatedRatingEngine.getDisplayName());
         Assert.assertTrue(updatedRatingEngine.getUpdated().after(updatedDate));
         log.info("Created date is " + createdDate);
@@ -406,7 +406,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
         ratingEngineList = getAllDeletedRatingEngines();
         Assert.assertEquals(ratingEngineList.size(), 2);
-        Assert.assertTrue(ratingEngineList.stream().allMatch(r -> r.getDeleted()));
+        Assert.assertTrue(ratingEngineList.stream().allMatch(RatingEngine::getDeleted));
 
         hardDeleteRatingEngine(rbRatingEngineId);
         hardDeleteRatingEngine(aiRatingEngineId);
@@ -464,8 +464,8 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         return ratingEngineService.getRatingEngineById(ratingEngineId, populateRefreshedDate, populateActiveModel);
     }
 
-    protected RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId) {
-        return ratingEngineService.createOrUpdate(ratingEngine, tenantId);
+    protected RatingEngine createOrUpdate(RatingEngine ratingEngine) {
+        return ratingEngineService.createOrUpdate(ratingEngine);
     }
 
     protected void deleteById(String ratingEngineId) {
@@ -488,6 +488,6 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngineId);
         ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
-        createOrUpdate(ratingEngine, mainTestTenant.getId());
+        createOrUpdate(ratingEngine);
     }
 }

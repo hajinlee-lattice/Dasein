@@ -294,7 +294,7 @@ public enum LedpCode {
     LEDP_18171("Could not create valid session for External User {0}."), //
     LEDP_18172("Action Ids for job {0} is empty."), //
     LEDP_18173("SchemaInterpretation {0} not supported for cleanup file template!"), //
-    LEDP_18174("Status {0} cannot transit to {1} for Rating Engine with name = {2}."), //
+    LEDP_18174("Cannot transition Rating Engine: {0} from {1} to {2}"), //
     LEDP_18175("There are Plays associated with the current Rating Engine {0} and thus it cannot be deleted."), //
     LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchble accounts."), //
     LEDP_18177("Websocket session {0} has NOT associated with any authentication token yet."), //
@@ -307,6 +307,7 @@ public enum LedpCode {
     LEDP_18183("Column name {0} has potential conflict with system defined name, Please don't begin with {1}"), //
     LEDP_18184("Job cannot be null or incomplete"), //
     LEDP_18185("User {0} does not have the right to deactivate attribute"), //
+    LEDP_18186("No scoring iteration set for Rating Engine: {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -725,6 +726,9 @@ public enum LedpCode {
     LEDP_40026("invalid attribute config {0} after render"), //
     LEDP_40027("invalid attribute config {0} in DB"), //
     LEDP_40028("Cannot change job Status for ai model {0} since the current status is already terminal"), //
+    LEDP_40029("RatingModel {0} not associated with Rating Engine {1}"), //
+    LEDP_40030("BucketMetadata not provided for AIModel {0} while setting ScoringIteration for RatingEngine {1}"), //
+    LEDP_40031("No ModelSummary for AIModel {0}, cannot set it as the ScoringIteration for RatingEngine {1}"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

@@ -87,7 +87,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     }
 
     protected RatingEngine createRatingEngine(RatingEngine ratingEngine) {
-        return ratingEngineService.createOrUpdate(ratingEngine, mainTestTenant.getId());
+        return ratingEngineService.createOrUpdate(ratingEngine);
     }
 
     protected RatingModel getRatingModel() {

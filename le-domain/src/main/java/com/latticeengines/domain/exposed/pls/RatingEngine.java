@@ -133,6 +133,18 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private List<BucketMetadata> bucketMetadata;
 
+    private RatingModel latestIteration;
+
+    private Long latestIterationPid;
+
+    private RatingModel scoringIteration;
+
+    private Long scoringIterationPid;
+
+    private RatingModel publishedIteration;
+
+    private Long publishedIterationPid;
+
     @Override
     @JsonProperty("pid")
     @Id
@@ -259,14 +271,10 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.deleted = deleted;
     }
 
-    @Column(name = "JUST_CREATED")
     @JsonProperty("justCreated")
+    @Transient
     public Boolean getJustCreated() {
-        return this.justCreated;
-    }
-
-    public void setJustCreated(Boolean justCreated) {
-        this.justCreated = justCreated;
+        return scoringIteration == null;
     }
 
     @JsonProperty("segment")
@@ -378,6 +386,45 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.activeModelPid = pid;
     }
 
+    @JsonProperty("published_iteration")
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "PUBLISHED_ITERATION")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public RatingModel getPublishedIteration() {
+        return publishedIteration;
+    }
+
+    @JsonProperty("published_iteration")
+    public void setPublishedIteration(RatingModel publishedIteration) {
+        this.publishedIteration = publishedIteration;
+    }
+
+    @JsonProperty("scoring_iteration")
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "SCORING_ITERATION")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public RatingModel getScoringIteration() {
+        return scoringIteration;
+    }
+
+    @JsonProperty("scoring_iteration")
+    public void setScoringIteration(RatingModel scoringIteration) {
+        this.scoringIteration = scoringIteration;
+    }
+
+    @JsonProperty("latest_iteration")
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "LATEST_ITERATION")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public RatingModel getLatestIteration() {
+        return latestIteration;
+    }
+
+    @JsonProperty("latest_iteration")
+    public void setLatestIteration(RatingModel latestIteration) {
+        this.latestIteration = latestIteration;
+    }
+
     @JsonIgnore
     @Lob
     @Column(name = "ADVANCED_RATING_CONFIG")
@@ -458,11 +505,11 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
                 defaultName = String.format(CUSTOM_EVENT_NAME_PATTERN, datePart);
                 break;
             case CROSS_SELL:
-                if (getAdvancedRatingConfig() !=null) {
+                if (getAdvancedRatingConfig() != null) {
                     defaultName = String.format(CROSS_SELL_NAME_PATTERN, //
                             ((CrossSellRatingConfig) getAdvancedRatingConfig())
                                     .getModelingStrategy() == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE ? "First"
-                                    : "Repeat",
+                                            : "Repeat",
                             datePart);
                 }
                 break;

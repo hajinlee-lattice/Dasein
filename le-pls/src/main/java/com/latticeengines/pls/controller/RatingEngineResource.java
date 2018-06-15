@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
@@ -224,6 +225,15 @@ public class RatingEngineResource {
         Action action = ratingModelAndAction.getAction();
         registerAction(action, tenant);
         return ratingModelAndAction.getRatingModel();
+    }
+
+    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setScoringIteration")
+    @ResponseBody
+    @ApiOperation(value = "Set the given ratingmodel as the Scoring Iteration for the given rating engine")
+    public void setScoringIteration(@PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, @RequestBody List<BucketMetadata> bucketMetadatas) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        ratingEngineProxy.setScoringIteration(tenant.getId(), ratingEngineId, ratingModelId, bucketMetadatas);
     }
 
     private void registerAction(Action action, Tenant tenant) {

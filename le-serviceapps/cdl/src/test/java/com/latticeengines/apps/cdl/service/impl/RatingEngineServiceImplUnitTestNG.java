@@ -107,7 +107,7 @@ public class RatingEngineServiceImplUnitTestNG {
     }
 
     private void mockRatingEngineService() {
-        doReturn(Collections.singleton(id1)).when(ratingEngineService).engineIdsAvailableInRedshift();
+        doReturn(Collections.singleton(id1)).when(ratingEngineService).getPublishedRatingEngineIds();
     }
 
     private RatingEngine createDefaultRatingEngine() {

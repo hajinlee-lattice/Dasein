@@ -53,7 +53,8 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
             } else {
                 emailInfo.setModelId(modelName);
             }
-            log.info(String.format("userId: %s; modelName: %s", emailInfo.getUserId(), emailInfo.getModelId()));
+            log.info(String.format("userId: %s; modelName: %s; status:%s ", emailInfo.getUserId(),
+                    emailInfo.getModelId(), jobExecution.getStatus().name()));
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             try {
                 proxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId, emailInfo);

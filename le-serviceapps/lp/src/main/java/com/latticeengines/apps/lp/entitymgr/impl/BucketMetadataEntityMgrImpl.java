@@ -42,7 +42,7 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
     private ModelSummaryWriterRepository modelSummaryRepository;
 
     @Inject
-    private RatingEngineReository ratingEngineReository;
+    private RatingEngineReository ratingEngineRepository;
 
     @Inject
     private AIModelRepository aiModelRepostiry;
@@ -61,7 +61,7 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
     @Transactional(propagation = Propagation.REQUIRED)
     public void createBucketMetadata(List<BucketMetadata> bucketMetadataList, String modelGuid, String engineId) {
         ModelSummary modelSummary = modelSummaryRepository.findById(modelGuid);
-        RatingEngine ratingEngine = ratingEngineReository.findById(engineId);
+        RatingEngine ratingEngine = ratingEngineRepository.findById(engineId);
         bucketMetadataList.forEach(bucketMetadata -> {
             bucketMetadata.setModelSummary(modelSummary);
             bucketMetadata.setRatingEngine(ratingEngine);
@@ -95,8 +95,11 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<BucketMetadata> getUpToDateBucketMetadatasForEngineFromReader(String engineId) {
-        RatingEngine ratingEngine = ratingEngineReository.findById(engineId);
-        AIModel aiModel = aiModelRepostiry.findByPid(ratingEngine.getActiveModelPid());
+        RatingEngine ratingEngine = ratingEngineRepository.findById(engineId);
+        if (ratingEngine.getPublishedIteration() == null) {
+            return null;
+        }
+        AIModel aiModel = aiModelRepostiry.findByPid(ratingEngine.getPublishedIteration().getPid());
         return getUpToDateBucketMetadatasForModelFromReader(aiModel.getModelSummaryId());
     }
 

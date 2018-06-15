@@ -88,7 +88,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(type);
         // test basic creation
-        ratingEngine = ratingEngineService.createOrUpdate(ratingEngine, mainTestTenant.getId());
+        ratingEngine = ratingEngineService.createOrUpdate(ratingEngine);
 
         return ratingEngine;
     }
@@ -193,7 +193,8 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         RatingEngine ratingEngine = createRatingEngine(RatingEngineType.RULE_BASED);
         List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(ratingEngine.getId());
         RuleBasedModel roleBasedModel = constructRuleModel();
-        ratingEngineService.updateRatingModel(ratingEngine.getId(), ratingModels.iterator().next().getId(), roleBasedModel);
+        ratingEngineService.updateRatingModel(ratingEngine.getId(), ratingModels.iterator().next().getId(),
+                roleBasedModel);
 
         try {
             Thread.sleep(2000L);
@@ -204,7 +205,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         Exception e = null;
         try {
             rbRatingEngine.setCreated(new Date());
-            ratingEngineService.createOrUpdate(rbRatingEngine, mainTestTenant.getId());
+            ratingEngineService.createOrUpdate(rbRatingEngine);
         } catch (Exception ex) {
             e = ex;
         }
@@ -224,12 +225,11 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     }
 
     private Map<RatingBucketName, Long> generateCoverageMap() {
-        Map<RatingBucketName, Long> coverageMap = new ImmutableMap.Builder<RatingBucketName, Long>() //
+        return new ImmutableMap.Builder<RatingBucketName, Long>() //
                 .put(RatingBucketName.A, RATING_A_COUNT) //
                 .put(RatingBucketName.D, RATING_D_COUNT) //
                 .put(RatingBucketName.F, RATING_F_COUNT) //
                 .build();
-        return coverageMap;
     }
 
     protected void deleteRatingEngine(String ratingEngineId) {

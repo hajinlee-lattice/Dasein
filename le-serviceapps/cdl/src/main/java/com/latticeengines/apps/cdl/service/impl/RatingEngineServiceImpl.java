@@ -58,6 +58,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -73,9 +74,11 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -132,6 +135,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;
@@ -182,10 +187,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingEngine> list = ratingEngineEntityMgr.findAllByTypeAndStatus(type, status);
         List<RatingEngine> selectedList = list;
         if (publishedRatingsOnly) {
-            Set<String> availableRatingIdInRedshift = engineIdsAvailableInRedshift();
-            log.info(String.format("Available Rating Ids in Redshift are %s", availableRatingIdInRedshift));
-            selectedList = list.stream()
-                    .filter(ratingEngine -> availableRatingIdInRedshift.contains(ratingEngine.getId()))
+            Set<String> publishedRatingEngineIds = getPublishedRatingEngineIds();
+            selectedList = list.stream().filter(ratingEngine -> publishedRatingEngineIds.contains(ratingEngine.getId()))
                     .collect(Collectors.toList());
         }
 
@@ -206,7 +209,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public List<String> getAllRatingEngineIdsInSegment(String segmentName) {
         List<String> ids = ratingEngineEntityMgr.findAllIdsInSegment(segmentName);
-        ids.retainAll(engineIdsAvailableInRedshift());
+        ids.retainAll(getPublishedRatingEngineIds());
         return ids;
     }
 
@@ -222,15 +225,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate,
-            boolean populateActiveModel) {
+    public RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate, boolean inflate) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingEngine ratingEngine;
-        if (populateActiveModel) {
-            ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId, true);
-        } else {
-            ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
-        }
+        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId, inflate);
         if (populateRefreshedDate) {
             updateLastRefreshedDate(tenant.getId(), ratingEngine);
         }
@@ -243,12 +240,12 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId) {
-        return createOrUpdate(ratingEngine, tenantId, false);
+    public RatingEngine createOrUpdate(RatingEngine ratingEngine) {
+        return createOrUpdate(ratingEngine, false);
     }
 
     @Override
-    public RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment) {
+    public RatingEngine createOrUpdate(RatingEngine ratingEngine, Boolean unlinkSegment) {
         if (ratingEngine == null) {
             throw new NullPointerException("Entity is null when creating a rating engine.");
         }
@@ -258,13 +255,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingEngine.getSegment() != null) {
             String segmentName = ratingEngine.getSegment().getName();
-            MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(tenantId, segmentName);
+            MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(tenant.getId(), segmentName);
             MetadataSegment segment = segmentDTO.getMetadataSegment();
             segment.setPid(segmentDTO.getPrimaryKey());
             ratingEngine.setSegment(segment);
         }
 
-        ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenantId, unlinkSegment);
+        ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenant.getId(), unlinkSegment);
         updateLastRefreshedDate(tenant.getId(), ratingEngine);
         evictRatingMetadataCache();
         return ratingEngine;
@@ -287,14 +284,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             String displayName = ratingEngine.getDisplayName();
             ratingEngine.setDisplayName(generateReplicaName(displayName));
             ratingEngine.setRatingEngineNotes(null);
-            RatingEngine replicatedEngine = createOrUpdate(ratingEngine, tenantId);
+            RatingEngine replicatedEngine = createOrUpdate(ratingEngine);
             log.info("Replicated rating engine " + ratingEngineId + " to " + replicatedEngine.getId());
 
             if (activeModel != null) {
                 log.info("Replicating active model " + activeModel.getId() + " for replicated engine "
                         + ratingEngine.getId() + "(" + ratingEngine.getDisplayName() + ")");
                 RatingModel replicatedModel = replicateRatingModel(replicatedEngine, activeModel);
-                createOrUpdate(replicatedEngine, tenantId);
+                createOrUpdate(replicatedEngine);
                 log.info("Replicated an active model " + replicatedModel.getId() + " in replicated engine "
                         + ratingEngine.getId() + "(" + ratingEngine.getDisplayName() + ")");
             }
@@ -306,7 +303,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     private RatingModel replicateRatingModel(RatingEngine ratingEngine, RatingModel model) {
         RatingModel replicatedModel;
-        if (model instanceof RuleBasedModel) {
+        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
             replicatedModel = replicateRuleBasedModel(ratingEngine, (RuleBasedModel) model);
         } else {
             replicatedModel = replicateAIModel(ratingEngine, (AIModel) model);
@@ -405,6 +402,35 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingModel model = ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
         evictRatingMetadataCache();
         return model;
+    }
+
+    @Override
+    public void setScoringIteration(String ratingEngineId, String ratingModelId, List<BucketMetadata> bucketMetadatas) {
+
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, true);
+        RatingModel ratingModel = getRatingModel(ratingEngineId, ratingModelId);
+
+        if (ratingEngine.getType() != RatingEngineType.RULE_BASED) {
+            if (bucketMetadatas == null || CollectionUtils.isEmpty(bucketMetadatas)) {
+                throw new LedpException(LedpCode.LEDP_40030, new String[] { ratingModelId, ratingEngineId });
+            }
+            AIModel aiModel = (AIModel) ratingModel;
+            if (StringUtils.isEmpty(aiModel.getModelSummaryId())) {
+                throw new LedpException(LedpCode.LEDP_40031, new String[] { ratingModelId, ratingEngineId });
+            }
+
+            log.info(String.format("Creating BucketMetadata for RatingEngine %s, AIModel %s and ModelSummary %s",
+                    ratingEngineId, ratingModelId, aiModel.getModelSummaryId()));
+            CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+            request.setBucketMetadataList(bucketMetadatas);
+            request.setModelGuid(aiModel.getModelSummaryId());
+            request.setRatingEngineId(ratingEngineId);
+            request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
+            bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getTenantId(), request);
+        }
+
+        ratingEngine.setScoringIteration(ratingModel);
+        createOrUpdate(ratingEngine);
     }
 
     @Override
@@ -556,7 +582,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @VisibleForTesting
-    Set<String> engineIdsAvailableInRedshift() {
+    Set<String> getPublishedRatingEngineIds() {
         Set<String> engineIds = new HashSet<>();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
@@ -588,7 +614,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
             log.info("Updating rating engine " + ratingEngine.getId() + " counts " + JsonUtils.serialize(counts));
             ratingEngine.setCountsByMap(counts);
-            createOrUpdate(ratingEngine, tenant.getId());
+            createOrUpdate(ratingEngine);
             return counts;
         }
     }
@@ -867,7 +893,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
         return attributes;
     }
-    
 
     @VisibleForTesting
     void setTpForParallelStream(ForkJoinPool tpForParallelStream) {

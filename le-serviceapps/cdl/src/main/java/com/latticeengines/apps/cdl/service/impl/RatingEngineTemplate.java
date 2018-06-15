@@ -52,6 +52,7 @@ public abstract class RatingEngineTemplate {
         ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
         ratingEngineSummary.setCoverage(ratingEngine.getCountsAsMap());
         ratingEngineSummary.setAdvancedRatingConfig(ratingEngine.getAdvancedRatingConfig());
+        ratingEngineSummary.setPublished(ratingEngine.getPublishedIteration() != null);
 
         MetadataSegment segment = ratingEngine.getSegment();
         if (segment != null) {
@@ -59,15 +60,15 @@ public abstract class RatingEngineTemplate {
             ratingEngineSummary.setContactsInSegment(segment.getContacts());
         }
 
-        if (ratingEngine.getType() != RatingEngineType.RULE_BASED) {
-            ratingEngineSummary.setBucketMetadata(
-                    bucketedScoreProxy.getLatestABCDBucketsByEngineId(tenantId, ratingEngine.getId()));
-        } else {
+        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
             Map<String, Long> counts = ratingEngine.getCountsAsMap();
             if (counts != null)
                 ratingEngineSummary.setBucketMetadata(counts.keySet().stream()
                         .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
                         .collect(Collectors.toList()));
+        } else {
+            ratingEngineSummary.setBucketMetadata(
+                    bucketedScoreProxy.getLatestABCDBucketsByEngineId(tenantId, ratingEngine.getId()));
         }
 
         ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);

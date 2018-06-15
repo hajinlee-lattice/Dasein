@@ -7,7 +7,7 @@ public class RatingEngineStatusUnitTestNG {
 
     @Test(groups = "unit")
     public void testTransition() {
-        Assert.assertTrue(RatingEngineStatus.canTransit(RatingEngineStatus.INACTIVE, RatingEngineStatus.ACTIVE));
-        Assert.assertTrue(RatingEngineStatus.canTransit(RatingEngineStatus.ACTIVE, RatingEngineStatus.INACTIVE));
+        Assert.assertTrue(RatingEngineStatus.INACTIVE.canTransition(RatingEngineStatus.ACTIVE));
+        Assert.assertTrue(RatingEngineStatus.ACTIVE.canTransition(RatingEngineStatus.INACTIVE));
     }
 }

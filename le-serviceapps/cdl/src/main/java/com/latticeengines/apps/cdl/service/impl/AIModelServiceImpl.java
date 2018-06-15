@@ -140,5 +140,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
         aiModel.setModelingJobStatus(newStatus);
         createOrUpdate(aiModel, ratingEngineId);
+        log.info(String.format("Modeling Job status updated for AIModel:%s, RatingEngine:%s to %s", aiModelId,
+                ratingEngineId, newStatus.name()));
     }
 }

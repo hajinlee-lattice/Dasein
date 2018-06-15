@@ -24,7 +24,7 @@ public enum RatingEngineStatus {
         transitionMap.put(INACTIVE, Sets.newHashSet(ACTIVE));
     }
 
-    private RatingEngineStatus(int statusId) {
+    RatingEngineStatus(int statusId) {
         this.stautsId = statusId;
     }
 
@@ -36,9 +36,9 @@ public enum RatingEngineStatus {
         return statusMap.get(statusId);
     }
 
-    public static boolean canTransit(RatingEngineStatus srcState, RatingEngineStatus dstState) {
-        return srcState.equals(dstState)
-                || transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState);
+    public boolean canTransition(RatingEngineStatus transitionState) {
+        return this.equals(transitionState)
+                || transitionMap.containsKey(this) && transitionMap.get(this).contains(transitionState);
     }
 
 }

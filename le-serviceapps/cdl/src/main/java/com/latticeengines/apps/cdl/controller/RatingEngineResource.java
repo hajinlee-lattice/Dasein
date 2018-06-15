@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
@@ -138,8 +139,7 @@ public class RatingEngineResource {
         if (ratingEngine == null) {
             throw new NullPointerException("Rating Engine is null.");
         }
-        return ratingEngineService.createOrUpdate(ratingEngine, CustomerSpace.parse(customerSpace).toString(),
-                unlinkSegment);
+        return ratingEngineService.createOrUpdate(ratingEngine, unlinkSegment);
     }
 
     @PostMapping(value = "/replicate/{engineId}")
@@ -355,6 +355,16 @@ public class RatingEngineResource {
             @PathVariable String ratingModelId, //
             @RequestParam(value = "newStatus", required = true) JobStatus newStatus) {
         ratingEngineService.updateModelingJobStatus(ratingEngineId, ratingModelId, newStatus);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setScoringIteration", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
+    public void setScoringIteration(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestBody List<BucketMetadata> bucketMetadatas) {
+        ratingEngineService.setScoringIteration(ratingEngineId, ratingModelId, bucketMetadatas);
     }
 
     @PostMapping(value = "/coverage")

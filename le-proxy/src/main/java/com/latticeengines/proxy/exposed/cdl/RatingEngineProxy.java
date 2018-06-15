@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
@@ -160,6 +161,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         String url = constructUrl(URL_PREFIX + "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return post("update rating model with action", url, ratingModel, RatingModelAndActionDTO.class);
+    }
+
+    public void setScoringIteration(String customerSpace, String ratingEngineId, String ratingModelId,
+            List<BucketMetadata> bucketMetadatas) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModel}/setScoringIteration",
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+        post("setScoringIteration", url, bucketMetadatas, Object.class);
     }
 
     @SuppressWarnings("rawtypes")

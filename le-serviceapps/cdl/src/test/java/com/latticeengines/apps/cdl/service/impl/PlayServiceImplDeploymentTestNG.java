@@ -72,7 +72,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         ratingEngine1.setCreatedBy(CREATED_BY);
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         ratingEngine1.setTenant(mainTestTenant);
-        RatingEngine createdRatingEngine = ratingEngineService.createOrUpdate(ratingEngine1, mainTestTenant.getId());
+        RatingEngine createdRatingEngine = ratingEngineService.createOrUpdate(ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
         ratingEngine1.setPid(createdRatingEngine.getPid());

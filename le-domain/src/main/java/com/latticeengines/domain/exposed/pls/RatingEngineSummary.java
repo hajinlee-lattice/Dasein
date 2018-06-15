@@ -68,6 +68,9 @@ public class RatingEngineSummary {
     @JsonProperty("advancedRatingConfig")
     private AdvancedRatingConfig advancedRatingConfig;
 
+    @JsonProperty("isPublished")
+    private boolean isPublished;
+
     @JsonProperty("deleted")
     private Boolean deleted;
 
@@ -206,6 +209,10 @@ public class RatingEngineSummary {
     public void setAdvancedRatingConfig(AdvancedRatingConfig advancedRatingConfig) {
         this.advancedRatingConfig = advancedRatingConfig;
     }
+
+    public boolean isPublished() { return isPublished; }
+
+    public void setPublished(boolean published) { isPublished = published; }
 
     public Boolean getDeleted() {
         return deleted;

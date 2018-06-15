@@ -50,7 +50,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
-import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.AdvancedRatingConfig;
@@ -138,26 +137,17 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     @Override
     @SoftDeleteConfiguration
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public RatingEngine findById(String id, boolean withActiveModel) {
+    public RatingEngine findById(String id, boolean inflate) {
         RatingEngine ratingEngine = ratingEngineDao.findById(id);
-        if (withActiveModel && ratingEngine != null) {
+        if (ratingEngine != null && inflate) {
             Long activeModelPid = ratingEngine.getActiveModelPid();
             if (activeModelPid != null) {
-                switch (ratingEngine.getType()) {
-                case RULE_BASED:
-                    RatingModel ruleBasedModel = ruleBasedModelDao.findByKey(RuleBasedModel.class, activeModelPid);
-                    ratingEngine.setActiveModel(ruleBasedModel);
-                    break;
-                case CUSTOM_EVENT:
-                case CROSS_SELL:
-                    RatingModel aiModel = aiModelDao.findByKey(AIModel.class, activeModelPid);
-                    ratingEngine.setActiveModel(aiModel);
-                    break;
-                default:
-                    break;
-                }
+                ratingEngine.setActiveModel(ratingEngine.getType() == RatingEngineType.RULE_BASED
+                        ? ruleBasedModelDao.findByKey(RuleBasedModel.class, activeModelPid)
+                        : aiModelDao.findByKey(AIModel.class, activeModelPid));
             }
         }
+
         return ratingEngine;
     }
 
@@ -237,7 +227,16 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             if (retrievedRatingEngine.getStatus() == RatingEngineStatus.INACTIVE
                     && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
                 setActivationActionContext(retrievedRatingEngine);
-                retrievedRatingEngine.setJustCreated(false);
+                if (retrievedRatingEngine.getScoringIteration() == null) {
+                    if (retrievedRatingEngine.getType() == RatingEngineType.RULE_BASED) {
+                        retrievedRatingEngine.setScoringIteration(retrievedRatingEngine.getLatestIteration());
+                    } else {
+                        log.error(String.format("No scoring iteration set for Rating Engine: %s",
+                                retrievedRatingEngine.getId()));
+                        throw new LedpException(LedpCode.LEDP_18186,
+                                new String[] { retrievedRatingEngine.getDisplayName() });
+                    }
+                }
             }
             retrievedRatingEngine.setStatus(ratingEngine.getStatus());
         }
@@ -270,10 +269,23 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             retrievedRatingEngine.setActiveModelPid(ratingEngine.getActiveModelPid());
         }
 
+        if (ratingEngine.getLatestIteration() != null) {
+            retrievedRatingEngine.setLatestIteration(ratingEngine.getLatestIteration());
+        }
+
+        if (ratingEngine.getScoringIteration() != null) {
+            retrievedRatingEngine.setScoringIteration(ratingEngine.getScoringIteration());
+        }
+
+        if (ratingEngine.getPublishedIteration() != null) {
+            retrievedRatingEngine.setPublishedIteration(ratingEngine.getPublishedIteration());
+        }
+
         // PLS-7555 - allow segment to be reset to null for custom event rating
         if (unlinkSegment == Boolean.TRUE && !retrievedRatingEngine.getType().isTargetSegmentMandatory()) {
             retrievedRatingEngine.setSegment(null);
         }
+
         retrievedRatingEngine.setUpdated(new Date());
         ratingEngineDao.update(retrievedRatingEngine);
     }
@@ -281,20 +293,19 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     @VisibleForTesting
     void validateForStatusUpdate(RatingEngine retrievedRatingEngine, RatingEngine ratingEngine) {
         // Check transition diagram
-        if (!RatingEngineStatus.canTransit(retrievedRatingEngine.getStatus(), ratingEngine.getStatus())) {
-            log.error(String.format("Status transition of the Rating Engine %s is invalid.",
-                    retrievedRatingEngine.getId()));
-            throw new LedpException(LedpCode.LEDP_18174, new String[] { retrievedRatingEngine.getStatus().name(),
-                    ratingEngine.getStatus().name(), ratingEngine.getDisplayName() });
+        if (!retrievedRatingEngine.getStatus().canTransition(ratingEngine.getStatus())) {
+            log.error(String.format("Cannot Transition Rating Engine: %s from %s to %s.", //
+                    retrievedRatingEngine.getId(), retrievedRatingEngine.getStatus().name(),
+                    ratingEngine.getStatus().name()));
+            throw new LedpException(LedpCode.LEDP_18174, new String[] { ratingEngine.getDisplayName(),
+                    retrievedRatingEngine.getStatus().name(), ratingEngine.getStatus().name(), });
         }
 
         // Check active model of Rating Engine
-        if (ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
-            if (retrievedRatingEngine.getActiveModelPid() == null) {
-                log.error(
-                        String.format("Active Model check failed for Rating Engine=%s", retrievedRatingEngine.getId()));
-                throw new LedpException(LedpCode.LEDP_18175, new String[] { retrievedRatingEngine.getDisplayName() });
-            }
+        if (ratingEngine.getStatus() == RatingEngineStatus.ACTIVE
+                && retrievedRatingEngine.getScoringIteration() == null) {
+            log.error(String.format("No scoring iteration set for Rating Engine: %s", retrievedRatingEngine.getId()));
+            throw new LedpException(LedpCode.LEDP_18186, new String[] { retrievedRatingEngine.getDisplayName() });
         }
     }
 
@@ -356,17 +367,22 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
 
         ratingEngine.setAdvancedRatingConfig(advancedRatingConfig);
 
-        // set Activation Action Context
-        if (RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus())) {
-            setActivationActionContext(ratingEngine);
-            ratingEngine.setJustCreated(false);
-        }
         ratingEngineDao.create(ratingEngine);
 
         if (type == RatingEngineType.RULE_BASED) {
             createRuleBasedModel(ratingEngine);
         } else {
             createAIModel(ratingEngine, advancedModelingConfig);
+        }
+
+        // set Activation Action Context
+        if (RatingEngineStatus.ACTIVE == ratingEngine.getStatus()) {
+            if (ratingEngine.getScoringIteration() == null && ratingEngine.getType() != RatingEngineType.RULE_BASED) {
+                log.error(String.format("No scoring iteration set for Rating Engine: %s", ratingEngine.getId()));
+                throw new LedpException(LedpCode.LEDP_18186, new String[] { ratingEngine.getDisplayName() });
+            }
+            setActivationActionContext(ratingEngine);
+            // ratingEngine.setJustCreated(false);
         }
     }
 
@@ -382,8 +398,13 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         populateUnusedAttrsInBktRestrictions(ratingEngine, ruleBasedModel);
 
         ruleBasedModelDao.create(ruleBasedModel);
+
         ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
         ratingEngine.setActiveModel(ruleBasedModel);
+        ratingEngine.setLatestIteration(ruleBasedModel);
+        if (ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
+            ratingEngine.setScoringIteration(ruleBasedModel);
+        }
         ratingEngineDao.update(ratingEngine);
     }
 
@@ -436,8 +457,10 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         aiModel.setRatingEngine(ratingEngine);
         aiModel.setAdvancedModelingConfig(advancedModelingConfig);
         aiModelDao.create(aiModel);
+
         ratingEngine.setActiveModelPid(aiModel.getPid());
         ratingEngine.setActiveModel(aiModel);
+        ratingEngine.setLatestIteration(aiModel);
         ratingEngineDao.update(ratingEngine);
 
     }

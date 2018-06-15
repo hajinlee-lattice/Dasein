@@ -161,7 +161,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateSegmentNull" })
     public void testDelete() {
-        aiModelEntityMgr.deleteById(aiModel.getId());
+        ratingEngineEntityMgr.deleteById(ratingEngine.getId(), true);
         aiModel = aiModelEntityMgr.findById(aiModel.getId());
         Assert.assertNull(aiModel, "AIModel is not deleted");
     }
@@ -220,7 +220,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateSegmentNullCustomEvent" })
     public void testDeleteCustomEvent() {
-        aiModelEntityMgr.deleteById(aiModelCustomEvent.getId());
+        ratingEngineEntityMgr.deleteById(ratingEngineCustomEvent.getId(), true);
         aiModelCustomEvent = aiModelEntityMgr.findById(aiModelCustomEvent.getId());
         Assert.assertNull(aiModelCustomEvent, "AIModel is not deleted");
     }

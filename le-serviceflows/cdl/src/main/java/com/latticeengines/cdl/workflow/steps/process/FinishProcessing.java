@@ -17,6 +17,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -80,6 +82,22 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         // update segment and rating engine counts
         SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
         RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace.toString());
+        setPublishedModels();
+    }
+
+    private void setPublishedModels() {
+        List<RatingModelContainer> publishedRatingContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        publishedRatingContainers.forEach(container -> {
+            try {
+                RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.toString(), container.getEngineSummary().getId());
+                ratingEngine.setPublishedIteration(container.getModel());
+                ratingEngineProxy.createOrUpdateRatingEngine(customerSpace.toString(), ratingEngine);
+                log.info("Updated the published iteration  of Rating Engine: " + ratingEngine.getId() + " to Rating model: "
+                        + container.getModel().getId());
+            } catch (Exception e) {
+                log.error("Failed to update the published Iteration of rating engine " + container.getEngineSummary().getId(), e);
+            }
+        });
     }
 
     private void deleteOrphanTables() {
@@ -104,7 +122,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
             bucketedScoreSummaryMap.forEach((modelGuid, bucketedScoreSummary) -> {
                 log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
                         + JsonUtils.serialize(bucketedScoreSummary));
-                bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace.toString(), modelGuid, bucketedScoreSummary);
+                bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace.toString(), modelGuid,
+                        bucketedScoreSummary);
             });
         }
         Map<String, List> listMap = getMapObjectFromContext(BUCKET_METADATA_MAP, String.class, List.class);
