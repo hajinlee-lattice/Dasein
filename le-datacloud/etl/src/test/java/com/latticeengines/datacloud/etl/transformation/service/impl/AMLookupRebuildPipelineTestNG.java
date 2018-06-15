@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.AMLookupRebuild;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedPriActFix;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCleanup;
@@ -56,6 +57,7 @@ public class AMLookupRebuildPipelineTestNG
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
+        confirmIntermediateSource(new GeneralSource(targetSeedName), null);
         confirmResultFile(progress);
         cleanupProgressTables();
     }
@@ -237,6 +239,19 @@ public class AMLookupRebuildPipelineTestNG
                 { 101L, "dom100.com", "State100", "Zip100", "Country100", "DUNS101", "Y", "Y", null, "DUNS101", 10000,
                         10000L, "Y" },
 
+                // test priority to pick primary domain
+                // test IsPrimaryAccount
+                { 1000L, "dom1000.com", null, null, null, "DUNS1000", "Y", "Y", null, null, null, null, "N" },
+                { 1001L, "dom1001.com", null, null, null, "DUNS1000", "Y", "Y", null, null, null, null, null },
+                { 1002L, "dom1002.com", null, null, null, "DUNS1000", "Y", "N", null, null, null, null, "Y" },
+                { 1003L, "dom1003.com", null, null, null, "DUNS1000", "Y", "N", null, null, null, null, "N" },
+                { 1004L, "dom1004.com", null, null, null, "DUNS1000", "Y", "N", null, null, null, null, null },
+                // test IsPrimaryDomain
+                { 1005L, "dom1005.com", null, null, null, "DUNS1005", "Y", "N", null, null, null, null, "N" },
+                { 1006L, "dom1006.com", null, null, null, "DUNS1005", "Y", "Y", null, null, null, null, "N" },
+                { 1007L, "dom1007.com", null, null, null, "DUNS1005", "Y", "N", null, null, null, null, null },
+                // test domain only
+                { 1008L, "dom1008.com", null, null, null, null, "Y", "N", null, null, null, null, "N" },
         };
 
         uploadBaseSourceData(ams, baseSourceVersion, columns, data);
@@ -389,6 +404,28 @@ public class AMLookupRebuildPipelineTestNG
                 { "_DOMAIN_NULL_DUNS_DUNS101", 101L }, //
                 { "_DOMAIN_dom100.com_DUNS_DUNS100", 100L }, //
                 { "_DOMAIN_dom100.com_DUNS_DUNS101", 101L }, //
+
+                { "_DOMAIN_dom1000.com_DUNS_DUNS1000", 1000L }, //
+                { "_DOMAIN_dom1001.com_DUNS_DUNS1000", 1001L }, //
+                { "_DOMAIN_dom1002.com_DUNS_DUNS1000", 1002L }, //
+                { "_DOMAIN_dom1003.com_DUNS_DUNS1000", 1003L }, //
+                { "_DOMAIN_dom1004.com_DUNS_DUNS1000", 1004L }, //
+                { "_DOMAIN_NULL_DUNS_DUNS1000", 1002L }, //
+                { "_DOMAIN_dom1000.com_DUNS_NULL", 1000L }, //
+                { "_DOMAIN_dom1001.com_DUNS_NULL", 1001L }, //
+                { "_DOMAIN_dom1002.com_DUNS_NULL", 1002L }, //
+                { "_DOMAIN_dom1003.com_DUNS_NULL", 1003L }, //
+                { "_DOMAIN_dom1004.com_DUNS_NULL", 1004L }, //
+
+                { "_DOMAIN_dom1005.com_DUNS_DUNS1005", 1005L }, //
+                { "_DOMAIN_dom1006.com_DUNS_DUNS1005", 1006L }, //
+                { "_DOMAIN_dom1007.com_DUNS_DUNS1005", 1007L }, //
+                { "_DOMAIN_NULL_DUNS_DUNS1005", 1006L }, //
+                { "_DOMAIN_dom1005.com_DUNS_NULL", 1005L }, //
+                { "_DOMAIN_dom1006.com_DUNS_NULL", 1006L }, //
+                { "_DOMAIN_dom1007.com_DUNS_NULL", 1007L }, //
+
+                { "_DOMAIN_dom1008.com_DUNS_NULL", 1008L }
         };
 
         Map<String, Long> lookup = new HashMap<>();
@@ -412,6 +449,28 @@ public class AMLookupRebuildPipelineTestNG
         });
 
         Assert.assertEquals(seenKeys.size(), lookup.size());
+    }
+
+    @Override
+    protected void verifyIntermediateResult(String source, String version, Iterator<GenericRecord> records) {
+        log.info(String.format("Start to verify intermediate source %s", source));
+        try {
+            switch (source) {
+            case "AccountMasterSeedCleaned":
+                verifyAMSeedCleaned(records);
+                break;
+            default:
+                throw new UnsupportedOperationException(String.format("Unknown intermediate source %s", source));
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Exception in verifyIntermediateResult", ex);
+        }
+    }
+
+    private void verifyAMSeedCleaned(Iterator<GenericRecord> records) {
+        while (records.hasNext()) {
+            log.info(records.next().toString());
+        }
     }
 
 }

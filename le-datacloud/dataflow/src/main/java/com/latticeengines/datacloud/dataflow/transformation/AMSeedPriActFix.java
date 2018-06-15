@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AMSeedPriDomainAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMSeedPriLocAggregator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -28,12 +29,19 @@ public class AMSeedPriActFix extends ConfigurableFlowBase<TransformerConfig> {
     private static final String LATTICEID_PRILOC_CTY = "_LatticeID_PriLoc_Cty_";
     private static final String LATTICEID_PRILOC_ST = "_LatticeID_PriLoc_St_";
     private static final String LATTICEID_PRILOC_ZIP = "_LatticeID_PriLoc_Zip_";
+    private static final String LATTICEID_PRIDOM = "_LatticeID_PriDom_";
 
-    @SuppressWarnings("rawtypes")
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         Node ams = addSource(parameters.getBaseTables().get(0));
+        ams = fixPriLoc(ams);
+        ams = fixPriDom(ams);
+        return ams;
+    }
 
+    @SuppressWarnings("rawtypes")
+    private Node fixPriLoc(Node ams) {
         List<FieldMetadata> fms = new ArrayList<>(Arrays.asList(new FieldMetadata(LATTICEID_PRILOC, Long.class)));
         List<String> groupFields = new ArrayList<>(Arrays.asList(DataCloudConstants.AMS_ATTR_DOMAIN));
         Aggregator agg = new AMSeedPriLocAggregator(new Fields(LATTICEID_PRILOC), groupFields);
@@ -81,6 +89,24 @@ public class AMSeedPriActFix extends ConfigurableFlowBase<TransformerConfig> {
                         new FieldMetadata(DataCloudConstants.ATTR_IS_ZIP_PRIMARY_LOCATION, String.class))
                 .discard(new FieldList(LATTICEID_PRILOC, LATTICEID_PRILOC_CTY, LATTICEID_PRILOC_ST,
                         LATTICEID_PRILOC_ZIP));
+
+        return ams;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Node fixPriDom(Node ams) {
+        List<FieldMetadata> fms = new ArrayList<>(Arrays.asList(new FieldMetadata(LATTICEID_PRIDOM, Long.class)));
+        List<String> groupFields = new ArrayList<>(Arrays.asList(DataCloudConstants.AMS_ATTR_DUNS));
+        Aggregator agg = new AMSeedPriDomainAggregator(new Fields(LATTICEID_PRIDOM), groupFields);
+        Node priDom = ams.groupByAndAggregate(new FieldList(groupFields), agg, fms).renamePipe("PriDom");
+
+        ams = ams.join(new FieldList(DataCloudConstants.LATTIC_ID), priDom, new FieldList(LATTICEID_PRIDOM),
+                JoinType.LEFT);
+        ams = ams.discard(new FieldList(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN))
+                .apply(String.format("(%s == null || %s != null) ? \"Y\" : \"N\"", DataCloudConstants.AMS_ATTR_DUNS,
+                        LATTICEID_PRIDOM), new FieldList(DataCloudConstants.AMS_ATTR_DUNS, LATTICEID_PRIDOM),
+                        new FieldMetadata(DataCloudConstants.ATTR_IS_PRIMARY_DOMAIN, String.class))
+                .discard(new FieldList(LATTICEID_PRIDOM));
 
         return ams;
     }
