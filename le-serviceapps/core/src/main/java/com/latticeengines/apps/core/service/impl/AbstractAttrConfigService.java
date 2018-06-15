@@ -224,6 +224,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return renderedList;
     }
 
+    @Deprecated
     @Override
     public AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
@@ -269,6 +270,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             attrValidationService.setValidateParam(dbConfigs);
             ValidationDetails details = attrValidationService.validate(renderedList, isAdmin);
             toReturn.setDetails(details);
+            if (toReturn.hasWarning()) {
+                log.info("current attribute configs has warnings:" + JsonUtils.serialize(details));
+                return toReturn;
+            }
             if (toReturn.hasError()) {
                 throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
                         + JsonUtils.serialize(toReturn.getDetails()));

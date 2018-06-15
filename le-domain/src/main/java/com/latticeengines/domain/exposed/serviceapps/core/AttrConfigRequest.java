@@ -34,6 +34,10 @@ public class AttrConfigRequest {
         return details != null && details.hasError();
     }
 
+    public boolean hasWarning() {
+        return details != null && details.hasWarning();
+    }
+
     public void fixJsonDeserialization() {
         if (CollectionUtils.isNotEmpty(attrConfigs)) {
             attrConfigs.forEach(AttrConfig::fixJsonDeserialization);

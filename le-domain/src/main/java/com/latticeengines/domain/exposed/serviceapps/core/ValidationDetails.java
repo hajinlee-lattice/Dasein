@@ -40,6 +40,15 @@ public class ValidationDetails {
         return hasError;
     }
 
+    public boolean hasWarning() {
+        boolean hasWarning = false;
+        if (CollectionUtils.isNotEmpty(validations)) {
+            hasWarning = validations.stream().anyMatch(validation -> //
+            validation.impactWarnings != null && MapUtils.isNotEmpty(validation.impactWarnings.getWarnings()));
+        }
+        return hasWarning;
+    }
+
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class AttrValidation {
 
