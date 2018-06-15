@@ -18,6 +18,15 @@ angular
                     });
 
                     return deferred.promise;
+                },
+                Precheck: function($q, ConfigureAttributesStore) {
+                    var deferred = $q.defer();
+
+                    ConfigureAttributesStore.getPrecheck().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             },
             redirectTo: 'home.configureattributes.spend_change'

@@ -7,7 +7,8 @@ angular
             vm:'='
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore, BrowserStorageUtility, FeatureFlagService) {
+        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, 
+            DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore, BrowserStorageUtility, FeatureFlagService) {
             var vm = $scope.vm;
 
             angular.extend(vm, {

@@ -7,6 +7,7 @@ angular.module('lp.configureattributes')
         this.steps = null;
         this.options = {};
         this.saved = [];
+        this.precheck = null;
     }
 
     this.init();
@@ -30,30 +31,16 @@ angular.module('lp.configureattributes')
         return deferred.promise;
     }
 
-    this.getSteps = function(data, steps) {
-        if(this.steps) {
-            return this.steps;
-        } else {
-            var _data = {},
-                steps = steps || {};
-            for(var i in data) {
-                var item = data[i];
-                _data[item.metrics] = _data[item.metrics] || [];
-                _data[item.metrics].push(item);
-            }
-            for(var key in steps) {
-                var types = steps[key].type.split(','),
-                    typesObj = {};
-                for(var j in types) {
-                    var type = types[j];
-                    steps[key].data = steps[key].data || {};
-                    if(_data[type]) {
-                        steps[key].data[type] = _data[type];
-                    }
-                }
-            }
-            return steps;
-        }
+    this.savePurchaseHistory = function() {
+        var deferred = $q.defer();
+
+        ConfigureAttributesService.savePurchaseHistory(this.purchaseHistory).then(function(result) {
+            deferred.resolve(result);
+        });
+        // deferred.resolve(this.purchaseHistory);
+        // console.log(this.purchaseHistory);
+        
+        return deferred.promise;
     }
 
     this.setOptions = function(options) {
@@ -190,14 +177,43 @@ angular.module('lp.configureattributes')
         ConfigureAttributesStore.setSaved(step);
     }
 
-    this.savePurchaseHistory = function() {
+    this.getSteps = function(data, steps) {
+        if(this.steps) {
+            return this.steps;
+        } else {
+            var _data = {},
+                steps = steps || {};
+            for(var i in data) {
+                var item = data[i];
+                _data[item.metrics] = _data[item.metrics] || [];
+                _data[item.metrics].push(item);
+            }
+            for(var key in steps) {
+                var types = steps[key].type.split(','),
+                    typesObj = {};
+                for(var j in types) {
+                    var type = types[j];
+                    steps[key].data = steps[key].data || {};
+                    if(_data[type]) {
+                        steps[key].data[type] = _data[type];
+                    }
+                }
+            }
+            return steps;
+        }
+    }
+
+    this.getPrecheck = function() {
         var deferred = $q.defer();
 
-        ConfigureAttributesService.savePurchaseHistory(this.purchaseHistory).then(function(result) {
-            deferred.resolve(result);
-        });
-        // deferred.resolve(this.purchaseHistory);
-        // console.log(this.purchaseHistory);
+        if(this.precheck) {
+            deferred.resolve(this.precheck);
+        } else {
+            ConfigureAttributesService.getPrecheck().then(function(result) {
+                ConfigureAttributesStore.precheck = result;
+                deferred.resolve(result);
+            });
+        }
         
         return deferred.promise;
     }
@@ -237,4 +253,20 @@ angular.module('lp.configureattributes')
         return deferred.promise;
         var deferred = $q.defer();
     };
+
+    this.getPrecheck = function() {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: '/pls/datacollection/metrics/precheck',
+            headers: { 'Content-Type': 'application/json' }
+        }).success(function(result, status) {
+            deferred.resolve(result);
+        }).error(function(error, status) {
+            deferred.resolve(error);
+        });
+
+        return deferred.promise;
+        var deferred = $q.defer();
+    }
 });

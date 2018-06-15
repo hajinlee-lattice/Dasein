@@ -10,6 +10,7 @@ angular.module('lp.configureattributes.configure', [])
             forceNextStep = false,
             resolve = $scope.$parent.$resolve,
             PurchaseHistory = resolve.PurchaseHistory,
+            Precheck = resolve.Precheck,
             totalMonths = 60,
             timestamp = + new Date(),
             defaultOption = {
@@ -42,11 +43,13 @@ angular.module('lp.configureattributes.configure', [])
                 share_of_wallet: {
                     type: 'ShareOfWallet',
                     label: '% Share of Wallet',
+                    disabled: Precheck.disableShareOfWallet,
                     description: $sce.trustAsHtml('<p>This curated attribute is calculated by comparing spend ratio for a given product of a given account with that of other accounts in the same segment.</p><p>This insignts are useful to drive sales &amp; marketing campaigns for the accounts where the share of wallet is below the desired range.</p>'),
                 },
                 margin: {
                     type: 'Margin',
                     label: '% Margin',
+                    disabled: Precheck.disableMargin,
                     description: $sce.trustAsHtml('<p>This curated attribute is calculated by analyzing cost of sell &amp; revenue for a given product of a given account in the specified time window.</p><p>The insights are useful to drive sales &amp; marketing campaigns for the accounts where the profit margins are below expected levels</p>'),
                 }
             },
@@ -61,7 +64,8 @@ angular.module('lp.configureattributes.configure', [])
             options: ConfigureAttributesStore.getOptions() || {},
             completed: ConfigureAttributesStore.getSaved(),
             PurchaseHistory: PurchaseHistory,
-            hasChanges: false
+            hasChanges: false,
+            precheck: Precheck
         });
 
         vm.steps_count = Object.keys(vm.steps).length;
@@ -210,7 +214,10 @@ angular.module('lp.configureattributes.configure', [])
 
         }
 
-        vm.goto = function(name) {
+        vm.goto = function(name, item) {
+            if(item.disabled) {
+                return false;
+            }
             if(!forceNextStep) {
                 $state.go('home.configureattributes.' + name);
             } else {

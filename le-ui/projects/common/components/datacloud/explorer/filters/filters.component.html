@@ -23,7 +23,7 @@
             <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
         </div>
     </li>
-    <li class="configureattributes show-tooltip title-tooltip top" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
+    <li class="configureattributes show-tooltip title-tooltip top" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard && !vm.datacollectionPrecheck.disableAll">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Configure Attributes</span></div>
         <button class="button borderless-button" 
                 ui-sref="home.configureattributes">

@@ -1,4 +1,4 @@
-<div class="configured-message" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.ShareOfWallet)}">
+<div class="configured-message" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.ShareOfWallet) || vm.precheck.disableShareOfWallet}">
     Spend analytics segment type is <em ng-if="!vm.dataCheckWrapper(vm.steps[vm.step].data.ShareOfWallet)">not</em> provided
 
     <span class="more-info show-tooltip top middle delay" ng-if="!vm.steps[vm.step].data.ShareOfWallet">&#105;
@@ -12,7 +12,7 @@
     </span>
 </div>
 
-<ul class="fields" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.ShareOfWallet)}">
+<ul class="fields" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.ShareOfWallet) || vm.precheck.disableShareOfWallet}">
     <li>
         <label for="options">% Share of Wallet in last</label>
         <select id="options"

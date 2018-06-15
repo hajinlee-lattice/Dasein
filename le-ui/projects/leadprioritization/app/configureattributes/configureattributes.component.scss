@@ -103,7 +103,7 @@
                         background-image: url(/assets/images/purchasehistory/margin.png);
                     }
                 }
-                &:hover {
+                &:not(.disabled):hover {
                     color: blue;
                     &:before {
                         border-color: blue;
@@ -124,6 +124,10 @@
                         border-color: #6abe44;
                         background-image: url(/assets/images/purchasehistory/checkmark.png);
                     }
+                }
+                &.disabled {
+                    opacity: .3;
+                    pointer-events: none;
                 }
             }
         }

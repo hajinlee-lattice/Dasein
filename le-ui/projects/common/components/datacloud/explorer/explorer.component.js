@@ -14,7 +14,7 @@ angular.module('common.datacloud.explorer', [
     Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
-    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils
+    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, DatacollectionPrecheck
 ){
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -90,7 +90,8 @@ angular.module('common.datacloud.explorer', [
         feedbackModal: DataCloudStore.getFeedbackModal(),
         stateParams: $stateParams,
         segment: $stateParams.segment,
-        inWizard: false
+        inWizard: false,
+        datacollectionPrecheck: DatacollectionPrecheck
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);

@@ -142,6 +142,15 @@ angular
 
                     return deferred.promise;
                 }],
+                DatacollectionPrecheck: ['$q', 'ConfigureAttributesStore', function($q, ConfigureAttributesStore) {
+                    var deferred = $q.defer();
+
+                    ConfigureAttributesStore.getPrecheck().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }],
                 // below resolves are needed. Do not removed
                 // override at child state when needed
                 LookupResponse: [function() {
