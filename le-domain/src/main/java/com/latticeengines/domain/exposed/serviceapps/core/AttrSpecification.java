@@ -16,11 +16,11 @@ public enum AttrSpecification {
             false, true), //
     CDL_CONTACT_EXTENSION("CDL Contact Extensions", true, true, true, true, true, false, false, true, true, false,
             false, false), //
-    CDL_DERIVED_PB("CDL Derived Attributes for Product Bundles", true, false, false, false, false, false, false, false,
+    CDL_DERIVED_PB("CDL Derived Attributes for Product Bundles", true, true, false, false, false, false, false, false,
             false, false, true, false), //
     CDL_DERIVED_WBC("CDL Derived Attributes for Website Behavior Categories", true, true, true, true, false, false,
             false, true, false, false, true, false), //
-    CDL_RATING("CDL Rating Attributes", true, false, false, false, false, false, false, false, false, false, false,
+    CDL_RATING("CDL Rating Attributes", true, true, false, false, false, false, false, false, false, false, false,
             false), //
     CDL_SEGMENTS("CDL Segments as Attributes", true, true, true, true, false, false, false, true, true, false, true,
             false); //
