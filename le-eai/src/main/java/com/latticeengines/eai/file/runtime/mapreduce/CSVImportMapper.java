@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -66,6 +67,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private static final String ERROR_FILE = "error.csv";
 
     private static final String NULL = "null";
+
+    private static final String SCIENTIFIC_REGEX = "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$";
+    private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
 
     private Schema schema;
 
@@ -370,6 +374,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     @VisibleForTesting
     Number parseStringToNumber(String inputStr) throws ParseException {
+        if (SCIENTIFIC_PTN.matcher(inputStr).matches()) {
+            // handle scientific notation
+            return Double.parseDouble(inputStr);
+        }
+
         NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
         return numberFormatter.parse(inputStr, Locale.getDefault());
     }
