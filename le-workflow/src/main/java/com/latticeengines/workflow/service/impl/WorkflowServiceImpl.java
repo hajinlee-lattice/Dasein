@@ -178,6 +178,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         Long workflowPid = workflowJobEntityMgr.findByWorkflowId(workflowJob.getWorkflowId()).getPid();
         WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
         jobUpdate.setWorkflowPid(workflowPid);
+        jobUpdate.setCreateTime(currentTime);
         jobUpdate.setLastUpdateTime(currentTime);
         workflowJobUpdateEntityMgr.create(jobUpdate);
 
@@ -193,8 +194,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflowJobEntityMgr.registerWorkflowId(workflowJob);
         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
 
+        Long currentTime = System.currentTimeMillis();
         WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
-        jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+        jobUpdate.setCreateTime(currentTime);
+        jobUpdate.setLastUpdateTime(currentTime);
         workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
 
         return new WorkflowExecutionId(jobExecutionId);
@@ -228,9 +231,11 @@ public class WorkflowServiceImpl implements WorkflowService {
 
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
             if (jobUpdate == null) {
+                Long currentTime = System.currentTimeMillis();
                 jobUpdate = new WorkflowJobUpdate();
                 jobUpdate.setWorkflowPid(workflowJob.getPid());
-                jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+                jobUpdate.setCreateTime(currentTime);
+                jobUpdate.setLastUpdateTime(currentTime);
                 workflowJobUpdateEntityMgr.create(jobUpdate);
             } else {
                 jobUpdate.setLastUpdateTime(System.currentTimeMillis());

@@ -22,6 +22,7 @@ public class WorkflowJobUpdateEntityMgrImplTestNG extends WorkflowTestNGBase {
     private Long workflowPid2 = 9902L;
     private Long lastUpdateTime1 = 1516231234L;
     private Long lastUpdateTime2 = 1516235972L;
+    private Long currentTime = 1516231000L;
 
     @BeforeClass(groups = "functional")
     @Override
@@ -29,11 +30,13 @@ public class WorkflowJobUpdateEntityMgrImplTestNG extends WorkflowTestNGBase {
         jobUpdate1 = new WorkflowJobUpdate();
         jobUpdate1.setWorkflowPid(workflowPid1);
         jobUpdate1.setLastUpdateTime(lastUpdateTime1);
+        jobUpdate1.setCreateTime(currentTime);
         workflowJobUpdateEntityMgr.create(jobUpdate1);
 
         jobUpdate2 = new WorkflowJobUpdate();
         jobUpdate2.setWorkflowPid(workflowPid2);
         jobUpdate2.setLastUpdateTime(lastUpdateTime2);
+        jobUpdate2.setCreateTime(currentTime);
         workflowJobUpdateEntityMgr.create(jobUpdate2);
     }
 
@@ -47,10 +50,12 @@ public class WorkflowJobUpdateEntityMgrImplTestNG extends WorkflowTestNGBase {
         jobUpdate1 = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid1);
         Assert.assertEquals(jobUpdate1.getWorkflowPid(), workflowPid1);
         Assert.assertEquals(jobUpdate1.getLastUpdateTime(), lastUpdateTime1);
+        Assert.assertEquals(jobUpdate1.getCreateTime(), currentTime);
 
         jobUpdate2 = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid2);
         Assert.assertEquals(jobUpdate2.getWorkflowPid(), workflowPid2);
         Assert.assertEquals(jobUpdate2.getLastUpdateTime(), lastUpdateTime2);
+        Assert.assertEquals(jobUpdate2.getCreateTime(), currentTime);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testFindByWorkflowPid")
@@ -59,6 +64,7 @@ public class WorkflowJobUpdateEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate1);
         WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(jobUpdate1.getWorkflowPid());
         Assert.assertEquals(jobUpdate.getLastUpdateTime(), lastUpdateTime2);
+        Assert.assertEquals(jobUpdate.getCreateTime(), currentTime);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testUpdateLastUpdateTime")
@@ -67,7 +73,9 @@ public class WorkflowJobUpdateEntityMgrImplTestNG extends WorkflowTestNGBase {
         Assert.assertEquals(jobUpdates.size(), 2);
         Assert.assertEquals(jobUpdates.get(0).getWorkflowPid(), workflowPid1);
         Assert.assertEquals(jobUpdates.get(0).getLastUpdateTime(), lastUpdateTime2);
+        Assert.assertEquals(jobUpdates.get(0).getCreateTime(), currentTime);
         Assert.assertEquals(jobUpdates.get(1).getWorkflowPid(), workflowPid2);
         Assert.assertEquals(jobUpdates.get(1).getLastUpdateTime(), lastUpdateTime2);
+        Assert.assertEquals(jobUpdates.get(1).getCreateTime(), currentTime);
     }
 }

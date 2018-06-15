@@ -39,4 +39,13 @@ CREATE PROCEDURE `UpdateSchema`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateWorkflowJobUpdate`()
+  BEGIN
+    ALTER TABLE `PLS_MultiTenant`.`WORKFLOW_JOB_UPDATE`
+      ADD `CREATE_TIME` BIGINT(20);
+  END;
+//
+DELIMITER ;
+
 CALL `UpdateSchema`();
+CALL `UpdateWorkflowJobUpdate`();

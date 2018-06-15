@@ -85,6 +85,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
 
     private long heartbeatThreshold;
     private long currentTime;
+    private long jobUpdateCreateTime;
     private long successTime;
     private long failedTime;
 
@@ -113,6 +114,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         currentTime = System.currentTimeMillis();
         successTime = currentTime - heartbeatThreshold;
         failedTime = currentTime - 3 * heartbeatThreshold;
+        jobUpdateCreateTime = currentTime - 5 * heartbeatThreshold;
         log.info(String.format("heartbeatThreshold=%s, currentTime=%s, successTime=%s, failedTime=%s",
                 heartbeatThreshold, currentTime, successTime, failedTime));
     }
@@ -499,6 +501,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobUpdate1 = new WorkflowJobUpdate();
         jobUpdate1.setWorkflowPid(workflowJobEntityMgr.findByWorkflowId(workflowJob1.getWorkflowId()).getPid());
         jobUpdate1.setLastUpdateTime(successTime);
+        jobUpdate1.setCreateTime(jobUpdateCreateTime);
         workflowJobUpdateEntityMgr.create(jobUpdate1);
 
         applicationId = "application_10001";
@@ -527,6 +530,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobUpdate11 = new WorkflowJobUpdate();
         jobUpdate11.setWorkflowPid(workflowJobEntityMgr.findByWorkflowId(workflowJob11.getWorkflowId()).getPid());
         jobUpdate11.setLastUpdateTime(failedTime);
+        jobUpdate11.setCreateTime(jobUpdateCreateTime);
         workflowJobUpdateEntityMgr.create(jobUpdate11);
 
         applicationId = "application_10002";
@@ -553,6 +557,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobUpdate12 = new WorkflowJobUpdate();
         jobUpdate12.setWorkflowPid(workflowJobEntityMgr.findByWorkflowId(workflowJob12.getWorkflowId()).getPid());
         jobUpdate12.setLastUpdateTime(failedTime);
+        jobUpdate12.setCreateTime(jobUpdateCreateTime);
         workflowJobUpdateEntityMgr.create(jobUpdate12);
 
         applicationId = "application_10003";
@@ -581,6 +586,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobUpdate13 = new WorkflowJobUpdate();
         jobUpdate13.setWorkflowPid(workflowJobEntityMgr.findByWorkflowId(workflowJob13.getWorkflowId()).getPid());
         jobUpdate13.setLastUpdateTime(failedTime);
+        jobUpdate13.setCreateTime(jobUpdateCreateTime);
         workflowJobUpdateEntityMgr.create(jobUpdate13);
 
         applicationId = "application_20000";
@@ -614,6 +620,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobUpdate2 = new WorkflowJobUpdate();
         jobUpdate2.setWorkflowPid(workflowJobEntityMgr.findByWorkflowId(workflowJob2.getWorkflowId()).getPid());
         jobUpdate2.setLastUpdateTime(successTime);
+        jobUpdate2.setCreateTime(jobUpdateCreateTime);
         workflowJobUpdateEntityMgr.create(jobUpdate2);
 
         createTenant();
@@ -640,6 +647,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobUpdate3 = new WorkflowJobUpdate();
         jobUpdate3.setWorkflowPid(workflowJobEntityMgr.findByWorkflowId(workflowJob3.getWorkflowId()).getPid());
         jobUpdate3.setLastUpdateTime(successTime);
+        jobUpdate3.setCreateTime(jobUpdateCreateTime);
         workflowJobUpdateEntityMgr.create(jobUpdate3);
 
         applicationId = "application_30001";
@@ -669,6 +677,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobUpdate31 = new WorkflowJobUpdate();
         jobUpdate31.setWorkflowPid(workflowJobEntityMgr.findByWorkflowId(workflowJob31.getWorkflowId()).getPid());
         jobUpdate31.setLastUpdateTime(failedTime);
+        jobUpdate31.setCreateTime(jobUpdateCreateTime);
         workflowJobUpdateEntityMgr.create(jobUpdate31);
     }
 

@@ -277,6 +277,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Long workflowPid = workflowJob.getPid();
         WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
         jobUpdate.setWorkflowPid(workflowPid);
+        jobUpdate.setCreateTime(currentTime);
         jobUpdate.setLastUpdateTime(currentTime);
         workflowJobUpdateEntityMgr.create(jobUpdate);
 
@@ -314,6 +315,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
             if (jobUpdate != null
+                    && (jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime() >= 1000 * 120)
                     && (System.currentTimeMillis() - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);

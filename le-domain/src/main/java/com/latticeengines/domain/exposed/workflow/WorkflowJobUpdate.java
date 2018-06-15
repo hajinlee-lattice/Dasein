@@ -27,6 +27,9 @@ public class WorkflowJobUpdate implements HasPid {
     @Column(name = "LAST_UPDATE_TIME", nullable = false)
     private Long lastUpdateTime;
 
+    @Column(name = "CREATE_TIME", nullable = false)
+    private Long createTime;
+
     @Override
     public Long getPid() {
         return pid;
@@ -51,6 +54,14 @@ public class WorkflowJobUpdate implements HasPid {
 
     public void setLastUpdateTime(Long lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public Long getCreateTime() {
+        return this.createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
     }
 
     @Override
