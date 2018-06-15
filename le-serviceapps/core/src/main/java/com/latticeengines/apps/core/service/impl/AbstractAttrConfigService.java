@@ -120,7 +120,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     @VisibleForTesting
     <T extends Serializable> AttrConfigCategoryOverview<T> getAttrConfigOverview(@NonNull List<AttrConfig> renderedList,
             Category category, List<String> propertyNames, boolean onlyActiveAttrs) {
-        AttrConfigCategoryOverview<T> overview = new AttrConfigCategoryOverview<T>();
+        AttrConfigCategoryOverview<T> overview = new AttrConfigCategoryOverview<>();
         Map<String, Map<T, Long>> propSummary = new HashMap<>();
         overview.setPropSummary(propSummary);
         if (category.isPremium()) {

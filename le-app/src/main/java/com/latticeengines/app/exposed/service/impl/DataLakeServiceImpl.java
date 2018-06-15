@@ -414,8 +414,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     public Map<String, StatsCube> getStatsCubesFromCache(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
-            Map<String, StatsCube> cubes = container.getStatsCubes();
-            return cubes;
+            return container.getStatsCubes();
         }
         return null;
     }

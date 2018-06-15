@@ -1329,12 +1329,10 @@ public class SchemaRepository {
             attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
             attrs.forEach(a -> a.setCategory(Category.ACCOUNT_INFORMATION));
         } else if (schema == SchemaInterpretation.Account) {
-            List<Attribute> attributeWithDefaultValue = Arrays.asList(website, accountCompanyName, duns, city, state,
-                    country, postalCode, phoneNumber);
-            setDefaultEmptyStrForAttrs(attributeWithDefaultValue);
-            attrs.addAll(attributeWithDefaultValue);
+            attrs.addAll(Arrays.asList(website, accountCompanyName, duns, city, state,
+                    country, postalCode, phoneNumber));
             attrs.addAll(Arrays.asList(address1, address2));
-            attrs.forEach(a -> a.setCategory(Category.ACCOUNT_INFORMATION));
+            attrs.forEach(a -> a.setCategory(Category.ACCOUNT_ATTRIBUTES));
         } else if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.SalesforceLead) {
             attrs.add(email);
             attrs.add(contactCompanyName);
@@ -1346,15 +1344,11 @@ public class SchemaRepository {
             if (SchemaInterpretation.SalesforceLead.equals(schema)) {
                 // needed for CSV downloads in LPI
                 attrs.forEach(a -> a.setCategory(Category.LEAD_INFORMATION));
+            } else {
+                attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
             }
         }
         return attrs;
-    }
-
-    private void setDefaultEmptyStrForAttrs(List<Attribute> attributeList) {
-        for (Attribute attr : attributeList) {
-            attr.setDefaultValueStr("");
-        }
     }
 
     public List<Attribute> matchingAttributes(BusinessEntity entity) {
