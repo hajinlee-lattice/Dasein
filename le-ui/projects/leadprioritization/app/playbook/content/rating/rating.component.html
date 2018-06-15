@@ -30,7 +30,7 @@
                         <li class="name">Segment</li>
                         <li class="ratingengine">Model</li>
                         <li class="accounts">Accounts</li> 
-                        <li class="contacts">Contacts</li>
+                        <!-- <li class="contacts">Contacts</li> -->
                     </ul>
                 </li>
                 <li 
@@ -55,11 +55,12 @@
                             <label for="rating{{$index}}">{{rating.displayName}}</label>
                         </li>
                         <li class="accounts">
-                            <label for="rating{{$index}}">{{rating.accountsInSegment|number}}</label>
+                            <label for="rating{{$index}}">{{vm.getAccountCount(rating)|number}}</label>
                         </li>
-                        <li class="contacts">
+                        <!-- contact column commented out for M-21 -->
+                        <!-- <li class="contacts">
                             <label for="rating{{$index}}">{{rating.contactsInSegment|number}}</label>
-                        </li>
+                        </li> -->
                     </ul>
                 </li>
                 <li class="item centered-info-message" ng-if="!filteredList.length">

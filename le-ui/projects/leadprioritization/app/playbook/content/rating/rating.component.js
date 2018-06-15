@@ -51,6 +51,20 @@ angular.module('lp.playbook.wizard.rating', [])
         }
     }
 
+    vm.getAccountCount = function(rating){
+        var count = 0;
+        if(rating && rating.bucketMetadata){
+            rating.bucketMetadata.forEach(function(bucket){
+                if(bucket.num_leads){
+                    count = count + bucket.num_leads;
+                }
+            });
+        }else{
+            return rating.accountsInSegment;
+        }
+        return count;
+    }
+
     vm.saveRating = function(rating) {
         PlaybookWizardStore.setRating(rating);
     }
