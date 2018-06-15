@@ -12,6 +12,8 @@ public class AttrConfigActivationOverview {
 
     @JsonProperty("Category")
     private Category category;
+    @JsonProperty("DisplayName")
+    private String displayName;
     @JsonProperty("Selected")
     private Long selected;
     @JsonProperty("TotalAttrs")
@@ -25,6 +27,14 @@ public class AttrConfigActivationOverview {
 
     public Category getCategory() {
         return this.category;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return this.displayName;
     }
 
     public void setSelected(Long selected) {

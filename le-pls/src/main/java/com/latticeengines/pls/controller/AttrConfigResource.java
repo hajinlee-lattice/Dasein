@@ -1,6 +1,6 @@
 package com.latticeengines.pls.controller;
 
-import java.util.Map;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -39,7 +39,7 @@ public class AttrConfigResource {
     @GetMapping(value = "/activation/overview")
     @ResponseBody
     @ApiOperation("get activation overview")
-    public Map<String, AttrConfigActivationOverview> getActivationOverview() {
+    public List<AttrConfigActivationOverview> getActivationOverview() {
         return attrConfigService.getOverallAttrConfigActivationOverview();
     }
 
@@ -50,38 +50,38 @@ public class AttrConfigResource {
         return attrConfigService.getOverallAttrConfigUsageOverview();
     }
 
-    @PutMapping(value = "/activation/config/category/{categoryName}")
+    @PutMapping(value = "/activation/config/category/{categoryDisplayName}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("update Activation Config")
-    public void updateActivationConfig(@PathVariable String categoryName,
+    public void updateActivationConfig(@PathVariable String categoryDisplayName,
             @RequestBody AttrConfigSelectionRequest request) {
-        attrConfigService.updateActivationConfig(categoryName, request);
+        attrConfigService.updateActivationConfig(categoryDisplayName, request);
     }
 
-    @PutMapping(value = "/usage/config/category/{categoryName}")
+    @PutMapping(value = "/usage/config/category/{categoryDisplayName}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation("update Usage Config")
-    public void updateUsageConfig(@PathVariable String categoryName,
-            @RequestParam(value = "usage", required = true) String usage,
+    public void updateUsageConfig(@PathVariable String categoryDisplayName,
+            @RequestParam(value = "usage", required = true) String usageName,
             @RequestBody AttrConfigSelectionRequest request) {
-        attrConfigService.updateUsageConfig(categoryName, usage, request);
+        attrConfigService.updateUsageConfig(categoryDisplayName, usageName, request);
     }
 
-    @GetMapping(value = "/activation/config/category/{categoryName}")
+    @GetMapping(value = "/activation/config/category/{categoryDisplayName}")
     @ResponseBody
     @ApiOperation("get activation configuration detail for a specific category")
-    public AttrConfigSelectionDetail getActivationConfiguration(@PathVariable String categoryName) {
-        log.info("get activation configuration detail for " + categoryName);
-        return attrConfigService.getAttrConfigSelectionDetailForState(categoryName);
+    public AttrConfigSelectionDetail getActivationConfiguration(@PathVariable String categoryDisplayName) {
+        log.info("get activation configuration detail for " + categoryDisplayName);
+        return attrConfigService.getAttrConfigSelectionDetailForState(categoryDisplayName);
     }
 
-    @GetMapping(value = "/usage/config/category/{categoryName}")
+    @GetMapping(value = "/usage/config/category/{categoryDisplayName}")
     @ResponseBody
     @ApiOperation("get usage configuration detail for a specific category")
-    public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryName,
-            @RequestParam(value = "usage", required = true) String usage) {
-        log.info("get usage configuration detail for " + categoryName);
-        return attrConfigService.getAttrConfigSelectionDetails(categoryName, usage);
+    public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryDisplayName,
+            @RequestParam(value = "usage", required = true) String usageName) {
+        log.info("get usage configuration detail for " + categoryDisplayName);
+        return attrConfigService.getAttrConfigSelectionDetails(categoryDisplayName, usageName);
     }
 
 }

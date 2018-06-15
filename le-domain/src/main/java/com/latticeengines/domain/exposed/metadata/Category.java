@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,8 +36,8 @@ public enum Category {
     private final String name;
     private static Map<String, Category> nameMap;
     private static Set<String> values;
-    private static Set<Category> premiumCategories = new HashSet<>(
-            Arrays.asList(INTENT, TECHNOLOGY_PROFILE, ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES, WEBSITE_KEYWORDS));
+    private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE, WEBSITE_KEYWORDS,
+            ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES);
     private static Set<Category> hiddenFromUiCategories = new HashSet<>(
             Arrays.asList(LEAD_INFORMATION, DEFAULT, ACCOUNT_INFORMATION));
 
@@ -93,7 +94,7 @@ public enum Category {
         }
     }
 
-    public static Set<Category> getPremiunCategories() {
+    public static List<Category> getPremiunCategories() {
         return premiumCategories;
     }
 

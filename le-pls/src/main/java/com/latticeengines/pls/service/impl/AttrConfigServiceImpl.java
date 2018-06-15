@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -54,9 +53,38 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public static final String[] usageProperties = { ColumnSelection.Predefined.Segment.getName(),
             ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.TalkingPoint.getName(),
             ColumnSelection.Predefined.CompanyProfile.getName() };
-    private static final Set<String> usagePropertySet = new HashSet<>(Arrays.asList(usageProperties));
+    private static final List<String> usagePropertyList = Arrays.asList(usageProperties);
+    private static final HashMap<String, String> categoryToDisplayName = new HashMap<>();
+    private static final HashMap<String, String> displayNameToCategory = new HashMap<>();
+    private static final HashMap<String, String> usageToDisplayName = new HashMap<>();
+    private static final HashMap<String, String> displayNameToUsage = new HashMap<>();
     private static final String defaultDisplayName = "Default Name";
     private static final String defaultDescription = "Default Description";
+
+    static {
+        // this map has all the maping for all premium attributes
+        categoryToDisplayName.put("My Attributes", "MY ACCOUNT");
+        categoryToDisplayName.put("Contact Attributes", "MY CONTACT");
+        categoryToDisplayName.put("Intent", "INTENT");
+        categoryToDisplayName.put("Technology Profile", "TECHNOLOGY PROFILE");
+        categoryToDisplayName.put("Website Keywords", "WEBSITE KEYWORD");
+
+        displayNameToCategory.put("MY ACCOUNT", "My Attributes");
+        displayNameToCategory.put("MY CONTACT", "Contact Attributes");
+        displayNameToCategory.put("INTENT", "Intent");
+        displayNameToCategory.put("TECHNOLOGY PROFILE", "Technology Profile");
+        displayNameToCategory.put("WEBSITE KEYWORD", "Website Keywords");
+
+        usageToDisplayName.put(ColumnSelection.Predefined.Segment.getName(), "SEGMENTATION");
+        usageToDisplayName.put(ColumnSelection.Predefined.Enrichment.getName(), "EXPORT");
+        usageToDisplayName.put(ColumnSelection.Predefined.TalkingPoint.getName(), "TALKING POINTS");
+        usageToDisplayName.put(ColumnSelection.Predefined.CompanyProfile.getName(), "COMPANY PROFILE");
+
+        displayNameToUsage.put("SEGMENTATION", ColumnSelection.Predefined.Segment.getName());
+        displayNameToUsage.put("EXPORT", ColumnSelection.Predefined.Enrichment.getName());
+        displayNameToUsage.put("TALKING POINTS", ColumnSelection.Predefined.TalkingPoint.getName());
+        displayNameToUsage.put("COMPANY PROFILE", ColumnSelection.Predefined.CompanyProfile.getName());
+    }
 
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
@@ -69,8 +97,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, AttrConfigActivationOverview> getOverallAttrConfigActivationOverview() {
-        Map<String, AttrConfigActivationOverview> result = new HashMap<>();
+    public List<AttrConfigActivationOverview> getOverallAttrConfigActivationOverview() {
+        List<AttrConfigActivationOverview> result = new ArrayList<>();
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
                 MultiTenantContext.getTenantId(),
                 Category.getPremiunCategories().stream().map(Category::getName).collect(Collectors.toList()),
@@ -85,7 +113,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active) != null
                             ? activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active)
                             : 0L);
-            result.put(category.getName(), categoryOverview);
+            categoryOverview.setDisplayName(mapCategoryToDisplayName(category.getName()));
+            result.add(categoryOverview);
         }
         return result;
     }
@@ -94,14 +123,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public AttrConfigUsageOverview getOverallAttrConfigUsageOverview() {
         AttrConfigUsageOverview usageOverview = new AttrConfigUsageOverview();
         Map<String, Long> attrNums = new HashMap<>();
-        Map<String, Map<String, Long>> selections = new HashMap<>();
+        Map<String, Map<String, Long>> selections = new LinkedHashMap<>();
         usageOverview.setAttrNums(attrNums);
         usageOverview.setSelections(selections);
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy
                 .getAttrConfigOverview(MultiTenantContext.getTenantId(), null, Arrays.asList(usageProperties), true);
         log.info("map is " + map);
 
-        for (String property : usageProperties) {
+        for (String property : usagePropertyList) {
             Map<String, Long> detailedSelections = new HashMap<>();
             if (property.equals(ColumnSelection.Predefined.Enrichment.getName())) {
                 detailedSelections.put(AttrConfigUsageOverview.LIMIT, AttrConfigUsageOverview.defaultExportLimit);
@@ -109,12 +138,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                 detailedSelections.put(AttrConfigUsageOverview.LIMIT,
                         AttrConfigUsageOverview.defaultCompanyProfileLimit);
             }
-            selections.put(property, detailedSelections);
+            selections.put(mapUsageToDisplayName(property), detailedSelections);
             long num = 0L;
             for (String category : map.keySet()) {
                 // For each category, update its total attrNums
                 AttrConfigCategoryOverview<?> categoryOverview = map.get(category);
-                attrNums.put(category, categoryOverview.getTotalAttrs());
+                attrNums.put(mapCategoryToDisplayName(category), categoryOverview.getTotalAttrs());
 
                 // Synthesize the properties for all the categories
                 Map<?, Long> propertyDetail = categoryOverview.getPropSummary().get(property);
@@ -129,8 +158,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public void updateActivationConfig(String categoryName, AttrConfigSelectionRequest request) {
+    public void updateActivationConfig(String categoryDisplayName, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getTenantId();
+        String categoryName = mapDisplayNameToCategory(categoryDisplayName);
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(categoryName, request);
         cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
         createUpdateActivationActions(categoryName, request);
@@ -215,17 +245,18 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public void updateUsageConfig(String categoryName, String usage, AttrConfigSelectionRequest request) {
+    public void updateUsageConfig(String categoryDisplayName, String usageName, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getTenantId();
+        String categoryName = mapDisplayNameToCategory(categoryDisplayName);
+        String usage = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
         cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
     }
 
     @VisibleForTesting
-    AttrConfigRequest generateAttrConfigRequestForUsage(String categoryName, String usage,
+    AttrConfigRequest generateAttrConfigRequestForUsage(String categoryName, String property,
             AttrConfigSelectionRequest request) {
         Category category = resolveCategory(categoryName);
-        String property = translateUsageToProperty(usage);
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
@@ -260,15 +291,17 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName) {
+    public AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryDisplayName) {
+        String categoryName = mapDisplayNameToCategory(categoryDisplayName);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
         return generateSelectionDetails(categoryName, attrConfigRequest, ColumnMetadataKey.State, false);
     }
 
     @Override
-    public AttrConfigSelectionDetail getAttrConfigSelectionDetails(String categoryName, String usage) {
-        String property = translateUsageToProperty(usage);
+    public AttrConfigSelectionDetail getAttrConfigSelectionDetails(String categoryDisplayName, String usageName) {
+        String categoryName = mapDisplayNameToCategory(categoryDisplayName);
+        String property = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
         return generateSelectionDetails(categoryName, attrConfigRequest, property, true);
@@ -342,7 +375,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                                 } else {
                                     attrDetail.setSelected(false);
                                 }
-                            } else if (usagePropertySet.contains(property)) {
+                            } else if (usagePropertyList.contains(property)) {
                                 Boolean actualState = (Boolean) getActualValue(attrConfigProp);
                                 if (Boolean.TRUE.equals(actualState)) {
                                     selected++;
@@ -418,6 +451,28 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         }
         return configProp.getSystemValue();
+    }
+
+    static String mapCategoryToDisplayName(String categoryName) {
+        if (categoryToDisplayName.containsKey(categoryName)) {
+            return categoryToDisplayName.get(categoryName);
+        }
+        return categoryName;
+    }
+
+    static String mapDisplayNameToCategory(String categoryDisplayName) {
+        if (displayNameToCategory.containsKey(categoryDisplayName.toUpperCase())) {
+            return displayNameToCategory.get(categoryDisplayName.toUpperCase());
+        }
+        return categoryDisplayName;
+    }
+
+    static String mapUsageToDisplayName(String usageName) {
+        return usageToDisplayName.get(usageName);
+    }
+
+    static String mapDisplayNameToUsage(String usageDisplayName) {
+        return displayNameToUsage.get(usageDisplayName.toUpperCase());
     }
 
 }

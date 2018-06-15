@@ -100,33 +100,43 @@ public class AttrConfigServiceImplUnitTestNG {
     public void testGetOverallAttrConfigActivationOverview() {
         when(cdlAttrConfigProxy.getAttrConfigOverview(anyString(), Matchers.anyList(), Matchers.anyList(),
                 anyBoolean())).thenReturn(generatePremiumCategoryAttrConfigActivationOverview());
-        Map<String, AttrConfigActivationOverview> result = attrConfigService.getOverallAttrConfigActivationOverview();
+        List<AttrConfigActivationOverview> result = attrConfigService.getOverallAttrConfigActivationOverview();
         Assert.assertEquals(result.size(), Category.getPremiunCategories().size());
 
-        AttrConfigActivationOverview categoryOverview = result.get(Category.INTENT.getName());
+        AttrConfigActivationOverview categoryOverview = result.get(0);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalIntentAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), intentLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForIntent);
+        Assert.assertEquals(categoryOverview.getDisplayName(),
+                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.INTENT.getName()));
 
-        categoryOverview = result.get(Category.TECHNOLOGY_PROFILE.getName());
+        categoryOverview = result.get(1);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalTpAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), tpLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForTp);
+        Assert.assertEquals(categoryOverview.getDisplayName(),
+                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.TECHNOLOGY_PROFILE.getName()));
 
-        categoryOverview = result.get(Category.ACCOUNT_ATTRIBUTES.getName());
-        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalAccountAttrs);
-        Assert.assertEquals(categoryOverview.getLimit(), accountLimit);
-        Assert.assertEquals(categoryOverview.getSelected(), activeForAccount);
-
-        categoryOverview = result.get(Category.CONTACT_ATTRIBUTES.getName());
-        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalContactAttrs);
-        Assert.assertEquals(categoryOverview.getLimit(), contactLimit);
-        Assert.assertEquals(categoryOverview.getSelected(), activeForContact);
-
-        categoryOverview = result.get(Category.WEBSITE_KEYWORDS.getName());
+        categoryOverview = result.get(2);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalWebsiteKeywordAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), websiteKeywordLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForWebsiteKeyword);
+        Assert.assertEquals(categoryOverview.getDisplayName(),
+                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.WEBSITE_KEYWORDS.getName()));
+
+        categoryOverview = result.get(3);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalAccountAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), accountLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), activeForAccount);
+        Assert.assertEquals(categoryOverview.getDisplayName(),
+                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.ACCOUNT_ATTRIBUTES.getName()));
+
+        categoryOverview = result.get(4);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalContactAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), contactLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), activeForContact);
+        Assert.assertEquals(categoryOverview.getDisplayName(),
+                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.CONTACT_ATTRIBUTES.getName()));
 
     }
 
@@ -140,14 +150,15 @@ public class AttrConfigServiceImplUnitTestNG {
         log.info("overall usageOverview is " + usageOverview);
         Map<String, Long> attrNums = usageOverview.getAttrNums();
         Assert.assertEquals(attrNums.size(), 6);
-        Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - 10960L, 0);
-        Map<String, Map<String, Long>> selections = usageOverview.getSelections();
         Assert.assertEquals(
-                selections.get(ColumnSelection.Predefined.Segment.getName()).get(AttrConfigUsageOverview.SELECTED)
-                        - 3677,
-                0);
-        Assert.assertNotNull(
-                selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT));
+                attrNums.get(AttrConfigServiceImpl.mapCategoryToDisplayName(Category.INTENT.getName())) - 10960L, 0);
+        Map<String, Map<String, Long>> selections = usageOverview.getSelections();
+        Assert.assertEquals(selections
+                .get(AttrConfigServiceImpl.mapUsageToDisplayName(ColumnSelection.Predefined.Segment.getName()))
+                .get(AttrConfigUsageOverview.SELECTED) - 3677, 0);
+        Assert.assertNotNull(selections
+                .get(AttrConfigServiceImpl.mapUsageToDisplayName(ColumnSelection.Predefined.Enrichment.getName()))
+                .get(AttrConfigUsageOverview.LIMIT));
     }
 
     @Test(groups = "unit")
@@ -173,15 +184,15 @@ public class AttrConfigServiceImplUnitTestNG {
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
         request.setDeselect(Arrays.asList(deselect));
         request.setSelect(Arrays.asList(select));
-        AttrConfigRequest attrConfigRequest = attrConfigService
-                .generateAttrConfigRequestForUsage(Category.INTENT.getName(), usage, request);
+        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForUsage(
+                Category.INTENT.getName(), AttrConfigServiceImpl.mapDisplayNameToUsage(usage), request);
         List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
         Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
         for (AttrConfig attrConfig : attrConfigs) {
+            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
             Assert.assertNotNull(attrConfig.getAttrName());
             Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Account);
             Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Enrichment.getName()));
-            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
         }
     }
 
