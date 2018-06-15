@@ -136,8 +136,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private void updateReport(ObjectNode report) {
-        Map<BusinessEntity, Long> previousCnts = retrievePreviousEntityCnts();
         Map<BusinessEntity, Long> currentCnts = retrieveCurrentEntityCnts();
+        Map<BusinessEntity, Long> deleteCnts = getDeletedCount();
 
         generateCollectionStatus(currentCnts);
         ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
@@ -156,10 +156,10 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             if (entity != BusinessEntity.Product && entity != BusinessEntity.PurchaseHistory) {
                 long newCnt = consolidateSummaryNode.get(ReportConstants.NEW).asLong();
-                long deleteCnt = newCnt - (currentCnts.get(entity) - previousCnts.get(entity));
+                long deleteCnt = deleteCnts.get(entity) == null ? 0L : deleteCnts.get(entity);
                 log.info(String.format(
-                        "For entity %s, previous total count: %d, current total count: %d, new count: %s, delete count: %d",
-                        entity.name(), previousCnts.get(entity), currentCnts.get(entity), newCnt, deleteCnt));
+                        "For entity %s, current total count: %d, new count: %s, delete count: %d, entity has delete action attached: %b",
+                        entity.name(), currentCnts.get(entity), newCnt, deleteCnt, deleteCnts.containsKey(entity)));
                 consolidateSummaryNode.put("DELETE", String.valueOf(deleteCnt));
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
                 entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
@@ -181,6 +181,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     }
 
+    @Deprecated
     private Map<BusinessEntity, Long> retrievePreviousEntityCnts() {
         Map<BusinessEntity, Long> previousCnts = new HashMap<>();
         List<String> types = Collections.singletonList("processAnalyzeWorkflow");
@@ -300,6 +301,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private Map<BusinessEntity, Long> getDeletedCount() {
         List<Action> deleteActions = getDeleteActions();
         if (CollectionUtils.isEmpty(deleteActions)) {
+            log.info("No delete action attached to current PA job");
             return Collections.emptyMap();
         }
         Map<BusinessEntity, Long> deleteCounts = new HashMap<>();
