@@ -4,6 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="classpath:common-testclient-env-context.xml"/>
+    <import resource="classpath:common-threadpool-context.xml" />
     <import resource="classpath:serviceapps-lp-context.xml"/>
     <import resource="classpath:testframework-context.xml" />
 
