@@ -3,6 +3,7 @@ package com.latticeengines.common.exposed.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
@@ -98,7 +99,7 @@ public class HttpClientUtils {
         PoolingHttpClientConnectionManager pool = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         pool.setDefaultMaxPerRoute(16);
         pool.setMaxTotal(1024);
-        // pool.setValidateAfterInactivity(60000); // 1 mins (default 2s)
+        //pool.setValidateAfterInactivity(2000); // 2 secs (default 5s)
         return pool;
     }
 
@@ -107,6 +108,8 @@ public class HttpClientUtils {
         HttpComponentsClientHttpRequestFactory reqFac = new HttpComponentsClientHttpRequestFactory( //
                 HttpClientBuilder.create() //
                         .setConnectionManager(connectionManager) //
+                        .evictExpiredConnections()
+                        .evictIdleConnections(30L, TimeUnit.SECONDS)
                         .build());
         reqFac.setConnectionRequestTimeout(10000); // 10 sec
         reqFac.setConnectTimeout(600000); // 10 min
