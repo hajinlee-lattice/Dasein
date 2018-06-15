@@ -13,7 +13,7 @@ angular
 
             },
             templateUrl: '/components/charts/bar-chart.component.html',
-            controller: function ($scope, $filter, $timeout) {
+            controller: function ($scope, $filter) {
                 
                 /**
                  * Return the number with decimals truncated to the maxDigits.
@@ -38,6 +38,19 @@ angular
                         });
                     }
                     return highest;
+                }
+                function getHighestRounded(){
+                    var decimal =  getRoundedNumber(($scope.highest % 1), 1);
+                    var ret = $scope.highest;
+                    var add = 0;
+                    if(decimal > 0 && decimal > 0.5) {
+                        add = 1 - decimal;
+                    }else if(decimal > 0 && decimal < 0.5){
+                        add = 0.5 - decimal;
+                    }
+                    ret = $scope.highest + add;
+                    ret = getRoundedNumber(ret, 1);
+                    return ret;
                 }
 
                 function getHorizontalPercentage(stat, field, limit) {
@@ -131,6 +144,23 @@ angular
                         $scope.config.columns = {};
                     }
                 }
+           
+                function getRoundedNumber(value, decimal){
+                    var rounded = Number(Math.round(value+'e'+decimal)+'e-'+decimal);
+                    return rounded;
+                }
+
+                function validateData(){
+                    if ($scope.bktlist == undefined) {
+                        $scope.bktlist = [];
+                    }
+                    $scope.bktlist.forEach(function(element){
+                        if(element.lift){
+                            element.lift = getRoundedNumber(element.lift, $scope.decimal);
+                        }
+                    });
+                   
+                }
 
                 /**
                  * configuration:
@@ -150,7 +180,7 @@ angular
                     $scope.sortBy = $scope.config.data.sortBy !== undefined ? $scope.config.data.sortBy : '-Cnt';
                     $scope.trimData = $scope.config.data.trim !== undefined ? $scope.config.data.trim : false;
                     $scope.top = $scope.config.data.top !== undefined ? $scope.config.data.top : 5;
-
+                    $scope.decimal = $scope.config.data.decimal !== undefined ? $scope.config.data.decimal : 1;
                     /***********************************************************/
 
                     /************************** Chart Config ***********************/
@@ -185,11 +215,16 @@ angular
                     }
                     //*****************************************/
 
+                    // console.log($scope.bktlist);
+                    validateData();
+
                     $scope.highest = 0;
                     var column = getColumnForGraph();
                     if (column !== null) {
                         $scope.highest = getHighestStat($scope.bktlist, column.field);
+                        $scope.highest = getHighestRounded();
                     }
+                    // console.log('Highest ', $scope.highest);
                 }
 
                 $scope.init();
@@ -244,7 +279,7 @@ angular
                     if ($scope.usecolor == true || $scope.getStatCount(stat) > 0) {
                         return $scope.color;
                     } else {
-                        return "#939393";
+                        return '#939393';
                     }
                 }
 
@@ -264,43 +299,16 @@ angular
                         return 0;
                     }
                     switch ($scope.chartType) {
-                        case 'decimal':
-                            {
-                                return getHorizontalPercentageSubDec(stat, column.field, limit);
-                            }
-                        default:
-                            {
-                                return getHorizontalPercentage(stat, column.field, limit);
-                            }
+                    case 'decimal':
+                        {
+                            return getHorizontalPercentageSubDec(stat, column.field, limit);
+                        }
+                    default:
+                        {
+                            return getHorizontalPercentage(stat, column.field, limit);
+                        }
                     }
-                }
-
-                // $scope.getVerticalLines = function () {
-                //     if ($scope.bktlist.length == 0) {
-                //         return [];
-                //     }
-                //     if ($scope.vertcalLines === undefined) {
-                //         var top = Math.round($scope.highest * 2) / 2;
-                //         if (top == 1) {
-                //             $scope.maxVLines = 2;
-                //         }
-
-                //         var lines = [];
-                //         var intervalPerc = 100 / $scope.maxVLines;
-                //         var intervalLabel = $scope.highest / $scope.maxVLines;
-                //         intervalLabel = Math.round(intervalLabel * 2) / 2;
-                //         for (var i = 0; i < $scope.maxVLines; i++) {
-                //             var perc = (intervalPerc * (i + 1));
-                //             var label = (intervalLabel * (i + 1));
-                //             lines.push({
-                //                 'perc': perc + '%',
-                //                 'label': label + $scope.vlinesSuffix
-                //             });
-                //         }
-                //         $scope.vertcalLines = lines;
-                //     }
-                //     return $scope.vertcalLines;
-                // }
+                };
 
                 $scope.getVerticalLines = function () {
                     if (!$scope.bktlist || $scope.bktlist.length == 0) {
@@ -308,12 +316,7 @@ angular
                     }
                     if ($scope.vertcalLines === undefined) {
                         var lines = [];
-                        var f = getColumnForGraph($scope.columns).field;
-                        var max = Number(Math.round($scope.highest * 2) / 2);
-                        if (max < $scope.highest) {
-                            max = Number(Math.round(max));
-                        }
-
+                        var max = $scope.highest;//getMaxRounded();
                         if ($scope.bktlist.length == 1) {
                             lines.push({
                                 'perc': Number(100 / 2) + '%',
