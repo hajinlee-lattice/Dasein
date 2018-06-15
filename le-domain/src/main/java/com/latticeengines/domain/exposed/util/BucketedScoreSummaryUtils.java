@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
@@ -18,7 +19,11 @@ public class BucketedScoreSummaryUtils {
     public static BucketedScoreSummary generateBucketedScoreSummary(List<GenericRecord> pivotedRecords) {
         int cumulativeNumLeads = 0;
         double cumulativeNumConverted = 0;
-
+        Collections.sort(
+            pivotedRecords,
+            (GenericRecord g1, GenericRecord g2) ->
+                Double.compare(Double.valueOf(g1.get(SCORE).toString()), Double.valueOf(g2.get(SCORE).toString()))
+        );
         int idx = pivotedRecords.size() - 1;
         int currentScore = MAX_SCORE;
 
