@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -18,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -55,6 +57,8 @@ public class RatingEngineServiceImplUnitTestNG {
         mockRatingEngineEntityMgr();
         mockRatingEngineService();
         mockTenantContext();
+        ForkJoinPool tpForParallelStream = ThreadPoolUtils.getForkJoinThreadPool("rating-details-fetcher", 2);
+        ratingEngineService.setTpForParallelStream(tpForParallelStream);
     }
 
     @Test(groups = "unit")

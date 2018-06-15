@@ -867,4 +867,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
         return attributes;
     }
+    
+
+    @VisibleForTesting
+    void setTpForParallelStream(ForkJoinPool tpForParallelStream) {
+        this.tpForParallelStream = tpForParallelStream;
+    }
 }
