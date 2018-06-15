@@ -93,6 +93,7 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         contactAttributes = Arrays.asList(STATE, COMPANY_NAME);
 
         setupTestEnvironment();
+        createDataCollection();
         testSegment = createMetadataSegment(SEGMENT_NAME);
         log.info(String.format("Created metadata segment with name %s", testSegment.getName()));
     }
