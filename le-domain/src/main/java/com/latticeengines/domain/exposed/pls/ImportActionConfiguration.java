@@ -27,6 +27,9 @@ public class ImportActionConfiguration extends ActionConfiguration {
     @JsonProperty("registered_tables")
     private List<String> registeredTables;
 
+    @JsonProperty("mock_completed")
+    private Boolean mockCompleted;
+
     public Long getWorkflowId() {
         return workflowId;
     }
@@ -57,6 +60,14 @@ public class ImportActionConfiguration extends ActionConfiguration {
 
     public void setRegisteredTables(List<String> registeredTables) {
         this.registeredTables = registeredTables;
+    }
+
+    public Boolean getMockCompleted() {
+        return mockCompleted;
+    }
+
+    public void setMockCompleted(Boolean mockCompleted) {
+        this.mockCompleted = mockCompleted;
     }
 
     @Override

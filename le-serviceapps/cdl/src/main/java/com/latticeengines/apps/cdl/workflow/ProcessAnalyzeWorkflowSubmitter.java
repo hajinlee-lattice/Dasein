@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -120,7 +121,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         try {
             Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
-            updateActions(customerSpace, actionAndJobIds.getLeft(), pidWrapper.getPid());
+            updateActions(actionAndJobIds.getLeft(), pidWrapper.getPid());
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
@@ -148,9 +149,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     Pair<List<Long>, List<Long>> getActionAndJobIds(String customerSpace) {
         List<Action> actions = actionService.findByOwnerId(null);
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
-        Set<ActionType> importAndDeleteTypes = Stream
-                .of(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, ActionType.CDL_OPERATION_WORKFLOW)
-                .collect(Collectors.toSet());
+        Set<ActionType> importAndDeleteTypes = Sets.newHashSet( //
+                ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
+                ActionType.CDL_OPERATION_WORKFLOW);
         // TODO add status filter to filter out running ones
         List<String> importAndDeleteJobIdStrs = actions.stream()
                 .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingId() != null)
@@ -189,7 +190,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
     }
 
-    private void updateActions(String customerSpace, List<Long> actionIds, Long workflowPid) {
+    private void updateActions(List<Long> actionIds, Long workflowPid) {
         log.info(String.format("Updating actions=%s with place holder ownerId=%d", Arrays.toString(actionIds.toArray()),
                 workflowPid));
         if (CollectionUtils.isNotEmpty(actionIds)) {
@@ -199,11 +200,20 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
             List<Long> completedImportAndDeleteJobIds) {
-        if (selectedTypes.contains(action.getType())
-                && !completedImportAndDeleteJobIds.contains(action.getTrackingId())) {
-            return false;
+        boolean isComplete = true; // by default every action is valid
+        if (selectedTypes.contains(action.getType())) {
+            // special check if is selected type
+            isComplete = false;
+            if (completedImportAndDeleteJobIds.contains(action.getTrackingId())) {
+                isComplete = true;
+            } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+                if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
+                    isComplete = true;
+                }
+            }
         }
-        return true;
+        return isComplete;
     }
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,

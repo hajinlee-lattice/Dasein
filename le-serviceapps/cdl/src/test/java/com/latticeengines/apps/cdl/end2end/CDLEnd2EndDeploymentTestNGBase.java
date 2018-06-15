@@ -440,6 +440,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         configuration.setDataFeedTaskId(feedTaskId);
         configuration.setImportCount(count);
         configuration.setRegisteredTables(tableNames);
+        configuration.setMockCompleted(true);
         Action action = new Action();
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action.setActionInitiator(INITIATOR);
