@@ -114,7 +114,7 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             segmentable = true;
         } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.Score)
                 .equalsIgnoreCase(suffix.substring(1))) {
-            segmentable = true;
+            segmentable = false;
         }
         return segmentable;
     }
