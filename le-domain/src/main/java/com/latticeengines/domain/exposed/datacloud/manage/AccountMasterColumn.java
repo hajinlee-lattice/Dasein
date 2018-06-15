@@ -382,7 +382,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setCanInternalEnrich(isInternalEnrichment());
         metadata.setGroups(getPredefinedGroups());
 
-        if (StringUtils.isNotBlank(metadata.getDataLicense())) {
+        if (StringUtils.isNotBlank(metadata.getDataLicense()) || Category.WEBSITE_KEYWORDS.equals(metadata.getCategory())) {
             metadata.setAttrState(AttrState.Inactive);
         }
 
