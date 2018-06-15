@@ -162,8 +162,11 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
         TransformationGroup transformationGroup = parameters.getTransformationGroup();
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(schemaInterpretation, transformationGroup);
-        DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
         boolean isLPI = CustomEventModelingType.LPI.equals(parameters.getCustomEventModelingType());
+        DataCollection.Version version = null;
+        if (!isLPI) {
+            version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
+        }
         return new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
