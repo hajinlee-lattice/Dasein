@@ -275,6 +275,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = internalResourceRestApiProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, Boolean.TRUE,
                         enrichmentEnabledForInternalAttributes);
+        leadEnrichmentAttributeList.sort((e1, e2) -> {
+            return e1.getCategory().compareTo(e2.getCategory()) != 0 ? e1.getCategory().compareTo(e2.getCategory())
+                    : e1.getDisplayName().compareTo(e2.getDisplayName());
+        });
         for (LeadEnrichmentAttribute attribute : leadEnrichmentAttributeList) {
             String fieldType = attribute.getFieldType();
             Schema.Type avroType = null;
