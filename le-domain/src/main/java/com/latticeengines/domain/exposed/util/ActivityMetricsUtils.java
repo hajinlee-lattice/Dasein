@@ -231,6 +231,10 @@ public class ActivityMetricsUtils {
         return false;
     }
 
+    public static String getMetricsDisplayName(InterfaceName metrics) {
+        return metricsDisplayNames.get(metrics);
+    }
+
     // <DisplayName, SecondDisplayName>
     public static Pair<String, String> getDisplayNamesFromFullName(String fullName, String evaluationDate,
             List<PeriodStrategy> strategies) {

@@ -1,5 +1,10 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,48 +17,57 @@ public class ActivityMetricsActionConfiguration extends ActionConfiguration {
 
     }
 
-    public ActivityMetricsActionConfiguration(int newCnt, int activateCnt, int deprecateCnt) {
-        this.newCnt = newCnt;
-        this.activateCnt = activateCnt;
-        this.deprecateCnt = deprecateCnt;
+    public ActivityMetricsActionConfiguration(List<String> activated, List<String> updated, List<String> deactivated) {
+        this.activated = activated;
+        this.updated = updated;
+        this.deactivated = deactivated;
     }
 
-    @JsonProperty("NewCnt")
-    private int newCnt;
+    @JsonProperty("Activated")
+    private List<String> activated;
 
-    @JsonProperty("ActivateCnt")
-    private int activateCnt;
+    @JsonProperty("Updated")
+    private List<String> updated;
 
-    @JsonProperty("DeprecateCnt")
-    private int deprecateCnt;
+    @JsonProperty("Deactivated")
+    private List<String> deactivated;
 
-    public int getNewCnt() {
-        return newCnt;
+    public List<String> getActivated() {
+        return activated;
     }
 
-    public void setNewCnt(int newCnt) {
-        this.newCnt = newCnt;
+    public void setActivated(List<String> activated) {
+        this.activated = activated;
     }
 
-    public int getActivateCnt() {
-        return activateCnt;
+    public List<String> getUpdated() {
+        return updated;
     }
 
-    public void setActivateCnt(int activateCnt) {
-        this.activateCnt = activateCnt;
+    public void setUpdated(List<String> updated) {
+        this.updated = updated;
     }
 
-    public int getDeprecateCnt() {
-        return deprecateCnt;
+    public List<String> getDeactivated() {
+        return deactivated;
     }
 
-    public void setDeprecateCnt(int deprecateCnt) {
-        this.deprecateCnt = deprecateCnt;
+    public void setDeactivated(List<String> deactivated) {
+        this.deactivated = deactivated;
     }
 
     @Override
     public String serialize() {
-        return String.format("%d metrics are created, %d metrics are re-activated and %d metrics are deprecated",
-                newCnt, activateCnt, deprecateCnt);
+        List<String> confStr = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(activated)) {
+            confStr.add("Activated: " + String.join(",", activated));
+        }
+        if (CollectionUtils.isNotEmpty(updated)) {
+            confStr.add("Updated: " + String.join(",", updated));
+        }
+        if (CollectionUtils.isNotEmpty(deactivated)) {
+            confStr.add("Deactivated: " + String.join(",", deactivated));
+        }
+        return String.join("; ", confStr);
     }
 }

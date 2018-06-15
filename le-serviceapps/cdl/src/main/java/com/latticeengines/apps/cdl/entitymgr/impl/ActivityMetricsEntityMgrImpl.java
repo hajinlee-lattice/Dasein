@@ -86,18 +86,23 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
             metrics.setPeriods();
         });
 
+        // for action info: metrics displayname without period
+        Set<String> activated = new HashSet<>();
+        Set<String> updated = new HashSet<>();
+        Set<String> deactivated = new HashSet<>();
+
         List<ActivityMetrics> existingList = repository.findAllByTenant(tenant);
         if (CollectionUtils.isEmpty(existingList)) {
             metricsList.forEach(metrics -> {
                 super.createOrUpdate(metrics);
+                activated.add(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()));
             });
-            createAction(tenant.getName(), metricsList.size(), 0, 0);
+            createAction(MultiTenantContext.getEmailAddress(), new ArrayList<>(activated), new ArrayList<>(updated),
+                    new ArrayList<>(deactivated));
             return metricsList;
         }
 
-        int newCnt = 0;
-        int activateCnt = 0;
-        int deprecateCnt = 0;
+
         Map<String, ActivityMetrics> existingMetrics = new HashMap<>();
         existingList.forEach(existing -> {
             existingMetrics.put(ActivityMetricsUtils.getNameWithPeriod(existing), existing);
@@ -111,31 +116,36 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
                 existing.setEOL(true);
                 existing.setDeprecated(new Date());
                 super.createOrUpdate(existing);
-                deprecateCnt++;
             }
+            // Put all existing ones to deactivated first, might move to updated later
+            deactivated.add(ActivityMetricsUtils.getMetricsDisplayName(existing.getMetrics()));
         }
         for (ActivityMetrics metrics : metricsList) {
             if (existingMetrics.containsKey(ActivityMetricsUtils.getNameWithPeriod(metrics))) {
                 metrics.setPid(existingMetrics.get(ActivityMetricsUtils.getNameWithPeriod(metrics)).getPid());
                 metrics.setCreated(existingMetrics.get(ActivityMetricsUtils.getNameWithPeriod(metrics)).getCreated());
-                if (existingMetrics.get(ActivityMetricsUtils.getNameWithPeriod(metrics)).isEOL()) {
-                    activateCnt++;
-                }
-            } else {
-                newCnt++;
+            }
+            if (deactivated.contains(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()))) {
+                deactivated.remove(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()));
+                updated.add(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()));
+            } else if (!updated.contains(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()))) {
+                activated.add(ActivityMetricsUtils.getMetricsDisplayName(metrics.getMetrics()));
             }
             super.createOrUpdate(metrics);
         }
 
-        createAction(MultiTenantContext.getEmailAddress(), newCnt, activateCnt, deprecateCnt);
+        createAction(MultiTenantContext.getEmailAddress(), new ArrayList<>(activated), new ArrayList<>(updated),
+                new ArrayList<>(deactivated));
         return metricsList;
     }
 
-    private void createAction(String initiator, int newCnt, int activateCnt, int deprecateCnt) {
+    private void createAction(String initiator, List<String> activated, List<String> updated,
+            List<String> deactivated) {
         Action action = new Action();
         action.setType(ActionType.ACTIVITY_METRICS_CHANGE);
         action.setActionInitiator(initiator);
-        ActivityMetricsActionConfiguration config = new ActivityMetricsActionConfiguration(newCnt, activateCnt, deprecateCnt);
+        ActivityMetricsActionConfiguration config = new ActivityMetricsActionConfiguration(activated, updated,
+                deactivated);
         action.setActionConfiguration(config);
         ActionContext.setAction(action);
     }

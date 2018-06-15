@@ -2,6 +2,7 @@ package com.latticeengines.apps.core.entitymgr.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -82,9 +83,9 @@ public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
                 break;
             case 2:
                 ac = new ActivityMetricsActionConfiguration();
-                ((ActivityMetricsActionConfiguration) ac).setActivateCnt(100);
-                ((ActivityMetricsActionConfiguration) ac).setDeprecateCnt(200);
-                ((ActivityMetricsActionConfiguration) ac).setNewCnt(300);
+            ((ActivityMetricsActionConfiguration) ac).setActivated(Collections.emptyList());
+            ((ActivityMetricsActionConfiguration) ac).setUpdated(Collections.emptyList());
+            ((ActivityMetricsActionConfiguration) ac).setDeactivated(Collections.emptyList());
                 break;
             case 3:
                 ac = new AttrConfigLifeCycleChangeConfiguration();

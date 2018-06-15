@@ -8,6 +8,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -27,6 +29,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ActivityMetricsEntityMgrTestNG.class);
+
     @Inject
     private ActivityMetricsEntityMgr entityMgr;
 
@@ -69,9 +74,10 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(ActionContext.getAction());
         ActivityMetricsActionConfiguration config = (ActivityMetricsActionConfiguration) ActionContext.getAction()
                 .getActionConfiguration();
-        Assert.assertEquals(config.getNewCnt(), 6);
-        Assert.assertEquals(config.getDeprecateCnt(), 0);
-        Assert.assertEquals(config.getActivateCnt(), 0);
+        log.info("ActionConfiguration: " + config.serialize());
+        Assert.assertEquals(config.getActivated().size(), 4);
+        Assert.assertEquals(config.getUpdated().size(), 0);
+        Assert.assertEquals(config.getDeactivated().size(), 0);
 
         metricsList = constructUpdatedMetricsList();
         saved = entityMgr.save(metricsList);
@@ -85,9 +91,10 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(all.size(), 10);
         Assert.assertNotNull(ActionContext.getAction());
         config = (ActivityMetricsActionConfiguration) ActionContext.getAction().getActionConfiguration();
-        Assert.assertEquals(config.getNewCnt(), 4);
-        Assert.assertEquals(config.getDeprecateCnt(), 4);
-        Assert.assertEquals(config.getActivateCnt(), 0);
+        log.info("ActionConfiguration: " + config.serialize());
+        Assert.assertEquals(config.getActivated().size(), 1);
+        Assert.assertEquals(config.getUpdated().size(), 4);
+        Assert.assertEquals(config.getDeactivated().size(), 0);
 
         metricsList = constructSecondUpdatedMetricsList();
         saved = entityMgr.save(metricsList);
@@ -101,9 +108,10 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(all.size(), 10);
         Assert.assertNotNull(ActionContext.getAction());
         config = (ActivityMetricsActionConfiguration) ActionContext.getAction().getActionConfiguration();
-        Assert.assertEquals(config.getNewCnt(), 0);
-        Assert.assertEquals(config.getDeprecateCnt(), 9);
-        Assert.assertEquals(config.getActivateCnt(), 1);
+        log.info("ActionConfiguration: " + config.serialize());
+        Assert.assertEquals(config.getActivated().size(), 0);
+        Assert.assertEquals(config.getUpdated().size(), 1);
+        Assert.assertEquals(config.getDeactivated().size(), 4);
 
         Tenant tenant = new Tenant("dummy");
         tenant.setPid(-1L);
