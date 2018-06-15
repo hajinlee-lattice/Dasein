@@ -27,6 +27,12 @@ public abstract class RatingEngineTemplate {
 
     @VisibleForTesting
     RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId) {
+        Date lastRefreshedDate = findLastRefreshedDate(tenantId);
+        return constructRatingEngineSummary(ratingEngine, tenantId, lastRefreshedDate);
+    }
+
+    RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId,
+            Date lastRefreshedDate) {
         if (ratingEngine == null) {
             return null;
         }
@@ -64,7 +70,6 @@ public abstract class RatingEngineTemplate {
                         .collect(Collectors.toList()));
         }
 
-        Date lastRefreshedDate = findLastRefreshedDate(tenantId);
         ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);
         return ratingEngineSummary;
     }

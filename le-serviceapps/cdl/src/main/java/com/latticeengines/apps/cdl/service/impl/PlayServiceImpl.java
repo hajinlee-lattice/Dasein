@@ -54,7 +54,7 @@ public class PlayServiceImpl implements PlayService {
 
     private static Logger log = LoggerFactory.getLogger(PlayServiceImpl.class);
 
-    @Value("${pls.play.service.threadpool.size:10}")
+    @Value("${cdl.play.service.threadpool.size:20}")
     private Integer fetcherNum;
 
     @Inject

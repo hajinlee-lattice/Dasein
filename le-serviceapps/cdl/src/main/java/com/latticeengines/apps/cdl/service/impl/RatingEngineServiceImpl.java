@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -40,6 +41,7 @@ import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkf
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -84,6 +86,9 @@ import reactor.core.publisher.ParallelFlux;
 public class RatingEngineServiceImpl extends RatingEngineTemplate implements RatingEngineService {
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
+
+    @Value("${cdl.rating.service.threadpool.size:20}")
+    private Integer fetcherNum;
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -130,6 +135,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;
 
+    private ForkJoinPool tpForParallelStream;
+
+    @PostConstruct
+    public void postConstruct() {
+        tpForParallelStream = ThreadPoolUtils.getForkJoinThreadPool("rating-details-fetcher", fetcherNum);
+    }
+
     @Override
     public List<RatingEngine> getAllRatingEngines() {
         Tenant tenant = MultiTenantContext.getTenant();
@@ -160,6 +172,12 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         log.info(String.format(
                 "Get all the rating engine summaries for tenant %s with status set to %s and type set to %s",
                 tenant.getId(), status, type));
+
+        long timestamp = System.currentTimeMillis();
+        Date lastRefreshedDate = findLastRefreshedDate(tenant.getId());
+        log.info(String.format("Fetched lastRefreshedDate %s in %d ms", lastRefreshedDate,
+                (System.currentTimeMillis() - timestamp)));
+
         List<RatingEngine> list = ratingEngineEntityMgr.findAllByTypeAndStatus(type, status);
         List<RatingEngine> selectedList = list;
         if (publishedRatingsOnly) {
@@ -169,8 +187,19 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     .filter(ratingEngine -> availableRatingIdInRedshift.contains(ratingEngine.getId()))
                     .collect(Collectors.toList());
         }
-        return selectedList.stream().map(ratingEngine -> constructRatingEngineSummary(ratingEngine, tenant.getId()))
-                .collect(Collectors.toList());
+
+        final List<RatingEngine> finalSelectedList = selectedList;
+
+        timestamp = System.currentTimeMillis();
+        List<RatingEngineSummary> result = tpForParallelStream.submit(//
+                () -> finalSelectedList.stream().map(
+                        ratingEngine -> constructRatingEngineSummary(ratingEngine, tenant.getId(), lastRefreshedDate))
+                        .collect(Collectors.toList()))
+                .join();
+        log.info(String.format("Executed constructRatingEngineSummary in %d ms",
+                (System.currentTimeMillis() - timestamp)));
+
+        return result;
     }
 
     @Override
