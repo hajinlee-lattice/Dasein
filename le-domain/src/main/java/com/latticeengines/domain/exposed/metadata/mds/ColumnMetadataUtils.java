@@ -55,6 +55,17 @@ public final class ColumnMetadataUtils {
             overwritee.setShouldDeprecate(overwriter.getShouldDeprecate());
         }
 
+        // can change flags
+        if (overwriter.getCanSegment() != null) {
+            overwritee.setCanSegment(overwriter.getCanSegment());
+        }
+        if (overwriter.getCanEnrich() != null) {
+            overwritee.setCanEnrich(overwriter.getCanEnrich());
+        }
+        if (overwriter.getCanInternalEnrich() != null) {
+            overwritee.setCanInternalEnrich(overwriter.getCanInternalEnrich());
+        }
+
         // usage groups
         if (overwriter.getShouldDeprecate() != null) {
             overwritee.setShouldDeprecate(overwriter.getShouldDeprecate());
