@@ -17,7 +17,7 @@
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)
         </label> -->
 
-        <!-- <div 
+        <div 
             class="checkbox-input">
             <input 
                 type="checkbox"
@@ -32,7 +32,7 @@
                 ng-change="targetsLimit && vm.updateTargetLimit()"
                 class="form-control" />
             <span> highest rated targets</span>
-        </div> -->
+        </div>
 
         <ul 
             class="bucket-checkboxes"
@@ -156,7 +156,7 @@
                     <span ng-show="sortType == 'CompanyName' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <th>Web Address</th>
-                <th>SalesForce ID</th>
+                <!-- <th>SalesForce ID</th> -->
                 <th class="sortable" ng-click="sortType = 'ScoreBucket'; sortReverse = !sortReverse">
                     Rating
                     <span ng-show="sortType == 'ScoreBucket' && !sortReverse" class="fa fa-caret-down"></span>
@@ -173,7 +173,7 @@
                     <span ng-if="account.Website">{{account.Website}}</span>
                     <span ng-if="!account.Website" class="gray-text">N/A</span>
                 </td>
-                <td>
+                <!-- <td>
                     <span 
                         class="gray-text"
                         ng-if="!account.SalesforceAccountID">
@@ -183,7 +183,7 @@
                         ng-if="account.SalesforceAccountID">
                         {{account.SalesforceAccountID}}
                     </span>
-                </td>
+                </td> -->
                 <td>{{account.ScoreBucket}}</td>
             </tr>
         </tbody>

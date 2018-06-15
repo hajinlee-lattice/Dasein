@@ -553,11 +553,11 @@ angular
                 WizardProgressItems: function(PlaybookWizardStore) {
                     return [
                         { label: 'Rating', state: 'rating', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true },
-                        { label: 'Targets', state: 'rating.targets', progressDisabled: true },
-                        { label: 'CRM System', state: 'rating.targets.crmselection', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true },
-                        { label: 'Insights', state: 'rating.targets.crmselection.insights', progressDisabled: true},
-                        { label: 'Preview', state: 'rating.targets.crmselection.insights.preview', progressDisabled: true },
-                        { label: 'Launch', state: 'rating.targets.crmselection.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch, progressDisabled: true }
+                        { label: 'CRM System', state: 'rating.crmselection', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true },
+                        { label: 'Targets', state: 'rating.crmselection.targets', progressDisabled: true },
+                        { label: 'Insights', state: 'rating.crmselection.targets.insights', progressDisabled: true},
+                        { label: 'Preview', state: 'rating.crmselection.targets.insights.preview', progressDisabled: true },
+                        { label: 'Launch', state: 'rating.crmselection.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch, progressDisabled: true }
                     ];
                 },
                 WizardControlsOptions: function() {
@@ -627,7 +627,42 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.targets', {
+        .state('home.playbook.create.rating.crmselection', {
+            url: '/crm-selection',
+            params: {
+                section: 'wizard.insights',
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
+            },
+            resolve: {
+                orgs: function($q, SfdcStore) {
+                    var deferred = $q.defer();
+
+                    SfdcStore.getOrgs().then(function (result) {
+                        
+                        deferred.resolve(result.CRM);
+                        
+                        // var orgs = result.CRM;
+
+                        // angular.forEach(orgs, function(value, key) {
+                        //     if (value.isRegistered === false) {
+                        //         orgs.splice(key, 1);
+                        //     }
+                        // });
+
+                        // orgs.filter(function(vendor){ return vendor.Name === "Magenic" });
+
+                        // deferred.resolve(orgs);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                'wizard_content@home.playbook.create': 'crmSelection'
+            }
+        })
+        .state('home.playbook.create.rating.crmselection.targets', {
             url: '/targets',
             params: {
                 section: 'wizard.targets',
@@ -741,42 +776,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.targets.crmselection', {
-            url: '/crm-selection',
-            params: {
-                section: 'wizard.insights',
-                pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
-            },
-            resolve: {
-                orgs: function($q, SfdcStore) {
-                    var deferred = $q.defer();
-
-                    SfdcStore.getOrgs().then(function (result) {
-                        
-                        deferred.resolve(result.CRM);
-                        
-                        // var orgs = result.CRM;
-
-                        // angular.forEach(orgs, function(value, key) {
-                        //     if (value.isRegistered === false) {
-                        //         orgs.splice(key, 1);
-                        //     }
-                        // });
-
-                        // orgs.filter(function(vendor){ return vendor.Name === "Magenic" });
-
-                        // deferred.resolve(orgs);
-                    });
-
-                    return deferred.promise;
-                }
-            },
-            views: {
-                'wizard_content@home.playbook.create': 'crmSelection'
-            }
-        })
-        .state('home.playbook.create.rating.targets.crmselection.insights', {
+        .state('home.playbook.create.rating.crmselection.targets.insights', {
             url: '/insights',
             params: {
                 section: 'wizard.insights',
@@ -812,7 +812,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.targets.crmselection.insights.preview', {
+        .state('home.playbook.create.rating.crmselection.targets.insights.preview', {
             url: '/preview',
             params: {
                 pageIcon: 'ico-playbook',
@@ -834,7 +834,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.targets.crmselection.insights.preview.launch', {
+        .state('home.playbook.create.rating.crmselection.targets.insights.preview.launch', {
             url: '/launch',
             views: {
                 'wizard_content@home.playbook.create': {

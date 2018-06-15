@@ -118,18 +118,16 @@
                         ng-if="!vm.current.tileStates[rating.id].editRating">
                         
                         <ul>
-                            <li>Created By: <span class="blue-text">{{rating.createdBy}}</span></li>
-                            <li>Created On: <span class="blue-text">{{rating.created | date}}</span></li>
+                            <li>Created By: <span>{{rating.createdBy}}</span></li>
+                            <li>Created On: <span>{{rating.created | date}}</span></li>
                             <li class="text-ellipsis">
                                 Segment: 
-                                <span ng-if="rating.segmentDisplayName != null" class="blue-text" title="{{rating.segmentDisplayName}}">{{rating.segmentDisplayName}}</span>
+                                <span ng-if="rating.segmentDisplayName != null" title="{{rating.segmentDisplayName}}">{{rating.segmentDisplayName}}</span>
                                 <span ng-if="rating.segmentDisplayName == null" class="gray-text">Segment not selected</span>
                             </li>
                             <li>
                                 Last Data Refresh: 
-                                <span>
-                                    <span class="blue-text">{{rating.lastRefreshedDate | date}}</span>
-                                </span>
+                                <span>{{rating.lastRefreshedDate | date}}</span>
                             </li>
                         </ul>
                     </div><!-- End .tile-metadata -->

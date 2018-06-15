@@ -64,9 +64,9 @@
                     </div>
 
                     <div class="blank-ids" ng-if="!$ctrl.loadingCoverageCounts && $ctrl.nullCount !== 0 && $ctrl.nullCount !== null">
-                        <p>For the above selected SFDC Org, <strong>{{ $ctrl.nullCount | number }} of {{ $ctrl.totalCount | number }}</strong> recommendations have blank Account ID. It is advisable to remove these recommendations from the plays as they will fail to launch your CRM system.</p>
-                        <p>Note: An exception of this rule is when 'Lead workflow' is used to provide recommendations to your reps.</p>
-                        <label>
+                        <p>For the above selected SFDC Org, <strong>{{ $ctrl.nullCount | number }} of {{ $ctrl.totalCount | number }}</strong> recommendations have blank Account ID. <span  ng-if="$ctrl.nullCount != $ctrl.totalCount">It is advisable to remove these recommendations from the plays as they will fail to launch your CRM system.</span></p>
+                        <p ng-if="$ctrl.nullCount != $ctrl.totalCount">Note: An exception of this rule is when 'Lead workflow' is used to provide recommendations to your reps.</p>
+                        <label ng-if="$ctrl.nullCount != $ctrl.totalCount">
                             <input 
                                 type="checkbox" 
                                 ng-model="excludeItemsWithoutSalesforceId"

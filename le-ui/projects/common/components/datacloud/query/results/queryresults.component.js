@@ -79,8 +79,9 @@ angular.module('common.datacloud.query.results', [
             } else if (vm.section === 'dashboard.targets') {
 
                 PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
-                    data.ratings.forEach(function(bucket){
-                        vm.selectedBuckets.push(bucket.bucket);
+                    var buckets = data.ratingEngine.bucketMetadata;
+                    buckets.forEach(function(bucket){
+                        vm.selectedBuckets.push(bucket.bucket_name);
                     });
                 });
 
@@ -321,6 +322,7 @@ angular.module('common.datacloud.query.results', [
     };
 
     vm.updateTargetLimit = function() {
+        console.log("yo", vm.ratedTargetsLimit);
         PlaybookWizardStore.setRatedTargetsLimit(vm.ratedTargetsLimit);
     }
     vm.ratingLimitInputClick = function($event) {

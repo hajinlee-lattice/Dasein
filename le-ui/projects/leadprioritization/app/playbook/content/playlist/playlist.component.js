@@ -50,7 +50,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
 
     vm.init = function($q) {
 
-        // console.log(vm.current.plays[0]);
+        // console.log(vm.current.plays);
         
         PlaybookWizardStore.clear();
 
