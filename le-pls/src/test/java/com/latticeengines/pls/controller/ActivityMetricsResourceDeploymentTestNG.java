@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
@@ -41,7 +42,7 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenant();
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
 

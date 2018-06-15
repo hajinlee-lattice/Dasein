@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -86,7 +87,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         if (shouldSkipAutoTenantCreation) {
             tenant = mainTestTenant;
         } else {
-            setupTestEnvironmentWithOneTenant();
+            setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
             tenant = testBed.getMainTestTenant();
         }
         switchToSuperAdmin();

@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -56,7 +57,7 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenant();
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);

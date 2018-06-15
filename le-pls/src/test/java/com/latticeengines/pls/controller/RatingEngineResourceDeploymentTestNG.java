@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -84,7 +85,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenant();
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);
