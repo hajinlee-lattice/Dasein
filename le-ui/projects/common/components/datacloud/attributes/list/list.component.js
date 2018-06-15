@@ -5,7 +5,7 @@ angular.module('common.attributes.list', [])
     bindings: {
         filters: '<'
     },
-    controller: function ($state, $stateParams, AttrConfigStore) {
+    controller: function ($state, $stateParams, AttrConfigStore, BrowserStorageUtility) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -13,18 +13,35 @@ angular.module('common.attributes.list', [])
         vm.indeterminate = {};
         vm.startChecked = {};
         vm.allCheckedMap = {};
+        vm.accesslevel = '';
         vm.allChecked = false;
 
         vm.$onInit = function() {
-            console.log('attrResultsList', vm.data);
             vm.data = vm.store.getData();
             vm.section = vm.store.getSection();
             vm.params = $stateParams;
 
+            vm.setAccessRestriction();
+            vm.autoDrillDown();
             vm.parseData();
             vm.countSelected();
 
             vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
+            console.log('attrResultsList', vm);
+        };
+        
+        vm.setAccessRestriction = function() {
+            var session = BrowserStorageUtility.getSessionDocument();
+
+            if (session !== null || session.User !== null) {
+                vm.accesslevel = session.User.AccessLevel;
+            }
+        };
+        
+        vm.autoDrillDown = function() {
+            if (vm.data.config && vm.data.config.Subcategories.length == 1) {
+                vm.go(vm.data.config.Subcategories[0].DisplayName);
+            }
         };
 
         vm.parseData = function() {
@@ -98,22 +115,12 @@ angular.module('common.attributes.list', [])
         };
 
         vm.back = function() {
-            vm.subcategory = '';
-            vm.filters.page = 1;
-
-            $state.go('.', { 
-                subcategory: vm.subcategory 
-            });
+            vm.go('');
         };
 
         vm.click = function(item) {
             if (item.Attributes) {
-                vm.subcategory = item.DisplayName;
-                vm.filters.page = 1;
-
-                $state.go('.', { 
-                    subcategory: vm.subcategory 
-                });
+                vm.go(item.DisplayName);
             } else {
                 vm.toggleSelected(item);
             }
@@ -170,7 +177,7 @@ angular.module('common.attributes.list', [])
         };
 
         vm.isStartsDisabled = function(item) {
-            if (item.Attributes || vm.section == 'enable') {
+            if (item.Attributes || vm.section == 'enable' || vm.accesslevel != 'EXTERNAL_USER') {
                 return false;
             }
 
@@ -291,6 +298,15 @@ angular.module('common.attributes.list', [])
             //console.log(obj, vm.filters);
 
             return obj;
+        };
+
+        vm.go = function(subcategory) {
+            vm.subcategory = subcategory;
+            vm.filters.page = 1;
+            
+            $state.go('.', { 
+                subcategory: subcategory 
+            });
         };
     }
 });

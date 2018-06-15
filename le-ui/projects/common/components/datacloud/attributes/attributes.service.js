@@ -31,19 +31,23 @@ angular.module('common.attributes')
 
         this.tabs = {
             activate: [{
-                    label: "Intent Attributes",
+                    label: "Intent",
                     category: "Intent",
                     supplemental: 'ACTIVATED'
                 },{
-                    label: "Technology Profile Attributes",
+                    label: "Technology Profile",
                     category: "Technology Profile",
                     supplemental: 'ACTIVATED'
                 },{
-                    label: "My Account Attributes",
+                    label: "Website Keywords",
+                    category: "Website Keywords",
+                    supplemental: 'ACTIVATED'
+                },{
+                    label: "My Account",
                     category: "My Attributes",
                     supplemental: 'ACTIVATED'
                 },{
-                    label: "My Contact Attributes",
+                    label: "My Contact",
                     category: "Contact Attributes",
                     supplemental: 'ACTIVATED'
                 }
