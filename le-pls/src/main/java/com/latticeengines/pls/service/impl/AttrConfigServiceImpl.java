@@ -63,27 +63,27 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     static {
         // this map has all the maping for all premium attributes
-        categoryToDisplayName.put("My Attributes", "MY ACCOUNT");
-        categoryToDisplayName.put("Contact Attributes", "MY CONTACT");
-        categoryToDisplayName.put("Intent", "INTENT");
-        categoryToDisplayName.put("Technology Profile", "TECHNOLOGY PROFILE");
-        categoryToDisplayName.put("Website Keywords", "WEBSITE KEYWORD");
+        categoryToDisplayName.put("My Attributes", "My Account");
+        categoryToDisplayName.put("Contact Attributes", "My Contact");
+        categoryToDisplayName.put("Intent", "Intent");
+        categoryToDisplayName.put("Technology Profile", "Technology Profile");
+        categoryToDisplayName.put("Website Keywords", "Website Keyword");
 
-        displayNameToCategory.put("MY ACCOUNT", "My Attributes");
-        displayNameToCategory.put("MY CONTACT", "Contact Attributes");
-        displayNameToCategory.put("INTENT", "Intent");
-        displayNameToCategory.put("TECHNOLOGY PROFILE", "Technology Profile");
-        displayNameToCategory.put("WEBSITE KEYWORD", "Website Keywords");
+        displayNameToCategory.put("My Account", "My Attributes");
+        displayNameToCategory.put("My Contact", "Contact Attributes");
+        displayNameToCategory.put("Intent", "Intent");
+        displayNameToCategory.put("Technology Profile", "Technology Profile");
+        displayNameToCategory.put("Website Keyword", "Website Keywords");
 
-        usageToDisplayName.put(ColumnSelection.Predefined.Segment.getName(), "SEGMENTATION");
-        usageToDisplayName.put(ColumnSelection.Predefined.Enrichment.getName(), "EXPORT");
-        usageToDisplayName.put(ColumnSelection.Predefined.TalkingPoint.getName(), "TALKING POINTS");
-        usageToDisplayName.put(ColumnSelection.Predefined.CompanyProfile.getName(), "COMPANY PROFILE");
+        usageToDisplayName.put(ColumnSelection.Predefined.Segment.getName(), "Segmentation");
+        usageToDisplayName.put(ColumnSelection.Predefined.Enrichment.getName(), "Export");
+        usageToDisplayName.put(ColumnSelection.Predefined.TalkingPoint.getName(), "Talking Points");
+        usageToDisplayName.put(ColumnSelection.Predefined.CompanyProfile.getName(), "Company Profile");
 
-        displayNameToUsage.put("SEGMENTATION", ColumnSelection.Predefined.Segment.getName());
-        displayNameToUsage.put("EXPORT", ColumnSelection.Predefined.Enrichment.getName());
-        displayNameToUsage.put("TALKING POINTS", ColumnSelection.Predefined.TalkingPoint.getName());
-        displayNameToUsage.put("COMPANY PROFILE", ColumnSelection.Predefined.CompanyProfile.getName());
+        displayNameToUsage.put("Segmentation", ColumnSelection.Predefined.Segment.getName());
+        displayNameToUsage.put("Export", ColumnSelection.Predefined.Enrichment.getName());
+        displayNameToUsage.put("Talking Points", ColumnSelection.Predefined.TalkingPoint.getName());
+        displayNameToUsage.put("Company Profile", ColumnSelection.Predefined.CompanyProfile.getName());
     }
 
     @Inject
@@ -250,7 +250,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         String categoryName = mapDisplayNameToCategory(categoryDisplayName);
         String usage = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
-        cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
+        AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
     }
 
     @VisibleForTesting
@@ -461,8 +461,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     static String mapDisplayNameToCategory(String categoryDisplayName) {
-        if (displayNameToCategory.containsKey(categoryDisplayName.toUpperCase())) {
-            return displayNameToCategory.get(categoryDisplayName.toUpperCase());
+        if (displayNameToCategory.containsKey(categoryDisplayName)) {
+            return displayNameToCategory.get(categoryDisplayName);
         }
         return categoryDisplayName;
     }
@@ -472,7 +472,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     static String mapDisplayNameToUsage(String usageDisplayName) {
-        return displayNameToUsage.get(usageDisplayName.toUpperCase());
+        return displayNameToUsage.get(usageDisplayName);
     }
 
 }
