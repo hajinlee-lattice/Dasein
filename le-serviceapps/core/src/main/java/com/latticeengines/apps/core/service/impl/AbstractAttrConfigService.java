@@ -133,6 +133,18 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
                         MultiTenantContext.getTenantId(), DataLicense.HG.getDataLicense()));
                 break;
+            case WEBSITE_KEYWORDS:
+                // TODO going to get rid of the try catch after the zookeeper is
+                // updated for all tenants
+                long defaultWebsiteKeywords = 200L;
+                try {
+                    defaultWebsiteKeywords = (long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                            MultiTenantContext.getTenantId(), DataLicense.WEBSITEKEYWORDS.getDataLicense());
+                } catch (Exception e) {
+                    log.warn("Error getting the limit for website keyword " + MultiTenantContext.getTenant().getId());
+                }
+                overview.setLimit(defaultWebsiteKeywords);
+                break;
             case ACCOUNT_ATTRIBUTES:
                 overview.setLimit(DEFAULT_LIMIT);
                 break;
@@ -583,8 +595,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @SuppressWarnings("unchecked")
     private void modifyInactivateState(AttrConfig attrConfig) {
-        // set allow customization to false when final value of state prop is inactive
-        // in other words, active and deprecated states will not change allow customization
+        // set allow customization to false when final value of state prop is
+        // inactive
+        // in other words, active and deprecated states will not change allow
+        // customization
         AttrState state = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
         if (AttrState.Inactive.equals(state)) {
             attrConfig.getAttrProps().forEach((key, value) -> {
