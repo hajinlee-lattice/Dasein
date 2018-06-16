@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -154,7 +155,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         boolean enableMatching = rtsBulkScoringConfig.isEnableMatching();
 
         if (rtsBulkScoringConfig.isEnableLeadEnrichment()) {
-            leadEnrichmentAttributeMap = new HashMap<>();
+            leadEnrichmentAttributeMap = new LinkedHashMap<>();
             leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
             leadEnrichmentInternalAttributeFlagMap = new HashMap<>();
 
