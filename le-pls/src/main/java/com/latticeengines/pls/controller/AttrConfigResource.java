@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.pls.service.AttrConfigService;
+import com.latticeengines.pls.service.impl.AttrConfigServiceImpl.UpdateUsageResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -53,7 +54,6 @@ public class AttrConfigResource {
     }
 
     @PutMapping(value = "/activation/config/category/{categoryDisplayName}")
-    @ResponseStatus(HttpStatus.OK)
     @ApiOperation("update Activation Config")
     public void updateActivationConfig(@PathVariable String categoryDisplayName,
             @RequestBody AttrConfigSelectionRequest request) {
@@ -61,12 +61,16 @@ public class AttrConfigResource {
     }
 
     @PutMapping(value = "/usage/config/category/{categoryDisplayName}")
-    @ResponseStatus(HttpStatus.OK)
     @ApiOperation("update Usage Config")
-    public void updateUsageConfig(@PathVariable String categoryDisplayName,
+    public String updateUsageConfig(@PathVariable String categoryDisplayName,
             @RequestParam(value = "usage", required = true) String usageName,
-            @RequestBody AttrConfigSelectionRequest request) {
-        attrConfigService.updateUsageConfig(categoryDisplayName, usageName, request);
+            @RequestBody AttrConfigSelectionRequest request, HttpServletResponse response) {
+        UpdateUsageResponse updateUsageResponse = attrConfigService.updateUsageConfig(categoryDisplayName, usageName,
+                request);
+        if (updateUsageResponse.getMessage() != null) {
+            response.setStatus(HttpStatus.ORDINAL_500_Internal_Server_Error);
+        }
+        return updateUsageResponse.getMessage();
     }
 
     @GetMapping(value = "/activation/config/category/{categoryDisplayName}")

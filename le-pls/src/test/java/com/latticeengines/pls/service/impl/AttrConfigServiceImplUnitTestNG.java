@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -42,7 +43,12 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
+import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings.Type;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
+import com.latticeengines.pls.service.impl.AttrConfigServiceImpl.UpdateUsageResponse;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
@@ -309,6 +315,42 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
         Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
                 .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 1);
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateUsageConfig() {
+        AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
+        request.setDeselect(Arrays.asList(deselect[0]));
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
+                .thenReturn(generateAttrConfigRequest());
+        UpdateUsageResponse updateUsageResponse = attrConfigService.updateUsageConfig(Category.INTENT.getName(),
+                "Company Profile", request);
+        Assert.assertNotNull(updateUsageResponse.getMessage());
+        log.info("message is " + updateUsageResponse.getMessage());
+
+        request.setDeselect(Arrays.asList(deselect));
+        updateUsageResponse = attrConfigService.updateUsageConfig(Category.INTENT.getName(), "Company Profile",
+                request);
+        Assert.assertNotNull(updateUsageResponse.getMessage());
+        log.info("message is " + updateUsageResponse.getMessage());
+
+    }
+
+    private AttrConfigRequest generateAttrConfigRequest() {
+        AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
+        List<AttrValidation> validations = new ArrayList<>();
+        ValidationDetails details = new ValidationDetails();
+        attrConfigRequest.setDetails(details);
+        details.setValidations(validations);
+        AttrValidation attrValidation = new AttrValidation();
+        validations.add(attrValidation);
+        attrValidation.setAttrName(deselect[0]);
+        attrValidation.setImpactWarnings(new ImpactWarnings());
+        Map<Type, List<String>> warnings = new HashMap<>();
+        warnings.put(ImpactWarnings.Type.IMPACTED_SEGMENTS, Arrays.asList("seg1", "seg2"));
+        warnings.put(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, Arrays.asList("re1", "re2"));
+        attrValidation.getImpactWarnings().setWarnings(warnings);
+        return attrConfigRequest;
     }
 
     private AttrConfigOverview<AttrState> generateIntentAttrConfigOverview() {

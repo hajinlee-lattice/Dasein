@@ -48,6 +48,8 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOver
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.AttrConfigService;
@@ -262,12 +264,30 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public void updateUsageConfig(String categoryDisplayName, String usageName, AttrConfigSelectionRequest request) {
+    public UpdateUsageResponse updateUsageConfig(String categoryDisplayName, String usageName,
+            AttrConfigSelectionRequest request) {
+        UpdateUsageResponse updateUsageResponse = new UpdateUsageResponse();
         String tenantId = MultiTenantContext.getTenantId();
         String categoryName = mapDisplayNameToCategory(categoryDisplayName);
         String usage = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
         AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
+        if (saveResponse != null && saveResponse.hasWarning()) {
+            List<AttrValidation> attrValidationList = saveResponse.getDetails().getValidations();
+            if (request.getDeselect() != null && request.getDeselect().size() > 1) {
+                // deactivate at subcategory level
+                Set<String> attrSet = attrValidationList.stream().map(AttrValidation::getAttrName)
+                        .collect(Collectors.toSet());
+                updateUsageResponse.setMessage(attrSet.toString());
+            } else if (request.getDeselect() != null && request.getDeselect().size() == 1) {
+                // deactivate at attribute level
+                Map<ImpactWarnings.Type, List<String>> warnings = attrValidationList.get(0).getImpactWarnings()
+                        .getWarnings();
+                updateUsageResponse.setMessage(warnings.toString());
+            }
+        }
+        return updateUsageResponse;
+
     }
 
     @VisibleForTesting
@@ -517,8 +537,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     /**
-     * Start with simple solution to get all metadata from cached decorated metadata
-     * If having performance issue, metadata from datacloud could be got from ColumnMetadataProxy
+     * Start with simple solution to get all metadata from cached decorated
+     * metadata If having performance issue, metadata from datacloud could be
+     * got from ColumnMetadataProxy
      */
     private Set<String> getAttrsWithCatAndSubcat(BusinessEntity entity, Category cat, String subcatName) {
         Set<String> attrs = new HashSet<>();
@@ -533,6 +554,20 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         });
         return attrs;
+    }
+
+    public static class UpdateUsageResponse {
+
+        String message;
+
+        public void setMessage(String msg) {
+            message = msg;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
     }
 
 }
