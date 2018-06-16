@@ -3,24 +3,34 @@ package com.latticeengines.pls.service.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -42,6 +52,7 @@ import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.AttrConfigService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -94,6 +105,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private DataLakeService dataLakeService;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -473,6 +490,49 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     static String mapDisplayNameToUsage(String usageDisplayName) {
         return displayNameToUsage.get(usageDisplayName);
+    }
+
+    @Override
+    public Map<String, AttributeStats> getStats(String catDisplayName, @PathVariable String subcatName) {
+        String catName = mapDisplayNameToCategory(catDisplayName);
+        Category cat = resolveCategory(catName);
+        BusinessEntity entity = CategoryUtils.getEntity(cat);
+
+        Map<String, StatsCube> cubes = dataLakeService.getStatsCubes();
+        if (cubes.get(entity.name()) == null) {
+            return Collections.<String, AttributeStats> emptyMap();
+        }
+        StatsCube cube = cubes.get(entity.name());
+        Map<String, AttributeStats> stats = cube.getStatistics();
+        if (MapUtils.isEmpty(stats)) {
+            return Collections.<String, AttributeStats> emptyMap();
+        }
+
+        Set<String> attrsToRetain = getAttrsWithCatAndSubcat(entity, cat, subcatName);
+        if (CollectionUtils.isEmpty(attrsToRetain)) {
+            return Collections.<String, AttributeStats> emptyMap();
+        }
+        stats.entrySet().removeIf(e -> !attrsToRetain.contains(e.getKey()));
+        return stats;
+    }
+
+    /**
+     * Start with simple solution to get all metadata from cached decorated metadata
+     * If having performance issue, metadata from datacloud could be got from ColumnMetadataProxy
+     */
+    private Set<String> getAttrsWithCatAndSubcat(BusinessEntity entity, Category cat, String subcatName) {
+        Set<String> attrs = new HashSet<>();
+        List<ColumnMetadata> cms = servingStoreProxy
+                .getDecoratedMetadataFromCache(MultiTenantContext.getCustomerSpace().toString(), entity);
+        if (CollectionUtils.isEmpty(cms)) {
+            return attrs;
+        }
+        cms.forEach(cm -> {
+            if (cm.getCategory() == cat && subcatName.equalsIgnoreCase(cm.getSubcategory())) {
+                attrs.add(cm.getAttrName());
+            }
+        });
+        return attrs;
     }
 
 }

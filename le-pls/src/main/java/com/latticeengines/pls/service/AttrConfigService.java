@@ -1,7 +1,11 @@
 package com.latticeengines.pls.service;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
@@ -20,4 +24,6 @@ public interface AttrConfigService {
     void updateActivationConfig(String categoryDisplayName, AttrConfigSelectionRequest request);
 
     void updateUsageConfig(String categoryDisplayName, String usageName, AttrConfigSelectionRequest request);
+
+    Map<String, AttributeStats> getStats(String catDisplayName, @PathVariable String subcatName);
 }

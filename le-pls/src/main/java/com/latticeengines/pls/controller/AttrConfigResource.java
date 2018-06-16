@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
@@ -71,7 +73,6 @@ public class AttrConfigResource {
     @ResponseBody
     @ApiOperation("get activation configuration detail for a specific category")
     public AttrConfigSelectionDetail getActivationConfiguration(@PathVariable String categoryDisplayName) {
-        log.info("get activation configuration detail for " + categoryDisplayName);
         return attrConfigService.getAttrConfigSelectionDetailForState(categoryDisplayName);
     }
 
@@ -80,8 +81,13 @@ public class AttrConfigResource {
     @ApiOperation("get usage configuration detail for a specific category")
     public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryDisplayName,
             @RequestParam(value = "usage", required = true) String usageName) {
-        log.info("get usage configuration detail for " + categoryDisplayName);
         return attrConfigService.getAttrConfigSelectionDetails(categoryDisplayName, usageName);
     }
 
+    @GetMapping(value = "/stats/category/{catDisplayName}/subcategory/{subcatName}")
+    @ResponseBody
+    @ApiOperation("get (attr, stats buckets) pairs for specific category and sub-category")
+    public Map<String, AttributeStats> getStats(@PathVariable String catDisplayName, @PathVariable String subcatName) {
+        return attrConfigService.getStats(catDisplayName, subcatName);
+    }
 }
