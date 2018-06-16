@@ -38,6 +38,8 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.JobStepDisplayInfoMapping;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -53,6 +55,7 @@ import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -88,6 +91,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -148,6 +154,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
             if (job != null) {
                 updateJobWithModelSummary(job);
+                updateJobWithRatingEngine(job);
                 updateStepDisplayNameAndNumSteps(job);
                 updateJobDisplayNameAndDescription(job);
                 updateJobWithSubJobsIfIsPnA(job);
@@ -487,10 +494,18 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
         }
 
+        Map<String, RatingEngineSummary> ratingIdToRatingEngineSummaries = new HashMap<>();
+        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
+                .getRatingEngineSummaries(MultiTenantContext.getTenant().getId());
+        for (RatingEngineSummary ratingEngineSummary : ratingEngineSummaries) {
+            ratingIdToRatingEngineSummaries.put(ratingEngineSummary.getId(), ratingEngineSummary);
+        }
+
         for (Job job : jobs) {
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
             updateJobWithModelSummaryInfo(job, true, modelIdToModelSummaries);
+            updateJobWithRatingEngineSummaryInfo(job, true, ratingIdToRatingEngineSummaries);
             updateJobWithSubJobsIfIsPnA(job);
         }
     }
@@ -515,6 +530,50 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 getJobSourceFileExists(job.getApplicationId()).toString());
 
         updateJobWithModelSummaryInfo(job, false, Collections.emptyMap());
+    }
+
+    private void updateJobWithRatingEngine(Job job) {
+        if (job.getInputs() == null) {
+            job.setInputs(new HashMap<>());
+        }
+        updateJobWithRatingEngineSummaryInfo(job, false, Collections.emptyMap());
+    }
+
+    private void updateJobWithRatingEngineSummaryInfo(Job job, boolean useMap,
+            Map<String, RatingEngineSummary> ratingIdToRatingEngineSummaries) {
+        String ratingId = null;
+        if (job.getJobType() != null && (job.getJobType() == "customEventModelingWorkflow"
+                || job.getJobType() == "ratingEngineImportMatchAndModelWorkflow")) {
+            if (job.getInputs() != null
+                    && job.getInputs().containsKey(WorkflowContextConstants.Inputs.RATING_ENGINE_ID)) {
+                ratingId = job.getInputs().get(WorkflowContextConstants.Inputs.RATING_ENGINE_ID);
+            }
+            if (ratingId == null) {
+                return;
+            }
+        } else {
+            return;
+        }
+
+        String displayName = null;
+        if (useMap) {
+            if (ratingIdToRatingEngineSummaries.containsKey(ratingId)) {
+                displayName = ratingIdToRatingEngineSummaries.get(ratingId).getDisplayName();
+            }
+        } else {
+            RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getTenant().getId(),
+                    ratingId);
+            if (ratingEngine != null) {
+                displayName = ratingEngine.getDisplayName();
+            }
+        }
+
+        if (displayName != null) {
+            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, displayName);
+        } else {
+            log.warn(String.format("RatingEngine: %s for job: %s cannot be found in the database. Please check",
+                    ratingId, job.getId()));
+        }
     }
 
     private void updateJobWithModelSummaryInfo(Job job, boolean useMap,
