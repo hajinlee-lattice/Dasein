@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
+import com.latticeengines.cdl.workflow.steps.rating.PostIterationInitialization;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.rating.ProfileRatingWrapper;
+import com.latticeengines.cdl.workflow.steps.rating.StartIteration;
 import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
@@ -33,6 +35,12 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
     private CloneInactiveServingStores cloneInactiveServingStores;
 
     @Inject
+    private StartIteration startIteration;
+
+    @Inject
+    private PostIterationInitialization postIterationInitialization;
+
+    @Inject
     private GenerateRatingWorkflow generateRatingWorkflow;
 
     @Inject
@@ -46,14 +54,18 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
 
     @Override
     public Workflow defineWorkflow(ProcessRatingWorkflowConfiguration config) {
-        return new WorkflowBuilder(name(), config) //
+        WorkflowBuilder builder = new WorkflowBuilder(name(), config) //
                 .next(prepareForRating) //
                 .next(cloneInactiveServingStores) //
-                .next(resetRating) //
-                .next(generateRatingWorkflow) //
-                .next(profileRatingWrapper) //
-                .next(combineStatistics) //
-                .next(exportToRedshift) //
-                .build();
+                .next(resetRating); //
+        for (int i = 0; i < config.getMaxIteration(); i++) {
+            builder = builder.next(startIteration) //
+                    .next(postIterationInitialization) //
+                    .next(generateRatingWorkflow) //
+                    .next(profileRatingWrapper) //
+                    .next(combineStatistics) //
+                    .next(exportToRedshift);
+        }
+        return builder.build();
     }
 }

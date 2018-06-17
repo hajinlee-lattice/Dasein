@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow.service;
+package com.latticeengines.domain.exposed.cdl;
 
 import java.util.ArrayList;
 import java.util.HashMap;

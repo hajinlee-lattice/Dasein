@@ -128,7 +128,6 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
             } else {
                 throw new RuntimeException("There's no new APS file created!");
             }
-
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

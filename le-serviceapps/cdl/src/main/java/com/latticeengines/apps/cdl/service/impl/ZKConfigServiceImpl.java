@@ -15,6 +15,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 
 @Service("zKConfigService")
 public class ZKConfigServiceImpl implements ZKConfigService {
@@ -65,6 +66,24 @@ public class ZKConfigServiceImpl implements ZKConfigService {
         } catch (Exception e) {
             log.warn("Failed to tell if InternalEnrichment is enabled in ZK for " + customerSpace.getTenantId() + ": " + e.getMessage());
             return false;
+        }
+    }
+
+    @Override
+    public String getRollingPeriod(CustomerSpace customerSpace) {
+        try {
+            String data = null;
+            Path cdlPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
+                    CDLComponent.componentName);
+            Path dataPath = cdlPath.append("DefaultAPSRollupPeriod");
+            Camille camille = CamilleEnvironment.getCamille();
+            if (camille.exists(dataPath)) {
+                data = camille.get(dataPath).getData();
+            }
+            return data;
+        } catch (Exception e) {
+            log.warn("Failed to get DefaultAPSRollupPeriod from ZK for " + customerSpace.getTenantId(), e);
+            return ApsRollingPeriod.BUSINESS_MONTH.getName();
         }
     }
 

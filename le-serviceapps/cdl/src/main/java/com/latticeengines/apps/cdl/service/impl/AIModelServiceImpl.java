@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -111,8 +110,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         if (advancedConf != null
                 && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
-            PeriodStrategy strategy = periodService.getPeriodStrategies().stream()
-                    .filter(x -> x.getTemplate() == PeriodStrategy.Template.Month).collect(Collectors.toList()).get(0);
+            PeriodStrategy strategy = periodService.getApsRollupPeriod();
             int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy, version);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
                     .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, maxPeriod);

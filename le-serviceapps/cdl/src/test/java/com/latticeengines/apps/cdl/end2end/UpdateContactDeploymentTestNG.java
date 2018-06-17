@@ -17,7 +17,7 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 1100);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 500);
 
         new Thread(this::createTestSegments).start();
 
@@ -37,7 +37,6 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     private void verifyProcess() {
         runCommonPAVerifications();
-
         verifyProcessAnalyzeReport(processAnalyzeAppId);
 
 //        long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;

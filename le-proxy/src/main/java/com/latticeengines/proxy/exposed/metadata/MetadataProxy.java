@@ -105,13 +105,13 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         List<Attribute> attributes = null;
         try {
-            if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
-                log.info("CreateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
-                attributes = table.getAttributes();
-                table.setAttributes(null);
-            }
+//            if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
+//                log.info("CreateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
+//                attributes = table.getAttributes();
+//                table.setAttributes(null);
+//            }
             post("createTable", url, table, null);
-            addTableAttributes(customerSpace, tableName, attributes);
+//            addTableAttributes(customerSpace, tableName, attributes);
         } catch(Exception e) {
             deleteTable(customerSpace, tableName);
             throw e;
@@ -142,13 +142,13 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         List<Attribute> attributes = null;
         try {
-            if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
-                log.info("UpdateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
-                attributes = table.getAttributes();
-                table.setAttributes(null);
-            }
+//            if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
+//                log.info("UpdateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
+//                attributes = table.getAttributes();
+//                table.setAttributes(null);
+//            }
             put("updateTable", url, table);
-            addTableAttributes(customerSpace, tableName, attributes);
+            // addTableAttributes(customerSpace, tableName, attributes);
         } catch(Exception e) {
             deleteTable(customerSpace, tableName);
             throw e;

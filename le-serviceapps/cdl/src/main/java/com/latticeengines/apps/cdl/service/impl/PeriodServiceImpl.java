@@ -21,6 +21,7 @@ import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -107,6 +108,7 @@ public class PeriodServiceImpl implements PeriodService {
         return ids;
     }
 
+    // FIXME: (Yintao - M21) to be changed to use data collection status
     @Override
     public int getMaxPeriodId(String customerSpace, PeriodStrategy periodStrategy, DataCollection.Version version) {
         if (version == null) {
@@ -118,6 +120,30 @@ public class PeriodServiceImpl implements PeriodService {
             dateStr = LocalDate.now().toString();
         }
         return PeriodBuilderFactory.build(periodStrategy).toPeriodId(dateStr);
+    }
+
+    // FIXME: (Yintao - M21) to be changed to use data collection status
+    @Override
+    public PeriodStrategy getApsRollupPeriod() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        ApsRollingPeriod rollupPeriod = ApsRollingPeriod.fromName(zkConfigService.getRollingPeriod(customerSpace));
+        PeriodStrategy.Template template;
+        switch (rollupPeriod) {
+            case BUSINESS_YEAR:
+                template = PeriodStrategy.Template.Year;
+                break;
+            case BUSINESS_QUARTER:
+                template = PeriodStrategy.Template.Quarter;
+                break;
+            case BUSINESS_WEEK:
+                template = PeriodStrategy.Template.Week;
+                break;
+            case BUSINESS_MONTH:
+            default:
+                template = PeriodStrategy.Template.Month;
+                break;
+        }
+        return getPeriodStrategies().stream().filter(x -> x.getTemplate() == template).findFirst().orElse(null);
     }
 
 }

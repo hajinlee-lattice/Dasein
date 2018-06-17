@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -81,23 +82,45 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         // update segment and rating engine counts
         SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
-        RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace.toString());
+        updateActiveRuleModelCounts();
         setPublishedModels();
     }
 
+    private void updateActiveRuleModelCounts() {
+        List<RatingModelContainer> containers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        if (CollectionUtils.isNotEmpty(containers)) {
+            containers.forEach(container -> {
+                if (RatingEngineType.RULE_BASED.equals(container.getEngineSummary().getType())) {
+                    String engineId = container.getEngineSummary().getId();
+                    try {
+                        Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace.toString(), engineId);
+                        log.info("Updated the counts of rating engine " + engineId + " to "
+                                + (MapUtils.isNotEmpty(counts) ? JsonUtils.pprint(counts) : null));
+                    } catch (Exception e) {
+                        log.error("Failed to update the counts of rating engine " + engineId, e);
+                    }
+                }
+            });
+        }
+    }
+
     private void setPublishedModels() {
-        List<RatingModelContainer> publishedRatingContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
-        publishedRatingContainers.forEach(container -> {
-            try {
-                RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.toString(), container.getEngineSummary().getId());
-                ratingEngine.setPublishedIteration(container.getModel());
-                ratingEngineProxy.createOrUpdateRatingEngine(customerSpace.toString(), ratingEngine);
-                log.info("Updated the published iteration  of Rating Engine: " + ratingEngine.getId() + " to Rating model: "
-                        + container.getModel().getId());
-            } catch (Exception e) {
-                log.error("Failed to update the published Iteration of rating engine " + container.getEngineSummary().getId(), e);
-            }
-        });
+        List<RatingModelContainer> containers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        if (CollectionUtils.isNotEmpty(containers)) {
+            containers.forEach(container -> {
+                if (!RatingEngineType.RULE_BASED.equals(container.getEngineSummary().getType())) {
+                    try {
+                        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.toString(), container.getEngineSummary().getId());
+                        ratingEngine.setPublishedIteration(container.getModel());
+                        ratingEngineProxy.createOrUpdateRatingEngine(customerSpace.toString(), ratingEngine);
+                        log.info("Updated the published iteration  of Rating Engine: " + ratingEngine.getId() + " to Rating model: "
+                                + container.getModel().getId());
+                    } catch (Exception e) {
+                        log.error("Failed to update the published Iteration of rating engine " + container.getEngineSummary().getId(), e);
+                    }
+                }
+            });
+        }
     }
 
     private void deleteOrphanTables() {

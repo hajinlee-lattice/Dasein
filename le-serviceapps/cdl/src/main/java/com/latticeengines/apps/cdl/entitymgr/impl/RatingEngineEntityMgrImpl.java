@@ -402,9 +402,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
         ratingEngine.setActiveModel(ruleBasedModel);
         ratingEngine.setLatestIteration(ruleBasedModel);
-        if (ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
-            ratingEngine.setScoringIteration(ruleBasedModel);
-        }
+        ratingEngine.setScoringIteration(ruleBasedModel);
         ratingEngineDao.update(ratingEngine);
     }
 

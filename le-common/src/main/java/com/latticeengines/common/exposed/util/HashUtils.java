@@ -19,4 +19,9 @@ public final class HashUtils {
     public static String getCleanedString(String str) {
         return str.replaceAll("[^a-zA-Z0-9]+", "");
     }
+
+    public static void main(String[] args) {
+        String original = args[0];
+        System.out.println(HashUtils.getCleanedString(getShortHash(original)));
+    }
 }

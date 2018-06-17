@@ -10,4 +10,6 @@ public interface ZKConfigService {
 
     boolean isInternalEnrichmentEnabled(CustomerSpace customerSpace);
 
+    String getRollingPeriod(CustomerSpace customerSpace);
+
 }

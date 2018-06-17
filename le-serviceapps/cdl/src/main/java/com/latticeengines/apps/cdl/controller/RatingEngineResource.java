@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -433,4 +434,14 @@ public class RatingEngineResource {
         return ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, entityType, restrictNotNullSalesforceId,
                 freeFormTextSearch, selectedBuckets, lookupIdColumn);
     }
+
+    @GetMapping(value = "/dependingattrs/type/{engineType}/model/{modelId}")
+    @ResponseBody
+    @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
+    public List<AttributeLookup> getDependingAttrsForModel(@PathVariable String customerSpace,
+                                                              @PathVariable RatingEngineType engineType,
+                                                              @PathVariable String modelId) {
+        return ratingEngineService.getDependingAttrsInModel(engineType, modelId);
+    }
+
 }

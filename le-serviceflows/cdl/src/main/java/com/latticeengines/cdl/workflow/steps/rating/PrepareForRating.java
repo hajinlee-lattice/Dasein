@@ -1,14 +1,20 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +22,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.common.exposed.graph.StringGraphNode;
+import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -30,12 +39,11 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 import reactor.core.publisher.Flux;
@@ -50,26 +58,23 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private MetadataProxy metadataProxy;
-
     private String customerSpace;
 
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace().toString();
-        String rawRatingTableName = NamingUtils.timestamp("RawRating");
-        putStringValueInContext(RULE_RAW_RATING_TABLE_NAME, rawRatingTableName);
-        readActiveRatingModels();
+        List<RatingModelContainer> activeModels = readActiveRatingModels();
+        log.info("Found " + CollectionUtils.size(activeModels) + " active rating models.");
+        putObjectInContext(RATING_MODELS, activeModels);
+        putObjectInContext(RATING_MODELS_BY_ITERATION, splitIntoIterations(activeModels));
+        putObjectInContext(CURRENT_RATING_ITERATION, 0);
+
         removeObjectFromContext(TABLES_GOING_TO_DYNAMO);
         removeObjectFromContext(TABLES_GOING_TO_REDSHIFT);
         removeObjectFromContext(STATS_TABLE_NAMES);
     }
 
-    private void readActiveRatingModels() {
+    private List<RatingModelContainer> readActiveRatingModels() {
         List<RatingEngineSummary> summaries = ratingEngineProxy.getRatingEngineSummaries(customerSpace);
         if (CollectionUtils.isNotEmpty(summaries)) {
             List<RatingModelContainer> activeModels = Flux.fromIterable(summaries) //
@@ -78,9 +83,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                     .filter(container -> container.getModel() != null) //
                     .sequential().collectList().block();
             if (CollectionUtils.isNotEmpty(activeModels)) {
-                log.info("Found " + activeModels.size() + " active rating models.");
-                putObjectInContext(RATING_MODELS, activeModels);
-
                 List<String> modelGuids = activeModels.stream().filter(container -> {
                     RatingEngineType engineType = container.getEngineSummary().getType();
                     return RatingEngineType.CUSTOM_EVENT.equals(engineType)
@@ -98,11 +100,12 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                     .collectList().block();
             log.info("Found " + CollectionUtils.size(inactiveEngineIds) + " inactive rating engines.");
             if (CollectionUtils.isNotEmpty(inactiveEngineIds)) {
-                List<String> queryAttrs = getQueryAttributes(inactiveEngineIds);
-                putObjectInContext(INACTIVE_ENGINE_ATTRIBUTES, queryAttrs);
+                putObjectInContext(INACTIVE_ENGINES, inactiveEngineIds);
             }
+            return activeModels;
         } else {
             log.info("There is no rating engine summaries");
+            return null;
         }
     }
 
@@ -201,29 +204,126 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         return true;
     }
 
-    private List<String> getQueryAttributes(List<String> engineIds) {
-        List<String> attrs = new ArrayList<>();
-        String customerSpace = configuration.getCustomerSpace().toString();
-        DataCollection.Version version = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        String tableName = dataCollectionProxy.getTableName(customerSpace, BusinessEntity.Rating.getServingStore(),
-                version);
-        if (StringUtils.isBlank(tableName)) {
-            log.info("There is no previous rating table to ingest");
-        } else {
-            List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, tableName);
-            Set<String> possibleAttrs = new HashSet<>();
-            engineIds.forEach(engineId -> {
-                for (RatingEngine.ScoreType scoreType : RatingEngine.ScoreType.values()) {
-                    possibleAttrs.add(RatingEngine.toRatingAttrName(engineId, scoreType));
+    private List<List<RatingModelContainer>> splitIntoIterations(List<RatingModelContainer> containers) {
+        List<List<RatingModelContainer>> iterations = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(containers)) {
+            if (configuration.getMaxIteration() <= 1) {
+                log.info("Max Iteration is " + configuration.getMaxIteration() + ", run single pass.");
+                iterations = Collections.singletonList(containers);
+            } else {
+                try {
+                    List<List<String>> generations = getREDepGraphLayers(containers, configuration.getMaxIteration());
+                    log.info("Got dependency graph layers: \n" + JsonUtils.pprint(generations));
+                    if (CollectionUtils.isNotEmpty(generations) && generations.size() > 1) {
+                        Map<String, RatingModelContainer> containerMap = new HashMap<>();
+                        containers.forEach(container -> containerMap.put(container.getEngineSummary().getId(), container));
+                        for (List<String> generation: generations) {
+                            List<RatingModelContainer> iteration = generation.stream() //
+                                    .map(containerMap::get).collect(Collectors.toList());
+                            iterations.add(iteration);
+                        }
+                    } else {
+                        log.info("No more than 1 generation, run single pass.");
+                        iterations = Collections.singletonList(containers);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to resolve dependency generations, just run single pass.", e);
+                    iterations = Collections.singletonList(containers);
                 }
-            });
-            cms.forEach(cm -> {
-                if (possibleAttrs.contains(cm.getAttrName())) {
-                    attrs.add(cm.getAttrName());
-                }
-            });
+            }
         }
-        return attrs;
+        return iterations;
+    }
+
+    private List<List<String>> getREDepGraphLayers(List<RatingModelContainer> containers, int maxIter) {
+        Map<String, StringGraphNode> nodes = getREDepGraph(containers);
+        List<StringGraphNode> graph = new ArrayList<>(nodes.values());
+        TopologicalTraverse traverser = new TopologicalTraverse();
+        NodeVisitor vistor = new NodeVisitor();
+        traverser.traverse(graph, vistor);
+        List<String> topologicalTrace = vistor.trace;
+        log.info("Topological trace: " + topologicalTrace);
+        Map<String, Integer> depth = new HashMap<>();
+        topologicalTrace.forEach(engineId -> {
+            StringGraphNode graphNode = nodes.get(engineId);
+            if (CollectionUtils.isEmpty(graphNode.getChildren())) {
+                depth.put(engineId, 0);
+            } else {
+                int maxChildDepth = 0;
+                for (StringGraphNode child: graphNode.getChildren()) {
+                    String childId = child.getVal();
+                    maxChildDepth = Math.max(maxChildDepth, depth.get(childId));
+                }
+                depth.put(engineId, maxChildDepth + 1);
+            }
+        });
+        log.info("Resolved depth map: " + JsonUtils.serialize(depth));
+        if (MapUtils.isNotEmpty(depth)) {
+            int maxDepth = Math.min(depth.values().stream().max(Integer::compareTo).orElse(1) + 1, maxIter);
+            List<List<String>> generations = new ArrayList<>(maxDepth);
+            for (int i = 0; i < maxDepth; i++) {
+                generations.add(new ArrayList<>());
+            }
+            depth.forEach((engineId, engineDepth) -> {
+                int engineItr = Math.min(engineDepth, maxDepth - 1);
+                generations.get(engineItr).add(engineId);
+            });
+            return generations;
+        } else {
+            return null;
+        }
+    }
+
+    private Map<String, StringGraphNode> getREDepGraph(List<RatingModelContainer> containers) {
+        final ConcurrentMap<String, StringGraphNode> nodes = new ConcurrentHashMap<>();
+        final Set<String> engineIds = containers.stream() //
+                .map(container -> {
+                    String engineId = container.getEngineSummary().getId();
+                    if (!nodes.containsKey(engineId)) {
+                        nodes.putIfAbsent(engineId, new StringGraphNode(engineId));
+                    }
+                    return engineId;
+                }).collect(Collectors.toSet());
+        List<Runnable> runnables = new ArrayList<>();
+        containers.forEach(container -> {
+            Runnable runnable = () -> {
+                String engineId = container.getEngineSummary().getId();
+                RatingEngineType engineType = container.getEngineSummary().getType();
+                String modelId = container.getModel().getId();
+                List<AttributeLookup> attributeLookups = ratingEngineProxy.getDependingAttrsForModel(customerSpace,
+                        engineType, modelId);
+                if (CollectionUtils.isNotEmpty(attributeLookups)) {
+                    attributeLookups.forEach(attributeLookup -> {
+                        if (BusinessEntity.Rating.equals(attributeLookup.getEntity())) {
+                            String dependingEngineId = RatingEngine.toEngineId(attributeLookup.getAttribute());
+                            if (engineIds.contains(dependingEngineId)) {
+                                StringGraphNode child = nodes.get(dependingEngineId);
+                                nodes.get(engineId).addChild(child);
+                            }
+                        }
+                    });
+                }
+                List<String> childIds = nodes.get(engineId).getChildren().stream().map(StringGraphNode::getVal)
+                        .collect(Collectors.toList());
+                log.info(String.format("Engine %s depends on %s", engineId, childIds));
+            };
+            runnables.add(runnable);
+        });
+        ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("dep-attrs", Math.min(8, engineIds.size()));
+        ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 1);
+        threadPool.shutdown();
+        return new HashMap<>(nodes);
+    }
+
+    private static class NodeVisitor implements Visitor {
+        public List<String> trace = new ArrayList<>();
+
+        @Override
+        public void visit(Object o, VisitorContext ctx) {
+            if (o.getClass().equals(StringGraphNode.class)) {
+                trace.add(((StringGraphNode) o).getVal());
+            }
+        }
     }
 
 }

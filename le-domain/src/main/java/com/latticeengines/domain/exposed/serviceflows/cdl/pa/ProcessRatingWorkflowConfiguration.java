@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -18,6 +19,17 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshif
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+
+    @JsonProperty("max_iteration")
+    private int maxIteration;
+
+    public int getMaxIteration() {
+        return maxIteration;
+    }
+
+    public void setMaxIteration(int maxIteration) {
+        this.maxIteration = maxIteration;
+    }
 
     public static class Builder {
         private ProcessRatingWorkflowConfiguration configuration = new ProcessRatingWorkflowConfiguration();
@@ -72,6 +84,13 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             }
             return this;
         }
+
+        public Builder maxIteration(int maxIteraton) {
+            configuration.setMaxIteration(maxIteraton);
+            processRatingStepConfiguration.setMaxIteration(maxIteraton);
+            return this;
+        }
+
 
         public Builder transformationGroup(TransformationGroup transformationGroup,
                 List<TransformDefinition> stdTransformDefns) {

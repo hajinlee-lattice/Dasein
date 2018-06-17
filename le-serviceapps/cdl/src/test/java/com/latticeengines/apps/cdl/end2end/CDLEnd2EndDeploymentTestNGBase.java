@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -46,12 +48,14 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -82,7 +86,6 @@ import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -93,16 +96,12 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelin
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.AggregationFilter;
-import com.latticeengines.domain.exposed.query.AggregationSelector;
-import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
@@ -130,7 +129,7 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
-    private static final Logger logger = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
     private static final String INITIATOR = "test@lattice-engines.com";
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";
@@ -167,17 +166,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final long RATING_D_COUNT_1 = 5;
     static final long RATING_F_COUNT_1 = 2;
 
-    static final long RATING_A_COUNT_2 = 20;
-    static final long RATING_D_COUNT_2 = 22;
-    static final long RATING_F_COUNT_2 = 0;
-
-    static final long RATING_A_COUNT_2_REBUILD = 18;
-    static final long RATING_D_COUNT_2_REBUILD = 31;
-    static final long RATING_F_COUNT_2_REBUILD = 4;
-
-    static final String SEGMENT_PRODUCT_ID = "CEC1F504FE9683F5FE518BACB9409CAC";
-    static final String TARGET_PRODUCT = "6368494B622E0CB60F9C80FEB1D0F95F";
-    static final String TRAINING_PRODUCT = "B0829F745A42D18FE77050EC05A51D2F";
+    static final String TARGET_PRODUCT = "A48F113437D354134E584D8886116989";
+    static final String TRAINING_PRODUCT = "9IfG2T5joqw0CIJva0izeZXSCwON1S";
 
     static final int EARLIEST_TRANSACTION = 48033;
     static final int LATEST_TRANSACTION = 48929;
@@ -248,24 +238,25 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     protected void setupEnd2EndTestEnvironment() throws Exception {
-        logger.info("Bootstrapping test tenants using tenant console ...");
+        log.info("Bootstrapping test tenants using tenant console ...");
 
         setupTestEnvironment();
         mainTestTenant = testBed.getMainTestTenant();
         checkpointService.setMainTestTenant(mainTestTenant);
 
-        logger.info("Test environment setup finished.");
+        log.info("Test environment setup finished.");
         createDataFeed();
         updateDataCloudBuildNumber();
         setupBusinessCalendar();
         setupPurchaseHistoryMetrics();
+        // setDefaultAPSRollupPeriod();
 
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
     }
 
     protected void resetCollection() {
-        logger.info("Start reset collection data ...");
+        log.info("Start reset collection data ...");
         boolean resetStatus = cdlProxy.reset(mainTestTenant.getId());
         assertEquals(resetStatus, true);
     }
@@ -275,10 +266,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void processAnalyze(ProcessAnalyzeRequest request) {
-        logger.info("Start processing and analyzing ...");
+        log.info("Start processing and analyzing ...");
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);
         processAnalyzeAppId = appId.toString();
-        logger.info("processAnalyzeAppId=" + processAnalyzeAppId);
+        log.info("processAnalyzeAppId=" + processAnalyzeAppId);
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
                 false);
         assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
@@ -289,12 +280,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 Thread.currentThread().getContextClassLoader());
         SourceFile sourceFile = fileUploadProxy.uploadFile("Account1.csv", false, "Account1.csv",
                 SchemaInterpretation.Account, "Account", csvResrouce);
-        logger.info("Uploaded file " + sourceFile.getName() + " to " + sourceFile.getPath());
+        log.info("Uploaded file " + sourceFile.getName() + " to " + sourceFile.getPath());
     }
 
     SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type,
             Resource source) {
-        logger.info("Upload file " + fileName + ", operation type is " + type.name() + ", Schema is " + schema.name());
+        log.info("Upload file " + fileName + ", operation type is " + type.name() + ", Schema is " + schema.name());
         return fileUploadProxy.uploadDeleteFile(false, fileName, schema.name(), type.name(), source);
     }
 
@@ -376,7 +367,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         try {
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, extractPath + "/part-00000.avro");
             numRecords = AvroUtils.count(yarnConfiguration, extractPath + "/*.avro");
-            logger.info("Uploaded " + numRecords + " records from " + fileName + " to " + extractPath);
+            log.info("Uploaded " + numRecords + " records from " + fileName + " to " + extractPath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload avro file " + fileName);
         }
@@ -435,7 +426,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private void registerImportAction(String feedTaskId, long count, List<String> tableNames) {
-        logger.info(String.format("Registering action for dataFeedTask=%s", feedTaskId));
+        log.info(String.format("Registering action for dataFeedTask=%s", feedTaskId));
         ImportActionConfiguration configuration = new ImportActionConfiguration();
         configuration.setDataFeedTaskId(feedTaskId);
         configuration.setImportCount(count);
@@ -457,7 +448,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     void importData(BusinessEntity entity, String s3FileName, String feedType) {
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName), s3FileName);
-        logger.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
+        log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         SourceFile template = fileUploadProxy.uploadFile(s3FileName, false, s3FileName, entity.name(), csvResource);
         FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
         modifyFieldMappings(entity, fieldMappingDocument);
@@ -474,12 +465,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
                 SourceType.FILE.getName(), feedType);
-        logger.info("Modified field mapping document is saved, start importing ...");
+        log.info("Modified field mapping document is saved, start importing ...");
         ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType, template, template,
                 INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
-        logger.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
+        log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
 
     private void modifyFieldMappings(BusinessEntity entity, FieldMappingDocument fieldMappingDocument) {
@@ -521,7 +512,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
         String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType,
                 metaData);
-        logger.info("Creating a data feed task for " + entity + " with id " + taskId);
+        log.info("Creating a data feed task for " + entity + " with id " + taskId);
         if (StringUtils.isEmpty(taskId)) {
             throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
         }
@@ -571,7 +562,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private void registerMetadataChangeAction(DataFeedTask dataFeedTask) {
-        logger.info(String.format("Registering action for dataFeedTask=%s", dataFeedTask));
+        log.info(String.format("Registering action for dataFeedTask=%s", dataFeedTask));
         Action action = new Action();
         action.setType(ActionType.METADATA_CHANGE);
         action.setActionInitiator(INITIATOR);
@@ -596,7 +587,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         try {
             AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro", records, true);
-            logger.info("Uploaded " + records.size() + " records to " + targetPath);
+            log.info("Uploaded " + records.size() + " records to " + targetPath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload avro for " + entityName);
         }
@@ -651,7 +642,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             String filename = file.substring(file.lastIndexOf("/") + 1);
             Date folderTime = new SimpleDateFormat(COLLECTION_DATE_FORMAT).parse(filename);
             if (folderTime.getTime() > startMillis && folderTime.getTime() < endMillis) {
-                logger.info("Find matched file: " + filename);
+                log.info("Find matched file: " + filename);
                 HdfsUtils.HdfsFileFilter filter = file1 -> {
                     if (file1 == null) {
                         return false;
@@ -774,7 +765,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(summaryReport.getJson());
         Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
 
-        logger.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
+        log.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
 
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
@@ -863,7 +854,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Bucket websiteBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(".com"));
         BucketRestriction websiteRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), websiteBkt);
-        Bucket.Transaction txn = new Bucket.Transaction("A80D4770376C1226C47617C071324C0B", TimeFilter.ever(), null,
+        Bucket.Transaction txn = new Bucket.Transaction("GMm4ZQnMOWpN8Gn7MhZLB7SrGmOss", TimeFilter.ever(), null,
                 null, false);
         Bucket purchaseBkt = Bucket.txnBkt(txn);
         BucketRestriction purchaseRestriction = new BucketRestriction(
@@ -889,7 +880,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Bucket stateBkt = Bucket.valueBkt(ComparisonType.IN_COLLECTION,
                 Arrays.asList("CALIFORNIA", "TEXAS", "MICHIGAN", "NEW YORK"));
         BucketRestriction stateRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "LDC_State"), stateBkt);
+                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
         Bucket techBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("SEGMENT_5"));
         BucketRestriction techRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "SpendAnalyticsSegment"), techBkt);
@@ -911,26 +902,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     MetadataSegment constructTargetSegment() {
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Arrays.asList("VT"));
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Collections.singletonList("Virginia"));
         BucketRestriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_MODELING);
         segment.setDisplayName("End2End Segment Modeling");
         segment.setDescription("A test segment for CDL end2end modeling test.");
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
-        segment.setAccountRestriction(accountRestriction);
-        return segment;
-    }
-
-    MetadataSegment constructTrainingSegment() {
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
-        BucketRestriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
-        MetadataSegment segment = new MetadataSegment();
-        segment.setName(SEGMENT_NAME_TRAINING);
-        segment.setDisplayName("End2End Segment Training");
-        segment.setDescription("A training segment for CDL end2end modeling test.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
         segment.setAccountRestriction(accountRestriction);
         return segment;
@@ -948,7 +926,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
         int retries = 0;
         while (segment == null && retries++ < 3) {
-            logger.info("Wait for 1 sec to retry getting rating engine.");
+            log.info("Wait for 1 sec to retry getting rating engine.");
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
@@ -969,7 +947,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
         int retries = 0;
         while (segment == null && retries++ < 3) {
-            logger.info("Wait for 1 sec to retry getting rating engine.");
+            log.info("Wait for 1 sec to retry getting rating engine.");
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
@@ -1004,7 +982,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
         int retries = 0;
         while (segment == null && retries++ < 3) {
-            logger.info("Wait for 1 sec to retry getting rating engine.");
+            log.info("Wait for 1 sec to retry getting rating engine.");
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
@@ -1031,24 +1009,17 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
 
         newEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
-
         Assert.assertNotNull(newEngine);
         Assert.assertNotNull(newEngine.getActiveModel(), JsonUtils.pprint(newEngine));
 
         String modelId = newEngine.getActiveModel().getId();
         RuleBasedModel model = constructRuleModel(modelId);
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), modelId, model);
-
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
 
     void activateRatingEngine(String engineId) {
-        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), engineId);
-        if (ratingEngine == null) {
-            throw new IllegalArgumentException("Cannot find the engine to be activated " + engineId);
-        }
-        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
-        ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
+        activateRatingEngine(engineId, mainTestTenant);
     }
 
     private RuleBasedModel constructRuleModel(String modelId) {
@@ -1056,7 +1027,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         ratingRule.setDefaultBucketName(RatingBucketName.D.getName());
 
         Bucket bktA = Bucket.valueBkt("CALIFORNIA");
-        Restriction resA = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "LDC_State"), bktA);
+        Restriction resA = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "State"), bktA);
         ratingRule.setRuleForBucket(RatingBucketName.A, resA, null);
 
         Bucket bktF = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("BOB"));
@@ -1070,36 +1041,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return ruleBasedModel;
     }
 
-    MetadataSegment targetSegmentWithTrxRestrictions() {
-        // this filters out this account in the test data 0012400001DO2fqAAD
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Arrays.asList("VT"));
-        BucketRestriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
-
-        TransactionRestriction invalidTrxRes = new TransactionRestriction(SEGMENT_PRODUCT_ID,
-                new TimeFilter(ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(),
-                        Collections.singletonList("2018-04-09")),
-                false,
-                new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM, ComparisonType.GREATER_THAN,
-                        Collections.singletonList(1)),
-                new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM, ComparisonType.GREATER_THAN,
-                        Collections.singletonList(1)));
-
-        TransactionRestriction validTrxRes = new TransactionRestriction(SEGMENT_PRODUCT_ID,
-                new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Month.name(), Arrays.asList(3, 6)),
-                false, null, null);
-
-        MetadataSegment segment = new MetadataSegment();
-        segment.setName(SEGMENT_NAME_MODELING);
-        segment.setDisplayName("End2End Segment Modeling");
-        segment.setDescription("A test segment for CDL end2end modeling test.");
-        segment.setAccountRestriction(Restriction.builder() //
-                .and(accountRestriction, invalidTrxRes, validTrxRes).build());
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction(segment.getAccountRestriction()));
-
-        return segment;
-    }
-
     RatingEngine constructRatingEngine(RatingEngineType engineType, MetadataSegment targetSegment) {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setDisplayName("CDL End2End " + engineType + " Engine");
@@ -1111,17 +1052,19 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return ratingEngine;
     }
 
-    void configureCrossSellModel(AIModel testAIModel, PredictionType predictionType, String targetProductId,
+    void configureCrossSellModel(AIModel testAIModel, PredictionType predictionType, ModelingStrategy strategy, String targetProductId,
             String trainingProductId) {
         testAIModel.setPredictionType(predictionType);
-
         CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
+        config.setModelingStrategy(strategy);
         Map<CrossSellModelingConfigKeys, ModelingConfigFilter> myMap = new HashMap<>();
-        myMap.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, new ModelingConfigFilter(
-                CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 3));
+        if (ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy)) {
+//        Map<CrossSellModelingConfigKeys, ModelingConfigFilter> myMap = new HashMap<>();
+//        myMap.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, new ModelingConfigFilter(
+//                CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 3));
+//
+        }
         config.setFilters(myMap);
-
-        config.setModelingStrategy(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE);
         config.setTargetProducts(Collections.singletonList(targetProductId));
         config.setTrainingProducts(Collections.singletonList(trainingProductId));
     }
@@ -1146,7 +1089,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), engineId);
         int retries = 0;
         while (ratingEngine == null && retries++ < 3) {
-            logger.info("Wait for 1 sec to retry getting rating engine.");
+            log.info("Wait for 1 sec to retry getting rating engine.");
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
@@ -1175,7 +1118,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     void verifyUpdateActions() {
         List<Action> actions = actionProxy.getActions(mainTestTenant.getId());
-        logger.info(String.format("actions=%s", actions));
+        log.info(String.format("actions=%s", actions));
         Assert.assertTrue(CollectionUtils.isNotEmpty(actions));
         Assert.assertTrue(actions.stream().allMatch(action -> action.getOwnerId() != null));
     }
@@ -1204,6 +1147,20 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void setupPurchaseHistoryMetrics() {
         List<ActivityMetrics> metrics = ActivityMetricsUtils.fakePurchaseMetrics(mainTestTenant);
         activityMetricsProxy.save(mainCustomerSpace, ActivityType.PurchaseHistory, metrics);
+    }
+
+    void setDefaultAPSRollupPeriod() {
+        String rollupPeriod = ApsRollingPeriod.BUSINESS_QUARTER.name();
+        String podId = CamilleEnvironment.getPodId();
+        Path zkPath = PathBuilder.buildCustomerSpaceServicePath(podId, CustomerSpace.parse(mainCustomerSpace), "CDL");
+        zkPath = zkPath.append("DefaultAPSRollupPeriod");
+        Camille camille = CamilleEnvironment.getCamille();
+        try {
+            camille.upsert(zkPath, new Document(rollupPeriod), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update DefaultAPSRollupPeriod", e);
+        }
+        log.info("Updated DefaultAPSRollupPeriod to " + rollupPeriod);
     }
 
 }

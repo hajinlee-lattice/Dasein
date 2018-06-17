@@ -577,13 +577,13 @@ public class CheckpointService {
     }
 
     private void saveRedshiftTableIfExists(TableRoleInCollection role, DataCollection.Version version) {
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role, version);
-        if (table != null) {
-            List<String> redshiftTables = redshiftService.getTables(table.getName());
+        String tableName = dataCollectionProxy.getTableName(mainTestTenant.getId(), role, version);
+        if (StringUtils.isNotBlank(tableName)) {
+            List<String> redshiftTables = redshiftService.getTables(tableName);
             if (CollectionUtils.isNotEmpty(redshiftTables)) {
                 if (redshiftTables.size() != 1) {
                     throw new IllegalStateException("There are " + redshiftTables.size()
-                            + " redshift tables prefixed by " + table.getName() + ": " + redshiftTables);
+                            + " redshift tables prefixed by " + tableName + ": " + redshiftTables);
                 }
                 String oldTable = redshiftTables.get(0);
                 String newTable = String.format("%s_%s", TestFrameworkUtils.generateTenantName(), role.name());

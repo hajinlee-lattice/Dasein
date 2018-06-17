@@ -17,4 +17,6 @@ public interface PeriodService {
     int getMaxPeriodId(String customerSpace, PeriodStrategy periodStrategy, DataCollection.Version version);
 
     Map<PeriodStrategy.Template, Integer> getPeriodId(String date, PeriodStrategy periodStrategy);
+
+    PeriodStrategy getApsRollupPeriod();
 }

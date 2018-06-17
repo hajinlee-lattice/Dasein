@@ -32,6 +32,9 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("FailingStep")
     private FailingStep failingStep;
 
+    @JsonProperty("MaxRatingIteration")
+    private Integer MaxRatingIterations;
+
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }
@@ -70,5 +73,13 @@ public class ProcessAnalyzeRequest {
 
     public void setIgnoreDataCloudChange(Boolean ignoreDataCloudChange) {
         this.ignoreDataCloudChange = ignoreDataCloudChange;
+    }
+
+    public Integer getMaxRatingIterations() {
+        return MaxRatingIterations;
+    }
+
+    public void setMaxRatingIterations(Integer maxRatingIterations) {
+        MaxRatingIterations = maxRatingIterations;
     }
 }

@@ -32,6 +32,9 @@ public class PivotRatingsConfig extends TransformerConfig {
     @JsonProperty("ai_model_ids")
     private List<String> aiModelIds;
 
+    @JsonProperty("inactive_engines")
+    private List<String> inactiveEngines;
+
     public Map<String, String> getIdAttrsMap() {
         return idAttrsMap;
     }
@@ -78,5 +81,13 @@ public class PivotRatingsConfig extends TransformerConfig {
 
     public void setAiModelIds(List<String> aiModelIds) {
         this.aiModelIds = aiModelIds;
+    }
+
+    public List<String> getInactiveEngines() {
+        return inactiveEngines;
+    }
+
+    public void setInactiveEngines(List<String> inactiveEngines) {
+        this.inactiveEngines = inactiveEngines;
     }
 }

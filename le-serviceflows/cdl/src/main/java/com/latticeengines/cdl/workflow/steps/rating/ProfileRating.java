@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,8 +100,11 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         if (aiRawTable == null && ruleRawTable == null) {
             throw new IllegalStateException("Cannot find any raw rating table");
         }
-
-        inactiveRating = getStringValueFromContext(INACTIVE_RATINGS_TABLE_NAME);
+        List<String> inactiveEngines = getListObjectFromContext(ITERATION_INACTIVE_ENGINES, String.class);
+        if (CollectionUtils.isNotEmpty(inactiveEngines)) {
+            DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+            inactiveRating = dataCollectionProxy.getTableName(customerSpace.toString(), BusinessEntity.Rating.getServingStore(), version);
+        }
         modelContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
     }
 
@@ -226,6 +230,8 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         }
         if (inactiveSrcIdx > -1) {
             config.setInactiveSourceIdx(inactiveSrcIdx);
+            List<String> inactiveEngines = getListObjectFromContext(ITERATION_INACTIVE_ENGINES, String.class);
+            config.setInactiveEngines(inactiveEngines);
         }
         return config;
     }

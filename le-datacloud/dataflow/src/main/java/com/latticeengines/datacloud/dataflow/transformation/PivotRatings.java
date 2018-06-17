@@ -104,7 +104,18 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         Integer inactiveSrcIdx = config.getInactiveSourceIdx();
         if (inactiveSrcIdx != null) {
             Node inactive = addSource(parameters.getBaseTables().get(inactiveSrcIdx));
-            inactive = inactive.discard(InterfaceName.CDLCreatedTime.name(), InterfaceName.CDLUpdatedTime.name());
+            List<String> inactiveEngines = config.getInactiveEngines();
+            List<String> inactiveToRetain = new ArrayList<>();
+            inactiveToRetain.add(InterfaceName.AccountId.name());
+            Set<String> existing = new HashSet<>(inactive.getFieldNames());
+            for (String inactiveEngine: inactiveEngines) {
+                for (RatingEngine.ScoreType scoreType: RatingEngine.ScoreType.values()) {
+                    String scoreAttr = RatingEngine.toRatingAttrName(inactiveEngine, scoreType);
+                    inactiveToRetain.add(scoreAttr);
+                }
+            }
+            inactiveToRetain.retainAll(existing);
+            inactive = inactive.retain(new FieldList(inactiveToRetain));
             String idCol2 = idCol + "_2";
             inactive = inactive.rename(new FieldList(idCol), new FieldList(idCol2));
             pivoted = pivoted.outerJoin(idCol, inactive, idCol2);

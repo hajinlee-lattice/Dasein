@@ -40,8 +40,13 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -53,6 +58,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -89,6 +96,12 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     @Inject
     private Configuration yarnConfiguration;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private ActionProxy actionProxy;
 
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;
@@ -293,6 +306,27 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         newTable.setTenant(mainTestTenant);
         newTable.setTableType(TableType.DATATABLE);
         metadataProxy.createTable(mainCustomerSpace, tableName, newTable);
+    }
+
+    protected void activateRatingEngine(String engineId, Tenant tenant) {
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setId(engineId);
+        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+        RatingEngineAndActionDTO ratingEngineAndAction = ratingEngineProxy.createOrUpdateRatingEngineAndActionDTO(mainTestTenant.getId(), ratingEngine, true);
+        Action action = ratingEngineAndAction.getAction();
+        registerAction(action, tenant);
+    }
+
+    private void registerAction(Action action, Tenant tenant) {
+        if (action != null) {
+            action.setTenant(tenant);
+            log.info(String.format("Registering action %s", action));
+            ActionConfiguration actionConfig = action.getActionConfiguration();
+            if (actionConfig != null) {
+                action.setDescription(actionConfig.serialize());
+            }
+            actionProxy.createAction(tenant.getId(), action);
+        }
     }
 
 }

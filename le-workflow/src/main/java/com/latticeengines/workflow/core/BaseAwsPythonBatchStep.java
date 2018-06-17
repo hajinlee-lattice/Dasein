@@ -94,7 +94,7 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
             return;
         }
 
-        boolean result = false;
+        boolean result;
         if (config.isRunInAws()) {
             executeInAws();
             result = waitForCompletion();
@@ -102,12 +102,12 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
             result = executeInline();
         }
         log.info("Submitted Aws Batch Job, result=" + result);
+        afterComplete(config);
     }
 
     public boolean waitForCompletion() {
         String batchJobId = config.getJobId();
         boolean result = batchService.waitForCompletion(batchJobId, 1000 * 60 * 300L);
-        afterComplete(config);
         log.info("Finished waiting for Aws Batch Job, result=" + result);
         return result;
     }

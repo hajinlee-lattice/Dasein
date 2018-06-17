@@ -175,7 +175,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             urlPattern += "?" + StringUtils.join(conditions, "&");
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
-        log.info("url=" + url);
         List<?> list = get("getTableNames", url, List.class);
         return JsonUtils.convertList(list, String.class);
     }

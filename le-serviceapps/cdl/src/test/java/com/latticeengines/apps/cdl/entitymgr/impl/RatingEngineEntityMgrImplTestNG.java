@@ -129,7 +129,6 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(createdRatingEngine.getType(), RatingEngineType.RULE_BASED);
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.INACTIVE);
-        Assert.assertTrue(createdRatingEngine.getJustCreated());
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
 
         // test rating engine note creation

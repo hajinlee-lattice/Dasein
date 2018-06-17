@@ -26,8 +26,10 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -292,6 +294,12 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
                 URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus?newStatus={newStatus}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, newStatus);
         post("updateModelingStatus", url, null, Object.class);
+    }
+
+    public List<AttributeLookup> getDependingAttrsForModel(String customerSpace, RatingEngineType engineType, String modelId) {
+        String url = constructUrl(URL_PREFIX + "/dependingattrs/type/{engineType}/model/{modelId}",
+                shortenCustomerSpace(customerSpace), engineType, modelId);
+        return getList("get depending attrs for rating model", url, AttributeLookup.class);
     }
 
     public RatingsCountResponse getRatingEngineCoverageInfo(String customerSpace,

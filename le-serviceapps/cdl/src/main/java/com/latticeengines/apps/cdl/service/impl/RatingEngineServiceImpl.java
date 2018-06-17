@@ -55,7 +55,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -76,7 +75,6 @@ import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuer
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
@@ -101,7 +99,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private PlayEntityMgr playEntityMgr;
 
     @Inject
-    private SegmentProxy segmentProxy;
+    private SegmentService segmentService;
 
     @Inject
     private EntityProxy entityProxy;
@@ -131,10 +129,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private PlayService playService;
 
     @Inject
-    private SegmentService segmentService;
-
-    @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
@@ -255,12 +251,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingEngine.getSegment() != null) {
             String segmentName = ratingEngine.getSegment().getName();
-            MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(tenant.getId(), segmentName);
-            MetadataSegment segment = segmentDTO.getMetadataSegment();
-            segment.setPid(segmentDTO.getPrimaryKey());
+            MetadataSegment segment = segmentService.findByName(tenant.getId(), segmentName);
             ratingEngine.setSegment(segment);
         }
-
         ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenant.getId(), unlinkSegment);
         updateLastRefreshedDate(tenant.getId(), ratingEngine);
         evictRatingMetadataCache();
@@ -275,8 +268,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             log.info(String.format("Replicating rating engine %s (%s)", ratingEngineId, ratingEngine.getDisplayName()));
 
             RatingModel activeModel = ratingEngine.getActiveModel();
-            String tenantId = MultiTenantContext.getTenant().getId();
-
             ratingEngine.setPid(null);
             ratingEngine.setId(null);
             ratingEngine.setActiveModel(null);
@@ -687,16 +678,25 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @SuppressWarnings("unchecked")
     @Override
     public List<AttributeLookup> getDependentAttrsInActiveModel(String ratingEngineId) {
-        Set<AttributeLookup> attributes = new HashSet<>();
         RatingEngine ratingEngine = validateRatingEngine_PopulateActiveModel(ratingEngineId);
-        RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
-
         RatingModel activeRatingModel = ratingEngine.getActiveModel();
         if (activeRatingModel != null) {
-            ratingModelService.findRatingModelAttributeLookups(activeRatingModel);
-            attributes.addAll(activeRatingModel.getRatingModelAttributes());
+            return getDependingAttrsInModel(ratingEngine.getType(), ratingEngine.getActiveModel().getId());
+        } else {
+            return new ArrayList<>();
         }
+    }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AttributeLookup> getDependingAttrsInModel(RatingEngineType engineType, String modelId) {
+        Set<AttributeLookup> attributes = new HashSet<>();
+        RatingModelService<RatingModel> ratingModelService = getRatingModelService(engineType);
+        RatingModel ratingModel = ratingModelService.getRatingModelById(modelId);
+        if (ratingModel != null) {
+            ratingModelService.findRatingModelAttributeLookups(ratingModel);
+            attributes.addAll(ratingModel.getRatingModelAttributes());
+        }
         return new ArrayList<>(attributes);
     }
 

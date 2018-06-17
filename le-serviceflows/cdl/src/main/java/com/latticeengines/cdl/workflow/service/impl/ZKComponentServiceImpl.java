@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.cdl.workflow.service.ApsRollingPeriod;
+import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 import com.latticeengines.cdl.workflow.service.ZKComponentService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;

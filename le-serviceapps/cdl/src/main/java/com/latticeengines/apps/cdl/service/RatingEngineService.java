@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -67,6 +68,8 @@ public interface RatingEngineService {
     List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId);
 
     List<AttributeLookup> getDependentAttrsInActiveModel(String ratingEngineId);
+
+    List<AttributeLookup> getDependingAttrsInModel(RatingEngineType engineType, String modelId);
 
     List<RatingModel> getDependingRatingModels(List<String> attributes);
 

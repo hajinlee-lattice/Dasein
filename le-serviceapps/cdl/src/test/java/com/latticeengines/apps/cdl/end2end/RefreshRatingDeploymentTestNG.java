@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -63,7 +64,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private String podId;
 
     private static final String MODELS_RESOURCE_ROOT = "end2end/models";
-    private static final boolean ENABLE_AI_RATINGS = true;
+    private static final boolean ENABLE_AI_RATINGS = false;
 
     private RatingEngine rule1;
     private RatingEngine rule2;
@@ -99,7 +100,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
             if (enableAIRatings) {
                 new Thread(this::setupAIModels).start();
             }
-            resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+            resumeCrossSellCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
             verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 
             new Thread(() -> {
@@ -108,7 +109,6 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 rule2 = createRuleBasedRatingEngine();
                 activateRatingEngine(rule1.getId());
                 activateRatingEngine(rule2.getId());
-                createAndDeleteRatingEngine();
             }).start();
 
             if (enableAIRatings) {
@@ -121,14 +121,14 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 ai1 = createCrossSellEngine(segment, modelSummary, PredictionType.EXPECTED_VALUE);
                 long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                         ai1.getId(), ai1.getActiveModel().getId(), ModelingQueryType.TARGET);
-                Assert.assertEquals(targetCount, 81);
+                Assert.assertEquals(targetCount, 248);
                 activateRatingEngine(ai1.getId());
 
                 modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
                 ai2 = createCrossSellEngine(segment, modelSummary, PredictionType.PROPENSITY);
                 targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai2.getId(),
                         ai2.getActiveModel().getId(), ModelingQueryType.TARGET);
-                Assert.assertEquals(targetCount, 81);
+                Assert.assertEquals(targetCount, 248);
                 activateRatingEngine(ai2.getId());
 
                 modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid3);
@@ -147,7 +147,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     private RatingEngine createCrossSellEngine(MetadataSegment segment, ModelSummary modelSummary,
-            PredictionType predictionType) throws InterruptedException {
+                                               PredictionType predictionType) throws InterruptedException {
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL, segment);
 
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
@@ -157,7 +157,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         log.info("Created rating engine " + newEngine.getId());
 
         AIModel model = (AIModel) newEngine.getActiveModel();
-        configureCrossSellModel(model, predictionType, TARGET_PRODUCT, TRAINING_PRODUCT);
+        configureCrossSellModel(model, predictionType, ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, TARGET_PRODUCT, TRAINING_PRODUCT);
         model.setModelSummaryId(modelSummary.getId());
 
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);
@@ -165,6 +165,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         final String modelGuid = modelSummary.getId();
         final String engineId = newEngine.getId();
+        ratingEngineProxy.setScoringIteration(mainCustomerSpace, engineId, model.getId(), BucketMetadataUtils.getDefaultMetadata());
         new Thread(() -> insertBucketMetadata(modelGuid, engineId)).start();
         Thread.sleep(300);
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
@@ -189,6 +190,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         final String modelGuid = modelSummary.getId();
         final String engineId = newEngine.getId();
+        ratingEngineProxy.setScoringIteration(mainCustomerSpace, engineId, model.getId(), BucketMetadataUtils.getDefaultMetadata());
         new Thread(() -> insertBucketMetadata(modelGuid, engineId)).start();
         Thread.sleep(300);
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
@@ -196,18 +198,6 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     private void insertBucketMetadata(String modelGuid, String engineId) {
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
-        request.setModelGuid(modelGuid);
-        request.setRatingEngineId(engineId);
-        request.setBucketMetadataList(BucketMetadataUtils.getDefaultMetadata());
-        request.setLastModifiedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
-        bucketedScoreProxy.createABCDBuckets(mainTestTenant.getId(), request);
-        try {
-            Thread.sleep(5000);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        request = new CreateBucketMetadataRequest();
         request.setModelGuid(modelGuid);
         request.setRatingEngineId(engineId);
         request.setBucketMetadataList(getModifiedBucketMetadata());

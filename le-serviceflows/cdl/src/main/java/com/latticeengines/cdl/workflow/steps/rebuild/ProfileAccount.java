@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -123,7 +122,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
             TransformationStepConfig calc = calcStats(customerSpace, statsTablePrefix);
 
             //filter step
-            TransformationStepConfig filter = filter(customerSpace);
+            TransformationStepConfig filter = filter();
             TransformationStepConfig segmentProfile = segmentProfile();
             TransformationStepConfig segmentBucket = segmentBucket();
 
@@ -254,27 +253,24 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         return step;
     }
 
-    private TransformationStepConfig filter(CustomerSpace customerSpace) {
+    private TransformationStepConfig filter() {
         TransformationStepConfig step = new TransformationStepConfig();
         List<Integer> inputSteps = Collections.singletonList(matchStep);
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_COPIER);
 
-        DataCollection.Version inactive = dataCollectionProxy.getInactiveVersion(customerSpace.toString());
-
         CopierConfig conf = new CopierConfig();
-        List<ColumnMetadata> allAttrs = servingStoreProxy.getDecoratedMetadata(customerSpace.toString(),
-                BusinessEntity.Account, null, inactive).collectList().block();
         Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
         filterGroups.add(ColumnSelection.Predefined.ID);
         filterGroups.add(ColumnSelection.Predefined.LookupId);
 
-        List<ColumnMetadata> retainAttrs = allAttrs.stream().filter(cm ->
-                (!AttrState.Inactive.equals(cm.getAttrState()) && Boolean.TRUE.equals(cm.getCanSegment()))
+        List<ColumnMetadata> retainAttrs = allAttrs.stream().filter(cm -> Boolean.TRUE.equals(cm.getCanSegment())
                 || filterGroups.stream().anyMatch(cm::isEnabledFor)).collect(Collectors.toList());
-        List<String> retainAttrNames = retainAttrs.stream().map(segmentAttr -> segmentAttr.getAttrName())
+        List<String> retainAttrNames = retainAttrs.stream().map(ColumnMetadata::getAttrName)
                 .collect(Collectors.toList());
-        retainAttrNames.add(InterfaceName.AccountId.name());
+        if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
+            retainAttrNames.add(InterfaceName.AccountId.name());
+        }
 
         conf.setRetainAttrs(retainAttrNames);
         String confStr = appendEngineConf(conf, heavyEngineConfig());

@@ -227,6 +227,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
+        int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations() : 1;
+
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -250,6 +252,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .currentDataCloudBuildNumber(currentDataCloudBuildNumber) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //
                 .dynamoSignature(signature) //
+                .maxRatingIteration(maxIteration) //
                 .build();
     }
 
