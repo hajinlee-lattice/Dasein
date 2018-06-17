@@ -70,21 +70,21 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     }
 
     @Override
-    public String getRollingPeriod(CustomerSpace customerSpace) {
+    public ApsRollingPeriod getRollingPeriod(CustomerSpace customerSpace) {
+        ApsRollingPeriod period = ApsRollingPeriod.BUSINESS_MONTH;
         try {
-            String data = null;
             Path cdlPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
                     CDLComponent.componentName);
             Path dataPath = cdlPath.append("DefaultAPSRollupPeriod");
             Camille camille = CamilleEnvironment.getCamille();
             if (camille.exists(dataPath)) {
-                data = camille.get(dataPath).getData();
+                String data = camille.get(dataPath).getData();
+                period = ApsRollingPeriod.fromName(data);
             }
-            return data;
         } catch (Exception e) {
             log.warn("Failed to get DefaultAPSRollupPeriod from ZK for " + customerSpace.getTenantId(), e);
-            return ApsRollingPeriod.BUSINESS_MONTH.getName();
         }
+        return period;
     }
 
 }

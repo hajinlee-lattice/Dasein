@@ -126,7 +126,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public PeriodStrategy getApsRollupPeriod() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        ApsRollingPeriod rollupPeriod = ApsRollingPeriod.fromName(zkConfigService.getRollingPeriod(customerSpace));
+        ApsRollingPeriod rollupPeriod = zkConfigService.getRollingPeriod(customerSpace);
         PeriodStrategy.Template template;
         switch (rollupPeriod) {
             case BUSINESS_YEAR:

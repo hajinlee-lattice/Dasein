@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 
 public interface ZKConfigService {
 
@@ -10,6 +11,6 @@ public interface ZKConfigService {
 
     boolean isInternalEnrichmentEnabled(CustomerSpace customerSpace);
 
-    String getRollingPeriod(CustomerSpace customerSpace);
+    ApsRollingPeriod getRollingPeriod(CustomerSpace customerSpace);
 
 }
