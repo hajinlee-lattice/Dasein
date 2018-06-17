@@ -21,10 +21,10 @@ import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.proxy.exposed.objectapi.TransactionProxy;
 
@@ -124,26 +124,12 @@ public class PeriodServiceImpl implements PeriodService {
 
     // FIXME: (Yintao - M21) to be changed to use data collection status
     @Override
-    public PeriodStrategy getApsRollupPeriod() {
+    public PeriodStrategy getApsRollupPeriod(DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        ApsRollingPeriod rollupPeriod = zkConfigService.getRollingPeriod(customerSpace);
-        PeriodStrategy.Template template;
-        switch (rollupPeriod) {
-            case BUSINESS_YEAR:
-                template = PeriodStrategy.Template.Year;
-                break;
-            case BUSINESS_QUARTER:
-                template = PeriodStrategy.Template.Quarter;
-                break;
-            case BUSINESS_WEEK:
-                template = PeriodStrategy.Template.Week;
-                break;
-            case BUSINESS_MONTH:
-            default:
-                template = PeriodStrategy.Template.Month;
-                break;
-        }
-        return getPeriodStrategies().stream().filter(x -> x.getTemplate() == template).findFirst().orElse(null);
+        DataCollectionStatus dataCollectionStatus = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace.toString(), version);
+        String rollingPeriod = dataCollectionStatus.getApsRollingPeriod();
+        final String finalPeriod = StringUtils.isBlank(rollingPeriod) ? "Month" : rollingPeriod;
+        return getPeriodStrategies().stream().filter(x -> finalPeriod.equals(x.getName())).findFirst().orElse(null);
     }
 
 }

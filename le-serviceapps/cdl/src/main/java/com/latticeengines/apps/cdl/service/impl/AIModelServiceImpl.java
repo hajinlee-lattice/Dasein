@@ -110,10 +110,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         if (advancedConf != null
                 && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
-            PeriodStrategy strategy = periodService.getApsRollupPeriod();
+            PeriodStrategy strategy = periodService.getApsRollupPeriod(version);
             int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy, version);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
-                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, maxPeriod);
+                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, strategy.getName(), maxPeriod);
             return ratingQueryBuilder.build();
         } else {
             throw new LedpException(LedpCode.LEDP_40009,

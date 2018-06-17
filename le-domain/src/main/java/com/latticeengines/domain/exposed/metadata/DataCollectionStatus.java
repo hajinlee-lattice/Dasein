@@ -192,6 +192,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         this.detail.setTransactionCount(transactionCount);
     }
 
+    @JsonProperty("ApsRollingPeriod")
+    public String getApsRollingPeriod() {
+        return this.detail.getApsRollingPeriod();
+    }
+
+    @JsonProperty("ApsRollingPeriod")
+    public void setApsRollingPeriod(String apsRollupPeriod) {
+        this.detail.setApsRollingPeriod(apsRollupPeriod);
+    }
+
     private static class DataCollectionStatusDetail implements Serializable {
         private static final long serialVersionUID = -6030795342397598056L;
         @JsonProperty("MinTxnDate")
@@ -208,6 +218,8 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         private Long contactCount = 0L;
         @JsonProperty("TransactionCount")
         private Long transactionCount = 0L;
+        @JsonProperty("ApsRollingPeriod")
+        private String apsRollingPeriod;
 
         public Integer getMinTxnDate() {
             return minTxnDate;
@@ -265,6 +277,13 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
             this.transactionCount = transactionCount;
         }
 
+        public String getApsRollingPeriod() {
+            return apsRollingPeriod;
+        }
+
+        public void setApsRollingPeriod(String apsRollingPeriod) {
+            this.apsRollingPeriod = apsRollingPeriod;
+        }
     }
 
 }

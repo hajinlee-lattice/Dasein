@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
@@ -81,16 +82,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final BatonService batonService;
 
+    private final ZKConfigService zkConfigService;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
             WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-            BatonService batonService) {
+            BatonService batonService, ZKConfigService zkConfigService) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
         this.columnMetadataProxy = columnMetadataProxy;
         this.actionService = actionService;
         this.batonService = batonService;
+        this.zkConfigService = zkConfigService;
     }
 
     @WithWorkflowJobPid
@@ -228,6 +232,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
         int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations() : 1;
+        String apsRollingPeriod = zkConfigService.getRollingPeriod(CustomerSpace.parse(customerSpace)).getPeriodName();
 
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
@@ -253,6 +258,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .transformationGroup(transformationGroup, stdTransformDefns) //
                 .dynamoSignature(signature) //
                 .maxRatingIteration(maxIteration) //
+                .apsRollingPeriod(apsRollingPeriod) //
                 .build();
     }
 

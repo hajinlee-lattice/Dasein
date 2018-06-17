@@ -147,7 +147,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 .getOrCreateDataCollectionStatus(customerSpace.toString(), null);
         detail.setEvaluationDate(evaluationDate);
         detail.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
-        log.info("StartProxessing step: dataCollection Status is " + JsonUtils.serialize(detail));
+        detail.setApsRollingPeriod(configuration.getApsRollingPeriod());
+        log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(detail));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
 
         createReportJson();

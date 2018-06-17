@@ -24,8 +24,8 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilder {
 
-    protected CrossSellRatingEventQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
-        super(ratingEngine, aiModel, evaluationPeriod);
+    protected CrossSellRatingEventQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, String periodTypeName, int evaluationPeriod) {
+        super(ratingEngine, aiModel, periodTypeName, evaluationPeriod);
     }
 
     @Override

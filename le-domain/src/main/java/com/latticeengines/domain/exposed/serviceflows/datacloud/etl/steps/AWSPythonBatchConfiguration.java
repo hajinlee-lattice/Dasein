@@ -34,6 +34,9 @@ public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("version")
     private Version version;
 
+    @JsonProperty("rolling_period")
+    private String rollingPeriod;
+
     public boolean isRunInAws() {
         return runInAws;
     }
@@ -96,6 +99,14 @@ public class AWSPythonBatchConfiguration extends MicroserviceStepConfiguration {
 
     public void setVersion(Version version) {
         this.version = version;
+    }
+
+    public String getRollingPeriod() {
+        return rollingPeriod;
+    }
+
+    public void setRollingPeriod(String rollingPeriod) {
+        this.rollingPeriod = rollingPeriod;
     }
 
     @Override

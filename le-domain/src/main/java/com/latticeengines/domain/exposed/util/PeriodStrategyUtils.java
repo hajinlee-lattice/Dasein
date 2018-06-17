@@ -34,6 +34,15 @@ public class PeriodStrategyUtils {
         throw new RuntimeException("Fail to find period table from period strategy " + strategy.getName());
     }
 
+    public static Table findPeriodTableFromStrategyName(List<Table> periodTables, String strategyName) {
+        for (Table table : periodTables) {
+            if (table.getName().startsWith(getTablePrefixFromPeriodStrategyName(strategyName))) {
+                return table;
+            }
+        }
+        throw new RuntimeException("Fail to find period table from period strategy named " + strategyName);
+    }
+
     public static List<String> filterPeriodTablesByPeriods(List<String> periodTables, Set<String> periods) {
         List<String> filtered = new ArrayList<>();
         Set<String> tablePrefixes = new HashSet<>();

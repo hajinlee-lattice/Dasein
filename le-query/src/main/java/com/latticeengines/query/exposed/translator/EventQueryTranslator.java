@@ -54,6 +54,16 @@ import com.querydsl.sql.WindowFunction;
 public class EventQueryTranslator extends TranslatorCommon {
     private static final int ONE_LAG_BEHIND_OFFSET = 1;
 
+    private final String defaultPeriod;
+
+    public EventQueryTranslator() {
+        this("Month");
+    }
+
+    public EventQueryTranslator(String defaultPeriod) {
+        this.defaultPeriod = defaultPeriod;
+    }
+
     public QueryBuilder translateForScoring(QueryFactory queryFactory,
                                             AttributeRepository repository,
                                             Restriction restriction,
@@ -641,7 +651,7 @@ public class EventQueryTranslator extends TranslatorCommon {
         if (StringUtils.isEmpty(period)) {
             throw new RuntimeException("No period definition passed for event query.");
         } else if (StringUtils.isNotEmpty(periodInTxn) && !period.equals(periodInTxn)) {
-            throw new LedpException(LedpCode.LEDP_37016, new String[]{period, periodInTxn});
+            throw new LedpException(LedpCode.LEDP_37016, new String[]{ period, periodInTxn });
         }
 
         builder.with(translateAllKeys(queryFactory, repository, period, periodCount, sqlUser));
@@ -853,7 +863,7 @@ public class EventQueryTranslator extends TranslatorCommon {
     }
 
     private String getPeriodFromRestriction(Restriction rootRestriction) {
-        AtomicReference<String> periodRef = new AtomicReference<>(TimeFilter.Period.Month.name());
+        AtomicReference<String> periodRef = new AtomicReference<>(defaultPeriod);
 
         // set transaction entity
         if (rootRestriction instanceof LogicalRestriction) {
@@ -873,7 +883,14 @@ public class EventQueryTranslator extends TranslatorCommon {
     }
 
     private synchronized void updatePeriodName(TransactionRestriction txRestriction, AtomicReference<String> periodRef) {
-        String periodInTxn = txRestriction.getTimeFilter().getPeriod();
+        TimeFilter timeFilter = txRestriction.getTimeFilter();
+        String periodInTxn;
+        if (ComparisonType.EVER.equals(timeFilter.getRelation())) {
+            periodInTxn = defaultPeriod;
+            timeFilter.setPeriod(periodInTxn);
+        } else {
+            periodInTxn = timeFilter.getPeriod();
+        }
         if (StringUtils.isBlank(periodRef.get())) {
             periodRef.set(periodInTxn);
         } else if (!periodInTxn.equals(periodRef.get())) {

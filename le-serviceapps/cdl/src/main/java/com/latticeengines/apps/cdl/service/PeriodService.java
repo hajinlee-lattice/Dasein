@@ -18,5 +18,5 @@ public interface PeriodService {
 
     Map<PeriodStrategy.Template, Integer> getPeriodId(String date, PeriodStrategy periodStrategy);
 
-    PeriodStrategy getApsRollupPeriod();
+    PeriodStrategy getApsRollupPeriod(DataCollection.Version version);
 }

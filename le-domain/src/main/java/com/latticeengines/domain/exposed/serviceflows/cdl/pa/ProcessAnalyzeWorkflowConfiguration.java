@@ -174,6 +174,12 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder apsRollingPeriod(String apsRollingPeriod) {
+            awsPythonDataConfiguration.setRollingPeriod(apsRollingPeriod);
+            processStepConfiguration.setApsRollingPeriod(apsRollingPeriod);
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

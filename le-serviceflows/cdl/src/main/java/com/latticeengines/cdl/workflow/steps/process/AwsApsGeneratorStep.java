@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +20,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.cdl.workflow.service.ZKComponentService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -60,9 +59,6 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     protected MetadataProxy metadataProxy;
 
     @Inject
-    private ZKComponentService zkComponentService;
-
-    @Inject
     private Configuration yarnConfiguration;
 
     private DataCollection.Version active;
@@ -87,9 +83,12 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
             log.warn("Aps generation is disabled or there's not metadata table for period aggregated table!");
             return;
         }
-        PeriodStrategy rollingPeriod = zkComponentService.getRollingPeriod(config.getCustomerSpace());
-        log.info("Rolling Period=" + rollingPeriod.getName());
-        Table periodTable = PeriodStrategyUtils.findPeriodTableFromStrategy(periodTables, rollingPeriod);
+        String rollingPeriod = configuration.getRollingPeriod();
+        if (StringUtils.isBlank(rollingPeriod)) {
+            throw new RuntimeException("Must specify rolling period in configuration.");
+        }
+        log.info("Rolling Period=" + rollingPeriod);
+        Table periodTable = PeriodStrategyUtils.findPeriodTableFromStrategyName(periodTables, rollingPeriod);
         config.setRunInAws(apsInAws);
         List<String> inputPaths = getInputPaths(periodTable);
         config.setInputPaths(inputPaths);

@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import java.util.Collections;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -20,18 +18,12 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         try {
-            runPreCheckin();
+            importData();
+            processAnalyze();
+            verifyProcess();
         } finally {
             saveCheckpoint(CHECK_POINT);
         }
-    }
-
-    @Test(groups = "precheckin")
-    public void runPreCheckin() throws Exception {
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-        importData();
-        processAnalyze();
-        verifyProcess();
     }
 
     private void importData() throws Exception {
@@ -54,6 +46,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyActiveVersion(DataCollection.Version.Green);
 
         verifyProcessAnalyzeReport(processAnalyzeAppId);
+        verifyDataCollectionStatus();
 
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");

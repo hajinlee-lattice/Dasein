@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -31,17 +30,26 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 
 public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder {
 
-    private int targetPeriodId;
+    protected final String periodTypeName;
+    private final int targetPeriodId;
     protected AIModel aiModel;
     protected MetadataSegment baseSegment;
     protected String productIds;
     protected Restriction productTxnRestriction;
     protected EventFrontEndQuery ratingFrontEndQuery;
     protected int evaluationPeriodId;
-    protected String periodTypeName = PeriodStrategy.Template.Month.name();
 
     private List<ComparisonType> comparisonTypesToBeIgnored = Arrays.asList(ComparisonType.BEFORE, ComparisonType.AFTER,
             ComparisonType.BETWEEN_DATE);
+
+    CrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, String periodTypeName, int targetPeriodId) {
+        this.baseSegment = (MetadataSegment) ratingEngine.getSegment().clone();
+        this.aiModel = aiModel;
+        CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(aiModel);
+        this.productIds = String.join(",", config.getTargetProducts());
+        this.targetPeriodId = targetPeriodId;
+        this.periodTypeName = periodTypeName;
+    }
 
     protected abstract void handleCustomSegment();
 
@@ -154,27 +162,19 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         return productList;
     }
 
-    protected CrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int targetPeriodId) {
-        this.baseSegment = (MetadataSegment) ratingEngine.getSegment().clone();
-        this.aiModel = aiModel;
-        CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(aiModel);
-        this.productIds = String.join(",", config.getTargetProducts());
-        this.targetPeriodId = targetPeriodId;
-    }
-
     protected int getTargetPeriodId() {
         return targetPeriodId;
     }
 
     public static RatingQueryBuilder getCrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel,
-                                                                    ModelingQueryType modelingQueryType, int targetPeriodId) {
+                                                                    ModelingQueryType modelingQueryType, String periodTypeName, int targetPeriodId) {
         switch (modelingQueryType) {
             case TARGET:
-                return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, targetPeriodId);
+                return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, periodTypeName, targetPeriodId);
             case TRAINING:
-                return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, targetPeriodId);
+                return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, periodTypeName, targetPeriodId);
             case EVENT:
-                return new CrossSellRatingEventQueryBuilder(ratingEngine, aiModel, targetPeriodId);
+                return new CrossSellRatingEventQueryBuilder(ratingEngine, aiModel, periodTypeName, targetPeriodId);
             default:
                 throw new LedpException(LedpCode.LEDP_40010, new String[]{modelingQueryType.getModelingQueryTypeName()});
         }

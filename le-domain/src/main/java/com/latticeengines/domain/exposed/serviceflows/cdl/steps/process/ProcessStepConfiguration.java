@@ -24,6 +24,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("ignore_data_cloud_change")
     private Boolean ignoreDataCloudChange;
 
+    @JsonProperty("aps_rolling_period")
+    private String apsRollingPeriod;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -62,5 +65,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setIgnoreDataCloudChange(Boolean ignoreDataCloudChange) {
         this.ignoreDataCloudChange = ignoreDataCloudChange;
+    }
+
+    public String getApsRollingPeriod() {
+        return apsRollingPeriod;
+    }
+
+    public void setApsRollingPeriod(String apsRollingPeriod) {
+        this.apsRollingPeriod = apsRollingPeriod;
     }
 }

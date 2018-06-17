@@ -22,6 +22,8 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
 
     private static final Logger log = LoggerFactory.getLogger(UpdateTransactionDeploymentTestNG.class);
 
+    static final String CHECK_POINT = "update3";
+
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;
 
@@ -40,15 +42,13 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), 1000);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 1000);
 
-        new Thread(() -> {
-            createTestSegments();
-            ratingEngine = createRuleBasedRatingEngine();
-            activateRatingEngine(ratingEngine.getId());
-        }).start();
-
         importData();
         processAnalyze();
-        verifyProcess();
+        try {
+            verifyProcess();
+        } finally {
+            saveCheckpoint(CHECK_POINT);
+        }
     }
 
     private void importData() throws Exception {

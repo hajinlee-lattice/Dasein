@@ -19,8 +19,8 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
 
     protected MetadataSegment accountFiltererSegment;
 
-    protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
-        super(ratingEngine, aiModel, evaluationPeriod);
+    protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, String periodTypeName, int evaluationPeriod) {
+        super(ratingEngine, aiModel, periodTypeName, evaluationPeriod);
         accountFiltererSegment = (MetadataSegment) ratingEngine.getSegment().clone();
     }
 
@@ -50,7 +50,7 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
                     TimeFilter.priorOnly(config.getValue() - 1, periodTypeName), false, null, null);
             break;
         case CROSS_SELL_FIRST_PURCHASE:
-            productTxnRestriction = new TransactionRestriction(productIds, TimeFilter.ever(), true, null, null);
+            productTxnRestriction = new TransactionRestriction(productIds, TimeFilter.ever(periodTypeName), true, null, null);
             break;
         default:
             throw new LedpException(LedpCode.LEDP_40017);

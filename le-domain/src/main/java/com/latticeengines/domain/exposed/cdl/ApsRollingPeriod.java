@@ -45,4 +45,8 @@ public enum ApsRollingPeriod {
         return name;
     }
 
+    public String getPeriodName() {
+        return getName().replace("Business ", "");
+    }
+
 }

@@ -17,8 +17,8 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBuilder {
 
-    protected CrossSellRatingTrainingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
-        super(ratingEngine, aiModel, evaluationPeriod);
+    protected CrossSellRatingTrainingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, String periodTypeName, int evaluationPeriod) {
+        super(ratingEngine, aiModel, periodTypeName, evaluationPeriod);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
                     TimeFilter.priorOnly(config.getValue() - 1, periodTypeName), false, null, null);
             break;
         case CROSS_SELL_FIRST_PURCHASE:
-            productTxnRestriction = new TransactionRestriction(productIds, TimeFilter.ever(), true, null, null);
+            productTxnRestriction = new TransactionRestriction(productIds, TimeFilter.ever(periodTypeName), true, null, null);
             break;
         default:
             throw new LedpException(LedpCode.LEDP_40017);

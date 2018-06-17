@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EventType;
@@ -25,6 +28,8 @@ import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 
 public class ModelingQueryTranslator extends QueryTranslator {
 
+    private static final Logger log = LoggerFactory.getLogger(ModelingQueryTranslator.class);
+
     public ModelingQueryTranslator(QueryFactory queryFactory, AttributeRepository repository) {
         super(queryFactory, repository);
     }
@@ -36,8 +41,14 @@ public class ModelingQueryTranslator extends QueryTranslator {
             throw new IllegalArgumentException("No restriction specified for event query");
         }
 
+        if (EventType.Scoring.equals(eventType) && restrictionNotSpecified(frontEndQuery.getSegmentQuery())) {
+            log.warn("Did not specify segment query for target query: " + JsonUtils.serialize(frontEndQuery));
+        }
+
+        log.info("Translating modeling query with period name " + frontEndQuery.getPeriodName());
+
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
-        EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
+        EventQueryTranslator eventQueryTranslator = new EventQueryTranslator(frontEndQuery.getPeriodName());
         QueryBuilder queryBuilder = Query.builder();
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction);
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);

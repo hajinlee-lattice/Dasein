@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -47,12 +46,12 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -83,8 +82,8 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "16";
-    private static final String S3_CROSS_SELL_CHECKPOINTS_VERSION = "14";
+    private static final String S3_CHECKPOINTS_VERSION = "17";
+    private static final String S3_CROSS_SELL_CHECKPOINTS_VERSION = "17";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 400;
@@ -218,10 +217,13 @@ public class CheckpointService {
             if (statisticsContainer != null) {
                 dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
             }
+            DataCollectionStatus dataCollectionStatus = parseDataCollectionStatus(checkpoint, version);
+            if (dataCollectionStatus != null) {
+                dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainTestTenant.getId(), dataCollectionStatus, version);
+            }
         }
 
         cloneRedshiftTables(redshiftTablesToClone);
-
         uploadCheckpointHdfs(checkpoint);
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
@@ -328,25 +330,6 @@ public class CheckpointService {
         }
     }
 
-    private void verifyHdfsCheckpoint() throws IOException {
-        CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
-        Path dataRoot = PathBuilder.buildCustomerSpacePath(podId, cs).append("Data");
-        HdfsUtils.fileExists(yarnConfiguration, dataRoot.toString());
-        List<String> tables = HdfsUtils.getFilesForDir(yarnConfiguration, dataRoot.append("Tables").toString());
-        Assert.assertFalse(tables.isEmpty());
-        for (String tableHdfsPath : tables) {
-            String tableName = tableHdfsPath.substring(tableHdfsPath.lastIndexOf("/") + 1);
-            if (!"VisiDB".equals(tableName) && !tableName.contains("copy")) {
-                logger.info("Checking table " + tableName);
-                if (tableName.startsWith("AnalyticPurchaseState")) {
-                    continue;
-                }
-                Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, tableHdfsPath + "/*.avro");
-                Assert.assertTrue(iterator.hasNext(), "Table at " + tableHdfsPath + " does not have avro record.");
-            }
-        }
-    }
-
     private void uploadCheckpointHdfs(String checkpoint) throws IOException {
         logger.info("Start uploading checkpoint " + checkpoint + " to hdfs.");
         String localDir = checkpointDir + "/" + checkpoint + "/hdfs/Data";
@@ -444,6 +427,15 @@ public class CheckpointService {
         return statisticsContainer;
     }
 
+    private DataCollectionStatus parseDataCollectionStatus(String checkpoint, DataCollection.Version version)
+            throws IOException {
+        String jsonFile = String.format("%s/%s/%s/data_collection_status.json", checkpointDir, checkpoint, version.name());
+        if (!new File(jsonFile).exists()) {
+            return null;
+        }
+        return JsonUtils.deserialize(new FileInputStream(jsonFile), DataCollectionStatus.class);
+    }
+
     void cleanup() {
         if (StringUtils.isNotBlank(checkpointDir)) {
             FileUtils.deleteQuietly(new File(checkpointDir));
@@ -518,12 +510,10 @@ public class CheckpointService {
 
         downloadHdfsData(checkpoint);
 
+        DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
             String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
             FileUtils.forceMkdir(new File(tablesDir));
-
-            DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
-
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 saveTableIfExists(role, version, checkpoint);
                 if (active.equals(version)) {
@@ -531,12 +521,11 @@ public class CheckpointService {
                     saveDynamoTableIfExists(checkpoint, role, version);
                 }
             }
-
             saveStatsIfExists(version, checkpoint);
+            saveDataCollectionStatus(version, checkpoint);
         }
 
         printSaveRedshiftStatements(checkpoint);
-
         saveCheckpointVersion(checkpoint);
     }
 
@@ -620,6 +609,13 @@ public class CheckpointService {
         } else {
             logger.info("There is no stats at version " + version);
         }
+    }
+
+    private void saveDataCollectionStatus(DataCollection.Version version, String checkpoint) throws IOException {
+        DataCollectionStatus dataCollectionStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(mainTestTenant.getId(), version);
+        String jsonFile = String.format("checkpoints/%s/%s/data_collection_status.json", checkpoint, version.name());
+        om.writeValue(new File(jsonFile), dataCollectionStatus);
+        logger.info("Save DataCollection Status at version " + version + " to " + jsonFile);
     }
 
     private void printSaveRedshiftStatements(String checkpoint) {

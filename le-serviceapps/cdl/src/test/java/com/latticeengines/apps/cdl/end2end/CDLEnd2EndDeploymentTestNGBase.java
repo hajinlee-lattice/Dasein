@@ -67,6 +67,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -249,7 +250,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         updateDataCloudBuildNumber();
         setupBusinessCalendar();
         setupPurchaseHistoryMetrics();
-        // setDefaultAPSRollupPeriod();
+        setDefaultAPSRollupPeriod();
 
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
@@ -752,6 +753,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
+    void verifyDataCollectionStatus() {
+        DataCollectionStatus dataCollectionStatus = dataCollectionProxy
+                .getOrCreateDataCollectionStatus(mainTestTenant.getId(), initialVersion.complement());
+        Assert.assertTrue(dataCollectionStatus.getAccountCount() > 0);
+    }
+
     void verifyProcessAnalyzeReport(String appId) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 1);
@@ -854,8 +861,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Bucket websiteBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(".com"));
         BucketRestriction websiteRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), websiteBkt);
-        Bucket.Transaction txn = new Bucket.Transaction("GMm4ZQnMOWpN8Gn7MhZLB7SrGmOss", TimeFilter.ever(), null,
-                null, false);
+        Bucket.Transaction txn = new Bucket.Transaction("GMm4ZQnMOWpN8Gn7MhZLB7SrGmOss", TimeFilter.ever(), null, null,
+                false);
         Bucket purchaseBkt = Bucket.txnBkt(txn);
         BucketRestriction purchaseRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Transaction, "AnyName"), purchaseBkt);
@@ -879,8 +886,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected MetadataSegment constructTestSegment2() {
         Bucket stateBkt = Bucket.valueBkt(ComparisonType.IN_COLLECTION,
                 Arrays.asList("CALIFORNIA", "TEXAS", "MICHIGAN", "NEW YORK"));
-        BucketRestriction stateRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
+        BucketRestriction stateRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "State"),
+                stateBkt);
         Bucket techBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("SEGMENT_5"));
         BucketRestriction techRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "SpendAnalyticsSegment"), techBkt);
@@ -902,7 +909,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     MetadataSegment constructTargetSegment() {
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Collections.singletonList("Virginia"));
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Collections.singletonList("Delaware"));
         BucketRestriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
         MetadataSegment segment = new MetadataSegment();
@@ -1052,17 +1059,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return ratingEngine;
     }
 
-    void configureCrossSellModel(AIModel testAIModel, PredictionType predictionType, ModelingStrategy strategy, String targetProductId,
-            String trainingProductId) {
+    void configureCrossSellModel(AIModel testAIModel, PredictionType predictionType, ModelingStrategy strategy,
+            String targetProductId, String trainingProductId) {
         testAIModel.setPredictionType(predictionType);
         CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
         config.setModelingStrategy(strategy);
         Map<CrossSellModelingConfigKeys, ModelingConfigFilter> myMap = new HashMap<>();
         if (ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy)) {
-//        Map<CrossSellModelingConfigKeys, ModelingConfigFilter> myMap = new HashMap<>();
-//        myMap.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, new ModelingConfigFilter(
-//                CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 3));
-//
+            myMap.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, new ModelingConfigFilter(
+                    CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 1));
         }
         config.setFilters(myMap);
         config.setTargetProducts(Collections.singletonList(targetProductId));
@@ -1126,6 +1131,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void runCommonPAVerifications() {
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion.complement());
+        verifyDataCollectionStatus();
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
     }
@@ -1150,7 +1156,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void setDefaultAPSRollupPeriod() {
-        String rollupPeriod = ApsRollingPeriod.BUSINESS_QUARTER.name();
+        String rollupPeriod = ApsRollingPeriod.BUSINESS_QUARTER.getName();
         String podId = CamilleEnvironment.getPodId();
         Path zkPath = PathBuilder.buildCustomerSpaceServicePath(podId, CustomerSpace.parse(mainCustomerSpace), "CDL");
         zkPath = zkPath.append("DefaultAPSRollupPeriod");
