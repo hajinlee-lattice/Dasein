@@ -386,7 +386,7 @@ public class ModelingServiceExecutor {
         int maxTries = MAX_SECONDS_WAIT_FOR_MODELING;
         int i = 0;
         do {
-            Thread.sleep(10_000L);
+            Thread.sleep(30_000L);
             if (modeling) {
                 status = modelProxy.getJobStatus(appId);
             } else {
