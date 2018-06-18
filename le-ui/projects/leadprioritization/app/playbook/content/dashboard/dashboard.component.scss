@@ -326,6 +326,7 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
         margin-right: 20px;
         // border: 1px dashed transparent;
         min-height: 24px;
+        max-width: 96%;
         &.editing {
             width: 100%;
         }
@@ -363,6 +364,7 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
             display: block;
             width: 100%;
             border: 1px dashed rgba(0,0,0,0.15);
+            resize: vertical;
         }
         input {
             position: absolute;
@@ -374,6 +376,11 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
         }
         textarea {
             padding: 5px;
+        }
+        span {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: inherit;
         }
     }
 }
