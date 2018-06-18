@@ -78,25 +78,22 @@ public class DnBCacheServiceImpl implements DnBCacheService {
             cacheQueue.clear();
         }
         if (!caches.isEmpty()) {
+            Long startTime = System.currentTimeMillis();
             List<DnBCache> cacheBuffer = new ArrayList<>();
             log.info("Splitting " + caches.size() + " DnBCaches into groups.");
             for (DnBCache cache : caches) {
                 cacheBuffer.add(cache);
                 if (cacheBuffer.size() >= BUFFER_SIZE) {
-                    Long startTime = System.currentTimeMillis();
                     getCacheMgr().batchCreate(cacheBuffer);
-                    log.info(String.format("Dumped %d DnBCaches into Dynamo table. Duration=%d", cacheBuffer.size(),
-                            System.currentTimeMillis() - startTime));
                     cacheBuffer.clear();
                 }
             }
             if (!cacheBuffer.isEmpty()) {
-                Long startTime = System.currentTimeMillis();
                 getCacheMgr().batchCreate(cacheBuffer);
-                log.info(String.format("Dumped %d DnBCaches into Dynamo table. Duration=%d", cacheBuffer.size(),
-                        System.currentTimeMillis() - startTime));
                 cacheBuffer.clear();
             }
+            log.info(String.format("Dumped %d DnBCaches into Dynamo table. Duration=%d", caches.size(),
+                    System.currentTimeMillis() - startTime));
         }
     }
 

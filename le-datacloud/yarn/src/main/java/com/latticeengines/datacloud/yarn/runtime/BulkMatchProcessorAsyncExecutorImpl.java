@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Future;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.RateLimitingService;
 import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
@@ -23,6 +21,8 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+
+import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
@@ -212,7 +212,6 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
     private void sleepSeconds(int count) {
         try {
-            log.info("Too many records, sleep for seconds! size=" + count);
             Thread.sleep(1_000L);
         } catch (Exception ex) {
             log.warn("Failed to sleep!");

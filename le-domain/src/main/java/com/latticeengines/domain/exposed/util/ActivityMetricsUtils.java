@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
@@ -330,12 +332,12 @@ public class ActivityMetricsUtils {
         }
         cnts.forEach((m, cnt) -> {
             if (cnt > maxCnt.get(m)) {
-                throw new RuntimeException(
-                        String.format("Maximum for metrics %s is %d, but found %d", m, maxCnt.get(m), cnt));
+                throw new LedpException(LedpCode.LEDP_40032, new String[] {
+                        String.format("Maximum for metrics %s is %d, but found %d", m, maxCnt.get(m), cnt) });
             }
         });
         if (metricsIds.size() != metrics.size()) {
-            throw new RuntimeException("Metrics cannot be duplicate");
+            throw new LedpException(LedpCode.LEDP_40032, new String[] { "Metrics cannot be duplicate" });
         }
         return true;
     }
@@ -361,7 +363,8 @@ public class ActivityMetricsUtils {
             isValidComparisonType(metrics.getMetrics(), metrics.getPeriodsConfig().get(0).getRelation());
             break;
         default:
-            throw new UnsupportedOperationException(metrics.getMetrics() + " metrics is not supported");
+            throw new LedpException(LedpCode.LEDP_40032,
+                    new String[] { metrics.getMetrics() + " metrics is not supported" });
         }
         return true;
     }
@@ -369,17 +372,20 @@ public class ActivityMetricsUtils {
     private static boolean isValidPeriodConfig(InterfaceName metricsName, List<TimeFilter> timeFilters,
             int expectedCnt) {
         if (CollectionUtils.isEmpty(timeFilters) || timeFilters.size() != expectedCnt) {
-            throw new RuntimeException(metricsName + " metrics should have " + expectedCnt + " period config");
+            throw new LedpException(LedpCode.LEDP_40032,
+                    new String[] { metricsName + " metrics should have " + expectedCnt + " period config" });
         }
         Set<String> periods = new HashSet<>();
         for (TimeFilter timeFilter : timeFilters) {
             if (!validPeriods.contains(timeFilter.getPeriod())) {
-                throw new RuntimeException("Unknown period: " + timeFilter.getPeriod());
+                throw new LedpException(LedpCode.LEDP_40032,
+                        new String[] { "Unknown period: " + timeFilter.getPeriod() });
             }
             periods.add(timeFilter.getPeriod());
         }
         if (periods.size() > 1) {
-            throw new RuntimeException(metricsName + " metrics should have consistent period name");
+            throw new LedpException(LedpCode.LEDP_40032,
+                    new String[] { metricsName + " metrics should have consistent period name" });
         }
         return true;
     }
@@ -390,17 +396,18 @@ public class ActivityMetricsUtils {
         expectedCnt.put(ComparisonType.BETWEEN, 2);
         if (CollectionUtils.isEmpty(timeFilter.getValues())
                 || timeFilter.getValues().size() != expectedCnt.get(timeFilter.getRelation())) {
-            throw new RuntimeException(metricsName + " metrics should have "
-                    + expectedCnt.get(timeFilter.getRelation()) + " period values");
+            throw new LedpException(LedpCode.LEDP_40032, new String[] { metricsName + " metrics should have "
+                    + expectedCnt.get(timeFilter.getRelation()) + " period values" });
         }
         for (Object val : timeFilter.getValues()) {
             try {
                 if ((Integer) val <= 0) {
-                    throw new RuntimeException(metricsName + " metrics should have positive period values");
+                    throw new LedpException(LedpCode.LEDP_40032,
+                            new String[] { metricsName + " metrics should have positive period values" });
                 }
             } catch (Exception ex) {
-                throw new RuntimeException(
-                        "Fail to parse period value " + String.valueOf(val) + " for metrics " + metricsName);
+                throw new LedpException(LedpCode.LEDP_40032, new String[] {
+                        "Fail to parse period value " + String.valueOf(val) + " for metrics " + metricsName });
             }
         }
         return true;
@@ -412,8 +419,9 @@ public class ActivityMetricsUtils {
             comparisonType.get(metricsName).forEach(ct -> {
                 expectedTypes.add(ct.name());
             });
-            throw new RuntimeException(String.format("%s metrics should have comparison type as %s but found %s",
-                    metricsName, String.join(",", expectedTypes), type));
+            throw new LedpException(LedpCode.LEDP_40032,
+                    new String[] { String.format("%s metrics should have comparison type as %s but found %s",
+                            metricsName, String.join(",", expectedTypes), type) });
         }
         return true;
     }
@@ -432,8 +440,9 @@ public class ActivityMetricsUtils {
             types.forEach(t -> {
                 actualTypes.add(t.name());
             });
-            throw new RuntimeException(String.format("%s metrics should have comparison type as %s but found %s",
-                    metricsName, String.join(",", expectedTypes), String.join(",", actualTypes)));
+            throw new LedpException(LedpCode.LEDP_40032,
+                    new String[] { String.format("%s metrics should have comparison type as %s but found %s",
+                            metricsName, String.join(",", expectedTypes), String.join(",", actualTypes)) });
         }
         return true;
     }

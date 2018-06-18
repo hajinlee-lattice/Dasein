@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.ActivityMetricsService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
@@ -60,9 +62,19 @@ public class ActivityMetricsResource {
     public List<ActivityMetrics> saveActivityMetrics(@PathVariable ActivityType type,
             @RequestBody List<ActivityMetrics> metrics) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        ActivityMetricsWithAction am = metricsProxy.save(customerSpace, type, metrics);
-        registerAction(am.getAction(), MultiTenantContext.getTenant());
-        return am.getMetrics();
+        try {
+            ActivityMetricsWithAction am = metricsProxy.save(customerSpace, type, metrics);
+            registerAction(am.getAction(), MultiTenantContext.getTenant());
+            return am.getMetrics();
+        } catch (LedpException e) {
+            if (LedpCode.LEDP_40032.equals(e.getCode())) {
+                throw e;
+            } else {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GetMapping(value = "/precheck")

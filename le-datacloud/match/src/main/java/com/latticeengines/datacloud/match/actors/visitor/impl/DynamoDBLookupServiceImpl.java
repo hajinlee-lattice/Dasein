@@ -7,10 +7,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DynamoDBLookupService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
@@ -186,13 +185,9 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
                 }
                 for (String dataCloudVersion : lookupReqWithVersion.keySet()) {
                     try {
-                        Long startTime = System.currentTimeMillis();
                         List<AccountLookupEntry> results = accountLookupService
                                 .batchLookup(lookupReqWithVersion.get(dataCloudVersion));
                         List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
-                        log.info(String.format(
-                                "Fetched results from Dynamo for %d async requests (DataCloudVersion=%s) Duration=%d",
-                                reqIds.size(), dataCloudVersion, System.currentTimeMillis() - startTime));
                         if (results == null) {
                             throw new RuntimeException(String.format(
                                     "Dynamo lookup got null matching results: submitted %d requests", reqIds.size()));

@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -38,7 +39,7 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
     @Inject
     private CDLTestDataService cdlTestDataService;
 
-    private List<ActivityMetrics> created, updated, secUpdated;
+    private List<ActivityMetrics> created, updated, secUpdated, invalid;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -49,6 +50,7 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         created = constructMetricsList();
         updated = constructUpdatedMetricsList();
         secUpdated = constructSecUpdatedMetricsList();
+        invalid = constructInvalidMetricsList();
     }
 
     // Create 2 new metrics
@@ -103,6 +105,19 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(active.size(), secUpdated.size());
 
         verifyActions(3);
+    }
+
+    @Test(groups = "deployment", priority = 4)
+    public void testValidationFailure() {
+        boolean hasException = false;
+        try {
+            List<?> list = restTemplate.postForObject(
+                    getRestAPIHostPort() + "/pls/datacollection/metrics/PurchaseHistory", invalid, List.class);
+        } catch (Exception e) {
+            hasException = true;
+            Assert.assertTrue(e.getMessage().contains(LedpCode.LEDP_40032.name()));
+        }
+        Assert.assertTrue(hasException);
     }
 
     @Test(groups = "deployment")
@@ -221,6 +236,25 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         metrics.setPeriodsConfig(filters);
         metrics.setType(ActivityType.PurchaseHistory);
         metricsList.add(metrics);
+
+        return metricsList;
+    }
+
+    private List<ActivityMetrics> constructInvalidMetricsList() {
+        List<ActivityMetrics> metricsList = new ArrayList<>();
+        ActivityMetrics metrics = new ActivityMetrics();
+        metrics.setMetrics(InterfaceName.SpendChange);
+        TimeFilter filter1 = new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Month.name(),
+                Collections.singletonList(1));
+        TimeFilter filter2 = new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Month.name(),
+                Arrays.asList(1, 2));
+        List<TimeFilter> filters = new ArrayList<>();
+        filters.add(filter1);
+        filters.add(filter2);
+        metrics.setPeriodsConfig(filters);
+        metrics.setType(ActivityType.PurchaseHistory);
+        metricsList.add(metrics);
+        metricsList.add(metrics); // Duplicate metrics
 
         return metricsList;
     }

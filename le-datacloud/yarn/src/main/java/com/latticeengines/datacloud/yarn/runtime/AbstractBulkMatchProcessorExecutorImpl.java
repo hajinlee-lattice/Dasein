@@ -57,6 +57,11 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     private static final String STRING = String.class.getSimpleName();
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.buffer";
 
+    private String[] suppressedWarnings = new String[] { //
+            "Cannot find a match in data cloud for the input", //
+            "Parsed to a public domain" //
+    };
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -148,7 +153,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                 // record.setOutput(null);
                 // recordsWithErrors.add(record);
                 for (String msg : record.getErrorMessages()) {
-                    log.warn(msg);
+                    logMatchErrorMessage(msg);
                 }
             }
         }
@@ -157,6 +162,15 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         MatchOutput blockOutput = MatchUtils.mergeOutputs(processorContext.getBlockOutput(), groupOutput);
         processorContext.setBlockOutput(blockOutput);
         log.info("Merge group output into block output.");
+    }
+
+    private void logMatchErrorMessage(String msg) {
+        for (String w : suppressedWarnings) {
+            if (msg.contains(w)) {
+                return;
+            }
+        }
+        log.warn(msg);
     }
 
     private void writeDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)
