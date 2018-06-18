@@ -20,6 +20,8 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
+import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -155,21 +157,21 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
             listMap.forEach((modelGuid, list) -> {
                 List<BucketMetadata> bucketMetadata = JsonUtils.convertList(list, BucketMetadata.class);
                 String engineId = MapUtils.isNotEmpty(modelGuidToEngineIdMap) ? modelGuidToEngineIdMap.get(modelGuid) : null;
-//                if (bucketMetadata.get(0).getCreationTimestamp() == 0) {
-//                    // actually create bucket metadata
-//                    log.info("Create timestamp is 0, change to create bucketed metadata");
-//                    CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
-//                    request.setModelGuid(modelGuid);
-//                    request.setRatingEngineId(engineId);
-//                    request.setLastModifiedBy(configuration.getUserId());
-//                    request.setBucketMetadataList(bucketMetadata);
-//                    bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
-//                } else {
-//                    UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
-//                    request.setModelGuid(modelGuid);
-//                    request.setBucketMetadataList(bucketMetadata);
-//                    bucketedScoreProxy.updateABCDBuckets(customerSpace.toString(), request);
-//                }
+                if (bucketMetadata.get(0).getCreationTimestamp() == 0) {
+                    // actually create bucket metadata
+                    log.info("Create timestamp is 0, change to create bucketed metadata");
+                    CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+                    request.setModelGuid(modelGuid);
+                    request.setRatingEngineId(engineId);
+                    request.setLastModifiedBy(configuration.getUserId());
+                    request.setBucketMetadataList(bucketMetadata);
+                    bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
+                } else {
+                    UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
+                    request.setModelGuid(modelGuid);
+                    request.setBucketMetadataList(bucketMetadata);
+                    bucketedScoreProxy.updateABCDBuckets(customerSpace.toString(), request);
+                }
             });
         }
     }

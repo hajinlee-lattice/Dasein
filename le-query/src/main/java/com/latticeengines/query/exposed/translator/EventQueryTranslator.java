@@ -9,15 +9,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -54,14 +52,7 @@ import com.querydsl.sql.WindowFunction;
 public class EventQueryTranslator extends TranslatorCommon {
     private static final int ONE_LAG_BEHIND_OFFSET = 1;
 
-    private final String defaultPeriod;
-
     public EventQueryTranslator() {
-        this("Month");
-    }
-
-    public EventQueryTranslator(String defaultPeriod) {
-        this.defaultPeriod = defaultPeriod;
     }
 
     public QueryBuilder translateForScoring(QueryFactory queryFactory,
@@ -632,7 +623,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                                               QueryBuilder builder,
                                               String sqlUser) {
 
-        final String periodName = frontEndQuery.getPeriodName();
+        final String period = frontEndQuery.getPeriodName();
         final int periodCount = frontEndQuery.getPeriodCount();
         final int laggingPeriodCount = frontEndQuery.getLaggingPeriodCount();
         final int evaluationPeriodId = frontEndQuery.getEvaluationPeriodId();
@@ -641,19 +632,13 @@ public class EventQueryTranslator extends TranslatorCommon {
             throw new IllegalArgumentException("Invalid lagging period count: " + laggingPeriodCount);
         }
 
-        Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
-        Restriction rootRestriction = restriction;
-
-        String periodInTxn = getPeriodFromRestriction(rootRestriction);
-
-        String period = StringUtils.isEmpty(periodName) ? periodInTxn : periodName;
-
-        if (StringUtils.isEmpty(period)) {
-            throw new RuntimeException("No period definition passed for event query.");
-        } else if (StringUtils.isNotEmpty(periodInTxn) && !period.equals(periodInTxn)) {
-            throw new LedpException(LedpCode.LEDP_37016, new String[]{ period, periodInTxn });
+        if (StringUtils.isBlank(period)) {
+            throw new IllegalArgumentException("Must specify a period name in front end query: " + JsonUtils.serialize(frontEndQuery));
         }
 
+        Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
+        Restriction rootRestriction = restriction;
+        overwritePeriodsInRestriction(restriction, period);
         builder.with(translateAllKeys(queryFactory, repository, period, periodCount, sqlUser));
 
         if (calculateEventRevenue(isEvent, frontEndQuery)) {
@@ -862,39 +847,26 @@ public class EventQueryTranslator extends TranslatorCommon {
         return builder;
     }
 
-    private String getPeriodFromRestriction(Restriction rootRestriction) {
-        AtomicReference<String> periodRef = new AtomicReference<>(defaultPeriod);
-
+    private void overwritePeriodsInRestriction(Restriction rootRestriction, final String period) {
         // set transaction entity
         if (rootRestriction instanceof LogicalRestriction) {
             BreadthFirstSearch bfs = new BreadthFirstSearch();
             bfs.run(rootRestriction, (object, ctx) -> {
                 if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
-                    updatePeriodName(txRestriction, periodRef);
+                    overwritePeriod(txRestriction, period);
                 }
             });
         } else if (rootRestriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
-            updatePeriodName(txRestriction, periodRef);
+            overwritePeriod(txRestriction, period);
         }
-
-        return periodRef.get();
     }
 
-    private synchronized void updatePeriodName(TransactionRestriction txRestriction, AtomicReference<String> periodRef) {
+    private synchronized void overwritePeriod(TransactionRestriction txRestriction, String period) {
         TimeFilter timeFilter = txRestriction.getTimeFilter();
-        String periodInTxn;
-        if (ComparisonType.EVER.equals(timeFilter.getRelation())) {
-            periodInTxn = defaultPeriod;
-            timeFilter.setPeriod(periodInTxn);
-        } else {
-            periodInTxn = timeFilter.getPeriod();
-        }
-        if (StringUtils.isBlank(periodRef.get())) {
-            periodRef.set(periodInTxn);
-        } else if (!periodInTxn.equals(periodRef.get())) {
-            throw new LedpException(LedpCode.LEDP_37016, new String[]{ periodRef.get(), periodInTxn});
+        if (timeFilter != null) {
+            timeFilter.setPeriod(period);
         }
     }
 

@@ -76,16 +76,16 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             reAttr.setDisplayName(reDisplayName + " " + getSecondaryDisplayName(suffix));
             reAttr.setSubcategory(segmentDisplayName);
             reAttr.setCategory(Category.RATING);
-            if (isSegmentable(suffix) && !Boolean.TRUE.equals(summary.getDeleted())) {
-                reAttr.enableGroup(ColumnSelection.Predefined.Segment);
-            } else {
-                reAttr.disableGroup(ColumnSelection.Predefined.Segment);
-            }
             if (summary.getDeleted()) {
                 reAttr.setAttrState(AttrState.Inactive);
             } else if (RatingEngineStatus.INACTIVE.equals(summary.getStatus())) {
                 reAttr.setAttrState(AttrState.Deprecated);
                 reAttr.setShouldDeprecate(true);
+            }
+            if (isSegmentable(suffix) && !Boolean.TRUE.equals(summary.getDeleted())) {
+                reAttr.enableGroup(ColumnSelection.Predefined.Segment);
+            } else {
+                reAttr.disableGroup(ColumnSelection.Predefined.Segment);
             }
             return reAttr;
         });

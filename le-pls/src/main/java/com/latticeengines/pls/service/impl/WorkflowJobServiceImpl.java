@@ -31,7 +31,9 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -494,18 +496,24 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
         }
 
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        boolean hasCG = batonService.hasProduct(customerSpace, LatticeProduct.CG);
         Map<String, RatingEngineSummary> ratingIdToRatingEngineSummaries = new HashMap<>();
-        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
-                .getRatingEngineSummaries(MultiTenantContext.getTenant().getId());
-        for (RatingEngineSummary ratingEngineSummary : ratingEngineSummaries) {
-            ratingIdToRatingEngineSummaries.put(ratingEngineSummary.getId(), ratingEngineSummary);
+        if (hasCG) {
+            List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
+                    .getRatingEngineSummaries(MultiTenantContext.getTenant().getId());
+            for (RatingEngineSummary ratingEngineSummary : ratingEngineSummaries) {
+                ratingIdToRatingEngineSummaries.put(ratingEngineSummary.getId(), ratingEngineSummary);
+            }
         }
 
         for (Job job : jobs) {
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
             updateJobWithModelSummaryInfo(job, true, modelIdToModelSummaries);
-            updateJobWithRatingEngineSummaryInfo(job, true, ratingIdToRatingEngineSummaries);
+            if (hasCG) {
+                updateJobWithRatingEngineSummaryInfo(job, true, ratingIdToRatingEngineSummaries);
+            }
             updateJobWithSubJobsIfIsPnA(job);
         }
     }

@@ -127,14 +127,6 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertEquals(eventCount, 5374);
     }
 
-    @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
-    public void testInconsistentPeriod() {
-        EventFrontEndQuery npeQuery = loadFrontEndQueryFromResource("/inconsistant_period.json");
-        Long count = eventQueryService.getTrainingCount(npeQuery, DataCollection.Version.Blue);
-        Assert.assertNotNull(count);
-    }
-
-
     private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
@@ -206,6 +198,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     private long countTxnBktForTraining(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
+        frontEndQuery.setPeriodName("Month");
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
@@ -233,6 +226,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
+        frontEndQuery.setPeriodName("Month");
         return eventQueryService.getEventCount(frontEndQuery, DataCollection.Version.Blue);
     }
 

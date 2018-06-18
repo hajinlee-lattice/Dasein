@@ -48,7 +48,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
         log.info("Translating modeling query with period name " + frontEndQuery.getPeriodName());
 
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
-        EventQueryTranslator eventQueryTranslator = new EventQueryTranslator(frontEndQuery.getPeriodName());
+        EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
         QueryBuilder queryBuilder = Query.builder();
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction);
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
