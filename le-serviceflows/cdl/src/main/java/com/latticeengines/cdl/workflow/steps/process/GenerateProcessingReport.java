@@ -139,7 +139,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         Map<BusinessEntity, Long> currentCnts = retrieveCurrentEntityCnts();
         Map<BusinessEntity, Long> deleteCnts = getDeletedCount();
 
-        generateCollectionStatus(currentCnts);
         ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
         if (entitiesSummaryNode == null) {
             log.info("No entity summary reports found. Create it.");
@@ -168,9 +167,11 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
             entitiesSummaryNode.set(entity.name(), entityNode);
         }
+
+        updateCollectionStatus(currentCnts);
     }
 
-    private void generateCollectionStatus(Map<BusinessEntity, Long> currentCnts) {
+    private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts) {
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         detail.setAccountCount(currentCnts.get(BusinessEntity.Account));
         detail.setContactCount(currentCnts.get(BusinessEntity.Contact));

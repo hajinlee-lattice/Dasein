@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -32,7 +33,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class CleanupByUploadDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
@@ -114,7 +114,7 @@ public class CleanupByUploadDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
 
     private void verifyProcess() {
         runCommonPAVerifications();
-        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
+        verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
         long numContacts = CONTACT_IMPORT_SIZE_1;

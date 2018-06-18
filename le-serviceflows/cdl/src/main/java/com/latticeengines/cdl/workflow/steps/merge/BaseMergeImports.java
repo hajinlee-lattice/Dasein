@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -32,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -41,9 +41,6 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -220,6 +217,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                         .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             }
             ((ObjectNode) consolidateSummaryNode).setAll((ObjectNode) newItem.get(entity.name()));
+
             long updateCnt = 0;
             if (entityNode.has(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey())
                     && entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey()).has(ReportConstants.UPDATE)) {
@@ -228,35 +226,50 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             }
             updateEntityValueMapInContext(entity, UPDATED_RECORDS, updateCnt, Long.class);
             log.info(String.format("Save updated count %d for entity %s to workflow context", updateCnt, entity));
+
+            long newCnt = 0;
+            if (entityNode.has(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey())
+                    && entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey()).has(ReportConstants.NEW)) {
+                newCnt = entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey()).get(ReportConstants.NEW)
+                        .asLong();
+            }
+            updateEntityValueMapInContext(entity, NEW_RECORDS, newCnt, Long.class);
+            log.info(String.format("Save new count %d for entity %s to workflow context", newCnt, entity));
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
         }
     }
 
     protected void markPreviousEntityCnt() {
-        List<String> types = Collections.singletonList("processAnalyzeWorkflow");
-        List<Job> jobs = workflowProxy.getJobs(null, types, Boolean.TRUE, customerSpace.toString());
-        Optional<Job> latestSuccessJob = jobs.stream().filter(job -> job.getJobStatus() == JobStatus.COMPLETED)
-                .max(Comparator.comparing(Job::getEndTimestamp));
-
-        long previousCnt = 0;
-        try {
-            if (latestSuccessJob.isPresent()) {
-                Report report = latestSuccessJob.get().getReports().stream()
-                        .filter(r -> r.getPurpose() == ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY)
-                        .collect(Collectors.toList()).get(0);
-                ObjectMapper om = JsonUtils.getObjectMapper();
-                ObjectNode jsonReport = (ObjectNode) om.readTree(report.getJson().getPayload());
-                ObjectNode entitiesSummaryNode = (ObjectNode) jsonReport.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
-                previousCnt = entitiesSummaryNode.get(entity.name()).get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey())
-                        .get(ReportConstants.TOTAL).asLong();
-            } else {
-                log.info("Cannot find previous successful processAnalyzeWorkflow job");
-            }
-        } catch (Exception e) {
-            log.error("Fail to parse report from job: " + JsonUtils.serialize(latestSuccessJob.get()));
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (detail == null) {
+            updateEntityValueMapInContext(entity, EXISTING_RECORDS, 0L, Long.class);
+            log.error(
+                    "Fail to find data collection status in workflow context, set previous count as 0 fors entity "
+                            + entity);
+            return;
         }
 
+        Long previousCnt = null;
+        switch (entity) {
+        case Account:
+            previousCnt = detail.getAccountCount();
+            break;
+        case Contact:
+            previousCnt = detail.getContactCount();
+            break;
+        case Transaction:
+            previousCnt = detail.getTransactionCount();
+            break;
+        default:
+            break;
+        }
+
+        if (previousCnt == null) {
+            previousCnt = 0L;
+            log.info(String.format("Fail to find previous count for entity %s in data collection status, set as 0",
+                    entity));
+        }
         updateEntityValueMapInContext(entity, EXISTING_RECORDS, previousCnt, Long.class);
         log.info(String.format("Save previous count %d for entity %s to workflow context", previousCnt, entity));
     }

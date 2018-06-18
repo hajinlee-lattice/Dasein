@@ -108,7 +108,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 new Thread(this::setupAIModels).start();
             }
             resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
-            verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
+            verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 
             new Thread(() -> {
                 createTestSegment2();
@@ -217,7 +217,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     private void verifyProcess() {
         runCommonPAVerifications();
-        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory,
+        verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory,
                 BusinessEntity.Rating);
         verifyRuleBasedEngines();
         verifyDecoratedMetadata();

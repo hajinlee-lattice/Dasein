@@ -46,7 +46,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
     private void verifyProcess() {
         runCommonPAVerifications();
         verifyProcessAnalyzeReport(processAnalyzeAppId);
-        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
+        verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 
         long numAccounts = 500;
         long numContacts = 500;

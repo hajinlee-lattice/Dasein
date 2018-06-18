@@ -206,18 +206,26 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         Long existingCount = null;
         Long updateCount = null;
+        Long newCount = null;
         Map<BusinessEntity, Long> existingValueMap = step.getMapObjectFromContext(BaseWorkflowStep.EXISTING_RECORDS,
                 BusinessEntity.class, Long.class);
         if (existingValueMap != null) {
             existingCount = existingValueMap.get(mainEntity());
+        }
+        Map<BusinessEntity, Long> newValueMap = step.getMapObjectFromContext(BaseWorkflowStep.NEW_RECORDS,
+                BusinessEntity.class, Long.class);
+        if (newValueMap != null) {
+            newCount = newValueMap.get(mainEntity());
         }
         Map<BusinessEntity, Long> updateValueMap = step.getMapObjectFromContext(BaseWorkflowStep.UPDATED_RECORDS,
                 BusinessEntity.class, Long.class);
         if (updateValueMap != null) {
             updateCount = updateValueMap.get(mainEntity());
         }
-        if (existingCount != null && updateCount != null) {
-            hasManyUpdate = (updateCount * 1.0F / existingCount) >= 0.3;
+
+        long diffCount = (newCount == null ? 0L : newCount) + (updateCount == null ? 0L : updateCount);
+        if (existingCount != null && existingCount.longValue() != 0L) {
+            hasManyUpdate = (diffCount * 1.0F / existingCount) >= 0.3;
         }
     }
 

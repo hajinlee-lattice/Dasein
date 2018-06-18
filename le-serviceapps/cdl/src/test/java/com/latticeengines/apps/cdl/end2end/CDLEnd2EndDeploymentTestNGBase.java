@@ -743,13 +743,18 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return job.getReports();
     }
 
-    void verifyStats(BusinessEntity... entities) {
+    Map<String, StatsCube> verifyStats(boolean onlyAllowSpecifiedEntities, BusinessEntity... entities) {
         StatisticsContainer container = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(container);
         Map<String, StatsCube> cubeMap = container.getStatsCubes();
         for (BusinessEntity entity : entities) {
             Assert.assertTrue(cubeMap.containsKey(entity.name()), "Stats should contain a cube for " + entity);
         }
+
+        if (onlyAllowSpecifiedEntities) {
+
+        }
+        return cubeMap;
     }
 
     void verifyDataCollectionStatus(DataCollection.Version version) {

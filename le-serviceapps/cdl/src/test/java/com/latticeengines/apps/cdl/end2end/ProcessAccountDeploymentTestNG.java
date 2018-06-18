@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.end2end;
 
 import java.util.List;
 
+import java.util.Arrays;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -55,7 +57,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
 
-        verifyStats(BusinessEntity.Account, BusinessEntity.Contact);
+        verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact);
 
 //        long numAccounts = 500;
 //        long numContacts = 500;
@@ -67,8 +69,9 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 //        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
 //        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 99);
 //
-//        createTestSegment2();
-//        verifySegmentCountsNonNegative(SEGMENT_NAME_2, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
+        createTestSegment2();
+        verifySegmentCountsNonNegative(SEGMENT_NAME_2, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
+
 //        verifyUpdateActions();
     }
 
