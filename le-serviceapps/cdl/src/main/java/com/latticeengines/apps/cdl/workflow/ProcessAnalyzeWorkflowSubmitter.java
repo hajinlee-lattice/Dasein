@@ -70,6 +70,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${eai.export.dynamo.signature}")
     private String signature;
 
+    @Value("${cdl.pa.default.max.iteration}")
+    private int defaultMaxIteration;
+
     private final DataCollectionProxy dataCollectionProxy;
 
     private final DataFeedProxy dataFeedProxy;
@@ -231,7 +234,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
-        int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations() : 1;
+        int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations() : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService.getRollingPeriod(CustomerSpace.parse(customerSpace)).getPeriodName();
 
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
