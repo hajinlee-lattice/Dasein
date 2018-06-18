@@ -18,10 +18,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.hibernate.annotations.Index;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -57,6 +58,7 @@ public class Job implements HasPid, HasId<String> {
 
     @Override
     @Column(name = "JOB_ID", nullable = false)
+    @Index(name = "IX_JOB_ID")
     public String getId() {
         return id;
     }
