@@ -129,11 +129,14 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
         String outputDir = hdfsPathBuilder.constructMatchOutputDir(rootUid).toString();
         try {
             String avroGlobs = outputDir + (outputDir.endsWith("/") ? "*.avro" : "/*.avro");
+            log.info(String.format("Moving files from %s to %s", avroGlobs, resultDir));
+            int cnt = 0;
             for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlobs)) {
                 String avroFileName = new Path(avroFilePath).getName();
-                log.info("Move file from " + avroFilePath + " to " + new Path(resultDir, avroFileName).toString());
                 HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(resultDir, avroFileName).toString());
+                cnt++;
             }
+            log.info(String.format("Moved %d files from %s to %s", cnt, avroGlobs, resultDir));
         } catch (Exception e) {
             log.error("Failed to save match result", e);
             return false;

@@ -261,6 +261,7 @@ public class AvroUtils {
                 count += partialCount;
             }
             executorService.shutdown();
+            log.info(String.format("Totally %d records in %s", count.longValue(), glob));
             return count;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -268,7 +269,7 @@ public class AvroUtils {
     }
 
     private static Long countOneFile(Configuration configuration, String path) {
-        log.info("Counting number of records in " + path);
+        // log.info("Counting number of records in " + path);
         Long count = 0L;
 
         try (DataFileStream<GenericRecord> stream = getAvroFileStream(configuration, new Path(path));) {

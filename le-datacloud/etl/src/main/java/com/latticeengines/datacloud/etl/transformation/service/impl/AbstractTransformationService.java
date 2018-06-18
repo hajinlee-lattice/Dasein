@@ -315,15 +315,18 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             deleteFSEntry(progress, sourceDir);
             String currentMaxVersion = null;
 
+            log.info(String.format("Moving files from %s to %s", avroWorkflowDir, sourceDir));
+            int cnt = 0;
             for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
                     avroWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
                 if (!HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
                     HdfsUtils.mkdir(yarnConfiguration, sourceDir);
                 }
                 String avroFileName = new Path(avroFilePath).getName();
-                log.info("Move file from " + avroFilePath + " to " + new Path(sourceDir, avroFileName).toString());
                 HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
+                cnt++;
             }
+            log.info(String.format("Moved %d files from %s to %s", cnt, avroWorkflowDir, sourceDir));
 
             if (source instanceof TableSource) {
                 // register table with metadata proxy
