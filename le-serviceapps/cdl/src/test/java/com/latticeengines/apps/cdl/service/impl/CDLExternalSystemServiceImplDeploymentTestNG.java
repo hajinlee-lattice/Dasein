@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Assert;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -24,20 +23,12 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
-
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Inject
     private SystemMetadataStore systemMetadataStore;
