@@ -14,7 +14,7 @@ angular.module('common.datacloud.explorer', [
     Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
-    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, DatacollectionPrecheck
+    RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, ConfigureAttributesStore
 ){
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -90,13 +90,20 @@ angular.module('common.datacloud.explorer', [
         feedbackModal: DataCloudStore.getFeedbackModal(),
         stateParams: $stateParams,
         segment: $stateParams.segment,
-        inWizard: false,
-        datacollectionPrecheck: DatacollectionPrecheck
+        inWizard: false
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
+    getDatacollectionPrecheck = function() {
+        ConfigureAttributesStore.getPrecheck().then(function(result) {
+            vm.datacollectionPrecheck = result;
+        });
+    }
+
     vm.init = function() {
+        getDatacollectionPrecheck();
+
         if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add' || $state.current.name === 'home.ratingsengine.rulesprospects.segment.attributes.add') {
             vm.mode = 'dashboardrules';
         }

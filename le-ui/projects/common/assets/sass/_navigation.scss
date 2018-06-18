@@ -816,6 +816,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                 margin-top: .25em;
                 text-overflow: ellipsis;
                 overflow: hidden;
+                max-width: 150px;
             }
             .pd-header-downarrow {
                 margin-left: 10px;

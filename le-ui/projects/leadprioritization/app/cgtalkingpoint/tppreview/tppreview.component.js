@@ -69,7 +69,10 @@ angular.module('lp.cg.talkingpoint.preview', [])
                 vm.accounts = filterInvalidAccounts(accounts);
                 return CgTalkingPointStore.getDanteUrl({no_cache: true});
             }).then(function(danteUrl) {
-                vm.sceIframeSrc = $sce.trustAsResourceUrl(danteUrl);
+                var danteUrlParts = danteUrl.split('?'),
+                    newDanteUrl = '/dante' + (danteUrlParts && danteUrlParts[1] ? '?' + danteUrlParts[1] : '');
+
+                vm.sceIframeSrc = $sce.trustAsResourceUrl(newDanteUrl);
             }).then(function() {
                 vm.selected = vm.accounts[0];
                 if(vm.selected){
