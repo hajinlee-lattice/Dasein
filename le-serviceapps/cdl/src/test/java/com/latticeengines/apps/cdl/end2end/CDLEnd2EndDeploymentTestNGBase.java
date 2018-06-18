@@ -752,7 +752,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
-    void verifyDataCollectionStatus() {
+    void verifyDataCollectionStatus(DataCollection.Version version) {
         DataCollectionStatus dataCollectionStatus = dataCollectionProxy
                 .getOrCreateDataCollectionStatus(mainTestTenant.getId(), initialVersion.complement());
         Assert.assertTrue(dataCollectionStatus.getAccountCount() > 0);
@@ -1130,7 +1130,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void runCommonPAVerifications() {
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion.complement());
-        verifyDataCollectionStatus();
+        verifyDataCollectionStatus(initialVersion.complement());
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
     }

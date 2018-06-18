@@ -46,7 +46,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyActiveVersion(DataCollection.Version.Green);
 
         verifyProcessAnalyzeReport(processAnalyzeAppId);
-        verifyDataCollectionStatus();
+        verifyDataCollectionStatus(DataCollection.Version.Green);
 
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
