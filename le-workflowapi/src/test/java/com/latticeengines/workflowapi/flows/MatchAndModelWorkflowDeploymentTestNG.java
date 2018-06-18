@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -87,7 +88,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironment(LatticeProduct.LPA3);
         setupTables();
         setupModels();
     }

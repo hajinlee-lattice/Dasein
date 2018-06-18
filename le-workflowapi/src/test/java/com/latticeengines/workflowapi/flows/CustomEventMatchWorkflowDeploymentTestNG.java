@@ -16,6 +16,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -70,7 +71,7 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
 
     @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironment(LatticeProduct.CG);
         setupTables();
     }
 

@@ -6,13 +6,10 @@ import static org.testng.Assert.assertNotNull;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -21,6 +18,8 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -49,10 +48,8 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
         magicRestTemplate = testBed.getMagicRestTemplate();
     }
 
-    @Override
-    @BeforeClass(groups = { "deployment", "workflow" })
-    public void setup() throws Exception {
-        setupTestTenant();
+    protected void setupTestEnvironment(LatticeProduct product) throws Exception {
+        setupTestTenant(product);
         if (softwareLibraryService != null) {
             softwareLibraryService.setStackName(stackName);
         }
@@ -64,8 +61,8 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
     /**
      * Child class can override this, if it needs different environment
      */
-    protected void setupTestTenant() {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+    protected void setupTestTenant(LatticeProduct product) {
+        setupTestEnvironmentWithOneTenantForProduct(product);
         Tenant tenantWithPid = tenantService.findByTenantId(mainTestTenant.getId());
         mainTestTenant = tenantWithPid;
         MultiTenantContext.setTenant(tenantWithPid);

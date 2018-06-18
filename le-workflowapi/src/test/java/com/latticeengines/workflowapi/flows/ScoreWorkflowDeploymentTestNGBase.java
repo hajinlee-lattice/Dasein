@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkfl
 
     @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironment(LatticeProduct.LPA3);
         setupTables();
         setupModels();
     }

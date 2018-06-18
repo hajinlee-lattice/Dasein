@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
@@ -90,7 +91,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     @Override
     @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironment(LatticeProduct.LPA3);
         TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace)
                 .toString();
         SCORED_FILE_DIR = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace).toString()

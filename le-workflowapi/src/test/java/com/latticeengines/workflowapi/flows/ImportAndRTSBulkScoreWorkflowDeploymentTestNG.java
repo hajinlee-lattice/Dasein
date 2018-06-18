@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertNotNull;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
 
     @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironment(LatticeProduct.LPA3);
         sourceFile = uploadFile(RESOURCE_BASE + "/csvfiles/Account.csv", SchemaInterpretation.SalesforceAccount);
         setupModels();
     }
