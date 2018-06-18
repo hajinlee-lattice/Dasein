@@ -18,6 +18,7 @@ import com.latticeengines.apps.lp.entitymgr.BucketedScoreSummaryEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -101,12 +102,14 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         List<BucketMetadata> bucketMetadataList = request.getBucketMetadataList();
         String modelGuid = request.getModelGuid();
         List<BucketMetadata> updated = new ArrayList<>();
-        for (BucketMetadata bucketMetadata: bucketMetadataList) {
+        for (BucketMetadata bucketMetadata : bucketMetadataList) {
             if (bucketMetadata.getCreationTimestamp() <= 0) {
-                throw new RuntimeException("Must specify meaningful creation timestamp for bucket metadata to be updated.");
+                throw new RuntimeException(
+                        "Must specify meaningful creation timestamp for bucket metadata to be updated: "
+                                + JsonUtils.serialize(request));
             }
-            BucketMetadata existing = bucketMetadataEntityMgr
-                    .getBucketMetadatasByBucketNameAndTimestamp(bucketMetadata.getBucketName(), bucketMetadata.getCreationTimestamp());
+            BucketMetadata existing = bucketMetadataEntityMgr.getBucketMetadatasByBucketNameAndTimestamp(
+                    bucketMetadata.getBucketName(), bucketMetadata.getCreationTimestamp());
             if (existing != null) {
                 existing.setNumLeads(bucketMetadata.getNumLeads());
                 existing.setLift(bucketMetadata.getLift());
@@ -116,8 +119,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
                 }
                 updated.add(existing);
             } else {
-                bucketMetadataEntityMgr.create(bucketMetadata);
-                updated.add(bucketMetadata);
+                throw new RuntimeException("Cannot find existing bucket metadata to update");
             }
         }
         if (StringUtils.isNotBlank(modelGuid)) {

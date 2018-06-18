@@ -27,6 +27,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("aps_rolling_period")
     private String apsRollingPeriod;
 
+    @JsonProperty("user_id")
+    private String userId;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -73,5 +76,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setApsRollingPeriod(String apsRollingPeriod) {
         this.apsRollingPeriod = apsRollingPeriod;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

@@ -23,11 +23,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.graph.StringGraphNode;
-import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
+import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
-import com.latticeengines.common.exposed.visitor.Visitor;
-import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -66,7 +64,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         List<RatingModelContainer> activeModels = readActiveRatingModels();
         log.info("Found " + CollectionUtils.size(activeModels) + " active rating models.");
         putObjectInContext(RATING_MODELS, activeModels);
-        putObjectInContext(RATING_MODELS_BY_ITERATION, splitIntoIterations(activeModels));
+        putObjectInContext(RATING_MODELS_BY_ITERATION, splitIntoGenerations(activeModels));
         putObjectInContext(CURRENT_RATING_ITERATION, 0);
 
         removeObjectFromContext(TABLES_GOING_TO_DYNAMO);
@@ -204,7 +202,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         return true;
     }
 
-    private List<List<RatingModelContainer>> splitIntoIterations(List<RatingModelContainer> containers) {
+    private List<List<RatingModelContainer>> splitIntoGenerations(List<RatingModelContainer> containers) {
         List<List<RatingModelContainer>> iterations = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(containers)) {
             if (configuration.getMaxIteration() <= 1) {
@@ -238,35 +236,17 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     private List<List<String>> getREDepGraphLayers(List<RatingModelContainer> containers, int maxIter) {
         Map<String, StringGraphNode> nodes = getREDepGraph(containers);
         List<StringGraphNode> graph = new ArrayList<>(nodes.values());
-        TopologicalTraverse traverser = new TopologicalTraverse();
-        NodeVisitor vistor = new NodeVisitor();
-        traverser.traverse(graph, vistor);
-        List<String> topologicalTrace = vistor.trace;
-        log.info("Topological trace: " + topologicalTrace);
-        Map<String, Integer> depth = new HashMap<>();
-        topologicalTrace.forEach(engineId -> {
-            StringGraphNode graphNode = nodes.get(engineId);
-            if (CollectionUtils.isEmpty(graphNode.getChildren())) {
-                depth.put(engineId, 0);
-            } else {
-                int maxChildDepth = 0;
-                for (StringGraphNode child: graphNode.getChildren()) {
-                    String childId = child.getVal();
-                    maxChildDepth = Math.max(maxChildDepth, depth.get(childId));
-                }
-                depth.put(engineId, maxChildDepth + 1);
-            }
-        });
-        log.info("Resolved depth map: " + JsonUtils.serialize(depth));
-        if (MapUtils.isNotEmpty(depth)) {
-            int maxDepth = Math.min(depth.values().stream().max(Integer::compareTo).orElse(1) + 1, maxIter);
+        Map<StringGraphNode, Integer> depthMap = GraphUtils.getDepthMap(graph, StringGraphNode.class);
+        log.info("Resolved depth map: " + JsonUtils.serialize(depthMap));
+        if (MapUtils.isNotEmpty(depthMap)) {
+            int maxDepth = Math.min(depthMap.values().stream().max(Integer::compareTo).orElse(1) + 1, maxIter);
             List<List<String>> generations = new ArrayList<>(maxDepth);
             for (int i = 0; i < maxDepth; i++) {
                 generations.add(new ArrayList<>());
             }
-            depth.forEach((engineId, engineDepth) -> {
+            depthMap.forEach((engineIdNode, engineDepth) -> {
                 int engineItr = Math.min(engineDepth, maxDepth - 1);
-                generations.get(engineItr).add(engineId);
+                generations.get(engineItr).add(engineIdNode.getVal());
             });
             return generations;
         } else {
@@ -313,17 +293,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 1);
         threadPool.shutdown();
         return new HashMap<>(nodes);
-    }
-
-    private static class NodeVisitor implements Visitor {
-        public List<String> trace = new ArrayList<>();
-
-        @Override
-        public void visit(Object o, VisitorContext ctx) {
-            if (o.getClass().equals(StringGraphNode.class)) {
-                trace.add(((StringGraphNode) o).getVal());
-            }
-        }
     }
 
 }

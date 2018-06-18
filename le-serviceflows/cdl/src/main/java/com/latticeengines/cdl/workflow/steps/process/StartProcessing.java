@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,9 +40,6 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
-import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -107,7 +103,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @VisibleForTesting
     StartProcessing(DataCollectionProxy dataCollectionProxy, InternalResourceRestApiProxy internalResourceProxy,
-                    ActionProxy actionProxy, CustomerSpace customerSpace) {
+            ActionProxy actionProxy, CustomerSpace customerSpace) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.internalResourceProxy = internalResourceProxy;
         this.actionProxy = actionProxy;
@@ -143,8 +139,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
 
         // get current active collection status
-        DataCollectionStatus detail = dataCollectionProxy
-                .getOrCreateDataCollectionStatus(customerSpace.toString(), null);
+        DataCollectionStatus detail = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
+                null);
         detail.setEvaluationDate(evaluationDate);
         detail.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
         detail.setApsRollingPeriod(configuration.getApsRollingPeriod());
@@ -179,7 +175,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         grapherContext.setJobImpactedEntities(impactedEntities);
         List<Action> actions = getActions();
 
-        // TODO: separate out actions by entity
         List<Action> attrMgmtActions = getAttrManagementActions(actions);
         List<Action> accountAttrActions = getAttrManagementActionsForAccount(attrMgmtActions);
         List<Action> contactAttrActions = getAttrManagementActionsForContact(attrMgmtActions);
@@ -188,12 +183,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Action> purchaseMetricsActions = getPurchaseMetricsActions(actions);
         grapherContext.setPurchaseMetricsChanged(CollectionUtils.isNotEmpty(purchaseMetricsActions));
 
-        // FIXME: not really working before persisting action configuration
         List<Action> ratingActions = getRatingRelatedActions(actions);
-        grapherContext.setHasRatingEngineChange(CollectionUtils.isNotEmpty(ratingActions));
         List<String> segments = getActionImpactedSegmentNames(ratingActions);
-        grapherContext.setActionImpactedAIRatingEngines(getActionImpactedAIEngineIds(ratingActions, segments));
-        grapherContext.setActionImpactedRuleRatingEngines(getActionImpactedRuleEngineIds(ratingActions, segments));
+        grapherContext.setHasRatingEngineChange(
+                CollectionUtils.isNotEmpty(ratingActions) || CollectionUtils.isNotEmpty(segments));
 
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }
@@ -211,7 +204,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
             if (dataCollection != null
                     && (dataCollection.getDataCloudBuildNumber() == null
-                    || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))
+                            || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))
                     && hasAccountBatchStore()) {
                 changed = true;
             }
@@ -248,8 +241,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private List<Action> getAttrManagementActionsForAccount(List<Action> actions) {
         return actions.stream().filter(action -> {
-            AttrConfigLifeCycleChangeConfiguration lifeCycleChangeConfiguration =
-                    (AttrConfigLifeCycleChangeConfiguration) action.getActionConfiguration();
+            AttrConfigLifeCycleChangeConfiguration lifeCycleChangeConfiguration = (AttrConfigLifeCycleChangeConfiguration) action
+                    .getActionConfiguration();
             String categoryName = lifeCycleChangeConfiguration.getCategoryName();
             return !Category.CONTACT_ATTRIBUTES.equals(Category.fromName(categoryName));
         }).collect(Collectors.toList());
@@ -257,8 +250,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private List<Action> getAttrManagementActionsForContact(List<Action> actions) {
         return actions.stream().filter(action -> {
-            AttrConfigLifeCycleChangeConfiguration lifeCycleChangeConfiguration =
-                    (AttrConfigLifeCycleChangeConfiguration) action.getActionConfiguration();
+            AttrConfigLifeCycleChangeConfiguration lifeCycleChangeConfiguration = (AttrConfigLifeCycleChangeConfiguration) action
+                    .getActionConfiguration();
             String categoryName = lifeCycleChangeConfiguration.getCategoryName();
             return Category.CONTACT_ATTRIBUTES.equals(Category.fromName(categoryName));
         }).collect(Collectors.toList());
@@ -276,7 +269,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     protected List<String> getActionImpactedSegmentNames(List<Action> actions) {
         List<String> segmentNames = new ArrayList<>();
-        if (actions != null) {
+        if (CollectionUtils.isNotEmpty(actions)) {
             for (Action action : actions) {
                 if (ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) {
                     SegmentActionConfiguration configuration = (SegmentActionConfiguration) action
@@ -290,59 +283,15 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         return segmentNames;
     }
 
-    protected List<String> getActionImpactedAIEngineIds(List<Action> actions, Collection<String> segments) {
-        return getActionImpactedEngineIds(actions, segments,
-                Arrays.asList(RatingEngineType.CUSTOM_EVENT, RatingEngineType.CROSS_SELL));
-    }
-
-    protected List<String> getActionImpactedRuleEngineIds(List<Action> actions, Collection<String> segments) {
-        return getActionImpactedEngineIds(actions, segments, Collections.singletonList(RatingEngineType.RULE_BASED));
-    }
-
-    private List<String> getActionImpactedEngineIds(List<Action> actions, Collection<String> segments,
-            Collection<RatingEngineType> types) {
-        List<String> engineIds = new ArrayList<>();
-        if (actions != null) {
-            String customerSpace = configuration.getCustomerSpace().toString();
-            for (Action action : actions) {
-                if (ActionType.RATING_ENGINE_CHANGE.equals(action.getType())) {
-                    RatingEngineActionConfiguration configuration = (RatingEngineActionConfiguration) action
-                            .getActionConfiguration();
-                    if (configuration != null) {
-                        String engineId = configuration.getRatingEngineId();
-                        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
-                        if (ratingEngine != null //
-                                && !Boolean.TRUE.equals(ratingEngine.getDeleted()) //
-                                && !Boolean.TRUE.equals(ratingEngine.getJustCreated())) {
-                            if (types.contains(ratingEngine.getType())
-                                    || segments.contains(ratingEngine.getSegment().getName())) {
-                                String logMsg = String.format(
-                                        "Found a rating engine change action related to %s engine %s (%s): %s",
-                                        ratingEngine.getType().name(), ratingEngine.getId(), ratingEngine.getDisplayName(),
-                                        JsonUtils.serialize(action));
-                                log.info(logMsg);
-                                engineIds.add(ratingEngine.getId());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        log.info("Found action impacted rating engines of type " + types + ": " + engineIds);
-        return engineIds;
-    }
-
     private List<Action> getDeleteActions() {
         List<Action> actionList = getActions();
-        return actionList.stream()
-                .filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()))
+        return actionList.stream().filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
     }
 
     private List<Action> getImportActions() {
         List<Action> actionList = getActions();
-        return actionList.stream()
-                .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
+        return actionList.stream().filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
     }
 
@@ -380,8 +329,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                             action.getPid()));
                     continue;
                 }
-                ImportActionConfiguration importActionConfiguration =
-                        (ImportActionConfiguration) action.getActionConfiguration();
+                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
+                        .getActionConfiguration();
                 String taskId = importActionConfiguration.getDataFeedTaskId();
                 if (StringUtils.isEmpty(taskId)) {
                     continue;
@@ -433,8 +382,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     public static class RebuildEntitiesProvider {
         static Set<BusinessEntity> getRebuildEntities(StartProcessing st) {
             Set<BusinessEntity> rebuildEntities = new HashSet<>();
-            Collection<Class<? extends RebuildEntitiesTemplate>> decrators =
-                    Collections.singletonList(RebuildOnDeleteJobTemplate.class);
+            Collection<Class<? extends RebuildEntitiesTemplate>> decrators = Collections
+                    .singletonList(RebuildOnDeleteJobTemplate.class);
             for (Class<? extends RebuildEntitiesTemplate> c : decrators) {
                 try {
                     RebuildEntitiesTemplate template = c.getDeclaredConstructor(StartProcessing.class).newInstance(st);

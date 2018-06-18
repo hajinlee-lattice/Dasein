@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.testng.Assert;
@@ -14,6 +15,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.graph.traversal.impl.ReverseTopologicalTraverse;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
+import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 
@@ -124,6 +126,18 @@ public class TopologicalTraverseUnitTestNG {
         }
         Assert.assertTrue(exception);
         Assert.assertTrue(visitor.trace.size() <= 1);
+    }
+
+    @Test(groups = "unit")
+    public void testGetDepth() {
+        List<IntegerNode> nodes = constructGraph();
+        Map<IntegerNode, Integer> depthMap = GraphUtils.getDepthMap(new HashSet<>(nodes), IntegerNode.class);
+        Assert.assertEquals(depthMap.get(nodes.get(0)), new Integer(2));
+        Assert.assertEquals(depthMap.get(nodes.get(1)), new Integer(0));
+        Assert.assertEquals(depthMap.get(nodes.get(2)), new Integer(1));
+        Assert.assertEquals(depthMap.get(nodes.get(3)), new Integer(1));
+        Assert.assertEquals(depthMap.get(nodes.get(4)), new Integer(0));
+        Assert.assertEquals(depthMap.get(nodes.get(5)), new Integer(0));
     }
 
     private List<IntegerNode> constructCyclicGraph() {

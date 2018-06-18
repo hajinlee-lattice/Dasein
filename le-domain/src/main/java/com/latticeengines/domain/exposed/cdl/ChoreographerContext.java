@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -20,12 +19,6 @@ public class ChoreographerContext {
 
     @JsonProperty
     private boolean dataCloudChanged;
-
-    @JsonProperty
-    private List<String> actionImpactedAIRatingEngines;
-
-    @JsonProperty
-    private List<String> actionImpactedRuleRatingEngines;
 
     @JsonProperty
     private boolean hasAccountAttrLifeCycleChange;
@@ -54,22 +47,6 @@ public class ChoreographerContext {
 
     public void setDataCloudChanged(boolean dataCloudChanged) {
         this.dataCloudChanged = dataCloudChanged;
-    }
-
-    public List<String> getActionImpactedAIRatingEngines() {
-        return actionImpactedAIRatingEngines;
-    }
-
-    public void setActionImpactedAIRatingEngines(List<String> actionImpactedAIRatingEngines) {
-        this.actionImpactedAIRatingEngines = actionImpactedAIRatingEngines;
-    }
-
-    public List<String> getActionImpactedRuleRatingEngines() {
-        return actionImpactedRuleRatingEngines;
-    }
-
-    public void setActionImpactedRuleRatingEngines(List<String> actionImpactedRuleRatingEngines) {
-        this.actionImpactedRuleRatingEngines = actionImpactedRuleRatingEngines;
     }
 
     public boolean isHasAccountAttrLifeCycleChange() {

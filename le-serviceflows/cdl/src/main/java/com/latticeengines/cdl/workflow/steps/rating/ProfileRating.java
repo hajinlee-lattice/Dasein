@@ -105,7 +105,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
             DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
             inactiveRating = dataCollectionProxy.getTableName(customerSpace.toString(), BusinessEntity.Rating.getServingStore(), version);
         }
-        modelContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        modelContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
     }
 
     @Override

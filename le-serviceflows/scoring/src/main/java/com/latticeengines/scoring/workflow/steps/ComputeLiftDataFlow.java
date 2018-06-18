@@ -103,6 +103,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
             });
         } else {
             putObjectInContext(BUCKET_METADATA_MAP, modelGuidToBucketMetadataMap);
+            putObjectInContext(MODEL_GUID_ENGINE_ID_MAP, modelGuidToEngineIdMap);
         }
         metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), configuration.getTargetTableName());
     }
@@ -120,7 +121,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     }
 
     private boolean isMultiModel() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
         return CollectionUtils.isNotEmpty(allContainers);
     }
 
@@ -193,7 +194,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
         return allContainers.stream() //
                 .filter(container -> {
                     RatingEngineType ratingEngineType = container.getEngineSummary().getType();

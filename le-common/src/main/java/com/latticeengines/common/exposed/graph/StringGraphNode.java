@@ -26,4 +26,9 @@ public class StringGraphNode implements GraphNode {
         return children;
     }
 
+    @Override
+    public String toString() {
+        return val;
+    }
+
 }

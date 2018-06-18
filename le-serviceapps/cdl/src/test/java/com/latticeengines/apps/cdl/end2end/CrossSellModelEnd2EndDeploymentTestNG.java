@@ -6,13 +6,13 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
@@ -55,17 +55,18 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     private BucketedScoreProxy bucketedScoreProxy;
 
     // Target Products are shared with Refresh Rating test
-    private static final String[] repeatTargetProducts = new String[]{
+    private static final ImmutableList<String> repeatTargetProducts = ImmutableList.of(
             "6aWAxPIdKjD9bDVN90kMphZgevl8jua",
             "6mhfUZb1DOQWShBJZvmVPjnDE65Tmrd",
             "xsfqOtt95Ft5oWdrrEY5XbVca8W52U",
             "vjQ1pa9f3VAZWOs5B99KooDva2LsF2KB"
-    };
-    private static final String repeatTargetProductId = StringUtils.join(repeatTargetProducts, ",");
-    private static final String firstTargetProductId = "6aWAxPIdKjD9bDVN90kMphZgevl8jua";
+    );
+    private static final ImmutableList<String> firstTargetProducts = ImmutableList.of(
+            "6aWAxPIdKjD9bDVN90kMphZgevl8jua"
+    );
 
     // Training Products are only used by this test
-    private static final String[] repeatTrainingProducts = new String[]{
+    private static final ImmutableList<String> repeatTrainingProducts = ImmutableList.of(
         "9IfG2T5joqw0CIJva0izeZXSCwON1S",
         "Og8oP4j5zJ1Lieh3G38qTINC6m2Jor",
         "C4jlopoPp3mNkOqz4axpbpmWGIoU2Ua",
@@ -76,9 +77,10 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         "vTQ5oBReNHvkiYcWZA86TkrFqkoK15",
         "fuDcy4WsrfF278qOmcVNGz7FKUnCxHwm",
         "AWLhcmhd9d9GJGdW9cFdXFou4FmS4Evo"
-    };
-    private static final String repeatTrainingProductId = StringUtils.join(repeatTrainingProducts, ",");
-    private static final String firstTrainingProductId = "9IfG2T5joqw0CIJva0izeZXSCwON1S";
+    );
+    private static final ImmutableList<String> firstTrainingProducts = ImmutableList.of(
+            "9IfG2T5joqw0CIJva0izeZXSCwON1S"
+    );
 
 
 
@@ -187,11 +189,11 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         log.info("Created rating engine " + testRatingEngine.getId());
         testAIModel = (AIModel) testRatingEngine.getActiveModel();
 
-        String targetProductId = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy) ?
-                repeatTargetProductId : firstTargetProductId;
-        String trainingProductId = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy) ?
-                repeatTrainingProductId : firstTrainingProductId;
-        configureCrossSellModel(testAIModel, predictionType, strategy, targetProductId, trainingProductId);
+        List<String> targetProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy) ?
+                repeatTargetProducts : firstTargetProducts;
+        List<String> trainingProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy) ?
+                repeatTrainingProducts : firstTrainingProducts;
+        configureCrossSellModel(testAIModel, predictionType, strategy, targetProducts, trainingProducts);
 
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
                 testAIModel.getId(), testAIModel);
@@ -219,5 +221,6 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
             Assert.assertEquals(trainingCount, 3026, errorMsg);
             Assert.assertEquals(eventCount, 68, errorMsg);
         }
+        Assert.fail();
     }
 }

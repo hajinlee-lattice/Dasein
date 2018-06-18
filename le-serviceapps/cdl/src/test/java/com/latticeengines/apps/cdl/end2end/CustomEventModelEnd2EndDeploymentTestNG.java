@@ -39,6 +39,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "LETest1528844192916";
+    private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
     private MetadataSegment testSegment;
     private RatingEngine lpiCERatingEngine;
@@ -70,20 +71,8 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     @Test(groups = { "end2end", "precheckin" })
     public void end2endCDLStyleCustomEventModelTest() throws Exception {
         setupEnd2EndTestEnvironment();
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(LOADING_CHECKPOINT);
         CustomEventModelingType testType = CustomEventModelingType.CDL;
-        bootstrap(testType);
-        runCustomEventModel(testType);
-    }
-
-    /**
-     * This test is part of CD pipeline
-     */
-    // @Test(groups = "end2end")
-    public void end2endLPIStyleCustomEventModelTest() throws Exception {
-        setupEnd2EndTestEnvironment();
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
-        CustomEventModelingType testType = CustomEventModelingType.LPI;
         bootstrap(testType);
         runCustomEventModel(testType);
     }
@@ -99,7 +88,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             mainTestTenant = testBed.getMainTestTenant();
         } else {
             setupEnd2EndTestEnvironment();
-            resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+            resumeCheckpoint(LOADING_CHECKPOINT);
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         CustomEventModelingType testType = CustomEventModelingType.CDL;

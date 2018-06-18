@@ -111,7 +111,7 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
         if (CollectionUtils.isEmpty(allContainers)) {
             return Collections.emptyList();
         }

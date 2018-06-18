@@ -108,7 +108,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             log.info("Use the version specified in configuration: " + version);
         }
 
-        List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
         containers = allContainers.stream() //
                 .filter(container -> getTargetEngineTypes().contains(container.getEngineSummary().getType())) //
                 .collect(Collectors.toList());

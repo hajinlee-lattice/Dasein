@@ -5,6 +5,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CURRENT
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.INACTIVE_ENGINES;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ITERATION_RATING_MODELS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_MODELS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_MODELS_BY_ITERATION;
 
 import java.util.Collection;
 import java.util.List;
@@ -78,8 +79,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean initialized;
     private boolean enforceRebuild = false;
     private boolean hasDataChange = false;
-    private boolean hasActionImpactedAIModels = false;
-    private boolean hasActionImpactedRuleModels = false;
+    private boolean hasActions = false;
     private boolean hasAIModels = false;
     private boolean hasRuleModels = false;
 
@@ -88,6 +88,10 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean shouldProcessAI = false;
     private boolean shouldProcessRuleBased = false;
+
+    private int iteration = 0;
+    private int effectiveIterations = 1;
+    private boolean iterationFinished = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -108,7 +112,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         if (shouldReset) {
             skip = !isResetRatingStep(step) && !isCombineStatisticsStep(step);
         } else if (shouldRebuild) {
-            if (isResetRatingStep(step)) {
+            if (isResetRatingStep(step) || iterationFinished) {
                 skip = true;
             } else if (isStartIterationStep(step) || isCloneServingStoresStep(step)) {
                 // always run these steps in rebuild mode
@@ -134,6 +138,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                     RatingModelContainer.class);
             List<String> inactiveEngines = step.getListObjectFromContext(INACTIVE_ENGINES,
                     String.class);
+            List generations = step.getObjectFromContext(RATING_MODELS_BY_ITERATION, List.class);
+            effectiveIterations = Math.max(1, CollectionUtils.size(generations));
             boolean hasEngines = CollectionUtils.isNotEmpty(containers) || CollectionUtils.isNotEmpty(inactiveEngines);
             hasDataChange = hasDataChange();
             checkActionImpactedEngines(step);
@@ -143,8 +149,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                     "enforced=" + enforceRebuild, //
                     "hasEngines=" + hasEngines, //
                     "hasDataChange=" + hasDataChange, //
-                    "hasActionImpactedAIModels=" + hasActionImpactedAIModels, //
-                    "hasActionImpactedRuleModels=" + hasActionImpactedRuleModels, //
+                    "hasActions=" + hasActions, //
                     "shouldReset=" + shouldReset, //
                     "shouldRebuild=" + shouldRebuild, //
             };
@@ -155,25 +160,31 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private void initializeIteration(AbstractStep<? extends BaseStepConfiguration> step) {
         if (shouldRebuild) {
-            int iteration = step.getObjectFromContext(CURRENT_RATING_ITERATION, Integer.class);
-            List<RatingModelContainer> containers = step.getListObjectFromContext(ITERATION_RATING_MODELS,
-                    RatingModelContainer.class);
-            boolean hasCrossSellModels = hasCrossSellModels(containers);
-            boolean hasCustomEventModels = hasCustomEventModels(containers);
-            hasAIModels = hasCrossSellModels || hasCustomEventModels;
-            hasRuleModels = hasRuleModels(containers);
-            shouldProcessAI = shouldProcessAI();
-            shouldProcessRuleBased = shouldProcessRuleBased();
-            String[] msgs = new String[] {
-                    "iteration=" + iteration,
-                    "hasCrossSellModels=" + hasCrossSellModels, //
-                    "hasCustomEventModels=" + hasCustomEventModels, //
-                    "hasAIModels=" + hasAIModels, //
-                    "hasRuleModels=" + hasRuleModels, //
-                    "shouldProcessAI=" + shouldProcessAI, //
-                    "shouldProcessRuleBased=" + shouldProcessRuleBased, //
-            };
-            log.info(StringUtils.join(msgs, ", "));
+            if (!iterationFinished) {
+                iteration = step.getObjectFromContext(CURRENT_RATING_ITERATION, Integer.class);
+                List<RatingModelContainer> containers = step.getListObjectFromContext(ITERATION_RATING_MODELS,
+                        RatingModelContainer.class);
+                boolean hasCrossSellModels = hasCrossSellModels(containers);
+                boolean hasCustomEventModels = hasCustomEventModels(containers);
+                hasAIModels = hasCrossSellModels || hasCustomEventModels;
+                hasRuleModels = hasRuleModels(containers);
+                shouldProcessAI = shouldProcessAI();
+                shouldProcessRuleBased = shouldProcessRuleBased();
+                String[] msgs = new String[] {
+                        "iteration=" + iteration,
+                        "hasCrossSellModels=" + hasCrossSellModels, //
+                        "hasCustomEventModels=" + hasCustomEventModels, //
+                        "hasAIModels=" + hasAIModels, //
+                        "hasRuleModels=" + hasRuleModels, //
+                        "shouldProcessAI=" + shouldProcessAI, //
+                        "shouldProcessRuleBased=" + shouldProcessRuleBased, //
+                };
+                log.info(StringUtils.join(msgs, ", "));
+                iterationFinished = iteration > effectiveIterations;
+                log.info(String.format("All %d effective iterations are finished", effectiveIterations));
+            } else {
+                log.info("Skip dummy iteration " + (++iteration));
+            }
         } else {
             shouldProcessAI = false;
             shouldProcessRuleBased = false;
@@ -224,7 +235,6 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean shouldRebuild() {
         boolean rebuild = false;
-        boolean hasActions = hasActionImpactedAIModels || hasActionImpactedRuleModels;
         if (shouldReset) {
             log.info("Skip rebuild, because should reset.");
             rebuild = false;
@@ -252,18 +262,9 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     }
 
     private boolean shouldProcessModelOfOneType(boolean hasModels, String modelType) {
-        boolean shouldProcess = true;
-        boolean hasActionImpactedEngines = "AI".equalsIgnoreCase(modelType) ? hasActionImpactedAIModels
-                : hasActionImpactedRuleModels;
-        if (!hasModels) {
+        boolean shouldProcess = shouldRebuild;
+        if (shouldProcess && !hasModels) {
             log.info("Has no " + modelType + " models, skip generating " + modelType + " ratings");
-            shouldProcess = false;
-        } else if (enforceRebuild) {
-            log.info("enforced to rebuild ratings.");
-            shouldProcess = true;
-        } else if (!hasDataChange && !hasActionImpactedEngines) {
-            log.warn("Has neither underlying data change nor related actions, should skip generating " + modelType
-                    + " ratings");
             shouldProcess = false;
         }
         return shouldProcess;
@@ -297,13 +298,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private void checkActionImpactedEngines(AbstractStep<? extends BaseStepConfiguration> step) {
         ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
-
-        // TODO: change to check by engine type after DP-6275
-        hasActionImpactedAIModels = CollectionUtils.isNotEmpty(grapherContext.getActionImpactedAIRatingEngines());
-        hasActionImpactedRuleModels = CollectionUtils.isNotEmpty(grapherContext.getActionImpactedRuleRatingEngines());
-
-        hasActionImpactedAIModels = grapherContext.isHasRatingEngineChange();
-        hasActionImpactedRuleModels = grapherContext.isHasRatingEngineChange();
+        hasActions = grapherContext.isHasRatingEngineChange();
     }
 
 }

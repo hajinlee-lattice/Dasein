@@ -109,7 +109,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
         return allContainers.stream() //
                 .filter(container -> {
                     RatingEngineType ratingEngineType = container.getEngineSummary().getType();

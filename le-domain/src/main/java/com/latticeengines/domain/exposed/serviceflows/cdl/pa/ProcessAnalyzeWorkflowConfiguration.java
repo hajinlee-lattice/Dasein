@@ -155,6 +155,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder userId(String userId) {
             configuration.setUserId(userId);
+            processStepConfiguration.setUserId(userId);
             return this;
         }
 
