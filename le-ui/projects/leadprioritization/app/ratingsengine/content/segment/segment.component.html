@@ -13,7 +13,7 @@
 
             <div class="content-body" ng-if="vm.hasSegments">
 
-                <div ng-if="vm.stateParams.wizard_steps == 'customevent'" class="checkbox-option"> 
+                <div ng-if="vm.stateParams.wizard_steps == 'customevent' && vm.showScoreTrainingFileOption" class="checkbox-option"> 
                   <label>
                     <input type="checkbox" ng-model="vm.scoreTrainingFile"
                            ng-click="vm.selectTrainingFile()">

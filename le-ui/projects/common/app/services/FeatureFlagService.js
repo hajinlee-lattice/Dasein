@@ -80,6 +80,12 @@ mod = angular.module('mainApp.core.services.FeatureFlagService', [
         ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES: 'EnableInternalEnrichmentAttributes',
         LATTICE_INSIGHTS: 'LatticeInsights',
         VDB_MIGRATION: 'VDBMigration',
+        SCORE_EXTERNAL_FILE: 'ScoreExternalFile',
+        ENABLE_CROSS_SELL_MODELING: 'EnableCrossSellModeling',
+        ENABLE_FILE_IMPORT: 'EnableFileImport',
+        ENABLE_PRODUCT_BUNDLE_IMPORT: 'EnableProductBundleImport',
+        ENABLE_PRODUCT_HIERARCHY_IMPORT: 'EnableProductHierarchyImport',
+        ENABLE_PRODUCT_PURCHASE_IMPORT: 'EnableProductPurchaseImport',
 
         //TODO: deprecated flags
         CAMPAIGNS_PAGE: 'EnableCampaignUI',

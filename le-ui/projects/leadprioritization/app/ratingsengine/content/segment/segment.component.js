@@ -1,8 +1,9 @@
 angular.module('lp.ratingsengine.wizard.segment', [])
 .controller('RatingsEngineSegment', function(
-    $scope, $state, $stateParams, ResourceUtility, RatingsEngineStore, DataCloudStore, Segments, QueryStore, CurrentRatingEngine
+    $scope, $state, $stateParams, ResourceUtility, RatingsEngineStore, DataCloudStore, Segments, QueryStore, CurrentRatingEngine, FeatureFlagService
 ) {
-    var vm = this;
+    var vm = this,
+        flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
         currentRating: CurrentRatingEngine,
@@ -16,6 +17,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         hasSegments: true,
         sortBy: 'Selected',
         segmentsKeyMap: {},
+        showScoreTrainingFileOption: FeatureFlagService.FlagIsEnabled(flags.SCORE_EXTERNAL_FILE),
         scoreTrainingFile: false
     });
 
