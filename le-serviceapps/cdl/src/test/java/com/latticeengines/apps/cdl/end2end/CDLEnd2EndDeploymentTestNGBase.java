@@ -754,7 +754,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     void verifyDataCollectionStatus(DataCollection.Version version) {
         DataCollectionStatus dataCollectionStatus = dataCollectionProxy
-                .getOrCreateDataCollectionStatus(mainTestTenant.getId(), initialVersion.complement());
+                .getOrCreateDataCollectionStatus(mainTestTenant.getId(), version);
         Assert.assertTrue(dataCollectionStatus.getAccountCount() > 0);
     }
 
