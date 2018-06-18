@@ -87,6 +87,7 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             } else {
                 reAttr.disableGroup(ColumnSelection.Predefined.Segment);
             }
+            reAttr.setCanEnrich(false);
             return reAttr;
         });
     }
