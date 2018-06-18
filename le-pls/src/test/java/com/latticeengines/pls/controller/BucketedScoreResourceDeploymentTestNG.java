@@ -39,12 +39,8 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
-    private MetadataSegment segment;
-
     private RatingEngine re1;
-
     private String modelGuid;
-    private ModelSummary modelSummary;
 
     @Inject
     private MetadataSegmentService metadataSegmentService;
@@ -61,7 +57,7 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);
-        segment = RatingEngineResourceDeploymentTestNG.constructSegment(SEGMENT_NAME);
+        MetadataSegment segment = RatingEngineResourceDeploymentTestNG.constructSegment(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
         Assert.assertNotNull(createdSegment);
         MetadataSegment retrievedSegment = metadataSegmentService.getSegmentByName(createdSegment.getName(), false);
@@ -71,7 +67,7 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
                 createAIRatingEngine(retrievedSegment, RatingEngineType.CROSS_SELL));
 
         modelGuid = String.format("ms__%s__LETest", UUID.randomUUID().toString());
-        modelSummary = createModelSummary(modelGuid, mainTestTenant);
+        ModelSummary modelSummary = createModelSummary(modelGuid, mainTestTenant);
         modelSummaryEntityMgr.create(modelSummary);
 
         AIModel ratingModel = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(), re1.getId(),
