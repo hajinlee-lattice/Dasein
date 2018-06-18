@@ -256,37 +256,33 @@ angular.module('lp.ratingsengine.ratingslist', [
         var tileState = vm.current.tileStates[rating.id];
 
         if(tileState.editRating !== true){
-            if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
-                RatingsEngineStore.getRating(rating.id).then(function(engine){
-                    RatingsEngineStore.setRating(engine);
-                    RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
-
-                        var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : null,
-                            modelJobId = model.AI.modelingJobId;
-
-                        if ((modelId !== null) || (modelJobId !== null)) {
-                            $state.go('home.ratingsengine.dashboard', { 
-                                rating_id: rating.id, 
-                                modelId: modelId
-                            });
-                        } else {
-                            // console.log('TYPE ==> ', rating.type);
-                            if(rating.type === 'CROSS_SELL'){
-                                var strategy = rating.advancedRatingConfig.cross_sell.modelingStrategy;
-                                // console.log('Starategy ', strategy);
-                                $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: strategy, fromList: true});
-                            }else {
-                                $state.go('home.ratingsengine.customevent', {rating_id: rating.id, fromList: true});
-                            }
+            RatingsEngineStore.getModel(rating.id).then(function(model){
+                if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT'){
+                    var jobStatus = model.AI.modelingJobStatus;
+                    var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : null,
+                        modelJobId = model.AI.modelingJobId;
+                    
+                    if ((modelId !== null) || (modelJobId !== null)) {
+                        $state.go('home.ratingsengine.dashboard', { 
+                            rating_id: rating.id, 
+                            modelId: modelId,
+                            modelingJobStatus: jobStatus
+                        });
+                    } else {
+                        if(rating.type === 'CROSS_SELL'){
+                            var strategy = rating.advancedRatingConfig.cross_sell.modelingStrategy;
+                            $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: strategy, fromList: true});
+                        }else {
+                            $state.go('home.ratingsengine.customevent', {rating_id: rating.id, fromList: true});
                         }
+                    }
+                }else{
+                    $state.go('home.ratingsengine.dashboard', { 
+                        rating_id: rating.id, 
+                        modelId: '' 
                     });
-                });                
-            } else {
-                $state.go('home.ratingsengine.dashboard', { 
-                    rating_id: rating.id, 
-                    modelId: '' 
-                });
-            } 
+                }
+            });
         }
     };
 

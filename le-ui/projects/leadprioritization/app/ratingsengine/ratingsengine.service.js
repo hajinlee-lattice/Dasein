@@ -1005,6 +1005,22 @@ angular.module('lp.ratingsengine')
         }
     }
 
+    this.getModel = function(ratingId){
+        var deferred = $q.defer();
+        RatingsEngineStore.getRating(ratingId).then(function(engine){
+            RatingsEngineStore.setRating(engine);
+            console.log('Engine', engine);
+            if(engine.activeModel.AI){
+                RatingsEngineStore.getRatingModel(ratingId, engine.activeModel.AI.id).then(function(model){
+                    deferred.resolve(model);
+                });
+            }else {
+                deferred.resolve(engine.activeModel);
+            }
+        });   
+        return deferred.promise;  
+    };
+
 })
 .service('RatingsEngineService', function($q, $http, $state) {
     this.getRatings = function(active) {

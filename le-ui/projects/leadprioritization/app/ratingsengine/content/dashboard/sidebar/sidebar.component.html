@@ -15,7 +15,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}</span>
         </a>
     </li>
-    <li ng-if="!isRuleBased">
+    <li ng-if="!isRuleBased" ng-disabled="!isJobCompleted()">
         <a ng-if="modelIsReady" ui-sref="home.model.attributes({ rating_id: rating_id, modelId: modelId })">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
                 <span class="ico ico-attributes ico-light-gray"></span>
@@ -29,7 +29,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}</span>
         </a>
     </li>
-    <li ng-if="!isRuleBased" role="presentation" ui-sref-active="active">
+    <li ng-if="!isRuleBased" role="presentation" ui-sref-active="active" ng-disabled="!isJobCompleted()">
         <a ng-if="modelIsReady" ui-sref="home.model.performance({ rating_id: rating_id, modelId: modelId })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
                 <span class="ico ico-performance ico-light-gray"></span>
@@ -44,7 +44,7 @@
         </a>
     </li>
     <!-- <li ng-if="!vm.IsPmml && vm.HasRatingsAvailable" role="rating" ui-sref-active="active"> -->
-    <li ng-if="!isRuleBased" role="rating" ui-sref-active="active">
+    <li ng-if="!isRuleBased" role="rating" ui-sref-active="active" ng-disabled="!isJobCompleted()">
         <a ng-if="modelIsReady" ui-sref="home.model.ratings({ rating_id: rating_id, modelId: modelId, section: 'dashboard.ratings', ratingEngine: ratingEngine })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
                 <span class="ico ico-ratings ico-light-gray"></span>
@@ -59,7 +59,7 @@
         </a>
     </li>
     <!-- <li ng-if="vm.showModelSummary && !vm.Uploaded" role="presentation" ui-sref-active="active"> -->
-    <li ng-if="!isRuleBased" role="presentation" ui-sref-active="active">
+    <li ng-if="!isRuleBased" role="presentation" ui-sref-active="active" ng-disabled="!isJobCompleted()">
         <a ng-if="modelIsReady" ui-sref="home.model.summary({ rating_id: rating_id, modelId: modelId })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
                 <span class="ico ico-datatable ico-light-gray"></span>
@@ -81,7 +81,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}</span>
         </a>
     </li>
-    <li role="presentation" ui-sref-active="active">
+    <li role="presentation" ui-sref-active="active" ng-disabled="!isJobCompleted()">
         <a ui-sref="home.ratingsengine.dashboard.notes({ rating_id: rating_id, modelId: modelId })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
                 <span class="ico ico-notes"></span>

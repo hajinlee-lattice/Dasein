@@ -305,7 +305,6 @@ angular.module('lp.ratingsengine.dashboard', [
         }else {
             return 'Deactivate Scoring';
         }
-        
     };
     vm.disableButtonScoring = function(){
         if(!vm.isRulesBased){
@@ -315,6 +314,32 @@ angular.module('lp.ratingsengine.dashboard', [
             return deactivate;
         }else{
             return vm.deactivateInProgress; 
+        }
+    };
+
+    vm.isJobRunning = function(){
+        var activeModel = vm.ratingEngine.activeModel;
+        var jobStatus = '';
+        if(vm.ratingEngine.type === 'RULE_BASED'){
+            jobStatus = activeModel.rule.modelingJobStatus;
+        }else{
+            jobStatus = activeModel.AI.modelingJobStatus;
+        }
+
+        switch(jobStatus){
+            case 'Completed':
+                return false;
+
+            default: return true;
+        }
+
+    };
+
+    vm.canCreatePlay = function(){
+        if(vm.ratingEngine.status === 'ACTIVE' && Dashboard.summary.isPublished){
+            return true;
+        }else{
+            return false;
         }
     };
 

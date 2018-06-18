@@ -27,7 +27,7 @@
                         class="button orange-button"
                         ng-if="vm.isRulesBased"
                         ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })" 
-                        disabled="disabled">
+                        ng-disabled="!vm.canCreatePlay()">
                         <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata && !vm.status_toggle" -->
                         Create Play
                     </button>
@@ -36,14 +36,14 @@
                         class="button orange-button"
                         ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.activeModel.AI.modelSummaryId, ratingEngine: vm.ratingEngine })"
                         ng-if="!vm.isRulesBased"
-                        ng-disabled="vm.dashboard.summary.bucketMetadata.length === 0">
+                        ng-disabled="vm.dashboard.summary.bucketMetadata.length === 0 || vm.isJobRunning()">
                         {{ vm.publishOrActivateButtonLabel }}
                     </button>
                     <button
                         class="button orange-button"
                         ng-if="!vm.isRulesBased"
                         ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })"
-                        disabled="disabled">
+                        ng-disabled="!vm.canCreatePlay()">
                         <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata || vm.ratingEngine.status === 'INACTIVE'" -->
                         Create Play
                     </button>
