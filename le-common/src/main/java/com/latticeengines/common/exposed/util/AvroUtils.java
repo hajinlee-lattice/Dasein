@@ -277,7 +277,7 @@ public class AvroUtils {
                     count += stream.getBlockCount();
                 }
             } catch (NoSuchElementException e) {
-                log.info("Seems no next block in current stream.");
+                // log.info("Seems no next block in current stream.");
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to count avro at " + path, e);
