@@ -1,8 +1,11 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.List;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -47,6 +50,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
         verifyProcessAnalyzeReport(processAnalyzeAppId);
         verifyDataCollectionStatus(DataCollection.Version.Green);
+        verifyNumAttrsInAccount();
 
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
@@ -67,4 +71,12 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 //        verifySegmentCountsNonNegative(SEGMENT_NAME_2, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
 //        verifyUpdateActions();
     }
+
+
+    private void verifyNumAttrsInAccount() {
+        String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, BusinessEntity.Account.getServingStore());
+        List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);
+        Assert.assertTrue(cms.size() < 20000, "Should not have more than 20000 account attributes");
+    }
+
 }
