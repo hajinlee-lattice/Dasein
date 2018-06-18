@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -146,32 +147,29 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(returned.getAccountFrontEndRestriction());
         Assert.assertNotNull(returned.getContactFrontEndRestriction());
 
-        Assert.assertNotEquals(returned.getAccounts(), new Long(initialAccountNum), JsonUtils.serialize(returned));
-        Assert.assertNotEquals(returned.getContacts(), new Long(initialContactNum), JsonUtils.serialize(returned));
+        Assert.assertNotEquals(returned.getAccounts(), initialAccountNum, JsonUtils.serialize(returned));
+        Assert.assertNotEquals(returned.getContacts(), initialContactNum, JsonUtils.serialize(returned));
         assertMetadataSegmentUpdateAction();
         RatingEngine ratingEngine = testRatingEngineProxy.getRatingEngine(ratingEngineId);
         Assert.assertNotNull(ratingEngine);
 
         Map<String, Long> ratingCounts = ratingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(ratingCounts));
-        String counts = JsonUtils.serialize(ratingCounts);
+    }
 
-        // TODO uncomment the assertion PLS-7360
-        // Assert.assertEquals(ratingCounts.get(RatingBucketName.A.getName()),
-        // new Long(104), counts);
-        // Assert.assertEquals(ratingCounts.get(RatingBucketName.D.getName()),
-        // new Long(709), counts);
-        // Assert.assertEquals(ratingCounts.get(RatingBucketName.F.getName()),
-        // new Long(67), counts);
+    private List<Action> getSegmentActiosn() {
+        return actionService.findAll().stream() //
+                .filter(action -> ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) //
+                .collect(Collectors.toList());
     }
 
     private void assertMetadataSegmentUpdateActionNotGen() {
-        List<Action> actions = actionService.findAll();
+        List<Action> actions = getSegmentActiosn();
         Assert.assertEquals(actions.size(), actionNumber);
     }
 
     private void assertMetadataSegmentUpdateAction() {
-        List<Action> actions = actionService.findAll();
+        List<Action> actions = getSegmentActiosn();
         Assert.assertEquals(actions.size(), ++actionNumber);
         Action action = actions.get(actionNumber - 1);
         Assert.assertNotNull(action);
