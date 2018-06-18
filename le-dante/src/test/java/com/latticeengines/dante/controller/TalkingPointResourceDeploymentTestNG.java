@@ -3,6 +3,7 @@ package com.latticeengines.dante.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.dante.testFramework.DanteDeploymentTestNGBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -24,7 +25,7 @@ import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 
-public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
+public class TalkingPointResourceDeploymentTestNG extends DanteDeploymentTestNGBase {
     @Autowired
     private TalkingPointProxy talkingPointProxy;
 

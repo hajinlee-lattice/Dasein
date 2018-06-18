@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.inject.Inject;
 
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -37,8 +38,9 @@ import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
 public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
+
     @Autowired
-    protected GlobalAuthFunctionalTestBed testBed;
+    protected GlobalAuthFunctionalTestBed functionalTestBed;
 
     @Autowired
     private SegmentService segmentService;
@@ -68,8 +70,8 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String CREATED_BY = "lattice@lattice-engines.com";
 
     protected void setupRunEnvironment() {
-        testBed.bootstrap(1);
-        mainTestTenant = testBed.getMainTestTenant();
+        getTestBed().bootstrap(1);
+        mainTestTenant = getTestBed().getMainTestTenant();
         mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
         MultiTenantContext.setTenant(mainTestTenant);
     }
@@ -169,5 +171,9 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
     protected void deleteTestMetadataSegment() {
         segmentService.deleteSegmentByName(CustomerSpace.parse(mainTestTenant.getId()).toString(),
                 testMetadataSegment.getName());
+    }
+
+    protected GlobalAuthTestBed getTestBed() {
+        return functionalTestBed;
     }
 }
