@@ -1,5 +1,5 @@
 ul.attr-list-results {
-    li {
+    & > li {
         border-bottom: 1px solid #ccc;
         height: 40px;
         vertical-align: middle;
@@ -128,6 +128,20 @@ ul.attr-list-results {
         }
 
         div.attr-result-label {
+            display: flex;
+            
+            div.attr-result-buckets-container,
+            div.attr-result-label-container {
+                width: 100%;
+            }
+            div.attr-result-label-container {
+                flex-shrink: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        div.attr-result-label {
             position: relative;
             height: 100%;
             width: 100%;
@@ -168,6 +182,42 @@ ul.attr-list-results {
         
             &:hover {
                 background: #fff;
+            }
+
+            .attr-result-buckets {
+                display: flex;
+                justify-content: center;
+                
+                li {
+                    display: flex;
+                    margin-left: 4em;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    height: 2.8em;
+                    width: 100%;
+                    text-align: center;
+                    justify-content: space-between;
+                    
+                    &:first-child {
+                        margin-left: 0;
+                    }
+
+                    span {
+                        margin-right: 0em;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        width: 66%;
+                        display: inline-block;
+                    }
+
+                    em {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        width: 33%;
+                        display: inline-block;
+                        
+                    }
+                }
             }
         }
         

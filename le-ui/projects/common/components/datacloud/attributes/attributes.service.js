@@ -26,68 +26,8 @@ angular.module('common.attributes')
         this.data = {
             original: {},
             config: {},
-            overview: {}
-        };
-
-        this.tabs = {
-            activate: [{
-                    label: "Intent",
-                    category: "Intent",
-                    supplemental: 'ACTIVATED'
-                },{
-                    label: "Technology Profile",
-                    category: "Technology Profile",
-                    supplemental: 'ACTIVATED'
-                },{
-                    label: "Website Keywords",
-                    category: "Website Keywords",
-                    supplemental: 'ACTIVATED'
-                },{
-                    label: "My Account",
-                    category: "My Attributes",
-                    supplemental: 'ACTIVATED'
-                },{
-                    label: "My Contact",
-                    category: "Contact Attributes",
-                    supplemental: 'ACTIVATED'
-                }
-            ],
-            enable: [{
-                    label: "Segmentation",
-                    category: "Segment",
-                    supplemental: 'ENABLED'
-                },{
-                    label: "Export",
-                    category: "Enrichment",
-                    supplemental: 'ENABLED'
-                },{
-                    label: "Talking Points",
-                    category: "TalkingPoint",
-                    supplemental: 'ENABLED'
-                },{
-                    label: "Company Profile",
-                    category: "CompanyProfile",
-                    supplemental: 'ENABLED'
-                }
-            ],
-            edit: [{
-                    label: "Intent Attributes",
-                    category: "Intent",
-                    supplemesntal: 'ACTIVATED'
-                },{
-                    label: "Technology Profile Attributes",
-                    category: "Technology Profile",
-                    supplemental: 'ACTIVATED'
-                },{
-                    label: "My Attributes",
-                    category: "My Attributes",
-                    supplemental: 'ACTIVATED'
-                },{
-                    label: "Contact Attributes",
-                    category: "Contact Attributes",
-                    supplemental: 'ACTIVATED'
-                }
-            ]
+            overview: {},
+            buckets: {}
         };
     };
 
@@ -135,18 +75,34 @@ angular.module('common.attributes')
 
     this.getUsageLimit = function(overview, area) {
         var section = this.getSection();
-        var tabs = this.getTabMetadata(section);
-        var tab = tabs.filter(function(tab) {
-            return tab.label == area;
+        var tab = overview.Selections.filter(function(tab) {
+            return tab.DisplayName == area;
         })[0];
 
-        return overview.Selections[tab.category].Limit;
+        console.log(tab);
+
+        return tab.Limit;
     };
 
     this.putConfig = function(type, category, usage, data) {
         var deferred = $q.defer();
         
         AttrConfigService.putConfig(type, category, usage, data).then(function(data) {
+            deferred.resolve(data);
+        });
+
+        return deferred.promise;
+    };
+
+    this.readBucketData = function(category) {
+        return this.data.buckets;
+    };
+
+    this.getBucketData = function(category, subcategory) {
+        var deferred = $q.defer();
+        
+        AttrConfigService.getBucketData(category, subcategory).then(function(data) {
+            store.data.buckets[subcategory] = data.data;
             deferred.resolve(data);
         });
 
@@ -239,6 +195,19 @@ angular.module('common.attributes')
             method: 'GET',
             url: '/pls/attrconfig/' + section + '/config/category/' + category,
             params: params
+        }).then(function(response) {
+            deferred.resolve(response);
+        });
+        
+        return deferred.promise;
+    };
+
+    this.getBucketData = function(category, subcategory) {
+        var deferred = $q.defer();
+        
+        $http({
+            method: 'GET',
+            url: '/pls/attrconfig/stats/category/' + category + '/subcategory/' + subcategory
         }).then(function(response) {
             deferred.resolve(response);
         });

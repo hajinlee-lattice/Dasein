@@ -19,7 +19,11 @@ angular.module('common.attributes.controls', [])
             if (vm.section == 'enable') {
                 vm.store.setLimit(vm.store.getUsageLimit(vm.overview, vm.params.section));
             } else {
-                vm.store.setLimit(vm.overview[vm.params.category].Limit);
+                var tab = vm.overview.Selections.filter(function(tab) {
+                    return tab.DisplayName == vm.params.category;
+                })[0];
+                
+                vm.store.setLimit(tab.Limit);
             }
         };
 

@@ -1,6 +1,6 @@
 <div class="attr-results-container">
     <ul class="attr-pagination-top" ng-if="$ctrl.subcategory || filteredList.length > $ctrl.filters.pagesize">
-        <li class="attr-back-text pull-left" ng-if="$ctrl.subcategory">
+        <li class="attr-back-text pull-left" ng-if="$ctrl.subcategory && $ctrl.data.config.Subcategories.length != 1">
             <span ng-click="$ctrl.back()"><i class="fa fa-arrow-left"></i>Back</span>{{$ctrl.subcategory}}
         </li>
 
@@ -31,8 +31,10 @@
             </div>
 
             <div class="attr-result-label" ng-click="$ctrl.toggleAll()">
-                <label for="check_all">Attribute</label>
-                <span>({{$ctrl.getCount()|number}})</span>
+                <label for="check_all">
+                    Attribute
+                    <span>({{$ctrl.getCount()|number}})</span>
+                </label>
             </div>
         </li>
 
@@ -73,37 +75,48 @@
             </div>
 
             <div class="attr-result-label" ng-click="$ctrl.click(item)">
-                <label for="{{item.DisplayName}}">
-                    <i class="fa fa-exclamation-circle show-tooltip delay top left" ng-if="item.HasFrozenAttrs">
-                        <div class="tooltip_">
-                            <div class="cover">
-                                <em>Frozen Attributes:</em>
-                                <p>This category contains some Frozen Attributes that can not be altered</p>
+                <div class="attr-result-label-container">
+                    <label for="{{item.DisplayName}}">
+                        <i class="fa fa-exclamation-circle show-tooltip delay top left" ng-if="item.HasFrozenAttrs">
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <em>Frozen Attributes:</em>
+                                    <p>This category contains some Frozen Attributes that can not be altered</p>
+                                </div>
                             </div>
-                        </div>
-                    </i>
+                        </i>
 
-                    <i class="fa fa-info-circle show-tooltip delay top left" ng-if="$ctrl.isStartsDisabled(item)">
-                        <div class="tooltip_">
-                            <div class="cover">
-                                <em>Attribute Active:</em>
-                                <p>This attribute is Active and can not be disabled</p>
+                        <i class="fa fa-info-circle show-tooltip delay top left" ng-if="$ctrl.isStartsDisabled(item)">
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <em>Attribute Active:</em>
+                                    <p>This attribute is Active and can not be disabled</p>
+                                </div>
                             </div>
-                        </div>
-                    </i>
+                        </i>
 
-                    <span class="show-tooltip delay top left">
-                        <div class="tooltip_" ng-if="item.Description">
-                            <div class="cover">
-                                <em>Description:</em>
-                                <p>{{item.Description}}</p>
+                        <span class="show-tooltip delay top left">
+                            <div class="tooltip_" ng-if="item.Description">
+                                <div class="cover">
+                                    <em>Description:</em>
+                                    <p>{{item.Description}}</p>
+                                </div>
                             </div>
-                        </div>
-                        {{item.DisplayName}}
-                    </span>
-                </label>
+                            {{item.DisplayName}}
+                        </span>
 
-                <span ng-if="item.TotalAttrs">({{item.TotalAttrs|number}})</span>
+                        <span ng-if="item.TotalAttrs">({{item.TotalAttrs|number}})</span>
+                    </label>
+                </div>
+
+                <div class="attr-result-buckets-container">
+                    <ul class="attr-result-buckets" ng-if="$ctrl.subcategory">
+                        <li ng-repeat="bucket in $ctrl.getBuckets(item.Attribute) | orderBy: ['-Cnt','Lbl'] | limitTo: 3">
+                            <span>{{bucket.Lbl}}</span>
+                            <em>{{bucket.Cnt}}</em>
+                        </li>
+                    </ul>
+                </div>
                 
                 <i class="fa fa-chevron-right" ng-if="item.Attributes"></i>
             </div>

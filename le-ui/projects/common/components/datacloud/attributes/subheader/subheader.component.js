@@ -9,18 +9,9 @@ angular.module('common.attributes.subheader', [])
 
         vm.$onInit = function() {
             vm.section = AttrConfigStore.getSection();
-            vm.tabs = AttrConfigStore.getTabMetadata(vm.section);
-
-            if (vm.section == 'enable') {
-                vm.overview = vm.overview.Selections;
-            }
-
-            vm.tabs.forEach(function(item, index) {
-                item.Selected = item.Selected ? item.Selected : 0;
-                vm.tabs[index] = angular.extend({}, item, vm.overview[item.category]);
-            });
-
             vm.params = $stateParams;
+            vm.supplemental = vm.section == 'enable' ? 'ENABLED' : 'ACTIVE';
+            vm.tabs = vm.overview.Selections;
         };
 
         vm.click = function(name) {
@@ -54,8 +45,8 @@ angular.module('common.attributes.subheader', [])
         };
 
         vm.isActive = function(tab) {
-            var t_c = tab.category;
-            var t_l = tab.label;
+            var t_c = tab.DisplayName;
+            var t_l = tab.DisplayName;
             var p_c = vm.params.category;
             var p_s = vm.params.section;
             var act = vm.section == 'activate';

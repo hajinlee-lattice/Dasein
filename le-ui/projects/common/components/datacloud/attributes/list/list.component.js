@@ -9,6 +9,7 @@ angular.module('common.attributes.list', [])
         var vm = this;
 
         vm.store = AttrConfigStore;
+        vm.buckets = vm.store.readBucketData();
         vm.attributes = {};
         vm.indeterminate = {};
         vm.startChecked = {};
@@ -97,6 +98,11 @@ angular.module('common.attributes.list', [])
         };
 
         vm.getResults = function() {
+            if (vm.subcategory && !vm.buckets[vm.subcategory]) {
+                vm.buckets[vm.subcategory] = { Bkts: { List: [] } };
+                vm.store.getBucketData(vm.params.category, vm.subcategory);
+            }
+
             return vm.subcategory 
                 ? vm.attributes[vm.subcategory] 
                 : vm.data.config.Subcategories;
@@ -106,6 +112,16 @@ angular.module('common.attributes.list', [])
             return vm.subcategory 
                 ? vm.getSubcategory(vm.subcategory).TotalAttrs 
                 : vm.data.config.TotalAttrs;
+        };
+
+        vm.getBuckets = function(attribute) {
+            if (!vm.buckets[vm.subcategory]) {
+                return [];
+            }
+
+            var bucket = vm.buckets[vm.subcategory][attribute];
+
+            return bucket ? bucket.Bkts.List || [] : [];
         };
 
         vm.getSubcategory = function(name) {
