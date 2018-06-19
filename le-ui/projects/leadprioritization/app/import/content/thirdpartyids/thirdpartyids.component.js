@@ -4,6 +4,10 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     ResourceUtility, ImportWizardStore, Identifiers, FieldDocument
 ) {
     var vm = this;
+    var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
+    if(alreadySaved){
+        FieldDocument.fieldMappings = alreadySaved;
+    }
 
     angular.extend(vm, {
         identifiers: Identifiers,

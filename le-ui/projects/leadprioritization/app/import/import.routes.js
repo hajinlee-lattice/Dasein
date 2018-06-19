@@ -168,6 +168,10 @@ angular
         })
         .state('home.import.data.accounts.ids', {
             url: '/accountids',
+            onEnter: function($state, ImportWizardStore, FieldDocument){
+                ImportWizardStore.setSavedDocumentInState('home.import.data.accounts', FieldDocument.fieldMappings);
+                ImportWizardStore.setSavedDocumentInState('home.import.data.accounts.ids', FieldDocument.fieldMappings);
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
@@ -222,11 +226,9 @@ angular
             onEnter: function($state, ImportWizardStore, $transition$){
                 var from = $transition$._targetState._definition.parent.name;
                 if(from.includes('thirdpartyids')){
-                    ImportWizardStore.removeFromState('home.import.data.accounts.ids.thirdpartyids.latticefields');
-                    var startWith = ImportWizardStore.getSavedDocumentCopy('home.import.data.accounts.ids.thirdpartyids');
-                    ImportWizardStore.setSavedDocumentInState('home.import.data.accounts.ids.thirdpartyids.latticefields', startWith);
-                    // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current.name);
-                    // ImportWizardStore.removeSavedObjectFrom($state.current.name);
+                    // ImportWizardStore.removeFromState('home.import.data.accounts.ids.thirdpartyids.latticefields');
+                    var copy = ImportWizardStore.getSavedDocumentCopy('home.import.data.accounts.ids.thirdpartyids');
+                    ImportWizardStore.setSavedDocumentInState('home.import.data.accounts.ids.thirdpartyids.latticefields', copy);
                 }
             },
             resolve: {
@@ -278,7 +280,6 @@ angular
                 ImportWizardStore.setIgnore([]);
                 var to = $transition$._targetState._definition.name;
                 if(to === 'home.import.data.accounts.ids.thirdpartyids.latticefields'){
-                    // ImportWizardStore.saveDocumentFields('home.import.data.accounts.ids.thirdpartyids.latticefields');
                     ImportWizardStore.removeFromState('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields');
                 }
                 
@@ -308,7 +309,7 @@ angular
             }
         })
         .state('home.import.data.contacts', {
-            url: '/accounts',
+            url: '/contacts',
             resolve: {
                 WizardValidationStore: function(ImportWizardStore) {
                     return ImportWizardStore;
@@ -344,10 +345,16 @@ angular
         })
         .state('home.import.data.contacts.ids', {
             url: '/contactids',
+            onEnter: function($state, ImportWizardStore, FieldDocument){
+                ImportWizardStore.setSavedDocumentInState('home.import.data.contacts', FieldDocument.fieldMappings);
+                ImportWizardStore.setSavedDocumentInState('home.import.data.contacts.ids', FieldDocument.fieldMappings);
+                // ImportWizardStore.removeFromState('home.import.data.contacts.ids');
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
                     ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                        // console.log(result.Result);
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -374,13 +381,13 @@ angular
         })
         .state('home.import.data.contacts.ids.latticefields', {
             url: '/latticefields',
-            onEnter: function($state, ImportWizardStore, $transition$){
-                var from = $transition$._targetState._definition.parent.name;
-                if(from.includes('ids')){
-                    ImportWizardStore.removeFromState($state.current.name);
-                    // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current.name);
-                    // ImportWizardStore.removeSavedObjectFrom($state.current.name);
+            onExit: function($transition$, ImportWizardStore){
+                ImportWizardStore.setIgnore([]);
+                var to = $transition$._targetState._definition.name;
+                if(to === 'home.import.data.contacts.ids'){
+                    ImportWizardStore.removeFromState('home.import.data.contacts.ids.latticefields');
                 }
+                
             },
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {

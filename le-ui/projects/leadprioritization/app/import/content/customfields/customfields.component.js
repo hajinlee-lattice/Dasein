@@ -52,8 +52,9 @@ angular.module('lp.import.wizard.customfields', [])
             if(ignore == false){
                 ignore = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), element.userField, ImportWizardStore.fieldDocument.fieldMappings);
             }
-            if(ignore === true){
-                var name = element.userField;
+            var name = element.userField;
+            if(ignore === true && $scope.fieldMapping[name]){
+                // console.log(name);
                 $scope.fieldMapping[name].ignore = true;
                 element.defaultIgnored = true;
                 vm.defaultsIgnored.push(element);

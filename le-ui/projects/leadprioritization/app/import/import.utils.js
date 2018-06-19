@@ -30,6 +30,16 @@ angular.module('lp.import.utils', [])
             entity.list.push(fieldObj);
         });
     }
+    
+    function isFieldPartOfSchema(entity, fieldName){
+        var entityObj = latticeSchema[entity];
+        var map = entityObj.map;
+        if(map[fieldName]){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
     function isFieldMapped(entity, fieldName, fieldsMapped){
         var mapped = false;
@@ -75,30 +85,34 @@ angular.module('lp.import.utils', [])
         return inschema;
     };
 
-    function setMapping(savedObj, fieldsMapped){
+    function setMapping(entity, savedObj, fieldsMapped){
         var keysMapped = Object.keys(fieldsMapped);
         keysMapped.forEach(function(mapped){
             if(savedObj.mappedField === fieldsMapped[mapped].mappedField && 
                 savedObj.userField !== fieldsMapped[mapped].userField){
                 fieldsMapped[mapped].mappedField =  null;
                 fieldsMapped[mapped].mappedToLatticeField = false;
-                fieldsMapped[mapped].cdlExternalSystemType = null;
             }
             if(savedObj.userField === fieldsMapped[mapped].userField){
                 fieldsMapped[mapped].mappedField = savedObj.mappedField;
-                fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
+                fieldsMapped[mapped].mappedToLatticeField = isFieldPartOfSchema(entity, savedObj.mappedField);
+                if(savedObj.cdlExternalSystemType){
+                    fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
+                }
             }
         });
     }
    
-    this.updateDocumentMapping = function(savedObj, fieldsMapping){
+    this.updateDocumentMapping = function(entity, savedObj, fieldsMapping){
         if(savedObj && fieldsMapping){
             var keysSaved = Object.keys(savedObj);
             
             keysSaved.forEach(function(keySaved){
-                setMapping(savedObj[keySaved], fieldsMapping);
+                setMapping(entity, savedObj[keySaved], fieldsMapping);
             });
         }
+
+        // console.log(fieldsMapping);
     };
 
 

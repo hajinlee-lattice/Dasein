@@ -66,7 +66,7 @@ angular.module('lp.import')
                 state: 'accounts.ids.thirdpartyids.latticefields', 
                 nextLabel: 'Next, Add Custom Fields',
                 nextFn: function(nextState) {
-                    ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
+                    // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
@@ -74,9 +74,13 @@ angular.module('lp.import')
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields', 
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
-                        ImportWizardStore.setValidation('jobstatus', true);                
+                    ImportWizardStore.nextSaveMapping();
+                    ImportWizardStore.saveDocument(nextState, function(){
+                        ImportWizardStore.setValidation('jobstatus', true); 
                     });
+                    // ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
+                    //     ImportWizardStore.setValidation('jobstatus', true);                
+                    // });
                 }
             },{ 
                 label: 'Import File', 
@@ -104,7 +108,7 @@ angular.module('lp.import')
                 state: 'contacts.ids.latticefields', 
                 nextLabel: 'Next, Add Custom Fields', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
+                    // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
@@ -112,9 +116,13 @@ angular.module('lp.import')
                 state: 'contacts.ids.latticefields.customfields', 
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
-                        ImportWizardStore.setValidation('jobstatus', true);                
+                    ImportWizardStore.nextSaveMapping();
+                    ImportWizardStore.saveDocument(nextState, function(){
+                        ImportWizardStore.setValidation('jobstatus', true); 
                     });
+                    // ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
+                    //     ImportWizardStore.setValidation('jobstatus', true);                
+                    // });
                 }
             },{ 
                 label: 'Import File', 
@@ -237,9 +245,32 @@ angular.module('lp.import')
 
     this.nextSaveMapping = function(nextState) {
         this.saveDocumentFields($state.current.name);
-        this.saveDocumentFields(nextState);
-        $state.go(nextState);
+        
+        // this.saveDocumentFields(nextState);
+        if(nextState){
+            var copyFormer = this.getSavedDocumentCopy($state.current.name);
+            this.fieldDocumentSaved[nextState] = copyFormer;
+            $state.go(nextState);
+        }
     }
+
+    /**
+     * TO DO:
+     * 
+     */
+    this.saveDocument = function(nextState, callback){
+        var callback = (typeof callback === 'function' ? callback : function(){});
+        ImportWizardStore.fieldDocument.fieldMappings = this.getSavedDocumentCopy($state.current.name);
+        if(ImportWizardStore.fieldDocument.ignoredFields === null){
+            ImportWizardStore.fieldDocument.ignoredFields = [];
+        }
+        // var doc = this.getSavedDocumentCopy($state.current.name);
+        ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument(), {
+            feedType: ImportWizardStore.getFeedType(),
+            entity: ImportWizardStore.getEntityType()
+        }).then(callback);
+        $state.go(nextState);
+    };
 
     this.nextSaveFieldDocuments = function(nextState, callback) {
         var callback = (typeof callback === 'function' ? callback : function(){});
@@ -253,6 +284,7 @@ angular.module('lp.import')
         })
 
     }
+
 
     this.mergeFieldDocument = function(opts) {
             var deferred = $q.defer(),
@@ -427,10 +459,26 @@ angular.module('lp.import')
         this.saveObjects[key] = object;
     };
 
+    function getFormerState(state){
+        var period = state.lastIndexOf('.');
+        var formerState = state.substring(0, period);
+        return formerState;
+    }
     this.saveDocumentFields = function(state){
-        var copy = this.getFieldDocument(true).fieldMappings;
-        ImportUtils.updateDocumentMapping(this.saveObjects[state], copy);
-        this.fieldDocumentSaved[state] = copy;
+        if(this.saveObjects[state]){
+            var copy = this.getSavedDocumentCopy(getFormerState(state));// this.getFieldDocument(true).fieldMappings;
+            ImportUtils.updateDocumentMapping(ImportWizardStore.getEntityType(), this.saveObjects[state], copy);
+            if(copy){
+                this.fieldDocumentSaved[state] = copy;
+            }
+        }else{
+            var period = state.lastIndexOf('.');
+            var formerState = state.substring(0, period);
+            var copyDoc = this.getSavedDocumentCopy(formerState);
+            if(copyDoc){
+                this.fieldDocumentSaved[state] = copyDoc;
+            }
+        }
     };
 
     this.getSavedDocumentCopy = function(state){
