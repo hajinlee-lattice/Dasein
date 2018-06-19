@@ -714,13 +714,22 @@ public class ModelRetrieverImpl implements ModelRetriever {
             for (ModelSummary modelSummary : modelSummaries) {
                 ModelDetail modelDetail = null;
 
-                try {
-                    modelDetail = modelDetailsCache.getCache().get(createModelKey(customerSpace, modelSummary.getId()));
-                } catch (Exception e) {
-                    // skip the bad model
-                    log.error(String.format("Error converting model summary to model detail for model summary: %s",
-                            modelSummary.getId()));
-                    continue;
+                if (modelSummary.getStatus() == ModelSummaryStatus.DELETED) {
+                    log.info(String.format(
+                            "Creating model detail with known information for model summary: %s with status: %s.",
+                            modelSummary.getId(), modelSummary.getStatus().name()));
+                    modelDetail = createDefaultModelDetail(modelSummary);
+                } else {
+                    try {
+                        modelDetail = modelDetailsCache.getCache()
+                                .get(createModelKey(customerSpace, modelSummary.getId()));
+                    } catch (Exception e) {
+                        // log the error and create default model details object
+                        log.error(String.format(
+                                "Error converting model summary to model detail for model summary: %s with status: %s. Creating model detail with known information.",
+                                modelSummary.getId(), modelSummary.getStatus().name()), e.getMessage());
+                        modelDetail = createDefaultModelDetail(modelSummary);
+                    }
                 }
                 modelDetail.getModel().setName(modelSummary.getDisplayName());
                 modelDetail.setStatus(modelSummary.getStatus());
@@ -728,6 +737,15 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 models.add(modelDetail);
             }
         }
+    }
+
+    private ModelDetail createDefaultModelDetail(ModelSummary modelSummary) {
+        ModelDetail modelDetail;
+        modelDetail = new ModelDetail();
+        ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
+        Model model = new Model(modelSummary.getId(), modelSummary.getDisplayName(), modelType);
+        modelDetail.setModel(model);
+        return modelDetail;
     }
 
     ModelDetail loadModelDetailViaCache(CustomerSpace customerSpace, String modelId) {
