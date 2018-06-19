@@ -128,12 +128,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         if (ratingModel.getTrainingSegment() != null) {
             segments.add(ratingModel.getTrainingSegment());
         }
-        RatingEngine parentEngine = ratingModel.getRatingEngine();
-        if (parentEngine != null) {
-            MetadataSegment segment = parentEngine.getSegment();
-            if (segment != null) {
-                segments.add(segment);
-            }
+        MetadataSegment segment = aiModelEntityMgr.inflateParentSegment(ratingModel);
+        if (segment != null) {
+            segments.add(segment);
         }
         ratingModel.setRatingModelAttributes(new HashSet<>(segmentService.findDependingAttributes(segments)));
     }

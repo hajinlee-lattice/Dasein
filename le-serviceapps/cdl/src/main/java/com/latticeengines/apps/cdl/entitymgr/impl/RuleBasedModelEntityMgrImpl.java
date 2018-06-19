@@ -16,6 +16,7 @@ import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -39,7 +40,7 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public RuleBasedModel createOrUpdateRuleBasedModel(RuleBasedModel ruleBasedModel, String ratingEngineId) {
         if (ruleBasedModel.getId() == null) {
             ruleBasedModel.setId(RuleBasedModel.generateIdStr());
@@ -95,7 +96,7 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RuleBasedModel> findAllByRatingEngineId(String ratingEngineid) {
         RatingEngine ratingEngine = ratingEngineDao.findById(ratingEngineid);
         if (ratingEngine == null || ratingEngine.getPid() == null) {
@@ -106,13 +107,13 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public RuleBasedModel findById(String id) {
         return ruleBasedModelDao.findById(id);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteById(String id) {
         RuleBasedModel entity = findById(id);
         if (entity == null) {
@@ -122,12 +123,18 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteRuleBasedModel(RuleBasedModel ruleBasedModel) {
         if (ruleBasedModel == null) {
             throw new NullPointerException("RuleBasedModel cannot be found");
         }
         super.delete(ruleBasedModel);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public MetadataSegment inflateParentSegment(RuleBasedModel ruleBasedModel) {
+        return ruleBasedModelDao.findParentSegmentById(ruleBasedModel.getId());
     }
 
 }

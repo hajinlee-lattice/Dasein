@@ -14,11 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.service.RuleBasedModelService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -72,12 +72,9 @@ public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedM
                 attributes.addAll(RestrictionUtils.getRestrictionDependingAttributes(entry.getValue()));
             }
         }
-        RatingEngine parentEngine = ratingModel.getRatingEngine();
-        if (parentEngine != null) {
-            MetadataSegment segment = parentEngine.getSegment();
-            if (segment != null) {
-                attributes.addAll(segmentService.findDependingAttributes(Collections.singletonList(segment)));
-            }
+        MetadataSegment segment = ruleBasedModelEntityMgr.inflateParentSegment(ratingModel);
+        if (segment != null) {
+            attributes.addAll(segmentService.findDependingAttributes(Collections.singletonList(segment)));
         }
         ratingModel.setRatingModelAttributes(attributes);
     }

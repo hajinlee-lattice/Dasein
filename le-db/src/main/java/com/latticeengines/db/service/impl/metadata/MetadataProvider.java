@@ -58,6 +58,7 @@ public abstract class MetadataProvider {
             url = creds.getDecryptedPassword() != null ? url.replaceFirst("\\$\\$PASSWD\\$\\$",
                     creds.getDecryptedPassword()) : url;
             url = creds.getInstance() != null ? url.replaceFirst("\\$\\$INSTANCE\\$\\$", creds.getInstance()) : url;
+
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
             throw new LedpException(LedpCode.LEDP_11001, e);

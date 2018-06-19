@@ -1,8 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -60,7 +57,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     private String rbRatingEngineId;
 
     @BeforeClass(groups = "deployment")
-    public void setup() throws KeyManagementException, NoSuchAlgorithmException, IOException {
+    public void setup() {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId());
 
@@ -156,14 +153,14 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     private void testGetDependentAttrsInAllModels() {
         List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(rbRatingEngineId);
         Assert.assertNotNull(attributes);
-        Assert.assertEquals(attributes.size(), 2);
+        Assert.assertEquals(attributes.size(), 4);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInAllModels" })
     private void testGetDependentAttrsInActiveModel() {
         List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(rbRatingEngineId);
         Assert.assertNotNull(attributes);
-        Assert.assertEquals(attributes.size(), 2);
+        Assert.assertEquals(attributes.size(), 4);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInActiveModel" })

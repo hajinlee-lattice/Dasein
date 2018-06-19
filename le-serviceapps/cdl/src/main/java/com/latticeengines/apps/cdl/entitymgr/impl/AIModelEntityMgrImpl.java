@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +81,12 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
                 return retrievedAIModel;
             }
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public MetadataSegment inflateParentSegment(AIModel aiModel) {
+        return aiModelDao.findParentSegmentById(aiModel.getId());
     }
 
     private void updateExistingAIModel(AIModel retrievedAIModel, AIModel aiModel, String ratingEngineId) {
