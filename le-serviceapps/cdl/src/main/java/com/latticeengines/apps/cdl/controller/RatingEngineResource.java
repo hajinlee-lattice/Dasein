@@ -364,7 +364,7 @@ public class RatingEngineResource {
     public void setScoringIteration(@PathVariable String customerSpace, //
             @PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId, //
-            @RequestBody List<BucketMetadata> bucketMetadatas) {
+            @RequestBody(required = false) List<BucketMetadata> bucketMetadatas) {
         ratingEngineService.setScoringIteration(ratingEngineId, ratingModelId, bucketMetadatas);
     }
 
@@ -439,8 +439,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
     public List<AttributeLookup> getDependingAttrsForModel(@PathVariable String customerSpace,
-                                                              @PathVariable RatingEngineType engineType,
-                                                              @PathVariable String modelId) {
+            @PathVariable RatingEngineType engineType, @PathVariable String modelId) {
         return ratingEngineService.getDependingAttrsInModel(engineType, modelId);
     }
 

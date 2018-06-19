@@ -322,6 +322,11 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         createdDate = ratingEngine.getCreated();
         updatedDate = ratingEngine.getUpdated();
 
+        RatingEngine re = new RatingEngine();
+        re.setId(ratingEngine.getId());
+        re.setScoringIteration(ratingEngine.getLatestIteration());
+        createOrUpdate(re);
+
         // test update rating engine
         ratingEngine.setDisplayName(RATING_ENGINE_NAME);
         ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
@@ -363,8 +368,17 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
             Assert.assertNotEquals(replicated.getActiveModel().getId(), original.getActiveModel().getId());
         }
 
+        if (original.getLatestIteration() != null) {
+            Assert.assertNotNull(replicated.getLatestIteration());
+            Assert.assertNotEquals(replicated.getLatestIteration().getId(), original.getLatestIteration().getId());
+        }
+
+        Assert.assertNull(replicated.getScoringIteration());
+        Assert.assertNull(replicated.getPublishedIteration());
+
         Assert.assertNotEquals(replicated.getId(), original.getId());
         Assert.assertNotEquals(replicated.getDisplayName(), original.getDisplayName());
+        Assert.assertEquals(replicated.getType(), original.getType());
 
         Assert.assertTrue(CollectionUtils.isEmpty(replicated.getRatingEngineNotes()));
 
@@ -373,8 +387,8 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
             Assert.assertEquals(replicated.getSegment().getName(), original.getSegment().getName());
         }
         Assert.assertEquals(replicated.getType(), original.getType());
-        Assert.assertEquals(replicated.getStatus(), original.getStatus());
-        Assert.assertEquals(replicated.getDeleted(), original.getDeleted());
+        Assert.assertEquals(replicated.getStatus(), RatingEngineStatus.INACTIVE);
+        Assert.assertFalse(replicated.getDeleted());
         Assert.assertEquals(replicated.getAdvancedRatingConfigStr(), original.getAdvancedRatingConfigStr());
     }
 

@@ -14,12 +14,22 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("lpiPMPlay")
 public class LpiPMPlayImpl implements LpiPMPlay {
@@ -32,6 +42,14 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     @Inject
     private PlayProxy playProxy;
 
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private EntityProxy entityProxy;
+
+    private static List<Map<String, Object>> allProducts;
+
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
         // following API has sub-second performance even for large number of
@@ -42,12 +60,23 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         PlayLaunchDashboard dashboard = playProxy.getPlayLaunchDashboard(
                 MultiTenantContext.getCustomerSpace().toString(), null, null, 0L, 0L, 1L, null, null, null, null, null);
         List<Play> plays = dashboard.getUniquePlaysWithLaunches();
-
+        allProducts = allProducts == null ? getAllProducts() : allProducts;
         return handlePagination(start, offset, maximum, plays);
     }
 
+    private List<Map<String, Object>> getAllProducts() {
+        FrontEndQuery query = new FrontEndQuery();
+        query.setAccountRestriction(null);
+        query.setContactRestriction(null);
+        query.addLookups(BusinessEntity.Product, InterfaceName.ProductId.name());
+        query.addLookups(BusinessEntity.Product, InterfaceName.ProductName.name());
+        query.setMainEntity(BusinessEntity.Product);
+
+        return entityProxy.getData(MultiTenantContext.getCustomerSpace().toString(), query).getData();
+    }
+
     private List<Map<String, Object>> handlePagination(long start, int offset, int maximum, List<Play> plays) {
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> result = new ArrayList<>();
         int skipped = 0;
         int rowNum = offset + 1;
 
@@ -76,30 +105,70 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         playMap.put(PlaymakerConstants.AverageProbability, null);
         playMap.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY, secondsFromEpoch(play));
         playMap.put(PlaymakerConstants.PlayGroups, null);
-        playMap.put(PlaymakerConstants.TargetProducts, dummyTargetProducts());
-        playMap.put(PlaymakerConstants.Workflow, dummyWorkfowType());
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getCustomerSpace().toString(),
+                play.getRatingEngine().getId());
+        playMap.put(PlaymakerConstants.TargetProducts, getTargetProducts(ratingEngine));
+        playMap.put(PlaymakerConstants.Workflow, getPlayWorkFlowType(ratingEngine));
+
         playMap.put(PlaymakerConstants.RowNum, rowNum);
         result.add(playMap);
         return playMap;
     }
 
-    // TODO - remove following when we have workflow type defined for plays
-    private String dummyWorkfowType() {
-        return PlaymakerConstants.DefaultWorkflowType;
+    private String getPlayWorkFlowType(RatingEngine ratingEngine) {
+        try {
+            switch (ratingEngine.getType()) {
+            case RULE_BASED:
+                return "List";
+            case CUSTOM_EVENT:
+            case PROSPECTING:
+                return "Prospecting";
+            case CROSS_SELL:
+                ModelingStrategy strategy = ((CrossSellModelingConfig) ((AIModel) ratingEngine.getPublishedIteration())
+                        .getAdvancedModelingConfig()).getModelingStrategy();
+                if (strategy == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE) {
+                    return "Cross-sell";
+                }
+                if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
+                    return "Upsell";
+                }
+            default:
+                return "List";
+            }
+        } catch (Exception e) {
+            log.error("Failed to get the correct PlayType.", e);
+            return "List";
+        }
     }
 
     // TODO - remove following when we have products associated with plays
-    private List<Map<String, String>> dummyTargetProducts() {
-        List<Map<String, String>> products = new ArrayList<>();
-        Map<String, String> prod1 = new HashMap<>();
-        prod1.put(PlaymakerConstants.DisplayName, "Series K Disk");
-        prod1.put(PlaymakerConstants.ExternalName, "NETSUITE-SRSK");
-        products.add(prod1);
-        Map<String, String> prod2 = new HashMap<>();
-        prod2.put(PlaymakerConstants.DisplayName, "Series L Disk");
-        prod2.put(PlaymakerConstants.ExternalName, "NETSUITE-SRSL");
-        products.add(prod2);
-        return products;
+    private List<Map<String, String>> getTargetProducts(RatingEngine ratingEngine) {
+        if (ratingEngine == null) {
+            return null;
+        }
+        if (ratingEngine.getType() != RatingEngineType.CROSS_SELL) {
+            return null;
+        }
+
+        List<String> targetProductIds = ((CrossSellModelingConfig) ((AIModel) ratingEngine.getPublishedIteration())
+                .getAdvancedModelingConfig()).getTargetProducts();
+        List<Map<String, String>> toReturn = new ArrayList<>();
+
+        targetProductIds.forEach(productId -> {
+            Map<String, Object> foundProduct = findProductById(productId);
+            if (foundProduct != null) {
+                HashMap<String, String> prod = new HashMap<>();
+                prod.put(PlaymakerConstants.DisplayName, (String) foundProduct.get(InterfaceName.ProductName.name()));
+                prod.put(PlaymakerConstants.ExternalName, (String) foundProduct.get(InterfaceName.ProductId.name()));
+                toReturn.add(prod);
+            }
+        });
+        return toReturn;
+    }
+
+    private Map<String, Object> findProductById(String toFind) {
+        return allProducts.stream().filter(prod -> prod.get(InterfaceName.ProductId.name()).equals(toFind)).findFirst()
+                .get();
     }
 
     private long secondsFromEpoch(Play play) {

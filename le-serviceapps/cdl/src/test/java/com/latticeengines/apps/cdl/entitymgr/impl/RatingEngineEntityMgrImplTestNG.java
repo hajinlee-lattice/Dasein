@@ -228,8 +228,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         RatingEngine re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
         re.setNote(RATING_ENGINE_NEW_NOTE);
-        re.setStatus(RatingEngineStatus.ACTIVE);
         re.setId(ratingEngine.getId());
+        re.setStatus(RatingEngineStatus.ACTIVE);
         re.setScoringIteration(ratingEngine.getLatestIteration());
         re.setCountsByMap(ImmutableMap.of( //
                 RatingBucketName.A.getName(), 1L, //
@@ -249,13 +249,17 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 + ratingEngineEntityMgr.findById(ratingEngine.getId()).getUpdated());
         log.info("The create date for the newly updated one is " + createdRatingEngine.getCreated());
 
+        // Ai Ratings set scoring Iteration first, then mark them as active
         re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
         re.setNote(RATING_ENGINE_NEW_NOTE);
-        re.setStatus(RatingEngineStatus.ACTIVE);
         re.setId(aiRatingEngine.getId());
         re.setScoringIteration(aiRatingEngine.getLatestIteration());
+        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
 
+        re = new RatingEngine();
+        re.setId(aiRatingEngine.getId());
+        re.setStatus(RatingEngineStatus.ACTIVE);
         createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);

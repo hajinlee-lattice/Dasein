@@ -267,67 +267,68 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             String ratingEngineId = ratingEngine.getId();
             log.info(String.format("Replicating rating engine %s (%s)", ratingEngineId, ratingEngine.getDisplayName()));
 
-            RatingModel activeModel = ratingEngine.getActiveModel();
-            ratingEngine.setPid(null);
-            ratingEngine.setId(null);
-            ratingEngine.setActiveModel(null);
-            ratingEngine.setActiveModelPid(null);
+            RatingModel latestIteration = ratingEngine.getLatestIteration();
+            RatingEngine copy = new RatingEngine();
             String displayName = ratingEngine.getDisplayName();
-            ratingEngine.setDisplayName(generateReplicaName(displayName));
-            ratingEngine.setRatingEngineNotes(null);
-            RatingEngine replicatedEngine = createOrUpdate(ratingEngine);
-            log.info("Replicated rating engine " + ratingEngineId + " to " + replicatedEngine.getId());
+            copy.setDisplayName(generateReplicaName(displayName));
+            copy.setType(ratingEngine.getType());
+            copy.setSegment(ratingEngine.getSegment());
+            copy.setStatus(RatingEngineStatus.INACTIVE);
+            copy.setTenant(ratingEngine.getTenant());
+            copy.setAdvancedRatingConfig(ratingEngine.getAdvancedRatingConfig());
+            copy.setCreatedBy(ratingEngine.getCreatedBy());
 
-            if (activeModel != null) {
-                log.info("Replicating active model " + activeModel.getId() + " for replicated engine "
-                        + ratingEngine.getId() + "(" + ratingEngine.getDisplayName() + ")");
-                RatingModel replicatedModel = replicateRatingModel(replicatedEngine, activeModel);
-                createOrUpdate(replicatedEngine);
-                log.info("Replicated an active model " + replicatedModel.getId() + " in replicated engine "
-                        + ratingEngine.getId() + "(" + ratingEngine.getDisplayName() + ")");
+            copy = createOrUpdate(copy);
+            log.info("Replicated rating engine " + ratingEngineId + " to " + copy.getId());
+
+            if (latestIteration != null) {
+                log.info("Replicating latest Iteration " + latestIteration.getId() + " for replicated engine "
+                        + copy.getId() + "(" + copy.getDisplayName() + ")");
+                RatingModel replicatedModel = replicateRatingModel(copy.getLatestIteration(), latestIteration,
+                        copy.getType());
+                log.info("Replicated the latest iteration " + replicatedModel.getId() + " in replicated engine "
+                        + copy.getId() + "(" + copy.getDisplayName() + ")");
             }
-            return replicatedEngine;
+            return copy;
         } else {
             return null;
         }
     }
 
-    private RatingModel replicateRatingModel(RatingEngine ratingEngine, RatingModel model) {
-        RatingModel replicatedModel;
-        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
-            replicatedModel = replicateRuleBasedModel(ratingEngine, (RuleBasedModel) model);
+    private RatingModel replicateRatingModel(RatingModel copy, RatingModel original, RatingEngineType type) {
+        if (type == RatingEngineType.RULE_BASED) {
+            return replicateRuleBasedModel((RuleBasedModel) copy, (RuleBasedModel) original);
         } else {
-            replicatedModel = replicateAIModel(ratingEngine, (AIModel) model);
+            return replicateAIModel((AIModel) copy, (AIModel) original, type);
         }
-        return replicatedModel;
     }
 
     @SuppressWarnings("unchecked")
-    private AIModel replicateAIModel(RatingEngine ratingEngine, AIModel model) {
-        AIModel activeModel = (AIModel) ratingEngine.getActiveModel();
-        model.setPid(null);
-        model.setId(activeModel.getId());
-        model.setRatingEngine(ratingEngine);
-        if (StringUtils.isNotBlank(model.getModelSummaryId())) {
+    private AIModel replicateAIModel(AIModel copy, AIModel original, RatingEngineType type) {
+        copy.setAdvancedModelingConfig(original.getAdvancedModelingConfig());
+        copy.setModelingJobStatus(original.getModelingJobStatus());
+        copy.setPredictionType(original.getPredictionType());
+        copy.setTrainingSegment(original.getTrainingSegment());
+        copy.setRatingModelAttributes(original.getRatingModelAttributes());
+        if (StringUtils.isNotBlank(original.getModelSummaryId())) {
             String tenantId = MultiTenantContext.getTenant().getId();
-            String replicatedModelGUID = modelCopyProxy.copyModel(tenantId, tenantId, model.getModelSummaryId());
+            String replicatedModelGUID = modelCopyProxy.copyModel(tenantId, tenantId, original.getModelSummaryId());
             modelSummaryProxy.setDownloadFlag(tenantId);
-            model.setModelSummaryId(replicatedModelGUID);
+            copy.setModelSummaryId(replicatedModelGUID);
         }
-        RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
-                .getRatingModelService(ratingEngine.getType());
-        return ratingModelService.createOrUpdate(model, ratingEngine.getId());
+        RatingModelService<AIModel> ratingModelService = RatingModelServiceBase.getRatingModelService(type);
+        return ratingModelService.createOrUpdate(copy, copy.getId());
     }
 
     @SuppressWarnings("unchecked")
-    private RuleBasedModel replicateRuleBasedModel(RatingEngine ratingEngine, RuleBasedModel model) {
-        RuleBasedModel activeModel = (RuleBasedModel) ratingEngine.getActiveModel();
-        model.setPid(null);
-        model.setId(activeModel.getId());
-        model.setRatingEngine(ratingEngine);
+    private RuleBasedModel replicateRuleBasedModel(RuleBasedModel copy, RuleBasedModel original) {
+        copy.setRatingRule(original.getRatingRule());
+        copy.setSelectedAttributes(original.getSelectedAttributes());
+        copy.setRatingModelAttributes(original.getRatingModelAttributes());
+
         RatingModelService<RuleBasedModel> ratingModelService = RatingModelServiceBase
-                .getRatingModelService(ratingEngine.getType());
-        return ratingModelService.createOrUpdate(model, ratingEngine.getId());
+                .getRatingModelService(RatingEngineType.RULE_BASED);
+        return ratingModelService.createOrUpdate(copy, copy.getRatingEngine().getId());
     }
 
     @Override

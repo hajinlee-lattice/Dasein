@@ -113,8 +113,9 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         // set Rating Engine to active to mimic the fact this Rating Engine is
         // complete.
-        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
         ratingEngine.setScoringIteration(createdRatingEngine.getLatestIteration());
+        ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
+        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
         ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
 
         ruleBasedModel.setRatingRule(generateRatingRule());

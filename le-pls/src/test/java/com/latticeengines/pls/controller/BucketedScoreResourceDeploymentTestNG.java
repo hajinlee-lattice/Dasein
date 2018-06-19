@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -65,14 +66,18 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
 
         re1 = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(),
                 createAIRatingEngine(retrievedSegment, RatingEngineType.CROSS_SELL));
+        ((AIModel) re1.getLatestIteration()).setModelSummaryId("SomeModelSUmmaryId");
+        ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), re1.getId(), re1.getLatestIteration().getId(),
+                re1.getLatestIteration());
 
         modelGuid = String.format("ms__%s__LETest", UUID.randomUUID().toString());
         ModelSummary modelSummary = createModelSummary(modelGuid, mainTestTenant);
         modelSummaryEntityMgr.create(modelSummary);
 
         AIModel ratingModel = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(), re1.getId(),
-                re1.getActiveModel().getId());
+                re1.getLatestIteration().getId());
         ratingModel.setModelSummaryId(modelGuid);
+        ratingModel.setModelingJobStatus(JobStatus.COMPLETED);
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), re1.getId(), ratingModel.getId(), ratingModel);
     }
 
@@ -80,8 +85,8 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
     @Test(groups = "deployment")
     public void testCreate() throws InterruptedException {
         List<BucketMetadata> list = BucketedMetadataTestUtils.generateDefaultBucketMetadataList();
-        restTemplate.postForObject(getRestAPIHostPort() + "/pls/bucketedscore/abcdbuckets/ratingengine/" + re1.getId()
-                + "/model/" + modelGuid, list, Void.class);
+        restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "/ratingmodels/"
+                + re1.getLatestIteration().getId() + "/setScoringIteration", list, Void.class);
         Thread.sleep(500);
 
         Map<Long, List<BucketMetadata>> history = restTemplate.getForObject(

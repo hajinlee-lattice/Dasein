@@ -231,7 +231,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Set the given ratingmodel as the Scoring Iteration for the given rating engine")
     public void setScoringIteration(@PathVariable String ratingEngineId, //
-            @PathVariable String ratingModelId, @RequestBody List<BucketMetadata> bucketMetadatas) {
+            @PathVariable String ratingModelId, @RequestBody(required = false) List<BucketMetadata> bucketMetadatas) {
         Tenant tenant = MultiTenantContext.getTenant();
         ratingEngineProxy.setScoringIteration(tenant.getId(), ratingEngineId, ratingModelId, bucketMetadatas);
     }

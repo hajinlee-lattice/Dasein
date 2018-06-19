@@ -303,6 +303,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
 
         // Check active model of Rating Engine
         if (ratingEngine.getStatus() == RatingEngineStatus.ACTIVE
+                && retrievedRatingEngine.getType() != RatingEngineType.RULE_BASED
                 && retrievedRatingEngine.getScoringIteration() == null) {
             log.error(String.format("No scoring iteration set for Rating Engine: %s", retrievedRatingEngine.getId()));
             throw new LedpException(LedpCode.LEDP_18186, new String[] { retrievedRatingEngine.getDisplayName() });
@@ -402,7 +403,6 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
         ratingEngine.setActiveModel(ruleBasedModel);
         ratingEngine.setLatestIteration(ruleBasedModel);
-        ratingEngine.setScoringIteration(ruleBasedModel);
         ratingEngineDao.update(ratingEngine);
     }
 

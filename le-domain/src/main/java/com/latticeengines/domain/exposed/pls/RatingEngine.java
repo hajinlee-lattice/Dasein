@@ -127,23 +127,15 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private Date lastRefreshedDate;
 
-    private Boolean justCreated = true;
-
     private AdvancedRatingConfig advancedRatingConfig;
 
     private List<BucketMetadata> bucketMetadata;
 
     private RatingModel latestIteration;
 
-    private Long latestIterationPid;
-
     private RatingModel scoringIteration;
 
-    private Long scoringIterationPid;
-
     private RatingModel publishedIteration;
-
-    private Long publishedIterationPid;
 
     @Override
     @JsonProperty("pid")

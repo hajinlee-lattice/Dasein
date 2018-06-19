@@ -47,7 +47,7 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
             String aiModelId = job.getInputContextValue(WorkflowContextConstants.Inputs.RATING_MODEL_ID);
             if (ratingEngineId != null) {
                 ratingEngineProxy.updateModelingStatus(tenantId, ratingEngineId, aiModelId,
-                        JobStatus.fromString(job.getStatus()));
+                        JobStatus.fromString(jobExecution.getStatus().name()));
                 RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenantId, ratingEngineId);
                 emailInfo.setModelId(ratingEngine != null ? ratingEngine.getDisplayName() : modelName);
             } else {
