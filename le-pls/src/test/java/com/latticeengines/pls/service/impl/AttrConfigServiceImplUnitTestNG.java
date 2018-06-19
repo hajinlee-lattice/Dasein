@@ -30,9 +30,10 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
-import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
+import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -106,10 +107,11 @@ public class AttrConfigServiceImplUnitTestNG {
     public void testGetOverallAttrConfigActivationOverview() {
         when(cdlAttrConfigProxy.getAttrConfigOverview(anyString(), Matchers.anyList(), Matchers.anyList(),
                 anyBoolean())).thenReturn(generatePremiumCategoryAttrConfigActivationOverview());
-        List<AttrConfigActivationOverview> result = attrConfigService.getOverallAttrConfigActivationOverview();
+        AttrConfigStateOverview overview = attrConfigService.getOverallAttrConfigActivationOverview();
+        List<AttrConfigSelection> result = overview.getSelections();
         Assert.assertEquals(result.size(), Category.getPremiunCategories().size());
 
-        AttrConfigActivationOverview categoryOverview = result.get(0);
+        AttrConfigSelection categoryOverview = result.get(0);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalIntentAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), intentLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForIntent);
@@ -158,13 +160,19 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(attrNums.size(), 6);
         Assert.assertEquals(
                 attrNums.get(AttrConfigServiceImpl.mapCategoryToDisplayName(Category.INTENT.getName())) - 10960L, 0);
-        Map<String, Map<String, Long>> selections = usageOverview.getSelections();
-        Assert.assertEquals(selections
-                .get(AttrConfigServiceImpl.mapUsageToDisplayName(ColumnSelection.Predefined.Segment.getName()))
-                .get(AttrConfigUsageOverview.SELECTED) - 3677, 0);
-        Assert.assertNotNull(selections
-                .get(AttrConfigServiceImpl.mapUsageToDisplayName(ColumnSelection.Predefined.Enrichment.getName()))
-                .get(AttrConfigUsageOverview.LIMIT));
+        List<AttrConfigSelection> selections = usageOverview.getSelections();
+        Assert.assertEquals(selections.size(), AttrConfigServiceImpl.usageProperties.length);
+        Assert.assertEquals(selections.get(0).getDisplayName(),
+                AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[0]));
+        Assert.assertEquals(selections.get(0).getSelected() - 3677, 0);
+        Assert.assertEquals(selections.get(1).getDisplayName(),
+                AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[1]));
+        Assert.assertEquals(selections.get(2).getDisplayName(),
+                AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[2]));
+        Assert.assertEquals(selections.get(3).getDisplayName(),
+                AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[3]));
+        Assert.assertNotNull(selections.get(1).getLimit());
+        Assert.assertNotNull(selections.get(3).getLimit());
     }
 
     @Test(groups = "unit")

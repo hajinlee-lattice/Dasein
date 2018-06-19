@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AttrConfigActivationOverview {
+public class AttrConfigSelection {
 
     @JsonProperty("Category")
     private Category category;

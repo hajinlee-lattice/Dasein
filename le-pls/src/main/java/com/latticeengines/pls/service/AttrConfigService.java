@@ -1,20 +1,19 @@
 package com.latticeengines.pls.service;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
+import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.pls.service.impl.AttrConfigServiceImpl.UpdateUsageResponse;
 
 public interface AttrConfigService {
 
-    List<AttrConfigActivationOverview> getOverallAttrConfigActivationOverview();
+    AttrConfigStateOverview getOverallAttrConfigActivationOverview();
 
     AttrConfigUsageOverview getOverallAttrConfigUsageOverview();
 

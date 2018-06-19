@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -19,9 +18,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
+import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.pls.service.AttrConfigService;
 import com.latticeengines.pls.service.impl.AttrConfigServiceImpl.UpdateUsageResponse;
@@ -42,7 +41,7 @@ public class AttrConfigResource {
     @GetMapping(value = "/activation/overview")
     @ResponseBody
     @ApiOperation("get activation overview")
-    public List<AttrConfigActivationOverview> getActivationOverview() {
+    public AttrConfigStateOverview getActivationOverview() {
         return attrConfigService.getOverallAttrConfigActivationOverview();
     }
 

@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,12 +33,13 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
-import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.AttrDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.SubcategoryDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
+import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -116,8 +116,10 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<AttrConfigActivationOverview> getOverallAttrConfigActivationOverview() {
-        List<AttrConfigActivationOverview> result = new ArrayList<>();
+    public AttrConfigStateOverview getOverallAttrConfigActivationOverview() {
+        AttrConfigStateOverview overview = new AttrConfigStateOverview();
+        List<AttrConfigSelection> selections = new ArrayList<>();
+        overview.setSelections(selections);
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
                 MultiTenantContext.getTenantId(),
                 Category.getPremiunCategories().stream().map(Category::getName).collect(Collectors.toList()),
@@ -125,7 +127,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         for (Category category : Category.getPremiunCategories()) {
             AttrConfigCategoryOverview<AttrState> activationOverview = (AttrConfigCategoryOverview<AttrState>) map
                     .get(category.getName());
-            AttrConfigActivationOverview categoryOverview = new AttrConfigActivationOverview();
+            AttrConfigSelection categoryOverview = new AttrConfigSelection();
             categoryOverview.setLimit(activationOverview.getLimit());
             categoryOverview.setTotalAttrs(activationOverview.getTotalAttrs());
             categoryOverview.setSelected(
@@ -133,16 +135,16 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                             ? activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active)
                             : 0L);
             categoryOverview.setDisplayName(mapCategoryToDisplayName(category.getName()));
-            result.add(categoryOverview);
+            selections.add(categoryOverview);
         }
-        return result;
+        return overview;
     }
 
     @Override
     public AttrConfigUsageOverview getOverallAttrConfigUsageOverview() {
         AttrConfigUsageOverview usageOverview = new AttrConfigUsageOverview();
         Map<String, Long> attrNums = new HashMap<>();
-        Map<String, Map<String, Long>> selections = new LinkedHashMap<>();
+        List<AttrConfigSelection> selections = new ArrayList<>();
         usageOverview.setAttrNums(attrNums);
         usageOverview.setSelections(selections);
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy
@@ -150,14 +152,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         log.info("map is " + map);
 
         for (String property : usagePropertyList) {
-            Map<String, Long> detailedSelections = new HashMap<>();
+            AttrConfigSelection selection = new AttrConfigSelection();
             if (property.equals(ColumnSelection.Predefined.Enrichment.getName())) {
-                detailedSelections.put(AttrConfigUsageOverview.LIMIT, AttrConfigUsageOverview.defaultExportLimit);
+                selection.setLimit(AttrConfigUsageOverview.defaultExportLimit);
             } else if (property.equals(ColumnSelection.Predefined.CompanyProfile.getName())) {
-                detailedSelections.put(AttrConfigUsageOverview.LIMIT,
-                        AttrConfigUsageOverview.defaultCompanyProfileLimit);
+                selection.setLimit(AttrConfigUsageOverview.defaultCompanyProfileLimit);
             }
-            selections.put(mapUsageToDisplayName(property), detailedSelections);
+            selection.setDisplayName(mapUsageToDisplayName(property));
+            selections.add(selection);
             long num = 0L;
             for (String category : map.keySet()) {
                 // For each category, update its total attrNums
@@ -169,7 +171,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                 if (propertyDetail != null && propertyDetail.get(Boolean.TRUE) != null) {
                     num += propertyDetail.get(Boolean.TRUE);
                 }
-                detailedSelections.put(AttrConfigUsageOverview.SELECTED, num);
+                selection.setSelected(num);
             }
         }
 
