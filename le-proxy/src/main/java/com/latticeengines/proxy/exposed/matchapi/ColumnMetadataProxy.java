@@ -11,6 +11,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
@@ -113,21 +115,27 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return columnMetadataCache.getWatcherCache().get(KEY_PREFIX + "|" + dataCloudVersion);
     }
 
-    private List<ColumnMetadata> requestAllColumns(String dataCloudVersion) {
-        String msg = "Load metadata of data cloud version " + dataCloudVersion;
-        try (PerformanceTimer timer = new PerformanceTimer(msg)) {
+    private List<ColumnMetadata> requestAllColumnsWithRetry(String dataCloudVersion) {
+        RetryTemplate retry = getRetryTemplate("get AM metadata", HttpMethod.GET, "metadata api", false,
+        null);
+        return retry.execute(context -> {
+            String msg = "(Attempt=" + context.getRetryCount() + 1 + ") Load metadata of data cloud version " + dataCloudVersion;
+            return requestAllColumns(dataCloudVersion, msg);
+        });
+    }
+
+    private List<ColumnMetadata> requestAllColumns(String dataCloudVersion, String logMsg) {
+        try (PerformanceTimer timer = new PerformanceTimer(logMsg)) {
             long count = getColumnCount(dataCloudVersion);
             int pageSize = 5000;
             int numPages = (int) Math.ceil(1.0 * count / pageSize);
             Flux<ColumnMetadata> flux = Flux.range(0, numPages) //
                     .parallel().runOn(parallelFluxThreadPool()) //
                     .flatMap(page -> Flux.fromIterable(requestMetadataPage(dataCloudVersion, page, pageSize)))
-                    .doOnError(throwable -> //
-                            Flux.error(new RuntimeException("Failed to request a metadata page.", throwable)))
+                    .doOnError(Flux::error) //
                     .sequential();
             List<ColumnMetadata> cms = flux.collectList() //
-                    .blockOptional(Duration.of(1, ChronoUnit.MINUTES)) //
-                    .orElse(null);
+                    .block(Duration.of(1, ChronoUnit.MINUTES));
             if (cms != null) {
                 log.info("Loaded in total " + cms.size() + " columns from matchapi");
             }
@@ -212,7 +220,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                             CacheName.DataCloudCMCache, //
                             str -> {
                                 String key = str.replace(KEY_PREFIX + "|", "");
-                                return requestAllColumns(key);
+                                return requestAllColumnsWithRetry(key);
                             }, //
                             10); //
                     log.info("Initialized local cache DataCloudCMCache.");
