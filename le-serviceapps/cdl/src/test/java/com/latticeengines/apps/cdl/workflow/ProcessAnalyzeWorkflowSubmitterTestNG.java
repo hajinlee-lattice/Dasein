@@ -26,6 +26,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -154,19 +155,23 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         runningAction1.setPid(RUNNING_ACTION_1_PID);
         runningAction1.setTrackingId(RUNNING_ACTION_1_TRACKING_ID);
         runningAction1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        runningAction1.setActionConfiguration(new ImportActionConfiguration());
         Action runningAction2 = new Action();
         runningAction2.setPid(RUNNING_ACTION_2_PID);
         runningAction2.setTrackingId(RUNNING_ACTION_2_TRACKING_ID);
         runningAction2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        runningAction2.setActionConfiguration(new ImportActionConfiguration());
 
         Action completeAction1 = new Action();
         completeAction1.setPid(COMPLETE_ACTION_1_PID);
         completeAction1.setTrackingId(COMPLETE_ACTION_1_TRACKING_ID);
         completeAction1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        completeAction1.setActionConfiguration(new ImportActionConfiguration());
         Action completeAction2 = new Action();
         completeAction2.setPid(COMPLETE_ACTION_2_PID);
         completeAction2.setTrackingId(COMPLETE_ACTION_2_TRACKING_ID);
         completeAction2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        completeAction2.setActionConfiguration(new ImportActionConfiguration());
         actions.add(runningAction1);
         actions.add(runningAction2);
         actions.add(completeAction1);
@@ -196,6 +201,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         action.setPid(PROBLEMATIC_ACTION_NO_TRACKING_ID_PID);
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action.setTrackingId(null);
+        action.setActionConfiguration(new ImportActionConfiguration());
         actions.add(action);
         return actions;
     }
