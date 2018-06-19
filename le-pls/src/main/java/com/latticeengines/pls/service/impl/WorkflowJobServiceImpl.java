@@ -540,7 +540,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         updateJobWithModelSummaryInfo(job, false, Collections.emptyMap());
     }
 
-    private void updateJobWithRatingEngine(Job job) {
+    @VisibleForTesting
+    void updateJobWithRatingEngine(Job job) {
         if (job.getInputs() == null) {
             job.setInputs(new HashMap<>());
         }
@@ -550,8 +551,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private void updateJobWithRatingEngineSummaryInfo(Job job, boolean useMap,
             Map<String, RatingEngineSummary> ratingIdToRatingEngineSummaries) {
         String ratingId = null;
-        if (job.getJobType() != null && (job.getJobType() == "customEventModelingWorkflow"
-                || job.getJobType() == "ratingEngineImportMatchAndModelWorkflow")) {
+        if (job.getJobType() != null && (job.getJobType().equals("customEventModelingWorkflow")
+                || job.getJobType().equals("ratingEngineImportMatchAndModelWorkflow"))) {
             if (job.getInputs() != null
                     && job.getInputs().containsKey(WorkflowContextConstants.Inputs.RATING_ENGINE_ID)) {
                 ratingId = job.getInputs().get(WorkflowContextConstants.Inputs.RATING_ENGINE_ID);

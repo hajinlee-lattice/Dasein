@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -73,6 +75,9 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @InjectMocks
     private WorkflowJobServiceImpl workflowJobService;
+
+    @Mock
+    private RatingEngineProxy ratingEngineProxy;
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplUnitTestNG.class);
 
@@ -350,6 +355,27 @@ public class WorkflowJobServiceImplUnitTestNG {
         inputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, actionIds.toString());
         job.setInputs(inputContext);
         return job;
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateJobWithRatingEngine() {
+        String ratingEngineId = "engine_hcnrj_a3qfsaty3puoih1q";
+        String oldRatingEngineName = "oldName";
+        // String newRatingEngineName = "newName";
+        Job job = new Job();
+        job.setJobType("customEventModelingWorkflow");
+        Map<String, String> inputs = new HashMap<>();
+        job.setInputs(inputs);
+        inputs.put(WorkflowContextConstants.Inputs.RATING_ENGINE_ID, ratingEngineId);
+        inputs.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, oldRatingEngineName);
+        log.info("job is " + job);
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setId(ratingEngineId);
+        ratingEngine.setDisplayName("newName");
+        when(ratingEngineProxy.getRatingEngine(anyString(), anyString())).thenReturn(ratingEngine);
+        workflowJobService.updateJobWithRatingEngine(job);
+        Assert.assertEquals(job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME), "newName");
+        log.info("new job is " + job);
     }
 
 }
