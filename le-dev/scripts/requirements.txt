@@ -7,3 +7,4 @@ zc.zk
 RBTools
 zk-shell
 requests
+awscli

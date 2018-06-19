@@ -8,3 +8,4 @@ RBTools
 zk-shell
 tomcatmanager
 requests
+awscli
