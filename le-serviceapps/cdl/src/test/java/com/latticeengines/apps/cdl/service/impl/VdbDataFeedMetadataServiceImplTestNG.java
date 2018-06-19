@@ -58,7 +58,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     @BeforeClass(groups = "functional")
     private void setup() throws IOException {
         // setup test metadata string;
-        super.setupTestEnvironmentWithDummySegment();
+        super.setupTestEnvironment();
         testVdbMetadata = new VdbImportConfig();
         errorVdbMetadata = new VdbImportConfig();
         testVdbMetadata
@@ -91,8 +91,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         Table schemaTable2 = SchemaRepository.instance().getSchema(BusinessEntity.Account);
         Table resolved1 = vdbDataFeedMetadataService.resolveMetadata(test1Table, schemaTable1);
         Table resolved2 = vdbDataFeedMetadataService.resolveMetadata(test2Table, schemaTable2);
-        Assert.assertNotNull(resolved2.getAttribute(InterfaceName.CompanyName));
-        Assert.assertNull(resolved2.getAttribute(InterfaceName.CompanyName).getSourceAttrName());
+        Assert.assertNull(resolved2.getAttribute(InterfaceName.CompanyName));
         Table mergedTable = dataFeedTaskManagerService.mergeTable(resolved2, resolved1);
         Assert.assertNotNull(mergedTable.getAttribute(InterfaceName.CompanyName));
         Assert.assertNotNull(mergedTable.getAttribute(InterfaceName.CompanyName).getSourceAttrName());

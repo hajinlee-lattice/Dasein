@@ -393,7 +393,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 ENTITY_ACCOUNT);
         Table accountTemplate2 = accountDataFeedTask.getImportTemplate();
         Table sourceTable = metadataProxy.getTable(customerSpace, missingAccountFile.getTableName());
-        Assert.assertNotNull(sourceTable.getAttribute(InterfaceName.Website));
+        Assert.assertNull(sourceTable.getAttribute(InterfaceName.Website));
         Assert.assertNotNull(accountTemplate2.getAttribute(InterfaceName.Website));
     }
 
