@@ -22,7 +22,8 @@ public enum LatticeFeatureFlag {
     ENABLE_CROSS_SELL_MODELING("EnableCrossSellModeling", "Enable Cross Sell Modeling"), //
     ENABLE_PRODUCT_PURCHASE_IMPORT("EnableProductPurchaseImport", "Enable Product Purchase Import"), //
     ENABLE_PRODUCT_BUNDLE_IMPORT("EnableProductBundleImport", "Enable Product Bundle Import"), //
-    ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport", "Enable Product Hierarchy Import"), //    
+    ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport", "Enable Product Hierarchy Import"), //
+    PLAYBOOK_MODULE("PlaybookModule", "Playbook Module"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

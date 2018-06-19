@@ -70,7 +70,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_BUNDLE_IMPORT, //
-                LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT);
+                LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, //
+                LatticeFeatureFlag.PLAYBOOK_MODULE);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
         Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList( //
@@ -88,7 +89,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_BUNDLE_IMPORT, //
-                LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT);
+                LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, //
+                LatticeFeatureFlag.PLAYBOOK_MODULE);
         if (autoSchedule ^ true) {
             expectedDefaultFalseFlags = new ArrayList<>(expectedDefaultFalseFlags);
             expectedDefaultFalseFlags.add(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
