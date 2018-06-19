@@ -128,7 +128,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     private boolean inWorkflow(int seq, AbstractWorkflow<?> workflow) {
         String namespace = getStepNamespace(seq);
-        return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".") || namespace.contains("." + workflow.name() + ".");
+        return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".") || namespace.contains("." + workflow.name() + ".") || namespace.endsWith("." + workflow.name());
     }
 
     private boolean isExportToRedshiftStep(AbstractStep<? extends BaseStepConfiguration> step) {
