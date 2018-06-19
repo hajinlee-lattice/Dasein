@@ -5,10 +5,10 @@ import java.io.Serializable;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 
-public class FittedConversionRateCalculatorImpl implements FittedConversionRateCalculator, Serializable {
+public class FittedConversionRateCalculatorImplV1 implements FittedConversionRateCalculator, Serializable {
     private FitFunctionParameters params;
 
-    public FittedConversionRateCalculatorImpl(FitFunctionParameters params) {
+    public FittedConversionRateCalculatorImplV1(FitFunctionParameters params) {
         this.params = params;
     }
 

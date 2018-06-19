@@ -45,8 +45,14 @@ public class CalculatePositiveEventsFunction extends BaseOperation
 
     @Override
     public FittedConversionRateCalculator getCalculator(FitFunctionParameters params) {
-        // in case we need to support different fit functions later
-        return new FittedConversionRateCalculatorImpl(params);
+        switch (params.getVersion()) {
+        case "v1":
+            return new FittedConversionRateCalculatorImplV1(params);
+        case "v2":
+            return new FittedConversionRateCalculatorImplV2(params);
+        default:
+            throw new IllegalArgumentException("Unsupported fit function version " + params.getVersion());
+        }
     }
 
     private FitFunctionParameters parseFitFunctionParams(String fitFunctionParamsStr) {
