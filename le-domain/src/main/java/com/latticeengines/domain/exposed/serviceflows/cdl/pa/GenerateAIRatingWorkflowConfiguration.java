@@ -148,12 +148,12 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public Builder saveBucketMetadata() {
-            computeLift.setSaveBucketMetadata(Boolean.TRUE);
+            pivotScoreAndEvent.setSaveBucketMetadata(Boolean.TRUE);
             return this;
         }
 
         public Builder ratingEngineId(String ratingEngineId) {
-            computeLift.setRatingEngineId(ratingEngineId);
+            pivotScoreAndEvent.setRatingEngineId(ratingEngineId);
             return this;
         }
 
@@ -164,21 +164,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder setModelIdFromRecord(boolean setModelIdFromRecord) {
             score.setModelIdFromRecord(setModelIdFromRecord);
-            return this;
-        }
-
-        public Builder setExpectedValue(boolean expectedValue) {
-            if (expectedValue) {
-                computeLift.setScoreField(InterfaceName.ExpectedRevenue.name());
-            } else {
-                computeLift.setScoreField(InterfaceName.RawScore.name());
-            }
-            pivotScoreAndEvent.setExpectedValue(expectedValue);
-            return this;
-        }
-
-        public Builder deferSavingBucketedScoreSummaries() {
-            pivotScoreAndEvent.setDeferSavingBucketedScoreSummaries(false);
             return this;
         }
 
@@ -201,7 +186,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public Builder scoreField(String scoreField) {
-            computeLift.setScoreField(scoreField);
+            pivotScoreAndEvent.setScoreField(scoreField);
             return this;
         }
 

@@ -13,7 +13,6 @@ import com.latticeengines.cdl.workflow.steps.rating.CreateScoringTargetTable;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
-import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
@@ -53,9 +52,6 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
     @Inject
-    private ComputeLiftDataFlow computeLift;
-
-    @Inject
     private PivotScoreAndEventDataFlow pivotScoreAndEvent;
 
     @Override
@@ -74,7 +70,6 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
             builder.next(scoreAggregate); //
         }
         return builder.next(combineInputTableWithScore) //
-                .next(computeLift) //
                 .next(pivotScoreAndEvent) //
                 .build();
     }

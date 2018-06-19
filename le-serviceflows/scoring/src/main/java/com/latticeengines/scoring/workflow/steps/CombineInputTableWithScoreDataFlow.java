@@ -40,7 +40,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     @Override
     public void onExecutionCompleted() {
         putStringValueInContext(EXPORT_SCORE_TRAINING_FILE_TABLE_NAME, configuration.getTargetTableName());
-        putStringValueInContext(COMPUTE_LIFT_INPUT_TABLE_NAME, configuration.getTargetTableName());
+        // putStringValueInContext(COMPUTE_LIFT_INPUT_TABLE_NAME, configuration.getTargetTableName());
         putStringValueInContext(PIVOT_SCORE_INPUT_TABLE_NAME, configuration.getTargetTableName());
         putStringValueInContext(AI_RAW_RATING_TABLE_NAME, configuration.getTargetTableName());
     }
@@ -49,29 +49,10 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
                 getScoreResultTableName(), getInputTableName(), getBucketMetadata(), getModelType(),
                 configuration.getIdColumnName());
-        if (configuration.isCdlModel()) {
-            setupCdlParameters(params);
-        } else if (configuration.isCdlMultiModel()) {
+        if (configuration.isCdlMultiModel()) {
             setCdlMultiModelParams(params);
         }
         configuration.setDataFlowParams(params);
-    }
-
-    private void setupCdlParameters(CombineInputTableWithScoreParameters params) {
-        if (!configuration.isCdlModel())
-            return;
-        String scoreFieldName = InterfaceName.Probability.name();
-        if (configuration.isExpectedValue()) {
-            scoreFieldName = InterfaceName.ExpectedRevenue.name();
-        }
-        params.setScoreFieldName(scoreFieldName);
-        Integer multiplier = null;
-        if (!configuration.isExpectedValue() && !configuration.isLiftChart())
-            multiplier = 100;
-        params.setScoreMultiplier(multiplier);
-        if (configuration.isLiftChart())
-            params.setAvgScore(getDoubleValueFromContext(SCORING_AVG_SCORE));
-        params.setIdColumn(InterfaceName.AnalyticPurchaseState_ID.toString());
     }
 
     private void setCdlMultiModelParams(CombineInputTableWithScoreParameters params) {

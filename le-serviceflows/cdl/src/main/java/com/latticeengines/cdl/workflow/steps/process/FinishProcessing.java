@@ -167,6 +167,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                     request.setBucketMetadataList(bucketMetadata);
                     bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
                 } else {
+                    log.info("Updating bucket metadata for modelGUID=" + modelGuid + " : " + JsonUtils.serialize(bucketMetadata));
                     UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
                     request.setModelGuid(modelGuid);
                     request.setBucketMetadataList(bucketMetadata);

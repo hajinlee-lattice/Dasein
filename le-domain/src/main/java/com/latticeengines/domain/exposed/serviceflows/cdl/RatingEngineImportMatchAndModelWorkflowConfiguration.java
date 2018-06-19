@@ -358,7 +358,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         public Builder setExpectedValue(boolean expectedValue) {
             cdlModelWorkflowBuilder.setExpectedValue(expectedValue);
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
-            generateAIRating.setExpectedValue(expectedValue);
             return this;
         }
 

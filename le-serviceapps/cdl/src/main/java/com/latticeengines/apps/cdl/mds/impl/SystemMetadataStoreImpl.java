@@ -136,12 +136,10 @@ public class SystemMetadataStoreImpl extends
                                         || BusinessEntity.Contact.equals(entity)) {
                                     cm.setCanEnrich(true);
                                 }
-
                                 // enable a list of default attributes for Export
                                 if (exportAttributes.contains(cm.getAttrName())) {
                                     cm.enableGroup(Enrichment);
                                 }
-                                
                                 // all custom account attributes enabled for
                                 // following groups
                                 // unless otherwise specified in upstream
@@ -152,7 +150,6 @@ public class SystemMetadataStoreImpl extends
                                         cm.setSubcategory("Account IDs");
                                     }
                                 }
-
                                 cm.disableGroup(CompanyProfile);
 
                                 return cm;

@@ -55,6 +55,7 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @Enumerated(EnumType.STRING)
     private BucketName bucketName;
 
+    @Deprecated // should only use right bound (lower bound)
     @JsonProperty("left_bound_score")
     @Column(name = "LEFT_BOUND_SCORE", nullable = false)
     private int leftBoundScore;
@@ -114,10 +115,12 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         this.bucketName = BucketName.fromValue(bucketName);
     }
 
+    @Deprecated // should only use right bound (lower bound)
     public int getLeftBoundScore() {
         return leftBoundScore;
     }
 
+    @Deprecated // should only use right bound (lower bound)
     public void setLeftBoundScore(int leftBoundScore) {
         this.leftBoundScore = leftBoundScore;
     }

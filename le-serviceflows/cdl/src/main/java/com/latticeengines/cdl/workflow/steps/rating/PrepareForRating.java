@@ -26,6 +26,10 @@ import com.latticeengines.common.exposed.graph.StringGraphNode;
 import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -41,6 +45,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -56,6 +61,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
     private String customerSpace;
 
     @Override
@@ -66,6 +74,8 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         putObjectInContext(RATING_MODELS, activeModels);
         putObjectInContext(RATING_MODELS_BY_ITERATION, splitIntoGenerations(activeModels));
         putObjectInContext(CURRENT_RATING_ITERATION, 0);
+
+        initializeRatingLifts();
 
         removeObjectFromContext(TABLES_GOING_TO_DYNAMO);
         removeObjectFromContext(TABLES_GOING_TO_REDSHIFT);
@@ -293,6 +303,37 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 1);
         threadPool.shutdown();
         return new HashMap<>(nodes);
+    }
+
+    private void initializeRatingLifts() {
+        Map<String, Map<String, Double>> liftMap = new HashMap<>();
+        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        StatisticsContainer statsContainer = dataCollectionProxy.getStats(customerSpace, inactive);
+        if (statsContainer != null) {
+            StatsCube statsCube = statsContainer.getStatsCubes().get(BusinessEntity.Rating.name());
+            if (statsCube != null) {
+                statsCube.getStatistics().forEach((attrName, attrStats) -> {
+                    if (attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX) && BucketType.Enum.equals(attrStats.getBuckets().getType())) {
+                        Map<String, Double> lifts = new HashMap<>();
+                        attrStats.getBuckets().getBucketList().forEach(bucket -> {
+                            if (StringUtils.isNotBlank(bucket.getLabel()) && bucket.getLift() != null) {
+                                lifts.put(bucket.getLabel(), bucket.getLift());
+                            }
+                        });
+                        if (MapUtils.isNotEmpty(lifts)) {
+                            liftMap.put(attrName, lifts);
+                        }
+                    }
+                });
+            } else {
+                log.info("Not stats for Rating in " + inactive);
+            }
+        } else {
+            log.info("No stats at version " + inactive);
+        }
+        if (MapUtils.isNotEmpty(liftMap)) {
+            putObjectInContext(RATING_LIFTS, liftMap);
+        }
     }
 
 }

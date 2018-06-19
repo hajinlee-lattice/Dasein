@@ -1,12 +1,18 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
+
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 public class BucketedScoreSummaryUtils {
 
@@ -16,14 +22,12 @@ public class BucketedScoreSummaryUtils {
     private static final int MIN_SCORE = 5;
     private static final int MAX_SCORE = 99;
 
+    private static final Scheduler scheduler = Schedulers.newParallel("bucketed-score");
+
     public static BucketedScoreSummary generateBucketedScoreSummary(List<GenericRecord> pivotedRecords) {
         int cumulativeNumLeads = 0;
         double cumulativeNumConverted = 0;
-        Collections.sort(
-            pivotedRecords,
-            (GenericRecord g1, GenericRecord g2) ->
-                Double.compare(Double.valueOf(g1.get(SCORE).toString()), Double.valueOf(g2.get(SCORE).toString()))
-        );
+        pivotedRecords.sort(Comparator.comparingDouble(g -> Double.valueOf(g.get(SCORE).toString())));
         int idx = pivotedRecords.size() - 1;
         int currentScore = MAX_SCORE;
 
@@ -40,8 +44,8 @@ public class BucketedScoreSummaryUtils {
                 bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
                         Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
                         Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
-                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()),
-                        cumulativeNumLeads, cumulativeNumConverted);
+                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()), cumulativeNumLeads,
+                        cumulativeNumConverted);
                 cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
                 cumulativeNumConverted += (double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS);
                 idx--;
@@ -70,10 +74,55 @@ public class BucketedScoreSummaryUtils {
             if (totalLeadsInBar == 0) {
                 bucketedScoreSummary.getBarLifts()[32 - i] = 0;
             } else {
-                bucketedScoreSummary.getBarLifts()[32 - i] = (totalLeadsConvertedInBar / totalLeadsInBar)
-                        / totalLift;
+                bucketedScoreSummary.getBarLifts()[32 - i] = (totalLeadsConvertedInBar / totalLeadsInBar) / totalLift;
             }
         }
         return bucketedScoreSummary;
     }
+
+    public static List<BucketMetadata> computeLift(BucketedScoreSummary scoreSummary,
+                                                   List<BucketMetadata> bucketMetadataList) {
+        sortBucketMetadata(bucketMetadataList);
+        List<Integer> lowerBonds = null;
+        for (BucketMetadata bucketMetadata : bucketMetadataList) {
+            if (lowerBonds == null) {
+                lowerBonds = new ArrayList<>();
+            } else {
+                lowerBonds.add(bucketMetadata.getRightBoundScore());
+            }
+        }
+        if (CollectionUtils.isEmpty(lowerBonds) || lowerBonds.size() + 1 != bucketMetadataList.size()) {
+            throw new RuntimeException("Not enough lower bonds");
+        }
+        List<BucketedScore> boundaries = new ArrayList<>();
+        boundaries.add( new BucketedScore(0, 0, 0, scoreSummary.getTotalNumLeads(), scoreSummary.getTotalNumConverted()));
+        for (BucketedScore bucketedScore : scoreSummary.getBucketedScores()) {
+            if (bucketedScore != null) {
+                if (lowerBonds.contains(bucketedScore.getScore())) {
+                    System.out.println(bucketedScore);
+                    boundaries.add(bucketedScore);
+                }
+            }
+        }
+        boundaries.add( new BucketedScore(100, 0, 0, 0, 0));
+
+        double overallConversion = scoreSummary.getTotalNumConverted() / scoreSummary.getTotalNumLeads();
+        for (int i = 0; i < bucketMetadataList.size(); i++) {
+            BucketedScore lowerBond = boundaries.get(i);
+            BucketedScore upperBond = boundaries.get(i + 1);
+            int totolLeads = lowerBond.getLeftNumLeads() + lowerBond.getNumLeads() - upperBond.getLeftNumLeads();
+            double totolConverted = lowerBond.getLeftNumConverted() + lowerBond.getNumConverted() - upperBond.getLeftNumConverted();
+            double conversionRate = totolLeads == 0 ? 0 : totolConverted / totolLeads;
+            double lift = conversionRate / overallConversion;
+            bucketMetadataList.get(i).setLift(lift);
+        }
+
+        return bucketMetadataList;
+    }
+
+    private static void sortBucketMetadata(List<BucketMetadata> bucketMetadata) {
+        bucketMetadata.sort(Comparator.comparingInt(BucketMetadata::getRightBoundScore));
+    }
+
+
 }

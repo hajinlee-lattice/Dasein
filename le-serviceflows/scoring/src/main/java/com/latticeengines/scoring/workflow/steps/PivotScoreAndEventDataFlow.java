@@ -1,14 +1,17 @@
 package com.latticeengines.scoring.workflow.steps;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,10 +24,16 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
@@ -47,9 +56,17 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
+    private boolean multiModel = false;
+    private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
+    private Map<String, String> modelGuidToEngineIdMap;
+
     @Override
     public void onConfigurationInitialized() {
         String scoreTableName = getStringValueFromContext(PIVOT_SCORE_INPUT_TABLE_NAME);
+
+        multiModel = isMultiModel();
+        modelGuidToBucketMetadataMap = getModelGuidToBucketMetadataMap();
+        modelGuidToEngineIdMap = getModelGuidToEngineIdMap();
 
         PivotScoreAndEventParameters dataFlowParams = new PivotScoreAndEventParameters(scoreTableName);
         Map<String, Double> avgScores = getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class);
@@ -60,13 +77,11 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
                     getDoubleValueFromContext(SCORING_AVG_SCORE))//
             );
         }
-        Map<String, String> scoreFieldMap = getMapObjectFromContext(LIFT_SCORE_FIELDS, String.class, String.class);
+        Map<String, String> scoreFieldMap = getScoreFieldsMap();
         if (MapUtils.isNotEmpty(scoreFieldMap)) {
             dataFlowParams.setScoreFieldMap(scoreFieldMap);
         } else {
-            dataFlowParams.setScoreFieldMap(
-                    ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID), configuration.isExpectedValue()
-                            ? InterfaceName.ExpectedRevenue.name() : InterfaceName.RawScore.name()));
+            throw new RuntimeException("Cannot determine score fields.");
         }
 
         // get score derivation and fit function params for model
@@ -127,6 +142,8 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         saveBucketedScoreSummary(targetExtractPath);
         putOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH, targetExtractPath);
 
+        upsertRatingLifts();
+
         putStringValueInContext(EXPORT_BUCKET_TOOL_TABLE_NAME, configuration.getTargetTableName());
         String scoreOutputPath = getOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
         String pivotOutputPath = StringUtils.replace(scoreOutputPath, "_scored_", "_pivoted_");
@@ -146,21 +163,142 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             pivotedRecordsMap.get(modelGuid).add(record);
         }
         String customerSpace = configuration.getCustomerSpace().toString();
+
         Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = new HashMap<>();
         pivotedRecordsMap.forEach((modelGuid, pivotedRecords) -> {
             BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                     .generateBucketedScoreSummary(pivotedRecords);
-            if (configuration.isDeferSavingBucketedScoreSummaries()) {
-                bucketedScoreSummaryMap.put(modelGuid, bucketedScoreSummary);
-            } else {
+            List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
+            BucketedScoreSummaryUtils.computeLift(bucketedScoreSummary, bucketMetadata);
+            if (Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
                 log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
                         + JsonUtils.serialize(bucketedScoreSummary));
                 bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace, modelGuid, bucketedScoreSummary);
+                log.info("Save bucketed metadata for modelGUID=" + modelGuid + " : "
+                        + JsonUtils.serialize(bucketMetadata));
+                String engineId = modelGuidToEngineIdMap.get(modelGuid);
+                saveABCDBuckets(modelGuid, engineId, bucketMetadata);
+            } else {
+                bucketedScoreSummaryMap.put(modelGuid, bucketedScoreSummary);
             }
         });
-        if (configuration.isDeferSavingBucketedScoreSummaries()) {
+        if (!Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
             putObjectInContext(BUCKETED_SCORE_SUMMARIES, bucketedScoreSummaryMap);
+            putObjectInContext(BUCKET_METADATA_MAP, modelGuidToBucketMetadataMap);
+            putObjectInContext(MODEL_GUID_ENGINE_ID_MAP, modelGuidToEngineIdMap);
         }
+    }
+
+    private void saveABCDBuckets(String modelGuid, String engineId, List<BucketMetadata> bucketMetadata) {
+        boolean isRatingEngine = !modelGuid.equals(engineId);
+        CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+        String ratingEngineId = isRatingEngine ? engineId : configuration.getRatingEngineId();
+        request.setModelGuid(modelGuid);
+        request.setRatingEngineId(ratingEngineId);
+        request.setLastModifiedBy(configuration.getUserId());
+        request.setBucketMetadataList(bucketMetadata);
+        log.info("Save bucket metadata for modelGuid=" + modelGuid + ", ratingEngineId=" + ratingEngineId + ": "
+                + JsonUtils.pprint(bucketMetadata));
+        bucketedScoreProxy.createABCDBuckets(configuration.getCustomerSpace().toString(), request);
+    }
+
+    private Map<String, String> getModelGuidToEngineIdMap() {
+        Map<String, String> modelGuidToEngineIdMap = new HashMap<>();
+        if (multiModel) {
+            List<RatingModelContainer> containers = getModelContainers();
+            containers.forEach(container -> {
+                AIModel aiModel = (AIModel) container.getModel();
+                String modelGuid = aiModel.getModelSummaryId();
+                String engineId = container.getEngineSummary().getId();
+                modelGuidToEngineIdMap.put(modelGuid, engineId);
+            });
+        } else {
+            String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
+            modelGuidToEngineIdMap.put(modelGuid, modelGuid);
+        }
+        return modelGuidToEngineIdMap;
+    }
+
+    private Map<String, List<BucketMetadata>> getModelGuidToBucketMetadataMap() {
+        Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap = new HashMap<>();
+        if (multiModel) {
+            List<RatingModelContainer> containers = getModelContainers();
+            containers.forEach(container -> {
+                AIModel aiModel = (AIModel) container.getModel();
+                String modelGuid = aiModel.getModelSummaryId();
+                List<BucketMetadata> bucketMetadata = container.getEngineSummary().getBucketMetadata();
+                if (CollectionUtils.isEmpty(bucketMetadata)) {
+                    throw new IllegalArgumentException("Must provide bucket metadata for model " + modelGuid);
+                }
+                modelGuidToBucketMetadataMap.put(modelGuid, bucketMetadata);
+            });
+        } else {
+            String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
+            List<BucketMetadata> bucketMetadata = getListObjectFromContext(SCORING_BUCKET_METADATA,
+                    BucketMetadata.class);
+            if (CollectionUtils.isEmpty(bucketMetadata)) {
+                throw new IllegalArgumentException("Must provide bucket metadata for model " + modelGuid);
+            }
+            modelGuidToBucketMetadataMap.put(modelGuid, bucketMetadata);
+        }
+        return modelGuidToBucketMetadataMap;
+    }
+
+    private Map<String, String> getScoreFieldsMap() {
+        Map<String, String> scoreFieldsMap;
+        if (multiModel) {
+            scoreFieldsMap = new HashMap<>();
+            List<RatingModelContainer> containers = getModelContainers();
+            containers.forEach(container -> {
+                AIModel aiModel = (AIModel) container.getModel();
+                String modelGuid = aiModel.getModelSummaryId();
+                String scoreField = InterfaceName.RawScore.name();
+                if (PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType())) {
+                    scoreField = InterfaceName.ExpectedRevenue.name();
+                }
+                scoreFieldsMap.put(modelGuid, scoreField);
+            });
+        } else {
+            String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
+            String scoreField = configuration.getScoreField();
+            if (StringUtils.isBlank(scoreField)) {
+                throw new IllegalArgumentException("Must specify score field for pivot event and score.");
+            }
+            scoreFieldsMap = ImmutableMap.of(modelGuid, scoreField);
+        }
+        return scoreFieldsMap;
+    }
+
+    private void upsertRatingLifts() {
+        Map<String, Map<String, Double>> liftMap = new HashMap<>();
+        Map<String, Map> mapInContext = getMapObjectFromContext(RATING_LIFTS, String.class, Map.class);
+        if (MapUtils.isNotEmpty(mapInContext)) {
+            mapInContext.forEach((k, v) -> liftMap.put(k, JsonUtils.convertMap(v, String.class, Double.class)));
+        }
+        modelGuidToEngineIdMap.forEach((modelGuid, engineId) -> {
+            List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
+            liftMap.put(engineId, new HashMap<>());
+            bucketMetadata.forEach(bm -> {
+                String rating = bm.getBucketName();
+                double lift = bm.getLift();
+                liftMap.get(engineId).put(rating, lift);
+            });
+        });
+        putObjectInContext(RATING_LIFTS, liftMap);
+    }
+
+    private boolean isMultiModel() {
+        return CollectionUtils.isNotEmpty(getModelContainers());
+    }
+
+    private List<RatingModelContainer> getModelContainers() {
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
+        return allContainers.stream() //
+                .filter(container -> {
+                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                }).collect(Collectors.toList());
     }
 
 }
