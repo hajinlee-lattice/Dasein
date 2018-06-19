@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Enrichment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
@@ -120,43 +121,39 @@ public class SystemMetadataStoreImpl extends
 
                                 if (internalAttributes.contains(cm.getAttrName())) {
                                     cm.setGroups(null);
-                                } else {
-                                    // all non-LDC attributes can be
-                                    // enabled/disabled for Segmentation
-                                    cm.setCanSegment(true);
-
-                                    // all non-LDC attributes are enabled for
-                                    // Segmentation
-                                    // unless otherwise specified in upstream
-                                    cm.enableGroupIfNotPresent(Segment);
-
-                                    // all custom account and contact attributes
-                                    // can be enabled/disabled for Export
-                                    if (BusinessEntity.Account.equals(entity)
-                                            || BusinessEntity.Contact.equals(entity)) {
-                                        cm.setCanEnrich(true);
-                                    }
-
-                                    // all custom account attributes enabled for
-                                    // following groups
-                                    // unless otherwise specified in upstream
-                                    if (BusinessEntity.Account.equals(entity)) {
-                                        cm.enableGroupIfNotPresent(Model);
-                                        cm.enableGroupIfNotPresent(TalkingPoint);
-
-                                        if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
-                                            cm.setSubcategory("Account IDs");
-                                        }
-
-                                    }
+                                    return cm;
                                 }
 
-                                // enable a list of default attributes for
-                                // Export
-                                if (exportAttributes.contains(cm.getAttrName())) {
+                                // all non-LDC attributes can be
+                                // enabled/disabled for Segmentation
+                                cm.setCanSegment(true);
+                                // all non-LDC attributes are enabled for
+                                cm.enableGroup(Segment);
+
+                                // all custom account and contact attributes
+                                // can be enabled/disabled for Export
+                                if (BusinessEntity.Account.equals(entity)
+                                        || BusinessEntity.Contact.equals(entity)) {
                                     cm.setCanEnrich(true);
-                                    cm.enableGroupIfNotPresent(Enrichment);
                                 }
+
+                                // enable a list of default attributes for Export
+                                if (exportAttributes.contains(cm.getAttrName())) {
+                                    cm.enableGroup(Enrichment);
+                                }
+                                
+                                // all custom account attributes enabled for
+                                // following groups
+                                // unless otherwise specified in upstream
+                                if (BusinessEntity.Account.equals(entity)) {
+                                    cm.enableGroup(Model);
+                                    cm.enableGroup(TalkingPoint);
+                                    if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
+                                        cm.setSubcategory("Account IDs");
+                                    }
+                                }
+
+                                cm.disableGroup(CompanyProfile);
 
                                 return cm;
                             }) //
