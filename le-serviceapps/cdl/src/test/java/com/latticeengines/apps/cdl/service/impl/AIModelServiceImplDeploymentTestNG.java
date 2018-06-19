@@ -228,14 +228,14 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     private void testGetDependentAttrsInAllModels() {
         List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(aiRatingEngineId);
         Assert.assertNotNull(attributes);
-        Assert.assertEquals(attributes.size(), 2);
+        Assert.assertEquals(attributes.size(), 4);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInAllModels" })
     private void testGetDependentAttrsInActiveModel() {
         List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(aiRatingEngineId);
         Assert.assertNotNull(attributes);
-        Assert.assertEquals(attributes.size(), 2);
+        Assert.assertEquals(attributes.size(), 4);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInActiveModel" })

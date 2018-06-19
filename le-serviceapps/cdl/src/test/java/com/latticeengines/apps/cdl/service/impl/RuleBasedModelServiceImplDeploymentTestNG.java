@@ -127,9 +127,9 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         Assert.assertNotNull(rm);
 
         // test update rating model
-        RuleBasedModel roleBasedModel = constructRuleModel();
+        RuleBasedModel ruleBasedModel = constructRuleModel();
         RatingModel retrievedRuleBasedModel = ratingEngineService.updateRatingModel(rbRatingEngineId, ratingModelId,
-                roleBasedModel);
+                ruleBasedModel);
         Assert.assertTrue(retrievedRuleBasedModel instanceof RuleBasedModel);
         RatingRule ratingRule = ((RuleBasedModel) retrievedRuleBasedModel).getRatingRule();
 

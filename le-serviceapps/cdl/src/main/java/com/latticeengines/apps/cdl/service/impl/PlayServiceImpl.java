@@ -133,7 +133,9 @@ public class PlayServiceImpl implements PlayService {
 
     private void setBucketMetadata(Tenant tenant, Play play) {
         if (play.getRatingEngine() == null) {
-            log.info("No RatingEngine for play " + play.getName() + " hence no BucketMetadata can be set.");
+            log.error(String.format("Cannot set metadata since no Rating Engine was defined for Play %s.",
+                    play.getName()));
+            return;
         }
 
         if (play.getRatingEngine().getBucketMetadata() == null) {
@@ -282,33 +284,29 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private Play getFullPlay(Play play, boolean shouldLoadCoverage, Tenant tenant) {
-        if (play != null) {
-            Date lastRefreshedDate = findLastRefreshedDate();
-            play = getFullPlay(play, shouldLoadCoverage, tenant, lastRefreshedDate);
-            setBucketMetadata(tenant, play);
-        }
-        return play;
+        Date lastRefreshedDate = findLastRefreshedDate();
+        return getFullPlay(play, shouldLoadCoverage, tenant, lastRefreshedDate);
     }
 
     private Play getFullPlay(Play play, boolean shouldLoadCoverage, Tenant tenant, Date lastRefreshedDate) {
         if (play == null) {
             return null;
         }
+        RatingEngine ratingEngine = play.getRatingEngine();
+        if (ratingEngine == null || ratingEngine.getId() == null) {
+            log.error(String.format("Rating Engine for Play %s is not defined.", play.getName()));
+            throw new LedpException(LedpCode.LEDP_18187, new String[] { play.getName() });
+        }
+
         if (tenant != null) {
             MultiTenantContext.setTenant(tenant);
         }
 
         LaunchHistory launchHistory = updatePlayLaunchHistory(play);
-
-        RatingEngine ratingEngine = play.getRatingEngine();
-        if (ratingEngine == null || ratingEngine.getId() == null) {
-            log.info(String.format("Rating Engine for Play %s is not defined.", play.getName()));
-        } else {
-            if (shouldLoadCoverage) {
-                populateCoverageInfo(play, launchHistory, ratingEngine);
-            }
+        if (shouldLoadCoverage) {
+            populateCoverageInfo(play, launchHistory, ratingEngine);
         }
-
+        setBucketMetadata(tenant, play);
         updateLastRefreshedDate(play.getRatingEngine(), lastRefreshedDate);
         return play;
     }

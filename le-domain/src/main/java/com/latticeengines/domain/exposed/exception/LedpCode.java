@@ -308,6 +308,7 @@ public enum LedpCode {
     LEDP_18184("Job cannot be null or incomplete"), //
     LEDP_18185("User {0} does not have the right to deactivate attribute"), //
     LEDP_18186("No scoring iteration set for Rating Engine: {0}"), //
+    LEDP_18187("Cannot populate full play information since No Rating Engine associated with the Play: {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
