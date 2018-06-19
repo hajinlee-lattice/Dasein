@@ -119,7 +119,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         RetryTemplate retry = getRetryTemplate("get AM metadata", HttpMethod.GET, "metadata api", false,
         null);
         return retry.execute(context -> {
-            String msg = "(Attempt=" + context.getRetryCount() + 1 + ") Load metadata of data cloud version " + dataCloudVersion;
+            String msg = "(Attempt=" + (context.getRetryCount() + 1) + ") Load metadata of data cloud version " + dataCloudVersion;
             return requestAllColumns(dataCloudVersion, msg);
         });
     }
