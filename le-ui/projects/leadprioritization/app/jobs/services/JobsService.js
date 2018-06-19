@@ -9,6 +9,8 @@ angular
         "create_global_target_market": 0,
         "score_training_set": 0
     };
+    var nonWorkflowJobTypes = ['ratingEngineChange', 'segmentChange', 'attributeManagementActivation', 
+                                'attributeManagementDeactivation', 'metadataChange', 'purchaseMetricsChange'];
 
     this.getErrorLog = function(JobReport) {
         var deferred = $q.defer();
@@ -510,7 +512,7 @@ angular
     }
 
     function isNonWorkflowJobType (job) {
-        return job.id == null && job.pid == null;
+        return job.id == null && job.pid == null && nonWorkflowJobTypes.indexOf(job.jobType) >= 0;
     }
 
     function getSteps(job){
