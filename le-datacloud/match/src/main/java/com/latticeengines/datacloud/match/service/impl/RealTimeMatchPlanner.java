@@ -44,6 +44,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         setDecisionGraph(input);
         input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();
+        context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
             context.setSeekingIdOnly(true);
@@ -73,7 +74,6 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);
-
         return context;
     }
 
