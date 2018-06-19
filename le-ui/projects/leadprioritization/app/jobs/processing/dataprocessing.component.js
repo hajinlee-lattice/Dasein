@@ -2,7 +2,8 @@ angular.module('lp.jobs.import', [
                 'lp.jobs.import.row', 
                 'lp.jobs.row.subjobs', 
                 'lp.jobs.chevron', 
-                'mainApp.appCommon.directives.modal.window'])
+                'mainApp.appCommon.directives.modal.window',
+                'mainApp.core.utilities.BrowserStorageUtility'])
     .service('Browser', ['$window', function ($window) {
 
         this.IEVersion = function () {

@@ -1,7 +1,7 @@
 angular.module('lp.jobs.import.row', ['mainApp.appCommon.directives.modal.window'])
 
     .directive('importJobRow', [function () {
-        var controller = ['$scope', '$q', '$timeout', 'JobsStore', 'ModalStore', function ($scope, $q, $timeout, JobsStore, ModalStore) {
+        var controller = ['$scope', '$q', '$timeout', 'JobsStore', 'ModalStore', 'BrowserStorageUtility', function ($scope, $q, $timeout, JobsStore, ModalStore, BrowserStorageUtility) {
             $scope.thejob = $scope.job;
             $scope.disableButton = false;
             $scope.maxRowsTooltip = 3;
@@ -280,6 +280,12 @@ angular.module('lp.jobs.import.row', ['mainApp.appCommon.directives.modal.window
                 } else {
                     return '-';
                 }
+            };
+
+            $scope.hasRight = function(){
+                var ClientSession = BrowserStorageUtility.getClientSession();
+                var hasAccessRights = ClientSession.AccessLevel == 'INTERNAL_ADMIN' || ClientSession.AccessLevel == 'SUPER_ADMIN';
+                return hasAccessRights;
             };
 
             init();
