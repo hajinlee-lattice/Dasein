@@ -19,6 +19,13 @@ angular
     $stateProvider
         .state('home.import', {
             url: '/import',
+            onEnter: ['$state', 'BrowserStorageUtility', function($state, BrowserStorageUtility) {
+                var ClientSession = BrowserStorageUtility.getClientSession();
+                var hasAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
+                if (!hasAccessRights) {
+                    $state.go('home');
+                }
+            }],
             redirectTo: 'home.import.entry.accounts'
         })
         .state('home.import.calendar', {

@@ -266,6 +266,29 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return service.isBucketUsed(bucket);
         }
 
+        this.hasInputs = function(type, bucketRestriction) {
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            var cmpModel = bucketRestriction.bkt.Cmp;
+            if (service) {
+                switch (type) {
+                    case 'Enum':
+                        cmpModel = service.getEnumCmpModel(bucketRestriction);
+                        break;
+                    case 'String':
+                        cmpModel = service.getStringCmpModel(bucketRestriction);
+                        break;
+                    case 'Numerical':
+                        cmpModel = service.getNumericalCmpModel(bucketRestriction);
+                        break;
+                }
+                return this.no_inputs.indexOf(cmpModel) == -1;
+            } else {
+                console.warn('getCmpModel() service not implemented');
+            }
+            
+        }
+
         //***************** Editing ************************************/
 
 
@@ -768,7 +791,6 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return bucketRestriction.bkt.Cmp;
         }
         this.getEnumCmpModel = function (bucketRestriction) {
-
             return bucketRestriction.bkt.Cmp;
         }
 

@@ -281,7 +281,12 @@ angular.module('lp.segments.segments', [
                     }
                 } else {
                     // for pure string attributes
-                    attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationLabel('String', restriction.bucketRestriction) + " '" + QueryTreeService.getOperationValue(restriction.bucketRestriction, 'String') + "'");
+                    
+                    var value = enrichment.DisplayName + ': ' + QueryTreeService.getOperationLabel('String', restriction.bucketRestriction);
+                    if (QueryTreeService.hasInputs('String', restriction.bucketRestriction)) {
+                        value += " '" + QueryTreeService.getOperationValue(restriction.bucketRestriction, 'String') + "'";
+                    }
+                    attrs.push(value);
                 }
             } else {
                 vm.invalidSegments.add(segment.name);

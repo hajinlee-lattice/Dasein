@@ -6,6 +6,13 @@ angular
     $stateProvider
         .state('home.delete', {
             url: '/delete',
+            onEnter: ['$state', 'BrowserStorageUtility', function($state, BrowserStorageUtility) {
+                var ClientSession = BrowserStorageUtility.getClientSession();
+                var hasAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
+                if (!hasAccessRights) {
+                    $state.go('home');
+                }
+            }],
             resolve: {
                 EntitiesCount: function($q, QueryStore) {
                     var deferred = $q.defer();
@@ -16,13 +23,10 @@ angular
 
                     return deferred.promise;
 
-                } 
+                }
             },
             views: {
                 'main@': {
-                    // controller: 'DeleteEntry',
-                    // controllerAs: 'vm',
-                    // templateUrl: 'app/delete/delete.component.html'
                     template: '<delete-entry></delete-entry>'
                 }
             }

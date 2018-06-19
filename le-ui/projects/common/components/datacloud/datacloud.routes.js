@@ -437,6 +437,10 @@ angular
             },
             views: {
                 "main@": {
+                    controller: function($scope, BrowserStorageUtility) {
+                        var ClientSession = BrowserStorageUtility.getClientSession();
+                        $scope.showImportButton = ClientSession.AccessLevel != 'EXTERNAL_USER';
+                    },
                     templateUrl: '/components/datacloud/explorer/nodata/nodata.component.html'
                 }
             }

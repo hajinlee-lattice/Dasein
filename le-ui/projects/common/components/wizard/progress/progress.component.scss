@@ -61,6 +61,10 @@
                 opacity: 1;
             }
         }
+
+        &.ignore-ngclick {
+            cursor: default;
+        }
     }
     
     *[ng-click]:not(.ignore-ngclick) {
