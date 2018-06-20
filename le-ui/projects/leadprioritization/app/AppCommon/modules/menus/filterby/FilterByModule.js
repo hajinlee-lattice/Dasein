@@ -10,7 +10,7 @@ angular
         restrict: 'EA',
         scope: {
             config:'=',
-            callback: '&callbackFunction'
+            callback: '&?callbackFunction'
         },
         templateUrl: 'app/AppCommon/modules/menus/filterby/FilterByView.html',
         controller: function ($scope, $filter, $document) {
@@ -28,7 +28,7 @@ angular
 
                     if ($scope.visible) {
                         $scope.items.forEach(function(item, i) {
-                            if(typeof ($scope.callback) === undefined) {
+                            if(typeof ($scope.callback) === 'undefined') {
                                 item.filtered = $filter('filter')($scope.config.unfiltered, item.action, true);
                                 item.total = item.filtered.length;
                             }
@@ -55,7 +55,7 @@ angular
                     $scope.config.value = item.action;
 
                     $scope.callCallback = function () {
-                        if (typeof ($scope.callback) != undefined) {
+                        if (typeof ($scope.callback) != 'undefined'){
                             $scope.callback({args:Object.values(item)});
                         }
                     }
