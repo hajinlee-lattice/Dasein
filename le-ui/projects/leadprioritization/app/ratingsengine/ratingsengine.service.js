@@ -1009,7 +1009,6 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer();
         RatingsEngineStore.getRating(ratingId).then(function(engine){
             RatingsEngineStore.setRating(engine);
-            console.log('Engine', engine);
             if(engine.activeModel.AI){
                 RatingsEngineStore.getRatingModel(ratingId, engine.activeModel.AI.id).then(function(model){
                     deferred.resolve(model);
@@ -1019,6 +1018,19 @@ angular.module('lp.ratingsengine')
             }
         });   
         return deferred.promise;  
+    };
+
+    this.saveRatingStatus = function(rating_id, status){
+
+        var deferred = $q.defer();
+        var newRating = {
+            id: rating_id,
+            status: status
+        };
+        RatingsEngineService.saveRating(newRating).then(function(data){
+            deferred.resolve({success: true});
+        });
+        return deferred.promise;
     };
 
 })

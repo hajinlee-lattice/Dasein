@@ -26,7 +26,7 @@ angular.module('lp.models.ratings', [
   };
 })
 .controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore, RatingEngine, StateHistory) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore) {
 
     var vm = this;
     angular.extend(vm, {
@@ -50,7 +50,6 @@ angular.module('lp.models.ratings', [
     vm.init = function() {
 
         vm.Math = window.Math;
-        console.log(vm.ratingsSummary);
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
 
         if(vm.section === 'dashboard.scoring') {
@@ -156,6 +155,7 @@ angular.module('lp.models.ratings', [
             vm.buckets[i].bucket_name = vm.bucketNames[i];
         }
     }
+
 
     vm.addBucket = function(ev){
         if (vm.workingBuckets.length < 6 && vm.canAddBucket) {
@@ -309,19 +309,21 @@ angular.module('lp.models.ratings', [
             var aiModelId = vm.ratingModelId;
             ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
-                    vm.showSuccess = true;
-                    vm.chartNotUpdated = true;
-                    vm.updateContent = true;
-
-                    $rootScope.$broadcast('statusChange', { 
-                        activeStatus: 'ACTIVE'
+                    RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE').then(function(result){
+                        vm.showSuccess = true;
+                        vm.chartNotUpdated = true;
+                        vm.updateContent = true;
+                        vm.savingConfiguration = false;
+                        $rootScope.$broadcast('statusChange', { 
+                            activeStatus: 'ACTIVE'
+                        });
+                        $timeout( function(){ 
+                            vm.updateContent = false;
+                            vm.showSuccess = false;
+                            
+                        }, 200);
                     });
-
-                    $timeout( function(){ 
-                        vm.updateContent = false;
-                        vm.showSuccess = false;
-                        
-                    }, 200);
+                   
                 } else {
                     vm.savingConfiguration = false;
                     vm.createBucketsErrorMessage = result;
@@ -347,6 +349,7 @@ angular.module('lp.models.ratings', [
             });
         }
     }
+
 
 
     vm.init();

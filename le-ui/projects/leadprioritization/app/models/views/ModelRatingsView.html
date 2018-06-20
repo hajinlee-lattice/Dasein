@@ -21,9 +21,11 @@
                 	<button 
                 		type="button" 
                 		class="button orange-button"
-                		data-ng-click="vm.publishConfiguration($event)"
+                		ng-mousedown="vm.publishConfiguration($event)"
                 		ng-disabled="vm.chartNotUpdated">
-                        Publish Configuration</button>
+                        Publish Configuration
+
+                    </button>
                 </div>
             </div><!-- End .chart-header -->
 
