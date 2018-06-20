@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,6 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 
@@ -100,32 +100,27 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         Map<String, List<CDLExternalSystemMapping>> result = null;
         try {
             if (externalSystemType == null) {
-                cdlExternalSystemProxy.getExternalSystemMap(space.toString());
+                result = cdlExternalSystemProxy.getExternalSystemMap(space.toString());
             } else {
                 result = new HashMap<>();
                 result.put(externalSystemType.name(),
                         cdlExternalSystemProxy.getExternalSystemByType(space.toString(), externalSystemType));
             }
         } catch (Exception ex) {
-            log.error("Ignoring this error for now", ex);
             result = new HashMap<>();
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.CRM) {
-                CDLExternalSystemMapping c1 = new CDLExternalSystemMapping(InterfaceName.SalesforceAccountID.name(),
-                        "String", InterfaceName.SalesforceAccountID.name());
-                result.put(CDLExternalSystemType.CRM.name(), Arrays.asList(c1));
+                result.put(CDLExternalSystemType.CRM.name(), new ArrayList<>());
             }
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.MAP) {
-                CDLExternalSystemMapping m1 = new CDLExternalSystemMapping("MAP_Acc_Id_1", "String", "Id MAP_Acc_Id_1");
-                CDLExternalSystemMapping m2 = new CDLExternalSystemMapping("MAP_Acc_Id_2", "String", "Id MAP_Acc_Id_2");
-                result.put(CDLExternalSystemType.MAP.name(), Arrays.asList(m1, m2));
+                result.put(CDLExternalSystemType.MAP.name(), new ArrayList<>());
+            }
+            if (externalSystemType == null || externalSystemType == CDLExternalSystemType.ERP) {
+                result.put(CDLExternalSystemType.ERP.name(), new ArrayList<>());
             }
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.OTHER) {
-                CDLExternalSystemMapping o1 = new CDLExternalSystemMapping("OTHER_Acc_Id_1", "String",
-                        "Id OTHER_Acc_Id_1");
-                CDLExternalSystemMapping o2 = new CDLExternalSystemMapping("OTHER_Acc_Id_2", "String",
-                        "Id OTHER_Acc_Id_2");
-                result.put(CDLExternalSystemType.OTHER.name(), Arrays.asList(o1, o2));
+                result.put(CDLExternalSystemType.OTHER.name(), new ArrayList<>());
             }
+            log.error("Ignoring this error for now and returning default map of empty lists", ex);
         }
 
         return result;
