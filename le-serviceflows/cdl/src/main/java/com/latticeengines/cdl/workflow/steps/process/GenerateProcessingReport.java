@@ -153,6 +153,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     : PAReportUtils.initEntityReport(entity);
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+            // Product report is generated in MergeProduct step
+            // PurchaseHistory report is generated in ProfilePurchaseHistory step
             if (entity != BusinessEntity.Product && entity != BusinessEntity.PurchaseHistory) {
                 long newCnt = consolidateSummaryNode.get(ReportConstants.NEW).asLong();
                 long deleteCnt = deleteCnts.get(entity) == null ? 0L : deleteCnts.get(entity);

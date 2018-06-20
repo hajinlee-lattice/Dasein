@@ -17,6 +17,7 @@ public class PAReportUtils {
 
     public static ObjectNode initEntityReport(BusinessEntity entity) {
         ObjectNode entityNode = JsonUtils.createObjectNode();
+
         ObjectNode consolidateSummaryNode = JsonUtils.createObjectNode();
         switch (entity) {
         case Account:
@@ -39,14 +40,24 @@ public class PAReportUtils {
             consolidateSummaryNode.put(ReportConstants.NEW, "0");
             break;
         case PurchaseHistory:
-            consolidateSummaryNode.set(ReportConstants.ACTION, new ObjectMapper().createArrayNode());
-            consolidateSummaryNode.put(ReportConstants.PRODUCT, "0");
-            consolidateSummaryNode.put(ReportConstants.METRICS, "0");
+            consolidateSummaryNode.set(ReportConstants.ACTIONS, new ObjectMapper().createArrayNode());
             break;
         default:
             throw new UnsupportedOperationException(entity.name() + " business entity is not supported in P&A report");
         }
         entityNode.set(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey(), consolidateSummaryNode);
+
+        ObjectNode entityNumberNode = JsonUtils.createObjectNode();
+        switch (entity) {
+        case PurchaseHistory:
+            entityNumberNode.put(ReportConstants.TOTAL, "Not Available");
+            break;
+        default:
+            entityNumberNode.put(ReportConstants.TOTAL, "0");
+            break;
+        }
+        entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
+
         return entityNode;
     }
 

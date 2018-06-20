@@ -529,7 +529,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                     if (action.getType() == ActionType.ACTIVITY_METRICS_CHANGE) {
                         ObjectNode on = mapper.createObjectNode();
                         on.put(ReportConstants.TIME, sdf.format(action.getCreated()));
-                        on.put(ReportConstants.ACTION, JsonUtils.serialize(action.getActionConfiguration()));
+                        on.put(ReportConstants.ACTION, action.getActionConfiguration().serialize());
                         on.put(ReportConstants.USER, action.getActionInitiator());
                         actionNode.add(on);
                     }
