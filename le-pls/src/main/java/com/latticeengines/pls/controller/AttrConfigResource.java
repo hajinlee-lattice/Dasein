@@ -87,10 +87,11 @@ public class AttrConfigResource {
         return attrConfigService.getAttrConfigSelectionDetails(categoryDisplayName, usageName);
     }
 
-    @GetMapping(value = "/stats/category/{catDisplayName}/subcategory/{subcatName}")
+    @GetMapping(value = "/stats/category/{catDisplayName}")
     @ResponseBody
     @ApiOperation("get (attr, stats buckets) pairs for specific category and sub-category")
-    public Map<String, AttributeStats> getStats(@PathVariable String catDisplayName, @PathVariable String subcatName) {
+    public Map<String, AttributeStats> getStats(@PathVariable String catDisplayName,
+            @RequestParam(value = "subcategory", required = true) String subcatName) {
         return attrConfigService.getStats(catDisplayName, subcatName);
     }
 }

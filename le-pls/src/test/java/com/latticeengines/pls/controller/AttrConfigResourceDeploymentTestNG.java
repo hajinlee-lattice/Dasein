@@ -41,7 +41,7 @@ public class AttrConfigResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         log.info(String.format("Test category = %s, sub-cateogry = %s", catDisplayName, subcat));
         Map map = restTemplate.getForObject(
                 getRestAPIHostPort()
-                        + String.format("/pls/attrconfig/stats/category/%s/subcategory/%s", catDisplayName, subcat),
+                        + String.format("/pls/attrconfig/stats/category/%s?subcategory=%s", catDisplayName, subcat),
                 Map.class);
         Map<String, AttributeStats> stats = JsonUtils.convertMap(map, String.class, AttributeStats.class);
         Assert.assertTrue(MapUtils.isNotEmpty(stats));
