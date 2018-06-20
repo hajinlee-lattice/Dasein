@@ -217,7 +217,7 @@ angular
     }
     this.CreateABCDBucketsRatingEngine = function(ratingId, modelId, buckets) {
         var deferred = $q.defer();
-        var url = '/pls/ratingengines/'+ratingId+'/ratingmodels/'+modelId+'/SetScoringIteration';
+        var url = '/pls/ratingengines/'+ratingId+'/ratingmodels/'+modelId+'/setScoringIteration';
         $http({
             method: 'POST',
             url: url,
