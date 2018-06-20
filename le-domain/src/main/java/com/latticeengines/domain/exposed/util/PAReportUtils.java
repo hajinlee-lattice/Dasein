@@ -1,13 +1,12 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.util.Collections;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -40,7 +39,7 @@ public class PAReportUtils {
             consolidateSummaryNode.put(ReportConstants.NEW, "0");
             break;
         case PurchaseHistory:
-            consolidateSummaryNode.put(ReportConstants.ACTION, JsonUtils.serialize(Collections.emptyList()));
+            consolidateSummaryNode.set(ReportConstants.ACTION, new ObjectMapper().createArrayNode());
             consolidateSummaryNode.put(ReportConstants.PRODUCT, "0");
             consolidateSummaryNode.put(ReportConstants.METRICS, "0");
             break;
