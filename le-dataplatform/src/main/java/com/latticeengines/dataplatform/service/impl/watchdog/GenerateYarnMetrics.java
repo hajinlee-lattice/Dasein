@@ -150,7 +150,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
 
             CompletedJobMetric completedJobMetric = new CompletedJobMetric();
             completedJobMetric.setQueue(appReport.getQueue());
-            completedJobMetric.setFinalAppStatus(FinalApplicationStatus.SUCCEEDED.name());
+            completedJobMetric.setFinalAppStatus(finalAppStatus.name());
             completedJobMetric.setJobName(suffix);
             completedJobMetric.setTenantId(splits.get(0));
             CompletedJobMeasurement completedJobMeasurement = new CompletedJobMeasurement(completedJobMetric);
