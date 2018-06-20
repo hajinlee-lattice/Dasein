@@ -215,13 +215,12 @@ angular
 
         return deferred.promise;
     }
-
     this.CreateABCDBucketsRatingEngine = function(ratingId, modelId, buckets) {
         var deferred = $q.defer();
-
+        var url = '/pls/ratingengines/'+ratingId+'/ratingmodels/'+modelId+'/SetScoringIteration';
         $http({
             method: 'POST',
-            url: '/pls/bucketedscore/abcdbuckets/ratingengine/' + ratingId + '/model/' + modelId,
+            url: url,
             data: buckets,
             headers: {
                 'Content-Type': 'application/json'
@@ -247,4 +246,35 @@ angular
 
         return deferred.promise;
     }
+    // this.CreateABCDBucketsRatingEngine = function(ratingId, modelId, buckets) {
+    //     var deferred = $q.defer();
+
+    //     $http({
+    //         method: 'POST',
+    //         url: '/pls/bucketedscore/abcdbuckets/ratingengine/' + ratingId + '/model/' + modelId,
+    //         data: buckets,
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         }
+    //     }).then(
+    //         function onSuccess(response) {
+    //             var result = {
+    //                 data: response.data,
+    //                 success: true
+    //             };
+                
+    //             deferred.resolve(result);
+
+    //         }, function onError(response) {
+    //             if (!response.data) {
+    //                 response.data = {};
+    //             }
+
+    //             var errorMsg = response.data.errorMsg || 'unspecified error';
+    //             deferred.resolve(errorMsg);
+    //         }
+    //     );
+
+    //     return deferred.promise;
+    // }
 });

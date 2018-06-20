@@ -304,9 +304,10 @@ angular.module('lp.models.ratings', [
         vm.savingConfiguration = true;
 
         var rating_id = $stateParams.rating_id;
+        
         if(vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') {
-
-            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, vm.model.ModelId, vm.workingBuckets).then(function(result){
+            var aiModelId = vm.ratingModelId;
+            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
                     vm.showSuccess = true;
                     vm.chartNotUpdated = true;
