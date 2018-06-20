@@ -342,6 +342,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             export.setUsingDisplayName(Boolean.FALSE);
             computeLift.setScoreField(InterfaceName.Event.name());
             computeLift.setSaveBucketMetadata(Boolean.TRUE);
+            pivotScoreAndEvent.setScoreField(InterfaceName.Event.name());
             rtsBulkScoreWorkflowBuilder.skipBulkMatch(Boolean.TRUE);
 
             configuration.add(dedupEventTable);

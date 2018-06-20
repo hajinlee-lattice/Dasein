@@ -13,7 +13,6 @@ import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelComplet
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
-import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
 import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
@@ -50,9 +49,6 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
     @Inject
-    private ComputeLiftDataFlow computeLift;
-
-    @Inject
     private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
 
     @Inject
@@ -71,7 +67,6 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(rtsBulkScoreWorkflow) //
-                .next(computeLift) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportBucketTool) //
                 .listener(sendEmailAfterModelCompletionListener) //
