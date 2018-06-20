@@ -5,6 +5,7 @@ from collections import OrderedDict
 import pandas as pd
 import numpy as np
 from scipy.stats import linregress
+from scipy.stats import spearmanr
 from leframework.codestyle import overrides
 from leframework.model.state import State
 from leframework.util.pdversionutil import pd_before_17
@@ -25,8 +26,9 @@ class FitFunctionGenerator(State):
         try:
             rateChartDf = self.get_rate_dataframe(segments)
             maxRate = self.get_max_rate(rateChartDf)
+            avgRate = self.get_avg_rate(rateChartDf)
             decileRateDf = self.get_decile_rate(rateChartDf)
-            gamma, alpha, beta = self.interpolate_rate_chart((decileRateDf['rate']))
+            gamma, alpha, beta = self.rate_chart_fit((decileRateDf['rate']), decileRateDf['decile'], avgRate)
         except Exception as exp:
             self._logger.exception("Caught Exception while generating fit function: " + str(exp))
             alpha, beta, gamma, maxRate = self.get_default_fit_function_params()
@@ -35,12 +37,12 @@ class FitFunctionGenerator(State):
         structure["beta"] = beta
         structure["gamma"] = gamma
         structure["maxRate"] = maxRate
-        structure["version"] = "v1"
+        structure["version"] = "v2"
 
         self.getMediator().fit_function_parameters = structure
 
     def get_default_fit_function_params(self):
-        return (0.0, 0.0, 0.0, 0.0)
+        return 0.0, 0.0, 0.0, 0.0
 
     def get_rate_dataframe(self, rateChart):
         rateChartDf = pd.DataFrame.from_records(rateChart)
@@ -52,7 +54,7 @@ class FitFunctionGenerator(State):
         else:
             rateChartDf = rateChartDf.sort_values(by='Score', ascending=False)
         maxRateRow = rateChartDf.iloc[0]
-        return maxRateRow['Converted'] * 1.5 / maxRateRow['Count']
+        return maxRateRow['Converted'] * 1.0 / maxRateRow['Count']
 
     def get_decile_rate(self, p1):
         p1['decile'] = p1['Score'].apply(lambda x: int((x - 1) / 10 + 1))
@@ -60,64 +62,97 @@ class FitFunctionGenerator(State):
         p1_decile['rate'] = p1_decile['Converted'] / p1_decile['Count']
 
         p1_decile.sort_index(inplace=True, ascending=False)
-
+        p1_decile.reset_index(inplace=True)
         return p1_decile
 
-    def linear_fit(self, x, y):
-        num_of_fit_points = 5  # Number of points picked at random for fitting
-        num_of_iterations = 30  # Number of iterations to run
-        best_params = []
-        points_init = np.arange(2)
-        outlierThld = 2.0
-        matchesSet = set([])
-        for i in range(num_of_iterations):
-            points = np.random.choice(y.shape[0] - 2, num_of_fit_points - 2, replace=False) + 2
-            points = np.append(points_init, points)
-            x_points = x[points]
-            y_points = y[points]
-            x_points = x_points.reshape(x_points.shape[0], )
-            slope, intercept, r_value, p_value, std_err = linregress(x_points, y_points)
-            sq_err = np.sqrt(np.average(np.square(slope * x_points + intercept - y_points)))
-            ind_err = slope * x + intercept
-            ind_err = np.abs(np.subtract(ind_err, y))
-            matches = np.argwhere(ind_err <= outlierThld * sq_err).T[0]
-            if tuple(matches) in matchesSet:
-                continue
-            else:
-                matchesSet.add(tuple(matches))
+    def get_avg_rate(self, rateChartDf):
+        return rateChartDf['Converted'].sum() * 1.0 / rateChartDf['Count'].sum()
 
-            x_matches = x[matches]
-            y_matches = y[matches]
+    def linear_fit(self, xx, yy):
+        outlierThld = 2.0
+
+        params = []
+        slope, intercept, r_value, p_value, std_err = linregress(xx, yy)
+        diff = np.sum(np.square(np.exp(intercept + xx.reshape(xx.shape[0], ) * slope) - np.exp(yy)) * np.asarray(
+            range(xx.shape[0] + 1, 1, -1)))
+
+        params.append([slope, intercept, r_value, p_value, diff])
+
+        # find outliers
+        sq_err = np.sqrt(np.average(np.square(slope * xx + intercept - yy)))
+        ind_err = np.abs(np.subtract(slope * xx + intercept, yy))
+
+        matches = np.argwhere(ind_err <= outlierThld * sq_err).T[0]
+        matches = np.asarray(list(set(matches).union(set({0, 1}))))
+
+        if matches.shape[0] < yy.shape[0]:
+            x_matches = xx[matches]
+            y_matches = yy[matches]
             x_matches = x_matches.reshape(x_matches.shape[0], )
             slope, intercept, r_value, p_value, std_err = linregress(x_matches, y_matches)
-            error = np.sum(np.square(np.exp(intercept + x.reshape(x.shape[0], ) * slope) - np.exp(y)) * np.asarray(
-                range(x.shape[0] + 1, 1, -1)))
-            if len(best_params) == 0:
-                best_params = [slope, intercept, r_value, p_value, error]
-            elif (error < best_params[4]):
-                best_params = [slope, intercept, r_value, p_value, error]
-        alpha = best_params[0]
-        beta = best_params[1]
-        if best_params[2] >= -0.001 or best_params[3] > 0.5:
+            diff = np.sum(np.square(np.exp(intercept + xx.reshape(xx.shape[0], ) * slope) - np.exp(yy)) * np.asarray(
+                range(xx.shape[0] + 1, 1, -1)))
+            params.append([slope, intercept, r_value, p_value, diff])
+
+        minid = np.argmin(np.asarray([x[4] for x in params]))
+
+        bestParam = params[minid]
+
+        alpha = bestParam[0]
+        beta = bestParam[1]
+
+        if bestParam[2] >= -0.001 or bestParam[3] > 0.5:
             alpha = 0.0
-            beta = np.mean(y)
-        diff = np.sum(np.square(np.exp(beta + x.reshape(x.shape[0], ) * alpha) - np.exp(y)) * np.asarray(
-            range(x.shape[0] + 1, 1, -1)))
+            beta = 0.0
+
+        diff = np.sum(np.square(np.exp(beta + xx.reshape(xx.shape[0], ) * alpha) - np.exp(yy)) * np.asarray(
+            range(xx.shape[0] + 1, 1, -1)))
+
         return alpha, beta, diff
 
-    def interpolate_rate_chart(self, rateArray):
-        rateArray = np.asarray(rateArray)
-        rateArray = np.log(rateArray + 1e-6)
+    # Grid search over gamma, and returns gamma, alpha and beta that best fit the function :
+    # rate = beta * (decile + gamma) ** alpha
+    def rate_chart_fit(self, rateArray, decileArray, avgRate):
 
-        gammaList = [-0.99999, 0, 100000]
+        if avgRate < 1e-6 or rateArray[0] <= avgRate:
+            return (0.0, 0.0, np.log(max(avgRate, 1e-6)))
+
+        rateArray = np.asarray(rateArray)
+        decileArray = np.asarray(decileArray)[::-1]
+
+        decileArray = decileArray[~np.isnan(rateArray)]
+        rateArray = rateArray[~np.isnan(rateArray)]
+
+        if rateArray.shape[0] < 3:
+            return (0.0, 0.0, np.log(avgRate))
+
+        liftArray = rateArray / avgRate
+        decile = decileArray
+
+        idx = np.argwhere(liftArray > 0.01)
+
+        if idx.shape[0] >= 3:
+            liftArray = liftArray[idx]
+            decile = decile[idx]
+        else:
+            liftArray = liftArray[:3]
+            decile = decile[:3]
+
+        rho, pval = spearmanr(decile, liftArray)
+
+        if rho >= -0.001 or pval > 0.5:
+            return (0.0, 0.0, np.log(avgRate))
+
+        gammaList = [-0.9, 0, 100]
 
         gridSearchResults = {}
         for gridSearchDepth in range(8):
             for gamma in gammaList:
                 if gamma in gridSearchResults:
                     continue
-                decile = np.log(np.arange(1, rateArray.shape[0] + 1) + gamma)
-                gridSearchResults[gamma] = self.linear_fit(decile, rateArray)
+                logdecile = np.log(decile + gamma).reshape(decile.shape[0], )
+                logliftArray = np.log(liftArray + 1e-6).reshape(liftArray.shape[0], )
+                gridSearchResults[gamma] = self.linear_fit(logdecile, logliftArray)
             if gridSearchResults[gammaList[1]][2] >= gridSearchResults[gammaList[0]][2] \
                     and gridSearchResults[gammaList[2]][2] >= gridSearchResults[gammaList[1]][2]:
                 gammaList = [gammaList[0], 0.5 * (gammaList[0] + gammaList[1]), gammaList[1]]
@@ -126,6 +161,7 @@ class FitFunctionGenerator(State):
                 gammaList = [gammaList[1], 0.5 * (gammaList[1] + gammaList[2]), gammaList[2]]
             else:
                 gammaList = [0.5 * (gammaList[1] + gammaList[0]), gammaList[1], 0.5 * (gammaList[1] + gammaList[2])]
+
         minDiff = min([x[2] for x in gridSearchResults.values()])
         minGamma = [x for x, y in gridSearchResults.items() if np.abs(y[2] - minDiff) < 1e-6][0]
-        return (minGamma, gridSearchResults[minGamma][0], gridSearchResults[minGamma][1])
+        return (minGamma, gridSearchResults[minGamma][0], gridSearchResults[minGamma][1] + np.log(avgRate))

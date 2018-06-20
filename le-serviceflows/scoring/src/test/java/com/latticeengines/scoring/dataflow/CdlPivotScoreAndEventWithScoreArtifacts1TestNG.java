@@ -66,6 +66,23 @@ public class CdlPivotScoreAndEventWithScoreArtifacts1TestNG extends ServiceFlows
         return params;
     }
 
+    private PivotScoreAndEventParameters getStandardParameters2() {
+        PivotScoreAndEventParameters params = new PivotScoreAndEventParameters("InputTable");
+        String modelguid1 = "ms__25630e76-89ee-4fbe-b4bf-24182d9d67d5-ai_ba6vq";
+        params.setScoreFieldMap(ImmutableMap.of( //
+                                                 modelguid1, InterfaceName.RawScore.name() //
+        ));
+
+        String sd = loadScoreDerivation("/pivotScoreAndEvent/CDLScoreOutputWithScoreArtifacts1/scorederivation.json");
+        String fitFunctionParams =
+            loadFitFunctionParameters("/pivotScoreAndEvent/CDLScoreOutputWithScoreArtifacts1/fitfunctionparameters2.json");
+        params.setScoreDerivationMap(
+            ImmutableMap.of(modelguid1, sd));
+        params.setFitFunctionParametersMap(
+            ImmutableMap.of(modelguid1, fitFunctionParams));
+        return params;
+    }
+
     @Override
     protected String getFlowBeanName() {
         return "pivotScoreAndEvent";
@@ -109,6 +126,23 @@ public class CdlPivotScoreAndEventWithScoreArtifacts1TestNG extends ServiceFlows
     @Test(groups = "functional", expectedExceptions = IllegalArgumentException.class)
     public void testBadParameters() throws Exception {
         executeDataFlow(getBadParameters());
+    }
+
+    @Test(groups = "functional")
+    public void testStandardParameters2() throws Exception {
+        executeDataFlow(getStandardParameters2());
+        List<GenericRecord> outputRecords = readOutput();
+        // reverse the output list to test we sort it later
+        Collections.sort(
+            outputRecords,
+            (GenericRecord g1, GenericRecord g2) ->
+                Double.compare(Double.valueOf(g2.get("Score").toString()), Double.valueOf(g1.get("Score").toString()))
+        );
+        assertEquals(outputRecords.size(), 95);
+        BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
+            .generateBucketedScoreSummary(outputRecords);
+        System.out.println(bucketedScoreSummary);
+        Assert.assertEquals(7733, bucketedScoreSummary.getTotalNumLeads());
     }
 
     private String loadScoreDerivation(String resourceName) {
