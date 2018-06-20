@@ -3,9 +3,10 @@ package com.latticeengines.playmaker.service.impl;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -16,7 +17,6 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
@@ -27,13 +27,11 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
 
     private static final Logger log = LoggerFactory.getLogger(LpiPMPlayImplDeploymentTestNG.class);
 
+    @Inject
     private LpiPMPlayImpl lpiPMPlayImpl;
 
-    @Autowired
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
-
-    @Autowired
-    private PlayProxy playProxy;
 
     private long accountCount;
 
@@ -53,9 +51,6 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenant();
-
-        lpiPMPlayImpl = new LpiPMPlayImpl();
-        lpiPMPlayImpl.setPlayProxy(playProxy);
     }
 
     @Test(groups = "deployment")
