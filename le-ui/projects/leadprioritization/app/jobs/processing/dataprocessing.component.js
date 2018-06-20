@@ -110,6 +110,7 @@ angular.module('lp.jobs.import', [
                 'titlelength': 100,
                 'dischargetext': 'Cancel',
                 'dischargeaction': 'cancel',
+                'closeaction': 'forcecancel',
                 'confirmtext': 'Yes, Run Now',
                 'confirmaction': 'proceed',
                 'icon': 'fa fa-exclamation-triangle',
@@ -121,17 +122,17 @@ angular.module('lp.jobs.import', [
             };
 
             vm.modalCallback = function (args) {
-                // if (vm.config.dischargeaction === args.action) {
-                //     vm.toggleModal();
-                // } else 
+               
                 if (vm.config.confirmaction === args.action) {
                     vm.callback({ 'action': 'run', 'obj': args.data });
                 }else{
                     var data = ModalStore.getData(vm.config.name);
-                    vm.callback({ 'action': 'cancel', 'obj': data });
+                    vm.callback({ 'action': args.action, 'obj': data });
                 }
-                vm.toggleModal();
-                vm.msgUrl = 'app/jobs/processing/actions.incompleted.message.html';
+                if('closedForced' !== args.action){
+                    vm.toggleModal();
+                    vm.msgUrl = 'app/jobs/processing/actions.incompleted.message.html';
+                }
             };
             vm.toggleModal = function (data) {
                 var modal = ModalStore.get(vm.config.name);
