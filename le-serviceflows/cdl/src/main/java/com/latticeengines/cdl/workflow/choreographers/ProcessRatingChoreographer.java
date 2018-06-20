@@ -246,7 +246,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             rebuild = true;
         } else if (hasActions) {
             log.info("Going to rebuild, because has related actions.");
-            rebuild = false;
+            rebuild = true;
         } else {
             log.info("No reason to rebuild, skip.");
         }
