@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -672,16 +673,14 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.CreatedDate) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .fundamentalType(FundamentalType.DATE.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE)
-                .build());
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) //)__
+                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) // )__
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .fundamentalType(FundamentalType.DATE.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE)
-                .build());
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         return table;
     }
 
@@ -701,8 +700,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductName.name()) //
                 .allowedDisplayNames(Sets.newHashSet("NAME", "PRODUCT_NAME", "PRODUCT NAME")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.ProductName)
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .interfaceName(InterfaceName.ProductName).approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
@@ -710,8 +708,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Description.name()) //
                 .allowedDisplayNames(Sets.newHashSet("DESCRIPTION", "PRODUCT DESCRIPTION")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Description)
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .interfaceName(InterfaceName.Description).approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
@@ -719,8 +716,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductBundle.name()) //
                 .allowedDisplayNames(Sets.newHashSet("BUNDLE", "PRODUCT_BUNDLE", "PRODUCT BUNDLE")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.ProductBundle)
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .interfaceName(InterfaceName.ProductBundle).approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
@@ -728,8 +724,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductLine.name()) //
                 .allowedDisplayNames(Sets.newHashSet("LINE", "PRODUCT_LINE", "PRODUCT LINE")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.ProductLine)
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .interfaceName(InterfaceName.ProductLine).approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
@@ -737,8 +732,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductFamily.name()) //
                 .allowedDisplayNames(Sets.newHashSet("FAMILY", "PRODUCT_FAMILY", "PRODUCT FAMILY")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.ProductFamily)
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .interfaceName(InterfaceName.ProductFamily).approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
@@ -746,8 +740,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ProductCategory.name()) //
                 .allowedDisplayNames(Sets.newHashSet("CATEGORY", "PRODUCT_CATEGORY", "PRODUCT CATEGORY")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.ProductCategory)
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .interfaceName(InterfaceName.ProductCategory).approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
@@ -1329,8 +1322,8 @@ public class SchemaRepository {
             attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
             attrs.forEach(a -> a.setCategory(Category.ACCOUNT_INFORMATION));
         } else if (schema == SchemaInterpretation.Account) {
-            attrs.addAll(Arrays.asList(website, accountCompanyName, duns, city, state,
-                    country, postalCode, phoneNumber));
+            attrs.addAll(
+                    Arrays.asList(website, accountCompanyName, duns, city, state, country, postalCode, phoneNumber));
             attrs.addAll(Arrays.asList(address1, address2));
             attrs.forEach(a -> a.setCategory(Category.ACCOUNT_ATTRIBUTES));
         } else if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.SalesforceLead) {
@@ -1414,28 +1407,7 @@ public class SchemaRepository {
     }
 
     public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
-        Set<InterfaceName> attrs = new HashSet<>();
-        switch (entity) {
-            case Account:
-                attrs.add(InterfaceName.AccountId);
-                attrs.add(InterfaceName.LDC_Name);
-                attrs.add(InterfaceName.Website);
-                attrs.add(InterfaceName.Address_Street_1);
-                attrs.add(InterfaceName.City);
-                attrs.add(InterfaceName.State);
-                attrs.add(InterfaceName.PostalCode);
-                attrs.add(InterfaceName.Country);
-                attrs.add(InterfaceName.PhoneNumber);
-                break;
-            case Contact:
-                attrs.add(InterfaceName.ContactId);
-                attrs.add(InterfaceName.ContactName);
-                attrs.add(InterfaceName.Email);
-                attrs.add(InterfaceName.PhoneNumber);
-                attrs.add(InterfaceName.AccountId);
-            default:
-        }
-        return attrs;
+        return MetadataSegmentExportType.getDefaultExportAttributes(entity);
     }
 
     private static class AttributeBuilder {

@@ -2,75 +2,65 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public enum MetadataSegmentExportType {
-    ACCOUNT("Accounts", //
-            Arrays.asList(//
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.AccountId.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.CompanyName.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Website.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Address_Street_1.name().toLowerCase(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.City.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.State.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.PostalCode.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Country.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.PhoneNumber.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name() //
-            ), //
-            Arrays.asList("Account Id", "Company Name", "Website", "Street", //
-                    "City", "State", "Zip", "Country", "Phone", "Salesforce Id")), //
-    CONTACT("Contacts", //
-            Arrays.asList(//
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactId.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactName.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.Email.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.PhoneNumber.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.AccountId.name() //
-            ), //
-            Arrays.asList("Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id")), //
-    ACCOUNT_AND_CONTACT("Accounts and Contacts", //
-            Arrays.asList( //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactId.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactName.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.Email.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.PhoneNumber.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.AccountId.name(), //
-                    //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.CompanyName.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Website.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Address_Street_1.name().toLowerCase(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.City.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.State.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.PostalCode.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.Country.name(), //
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name() //
-            ), //
-            Arrays.asList("Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id", //
-                    "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id")), //
-    ACCOUNT_ID("Account_ID", //
-            Collections.singletonList(InterfaceName.AccountId.name()), //
-            Collections.singletonList("Account Id")); // ;
+
+    ACCOUNT("Accounts", BusinessEntity.Account), //
+    CONTACT("Contacts", BusinessEntity.Contact), //
+    ACCOUNT_AND_CONTACT("Accounts and Contacts", BusinessEntity.Contact, BusinessEntity.Account), //
+    ACCOUNT_ID("Account_ID", InterfaceName.AccountId, "Account Id"); // ;
 
     String displayName;
 
     List<Pair<String, String>> fieldNamePairs;
 
-    MetadataSegmentExportType(String displayName, List<String> fieldNames, List<String> fieldDisplayNames) {
+    MetadataSegmentExportType(String displayName, InterfaceName field, String fieldDisplayName) {
         this.displayName = displayName;
-        this.fieldNamePairs = new ArrayList<>();
-        for (int i = 0; i < fieldNames.size(); i++) {
-            fieldNamePairs.add( //
-                    new ImmutablePair<String, String>( //
-                            fieldNames.get(i), //
-                            fieldDisplayNames.get(i)));
-        }
+        this.fieldNamePairs = Collections.singletonList(new ImmutablePair<>(field.name(), fieldDisplayName));
+    }
+
+    MetadataSegmentExportType(String displayName, BusinessEntity... entities) {
+        this.displayName = displayName;
+        Set<InterfaceName> attrName = new HashSet<>();
+        this.fieldNamePairs = Arrays.asList(entities).stream() //
+                .map(e -> {
+                    String prefix;
+                    if (e == BusinessEntity.Account) {
+                        prefix = MetadataSegmentExport.ACCOUNT_PREFIX;
+                    } else if (e == BusinessEntity.Contact) {
+                        prefix = MetadataSegmentExport.CONTACT_PREFIX;
+                    } else {
+                        prefix = e.name() + "_";
+                    }
+                    return getDefaultExportAttributesPair(e).stream() //
+                            .map(p -> {
+                                InterfaceName interfaceName = p.getLeft();
+                                Pair<String, String> res = null;
+                                if (!attrName.contains(interfaceName)) {
+                                    // give precedence to field from first type
+                                    // if there are duplicate field names
+                                    attrName.add(interfaceName);
+                                    res = new ImmutablePair<>(prefix + interfaceName.name(), p.getRight());
+                                }
+                                return res;
+                            }) //
+                            .filter(r -> r != null) //
+                            .collect(Collectors.toList());
+                }) //
+                .flatMap(Collection::stream) //
+                .collect(Collectors.toList());
     }
 
     public String getDisplayName() {
@@ -79,5 +69,37 @@ public enum MetadataSegmentExportType {
 
     public List<Pair<String, String>> getFieldNamePairs() {
         return fieldNamePairs;
+    }
+
+    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
+        List<Pair<InterfaceName, String>> defaultExportAttributesPair = getDefaultExportAttributesPair(entity);
+        return defaultExportAttributesPair.stream() //
+                .map(Pair::getLeft) //
+                .collect(Collectors.toSet());
+    }
+
+    private static List<Pair<InterfaceName, String>> getDefaultExportAttributesPair(BusinessEntity entity) {
+        List<Pair<InterfaceName, String>> attrs = new ArrayList<>();
+        switch (entity) {
+        case Account:
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.AccountId, "Account Id"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.CompanyName, "Company Name"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Website, "Website"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Address_Street_1, "Street"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.City, "City"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.State, "State"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.PostalCode, "Zip"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Country, "Country"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.PhoneNumber, "Phone"));
+            break;
+        case Contact:
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.ContactId, "Contact Id"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.ContactName, "Contact Name"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.Email, "Email"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.PhoneNumber, "Contact Phone"));
+            attrs.add(new ImmutablePair<InterfaceName, String>(InterfaceName.AccountId, "Account Id"));
+        default:
+        }
+        return attrs;
     }
 }
