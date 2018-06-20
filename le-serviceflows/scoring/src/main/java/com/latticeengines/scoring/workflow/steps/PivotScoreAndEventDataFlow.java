@@ -2,6 +2,7 @@ package com.latticeengines.scoring.workflow.steps;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -293,6 +294,9 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     private List<RatingModelContainer> getModelContainers() {
         List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
+        if (allContainers == null) {
+            return Collections.emptyList();
+        }
         return allContainers.stream() //
                 .filter(container -> {
                     RatingEngineType ratingEngineType = container.getEngineSummary().getType();
