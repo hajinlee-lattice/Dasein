@@ -67,9 +67,9 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @Override
+    @JsonProperty("pid")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     @Column(name = "PID", nullable = false)
     public Long getPid() {
         return this.pid;
@@ -139,7 +139,11 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
 
     @JsonProperty("ratingmodel_attributes")
     @Transient
-    public Set<AttributeLookup> getRatingModelAttributes() { return this.ratingModelAttributes; }
+    public Set<AttributeLookup> getRatingModelAttributes() {
+        return this.ratingModelAttributes;
+    }
 
-    public void setRatingModelAttributes(Set<AttributeLookup> attributes) { this.ratingModelAttributes = attributes; }
+    public void setRatingModelAttributes(Set<AttributeLookup> attributes) {
+        this.ratingModelAttributes = attributes;
+    }
 }

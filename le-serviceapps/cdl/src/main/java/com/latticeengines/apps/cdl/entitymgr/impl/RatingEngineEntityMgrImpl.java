@@ -378,12 +378,16 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
 
         // set Activation Action Context
         if (RatingEngineStatus.ACTIVE == ratingEngine.getStatus()) {
-            if (ratingEngine.getScoringIteration() == null && ratingEngine.getType() != RatingEngineType.RULE_BASED) {
-                log.error(String.format("No scoring iteration set for Rating Engine: %s", ratingEngine.getId()));
-                throw new LedpException(LedpCode.LEDP_18186, new String[] { ratingEngine.getDisplayName() });
+            if (ratingEngine.getScoringIteration() == null) {
+                if (ratingEngine.getType() != RatingEngineType.RULE_BASED) {
+                    log.error(String.format("No scoring iteration set for Rating Engine: %s", ratingEngine.getId()));
+                    throw new LedpException(LedpCode.LEDP_18186, new String[] { ratingEngine.getDisplayName() });
+                } else {
+                    ratingEngine.setScoringIteration(ratingEngine.getLatestIteration());
+                    ratingEngineDao.update(ratingEngine);
+                }
             }
             setActivationActionContext(ratingEngine);
-            // ratingEngine.setJustCreated(false);
         }
     }
 

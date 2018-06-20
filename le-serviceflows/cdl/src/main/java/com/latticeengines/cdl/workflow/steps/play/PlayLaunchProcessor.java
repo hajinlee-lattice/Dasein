@@ -146,7 +146,7 @@ public class PlayLaunchProcessor {
                 log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
                 try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
-                        new GenericDatumWriter<GenericRecord>(playLaunchContext.getSchema()))) {
+                        new GenericDatumWriter<>(playLaunchContext.getSchema()))) {
                     dataFileWriter.create(playLaunchContext.getSchema(), localFile);
 
                     // loop over to required number of pages
@@ -162,7 +162,7 @@ public class PlayLaunchProcessor {
             // as per PM requirement, we need to fail play launch if 0
             // recommendations were created. In future this may be enhanced for
             // %based failure rate to decide if play launch failed or not
-            if (playLaunch.getAccountsLaunched() == null || playLaunch.getAccountsLaunched().longValue() == 0L) {
+            if (playLaunch.getAccountsLaunched() == null || playLaunch.getAccountsLaunched() == 0L) {
                 throw new LedpException(LedpCode.LEDP_18159,
                         new Object[] { playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored() });
             } else {
@@ -357,8 +357,9 @@ public class PlayLaunchProcessor {
         Schema schema = TableUtils.createSchema(playLaunch.getTableName(), recommendationTable);
 
         ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
-        RatingModel activeModel = ratingEngine.getActiveModel();
-        String modelId = activeModel.getId();
+        // RatingModel activeModel = ratingEngine.getActiveModel();
+        RatingModel publishedIteration = ratingEngine.getPublishedIteration();
+        String modelId = publishedIteration.getId();
         String ratingId = ratingEngine.getId();
         String segmentName = segment.getName();
         log.info(String.format("Processing segment: %s", segmentName));
@@ -378,7 +379,7 @@ public class PlayLaunchProcessor {
                 .contactFrontEndQuery(new FrontEndQuery()) //
                 .modelId(modelId) //
                 .ratingId(ratingId) //
-                .activeModel(activeModel) //
+                .publishedIteration(publishedIteration) //
                 .modifiableAccountIdCollectionForContacts(new ArrayList<>()) //
                 .counter(new Counter()) //
                 .recommendationTable(recommendationTable) //

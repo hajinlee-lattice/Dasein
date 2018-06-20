@@ -109,8 +109,21 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
+        Assert.assertNotNull(createdRatingEngine.getLatestIteration());
 
+        ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(),
+                createdRatingEngine.getLatestIteration().getId(), null);
+        createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
+        Assert.assertNotNull(createdRatingEngine.getScoringIteration());
+
+        RatingEngine re = new RatingEngine();
+        re.setId(createdRatingEngine.getId());
+        re.setPublishedIteration(ratingEngineProxy.getRatingModel(tenant.getId(), createdRatingEngine.getId(),
+                createdRatingEngine.getScoringIteration().getId()));
+        createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), re);
+        Assert.assertNotNull(createdRatingEngine.getPublishedIteration());
+
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
         ratingEngine1.setId(createdRatingEngine.getId());
 
         List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());

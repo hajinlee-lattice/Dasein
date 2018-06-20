@@ -42,7 +42,7 @@ public class PlayLaunchContext {
 
     private String ratingId;
 
-    private RatingModel activeModel;
+    private RatingModel publishedIteration;
 
     private FrontEndQuery accountFrontEndQuery;
 
@@ -58,8 +58,8 @@ public class PlayLaunchContext {
 
     public PlayLaunchContext(CustomerSpace customerSpace, Tenant tenant, String playName, String playLaunchId,
             PlayLaunch playLaunch, Play play, long launchTimestampMillis, RatingEngine ratingEngine,
-            MetadataSegment segment, String segmentName, String modelId, String ratingId, RatingModel activeModel,
-            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
+            MetadataSegment segment, String segmentName, String modelId, String ratingId,
+            RatingModel publishedIteration, FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
             List<Object> modifiableAccountIdCollectionForContacts, Counter counter, Table recommendationTable,
             Schema schema) {
         super();
@@ -75,7 +75,7 @@ public class PlayLaunchContext {
         this.segmentName = segmentName;
         this.modelId = modelId;
         this.ratingId = ratingId;
-        this.activeModel = activeModel;
+        this.publishedIteration = publishedIteration;
         this.accountFrontEndQuery = accountFrontEndQuery;
         this.contactFrontEndQuery = contactFrontEndQuery;
         this.modifiableAccountIdCollectionForContacts = modifiableAccountIdCollectionForContacts;
@@ -124,8 +124,8 @@ public class PlayLaunchContext {
         return segmentName;
     }
 
-    public RatingModel getActiveModel() {
-        return activeModel;
+    public RatingModel getPublishedIteration() {
+        return publishedIteration;
     }
 
     public String getModelId() {
@@ -193,7 +193,7 @@ public class PlayLaunchContext {
 
         private String ratingId;
 
-        private RatingModel activeModel;
+        private RatingModel publishedIteration;
 
         private FrontEndQuery accountFrontEndQuery;
 
@@ -270,8 +270,8 @@ public class PlayLaunchContext {
             return this;
         }
 
-        public PlayLaunchContextBuilder activeModel(RatingModel activeModel) {
-            this.activeModel = activeModel;
+        public PlayLaunchContextBuilder publishedIteration(RatingModel publishedIteration) {
+            this.publishedIteration = publishedIteration;
             return this;
         }
 
@@ -308,7 +308,7 @@ public class PlayLaunchContext {
 
         public PlayLaunchContext build() {
             return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play,
-                    launchTimestampMillis, ratingEngine, segment, segmentName, modelId, ratingId, activeModel,
+                    launchTimestampMillis, ratingEngine, segment, segmentName, modelId, ratingId, publishedIteration,
                     accountFrontEndQuery, contactFrontEndQuery, modifiableAccountIdCollectionForContacts, counter,
                     recommendationTable, schema);
         }

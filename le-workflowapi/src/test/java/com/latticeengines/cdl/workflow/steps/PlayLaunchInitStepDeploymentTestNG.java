@@ -130,7 +130,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
 
-        bucketsToLaunch = new HashSet<RatingBucketName>(Arrays.asList(RatingBucketName.A, RatingBucketName.B));
+        bucketsToLaunch = new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B));
         excludeItemsWithoutSalesforceId = true;
         topNCount = 5L;
 

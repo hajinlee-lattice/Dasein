@@ -96,9 +96,8 @@ public class FrontEndQueryCreator {
 
     private void prepareLookupsForFrontEndQueries(FrontEndQuery accountFrontEndQuery,
             FrontEndQuery contactFrontEndQuery, String destinationAccountId) {
-        Map<BusinessEntity, List<String>> tempAccLookupFields = null;
+        Map<BusinessEntity, List<String>> tempAccLookupFields;
         if (StringUtils.isBlank(destinationAccountId)) {
-            destinationAccountId = InterfaceName.SalesforceAccountID.name();
             tempAccLookupFields = accountLookupFields;
         } else {
             tempAccLookupFields = new HashMap<>();
@@ -182,7 +181,7 @@ public class FrontEndQueryCreator {
                     prepareContactRestriction(extractedContactRestriction, modifiableAccountIdCollectionForContacts));
         }
 
-        List<RatingModel> ratingModels = Collections.singletonList(playLaunchContext.getActiveModel());
+        List<RatingModel> ratingModels = Collections.singletonList(playLaunchContext.getPublishedIteration());
         accountFrontEndQuery.setRatingModels(ratingModels);
 
         // TODO add filtering based on list of selected buckets and update
@@ -215,10 +214,8 @@ public class FrontEndQueryCreator {
         Restriction accountIdRestriction = Restriction.builder()
                 .let(BusinessEntity.Contact, InterfaceName.AccountId.name()).inCollection(modifiableAccountIdCollection)
                 .build();
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
+        return new FrontEndRestriction(
                 Restriction.builder().and(extractedContactRestriction, accountIdRestriction).build());
-
-        return frontEndRestriction;
     }
 
     @VisibleForTesting
