@@ -23,11 +23,14 @@
             <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
         </div>
     </li>
-    <li class="configureattributes show-tooltip title-tooltip top" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard && (vm.datacollectionPrecheck && !vm.datacollectionPrecheck.disableAll)">
+    <li class="configureattributes show-tooltip title-tooltip top" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
         <div class="tooltip_"><span><i class="fa fa-link"></i>Configure Attributes</span></div>
-        <button class="button borderless-button" 
+        <button class="button borderless-button"
+                ng-class="{disabled: (vm.datacollectionPrecheck && vm.datacollectionPrecheck.disableAll) || !vm.datacollectionPrecheck}"
+                ng-disabled="(vm.datacollectionPrecheck && vm.datacollectionPrecheck.disableAll) || !vm.datacollectionPrecheck" 
                 ui-sref="home.configureattributes">
-            <i class="fa fa-wrench"></i>
+            <i class="fa fa-spinner fa-pulse fa-fw" ng-if="!vm.datacollectionPrecheck"></i>
+            <i class="fa fa-wrench" ng-if="vm.datacollectionPrecheck"></i>
         </button>
     </li>
     <li class="attributeadmin show-tooltip title-tooltip top" ng-if="vm.showAtributeAdmin() === true">
