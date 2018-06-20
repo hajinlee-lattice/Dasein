@@ -74,6 +74,7 @@ public enum JobStatus {
     }
 
     public static JobStatus fromString(String status, YarnApplicationState jobState) {
+        status = status.toUpperCase();
         if (EnumUtils.isValidEnum(FinalApplicationStatus.class, status)) {
             FinalApplicationStatus jobStatus = FinalApplicationStatus.valueOf(status);
             return fromYarnStatus(jobStatus, jobState);

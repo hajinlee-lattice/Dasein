@@ -60,11 +60,11 @@ DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
-    BEGIN
-        START TRANSACTION;
-        CALL `UpdateCDLTables`();
-        COMMIT;
-    END;
+  BEGIN
+      START TRANSACTION;
+      CALL `UpdateCDLTables`();
+      COMMIT;
+  END;
 //
 DELIMITER ;
 
@@ -76,5 +76,20 @@ CREATE PROCEDURE `UpdateWorkflowJobUpdate`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateWorkflowJob`()
+  BEGIN
+    UPDATE `PLS_MultiTenant`.`WORKFLOW_JOB`
+    SET `STATUS` = 'FAILED' WHERE BINARY `STATUS` = 'Failed';
+
+    UPDATE `PLS_MultiTenant`.`WORKFLOW_JOB`
+    SET `STATUS` = 'COMPLETED' WHERE BINARY `STATUS` = 'Completed';
+
+    UPDATE `PLS_MultiTenant`.`WORKFLOW_JOB`
+    SET `STATUS` = 'CANCELLED' WHERE BINARY `STATUS` = 'Cancelled';
+  END;
+//
+DELIMITER ;
+
 CALL `UpdateSchema`();
 CALL `UpdateWorkflowJobUpdate`();
+CALL `UpdateWorkflowJob`();
