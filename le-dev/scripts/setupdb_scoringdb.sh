@@ -7,6 +7,8 @@ if [ ! -f "${DDL}" ]; then
     mvn -T6 -f $WSHOME/db-pom.xml -DskipTests clean install
 fi
 
+echo "===DDL==="$DDL
+
 UNAME=`uname`
 threshold_version=5.6
 echo "Setting up ScoringDB"

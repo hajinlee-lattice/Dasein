@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     private static final String STATS_CUBE = "StatsCube";
     private static final String TOPN_TREE = "TopNTree";
+    private static final String TOPN_TREE_EXCLUDE_INTERNAL = "TopNTreeExcludeInternal";
     private static final String DEFAULT = "default";
 
     private static final String KEY_PREFIX = DataCloudConstants.SERVICE_TENANT;
@@ -174,15 +176,43 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return (TopNTree) amStatsCache.getWatcherCache().get(KEY_PREFIX + "|" + TOPN_TREE);
     }
 
+    /**
+     * Retrieve {@link TopNTree} and filter out all the attributes that can be internal enriched if the
+     * flag is set
+     * @param excludeInternalEnrichment flag to filter out internal attributes
+     * @return
+     */
+    public TopNTree getTopNTree(boolean excludeInternalEnrichment) {
+        initializeAMStatsCache();
+        if (excludeInternalEnrichment) {
+            return (TopNTree) amStatsCache.getWatcherCache().get(KEY_PREFIX + "|" + TOPN_TREE_EXCLUDE_INTERNAL);
+        } else {
+            return getTopNTree();
+        }
+    }
+
     private Object getStatsObjectViaREST(String key) {
         switch (key) {
         case STATS_CUBE:
             return getKryo("get AM status cube", constructUrl("/statscube"), StatsCube.class);
         case TOPN_TREE:
             return getKryo("get AM top n tree", constructUrl("/topn"), TopNTree.class);
+        case TOPN_TREE_EXCLUDE_INTERNAL:
+            return filterEnrichment(true);
         default:
             throw new IllegalArgumentException("Unknown cache key " + key);
         }
+    }
+
+    private TopNTree filterEnrichment(boolean excludeInternal) {
+        TopNTree topNTree = getKryo("get AM top n tree", constructUrl("/topn"), TopNTree.class);
+        List<ColumnMetadata> cms = columnSelection(ColumnSelection.Predefined.Enrichment);
+        Boolean excludeInternalEnrichment = excludeInternal;
+        Set<String> internalAttrs = cms.stream().filter(cm -> excludeInternalEnrichment.equals(cm.getCanInternalEnrich()))
+                .map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+        topNTree.getCategories().forEach((cat, catTree) -> catTree.getSubcategories()
+                .forEach((subCat, attrs) -> attrs.removeIf(attr -> internalAttrs.contains(attr.getAttribute()))));
+        return topNTree;
     }
 
     private DataCloudVersion requestLatestVersion(String compatibleVersion) {

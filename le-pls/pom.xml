@@ -214,6 +214,11 @@
             <version>${commons.fileupload.version}</version>
         </dependency>
         <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${commons.collections.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-hadoop</artifactId>
             <version>${project.version}</version>
