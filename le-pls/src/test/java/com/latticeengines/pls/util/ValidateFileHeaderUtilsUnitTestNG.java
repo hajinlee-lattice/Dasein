@@ -1,10 +1,5 @@
 package com.latticeengines.pls.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,6 +25,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.validation.ReservedField;
+
+import static org.testng.Assert.*;
 
 public class ValidateFileHeaderUtilsUnitTestNG {
 
@@ -68,6 +65,42 @@ public class ValidateFileHeaderUtilsUnitTestNG {
             closeableResourcePool.close();
         } catch (IOException e) {
             throw new RuntimeException("Problem when closing the pool", e);
+        }
+    }
+
+    /**
+     * Test {@link ValidateFileHeaderUtils#checkForLongHeaders(Set)}
+     * @throws FileNotFoundException should not be thrown
+     */
+    @Test(groups = "unit", dataProvider = "testLongCSVFileHeader")
+    public void testValidateLongCSVFileHeader(String filename, Integer expectedHeaderSize, Boolean shouldPass)
+            throws FileNotFoundException {
+        URL topPredictorCSVFileUrl = ClassLoader.getSystemResource(filename);
+        File csvFile = new File(topPredictorCSVFileUrl.getFile());
+        InputStream stream = new FileInputStream(csvFile);
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        try {
+            Set<String> headers = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+            // check if the header is parsed correctly
+            assertEquals(Integer.valueOf(headers.size()), expectedHeaderSize);
+            // check if any header is too long
+            ValidateFileHeaderUtils.checkForLongHeaders(headers);
+            if (!shouldPass) {
+                fail("Should have thrown exception");
+            }
+        } catch (LedpException e) {
+            if (shouldPass) {
+                fail("Should not have thrown exception");
+            } else {
+                assertNotNull(e);
+                assertEquals(e.getCode(), LedpCode.LEDP_18188);
+            }
+        } finally {
+            try {
+                closeableResourcePool.close();
+            } catch (IOException e) {
+                fail("Problem when closing the pool", e);
+            }
         }
     }
 
@@ -173,6 +206,24 @@ public class ValidateFileHeaderUtilsUnitTestNG {
     @DataProvider(name = "reservedBeginings")
     public Object[][] reservedBeginings() {
         return new Object[][] { new Object[] { DataCloudConstants.CEAttr }, new Object[] { DataCloudConstants.EAttr } };
+    }
+
+    /**
+     * Generate the testing data for {@link ValidateFileHeaderUtils#checkForLongHeaders(Set)}
+     * the
+     * @return array of testing data arrays, each data array is in the following format
+     * the first item is the resource csv file name
+     * the second item is the expected number of headers
+     * the third item is a flag to specify whether the test should pass
+     */
+    @DataProvider(name = "testLongCSVFileHeader")
+    public Object[][] provideTestLongCSVHeaderFile() {
+        return new Object[][] {
+                // invalid csv files
+                { "com/latticeengines/pls/util/long_headers.csv", 5, false },
+                // valid csv files
+                { "com/latticeengines/pls/functionalframework/topPredictor_model.csv", 17, true }
+        };
     }
 
 }

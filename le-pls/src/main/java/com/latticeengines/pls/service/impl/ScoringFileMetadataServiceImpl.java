@@ -100,6 +100,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
         validateHeadersWithDataCloudAttr(headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
+        ValidateFileHeaderUtils.checkForLongHeaders(headerFields);
         Collection<String> reservedWords = Arrays
                 .asList(new String[] { ReservedField.Percentile.displayName, ReservedField.Rating.displayName });
         Collection<String> reservedBeginings = Arrays.asList(DataCloudConstants.CEAttr, DataCloudConstants.EAttr);

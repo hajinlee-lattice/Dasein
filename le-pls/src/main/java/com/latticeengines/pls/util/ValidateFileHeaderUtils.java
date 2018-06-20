@@ -41,6 +41,7 @@ public class ValidateFileHeaderUtils {
     public static final int BIT_PER_BYTE = 1024;
     public static final int BYTE_NUM = 500;
     public static final int MAX_NUM_ROWS = 100;
+    public static final int MAX_HEADER_LENGTH = 63;
     public static final String AVRO_FIELD_NAME_PREFIX = "avro_";
 
     public static Set<String> getCSVHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool) {
@@ -149,6 +150,19 @@ public class ValidateFileHeaderUtils {
         for (final String field : headerFields) {
             if (StringUtils.isEmpty(field)) {
                 throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
+            }
+        }
+    }
+
+    /**
+     * Check if any CSV header name is longer than {@link ValidateFileHeaderUtils#MAX_HEADER_LENGTH}
+     * @param headerFields set of csv header names to be checked
+     * @throws LedpException with code {@link LedpCode#LEDP_18188} if any of the headers too long
+     */
+    public static void checkForLongHeaders(Set<String> headerFields) {
+        for (String field : headerFields) {
+            if (StringUtils.length(field) > MAX_HEADER_LENGTH) {
+                throw new LedpException(LedpCode.LEDP_18188, new String[] { String.valueOf(MAX_HEADER_LENGTH), field });
             }
         }
     }
