@@ -3,11 +3,12 @@
   "description": "Lattice Insights",
   "version": "1.0.0",
   "license": "ISC",
-  "repository": {
-    "type": "svn",
-    "url": "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
+  "repository" : { 
+    "type" : "svn",
+    "url" : "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
   },
-  "dependencies": {},
+  "dependencies": {
+  },
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-clean": "~0.6.0",
