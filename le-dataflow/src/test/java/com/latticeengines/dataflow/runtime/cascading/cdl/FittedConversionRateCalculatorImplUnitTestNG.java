@@ -244,4 +244,36 @@ public class FittedConversionRateCalculatorImplUnitTestNG {
                               "result = " + result + ", expected result =" + expectedResult);
         }
     }
+
+    @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
+    void testBadFitFunctionParameters1() {
+        FitFunctionParameters params =
+            new FitFunctionParameters(Double.NEGATIVE_INFINITY, 185.04455602025496, 62.5, 0.3627450980392157, "v2");
+        FittedConversionRateCalculatorImplV2 converter =
+            new FittedConversionRateCalculatorImplV2(params);
+    }
+
+    @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
+    void testBadFitFunctionParameters2() {
+        FitFunctionParameters params =
+            new FitFunctionParameters(1.2, Double.NaN, 62.5, 0.3627450980392157, "v2");
+        FittedConversionRateCalculatorImplV2 converter =
+            new FittedConversionRateCalculatorImplV2(params);
+    }
+
+    @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
+    void testBadFitFunctionParameters3() {
+        FitFunctionParameters params =
+            new FitFunctionParameters(1.2, 0.0, Double.NEGATIVE_INFINITY, 0.3627450980392157, "v2");
+        FittedConversionRateCalculatorImplV2 converter =
+            new FittedConversionRateCalculatorImplV2(params);
+    }
+
+    @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
+    void testBadFitFunctionParameters4() {
+        FitFunctionParameters params =
+            new FitFunctionParameters(1.2, 0.0, 0.0, Double.POSITIVE_INFINITY, "v2");
+        FittedConversionRateCalculatorImplV2 converter =
+            new FittedConversionRateCalculatorImplV2(params);
+    }
 }

@@ -9,6 +9,7 @@ public class FittedConversionRateCalculatorImplV1 implements FittedConversionRat
     private FitFunctionParameters params;
 
     public FittedConversionRateCalculatorImplV1(FitFunctionParameters params) {
+        validateParameters(params);
         this.params = params;
     }
 

@@ -49,6 +49,23 @@ public class CdlPivotScoreAndEventWithScoreArtifacts1TestNG extends ServiceFlows
         return params;
     }
 
+    private PivotScoreAndEventParameters getBadParameters() {
+        PivotScoreAndEventParameters params = new PivotScoreAndEventParameters("InputTable");
+        String modelguid1 = "ms__25630e76-89ee-4fbe-b4bf-24182d9d67d5-ai_ba6vq";
+        params.setScoreFieldMap(ImmutableMap.of( //
+                                                 modelguid1, InterfaceName.RawScore.name() //
+        ));
+
+        String sd = loadScoreDerivation("/pivotScoreAndEvent/CDLScoreOutputWithScoreArtifacts1/scorederivation.json");
+        String fitFunctionParams =
+            loadFitFunctionParameters("/pivotScoreAndEvent/CDLScoreOutputWithScoreArtifacts1/fitfunctionparameters_bad.json");
+        params.setScoreDerivationMap(
+            ImmutableMap.of(modelguid1, sd));
+        params.setFitFunctionParametersMap(
+            ImmutableMap.of(modelguid1, fitFunctionParams));
+        return params;
+    }
+
     @Override
     protected String getFlowBeanName() {
         return "pivotScoreAndEvent";
@@ -73,7 +90,7 @@ public class CdlPivotScoreAndEventWithScoreArtifacts1TestNG extends ServiceFlows
     }
 
     @Test(groups = "functional")
-    public void execute() throws Exception {
+    public void testStandardParameters() throws Exception {
         executeDataFlow(getStandardParameters());
         List<GenericRecord> outputRecords = readOutput();
         // reverse the output list to test we sort it later
@@ -87,6 +104,11 @@ public class CdlPivotScoreAndEventWithScoreArtifacts1TestNG extends ServiceFlows
             .generateBucketedScoreSummary(outputRecords);
         System.out.println(bucketedScoreSummary);
         Assert.assertEquals(7733, bucketedScoreSummary.getTotalNumLeads());
+    }
+
+    @Test(groups = "functional", expectedExceptions = IllegalArgumentException.class)
+    public void testBadParameters() throws Exception {
+        executeDataFlow(getBadParameters());
     }
 
     private String loadScoreDerivation(String resourceName) {
