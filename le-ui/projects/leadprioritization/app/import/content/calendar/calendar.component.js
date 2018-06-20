@@ -24,6 +24,7 @@ angular.module('lp.import.calendar', [])
     });
 
     angular.extend(vm, {
+        debug: debug,
         lastFrom: StateHistory.lastFrom(),
         saving: false,
         calendar: Calendar,
@@ -190,7 +191,7 @@ angular.module('lp.import.calendar', [])
                 } else {
                     vm.saving = true;
                     ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
-                        //$state.go(vm.lastFrom.name);
+                        $state.go(vm.lastFrom.name);
                     });
                 }
             }
