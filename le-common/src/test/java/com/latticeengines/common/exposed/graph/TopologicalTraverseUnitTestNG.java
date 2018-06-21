@@ -140,29 +140,6 @@ public class TopologicalTraverseUnitTestNG {
         Assert.assertEquals(depthMap.get(nodes.get(5)), new Integer(0));
     }
 
-    @Test(groups = "unit")
-    public void testGetDepthByString() {
-        StringGraphNode nodeA1 = new StringGraphNode("A");
-        StringGraphNode nodeA2 = new StringGraphNode("A");
-        StringGraphNode nodeB = new StringGraphNode("B");
-        StringGraphNode nodeC = new StringGraphNode("C");
-        StringGraphNode nodeD = new StringGraphNode("D");
-
-        nodeB.addChild(nodeA1);
-        nodeC.addChild(nodeA2);
-        nodeD.addChild(nodeB);
-        nodeD.addChild(nodeC);
-
-        List<IntegerNode> nodes = constructGraph();
-        Map<IntegerNode, Integer> depthMap = GraphUtils.getDepthMap(new HashSet<>(nodes), IntegerNode.class);
-        Assert.assertEquals(depthMap.get(nodes.get(0)), new Integer(2));
-        Assert.assertEquals(depthMap.get(nodes.get(1)), new Integer(0));
-        Assert.assertEquals(depthMap.get(nodes.get(2)), new Integer(1));
-        Assert.assertEquals(depthMap.get(nodes.get(3)), new Integer(1));
-        Assert.assertEquals(depthMap.get(nodes.get(4)), new Integer(0));
-        Assert.assertEquals(depthMap.get(nodes.get(5)), new Integer(0));
-    }
-
     private List<IntegerNode> constructCyclicGraph() {
         IntegerNode node1 = new IntegerNode(1);
         IntegerNode node2 = new IntegerNode(2);
