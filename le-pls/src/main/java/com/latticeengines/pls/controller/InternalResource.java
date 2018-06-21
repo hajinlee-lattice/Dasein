@@ -804,18 +804,19 @@ public class InternalResource extends InternalResourceBase {
     public void sendCDLProcessAnalyzeEmail(@PathVariable("result") String result,
             @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo) {
         List<User> users = userService.getUsers(tenantId);
+        Tenant tenant = tenantService.findByTenantId(tenantId);
         for (User user : users) {
             if (result.equals("COMPLETED")) {
                 if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
-                    emailService.sendCDLProcessAnalyzeCompletionEmail(user, appPublicUrl);
+                    emailService.sendCDLProcessAnalyzeCompletionEmail(user, tenant, appPublicUrl);
                 } else if (user.getEmail().equals(emailInfo.getUserId())) {
-                    emailService.sendCDLProcessAnalyzeCompletionEmail(user, appPublicUrl);
+                    emailService.sendCDLProcessAnalyzeCompletionEmail(user, tenant, appPublicUrl);
                 }
             } else if (result.equals("FAILED")) {
                 if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
-                    emailService.sendCDLProcessAnalyzeErrorEmail(user, appPublicUrl);
+                    emailService.sendCDLProcessAnalyzeErrorEmail(user, tenant, appPublicUrl);
                 } else if (user.getEmail().equals(emailInfo.getUserId())) {
-                    emailService.sendCDLProcessAnalyzeErrorEmail(user, appPublicUrl);
+                    emailService.sendCDLProcessAnalyzeErrorEmail(user, tenant, appPublicUrl);
                 }
             }
         }

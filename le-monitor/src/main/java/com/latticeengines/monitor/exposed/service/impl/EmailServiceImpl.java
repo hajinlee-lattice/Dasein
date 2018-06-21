@@ -715,45 +715,50 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendCDLProcessAnalyzeCompletionEmail(User user, String hostport) {
+    public void sendCDLProcessAnalyzeCompletionEmail(User user, Tenant tenant, String hostport) {
         try {
-            log.info("Sending CDL processanalyze complete email to " + user.getEmail()
-                    + " started.");
+            log.info("Sending CDL processanalyze complete email to " + user.getEmail() + " on " +
+                    tenant.getName() + " started.");
             EmailTemplateBuilder builder;
             builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_JOB_SUCCESS);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.CDL_PA_COMPLETION_EMAIL_SUBJECT, mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending CDL processanalyze complete email to " + user.getEmail() + " succeeded.");
+            log.info("Sending CDL processanalyze complete email to " + user.getEmail() +
+                    " on " + tenant.getName() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send CDL processanalyze complete email to " + user.getEmail() + " "
-                    + e.getMessage());
+            log.error("Failed to send CDL processanalyze complete email to " + user.getEmail() +
+                    " on " + tenant.getName() +  " " + e.getMessage());
         }
     }
 
     @Override
-    public void sendCDLProcessAnalyzeErrorEmail(User user, String hostport) {
+    public void sendCDLProcessAnalyzeErrorEmail(User user, Tenant tenant, String hostport) {
         try {
-            log.info("Sending PLS processanalyze error email to " + user.getEmail() + " started.");
+            log.info("Sending PLS processanalyze error email to " + user.getEmail() + " on " +
+                    tenant.getName() + " started.");
             EmailTemplateBuilder builder;
             builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_JOB_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.CDL_PA_ERROR_EMAIL_SUBJECT, mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending CDL processanalyze error email to " + user.getEmail() + " succeeded.");
+            log.info("Sending CDL processanalyze error email to " + user.getEmail() +
+                    " on " + tenant.getName() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send CDL processanalyze error email to " + user.getEmail() + " "
-                    + e.getMessage());
+            log.error("Failed to send CDL processanalyze error email to " + user.getEmail() +
+                    " on " + tenant.getName() +  " " + e.getMessage());
         }
     }
 
