@@ -426,7 +426,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             request.setModelGuid(aiModel.getModelSummaryId());
             request.setRatingEngineId(ratingEngineId);
             request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
-            bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getTenantId(), request);
+            bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getShortTenantId(), request);
         }
 
         ratingEngine.setScoringIteration(ratingModel);
@@ -659,7 +659,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     private void evictRatingMetadataCache() {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);

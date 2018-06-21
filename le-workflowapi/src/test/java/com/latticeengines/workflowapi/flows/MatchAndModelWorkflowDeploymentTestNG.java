@@ -147,7 +147,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
             }
         }
 
-        Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getTenantId(), summary.getId());
+        Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getShortTenantId(), summary.getId());
         ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(summary.getId());
         cloneAndRemodel(clone, modelMetadataService.getAttributesFromFields(clone.getAttributes(), metadata),
                 modelSummary);

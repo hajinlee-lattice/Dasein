@@ -61,7 +61,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
         BucketedScoreSummary bucketedScoreSummary = bucketedScoreProxy
-                .getBucketedScoreSummary(MultiTenantContext.getTenantId(), modelId);
+                .getBucketedScoreSummary(MultiTenantContext.getShortTenantId(), modelId);
         if (bucketedScoreSummary == null) {
             ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
             bucketedScoreSummary = getBucketedScoreSummaryBasedOnModelSummary(modelSummary);
@@ -95,7 +95,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
         BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                 .generateBucketedScoreSummary(pivotedRecords);
-        bucketedScoreProxy.createOrUpdateBucketedScoreSummary(MultiTenantContext.getTenantId(), modelSummary.getId(),
+        bucketedScoreProxy.createOrUpdateBucketedScoreSummary(MultiTenantContext.getShortTenantId(), modelSummary.getId(),
                 bucketedScoreSummary);
         log.info("Copy bucketed score summary from avro to db for model " + modelSummary.getId());
         return bucketedScoreSummary;
@@ -103,12 +103,12 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
-        return bucketedScoreProxy.getABCDBucketsByModelGuid(MultiTenantContext.getTenantId(), modelId);
+        return bucketedScoreProxy.getABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
     }
 
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
-        return bucketedScoreProxy.getLatestABCDBucketsByModelGuid(MultiTenantContext.getTenantId(), modelId);
+        return bucketedScoreProxy.getLatestABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
     }
 
     @Override
@@ -117,12 +117,12 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         request.setBucketMetadataList(bucketMetadatas);
         request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
         request.setModelGuid(modelId);
-        bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getTenantId(), request);
+        bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getShortTenantId(), request);
     }
 
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadataAcrossTenants(String modelId) {
-        return bucketedScoreProxy.getLatestABCDBucketsByModelGuid(MultiTenantContext.getTenantId(), modelId);
+        return bucketedScoreProxy.getLatestABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
     }
 
     @Override
@@ -133,20 +133,20 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         request.setModelGuid(modelId);
         request.setRatingEngineId(ratingEngineId);
         request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
-        bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getTenantId(), request);
+        bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getShortTenantId(), request);
         // Activate Rating Engine by default
         activateRatingEngine(ratingEngineId);
     }
 
     @Override
     public List<BucketMetadata> getUpToDateABCDBucketsBasedOnRatingEngineId(String ratingEngineId) {
-        return bucketedScoreProxy.getLatestABCDBucketsByEngineId(MultiTenantContext.getTenantId(), ratingEngineId);
+        return bucketedScoreProxy.getLatestABCDBucketsByEngineId(MultiTenantContext.getShortTenantId(), ratingEngineId);
     }
 
     @Override
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(
             String ratingEngineId) {
-        return bucketedScoreProxy.getABCDBucketsByEngineId(MultiTenantContext.getTenantId(), ratingEngineId);
+        return bucketedScoreProxy.getABCDBucketsByEngineId(MultiTenantContext.getShortTenantId(), ratingEngineId);
     }
 
     @Override

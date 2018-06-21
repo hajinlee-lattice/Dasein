@@ -72,7 +72,7 @@ public class TableRoleTemplateImpl implements TableRoleTemplate {
 
     @Override
     public Flux<ColumnMetadata> getSchema(Namespace2<TableRoleInCollection, DataCollection.Version> namespace) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         TableRoleInCollection role = namespace.getCoord1();
         DataCollection.Version version = namespace.getCoord2();
         return Flux.fromIterable(_tableRoleTemplate.getCachedSchema(tenantId, role, version));

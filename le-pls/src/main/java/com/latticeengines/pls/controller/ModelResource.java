@@ -144,14 +144,14 @@ public class ModelResource {
         }
         log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
                 parameters.getDeduplicationType()));
-        Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getTenantId(), parameters.getSourceModelSummaryId());
+        Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getShortTenantId(), parameters.getSourceModelSummaryId());
 
         ModelSummary modelSummary = modelSummaryService
                 .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
 
         SourceFile sourceFile = sourceFileService.findByTableName(modelSummary.getTrainingTableName());
         if (sourceFile != null) {
-            sourceFileService.copySourceFile(sourceFile.getName(), clone.getName(), MultiTenantContext.getTenantId());
+            sourceFileService.copySourceFile(sourceFile.getName(), clone.getName(), MultiTenantContext.getShortTenantId());
         } else {
             log.warn("Unable to find source file for model summary:" + modelSummary.getName());
         }
@@ -195,7 +195,7 @@ public class ModelResource {
     public ResponseDocument<Boolean> copyModel(@PathVariable String modelId,
             @RequestParam(value = "targetTenantId") String targetTenantId) {
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(targetTenantId);
-        modelCopyProxy.copyModel(MultiTenantContext.getTenantId(), targetTenantId, modelId);
+        modelCopyProxy.copyModel(MultiTenantContext.getShortTenantId(), targetTenantId, modelId);
         return ResponseDocument.successResponse(true);
     }
 
@@ -207,7 +207,7 @@ public class ModelResource {
             @RequestParam(value = "targetModelId") String targetModelId) {
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(targetTenantId);
         return ResponseDocument.successResponse( //
-                modelOperationProxy.replaceModel(MultiTenantContext.getTenantId(), sourceModelId, targetTenantId, targetModelId));
+                modelOperationProxy.replaceModel(MultiTenantContext.getShortTenantId(), sourceModelId, targetTenantId, targetModelId));
     }
 
     @RequestMapping(value = "/reviewmodel/{modelName}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")

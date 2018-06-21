@@ -31,7 +31,7 @@ public class ModelDetailResource {
     @ResponseBody
     @ApiOperation(value = "Get detail for specific model")
     public ModelDetail getModelDetail(@PathVariable String modelId) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         ModelDetail modelDetail = modelDetailProxy.getModelDetail(tenantId, modelId);
         if (modelDetail == null) {
             throw new LedpException(LedpCode.LEDP_18124, new String[] { modelId, tenantId });

@@ -401,7 +401,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         if (allowAutoSchedule) {
             try {
-                Long nextInvokeTime = dataFeedProxy.nextInvokeTime(MultiTenantContext.getTenantId());
+                Long nextInvokeTime = dataFeedProxy.nextInvokeTime(MultiTenantContext.getShortTenantId());
                 if (nextInvokeTime != null && nextInvokeTime.compareTo(new DateTime().toDate().getTime()) > 0) {
                     nextInvokeDate = new Date(nextInvokeTime);
                 } else if (nextInvokeTime != null && nextInvokeTime.compareTo(new DateTime().toDate().getTime()) < 0) {
@@ -415,7 +415,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setNote(String.format(CDLNote, nextInvokeDate));
             } catch (Exception e) {
                 log.warn(String.format("Geting next invoke time for tenant %s has error.",
-                        MultiTenantContext.getTenantId()));
+                        MultiTenantContext.getShortTenantId()));
             }
         }
         job.setStartTimestamp(nextInvokeDate);
@@ -641,7 +641,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return false;
         }
 
-        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getTenantId(), applicationId);
+        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getShortTenantId(), applicationId);
         return sourceFile != null;
     }
 

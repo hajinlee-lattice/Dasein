@@ -16,14 +16,14 @@ public class NamespaceServiceImpl implements NamespaceService {
 
     @Override
     public <T extends Serializable> Namespace2<String, T> prefixTenantId(Namespace1<T> namespace) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return Namespace.as(tenantId, namespace.getCoord1());
     }
 
     @Override
     public <T1 extends Serializable, T2 extends Serializable> Namespace3<String, T1, T2> prefixTenantId(
             Namespace2<T1, T2> namespace) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return Namespace.as(tenantId, namespace.getCoord1(), namespace.getCoord2());
     }
 

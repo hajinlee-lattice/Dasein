@@ -56,6 +56,6 @@ public class SourceFileServiceImpl implements SourceFileService {
     }
 
     private String getShortTenantId() {
-        return MultiTenantContext.getTenantId();
+        return MultiTenantContext.getShortTenantId();
     }
 }

@@ -211,7 +211,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     private void evictRatingMetadataCache() {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);

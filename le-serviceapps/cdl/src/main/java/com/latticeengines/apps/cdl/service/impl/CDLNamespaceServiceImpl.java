@@ -38,7 +38,7 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
     @Override
     public void setMultiTenantContext(String tenantId) {
         String fullId = CustomerSpace.parse(tenantId).toString();
-        String tenantIdInContext = MultiTenantContext.getTenantId();
+        String tenantIdInContext = MultiTenantContext.getShortTenantId();
         if (StringUtils.isBlank(tenantIdInContext)
                 || !CustomerSpace.parse(tenantIdInContext).toString().equals(fullId)) {
             Tenant tenant = tenantEntityMgr.findByTenantId(fullId);
@@ -51,14 +51,14 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
 
     @Override
     public <T extends Serializable> Namespace2<String, T> prependTenantId(Namespace1<T> namespace1) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return Namespace.as(tenantId, namespace1.getCoord1());
     }
 
     // -> tenantId, tableName
     @Override
     public Namespace2<String, String> resolveTableRole(TableRoleInCollection role, DataCollection.Version version) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         List<String> names = dataCollectionService.getTableNames(customerSpace, "", role, version);
         String tableName = CollectionUtils.isNotEmpty(names) ? names.get(0) : null;

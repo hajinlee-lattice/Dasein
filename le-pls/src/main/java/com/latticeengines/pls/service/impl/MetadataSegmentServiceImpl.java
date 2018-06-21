@@ -177,7 +177,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     private void clearRatingCache() {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         servingStoreCacheService.clearCache(tenantId, BusinessEntity.Rating);
     }
 

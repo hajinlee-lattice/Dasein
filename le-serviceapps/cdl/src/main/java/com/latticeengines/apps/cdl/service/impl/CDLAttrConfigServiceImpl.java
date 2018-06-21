@@ -34,7 +34,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
     protected List<ColumnMetadata> getSystemMetadata(BusinessEntity entity) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         DataCollection.Version version = dataCollectionService.getActiveVersion(tenantId);
         return servingStoreService.getSystemMetadata(entity, version) //
                 .sequential().collectList().block();
@@ -42,7 +42,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     protected List<ColumnMetadata> getSystemMetadata(Category category) {
         BusinessEntity entity = CategoryUtils.getEntity(category);
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         DataCollection.Version version = dataCollectionService.getActiveVersion(tenantId);
         return servingStoreService.getSystemMetadata(entity, version) //
                 .filter(cm -> category.equals(cm.getCategory())) //
@@ -51,7 +51,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Override
     public List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);

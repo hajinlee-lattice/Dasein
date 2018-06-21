@@ -53,13 +53,21 @@ public final class MultiTenantContext {
         return CustomerSpace.parse(tenant.getId());
     }
 
-    public static String getTenantId() {
+    public static String getShortTenantId() {
         Tenant tenant = getTenant();
         if (tenant == null) {
             return null;
         }
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
         return space.getTenantId();
+    }
+
+    public static String getPLSTenantId() {
+        Tenant tenant = getTenant();
+        if (tenant == null) {
+            return null;
+        }
+        return tenant.getId();
     }
 
     public static String getEmailAddress() {

@@ -30,7 +30,7 @@ public class ModelCopyResource {
     @ResponseBody
     @ApiOperation(value = "Copy model")
     public String copyModel(@PathVariable String customerSpace, @RequestBody CopyModelRequest request) {
-        String sourceTenantId = MultiTenantContext.getTenantId();
+        String sourceTenantId = MultiTenantContext.getShortTenantId();
         String targetTenantId = request.getTargetTenant();
         if (StringUtils.isBlank(targetTenantId)) {
             targetTenantId = sourceTenantId;

@@ -20,31 +20,31 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public List<Action> findAll() {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return actionProxy.getActions(tenantId);
     }
 
     @Override
     public List<Action> findByOwnerId(Long ownerId, Pageable pageable) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return actionProxy.getActionsByOwnerId(tenantId, ownerId);
     }
 
     @Override
     public Action create(Action action) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return actionProxy.createAction(tenantId, action);
     }
 
     @Override
     public Action update(Action action) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return actionProxy.updateAction(tenantId, action);
     }
 
     @Override
     public List<Action> findByPidIn(List<Long> actionPids) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return actionProxy.getActionsByPids(tenantId, actionPids);
     }
 

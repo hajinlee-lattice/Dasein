@@ -232,7 +232,7 @@ public class SystemMetadataStoreImpl extends
             @Override
             protected List<Namespace> project(Namespace1<BusinessEntity> namespace) {
                 BusinessEntity entity = namespace.getCoord1();
-                String tenantId = MultiTenantContext.getTenantId();
+                String tenantId = MultiTenantContext.getShortTenantId();
                 Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
                 Namespace lookupIdNs = Namespace.as(tenantId, entity);
                 return Arrays.asList(lookupIdNs, ratingNs);

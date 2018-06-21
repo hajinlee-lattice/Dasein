@@ -19,26 +19,26 @@ public class DataUnitServiceImpl implements DataUnitService {
 
     @Override
     public DataUnit createOrUpdateByNameAndStorageType(DataUnit dataUnit) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.createOrUpdateByNameAndStorageType(tenantId, dataUnit);
     }
 
     @Override
     public List<DataUnit> findByNameFromReader(String name) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.findByNameFromReader(tenantId, name);
     }
 
     @Override
     public DataUnit findByNameTypeFromReader(String name, DataUnit.StorageType storageType) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.findByNameTypeFromReader(tenantId, name, storageType);
     }
 
 
     @Override
     public void deleteByNameAndStorageType(String name, DataUnit.StorageType storageType) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         entityMgr.deleteByName(tenantId, name, storageType);
     }
 

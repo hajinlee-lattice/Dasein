@@ -75,7 +75,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
@@ -127,11 +127,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             switch (category) {
             case INTENT:
                 overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
-                        MultiTenantContext.getTenantId(), DataLicense.BOMBORA.getDataLicense()));
+                        MultiTenantContext.getShortTenantId(), DataLicense.BOMBORA.getDataLicense()));
                 break;
             case TECHNOLOGY_PROFILE:
                 overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
-                        MultiTenantContext.getTenantId(), DataLicense.HG.getDataLicense()));
+                        MultiTenantContext.getShortTenantId(), DataLicense.HG.getDataLicense()));
                 break;
             case WEBSITE_KEYWORDS:
                 // TODO going to get rid of the try catch after the zookeeper is
@@ -139,7 +139,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 long defaultWebsiteKeywords = 200L;
                 try {
                     defaultWebsiteKeywords = (long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
-                            MultiTenantContext.getTenantId(), DataLicense.WEBSITEKEYWORDS.getDataLicense());
+                            MultiTenantContext.getShortTenantId(), DataLicense.WEBSITEKEYWORDS.getDataLicense());
                 } catch (Exception e) {
                     log.warn("Error getting the limit for website keyword " + MultiTenantContext.getTenant().getId());
                 }
@@ -217,7 +217,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     @Override
     public List<AttrConfig> getRenderedList(Category category) {
         List<AttrConfig> renderedList;
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         BusinessEntity entity = CategoryUtils.getEntity(category);
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
@@ -276,7 +276,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             log.info("rendered List" + JsonUtils.serialize(renderedList));
             toReturn = new AttrConfigRequest();
             toReturn.setAttrConfigs(renderedList);
-            List<AttrConfig> dbConfigs = attrConfigEntityMgr.findAllByTenantId(MultiTenantContext.getTenantId());
+            List<AttrConfig> dbConfigs = attrConfigEntityMgr.findAllByTenantId(MultiTenantContext.getShortTenantId());
             dbConfigs = generateListFromMap(renderConfigs(dbConfigs, new ArrayList<>()));
             log.info("current db configs " + JsonUtils.serialize(dbConfigs));
             attrValidationService.setValidateParam(dbConfigs);
@@ -299,14 +299,14 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             CacheService cacheService = CacheServiceBase.getCacheService();
             // trim and save
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
-                String shortTenantId = MultiTenantContext.getTenantId();
+                String shortTenantId = MultiTenantContext.getShortTenantId();
                 attrConfigEntityMgr.save(shortTenantId, entity, trim(configList, isAdmin));
 
                 // clear serving metadata cache
                 String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
                 cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
             });
-            cacheService.refreshKeysByPattern(MultiTenantContext.getTenantId(), CacheName.DataLakeStatsCubesCache);
+            cacheService.refreshKeysByPattern(MultiTenantContext.getShortTenantId(), CacheName.DataLakeStatsCubesCache);
         }
 
         return toReturn;
@@ -340,7 +340,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         if (MapUtils.isEmpty(attrConfigGrps)) {
             return attrConfigGrps;
         } else {
-            String tenantId = MultiTenantContext.getTenantId();
+            String tenantId = MultiTenantContext.getShortTenantId();
             Map<String, List<String>> diffProperties = mergeConfigWithExisting(tenantId, attrConfigGrps,
                     toDeleteEntities);
 

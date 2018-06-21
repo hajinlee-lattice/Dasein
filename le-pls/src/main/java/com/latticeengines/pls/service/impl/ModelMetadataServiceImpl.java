@@ -22,32 +22,32 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Override
     public Table getEventTableFromModelId(String modelId) {
-        return modelMetadataProxy.getEventTableFromModelId(MultiTenantContext.getTenantId(), modelId);
+        return modelMetadataProxy.getEventTableFromModelId(MultiTenantContext.getShortTenantId(), modelId);
     }
 
     @Override
     public List<VdbMetadataField> getMetadata(String modelId) {
-        return modelMetadataProxy.getMetadata(MultiTenantContext.getTenantId(), modelId);
+        return modelMetadataProxy.getMetadata(MultiTenantContext.getShortTenantId(), modelId);
     }
 
     @Override
     public List<String> getRequiredColumnDisplayNames(String modelId) {
-        return modelMetadataProxy.getRequiredColumnDisplayNames(MultiTenantContext.getTenantId(), modelId);
+        return modelMetadataProxy.getRequiredColumnDisplayNames(MultiTenantContext.getShortTenantId(), modelId);
     }
 
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
-        return modelMetadataProxy.getRequiredColumns(MultiTenantContext.getTenantId(), modelId);
+        return modelMetadataProxy.getRequiredColumns(MultiTenantContext.getShortTenantId(), modelId);
     }
 
     @Override
     public Set<String> getLatticeAttributeNames(String modelId) {
-        return modelMetadataProxy.getLatticeAttributeNames(MultiTenantContext.getTenantId(), modelId);
+        return modelMetadataProxy.getLatticeAttributeNames(MultiTenantContext.getShortTenantId(), modelId);
     }
 
     @Override
     public List<Attribute> getAttributesFromFields(List<Attribute> attributes, List<VdbMetadataField> fields) {
-        return modelMetadataProxy.getAttributesFromFields(MultiTenantContext.getTenantId(), attributes, fields);
+        return modelMetadataProxy.getAttributesFromFields(MultiTenantContext.getShortTenantId(), attributes, fields);
     }
 
 }

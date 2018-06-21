@@ -163,7 +163,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     private Flux<ColumnMetadata> getAllSegmentAttributes() {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         Map<BusinessEntity, List<ColumnMetadata>> metadataInMds = new HashMap<>();
         Map<BusinessEntity, Set<String>> colsInServingStore = new HashMap<>();
         Map<String, StatsCube> cubeMap = new HashMap<>();
@@ -197,7 +197,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Override
     public List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
         // Only return attributes for account now
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, BusinessEntity.Account);
         return cms.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
         // Hack to limit attributes for talking points temporarily PLS-7065
@@ -208,13 +208,13 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Override
     public Map<String, StatsCube> getStatsCubes() {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return _dataLakeService.getStatsCubes(tenantId);
     }
 
     @Override
     public TopNTree getTopNTree() {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         return _dataLakeService.getTopNTree(tenantId);
     }
 

@@ -82,7 +82,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     public void downloadFileByApplicationId(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String applicationId, String fileDisplayName) throws IOException {
         log.info(String.format("Download file with applicationId=%s", applicationId));
-        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getTenantId(), applicationId);
+        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getShortTenantId(), applicationId);
         validateSourceFile(sourceFile);
         downloadSourceFileCsv(request, response, mimeType, fileDisplayName, sourceFile);
     }
@@ -91,7 +91,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     public void downloadFileByFileName(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName) throws IOException {
         log.info(String.format("Download file with fileName=%s", fileName));
-        SourceFile sourceFile = sourceFileProxy.findByName(MultiTenantContext.getTenantId(), fileName);
+        SourceFile sourceFile = sourceFileProxy.findByName(MultiTenantContext.getShortTenantId(), fileName);
         validateSourceFile(sourceFile);
         downloadSourceFileCsv(request, response, mimeType, sourceFile.getDisplayName(), sourceFile);
     }

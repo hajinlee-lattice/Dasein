@@ -51,7 +51,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
 
     @Override
     public String copyModel(String targetTenantId, String modelId) {
-        return copyModel(MultiTenantContext.getTenantId(), targetTenantId, modelId);
+        return copyModel(MultiTenantContext.getShortTenantId(), targetTenantId, modelId);
     }
 
     @Override

@@ -82,7 +82,7 @@ public class DanteConfigurationResource {
     @ResponseBody
     @ApiOperation(value = "Get an account by of attributes in a group")
     public FrontEndResponse<FrontEndDanteConfigurationDocument> getDanteConfiguration() {
-        String customerSpace = MultiTenantContext.getTenantId();
+        String customerSpace = MultiTenantContext.getShortTenantId();
         try {
             String widgetConfigurationDocument = getStaticDocument(
                     commonResourcePath + widgetConfigurationDocumentPath);

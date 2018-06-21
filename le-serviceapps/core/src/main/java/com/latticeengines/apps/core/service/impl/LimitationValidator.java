@@ -68,7 +68,7 @@ public class LimitationValidator extends AttrValidator {
 
     private void checkDataLicense(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         int totalSelectedPremiumNumber = 0;
         for (DataLicense license : DataLicense.values()) {
             int limit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, license.getDataLicense());

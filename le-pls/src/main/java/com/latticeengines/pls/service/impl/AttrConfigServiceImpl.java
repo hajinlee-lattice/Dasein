@@ -106,7 +106,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         List<AttrConfigSelection> selections = new ArrayList<>();
         overview.setSelections(selections);
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
-                MultiTenantContext.getTenantId(),
+                MultiTenantContext.getShortTenantId(),
                 Category.getPremiunCategories().stream().map(Category::getName).collect(Collectors.toList()),
                 Arrays.asList(ColumnMetadataKey.State), false);
         for (Category category : Category.getPremiunCategories()) {
@@ -132,8 +132,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         List<AttrConfigSelection> selections = new ArrayList<>();
         usageOverview.setAttrNums(attrNums);
         usageOverview.setSelections(selections);
-        Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy
-                .getAttrConfigOverview(MultiTenantContext.getTenantId(), null, Arrays.asList(usageProperties), true);
+        Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
+                MultiTenantContext.getShortTenantId(), null, Arrays.asList(usageProperties), true);
         log.info("map is " + map);
 
         for (String property : usagePropertyList) {
@@ -165,7 +165,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Override
     public void updateActivationConfig(String categoryName, AttrConfigSelectionRequest request) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(categoryName, request);
         cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
         createUpdateActivationActions(categoryName, request);
@@ -219,7 +219,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     private void verifyAccessLevel() {
-        AccessLevel accessLevel = userService.getAccessLevel(MultiTenantContext.getTenantId(),
+        AccessLevel accessLevel = userService.getAccessLevel(MultiTenantContext.getPLSTenantId(),
                 MultiTenantContext.getEmailAddress());
         if (AccessLevel.SUPER_ADMIN != accessLevel && AccessLevel.INTERNAL_ADMIN != accessLevel) {
             throw new LedpException(LedpCode.LEDP_18185, new String[] { MultiTenantContext.getEmailAddress() });
@@ -253,7 +253,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public UpdateUsageResponse updateUsageConfig(String categoryName, String usageName,
             AttrConfigSelectionRequest request) {
         UpdateUsageResponse updateUsageResponse = new UpdateUsageResponse();
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         String usage = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
         AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
@@ -298,7 +298,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Override
     public AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName) {
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
-                .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
+                .getAttrConfigByCategory(MultiTenantContext.getShortTenantId(), categoryName);
         return generateSelectionDetails(categoryName, attrConfigRequest, ColumnMetadataKey.State, false);
     }
 
@@ -306,7 +306,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public AttrConfigSelectionDetail getAttrConfigSelectionDetails(String categoryName, String usageName) {
         String property = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
-                .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
+                .getAttrConfigByCategory(MultiTenantContext.getShortTenantId(), categoryName);
         return generateSelectionDetails(categoryName, attrConfigRequest, property, true);
     }
 

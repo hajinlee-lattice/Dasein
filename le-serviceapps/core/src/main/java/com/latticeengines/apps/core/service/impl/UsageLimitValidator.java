@@ -38,7 +38,7 @@ public class UsageLimitValidator extends AttrValidator {
 
     @Override
     public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
-        String tenantId = MultiTenantContext.getTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         log.info("validate usage limit for tenant " + tenantId);
         LimitValidatorUtils.checkAmbiguityInFieldNames(attrConfigs);
         for (String usage : usageLimitCheckList) {
