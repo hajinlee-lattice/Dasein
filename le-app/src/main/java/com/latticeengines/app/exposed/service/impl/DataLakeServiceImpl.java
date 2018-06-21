@@ -481,7 +481,9 @@ public class DataLakeServiceImpl implements DataLakeService {
         Runnable statsCubeRunnable = () -> {
             log.info("Getting stats cubes for " + tenantId);
             Map<String, StatsCube> cubes = _dataLakeService.getStatsCubesFromCache(tenantId);
-            concurrentStatsCubeMap.putAll(cubes);
+            if (MapUtils.isNotEmpty(cubes)) {
+                concurrentStatsCubeMap.putAll(cubes);
+            }
             log.info("Finished getting stats cubes for " + tenantId);
         };
         runnables.add(statsCubeRunnable);
