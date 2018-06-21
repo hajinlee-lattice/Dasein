@@ -1,15 +1,13 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import java.util.List;
-
 import java.util.Arrays;
+import java.util.List;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -54,9 +52,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyDataCollectionStatus(DataCollection.Version.Green);
         verifyNumAttrsInAccount();
 
-        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
-        Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
-
         verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact);
 
 //        long numAccounts = 500;
@@ -71,8 +66,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 //
         createTestSegment2();
         verifySegmentCountsNonNegative(SEGMENT_NAME_2, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
-
-//        verifyUpdateActions();
+        verifyUpdateActions();
     }
 
 

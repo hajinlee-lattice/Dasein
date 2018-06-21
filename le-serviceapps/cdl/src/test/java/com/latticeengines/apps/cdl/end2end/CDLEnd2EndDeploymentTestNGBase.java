@@ -12,8 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -752,7 +754,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
 
         if (onlyAllowSpecifiedEntities) {
-
+            Set<BusinessEntity> allowed = new HashSet<>(Arrays.asList(entities));
+            for (BusinessEntity entity : BusinessEntity.values()) {
+                if (!allowed.contains(entity)) {
+                    Assert.assertFalse(cubeMap.containsKey(entity.name()),
+                            "Stats not should contain a cube for " + entity);
+                }
+            }
         }
         return cubeMap;
     }
