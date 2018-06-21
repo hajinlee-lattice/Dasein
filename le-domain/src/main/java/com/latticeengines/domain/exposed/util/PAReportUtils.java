@@ -49,7 +49,7 @@ public class PAReportUtils {
 
         ObjectNode entityNumberNode = JsonUtils.createObjectNode();
         switch (entity) {
-        case PurchaseHistory:
+        case Product:
             entityNumberNode.put(ReportConstants.TOTAL, "Not Available");
             break;
         default:
