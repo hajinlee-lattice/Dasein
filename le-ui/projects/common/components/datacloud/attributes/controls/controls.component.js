@@ -15,14 +15,15 @@ angular.module('common.attributes.controls', [])
             vm.section = vm.store.getSection();
             vm.data = vm.store.getData();
             vm.params = $stateParams;
+            vm.category = AttrConfigStore.getCategory();
 
             if (vm.section == 'enable') {
                 vm.store.setLimit(vm.store.getUsageLimit(vm.overview, vm.params.section));
             } else {
                 var tab = vm.overview.Selections.filter(function(tab) {
-                    return tab.DisplayName == vm.params.category;
+                    return tab.DisplayName == vm.category;
                 })[0];
-                
+
                 vm.store.setLimit(tab.Limit);
             }
         };

@@ -66,7 +66,7 @@
     "devallnowatch": "grunt devallnowatch",
     "build": "concurrently \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run insightsbuild\" \"npm run dantebuild\" \"npm run adminbuild\" \"npm run lp2build\"",
     "sass": "concurrently \"npm run commonsass\" \"npm run loginsass\" \"npm run lpsass\" \"npm run insightssass\" \"npm run dantesass\"",
-    "sentry": "concurrently \"npm run commonsentry\" \"npm run loginsentry\" \"npm run lpsentry\" \"npm run insightssentry\"",
+    "sentry": "concurrently \"npm run commonsentry\" \"npm run loginsentry\" \"npm run lpsentry\" \"npm run insightssentry\" \"npm run dantesentry\"",
     "precommit": "npm run lint_admin",
     "lint": "eslint Gruntfile.js app.js server/**/*.js",
     "//": "individual projects",

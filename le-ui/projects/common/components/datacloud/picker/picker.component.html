@@ -52,7 +52,7 @@
     <div class="picker-buckets noselect-children">
         <div ng-repeat="bucket in (filteredList = (vm.buckets | filter: vm.queryText)) | orderBy: [ vm.sortPrefix + 'Cnt', 'Lbl' ] | startFrom: vm.page_size * (vm.page - 1) | limitTo: vm.page_size">
             <label for="{{ bucket.Lbl }}" class="button white-button text-ellipsis" ng-class="{ 'checked': bucket.checked }">
-                {{ bucket.Lbl }}
+                <span>{{ bucket.Lbl }}</span>
                 <input  type="checkbox"
                         name="{{ bucket.Lbl }}" 
                         id="{{ bucket.Lbl }}"

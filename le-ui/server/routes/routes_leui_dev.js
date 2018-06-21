@@ -127,12 +127,13 @@ module.exports = [{
 },{
     path: '/projects/dante',
     pages: {
-        '/dante/': 'index.html',
-        '/dante/index': 'index.html'
+        '/dante/': 'assets/index.html',
+        '/dante/index': 'assets/index.html'
     },
     folders: {
-        '/dante/app': '/app',
-        '/dante/assets': '/assets'
+        '/dante': '/assets',
+        '/dante/CommonAssets': '/assets/CommonAssets',
+        '/dante/images': '/assets/images'
     }
 },{    
     path: '/projects/widgets',

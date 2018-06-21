@@ -29,8 +29,11 @@ angular.module('common.attributes.activate', [])
                 }],
                 config: ['$q', '$stateParams', 'AttrConfigService', 'AttrConfigStore', function($q, $stateParams, AttrConfigService, AttrConfigStore) {
                     var deferred = $q.defer();
+                    var category = $stateParams.category;
+
+                    AttrConfigStore.setCategory(category);
                     
-                    AttrConfigService.getConfig('activation', $stateParams.category).then(function(response) {
+                    AttrConfigService.getConfig('activation', category).then(function(response) {
                         AttrConfigStore.setData('config', response.data || []);
                         deferred.resolve(response.data || []);
                     });
@@ -55,8 +58,6 @@ angular.module('common.attributes.activate', [])
 
         vm.filters = AttrConfigStore.getFilters();
 
-        vm.$onInit = function() {
-            console.log('init attrActivate', vm);
-        };
+        vm.$onInit = function() {};
     }
 });

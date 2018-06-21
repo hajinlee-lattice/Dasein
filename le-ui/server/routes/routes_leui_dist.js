@@ -76,7 +76,9 @@ module.exports = [{
         '/dante/index': 'assets/index.html'
     },
     folders: {
-        '/dante': '/assets'
+        '/dante': '/assets',
+        '/dante/CommonAssets': '/assets/CommonAssets',
+        '/dante/images': '/assets/images'
     }
 },{  
     path: '/projects/demo',

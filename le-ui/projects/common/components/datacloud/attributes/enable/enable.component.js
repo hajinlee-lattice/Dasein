@@ -10,7 +10,7 @@ angular.module('common.attributes.enable', [])
                 },
                 category: {
                     dynamic: false,
-                    value: 'Website Profile'
+                    value: ''
                 },
                 subcategory: {
                     dynamic: true,
@@ -30,11 +30,27 @@ angular.module('common.attributes.enable', [])
 
                     return deferred.promise;
                 }],
-                config: ['$q', '$stateParams', 'AttrConfigService', 'AttrConfigStore', function($q, $stateParams, AttrConfigService, AttrConfigStore) {
+                config: ['$q', '$stateParams', 'AttrConfigService', 'AttrConfigStore', 'overview', function($q, $stateParams, AttrConfigService, AttrConfigStore, overview) {
                     var deferred = $q.defer();
                     var section = $stateParams.section;
+                    var category = $stateParams.category;
+
+                    if (!category) {
+                        Object.keys(overview.AttrNums).some(function(key) {
+                            console.log('blah', key, overview.AttrNums[key], category);
+                            if (key != 'Lattice Ratings' && overview.AttrNums[key] > 0) {
+                                return category = key;
+                            }
+                        });
+
+                        $stateParams.category = category;
+                    }
+
+                    AttrConfigStore.setCategory(category);
                     
-                    AttrConfigService.getConfig('usage', $stateParams.category, { usage: section }).then(function(response) {
+                    AttrConfigService.getConfig('usage', category, { 
+                        usage: section 
+                    }).then(function(response) {
                         AttrConfigStore.setData('config', response.data || []);
                         deferred.resolve(response.data || []);
                     });
@@ -60,7 +76,6 @@ angular.module('common.attributes.enable', [])
         vm.filters = AttrConfigStore.getFilters();
 
         vm.$onInit = function() {
-            console.log('init attrEnable', vm);
             vm.categories = vm.overview.AttrNums;
         };
     }

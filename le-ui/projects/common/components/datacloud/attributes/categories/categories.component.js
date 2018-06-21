@@ -4,7 +4,7 @@ angular.module('common.attributes.categories', [])
     bindings: {
         categories: '<'
     },
-    controller: function ($state, $stateParams, StateHistory) {
+    controller: function ($state, $stateParams, StateHistory, AttrConfigStore) {
         var vm = this;
 
         vm.current = 1;
@@ -13,16 +13,14 @@ angular.module('common.attributes.categories', [])
 
         vm.$onInit = function() {
             vm.params = $stateParams;
-            vm.category = vm.params.category;
+            vm.category = AttrConfigStore.getCategory();
             vm.catmap = vm.pruneEmptyCategories(angular.copy(vm.categories));
             vm.categories = Object.keys(vm.catmap);
             vm.catlength = vm.categories.length;
 
-            console.log(vm.params.category, index, vm.current, vm.categories.indexOf(vm.params.category), vm.categories);
-            var index = vm.categories.indexOf(vm.params.category);
+            var index = vm.categories.indexOf(vm.category) + 1;
 
             vm.current = Math.ceil(index / vm.pagesize);
-
         };
 
         vm.pruneEmptyCategories = function(catmap) {
@@ -80,7 +78,7 @@ angular.module('common.attributes.categories', [])
         };
 
         vm.isActive = function(category) {
-            var x = vm.params.category == category;
+            var x = vm.category == category;
             var y = vm.getTo().category == category;
             var z = vm.getFrom().category != category || vm.getTo().category == category;
 

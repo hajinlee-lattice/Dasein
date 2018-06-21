@@ -336,21 +336,35 @@ module.exports = function (grunt) {
 
     // This plugin converts a group of templates to JavaScript
     // and assembles them into an Angular module that primes the cache directly when the module is loaded.
+    // html2js: {
+    //     options: {
+    //         module: 'templates-main',
+    //         rename: function (moduleName) {
+    //             return moduleName.replace('../../../Projects/DanteWebSite/', ''); // because of Gruntfile location
+    //         },
+    //         singleModule: true
+    //     },
+    //     main: {
+    //         src: ['<%= dante.app %>/**/*.html'],
+    //         dest: '<%= dante.app %>/assets/templates.js'
+    //     }
+    // }
+
     html2js: {
         options: {
-            module: 'templates-main',
-            rename: function (moduleName) {
-                return moduleName.replace('../../../Projects/DanteWebSite/', ''); // because of Gruntfile location
-            },
-            singleModule: true
+            base: '',
+            htmlmin: {
+                removeComments: true,
+                collapseWhitespace: true,
+                conservativeCollapse: true,
+                minifyCSS: true
+            }
         },
         main: {
-            src: ['<%= dante.app %>/**/*.html'],
+            src: ['app/**/*.html'],
             dest: '<%= dante.app %>/assets/templates.js'
-        }//,
-        //watch: true
+        },
     }
-
   });
 
   grunt.loadNpmTasks('grunt-contrib-clean');

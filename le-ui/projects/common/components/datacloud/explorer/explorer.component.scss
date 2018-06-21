@@ -2007,7 +2007,10 @@ attr-categories,
             }
         }
     }
-    .category-contact-attributes, .category-my-attributes {
+    .category-contact-attributes, 
+    .category-my-contact, 
+    .category-my-account, 
+    .category-my-attributes {
         &.color {
             color: #457EBA;
         }

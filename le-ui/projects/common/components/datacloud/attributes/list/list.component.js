@@ -21,6 +21,7 @@ angular.module('common.attributes.list', [])
             vm.data = vm.store.getData();
             vm.section = vm.store.getSection();
             vm.params = $stateParams;
+            vm.category = vm.store.getCategory();
 
             vm.setAccessRestriction();
             vm.autoDrillDown();
@@ -28,7 +29,7 @@ angular.module('common.attributes.list', [])
             vm.countSelected();
 
             vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
-            console.log('attrResultsList', vm);
+            //console.log('attrResultsList', vm);
         };
         
         vm.setAccessRestriction = function() {
@@ -100,7 +101,7 @@ angular.module('common.attributes.list', [])
         vm.getResults = function() {
             if (vm.subcategory && !vm.buckets[vm.subcategory]) {
                 vm.buckets[vm.subcategory] = { Bkts: { List: [] } };
-                vm.store.getBucketData(vm.params.category, vm.subcategory);
+                vm.store.getBucketData(vm.category, vm.subcategory);
             }
 
             return vm.subcategory 
@@ -120,6 +121,15 @@ angular.module('common.attributes.list', [])
             }
 
             var bucket = vm.buckets[vm.subcategory][attribute];
+
+            if (bucket && !bucket.Bkts) {
+                bucket.Bkts = {
+                    List: [{ 
+                        Lbl: '<string>', 
+                        Cnt: bucket.Cnt 
+                    }]
+                };
+            }
 
             return bucket ? bucket.Bkts.List || [] : [];
         };
@@ -310,8 +320,6 @@ angular.module('common.attributes.list', [])
                     obj[property] = false;
                 }
             });
-
-            //console.log(obj, vm.filters);
 
             return obj;
         };

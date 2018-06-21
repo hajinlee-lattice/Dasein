@@ -130,11 +130,12 @@ ul.attr-list-results {
         div.attr-result-label {
             display: flex;
             
-            div.attr-result-buckets-container,
-            div.attr-result-label-container {
-                width: 100%;
+            div.attr-result-buckets-container{
+                width: 66%;
+                    
             }
             div.attr-result-label-container {
+                width: 33%;
                 flex-shrink: 1;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -186,36 +187,36 @@ ul.attr-list-results {
 
             .attr-result-buckets {
                 display: flex;
-                justify-content: center;
+                justify-content: start;
                 
                 li {
                     display: flex;
-                    margin-left: 4em;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     height: 2.8em;
-                    width: 100%;
-                    text-align: center;
-                    justify-content: space-between;
+                    width: 33%;
+                    text-align: unset;
+                    justify-content: start;
                     
                     &:first-child {
                         margin-left: 0;
                     }
 
                     span {
-                        margin-right: 0em;
                         overflow: hidden;
-                        text-overflow: ellipsis;
                         width: 66%;
-                        display: inline-block;
+                        display: block;
+                        text-align: right;
+                        padding-right: 1.4em;
+                        text-overflow: ellipsis;
                     }
 
                     em {
                         overflow: hidden;
                         text-overflow: ellipsis;
                         width: 33%;
-                        display: inline-block;
-                        
+                        display: block;
+                        color: #999;                        
                     }
                 }
             }

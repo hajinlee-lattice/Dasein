@@ -159,7 +159,7 @@ angular.module('common.datacloud.tabs.subheader', [])
                     vm.enableSaveSegmentMsg = true;
                     $timeout(function() {
                         vm.enableSaveSegmentMsg = false;
-                    },3500);
+                     },3500);
                 }
 
                 vm.saved = true;

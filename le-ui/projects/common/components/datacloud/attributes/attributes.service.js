@@ -22,6 +22,7 @@ angular.module('common.attributes')
 
         this.limit = -1;
         this.selected = [];
+        this.category = '';
 
         this.data = {
             original: {},
@@ -73,13 +74,19 @@ angular.module('common.attributes')
         this.limit = total;
     };
 
+    this.getCategory = function() {
+        return this.category;
+    };
+
+    this.setCategory = function(category) {
+        this.category = category;
+    };
+
     this.getUsageLimit = function(overview, area) {
         var section = this.getSection();
         var tab = overview.Selections.filter(function(tab) {
             return tab.DisplayName == area;
         })[0];
-
-        console.log(tab);
 
         return tab.Limit;
     };
@@ -207,7 +214,10 @@ angular.module('common.attributes')
         
         $http({
             method: 'GET',
-            url: '/pls/attrconfig/stats/category/' + category + '/subcategory/' + subcategory
+            url: '/pls/attrconfig/stats/category/' + category,
+            params: {
+                'subcategory': subcategory
+            } 
         }).then(function(response) {
             deferred.resolve(response);
         });
