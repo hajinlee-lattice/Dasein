@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
@@ -71,14 +72,14 @@ public class StatsCubeUtils {
 
     private static final Logger log = LoggerFactory.getLogger(StatsCubeUtils.class);
     private static final List<String> TOP_FIRMOGRAPHIC_ATTRS = Lists.reverse(Arrays.asList( //
-            "LDC_PrimaryIndustry", //
-            "LE_REVENUE_RANGE", //
-            "LE_EMPLOYEE_RANGE", //
-            "LDC_Domain", //
-            "LE_NUMBER_OF_LOCATIONS", //
-            "LDC_Country", //
-            "LDC_City", //
-            "LDC_State"));
+            DataCloudConstants.ATTR_LDC_INDUSTRY, //
+            DataCloudConstants.ATTR_REV_RANGE, //
+            DataCloudConstants.ATTR_NUM_EMP_RANGE, //
+            DataCloudConstants.ATTR_LDC_DOMAIN, //
+            DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, //
+            DataCloudConstants.ATTR_COUNTRY, //
+            DataCloudConstants.ATTR_CITY, //
+            DataCloudConstants.ATTR_STATE));
 
     static final String HASEVER_PURCHASED_SUFFIX = String.format("%s_%s", NamedPeriod.HASEVER.getName(), "Purchased");
 

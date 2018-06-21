@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
@@ -177,15 +179,21 @@ public class StatsCubeUtilsUnitTestNG {
         List<TopAttribute> topAttrs = catTopNTree.getSubcategories().get("Other");
         Assert.assertTrue(topAttrs.size() >= 5, "Should have at least 5 attributes in Firmographics");
         int idx = 0;
+        Set<String> expectedNoBktAttrs = new HashSet<>(Arrays.asList(DataCloudConstants.ATTR_LDC_DOMAIN));
         for (String expectedAttr : Arrays.asList(DataCloudConstants.ATTR_LDC_INDUSTRY, //
-                DataCloudConstants.ATTR_NUM_EMP_RANGE, //
                 DataCloudConstants.ATTR_REV_RANGE, //
+                DataCloudConstants.ATTR_NUM_EMP_RANGE, //
+                DataCloudConstants.ATTR_LDC_DOMAIN, //
+                DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, //
                 DataCloudConstants.ATTR_COUNTRY, //
-                DataCloudConstants.ATTR_IS_PRIMARY_LOCATION)) {
+                DataCloudConstants.ATTR_CITY, //
+                DataCloudConstants.ATTR_STATE)) {
             TopAttribute attr = topAttrs.get(idx++);
             Assert.assertEquals(attr.getAttribute(), expectedAttr);
-            verifyTopBkt(cube, attr.getAttribute(), attr.getTopBkt(), //
-                    StatsCubeUtils.getBktComparatorForCategory(null, Category.FIRMOGRAPHICS));
+            if (!expectedNoBktAttrs.contains(attr.getAttribute())) {
+                verifyTopBkt(cube, attr.getAttribute(), attr.getTopBkt(), //
+                        StatsCubeUtils.getBktComparatorForCategory(null, Category.FIRMOGRAPHICS));
+            }
         }
     }
 
