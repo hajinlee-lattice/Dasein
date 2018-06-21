@@ -1,7 +1,9 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CDL_ACTIVE_VERSION;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CURRENT_RATING_ITERATION;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.INACTIVE_ENGINES;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ITERATION_RATING_MODELS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_MODELS;
@@ -27,10 +29,13 @@ import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.rating.StartIteration;
 import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.BaseChoreographer;
 import com.latticeengines.workflow.exposed.build.Choreographer;
@@ -76,12 +81,16 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     @Inject
     private PostIterationInitialization postIterationInitialization;
 
+    @Inject
+    protected DataCollectionProxy dataCollectionProxy;
+
     private boolean initialized;
     private boolean enforceRebuild = false;
     private boolean hasDataChange = false;
     private boolean hasActions = false;
     private boolean hasAIModels = false;
     private boolean hasRuleModels = false;
+    private boolean hasAccount = false;
 
     private boolean shouldReset = false;
     private boolean shouldRebuild = false;
@@ -112,7 +121,9 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         if (shouldReset) {
             skip = !isResetRatingStep(step) && !isCombineStatisticsStep(step);
         } else if (shouldRebuild) {
-            if (isResetRatingStep(step) || iterationFinished) {
+            if (!hasAccount) {
+                skip = true;
+            } else if (isResetRatingStep(step) || iterationFinished) {
                 skip = true;
             } else if (isStartIterationStep(step) || isCloneServingStoresStep(step)) {
                 // always run these steps in rebuild mode
@@ -145,6 +156,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             checkActionImpactedEngines(step);
             shouldReset = shouldReset(hasEngines);
             shouldRebuild = shouldRebuild();
+            hasAccount = hasAccount(step);
             String[] msgs = new String[] { //
                     "enforced=" + enforceRebuild, //
                     "hasEngines=" + hasEngines, //
@@ -152,6 +164,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                     "hasActions=" + hasActions, //
                     "shouldReset=" + shouldReset, //
                     "shouldRebuild=" + shouldRebuild, //
+                    "hasAccount=" + hasAccount, //
             };
             log.info(StringUtils.join(msgs, ", "));
             initialized = true;
@@ -273,6 +286,20 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private void checkEnforcedRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
         BaseProcessEntityStepConfiguration configuration = (BaseProcessEntityStepConfiguration) step.getConfiguration();
         enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
+    }
+
+    private boolean hasAccount(AbstractStep<? extends BaseStepConfiguration> step) {
+        DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
+        if (StringUtils.isNotBlank(
+                dataCollectionProxy.getTableName(customerSpace, BusinessEntity.Account.getBatchStore(), active))) {
+            return true;
+        }
+        if (StringUtils.isNotBlank(dataCollectionProxy.getTableName(customerSpace,
+                BusinessEntity.Account.getBatchStore(), active.complement()))) {
+            return true;
+        }
+        return false;
     }
 
     private boolean hasCrossSellModels(Collection<RatingModelContainer> containers) {
