@@ -23,6 +23,10 @@ public class ImportanceOrderingUtils {
             .put("LDC_State", 40) //
             .build();
 
+    public static int getPredefinedImportanceOrder(String attrName) {
+        return FIRMOGRAPHIC_ORDERING.getOrDefault(attrName, 0);
+    }
+
     public static void addImportanceOrdering(List<ColumnMetadata> cms) {
         for (ColumnMetadata cm : cms) {
             if (Category.FIRMOGRAPHICS.equals(cm.getCategory())) {

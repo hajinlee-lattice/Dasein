@@ -326,7 +326,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                     }
                 });
             } else {
-                log.info("Not stats for Rating in " + inactive);
+                log.info("No stats for Rating in " + inactive);
             }
         } else {
             log.info("No stats at version " + inactive);

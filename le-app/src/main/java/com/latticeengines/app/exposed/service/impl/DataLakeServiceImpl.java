@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,6 +23,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -162,24 +164,32 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private Flux<ColumnMetadata> getAllSegmentAttributes() {
         String tenantId = MultiTenantContext.getTenantId();
-        Map<BusinessEntity, List<ColumnMetadata>> metadataMap = new HashMap<>();
-        Map<BusinessEntity, Set<String>> columnNamesMap = new HashMap<>();
-        Set<BusinessEntity> entities = new HashSet<>(BusinessEntity.SEGMENT_ENTITIES);
-        collectMetadataInParallel(tenantId, entities, metadataMap, columnNamesMap);
+        Map<BusinessEntity, List<ColumnMetadata>> metadataInMds = new HashMap<>();
+        Map<BusinessEntity, Set<String>> colsInServingStore = new HashMap<>();
+        Map<String, StatsCube> cubeMap = new HashMap<>();
+        collectMetadataInParallel(tenantId, BusinessEntity.SEGMENT_ENTITIES, metadataInMds, colsInServingStore,
+                cubeMap);
         return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES) //
                 .flatMap(entity -> {
-                    List<ColumnMetadata> cms = metadataMap.getOrDefault(entity, Collections.emptyList());
-                    if (CollectionUtils.isEmpty(cms)) {
+                    List<ColumnMetadata> cms = metadataInMds.getOrDefault(entity, Collections.emptyList());
+                    StatsCube statsCube = cubeMap.get(entity.name());
+                    if (CollectionUtils.isEmpty(cms) || statsCube == null) {
                         return Flux.empty();
                     } else {
                         Flux<ColumnMetadata> flux = Flux.fromIterable(cms);
-                        Set<String> availableAttrs = columnNamesMap.get(entity);
-                        if (CollectionUtils.isNotEmpty(availableAttrs)) {
-                            flux = flux.filter(cm -> availableAttrs.contains(cm.getAttrName()));
-                        }
-                        return flux //
+                        Set<String> availableAttrs = colsInServingStore.getOrDefault(entity, Collections.emptySet());
+                        flux = flux //
                                 .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
-                                .filter(cm -> !StatsCubeUtils.shouldHideAttr(entity, cm));
+                                .filter(cm -> !StatsCubeUtils.shouldHideAttr(entity, cm)) //
+                                .filter(cm -> {
+                                    boolean avail = availableAttrs.contains(cm.getAttrName());
+                                    if (!avail) {
+                                        log.info("Filtering out  " + cm.getAttrName() + " in " + entity
+                                                + " because it is not in serving store.");
+                                    }
+                                    return avail;
+                                });
+                        return StatsCubeUtils.sortByCategory(flux, statsCube);
                     }
                 });
     }
@@ -396,12 +406,10 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", unless = "#result == null")
     public TopNTree getTopNTreeFromCache(String customerSpace) {
-        Map<String, StatsCube> cubes = getStatsCubes();
-        if (MapUtils.isEmpty(cubes)) {
-            return null;
-        }
-        Map<String, List<ColumnMetadata>> cmMap = getColumnMetadataMap(customerSpace, cubes);
-        if (MapUtils.isEmpty(cmMap)) {
+        Map<String, StatsCube> cubes = new HashMap<>();
+        Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
+        populateColumnMetadataMap(customerSpace, cmMap, cubes);
+        if (MapUtils.isEmpty(cubes) || MapUtils.isEmpty(cmMap)) {
             return null;
         }
         String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
@@ -419,52 +427,70 @@ public class DataLakeServiceImpl implements DataLakeService {
         return null;
     }
 
-    private Map<String, List<ColumnMetadata>> getColumnMetadataMap(String customerSpace, Map<String, StatsCube> cubes) {
+    private void populateColumnMetadataMap(String customerSpace, Map<String, List<ColumnMetadata>> cmMap,
+            Map<String, StatsCube> cubeMap) {
         Map<BusinessEntity, List<ColumnMetadata>> metadataMap = new HashMap<>();
         Map<BusinessEntity, Set<String>> columnNamesMap = new HashMap<>();
-        Set<BusinessEntity> entities = cubes.keySet().stream().map(BusinessEntity::valueOf).collect(Collectors.toSet());
-        collectMetadataInParallel(customerSpace, entities, metadataMap, columnNamesMap);
-        Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
-        cubes.keySet().forEach(key -> {
+        collectMetadataInParallel(customerSpace, BusinessEntity.SEGMENT_ENTITIES, metadataMap, columnNamesMap, cubeMap);
+        ConcurrentMap<String, List<ColumnMetadata>> concurrentCmMap = new ConcurrentHashMap<>();
+        cubeMap.keySet().forEach(key -> {
             BusinessEntity entity = BusinessEntity.valueOf(key);
             List<ColumnMetadata> cms = metadataMap.get(entity);
             Set<String> attrs = columnNamesMap.getOrDefault(entity, Collections.emptySet());
             if (CollectionUtils.isNotEmpty(cms)) {
                 List<ColumnMetadata> attrsInTable = Flux.fromIterable(cms)
                         .filter(cm -> attrs.contains(cm.getAttrName())).collectList().block();
-                cmMap.put(key, attrsInTable);
+                concurrentCmMap.put(key, attrsInTable);
             }
         });
-        return cmMap;
+        cmMap.clear();
+        cmMap.putAll(concurrentCmMap);
     }
 
     private void collectMetadataInParallel(String customerSpace, Collection<BusinessEntity> entities,
-            Map<BusinessEntity, List<ColumnMetadata>> metadataMap, Map<BusinessEntity, Set<String>> columnNamesMap) {
+            Map<BusinessEntity, List<ColumnMetadata>> metadataMap, Map<BusinessEntity, Set<String>> columnNamesMap,
+            Map<String, StatsCube> statsCubeMap) {
         List<Runnable> runnables = new ArrayList<>();
         ConcurrentMap<BusinessEntity, List<ColumnMetadata>> concurrentMetadataMap = new ConcurrentHashMap<>();
         ConcurrentMap<BusinessEntity, Set<String>> concurrentColumnNamesMap = new ConcurrentHashMap<>();
+        ConcurrentMap<String, StatsCube> concurrentStatsCubeMap = new ConcurrentHashMap<>();
+        final String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
+        StopWatch stopWatch = new StopWatch();
         entities.forEach(entity -> {
-            final String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
             Runnable metadataRunnable = //
                     () -> {
+                        log.info("Getting cached metadata for " + tenantId + " : " + entity);
                         List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
                         if (CollectionUtils.isNotEmpty(cms)) {
                             concurrentMetadataMap.put(entity, cms);
                         }
+                        log.info("Finished getting cached metadata for " + tenantId + " : " + entity);
                     };
             Runnable columnNamesRunnable = //
                     () -> {
+                        log.info("Getting serving store attrs for " + tenantId + " : " + entity);
                         Set<String> attrs = _dataLakeService.getServingTableColumns(customerSpace, entity);
                         if (CollectionUtils.isNotEmpty(attrs)) {
                             concurrentColumnNamesMap.put(entity, attrs);
                         }
+                        log.info("Finished getting serving store attrs for " + tenantId + " : " + entity);
                     };
             runnables.add(metadataRunnable);
             runnables.add(columnNamesRunnable);
         });
-        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 30, 1);
+        Runnable statsCubeRunnable = () -> {
+            log.info("Getting stats cubes for " + tenantId);
+            Map<String, StatsCube> cubes = _dataLakeService.getStatsCubesFromCache(tenantId);
+            concurrentStatsCubeMap.putAll(cubes);
+            log.info("Finished getting stats cubes for " + tenantId);
+        };
+        runnables.add(statsCubeRunnable);
+        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 30, 2);
         metadataMap.putAll(concurrentMetadataMap);
         columnNamesMap.putAll(concurrentColumnNamesMap);
+        statsCubeMap.putAll(concurrentStatsCubeMap);
+        log.info("Finished collection metadata artifacts in parallel. Used " + stopWatch.getTime(TimeUnit.SECONDS)
+                + " sec.");
     }
 
     public List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
@@ -508,9 +534,11 @@ public class DataLakeServiceImpl implements DataLakeService {
                     Set<String> attrSet = new HashSet<>();
                     List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, tableName);
                     cms.forEach(cm -> attrSet.add(cm.getAttrName()));
-                    result = attrSet;
                     timer.setTimerMessage(
                             "Fetched " + attrSet.size() + " attr names for " + entity + " in " + customerSpace);
+                    if (CollectionUtils.isNotEmpty(attrSet)) {
+                        result = attrSet;
+                    }
                 }
             }
         }

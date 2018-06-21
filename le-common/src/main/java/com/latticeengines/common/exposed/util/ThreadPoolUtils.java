@@ -16,10 +16,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public class ThreadPoolUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(ThreadPoolUtils.class);
 
     private static long TIMEOUT = TimeUnit.HOURS.toMillis(1);
 
@@ -80,6 +84,7 @@ public class ThreadPoolUtils {
 
     public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService, List<T> runnables,
             int timeoutInMinutes, int intervalInSeconds) {
+        int numTasks = CollectionUtils.size(runnables);
         List<Future<?>> futures = runnables.stream().map(executorService::submit).collect(Collectors.toList());
         long startTime = System.currentTimeMillis();
         long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
@@ -87,6 +92,7 @@ public class ThreadPoolUtils {
             if (System.currentTimeMillis() - startTime > timeout) {
                 throw new RuntimeException("Cannot finish all runnables within timeout.");
             }
+            log.info("Checking status of " + CollectionUtils.size(futures) + " runnable futures.");
             List<Future> toBeRemoved = new ArrayList<>();
             futures.forEach(future -> {
                 try {
@@ -101,6 +107,8 @@ public class ThreadPoolUtils {
             });
             toBeRemoved.forEach(futures::remove);
         }
+        double duration = (System.currentTimeMillis() - startTime) * 0.001;
+        log.info("Finished all of " + numTasks + " runnable futures in " + duration + " sec.");
     }
 
 }

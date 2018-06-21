@@ -118,7 +118,7 @@ public abstract class BaseRestApiProxy {
         }
     }
 
-    protected <B> RetryTemplate getRetryTemplate(final String method, HttpMethod verb, final String url, final boolean logBody,
+    protected <B> ProxyRetryTemplate getRetryTemplate(final String method, HttpMethod verb, final String url, final boolean logBody,
             final B body) {
         ProxyRetryTemplate retryTemplate = new ProxyRetryTemplate(maxAttempts, initialWaitMsec, multiplier);
         retryTemplate.setRetryExceptions(retryExceptions);

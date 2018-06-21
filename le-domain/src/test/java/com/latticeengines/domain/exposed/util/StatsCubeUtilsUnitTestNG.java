@@ -171,7 +171,6 @@ public class StatsCubeUtilsUnitTestNG {
             Assert.assertNotNull(bkt.getValues().get(1));
             Assert.assertEquals(bkt.getValues().get(1), val2);
         }
-
     }
 
     private void verifyFirmographicsTopN(CategoryTopNTree catTopNTree, StatsCube cube) {

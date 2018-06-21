@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -24,11 +26,12 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
@@ -60,19 +63,27 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+
 public class StatsCubeUtils {
 
     private static final Logger log = LoggerFactory.getLogger(StatsCubeUtils.class);
-    private static final List<String> TOP_FIRMOGRAPHIC_ATTRS = Arrays.asList( //
-            DataCloudConstants.ATTR_IS_PRIMARY_LOCATION, //
-            DataCloudConstants.ATTR_COUNTRY, //
-            DataCloudConstants.ATTR_REV_RANGE, //
-            DataCloudConstants.ATTR_NUM_EMP_RANGE, //
-            DataCloudConstants.ATTR_LDC_INDUSTRY //
-    );
+    private static final List<String> TOP_FIRMOGRAPHIC_ATTRS = Lists.reverse(Arrays.asList( //
+            "LDC_PrimaryIndustry", //
+            "LE_REVENUE_RANGE", //
+            "LE_EMPLOYEE_RANGE", //
+            "LDC_Domain", //
+            "LE_NUMBER_OF_LOCATIONS", //
+            "LDC_Country", //
+            "LDC_City", //
+            "LDC_State"));
+
     static final String HASEVER_PURCHASED_SUFFIX = String.format("%s_%s", NamedPeriod.HASEVER.getName(), "Purchased");
 
     private static final ConcurrentMap<BusinessEntity, Set<String>> SYSTEM_ATTRS = new ConcurrentHashMap<>();
+    private static final Scheduler SORTER = Schedulers.newParallel("attr-sorter");
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);
@@ -430,39 +441,15 @@ public class StatsCubeUtils {
     // as value type
     // Not sure what type is passed in. Cast to String first.
     private static Double valObjToDouble(Object obj) {
-        Double dbl = Double.valueOf(String.valueOf(obj));
-        return dbl;
+        return Double.valueOf(String.valueOf(obj));
     }
 
     private static Double valObjToDouble(Object obj, boolean neg) {
         Double dbl = valObjToDouble(obj);
-        if (neg && dbl.doubleValue() != 0.0) {
+        if (neg && dbl != 0.0) {
             dbl = -dbl;
         }
         return dbl;
-    }
-
-    public static Map<String, StatsCube> filterStatsCube(Map<String, StatsCube> cubes,
-            Map<String, List<ColumnMetadata>> cmMap) {
-        for (Map.Entry<String, StatsCube> cubeEntry : cubes.entrySet()) {
-            String key = cubeEntry.getKey();
-            StatsCube cube = cubeEntry.getValue();
-            if (MapUtils.isNotEmpty(cube.getStatistics()) && cmMap.containsKey(key)) {
-                List<ColumnMetadata> cmList = cmMap.get(key);
-                cmList.forEach(cm -> {
-                    if (isNumericalAttribute(cm) || isBooleanAttribute(cm)) {
-                        AttributeStats stats = cube.getStatistics().get(cm.getAttrName());
-                        if (stats != null && stats.getNonNullCount() == 0L) {
-                            cube.getStatistics().remove(cm.getAttrName());
-                        }
-                    }
-                });
-            } else {
-                log.warn("Did not provide column metadata for " + key //
-                        + ", skipping the stats for the whole cube.");
-            }
-        }
-        return cubes;
     }
 
     public static StatsCube retainTop5Bkts(StatsCube cube) {
@@ -493,20 +480,13 @@ public class StatsCubeUtils {
             synchronized (StringUtils.class) {
                 if (!SYSTEM_ATTRS.containsKey(entity)) {
                     Set<String> systemAttrs = new HashSet<>();
-                    SchemaRepository.getSystemAttributes(entity).forEach(interfaceName -> systemAttrs.add(interfaceName.name()));
+                    SchemaRepository.getSystemAttributes(entity)
+                            .forEach(interfaceName -> systemAttrs.add(interfaceName.name()));
                     SYSTEM_ATTRS.put(entity, systemAttrs);
                 }
             }
         }
         return SYSTEM_ATTRS.get(entity);
-    }
-
-    private static boolean isNumericalAttribute(ColumnMetadata cm) {
-        return FundamentalType.NUMERIC.equals(cm.getFundamentalType());
-    }
-
-    private static boolean isBooleanAttribute(ColumnMetadata cm) {
-        return FundamentalType.BOOLEAN.equals(cm.getFundamentalType());
     }
 
     private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {
@@ -623,7 +603,8 @@ public class StatsCubeUtils {
         for (String name : attrStatsMap.keySet()) {
             ColumnMetadata cm = cmMap.get(name);
             if (cm == null) {
-                //log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity + ", skipping it.");
+                // log.warn("Cannot find attribute " + name + " in the provided
+                // column metadata for " + entity + ", skipping it.");
                 continue;
             }
             if (shouldHideAttr(entity, cm)) {
@@ -672,7 +653,8 @@ public class StatsCubeUtils {
     }
 
     private static Bucket getTopBkt(AttributeStats attributeStats, Comparator<Bucket> comparator) {
-        if (attributeStats.getBuckets() != null) {
+        if (attributeStats.getBuckets() != null
+                && CollectionUtils.isNotEmpty(attributeStats.getBuckets().getBucketList())) {
             return attributeStats.getBuckets().getBucketList().stream() //
                     .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0) //
                     .min(comparator).orElse(null);
@@ -727,17 +709,53 @@ public class StatsCubeUtils {
         return bkt != null && (bkt.getLabel().equalsIgnoreCase("Yes") || bkt.getLabel().equalsIgnoreCase("No"));
     }
 
-    private static Comparator<TopAttribute> defaultTopAttrComparator() {
-        return Comparator.comparing(attr -> -attr.getCount());
-    }
+    public static Flux<ColumnMetadata> sortByCategory(Flux<ColumnMetadata> cmFlux, StatsCube statsCube) {
+        if (MapUtils.isEmpty(statsCube.getStatistics())) {
+            return cmFlux;
+        }
+        ConcurrentMap<Category, ConcurrentLinkedQueue<Pair<TopAttribute, ColumnMetadata>>> topAttrMap = new ConcurrentHashMap<>();
+        Flux<Pair<TopAttribute, ColumnMetadata>> topAttributeFlux = cmFlux.map(cm -> {
+            String attrName = cm.getAttrName();
+            AttributeStats attributeStats = statsCube.getStatistics().get(attrName);
+            Category category = cm.getCategory();
+            BusinessEntity entity = cm.getEntity();
+            if (entity == null) {
+                entity = BusinessEntity.Account;
+            }
+            TopAttribute topAttribute = toTopAttr(category, entity, attrName, attributeStats, true);
+            return Pair.of(topAttribute, cm);
+        }).parallel().runOn(SORTER).map(pair -> {
+            Category category = pair.getRight().getCategory();
+            topAttrMap.putIfAbsent(category, new ConcurrentLinkedQueue<>());
+            topAttrMap.get(category).add(pair);
+            return pair;
+        }).sequential();
 
-    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> getAttrComparatorForCategory(
-            Category category) {
-        return (o1, o2) -> {
-            TopAttribute topAttr1 = new TopAttribute(o1.getKey(), o1.getValue().getNonNullCount());
-            TopAttribute topAttr2 = new TopAttribute(o2.getKey(), o2.getValue().getNonNullCount());
-            return getTopAttrComparatorForCategory(category).compare(topAttr1, topAttr2);
-        };
+        // the groupby method in reactor seems buggy
+        // it blocks the thread for a long time when sorting a big flux
+        // so change to two blocking steps
+        topAttributeFlux.count().block();
+
+        if (MapUtils.isNotEmpty(topAttrMap)) {
+            return Flux.fromIterable(topAttrMap.keySet()) //
+                    .parallel().runOn(SORTER) //
+                    .concatMap(category -> {
+                        List<Pair<TopAttribute, ColumnMetadata>> pairs = new ArrayList<>(topAttrMap.get(category));
+                        Comparator<Pair<TopAttribute, ColumnMetadata>> comparator = getAttrComparatorForCategory(
+                                category);
+                        pairs.sort(comparator);
+                        AtomicInteger ordering = new AtomicInteger(CollectionUtils.size(pairs));
+                        return Flux.fromIterable(pairs).map(Pair::getRight).map(cm -> {
+                            cm.setImportanceOrdering(ordering.getAndDecrement());
+                            return cm;
+                        });
+                    }).sequential();
+        } else {
+            return Flux.empty();
+        }
+    }
+    private static Comparator<Pair<TopAttribute, ColumnMetadata>> getAttrComparatorForCategory(Category category) {
+        return (o1, o2) -> getTopAttrComparatorForCategory(category).compare(o1.getLeft(), o2.getLeft());
     }
 
     private static Comparator<TopAttribute> getTopAttrComparatorForCategory(Category category) {
@@ -751,9 +769,32 @@ public class StatsCubeUtils {
             return techTopAttrComparator();
         case PRODUCT_SPEND:
             return productTopAttrComparator();
+        case RATING:
+            return ratingTopAttrComparator(intentTopAttrComparator().reversed(), defaultTopAttrComparator());
         default:
             return defaultTopAttrComparator();
         }
+    }
+
+    private static Comparator<TopAttribute> defaultTopAttrComparator() {
+        return (o1, o2) -> {
+            String attr1 = o1.getAttribute();
+            String attr2 = o2.getAttribute();
+            Long count1 = o1.getCount();
+            Long count2 = o2.getCount();
+            if (count1 == null) {
+                count1 = 0L;
+            }
+            if (count2 == null) {
+                count2 = 0L;
+            }
+            int countCmp = Long.compare(count2, count1);
+            if (countCmp == 0) {
+                return StringUtils.compare(attr1, attr2);
+            } else {
+                return countCmp;
+            }
+        };
     }
 
     private static Comparator<TopAttribute> firmographicTopAttrComparator() {
@@ -810,6 +851,28 @@ public class StatsCubeUtils {
                 }
             } else {
                 return bktId1.compareTo(bktId2);
+            }
+        };
+    }
+
+    private static Comparator<TopAttribute> ratingTopAttrComparator(Comparator<TopAttribute> ratingCmp, Comparator<TopAttribute> otherCmp) {
+        return (o1, o2) -> {
+            String attr1 = o1.getAttribute();
+            String attr2 = o2.getAttribute();
+            boolean isRating1 = attr1.startsWith(RatingEngine.RATING_ENGINE_PREFIX)
+                    && RatingEngine.toEngineId(attr1).equals(attr1);
+            boolean isRating2 = attr2.startsWith(RatingEngine.RATING_ENGINE_PREFIX)
+                    && RatingEngine.toEngineId(attr2).equals(attr2);
+            if (isRating1 == isRating2) {
+                if (isRating1) {
+                    return ratingCmp.compare(o1, o2);
+                } else {
+                    return otherCmp.compare(o1, o2);
+                }
+            } else if (isRating1) {
+                return -1;
+            } else {
+                return 1;
             }
         };
     }

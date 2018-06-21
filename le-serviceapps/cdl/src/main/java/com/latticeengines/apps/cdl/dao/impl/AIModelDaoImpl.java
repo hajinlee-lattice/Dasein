@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.dao.impl;
 
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -8,9 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.dao.AIModelDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
-
-import java.util.List;
 
 @Component("aiModelDao")
 public class AIModelDaoImpl extends BaseDaoImpl<AIModel> implements AIModelDao {
@@ -30,7 +30,7 @@ public class AIModelDaoImpl extends BaseDaoImpl<AIModel> implements AIModelDao {
         query.setParameter("id", id);
         List list =  query.list();
         if (CollectionUtils.size(list) != 1) {
-            throw new RuntimeException(String.format("Found %d segments for rule based model %s, while it should be 1.", CollectionUtils.size(list), id));
+            throw new RuntimeException(String.format("Found %d segments for AI model %s, while it should be 1.", CollectionUtils.size(list), id));
         } else {
             return (MetadataSegment) list.get(0);
         }

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -118,7 +119,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     }
 
     private List<ColumnMetadata> requestAllColumnsWithRetry(String dataCloudVersion) {
-        RetryTemplate retry = getRetryTemplate("get AM metadata", HttpMethod.GET, "metadata api", false,
+        ProxyRetryTemplate retry = getRetryTemplate("get AM metadata", HttpMethod.GET, "metadata api", false,
         null);
         return retry.execute(context -> {
             String msg = "(Attempt=" + (context.getRetryCount() + 1) + ") Load metadata of data cloud version " + dataCloudVersion;
