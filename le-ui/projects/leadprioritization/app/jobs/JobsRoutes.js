@@ -72,28 +72,6 @@ angular
             },
 
             resolve: {
-                // This a temporary fix so the Jobs page does not 
-                // enable the sidebar when no data is available
-                AttributesCount: function($q, $state, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getAttributesCount().then(function(result) {
-                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                        deferred.resolve(result.data);
-                    });
-                    return deferred.promise;
-                },
-                // InitJobs: function($q, JobsStore){
-                //     var deferred = $q.defer();
-                //         JobsStore.getJobs(false).then(function(res){
-                //             console.log('CALLBACK');
-                //             deferred.resolve();
-                //         });
-
-                //     return deferred.promise;
-                // },
                 ModelConfig: function() {
                     return {};
                 }
