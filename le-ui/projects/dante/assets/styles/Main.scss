@@ -48,7 +48,3 @@
        url('../CommonAssets/fonts/ProximaNova-Regular-webfont.ttf')  format('truetype'), /* Safari, Android, iOS */
        url('../CommonAssets/fonts/ProximaNova-Regular-webfont.svg#svgFontName') format('svg'); /* Legacy iOS */
 }
-
-if ($(".breadcrumbs > LI:contains('Getting Started')").length > 0) { 
-    $(".article-title").addClass("article-title0"); 
-}
