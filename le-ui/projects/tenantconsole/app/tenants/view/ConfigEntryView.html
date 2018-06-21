@@ -12,9 +12,9 @@
 
 <form name="configform" ng-hide="isObject || isList" class="form-inline" ng-class='{"has-error": showError}' novalidate>
     <div ng-if="!readonly || editing">
-        <label class="control-label">
+        <label class="control-label" ng-class="{'overflow': config.Node == 'EnrichAttributesMaxNumber'}">
             <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
-            {{ config.Node }}<span ng-if="required" class="required-mark">*</span>
+            {{ config.Node == 'EnrichAttributesMaxNumber' ? 'EnrichPremiumAttributesMaxNumber' : config.Node }}<span ng-if="required" class="required-mark">*</span>
         </label>
         <input ng-if="isReadonly || isDerived" type="{{ inputType }}" class="form-control" ng-model="config.Data" disabled />
         <label ng-if="isDerived" class="control-label text-muted">[derived]</label>
