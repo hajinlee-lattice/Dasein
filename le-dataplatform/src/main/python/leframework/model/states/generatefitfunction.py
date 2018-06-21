@@ -123,20 +123,23 @@ class FitFunctionGenerator(State):
         decileArray = decileArray[~np.isnan(rateArray)]
         rateArray = rateArray[~np.isnan(rateArray)]
 
-        if rateArray.shape[0] < 3:
+        if rateArray.shape[0] < 4:
             return (0.0, 0.0, np.log(avgRate))
 
         liftArray = rateArray / avgRate
         decile = decileArray
 
-        idx = np.argwhere(liftArray > 0.01)
+        idxToKeep = np.arange(liftArray.shape[0])
+        while idxToKeep.shape[0] > 3 and liftArray[idxToKeep[-1]] <= 0.01:
+            idxToKeep = idxToKeep[:-1]
 
-        if idx.shape[0] >= 3:
-            liftArray = liftArray[idx]
-            decile = decile[idx]
-        else:
-            liftArray = liftArray[:3]
-            decile = decile[:3]
+        liftArray = liftArray[idxToKeep]
+        decile = decile[idxToKeep]
+
+        idx = np.argwhere(liftArray <= 0.01)
+        mask = ~ np.in1d(np.arange(liftArray.shape[0]), idx)
+
+        liftArray[idx] = np.min(liftArray[mask])
 
         rho, pval = spearmanr(decile, liftArray)
 

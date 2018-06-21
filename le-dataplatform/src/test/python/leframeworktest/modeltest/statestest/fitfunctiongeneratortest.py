@@ -11,7 +11,7 @@ class FitFunctionGeneratorTest(TestBase):
 
     def testExecute(self):
         mediator = Mediator()
-        mediator.segmentations = self._loadSegmentations()
+        mediator.segmentations = self._loadModel1()
         self.fit.mediator = mediator
         self.assertEquals(self.fit.getName(), "FitFunctionGenerator")
         self.fit.execute()
@@ -26,7 +26,7 @@ class FitFunctionGeneratorTest(TestBase):
 
     def testExecute1(self):
         mediator = Mediator()
-        mediator.segmentations = self._loadSegmentations1()
+        mediator.segmentations = self._loadModel12()
         self.fit.mediator = mediator
         self.assertEquals(self.fit.getName(), "FitFunctionGenerator")
         self.fit.execute()
@@ -37,7 +37,1063 @@ class FitFunctionGeneratorTest(TestBase):
         self.assertAlmostEquals(fit_function_parameters['gamma'], 0.0, delta=1e-6)
         self.assertAlmostEquals(fit_function_parameters['maxRate'], 0.0, delta=1e-6)
 
-    def _loadSegmentations1(self):
+    def testExecute2(self):
+        mediator = Mediator()
+        mediator.segmentations = self._loadModel2()
+        self.fit.mediator = mediator
+        self.assertEquals(self.fit.getName(), "FitFunctionGenerator")
+        self.fit.execute()
+        fit_function_parameters = self.fit.getMediator().fit_function_parameters
+        print(fit_function_parameters)
+        self.assertAlmostEquals(fit_function_parameters['alpha'], -68.03777530752788, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['beta'], 312.60132663666815, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['gamma'], 100., delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['maxRate'], 0.3235294117647059, delta=1e-6)
+
+    def testExecute5(self):
+        mediator = Mediator()
+        mediator.segmentations = self._loadModel5()
+        self.fit.mediator = mediator
+        self.assertEquals(self.fit.getName(), "FitFunctionGenerator")
+        self.fit.execute()
+        fit_function_parameters = self.fit.getMediator().fit_function_parameters
+        print(fit_function_parameters)
+        self.assertAlmostEquals(fit_function_parameters['alpha'], -1.4704657617528374, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['beta'], -2.1588076595661319, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['gamma'], -0.675, delta=1e-6)
+        self.assertAlmostEquals(fit_function_parameters['maxRate'], 1.0, delta=1e-6)
+
+    def _loadModel5(self):
+        jsonStr = '''
+        {
+  "Segmentations": [
+    {
+      "LeadSource": "All",
+      "Segments": [
+        {
+          "Score": 100,
+          "Count": 33,
+          "Converted": 33
+        },
+        {
+          "Score": 99,
+          "Count": 33,
+          "Converted": 33
+        },
+        {
+          "Score": 98,
+          "Count": 33,
+          "Converted": 26
+        },
+        {
+          "Score": 97,
+          "Count": 33,
+          "Converted": 26
+        },
+        {
+          "Score": 96,
+          "Count": 33,
+          "Converted": 17
+        },
+        {
+          "Score": 95,
+          "Count": 33,
+          "Converted": 14
+        },
+        {
+          "Score": 94,
+          "Count": 33,
+          "Converted": 11
+        },
+        {
+          "Score": 93,
+          "Count": 33,
+          "Converted": 15
+        },
+        {
+          "Score": 92,
+          "Count": 33,
+          "Converted": 11
+        },
+        {
+          "Score": 91,
+          "Count": 33,
+          "Converted": 11
+        },
+        {
+          "Score": 90,
+          "Count": 33,
+          "Converted": 3
+        },
+        {
+          "Score": 89,
+          "Count": 33,
+          "Converted": 3
+        },
+        {
+          "Score": 88,
+          "Count": 33,
+          "Converted": 5
+        },
+        {
+          "Score": 87,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 86,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 85,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 84,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 83,
+          "Count": 33,
+          "Converted": 2
+        },
+        {
+          "Score": 82,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 81,
+          "Count": 33,
+          "Converted": 2
+        },
+        {
+          "Score": 80,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 79,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 78,
+          "Count": 33,
+          "Converted": 3
+        },
+        {
+          "Score": 77,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 76,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 75,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 74,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 73,
+          "Count": 33,
+          "Converted": 5
+        },
+        {
+          "Score": 72,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 71,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 70,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 69,
+          "Count": 33,
+          "Converted": 2
+        },
+        {
+          "Score": 68,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 67,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 66,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 65,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 64,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 63,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 62,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 61,
+          "Count": 33,
+          "Converted": 2
+        },
+        {
+          "Score": 60,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 59,
+          "Count": 33,
+          "Converted": 2
+        },
+        {
+          "Score": 58,
+          "Count": 33,
+          "Converted": 2
+        },
+        {
+          "Score": 57,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 56,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 55,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 54,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 53,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 52,
+          "Count": 33,
+          "Converted": 2
+        },
+        {
+          "Score": 51,
+          "Count": 33,
+          "Converted": 4
+        },
+        {
+          "Score": 50,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 49,
+          "Count": 33,
+          "Converted": 2
+        },
+        {
+          "Score": 48,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 47,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 46,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 45,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 44,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 43,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 42,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 41,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 40,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 39,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 38,
+          "Count": 33,
+          "Converted": 1
+        },
+        {
+          "Score": 37,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 36,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 35,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 34,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 33,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 32,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 31,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 30,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 29,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 28,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 27,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 26,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 25,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 24,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 23,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 22,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 21,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 20,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 19,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 18,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 17,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 16,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 15,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 14,
+          "Count": 33,
+          "Converted": 0
+        },
+        {
+          "Score": 13,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 12,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 11,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 10,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 9,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 8,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 7,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 6,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 5,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 4,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 3,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 2,
+          "Count": 32,
+          "Converted": 0
+        },
+        {
+          "Score": 1,
+          "Count": 32,
+          "Converted": 0
+        }
+      ]
+    }
+  ]
+}
+        '''
+        obj = json.loads(jsonStr)
+        return obj['Segmentations']
+
+    def _loadModel2(self):
+        jsonStr = '''
+        {
+    "Segmentations": [
+        {
+            "LeadSource": "All", 
+            "Segments": [
+                {
+                    "Score": 100, 
+                    "Count": 102, 
+                    "Converted": 33
+                }, 
+                {
+                    "Score": 99, 
+                    "Count": 102, 
+                    "Converted": 20
+                }, 
+                {
+                    "Score": 98, 
+                    "Count": 102, 
+                    "Converted": 31
+                }, 
+                {
+                    "Score": 97, 
+                    "Count": 102, 
+                    "Converted": 28
+                }, 
+                {
+                    "Score": 96, 
+                    "Count": 102, 
+                    "Converted": 22
+                }, 
+                {
+                    "Score": 95, 
+                    "Count": 102, 
+                    "Converted": 18
+                }, 
+                {
+                    "Score": 94, 
+                    "Count": 102, 
+                    "Converted": 36
+                }, 
+                {
+                    "Score": 93, 
+                    "Count": 102, 
+                    "Converted": 17
+                }, 
+                {
+                    "Score": 92, 
+                    "Count": 102, 
+                    "Converted": 21
+                }, 
+                {
+                    "Score": 91, 
+                    "Count": 102, 
+                    "Converted": 18
+                }, 
+                {
+                    "Score": 90, 
+                    "Count": 102, 
+                    "Converted": 22
+                }, 
+                {
+                    "Score": 89, 
+                    "Count": 102, 
+                    "Converted": 18
+                }, 
+                {
+                    "Score": 88, 
+                    "Count": 102, 
+                    "Converted": 17
+                }, 
+                {
+                    "Score": 87, 
+                    "Count": 102, 
+                    "Converted": 15
+                }, 
+                {
+                    "Score": 86, 
+                    "Count": 102, 
+                    "Converted": 22
+                }, 
+                {
+                    "Score": 85, 
+                    "Count": 102, 
+                    "Converted": 18
+                }, 
+                {
+                    "Score": 84, 
+                    "Count": 102, 
+                    "Converted": 13
+                }, 
+                {
+                    "Score": 83, 
+                    "Count": 102, 
+                    "Converted": 18
+                }, 
+                {
+                    "Score": 82, 
+                    "Count": 102, 
+                    "Converted": 15
+                }, 
+                {
+                    "Score": 81, 
+                    "Count": 102, 
+                    "Converted": 10
+                }, 
+                {
+                    "Score": 80, 
+                    "Count": 102, 
+                    "Converted": 15
+                }, 
+                {
+                    "Score": 79, 
+                    "Count": 102, 
+                    "Converted": 14
+                }, 
+                {
+                    "Score": 78, 
+                    "Count": 102, 
+                    "Converted": 14
+                }, 
+                {
+                    "Score": 77, 
+                    "Count": 102, 
+                    "Converted": 13
+                }, 
+                {
+                    "Score": 76, 
+                    "Count": 102, 
+                    "Converted": 9
+                }, 
+                {
+                    "Score": 75, 
+                    "Count": 102, 
+                    "Converted": 9
+                }, 
+                {
+                    "Score": 74, 
+                    "Count": 102, 
+                    "Converted": 5
+                }, 
+                {
+                    "Score": 73, 
+                    "Count": 102, 
+                    "Converted": 4
+                }, 
+                {
+                    "Score": 72, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 71, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 70, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 69, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 68, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 67, 
+                    "Count": 102, 
+                    "Converted": 4
+                }, 
+                {
+                    "Score": 66, 
+                    "Count": 102, 
+                    "Converted": 4
+                }, 
+                {
+                    "Score": 65, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 64, 
+                    "Count": 102, 
+                    "Converted": 3
+                }, 
+                {
+                    "Score": 63, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 62, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 61, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 60, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 59, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 58, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 57, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 56, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 55, 
+                    "Count": 102, 
+                    "Converted": 3
+                }, 
+                {
+                    "Score": 54, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 53, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 52, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 51, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 50, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 49, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 48, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 47, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 46, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 45, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 44, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 43, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 42, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 41, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 40, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 39, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 38, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 37, 
+                    "Count": 102, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 36, 
+                    "Count": 102, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 35, 
+                    "Count": 102, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 34, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 33, 
+                    "Count": 101, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 32, 
+                    "Count": 101, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 31, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 30, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 29, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 28, 
+                    "Count": 101, 
+                    "Converted": 2
+                }, 
+                {
+                    "Score": 27, 
+                    "Count": 101, 
+                    "Converted": 1
+                }, 
+                {
+                    "Score": 26, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 25, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 24, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 23, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 22, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 21, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 20, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 19, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 18, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 17, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 16, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 15, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 14, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 13, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 12, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 11, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 10, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 9, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 8, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 7, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 6, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 5, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 4, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 3, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 2, 
+                    "Count": 101, 
+                    "Converted": 0
+                }, 
+                {
+                    "Score": 1, 
+                    "Count": 101, 
+                    "Converted": 0
+                }
+            ]
+        }
+    ] 
+}
+        '''
+        obj = json.loads(jsonStr)
+        return obj['Segmentations']
+
+    def _loadModel12(self):
         jsonStr = '''
         {
         "Segmentations": [
@@ -553,8 +1609,7 @@ class FitFunctionGeneratorTest(TestBase):
         obj = json.loads(jsonStr)
         return obj['Segmentations']
 
-
-    def _loadSegmentations(self):
+    def _loadModel1(self):
         jsonStr = '''
        {
     "Segmentations": [

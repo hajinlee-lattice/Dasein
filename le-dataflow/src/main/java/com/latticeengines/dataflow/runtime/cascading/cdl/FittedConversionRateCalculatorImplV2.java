@@ -25,6 +25,11 @@ public class FittedConversionRateCalculatorImplV2 implements FittedConversionRat
         }
 
         double mappedPercentile = (-percentile + 105) * 0.1;
+
+        if (mappedPercentile + gamma < 1e-6) {
+            return maxRate;
+        }
+
         return Math.min(maxRate, Math.exp(beta + Math.log(mappedPercentile + gamma) * alpha));
 
     }
