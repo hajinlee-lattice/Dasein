@@ -175,8 +175,6 @@ public class SpaceLifecycleManager {
         String featureFlagDefinitions = featureFlagDefinitionDoc.getData();
         if (StringUtils.isEmpty(featureFlagDefinitions)) {
             throw new RuntimeException("featureFlagDefinitions is empty.");
-        } else {
-            log.info(String.format("featureFlagDefinitions is %s", featureFlagDefinitions));
         }
         String products = productsDoc.getData();
         if (StringUtils.isEmpty(products)) {
