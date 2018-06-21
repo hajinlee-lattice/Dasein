@@ -18,20 +18,21 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                var result = {
+                result = {
                     data: response.data,
                     success: true
-                };
-                
+                }
                 deferred.resolve(result);
-
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.resolve(errorMsg);
+                var result = {
+                    data: response.data,
+                    errorMsg: (response.data.errorMsg ? response.data.errorMsg : 'unspecified error'),
+                    success: false
+                };
+                deferred.reject(result);
             }
         );
 
@@ -56,20 +57,21 @@ angular
             headers: { 'Content-Type': 'application/json' }
         }).then(
             function onSuccess(response) {
-                var result = {
+                result = {
                     data: response.data,
                     success: true
-                };
-                
+                }
                 deferred.resolve(result);
-
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.resolve(errorMsg);
+                var result = {
+                    data: response.data,
+                    errorMsg: (response.data.errorMsg ? response.data.errorMsg : 'unspecified error'),
+                    success: false
+                };
+                deferred.reject(result);
             }
         );
 
@@ -96,20 +98,21 @@ angular
             headers: { 'Content-Type': 'application/json' }
         }).then(
             function onSuccess(response) {
-                var result = {
+                result = {
                     data: response.data,
                     success: true
-                };
-                
+                }
                 deferred.resolve(result);
-
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.resolve(errorMsg);
+                var result = {
+                    data: response.data,
+                    errorMsg: (response.data.errorMsg ? response.data.errorMsg : 'unspecified error'),
+                    success: false
+                };
+                deferred.reject(result);
             }
         );
 
@@ -137,15 +140,18 @@ angular
                 result = {
                     data: response.data,
                     success: true
-                };
+                }
                 deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                var result = {
+                    data: response.data,
+                    errorMsg: (response.data.errorMsg ? response.data.errorMsg : 'unspecified error'),
+                    success: false
+                };
+                deferred.reject(result);
             }
         );
 

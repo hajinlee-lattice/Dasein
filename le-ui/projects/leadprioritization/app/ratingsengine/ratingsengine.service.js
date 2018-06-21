@@ -1050,15 +1050,11 @@ angular.module('lp.ratingsengine')
             function onSuccess(response) {
                 result = response.data;
                 deferred.resolve(result);
-
-            }, 
-            function onError(response) {
+            }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-
                 deferred.reject(errorMsg);
             }
         );
@@ -1076,9 +1072,18 @@ angular.module('lp.ratingsengine')
                 segmentIds: segmentIds
             },
             cache: true
-        }).then(function(response) {
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -1091,9 +1096,18 @@ angular.module('lp.ratingsengine')
             url: '/pls/ratingengines/coverage',
             data: CoverageRequest,
             cache: true
-        }).then(function(response) {
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -1113,13 +1127,10 @@ angular.module('lp.ratingsengine')
             function onSuccess(response) {
                 result = response.data;
                 deferred.resolve(result);
-
-            }, 
-            function onError(response) {
+            }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
                 var errorMsg = response.data.errorMsg || 'unspecified error';
                 deferred.reject(errorMsg);
             }
@@ -1136,9 +1147,18 @@ angular.module('lp.ratingsengine')
             url: '/pls/ratingengines',
             data: opts,
             params: params || {}
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -1160,11 +1180,18 @@ angular.module('lp.ratingsengine')
             headers: {
                 'Accept': 'application/json'
             }
-        }).then(function (response) {
-            deferred.resolve(response.data);
-        }, function (response) {
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 
@@ -1175,9 +1202,18 @@ angular.module('lp.ratingsengine')
             method: 'POST',
             url: '/pls/ratingengines/' + opts.rating_id + '/ratingmodels/' + opts.model_id,
             data: opts.model
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -1188,9 +1224,18 @@ angular.module('lp.ratingsengine')
         $http({
             method: 'GET',
             url: '/pls/ratingengines/' + id
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -1201,9 +1246,18 @@ angular.module('lp.ratingsengine')
         $http({
             method: 'GET',
             url: '/pls/ratingengines/' + id + '/dashboard'
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -1217,9 +1271,18 @@ angular.module('lp.ratingsengine')
             headers: {
                 'Accept': 'text/plain'
             }
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -1230,9 +1293,18 @@ angular.module('lp.ratingsengine')
             method: 'POST',
             url:  '/pls/ratingengines/'+ratingid+'/ratingmodels/'+modelid,
             data: opts
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
        
 
         return deferred.promise;
@@ -1242,9 +1314,18 @@ angular.module('lp.ratingsengine')
         $http({
             method: 'GET',
             url:  '/pls/ratingengines/' + ratingId + '/ratingmodels/' + modelId
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
     
         return deferred.promise;
     }
@@ -1258,9 +1339,18 @@ angular.module('lp.ratingsengine')
                 querytype: queryType
             },
             data: ratingEngine
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
     
         return deferred.promise;
     }

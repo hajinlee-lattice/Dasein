@@ -59,9 +59,20 @@ angular.module('lp.sfdc', [])
             headers: {
                 'Content-Type': 'application/json'
             }
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -72,9 +83,20 @@ angular.module('lp.sfdc', [])
         $http({
             method: 'GET',
             url: '/pls/lookup-id-mapping/available-lookup-ids?externalSystemType=CRM'
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -85,9 +107,20 @@ angular.module('lp.sfdc', [])
         $http({
             method: 'GET',
             url: '/pls/lookup-id-mapping/'
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }
@@ -99,9 +132,20 @@ angular.module('lp.sfdc', [])
             method: 'PUT',
             url: '/pls/lookup-id-mapping/config/' + configid,
             data: org
-        }).then(function(response){
-            deferred.resolve(response);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
 
         return deferred.promise;
     }

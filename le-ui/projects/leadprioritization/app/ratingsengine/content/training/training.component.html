@@ -162,32 +162,37 @@
                     </li>
                 </ul><!-- End .checkbox-list -->
                 <ul class="data">
-                    <li class="stats-group">
+                    <li>
                         <h3>Modeling</h3>
-                        <dl class="stats">
-                            <dt>Records Selected</dt>
-                            <dd>
-                                <span ng-if="!vm.recordsCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
-                                <span ng-if="vm.recordsCountReturned">{{ vm.recordsCount | number }}</span>
-                            </dd>  
-                        </dl>
-                        <dl class="stats">
-                            <dt ng-if="vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE'">First Purchases</dt>
-                            <dt ng-if="vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE'">Repeat Purchases</dt>
-                            <dd>
-                                <span ng-if="!vm.purchasesCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
-                                <span ng-if="vm.purchasesCountReturned">{{ vm.purchasesCount | number }}</span>
-                            </dd>                        </dl>
+                        <div class="stats-group">
+                            <dl class="stats">
+                                <dt>Records Selected</dt>
+                                <dd>
+                                    <span ng-if="!vm.recordsCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="vm.recordsCountReturned">{{ vm.recordsCount | number }}</span>
+                                </dd>  
+                            </dl>
+                            <dl class="stats">
+                                <dt ng-if="vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE'">First Purchases</dt>
+                                <dt ng-if="vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE'">Repeat Purchases</dt>
+                                <dd>
+                                    <span ng-if="!vm.purchasesCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="vm.purchasesCountReturned">{{ vm.purchasesCount | number }}</span>
+                                </dd>
+                            </dl>
+                        </div>
                     </li>
-                    <li class="stats-group">
+                    <li>
                         <h3>Scoring</h3>
-                        <dl class="stats">
-                            <dt>Accounts to be scored</dt>
-                            <dd>
-                                <span ng-if="!vm.scoringCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
-                                <span ng-if="vm.scoringCountReturned">{{ vm.scoringCount | number }}</span>
-                            </dd>
-                        </dl>
+                        <div class="stats-group">
+                            <dl class="stats">
+                                <dt>Accounts to be scored</dt>
+                                <dd>
+                                    <span ng-if="!vm.scoringCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="vm.scoringCountReturned">{{ vm.scoringCount | number }}</span>
+                                </dd>
+                            </dl>
+                        </div>
                     </li>
                 </ul>
 

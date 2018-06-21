@@ -77,6 +77,28 @@
             padding: 20px;
             border-radius: 4px;
         }
+        .stats-group {
+            @include flex-container;
+            flex-direction: column;
+            dl {
+                border-left: none;
+                padding: 0;
+                margin-bottom: 8px;
+            }
+            @media screen and (min-width: 930px) {
+                flex-direction: row;
+                justify-content: space-between;
+                dl {
+                    border-left: #999 solid 1px;
+                    padding: 0 0.75em;
+                    margin-bottom: 0;
+                    &:first-of-type {
+                        border-left: 0;
+                        padding-left: 0;
+                    }
+                }
+            }
+        }
         h3 {
             font-size: 20px;
             padding: 0px 0 10px;
@@ -90,6 +112,9 @@
         }
         dd {
             font-size: 14px;
+            @media screen and (min-width: 930px) {
+                font-size: 22px;
+            }
         }
     }
 }

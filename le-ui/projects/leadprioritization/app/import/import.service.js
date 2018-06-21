@@ -772,9 +772,18 @@ angular.module('lp.import')
                 method: 'GET',
                 url: '/pls/datacollection/periods/calendar',
                 headers: { 'Content-Type': 'application/json' }
-            }).then(function(result) {
-                deferred.resolve(result.data);
-            });
+            }).then(
+                function onSuccess(response) {
+                    result = response.data;
+                    deferred.resolve(result);
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.reject(errorMsg);
+                }
+            );
 
             return deferred.promise;
         };
@@ -786,12 +795,18 @@ angular.module('lp.import')
                 url: '/pls/datacollection/periods/calendar/validate',
                 data: data,
                 headers: { 'Content-Type': 'application/json' }
-            }).success(function(result, status) {
-                deferred.resolve(result);
-            }).error(function(error, status) {
-                console.log(error);
-                deferred.resolve(error);
-            });
+            }).then(
+                function onSuccess(response) {
+                    result = response.data;
+                    deferred.resolve(result);
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.reject(errorMsg);
+                }
+            );
 
             return deferred.promise;
         };
@@ -803,12 +818,18 @@ angular.module('lp.import')
                 url: '/pls/datacollection/periods/calendar',
                 data: data,
                 headers: { 'Content-Type': 'application/json' }
-            }).success(function(result, status) {
-                deferred.resolve(result);
-            }).error(function(error, status) {
-                console.log(error);
-                deferred.resolve(error);
-            });
+            }).then(
+                function onSuccess(response) {
+                    result = response.data;
+                    deferred.resolve(result);
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.reject(errorMsg);
+                }
+            );
 
             return deferred.promise;
         };

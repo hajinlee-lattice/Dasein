@@ -64,14 +64,13 @@
                                 <select
                                     class="form-control"
                                     name="accountId"
-                                    ng-init="$ctrl.accountids[org.accountId]" 
+                                    ng-init="value = ($ctrl.accountids[org.accountId]) ? $ctrl.accountids[org.accountId] : null" 
                                     ng-model="org.accountId" 
                                     ng-required="org.accountId == null || org.accountId == ''"
                                     ng-disabled="org.isRegistered === false">
                                         <option value="">Select</option>
                                         <option ng-repeat="accountid in $ctrl.accountids" value="{{accountid.fieldName}}">CRM: {{accountid.displayName}}</option>
                                     </select>
-
                                     <!-- ng-options="accountid.fieldName as accountid.displayName for accountid in $ctrl.accountids" -->
                             </td>
                         </tr>

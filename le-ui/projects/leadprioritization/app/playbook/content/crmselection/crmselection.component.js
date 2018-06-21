@@ -47,6 +47,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
             $scope.excludeItemsWithoutSalesforceId = false;
             vm.setExcludeItems(false);
+            PlaybookWizardStore.setValidation('crmselection', false);
 
             if(vm.stored.crm_selection) {
                 PlaybookWizardStore.setDestinationOrgId(vm.stored.crm_selection.orgId);
@@ -89,6 +90,8 @@ angular.module('lp.playbook.wizard.crmselection', [])
 
 
                 });
+            } else {
+                PlaybookWizardStore.setValidation('crmselection', form.$valid);                
             }
         }
 

@@ -1273,12 +1273,26 @@ angular
 
                     return deferred.promise;
                 },
-                orgs: function($q, SfdcStore) {
+                orgs: function($q, SfdcStore, accountids) {
                     var deferred = $q.defer();
 
+                    var orgs = [];
+
                     SfdcStore.getOrgs().then(function (result) {
+                        var returnedOrgs = result.CRM;
+
+                        angular.forEach(returnedOrgs, function(org) {
+                            var found = accountids.some(function(el) {
+                                return el.fieldName == org.accountId;
+                            });
+                            if(!found){
+                                org.accountId = null;
+                            }
+                        });
+
                         deferred.resolve(result.CRM);
                     });
+                    
 
                     return deferred.promise;
                 }

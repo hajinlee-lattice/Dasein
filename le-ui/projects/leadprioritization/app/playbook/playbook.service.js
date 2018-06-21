@@ -262,9 +262,6 @@ angular.module('lp.playbook')
 
     this.nextLaunch = function() {
 
-
-        console.log(PlaybookWizardStore.getBucketsToLaunch());
-
         var play = PlaybookWizardStore.currentPlay,
             opts = {
                 bucketsToLaunch: PlaybookWizardStore.getBucketsToLaunch(),
@@ -656,9 +653,18 @@ angular.module('lp.playbook')
         $http({
             method: 'GET',
             url: this.host + '/play' + play_name_url
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 
@@ -668,9 +674,18 @@ angular.module('lp.playbook')
             method: 'POST',
             url: this.host + '/play',
             data: opts
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 
@@ -680,11 +695,18 @@ angular.module('lp.playbook')
             method: 'GET',
             url: this.host + '/play/launches/dashboard/count',
             params: params
-        }).then(function(response){
-            deferred.resolve(response.data);
-        }, function(response) {
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 
@@ -699,11 +721,18 @@ angular.module('lp.playbook')
             method: 'GET',
             url: this.host + '/play/launches/dashboard/',
             params: params
-        }).then(function(response){
-            canceler.resolve(response.data);
-        }, function(response) {
-            canceler.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                canceler.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                canceler.reject(errorMsg);
+            }
+        );
         return canceler.promise;
     }
 
@@ -726,15 +755,24 @@ angular.module('lp.playbook')
             data: {
                 launch_state: 'Launching',
                 bucketsToLaunch: bucketsToLaunch,
-                accountsSelected: ratedTargetsLimit,
+                topNCount: ratedTargetsLimit,
                 destinationOrgId: destinationOrgId,
                 destinationSysType: destinationSysType,
                 destinationAccountId: destinationAccountId,
                 excludeItemsWithoutSalesforceId: excludeItems
             }
-        }).then(function(response){
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 
@@ -757,12 +795,10 @@ angular.module('lp.playbook')
             function onSuccess(response) {
                 result = response.data;
                 deferred.resolve(result);
-
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
                 var errorMsg = response.data.errorMsg || 'unspecified error';
                 deferred.reject(errorMsg);
             }
@@ -780,9 +816,18 @@ angular.module('lp.playbook')
                 restrictNotNullSalesforceId: noSalesForceId,
 
             }
-        }).then(function(response) {
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 
@@ -800,9 +845,18 @@ angular.module('lp.playbook')
                     }
                 ]
             }
-        }).then(function(response) {
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 
@@ -812,9 +866,18 @@ angular.module('lp.playbook')
             method: 'GET',
             url: this.host + '/ratingengines/' + engineId + '/entitypreview',
             params: query
-        }).then(function(response) {
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 
@@ -824,9 +887,18 @@ angular.module('lp.playbook')
             method: 'GET',
             url: this.host + '/ratingengines/' + engineId + '/entitypreview/count',
             params: query
-        }).then(function(response) {
-            deferred.resolve(response.data);
-        });
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
         return deferred.promise;
     }
 

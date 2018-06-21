@@ -322,7 +322,6 @@ angular.module('common.datacloud.query.results', [
     };
 
     vm.updateTargetLimit = function() {
-        console.log("yo", vm.ratedTargetsLimit);
         PlaybookWizardStore.setRatedTargetsLimit(vm.ratedTargetsLimit);
     }
     vm.ratingLimitInputClick = function($event) {

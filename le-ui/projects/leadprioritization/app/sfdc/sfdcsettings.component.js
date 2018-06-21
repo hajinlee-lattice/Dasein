@@ -43,13 +43,10 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         }
 
         vm.$onInit = function() {
-            console.log(vm.orgs);
-            // console.log(vm.accountids);
-            // console.log(vm.featureflags);
+            console.log("Orgs", vm.orgs);
+            console.log("Account IDs", vm.accountids);
 
             vm.cdlIsEnabled = vm.featureflags.EnableCdl;
-            // console.log(vm.cdlIsEnabled);
-
             vm.generateAuthTokenButtonLabel = vm.cdlIsEnabled ? 'Email One-time Authentication Token' : 'Generate Salesforce Access Token';
 
             vm.initModalWindow();
