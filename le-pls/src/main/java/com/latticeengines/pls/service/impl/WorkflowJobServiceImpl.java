@@ -370,19 +370,18 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @VisibleForTesting
     Job generateUnstartedProcessAnalyzeJob(boolean expandChildrenJobs) {
-        Job job = null;
+        Job job = new Job();
+        job.setId(UNSTARTED_PROCESS_ANALYZE_ID);
+        job.setName("processAnalyzeWorkflow");
+        job.setJobStatus(JobStatus.READY);
+        job.setJobType("processAnalyzeWorkflow");
         List<Action> actions = actionService.findByOwnerId(null, null);
+        updateStartTimeStampAndForJob(job);
         if (CollectionUtils.isNotEmpty(actions)) {
-            job = new Job();
-            job.setId(UNSTARTED_PROCESS_ANALYZE_ID);
-            job.setName("processAnalyzeWorkflow");
-            job.setJobStatus(JobStatus.READY);
-            job.setJobType("processAnalyzeWorkflow");
             Map<String, String> unfinishedInputContext = new HashMap<>();
             List<Long> unfinishedActionIds = actions.stream().map(Action::getPid).collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
-            updateStartTimeStampAndForJob(job);
             if (expandChildrenJobs) {
                 job.setSubJobs(expandActions(actions));
             }

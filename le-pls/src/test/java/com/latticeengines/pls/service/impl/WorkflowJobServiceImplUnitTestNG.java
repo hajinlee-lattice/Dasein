@@ -137,23 +137,17 @@ public class WorkflowJobServiceImplUnitTestNG {
     @SuppressWarnings("unchecked")
     @Test(groups = "unit", dependsOnMethods = { "testExpandActions" })
     public void testGenerateUnstartedProcessAnalyzeJob() {
-        Date now = new DateTime().toDate();
         // Auto Schedule is off
         when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(false);
         Job job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
-        Assert.assertNotNull(job);
-        Assert.assertNull(job.getNote());
-        Assert.assertEquals(job.getName(), "processAnalyzeWorkflow");
-        Assert.assertEquals(job.getJobType(), "processAnalyzeWorkflow");
-        Assert.assertEquals(job.getJobStatus(), JobStatus.READY);
-        Assert.assertEquals(job.getId(), WorkflowJobServiceImpl.UNSTARTED_PROCESS_ANALYZE_ID);
+        testUnstartedPnAJob(job);
         Assert.assertNotNull(job.getInputs());
         Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS));
         List<Object> listObj = JsonUtils.deserialize(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS),
                 List.class);
         Assert.assertEquals(listObj.size(), 4);
+        Assert.assertNull(job.getNote());
         log.info(String.format("listObj is %s", listObj));
-        Assert.assertTrue(job.getStartTimestamp().after(now));
 
         // Auto Schedule is on
         when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(true);
@@ -162,9 +156,21 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertEquals(job.getSubJobs().size(), 4);
         Assert.assertNotNull(job.getNote());
         log.info("Note is " + job.getNote());
+
+        // test when no action, we still have P&A job
         when(actionService.findByOwnerId(null, null)).thenReturn(Collections.EMPTY_LIST);
         job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
-        Assert.assertNull(job);
+        testUnstartedPnAJob(job);
+    }
+
+    private void testUnstartedPnAJob(Job job) {
+        Date now = new DateTime().toDate();
+        Assert.assertNotNull(job);
+        Assert.assertEquals(job.getName(), "processAnalyzeWorkflow");
+        Assert.assertEquals(job.getJobType(), "processAnalyzeWorkflow");
+        Assert.assertEquals(job.getJobStatus(), JobStatus.READY);
+        Assert.assertEquals(job.getId(), WorkflowJobServiceImpl.UNSTARTED_PROCESS_ANALYZE_ID);
+        Assert.assertTrue(job.getStartTimestamp().after(now));
     }
 
     @Test(groups = "unit", dependsOnMethods = { "testGenerateUnstartedProcessAnalyzeJob" })
