@@ -126,7 +126,6 @@ public class QueryTranslatorUnitTestNG {
 
         RatingQueryTranslator queryTranslator = new RatingQueryTranslator(null, null);
         Query result = queryTranslator.translateRatingQuery(query, AccountQueryDecorator.COUNT_QUERY, null, "user");
-        assertTrue(result.getLookups().size() > 0);
         assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }
 
