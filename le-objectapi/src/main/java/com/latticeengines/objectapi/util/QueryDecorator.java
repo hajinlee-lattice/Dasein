@@ -11,6 +11,6 @@ public abstract class QueryDecorator {
 
     public abstract BusinessEntity getFreeTextSearchEntity();
 
-    public abstract String[] getFreeTextSearchAttrs();
+    public abstract AttributeLookup[] getFreeTextSearchAttrs();
 
 }

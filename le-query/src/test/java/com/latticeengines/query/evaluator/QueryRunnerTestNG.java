@@ -366,7 +366,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
 
         query = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(nameInRange) //
-                .freeText("ham", BusinessEntity.Account, ATTR_ACCOUNT_CITY) //
+                .freeText("ham", new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_CITY)) //
                 .build();
 
         results = queryEvaluatorService.getData(attrRepo, query, SQL_USER).getData();

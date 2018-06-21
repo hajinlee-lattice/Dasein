@@ -80,8 +80,7 @@ public class RatingQueryTranslator extends QueryTranslator {
                     appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator, sqlUser);
                 }
             }
-            queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
-                    decorator.getFreeTextSearchAttrs());
+            queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchAttrs());
         }
 
         configurePagination(frontEndQuery);

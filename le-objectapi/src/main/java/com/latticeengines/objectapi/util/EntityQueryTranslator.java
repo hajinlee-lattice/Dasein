@@ -54,8 +54,7 @@ public class EntityQueryTranslator extends QueryTranslator {
         }
 
         if (decorator != null) {
-            queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
-                    decorator.getFreeTextSearchAttrs());
+            queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchAttrs());
         }
 
         configurePagination(frontEndQuery);

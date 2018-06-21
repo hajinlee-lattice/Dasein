@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.latticeengines.domain.exposed.query.Query.FreeFormTextSearchAttribute;
 
 public class QueryBuilder {
@@ -79,13 +77,10 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder freeText(String freeFormTextSearch, BusinessEntity entity, String... attrs) {
+    public QueryBuilder freeText(String freeFormTextSearch, AttributeLookup... attrs) {
         this.freeFormTextSearch = freeFormTextSearch;
-        if (StringUtils.isNotBlank(freeFormTextSearch)) {
-            this.find(entity);
-        }
-        for (String attr : attrs) {
-            freeFormTextSearchAttributes.add(new FreeFormTextSearchAttribute(entity, attr));
+        for (AttributeLookup attr : attrs) {
+            freeFormTextSearchAttributes.add(new FreeFormTextSearchAttribute(attr.getEntity(), attr.getAttribute()));
         }
         return this;
     }

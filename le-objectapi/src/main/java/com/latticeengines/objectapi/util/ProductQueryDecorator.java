@@ -23,8 +23,11 @@ public class ProductQueryDecorator extends QueryDecorator {
     }
 
     @Override
-    public String[] getFreeTextSearchAttrs() {
-        return new String[] { InterfaceName.ProductId.toString(), InterfaceName.ProductName.toString() };
+    public AttributeLookup[] getFreeTextSearchAttrs() {
+        return new AttributeLookup[] { //
+                new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductId.toString()), //
+                new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductName.toString()) //
+        };
     }
 
     @Override

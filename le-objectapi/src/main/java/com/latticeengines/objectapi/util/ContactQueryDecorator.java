@@ -23,11 +23,11 @@ public class ContactQueryDecorator extends QueryDecorator {
     }
 
     @Override
-    public String[] getFreeTextSearchAttrs() {
-        return new String[] { //
-                InterfaceName.ContactName.name(), //
-                InterfaceName.CompanyName.name(), //
-                InterfaceName.Email.name() //
+    public AttributeLookup[] getFreeTextSearchAttrs() {
+        return new AttributeLookup[] { //
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
         };
     }
 

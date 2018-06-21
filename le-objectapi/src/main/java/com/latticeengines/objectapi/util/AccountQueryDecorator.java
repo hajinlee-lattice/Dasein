@@ -23,14 +23,14 @@ public class AccountQueryDecorator extends QueryDecorator {
     }
 
     @Override
-    public String[] getFreeTextSearchAttrs() {
-        return new String[] { //
-                InterfaceName.CompanyName.name(), //
-                InterfaceName.Website.name(), //
-                InterfaceName.City.name(), //
-                InterfaceName.State.name(), //
-                InterfaceName.Country.name(), //
-                InterfaceName.AccountId.name() //
+    public AttributeLookup[] getFreeTextSearchAttrs() {
+        return new AttributeLookup[] { //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
         };
     }
 

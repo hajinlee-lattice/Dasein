@@ -64,8 +64,7 @@ abstract class QueryTranslator {
         queryBuilder.from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
                 .page(frontEndQuery.getPageFilter()) //
-                .freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
-                        decorator.getFreeTextSearchAttrs()) //
+                .freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchAttrs()) //
                 .distinct(frontEndQuery.getDistinct());
 
         if (decorator.isDataQuery()) {

@@ -312,7 +312,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         // freetext
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
-                .freeText("intel", BusinessEntity.Account, "LDC_Domain", "LDC_Name") //
+                .freeText("intel", new AttributeLookup(BusinessEntity.Account, "LDC_Domain"), new AttributeLookup(BusinessEntity.Account, "LDC_Name")) //
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         sqlContains(sqlQuery, String.format("upper(%s.LDC_Domain) like ?", ACCOUNT));
