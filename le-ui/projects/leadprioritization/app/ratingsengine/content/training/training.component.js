@@ -24,7 +24,11 @@ angular.module('lp.ratingsengine.wizard.training', [
         recordsCountReturned: false,
         purchasesCountReturned: false
     });
-
+    vm.getNumericalConfig = function(){
+        var config = {debounce: 800};
+        var ret = JSON.stringify(config);
+        return ret;
+    };
     vm.init = function () {
         vm.engineId = vm.ratingEngine.id;
         vm.modelId = vm.ratingEngine.activeModel.AI.id;

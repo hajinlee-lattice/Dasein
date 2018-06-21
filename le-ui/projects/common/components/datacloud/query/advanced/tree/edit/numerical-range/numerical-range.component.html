@@ -8,7 +8,7 @@
                 max="{{getMaxVal(0)}}"
                 ng-if="showFrom()"        
                 ng-model="values.from.value" 
-                ng-model-options="{ debounce: 500 }"
+                ng-model-options="{ debounce: conf.debounce }"
                 ng-change="changeValue(0)"
                 ng-class="{'invalid-field': !isValValid(0), 'field-disabled': fromdisabled}" 
                 ng-required="!fromdisabled">
@@ -22,7 +22,7 @@
                 max="{{getMaxVal(1)}}"
                 ng-if="showTo()" 
                 ng-model="values.to.value"
-                ng-model-options="{ debounce: 500 }"
+                ng-model-options="{ debounce: conf.debounce }"
                 ng-change="changeValue(1)"
                 ng-class="{'invalid-field' : !isValValid(1), 'field-disabled': fromdisabled }" 
                 ng-required="!todisabled">

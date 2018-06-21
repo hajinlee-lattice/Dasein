@@ -1,6 +1,6 @@
 <div class="ratingengine-training playbook-content container">
     <div class="inner-container">
-        <ng-form name="trainingForm" form-on-change="vm.formOnChange()" novalidate>
+        <ng-form name="trainingForm" form-on-change="vm.formOnChange()" ng-model-options="{ debounce: 800 }" novalidate>
         
             <div class="header">
                 <h2>How do you want to train the model?</h2>
@@ -26,6 +26,7 @@
                             <div class="input-group prepend" >
                                     <numerical-range-directive
                                         config ="{{vm.getSpendConfigString()}}"
+                                        mainconfig="{{vm.getNumericalConfig()}}"
                                         showfrom="true"
                                         fromlabel="$"
                                         fromdisabled="!checkboxModel.spend" 
@@ -39,14 +40,6 @@
                                         showmessage="true"
                                         changed="vm.callbackSpend(type, position, value)">
                                     </numerical-range-directive>
-                                <!-- <span>$</span>
-                                <input 
-                                    type="text" 
-                                    class="form-control"
-                                    ng-disabled="!checkboxModel.spend"
-                                    ng-model="vm.spendValue"
-                                    ng-model-options="{ debounce: 750 }"
-                                    ng-change="vm.formOnChange()" /> -->
                             </div>
                         </div>
                     </li>
@@ -66,6 +59,7 @@
                             </select>
                             <div class="input-group append">
                                 <numerical-range-directive 
+                                    mainconfig="{{vm.getNumericalConfig()}}"
                                     config ="{{vm.getQuantityConfigString()}}"
                                     fromdisabled="!checkboxModel.quantity" 
                                     initialvalidation="false"
@@ -80,14 +74,6 @@
                                     invalidcallback="true"
                                     changed="vm.callbackQuantity(type, position, value)">
                                 </numerical-range-directive>
-                                <!-- <input 
-                                    type="text" 
-                                    class="form-control"
-                                    ng-disabled="!checkboxModel.quantity"
-                                    ng-model="vm.quantityValue"
-                                    ng-model-options="{ debounce: 750 }"
-                                    ng-change="vm.formOnChange()" />
-                                <span>Units</span> -->
                             </div>
                         </div>
                     </li>
@@ -100,6 +86,7 @@
                             <p>When modeling, only use historical records from the last</p>
                             <div class="input-group append">
                                 <numerical-range-directive 
+                                    mainconfig="{{vm.getNumericalConfig()}}"
                                     config ="{{vm.getPeriodConfigString()}}"
                                     initialvalidation="false"
                                     fromdisabled="!checkboxModel.periods" 
@@ -114,20 +101,7 @@
                                     invalidcallback="true"
                                     changed="vm.callbackPeriod(type, position, value)">
                                 </numerical-range-directive>
-                                <!-- <input 
-                                    type="text" 
-                                    class="form-control"
-                                    ng-disabled="!checkboxModel.periods"
-                                    ng-model="vm.periodsValue"
-                                    ng-model-options="{ debounce: 750 }"
-                                    ng-change="vm.formOnChange()" />
-                                <span>months</span> -->
                             </div>
-                            <!-- <select class="form-control">
-                                <option>Months</option>
-                                <option>Quarters</option>
-                                <option>Years</option>
-                            </select> -->
                         </div>
                     </li>
                     <li class="form-group auto-select-group">

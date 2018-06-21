@@ -17,6 +17,7 @@ angular
                 type: '@',
                 bucketrestriction: '=',
                 config: '@',
+                mainconfig: '@?',
                 showmessage: '=',
                 showfrom: '=',
                 showto: '=',
@@ -38,9 +39,19 @@ angular
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }
-  
+                
+                function validateMainConfig(){
+                    $scope.conf = {};
+                    if($scope.mainconfig){
+                        var tmp = JSON.parse($scope.mainconfig);
+                        $scope.conf.debounce = (tmp.debounce ? tmp.debounce: 500);
+                    }else {
+                        $scope.conf.debounce = 500;
+                    }
+                }
 
                 $scope.init = function () {
+                    validateMainConfig();
                     var conf = $scope.config;
                     if($scope.initialvalidation === undefined){
                         $scope.initialvalidation = true;
