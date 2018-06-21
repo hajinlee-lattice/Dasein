@@ -15,7 +15,7 @@ public interface SegmentService {
 
     MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment);
 
-    Boolean deleteSegmentByName(String customerSpace, String segmentName);
+    Boolean deleteSegmentByName(String customerSpace, String segmentName, boolean ignoreDependencyCheck);
 
     List<MetadataSegment> getSegments(String customerSpace);
 
@@ -29,13 +29,13 @@ public interface SegmentService {
 
     void upsertStats(String customerSpace, String segmentName, StatisticsContainer statisticsContainer);
 
-    void deleteAllSegments(String customerSpace);
+    void deleteAllSegments(String customerSpace, boolean ignoreDependencyCheck);
 
     Map<BusinessEntity, Long> updateSegmentCounts(String segmentName);
 
-    List<AttributeLookup> findDependingAttributes (List<MetadataSegment> metadataSegments);
+    List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments);
 
-    List<MetadataSegment> findDependingSegments (String customerSpace, List<String> attributes);
+    List<MetadataSegment> findDependingSegments(String customerSpace, List<String> attributes);
 
     void verifySegmentCyclicDependency(MetadataSegment metadataSegment);
 }

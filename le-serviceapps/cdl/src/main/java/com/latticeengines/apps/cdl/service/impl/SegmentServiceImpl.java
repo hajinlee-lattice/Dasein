@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,10 +80,14 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public Boolean deleteSegmentByName(String customerSpace, String segmentName) {
+    public Boolean deleteSegmentByName(String customerSpace, String segmentName, boolean ignoreDependencyCheck) {
         MetadataSegment segment = segmentEntityMgr.findByName(segmentName);
         if (segment == null) {
             return false;
+        }
+
+        if (!ignoreDependencyCheck) {
+            checkDependency(segment);
         }
         segmentEntityMgr.delete(segment);
         return true;
@@ -136,10 +141,10 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public void deleteAllSegments(String customerSpace) {
+    public void deleteAllSegments(String customerSpace, boolean ignoreDependencyCheck) {
         List<MetadataSegment> segments = getSegments(customerSpace);
         for (MetadataSegment segment : segments) {
-            deleteSegmentByName(customerSpace, segment.getName());
+            deleteSegmentByName(customerSpace, segment.getName(), ignoreDependencyCheck);
         }
     }
 
@@ -253,7 +258,9 @@ public class SegmentServiceImpl implements SegmentService {
         if (metadataSegment != null) {
             MetadataSegment existing = findByName(metadataSegment.getName());
             if (existing != null) {
-//                Map<Long, String> segmentMap = segmentCyclicDependency(existing, new LinkedHashMap<>(), new ArrayList<>());
+                // Map<Long, String> segmentMap =
+                // segmentCyclicDependency(existing, new LinkedHashMap<>(), new
+                // ArrayList<>());
                 Map<Long, String> segmentMap = null;
                 if (segmentMap != null) {
                     StringBuilder message = new StringBuilder();
@@ -272,15 +279,15 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Long, String> segmentCyclicDependency(
-            MetadataSegment metadataSegment, LinkedHashMap<Long, String> map, ArrayList<Long> list) {
-        LinkedHashMap<Long, String> segmentMap = (LinkedHashMap<Long, String>)map.clone();
-        ArrayList<Long> ratingEnginesPid = (ArrayList<Long>)list.clone();
+    private Map<Long, String> segmentCyclicDependency(MetadataSegment metadataSegment, LinkedHashMap<Long, String> map,
+            ArrayList<Long> list) {
+        LinkedHashMap<Long, String> segmentMap = (LinkedHashMap<Long, String>) map.clone();
+        ArrayList<Long> ratingEnginesPid = (ArrayList<Long>) list.clone();
 
         segmentMap.put(metadataSegment.getPid(), metadataSegment.getName());
         List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(metadataSegment));
-        List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(
-                convertAttributeLookupList(attributeLookups));
+        List<RatingEngine> ratingEngines = ratingEngineService
+                .getDependingRatingEngines(convertAttributeLookupList(attributeLookups));
 
         List<RatingEngine> unRepeatRatingEngines = new ArrayList<>();
         for (RatingEngine ratingEngine : ratingEngines) {
@@ -303,6 +310,19 @@ public class SegmentServiceImpl implements SegmentService {
         }
 
         return null;
+    }
+
+    private void checkDependency(MetadataSegment segment) {
+        List<String> ratingEngineIds = ratingEngineService //
+                .getAllRatingEngineIdsInSegment(segment.getName(), false);
+
+        if (CollectionUtils.isNotEmpty(ratingEngineIds)) {
+            log.error(String.format(
+                    "Dependency check failed for deletion of segment=%s "
+                            + "as some rating engines %s are dependent on it.",
+                    segment.getName(), new HashSet<>(ratingEngineIds)));
+            throw new LedpException(LedpCode.LEDP_18189, new String[] { segment.getDisplayName() });
+        }
     }
 
     @NoCustomerSpace

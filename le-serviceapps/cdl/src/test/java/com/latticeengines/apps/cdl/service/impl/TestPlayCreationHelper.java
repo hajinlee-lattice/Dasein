@@ -403,7 +403,7 @@ public class TestPlayCreationHelper {
 
         try {
             log.info("Cleaning up segment: " + segment.getName());
-            segmentService.deleteSegmentByName(tenantIdentifier, segment.getName());
+            segmentService.deleteSegmentByName(tenantIdentifier, segment.getName(), true);
         } catch (Exception ex) {
             ignoreException(ex);
         }

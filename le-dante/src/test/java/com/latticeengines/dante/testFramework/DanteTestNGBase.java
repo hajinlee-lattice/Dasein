@@ -170,7 +170,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected void deleteTestMetadataSegment() {
         segmentService.deleteSegmentByName(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                testMetadataSegment.getName());
+                testMetadataSegment.getName(), true);
     }
 
     protected GlobalAuthTestBed getTestBed() {

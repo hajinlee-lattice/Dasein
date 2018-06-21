@@ -30,6 +30,9 @@ public interface RatingEngineService {
 
     List<String> getAllRatingEngineIdsInSegment(String segmentName);
 
+    List<String> getAllRatingEngineIdsInSegment(String segmentName, //
+            boolean considerPublishedOnly);
+
     RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate, boolean populateActiveModel);
 
     RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate);

@@ -37,6 +37,8 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.proxy.TestRatingEngineProxy;
 import com.latticeengines.pls.service.ActionService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
@@ -53,6 +55,12 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     @Inject
     private TestRatingEngineProxy testRatingEngineProxy;
+
+    @Inject
+    private SegmentProxy segmentProxy;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Inject
     private ActionService actionService;
@@ -155,6 +163,17 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         Map<String, Long> ratingCounts = ratingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(ratingCounts));
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testUpdate")
+    public void testDelete() {
+        try {
+            segmentProxy.deleteSegmentByName(mainTestTenant.getId(), segmentName);
+            Assert.fail("Should not be able to delete segment if rating engine is associated with it");
+        } catch (Exception ex) {
+            ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), ratingEngineId, false);
+            segmentProxy.deleteSegmentByName(mainTestTenant.getId(), segmentName);
+        }
     }
 
     private List<Action> getSegmentActiosn() {

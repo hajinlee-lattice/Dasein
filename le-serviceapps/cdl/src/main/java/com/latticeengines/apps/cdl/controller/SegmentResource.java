@@ -93,7 +93,7 @@ public class SegmentResource {
     @ApiOperation(value = "Delete a segment by name")
     public Boolean deleteSegmentByName(@PathVariable String customerSpace, @PathVariable String segmentName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.deleteSegmentByName(customerSpace, segmentName);
+        return segmentService.deleteSegmentByName(customerSpace, segmentName, false);
     }
 
     @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.GET, headers = "Accept=application/json")
