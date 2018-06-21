@@ -1273,7 +1273,7 @@ angular
 
                     return deferred.promise;
                 },
-                orgs: function($q, SfdcStore, accountids) {
+                orgs: function($q, SfdcService, SfdcStore, accountids) {
                     var deferred = $q.defer();
 
                     var orgs = [];
@@ -1288,6 +1288,8 @@ angular
                             if(!found){
                                 org.accountId = null;
                             }
+
+                            SfdcService.saveOrgs(org.configId, org);
                         });
 
                         deferred.resolve(result.CRM);
