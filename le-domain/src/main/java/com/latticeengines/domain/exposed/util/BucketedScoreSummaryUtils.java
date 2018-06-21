@@ -115,6 +115,7 @@ public class BucketedScoreSummaryUtils {
             double conversionRate = totolLeads == 0 ? 0 : totolConverted / totolLeads;
             double lift = conversionRate / overallConversion;
             bucketMetadataList.get(i).setLift(lift);
+            bucketMetadataList.get(i).setNumLeads(totolLeads);
         }
 
         return bucketMetadataList;
