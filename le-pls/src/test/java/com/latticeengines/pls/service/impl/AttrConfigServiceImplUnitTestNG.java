@@ -115,36 +115,31 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalIntentAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), intentLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForIntent);
-        Assert.assertEquals(categoryOverview.getDisplayName(),
-                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.INTENT.getName()));
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.INTENT.getName());
 
         categoryOverview = result.get(1);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalTpAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), tpLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForTp);
-        Assert.assertEquals(categoryOverview.getDisplayName(),
-                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.TECHNOLOGY_PROFILE.getName()));
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.TECHNOLOGY_PROFILE.getName());
 
         categoryOverview = result.get(2);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalWebsiteKeywordAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), websiteKeywordLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForWebsiteKeyword);
-        Assert.assertEquals(categoryOverview.getDisplayName(),
-                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.WEBSITE_KEYWORDS.getName()));
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.WEBSITE_KEYWORDS.getName());
 
         categoryOverview = result.get(3);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalAccountAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), accountLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForAccount);
-        Assert.assertEquals(categoryOverview.getDisplayName(),
-                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.ACCOUNT_ATTRIBUTES.getName()));
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.ACCOUNT_ATTRIBUTES.getName());
 
         categoryOverview = result.get(4);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), totalContactAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), contactLimit);
         Assert.assertEquals(categoryOverview.getSelected(), activeForContact);
-        Assert.assertEquals(categoryOverview.getDisplayName(),
-                AttrConfigServiceImpl.mapCategoryToDisplayName(Category.CONTACT_ATTRIBUTES.getName()));
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.CONTACT_ATTRIBUTES.getName());
 
     }
 
@@ -158,8 +153,7 @@ public class AttrConfigServiceImplUnitTestNG {
         log.info("overall usageOverview is " + usageOverview);
         Map<String, Long> attrNums = usageOverview.getAttrNums();
         Assert.assertEquals(attrNums.size(), 6);
-        Assert.assertEquals(
-                attrNums.get(AttrConfigServiceImpl.mapCategoryToDisplayName(Category.INTENT.getName())) - 10960L, 0);
+        Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - 10960L, 0);
         List<AttrConfigSelection> selections = usageOverview.getSelections();
         Assert.assertEquals(selections.size(), AttrConfigServiceImpl.usageProperties.length);
         Assert.assertEquals(selections.get(0).getDisplayName(),
@@ -173,24 +167,6 @@ public class AttrConfigServiceImplUnitTestNG {
                 AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[3]));
         Assert.assertNotNull(selections.get(1).getLimit());
         Assert.assertNotNull(selections.get(3).getLimit());
-    }
-
-    @Test(groups = "unit")
-    public void testTranslateUsageToProperty() {
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("SEGMENTATION")
-                .equals(ColumnSelection.Predefined.Segment.getName()));
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("EXPoRT")
-                .equals(ColumnSelection.Predefined.Enrichment.getName()));
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("TALKING pOINTS")
-                .equals(ColumnSelection.Predefined.TalkingPoint.getName()));
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("COMPANY PROFILE")
-                .equals(ColumnSelection.Predefined.CompanyProfile.getName()));
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("State").equals(ColumnMetadataKey.State));
-        try {
-            attrConfigService.translateUsageToProperty("randome");
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof IllegalArgumentException);
-        }
     }
 
     @Test(groups = "unit")

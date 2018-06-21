@@ -52,46 +52,45 @@ public class AttrConfigResource {
         return attrConfigService.getOverallAttrConfigUsageOverview();
     }
 
-    @PutMapping(value = "/activation/config/category/{categoryDisplayName}")
+    @PutMapping(value = "/activation/config/category/{categoryName}")
     @ApiOperation("update Activation Config")
-    public void updateActivationConfig(@PathVariable String categoryDisplayName,
+    public void updateActivationConfig(@PathVariable String categoryName,
             @RequestBody AttrConfigSelectionRequest request) {
-        attrConfigService.updateActivationConfig(categoryDisplayName, request);
+        attrConfigService.updateActivationConfig(categoryName, request);
     }
 
-    @PutMapping(value = "/usage/config/category/{categoryDisplayName}")
+    @PutMapping(value = "/usage/config/category/{categoryName}")
     @ApiOperation("update Usage Config")
-    public String updateUsageConfig(@PathVariable String categoryDisplayName,
+    public String updateUsageConfig(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usageName,
             @RequestBody AttrConfigSelectionRequest request, HttpServletResponse response) {
-        UpdateUsageResponse updateUsageResponse = attrConfigService.updateUsageConfig(categoryDisplayName, usageName,
-                request);
+        UpdateUsageResponse updateUsageResponse = attrConfigService.updateUsageConfig(categoryName, usageName, request);
         if (updateUsageResponse.getMessage() != null) {
             response.setStatus(HttpStatus.ORDINAL_500_Internal_Server_Error);
         }
         return updateUsageResponse.getMessage();
     }
 
-    @GetMapping(value = "/activation/config/category/{categoryDisplayName}")
+    @GetMapping(value = "/activation/config/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get activation configuration detail for a specific category")
-    public AttrConfigSelectionDetail getActivationConfiguration(@PathVariable String categoryDisplayName) {
-        return attrConfigService.getAttrConfigSelectionDetailForState(categoryDisplayName);
+    public AttrConfigSelectionDetail getActivationConfiguration(@PathVariable String categoryName) {
+        return attrConfigService.getAttrConfigSelectionDetailForState(categoryName);
     }
 
-    @GetMapping(value = "/usage/config/category/{categoryDisplayName}")
+    @GetMapping(value = "/usage/config/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get usage configuration detail for a specific category")
-    public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryDisplayName,
+    public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usageName) {
-        return attrConfigService.getAttrConfigSelectionDetails(categoryDisplayName, usageName);
+        return attrConfigService.getAttrConfigSelectionDetails(categoryName, usageName);
     }
 
-    @GetMapping(value = "/stats/category/{catDisplayName}")
+    @GetMapping(value = "/stats/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get (attr, stats buckets) pairs for specific category and sub-category")
-    public Map<String, AttributeStats> getStats(@PathVariable String catDisplayName,
+    public Map<String, AttributeStats> getStats(@PathVariable String categoryName,
             @RequestParam(value = "subcategory", required = true) String subcatName) {
-        return attrConfigService.getStats(catDisplayName, subcatName);
+        return attrConfigService.getStats(categoryName, subcatName);
     }
 }
