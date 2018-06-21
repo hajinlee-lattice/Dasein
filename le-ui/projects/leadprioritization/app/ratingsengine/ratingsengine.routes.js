@@ -189,7 +189,7 @@ angular
                     },
                     "navigation@home": {
                         controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine, JobStatus) {
-                            $scope.rating_id = $stateParams.ratinsg_id || '';
+                            $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
 
