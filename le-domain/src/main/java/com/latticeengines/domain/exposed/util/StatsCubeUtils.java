@@ -640,11 +640,12 @@ public class StatsCubeUtils {
         AttributeLookup attributeLookup = new AttributeLookup(entity, attrName);
         TopAttribute topAttribute = new TopAttribute(attributeLookup, attributeStats.getNonNullCount());
         if (includeTopBkt && attributeStats.getBuckets() != null) {
-            BucketType bucketType = null;
-            if (BusinessEntity.Rating.equals(entity)) {
-                bucketType = attributeStats.getBuckets().getType();
+            boolean isRating = false;
+            if (BusinessEntity.Rating.equals(entity) || Category.RATING.equals(category)) {
+                isRating = (attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX)
+                        && RatingEngine.toEngineId(attrName).equals(attrName));
             }
-            Comparator<Bucket> comparator = getBktComparatorForCategory(bucketType, category);
+            Comparator<Bucket> comparator = getBktComparatorForCategory(category, isRating);
             Bucket topBkt = getTopBkt(attributeStats, comparator);
             if (topBkt != null) {
                 topAttribute.setTopBkt(topBkt);
@@ -664,7 +665,7 @@ public class StatsCubeUtils {
         }
     }
 
-    static Comparator<Bucket> getBktComparatorForCategory(BucketType bucketType, Category category) {
+    static Comparator<Bucket> getBktComparatorForCategory(Category category, boolean isRating) {
         switch (category) {
         case INTENT:
             return intentBktComparator();
@@ -674,7 +675,7 @@ public class StatsCubeUtils {
         case PRODUCT_SPEND:
             return productBktComparator();
         case RATING:
-            return ratingBktComparator(bucketType);
+            return ratingBktComparator(isRating);
         default:
             return Comparator.comparing(Bucket::getCount).reversed();
         }
@@ -688,9 +689,9 @@ public class StatsCubeUtils {
         return Comparator.comparing(Bucket::getId);
     }
 
-    private static Comparator<Bucket> ratingBktComparator(BucketType bucketType) {
-        if (BucketType.Enum.equals(bucketType)) {
-            return Comparator.comparing(Bucket::getLabel);
+    private static Comparator<Bucket> ratingBktComparator(boolean isRating) {
+        if (isRating) {
+            return Comparator.comparing(Bucket::getId);
         } else {
             return Comparator.comparing(Bucket::getCount).reversed();
         }
@@ -755,6 +756,7 @@ public class StatsCubeUtils {
             return Flux.empty();
         }
     }
+
     private static Comparator<Pair<TopAttribute, ColumnMetadata>> getAttrComparatorForCategory(Category category) {
         return (o1, o2) -> getTopAttrComparatorForCategory(category).compare(o1.getLeft(), o2.getLeft());
     }
@@ -771,7 +773,7 @@ public class StatsCubeUtils {
         case PRODUCT_SPEND:
             return productTopAttrComparator();
         case RATING:
-            return ratingTopAttrComparator(intentTopAttrComparator().reversed(), defaultTopAttrComparator());
+            return ratingTopAttrComparator(techTopAttrComparator(), defaultTopAttrComparator());
         default:
             return defaultTopAttrComparator();
         }
@@ -856,7 +858,8 @@ public class StatsCubeUtils {
         };
     }
 
-    private static Comparator<TopAttribute> ratingTopAttrComparator(Comparator<TopAttribute> ratingCmp, Comparator<TopAttribute> otherCmp) {
+    private static Comparator<TopAttribute> ratingTopAttrComparator(Comparator<TopAttribute> ratingCmp,
+            Comparator<TopAttribute> otherCmp) {
         return (o1, o2) -> {
             String attr1 = o1.getAttribute();
             String attr2 = o2.getAttribute();

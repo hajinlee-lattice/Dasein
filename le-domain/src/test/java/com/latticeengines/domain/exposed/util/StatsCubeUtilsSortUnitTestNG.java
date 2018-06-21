@@ -24,6 +24,8 @@ import reactor.test.StepVerifier;
 
 public class StatsCubeUtilsSortUnitTestNG {
 
+    Map<String, Integer> idSeqMap = new HashMap<>();
+
     @Test(groups = "unit")
     public void testSortFirmographics() {
         Map<String, AttributeStats> cube = new HashMap<>();
@@ -127,12 +129,12 @@ public class StatsCubeUtilsSortUnitTestNG {
         attrStats.setBuckets(buckets);
         cube.put(attrName, attrStats);
 
-
         List<ColumnMetadata> cmList2 = new ArrayList<>();
         String engineId1 = RatingEngine.generateIdStr();
         String engineId2 = RatingEngine.generateIdStr();
         String engineId3 = RatingEngine.generateIdStr();
         String engineId4 = RatingEngine.generateIdStr();
+        String engineId5 = RatingEngine.generateIdStr();
 
         attrName = engineId1 + "_score";
         metadata = new ColumnMetadata();
@@ -214,6 +216,30 @@ public class StatsCubeUtilsSortUnitTestNG {
         attrStats.setBuckets(buckets);
         cube.put(attrName, attrStats);
 
+        attrName = engineId5;
+        metadata = new ColumnMetadata();
+        metadata.setAttrName(attrName);
+        cmList2.add(metadata);
+        attrStats = new AttributeStats();
+        attrStats.setNonNullCount(20L);
+        buckets = new Buckets();
+        buckets.setType(BucketType.Enum);
+        bucketList = new ArrayList<>();
+        bucket1 = Bucket.valueBkt("A");
+        bucket1.setId(1L);
+        bucket1.setCount(20L);
+        bucketList.add(bucket1);
+        bucketList.add(bucket2);
+        buckets.setBucketList(bucketList);
+        attrStats.setBuckets(buckets);
+        cube.put(attrName, attrStats);
+
+
+        int seq = 1;
+        for (String engineId: Arrays.asList(engineId1, engineId2, engineId3, engineId4, engineId5)) {
+            idSeqMap.put(engineId, seq++);
+        }
+
         StatsCube statsCube = new StatsCube();
         statsCube.setStatistics(cube);
         Flux<ColumnMetadata> flux = Flux.fromIterable(cmList).map(cm -> {
@@ -226,11 +252,11 @@ public class StatsCubeUtilsSortUnitTestNG {
         }));
         verifyAttrSeq(StatsCubeUtils.sortByCategory(flux, statsCube),
                 Arrays.asList("LDC_PrimaryIndustry", "LE_NUMBER_OF_LOCATIONS", "Attr1", "Attr2", "Attr3", "Attr4"),
-                Arrays.asList(engineId4, engineId2, engineId3, engineId1 + "_score")
+                Arrays.asList(engineId4, engineId5, engineId2, engineId3, engineId1 + "_score")
         );
     }
 
-    private static void verifyAttrSeq(Flux<ColumnMetadata> flux, Iterable<String> attrSeq1, Iterable<String> attrSeq2) {
+    private void verifyAttrSeq(Flux<ColumnMetadata> flux, Iterable<String> attrSeq1, Iterable<String> attrSeq2) {
         flux = flux.sort(Comparator.comparing(ColumnMetadata::getCategory)).groupBy(ColumnMetadata::getCategory).flatMapSequential(grp -> grp);
         StepVerifier.FirstStep<ColumnMetadata> verifier = StepVerifier.create(flux);
         for (String nextAttr : attrSeq1) {
@@ -242,7 +268,7 @@ public class StatsCubeUtilsSortUnitTestNG {
         }
         for (String nextAttr : attrSeq2) {
             verifier.consumeNextWith(cm -> {
-                System.out.println(cm.getAttrName() + " : " + cm.getImportanceOrdering());
+                System.out.println(idSeqMap.get(RatingEngine.toEngineId(cm.getAttrName())) + " : " + cm.getImportanceOrdering());
                 Assert.assertEquals(cm.getAttrName(), nextAttr,
                         "Next attributes should be " + nextAttr + " but actually found " + cm.getAttrName());
             });

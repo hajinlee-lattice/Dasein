@@ -192,7 +192,7 @@ public class StatsCubeUtilsUnitTestNG {
             Assert.assertEquals(attr.getAttribute(), expectedAttr);
             if (!expectedNoBktAttrs.contains(attr.getAttribute())) {
                 verifyTopBkt(cube, attr.getAttribute(), attr.getTopBkt(), //
-                        StatsCubeUtils.getBktComparatorForCategory(null, Category.FIRMOGRAPHICS));
+                        StatsCubeUtils.getBktComparatorForCategory( Category.FIRMOGRAPHICS, false));
             }
         }
     }
