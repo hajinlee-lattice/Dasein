@@ -7,9 +7,11 @@ import java.util.Map;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.service.ReportService;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -29,6 +31,11 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
 
     @Autowired
     private ReportService reportService;
+
+    @BeforeClass(groups = "deployment")
+    public void setup() throws Exception {
+        setupTestEnvironment(LatticeProduct.LPA3);
+    }
 
     @Test(groups = "deployment")
     public void testRegisterReport() throws Exception {

@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -55,7 +56,7 @@ public abstract class BaseExportDeploymentTestNG<T extends WorkflowConfiguration
     @Override
     @BeforeClass(groups = "deployment" )
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironment(LatticeProduct.LPA3);
         prepareTables();
         tenantName = mainTestCustomerSpace.getTenantId();
     }
