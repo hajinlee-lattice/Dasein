@@ -38,8 +38,12 @@ def push(args):
         config = AwsEnvironment(args.environment)
         reg_url = config.ecr_registry()
     destination = reg_url + "/" + NAMESPACE + "/" + args.image + ":" + args.remotetag
-    subprocess.call(login_cmd + "; docker push %s" % destination, shell=True)
-    subprocess.call("docker rmi " + destination, shell=True)
+    if args.dryrun:
+        print login_cmd + "; docker push %s" % destination
+        print "docker rmi " + destination
+    else:
+        subprocess.call(login_cmd + "; docker push %s" % destination, shell=True)
+        subprocess.call("docker rmi " + destination, shell=True)
 
 def pull(args):
     print "pulling image %s:%s from repo to local ..." % (args.image, args.remotetag)
@@ -50,7 +54,7 @@ def purge(args):
         return
 
     print "purging old tags of image %s from repo ..." % args.image
-    purge_internal(args.environment, args.image)
+    purge_internal(args.environment, args.image, args.dryrun)
 
 def pull_internal(environment, image, remotetag, localtag, skiplogin=False, withf=False):
     if environment == 'dev':
@@ -66,7 +70,7 @@ def pull_internal(environment, image, remotetag, localtag, skiplogin=False, with
     tag_for_local(registry, image, remotetag, localtag, with_foption=withf)
     subprocess.call("docker rmi " + source, shell=True)
 
-def purge_internal(environment, image):
+def purge_internal(environment, image, dryrun=False):
     config = AwsEnvironment(environment)
     id = config.aws_account_id()
 
@@ -96,11 +100,14 @@ def purge_internal(environment, image):
 
     if len(to_delete) > 0:
         print 'deleting images ', to_delete
-        client.batch_delete_image(
-            registryId=id,
-            repositoryName=NAMESPACE + '/' + image,
-            imageIds=to_delete
-        )
+        if dryrun:
+            print "dryrun"
+        else:
+            client.batch_delete_image(
+                registryId=id,
+                repositoryName=NAMESPACE + '/' + image,
+                imageIds=to_delete
+            )
 
 
 def tag_for_remote(args):
@@ -178,30 +185,33 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     subparser = commands.add_parser("login")
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster', 'dr'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster', 'dr', 'qacluster-d'], help='environment')
     subparser.set_defaults(func=login)
 
     subparser = commands.add_parser("push")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster', 'dr'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster', 'dr', 'qacluster-d'], help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
     subparser.add_argument('-f', dest='withf', action="store_true", help='with -f option when tagging')
+    subparser.add_argument('--dryrun', dest='dryrun', action="store_true", help='Perform a dry run')
     subparser.set_defaults(func=push)
 
     subparser = commands.add_parser("pull")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster', 'dr'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster', 'dr', 'qacluster-d'], help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
     subparser.add_argument('-f', dest='withf', action="store_true", help='with -f option when tagging')
+    subparser.add_argument('--dryrun', dest='dryrun', action="store_true", help='NOOP')
     subparser.set_defaults(func=pull)
 
     subparser = commands.add_parser("purge")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
-    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster', 'dr'], help='environment')
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster', 'dr', 'qacluster-d'], help='environment')
+    subparser.add_argument('--dryrun', dest='dryrun', action="store_true", help='Perform dry run')
     subparser.set_defaults(func=purge)
 
     args = parser.parse_args()
