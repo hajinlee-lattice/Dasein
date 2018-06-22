@@ -62,6 +62,7 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
@@ -102,6 +103,9 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     @Inject
     private ActionProxy actionProxy;
+
+    @Inject
+    protected PeriodTransactionProxy periodTransactionProxy;
 
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;

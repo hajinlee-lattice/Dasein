@@ -2,9 +2,11 @@ package com.latticeengines.apps.cdl.end2end;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,16 +64,19 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
 
 //        long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
 //        long numContacts = CONTACT_IMPORT_SIZE_TOTAL;
-//        long numProducts = PRODUCT_IMPORT_SIZE_1;
 //        long numTransactions = TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2;
 //
-//        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-//        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
-//        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), numProducts);
 //        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedRawTransaction), numTransactions);
 //
-//        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-//        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+
+        Map<BusinessEntity, Long> batchStoreCounts = ImmutableMap.of( //
+                BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+        verifyBatchStore(batchStoreCounts);
+
+        Map<BusinessEntity, Long> servingStoreCounts = ImmutableMap.of( //
+                BusinessEntity.Product, SERVING_STORE_PRODUCTS, //
+                BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        verifyServingStore(servingStoreCounts);
 
 //        verityTestSegmentCountDiff(ImmutableList.of(BusinessEntity.Account, BusinessEntity.Contact));
         /*
@@ -93,7 +98,7 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
 
-    void setupUpdatedPurchaseHistoryMetrics() {
+    private void setupUpdatedPurchaseHistoryMetrics() {
         // Deprecated all the selected metrics
         List<ActivityMetrics> metrics = new ArrayList<>();
         RestTemplate restTemplate = testBed.getRestTemplate();

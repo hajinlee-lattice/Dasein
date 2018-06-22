@@ -2,7 +2,9 @@ package com.latticeengines.apps.cdl.end2end;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -54,16 +56,17 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
         verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact);
 
-//        long numAccounts = 500;
-//        long numContacts = 500;
-//
-//        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-//        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
-//        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), 99);
-//
-//        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-//        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 99);
-//
+        Map<BusinessEntity, Long> batchStoreCounts = ImmutableMap.of( //
+                BusinessEntity.Account, ACCOUNT_1, //
+                BusinessEntity.Contact, CONTACT_1, //
+                BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+        verifyBatchStore(batchStoreCounts);
+
+        Map<BusinessEntity, Long> servingStoreCounts = ImmutableMap.of( //
+                BusinessEntity.Product, SERVING_STORE_PRODUCTS, //
+                BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        verifyServingStore(servingStoreCounts);
+
         createTestSegment2();
         verifySegmentCountsNonNegative(SEGMENT_NAME_2, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
         verifyUpdateActions();

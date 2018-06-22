@@ -143,6 +143,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
     private static final String S3_AVRO_VERSION = "1";
 
+    static final Long ACCOUNT_1 = 500L;
+    static final Long CONTACT_1 = 500L;
+
+    static final Long BATCH_STORE_PRODUCTS = 99L;
+    static final Long SERVING_STORE_PRODUCTS = 30L;
+    static final Long SERVING_STORE_PRODUCT_HIERARCHIES = 20L;
+
     static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
     static final long SEGMENT_1_CONTACT_1 = 23;
@@ -260,7 +267,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected void resetCollection() {
         log.info("Start reset collection data ...");
         boolean resetStatus = cdlProxy.reset(mainTestTenant.getId());
-        assertEquals(resetStatus, true);
+        Assert.assertTrue(resetStatus);
     }
 
     void processAnalyze() {
@@ -1138,6 +1145,24 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         log.info(String.format("actions=%s", actions));
         Assert.assertTrue(CollectionUtils.isNotEmpty(actions));
         Assert.assertTrue(actions.stream().allMatch(action -> action.getOwnerId() != null));
+    }
+
+    void verifyBatchStore(Map<BusinessEntity, Long> expectedEntityCount) {
+        expectedEntityCount.forEach((key, value) -> {
+            Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value);
+        });
+    }
+
+    void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
+        expectedEntityCount.forEach((key, value) -> {
+            if (key != BusinessEntity.ProductHierarchy) {
+                Assert.assertEquals(Long.valueOf(countInRedshift(key)), value);
+            } else {
+                Assert.assertEquals(
+                        Long.valueOf(periodTransactionProxy.getProductHierarchy(mainCustomerSpace, null).size()),
+                        value);
+            }
+        });
     }
 
     void runCommonPAVerifications() {
