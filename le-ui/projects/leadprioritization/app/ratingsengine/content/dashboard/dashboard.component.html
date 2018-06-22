@@ -111,11 +111,10 @@
                 </div>
                 <div>
                     <h3>Ratings</h3>
-                    <h4 ng-if="vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0">No Ratings Available</h4>
-                    <bar-chart
+                    <h4 ng-if="vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0 || vm.dashboard.summary.isPublished == false">No Ratings Available</h4>
+                    <bar-chart ng-if="vm.dashboard.summary.isPublished"    
                         config="vm.ratingEngine.chartConfig" 
-                        bktlist="vm.dashboard.summary.bucketMetadata"
-                        ng-if="vm.dashboard.summary.bucketMetadata.bucketMetadata != undefined || vm.dashboard.summary.bucketMetadata.bucketMetadata != null || vm.dashboard.summary.bucketMetadata.length > 0">
+                        bktlist="vm.dashboard.summary.bucketMetadata">
                     </bar-chart>
                 </div>
                 <div>
