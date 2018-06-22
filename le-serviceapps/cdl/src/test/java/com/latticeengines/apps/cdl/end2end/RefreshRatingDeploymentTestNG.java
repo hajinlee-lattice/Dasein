@@ -75,6 +75,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     private RatingEngine rule1;
     private RatingEngine rule2;
+    private RatingEngine rule3;
     private RatingEngine ai1;
     private RatingEngine ai2;
     private RatingEngine ai3;
@@ -114,6 +115,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 createTestSegment2();
                 rule1 = createRuleBasedRatingEngine();
                 rule2 = createRuleBasedRatingEngine();
+                rule3 = createRuleBasedRatingEngine();
                 activateRatingEngine(rule1.getId());
                 activateRatingEngine(rule2.getId());
             }).start();

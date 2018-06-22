@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.rating;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
@@ -47,6 +49,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessR
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 import reactor.core.publisher.Flux;
@@ -63,6 +66,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     private String customerSpace;
 
@@ -101,9 +107,21 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 }).collect(Collectors.toList());
                 putStringValueInContext(SCORING_MODEL_ID, StringUtils.join(modelGuids, "|"));
             }
+            Set<String> existingEngineIds = new HashSet<>();
+            List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.Rating);
+            if (CollectionUtils.isNotEmpty(cms)) {
+                cms.forEach(cm -> {
+                    if (cm.getAttrName().startsWith(RatingEngine.RATING_ENGINE_PREFIX)) {
+                        String engineId = RatingEngine.toEngineId(cm.getAttrName());
+                        existingEngineIds.add(engineId);
+                    }
+                });
+            }
             List<String> inactiveEngineIds = Flux.fromIterable(summaries) //
                     .filter(summary -> !RatingEngineStatus.ACTIVE.equals(summary.getStatus())
-                            && !Boolean.TRUE.equals(summary.getDeleted())) //
+                            && !Boolean.TRUE.equals(summary.getDeleted())
+                            && existingEngineIds.contains(summary.getId())) //
                     .map(RatingEngineSummary::getId) //
                     .collectList().block();
             log.info("Found " + CollectionUtils.size(inactiveEngineIds) + " inactive rating engines.");
