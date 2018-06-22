@@ -341,8 +341,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             return attrConfigGrps;
         } else {
             String tenantId = MultiTenantContext.getShortTenantId();
-            Map<String, List<String>> diffProperties = mergeConfigWithExisting(tenantId, attrConfigGrps,
-                    toDeleteEntities);
+            mergeConfigWithExisting(tenantId, attrConfigGrps, toDeleteEntities);
 
             List<AttrConfig> renderedList;
             Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new HashMap<>();
@@ -386,11 +385,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     /**
      * Merge with existing configs in Document DB
      */
-    private Map<String, List<String>> mergeConfigWithExisting(String tenantId,
+    private void mergeConfigWithExisting(String tenantId,
             Map<BusinessEntity, List<AttrConfig>> attrConfigGrps, List<AttrConfigEntity> toDeleteEntities) {
-        // record the changes between user selected props and existing config
-        // props
-        Map<String, List<String>> diffProperties = new HashMap<>();
 
         attrConfigGrps.forEach((entity, configList) -> {
             List<AttrConfigEntity> existingConfigEntities = attrConfigEntityMgr.findAllByTenantAndEntity(tenantId,
@@ -409,22 +405,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 String attrName = config.getAttrName();
                 AttrConfig existingConfig = existingMap.get(attrName);
                 if (existingConfig != null) {
-                    // write user newly selected prop
-                    config.getAttrProps().forEach((propName, value) -> {
-                        if (!existingConfig.getAttrProps().containsKey(propName)) {
-                            List<String> diffList = diffProperties.getOrDefault(attrName, new ArrayList<>());
-                            diffList.add(propName);
-                            diffProperties.put(attrName, diffList);
-                        }
-                    });
                     // write user changed prop
                     existingConfig.getAttrProps().forEach((propName, propValue) -> {
-                        AttrConfigProp<?> prop = config.getAttrProps().get(propName);
-                        if (prop != null && propValue != null && propValue.getCustomValue() != prop.getCustomValue()) {
-                            List<String> diffList = diffProperties.getOrDefault(attrName, new ArrayList<>());
-                            diffList.add(propName);
-                            diffProperties.put(attrName, diffList);
-                        }
                         if (!config.getAttrProps().containsKey(propName)) {
                             config.getAttrProps().put(propName, propValue);
                         }
@@ -445,7 +427,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 }
             }
         });
-        return diffProperties;
     }
 
     /**
