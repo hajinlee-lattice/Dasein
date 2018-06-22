@@ -40,6 +40,9 @@ angular.module('common.datacloud.query')
             resetLabelIncrementor: false
         };
 
+        this.isDataAvailable = null;
+        this.collectionStatus = null;
+
         this.init = function() {
             this.initRestrictions();
         }
@@ -461,6 +464,20 @@ angular.module('common.datacloud.query')
             return results;
         };
 
+        this.getCollectionStatus = function() {
+            var deferred = $q.defer();
+            if (QueryStore.collectionStatus != null) {
+                deferred.resolve(QueryStore.collectionStatus);
+            } else {
+                QueryService.GetCollectionStatus().then(function(response){
+                    QueryStore.collectionStatus = response;
+                    QueryStore.isDataAvailable = response && (response.AccountCount != 0 || response.ContactCount != 0);
+                    deferred.resolve(response);
+                });
+            }
+            return deferred.promise;
+        }
+
         this.getEntitiesCounts = function(query) {
             var deferred = $q.defer();
 
@@ -752,6 +769,21 @@ angular.module('common.datacloud.query')
 
             return deferred.promise;
         };
+
+    this.GetCollectionStatus = function() {
+        var deferred = $q.defer(),
+            url = '/pls/datacollection/status';
+        
+        $http({
+            method: 'get',
+            url: url
+        }).then(function(response){
+            deferred.resolve(response.data);
+        }, function(response) {
+            deferred.resolve({});
+        });
+        return deferred.promise;
+    };
 
         this.GetEntitiesCounts = function(query, cancelPrevious) {
             var deferred = $q.defer();

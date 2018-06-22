@@ -295,6 +295,14 @@ angular
                 QueryStore.clear();
             }],
             resolve: angular.extend({}, DataCloudResolves, {
+                // RerouteToNoData: ['$state', '$stateParams', 'CollectionStatus', function($state, $stateParams, CollectionStatus) {
+                //     if (CollectionStatus && (CollectionStatus.AccountCount == 0 && CollectionStatus.ContactCount == 0)) {
+                //         $state.go('home.nodata', { 
+                //             tenantName: $stateParams.tenantName,
+                //             segment: $stateParams.segment
+                //         }); 
+                //     }
+                // }],
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var resolveQueryRestriction = function() {
                         var accountRestriction = QueryStore.getAccountRestriction(),
@@ -422,24 +430,16 @@ angular
                 pageTitle: 'My Data',
                 pageIcon: 'ico-analysis'
             },
-           resolve: {
-                AttributesCount: ['$q', '$state', 'DataCloudStore', 'ApiHost', function($q, $state, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getAttributesCount().then(function(result) {
-                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                        deferred.resolve(result.data);
-                    });
-                    return deferred.promise;
-                }]
-            },
             views: {
                 "main@": {
-                    controller: function($scope, BrowserStorageUtility) {
+                    controller: function($scope, BrowserStorageUtility, FeatureFlagService) {
+                        var flags = FeatureFlagService.Flags();
                         var ClientSession = BrowserStorageUtility.getClientSession();
-                        $scope.showImportButton = ClientSession.AccessLevel != 'EXTERNAL_USER';
+                        var hasAccessLevel = ['EXTERNAL_ADMIN', 'INTERNAL_USER', 'INTERNAL_ADMIN', 'SUPER_ADMIN'].indexOf(ClientSession.AccessLevel) >= 0;
+                        var vdbMigration = FeatureFlagService.FlagIsEnabled(flags.VDB_MIGRATION);
+                        var fileImportEnabled = FeatureFlagService.FlagIsEnabled(flags.ENABLE_FILE_IMPORT);
+
+                        $scope.showImportButton = hasAccessLevel && !vdbMigration && fileImportEnabled;
                     },
                     templateUrl: '/components/datacloud/explorer/nodata/nodata.component.html'
                 }
