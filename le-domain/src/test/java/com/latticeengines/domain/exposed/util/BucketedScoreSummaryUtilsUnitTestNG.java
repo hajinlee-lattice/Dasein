@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.BucketedScore;
 import org.apache.avro.generic.GenericRecord;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -27,8 +29,9 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
         List<GenericRecord> recordList = AvroUtils.readFromInputStream(is);
         BucketedScoreSummary summary = BucketedScoreSummaryUtils.generateBucketedScoreSummary(recordList);
         Assert.assertEquals(summary.getBarLifts().length, 32);
-        long notNullBuckets = Arrays.stream(summary.getBucketedScores()).filter(Objects::nonNull).count();
-        Assert.assertEquals(notNullBuckets, 96);
+        List<BucketedScore> notNullBuckets = Arrays.stream(summary.getBucketedScores()).filter(Objects::nonNull).collect(Collectors.toList());
+        Assert.assertEquals(notNullBuckets.size(), 96);
+        Assert.assertEquals(notNullBuckets.stream().map(BucketedScore::getNumLeads).reduce(0, (a, b) -> a + b), new Integer(summary.getTotalNumLeads()));
     }
 
     @Test(groups = "unit")
@@ -47,16 +50,18 @@ public class BucketedScoreSummaryUtilsUnitTestNG {
                     Assert.assertEquals(lift, 5.34, JsonUtils.serialize(bucketMetadata));
                     break;
                 case "B":
-                    Assert.assertEquals(lift, 3.27, JsonUtils.serialize(bucketMetadata));
+                    Assert.assertEquals(lift, 3.18, JsonUtils.serialize(bucketMetadata));
                     break;
                 case "C":
-                    Assert.assertEquals(lift, 1.49, JsonUtils.serialize(bucketMetadata));
+                    Assert.assertEquals(lift, 1.47, JsonUtils.serialize(bucketMetadata));
                     break;
                 case "D":
                     Assert.assertEquals(lift, 0.04, JsonUtils.serialize(bucketMetadata));
                     break;
             }
         }
+        Integer sumCount = bucketMetadataList.stream().map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b);
+        Assert.assertEquals(sumCount, new Integer(summary.getTotalNumLeads()));
     }
 
     private static List<BucketMetadata> getBucketMetadata() {
