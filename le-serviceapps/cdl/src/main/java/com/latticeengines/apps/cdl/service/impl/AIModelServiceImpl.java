@@ -8,6 +8,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,10 +29,13 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -128,11 +132,23 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         if (ratingModel.getTrainingSegment() != null) {
             segments.add(ratingModel.getTrainingSegment());
         }
-        MetadataSegment segment = aiModelEntityMgr.inflateParentSegment(ratingModel);
-        if (segment != null) {
-            segments.add(segment);
+        boolean shouldHaveParentSegment = true;
+        AdvancedModelingConfig advancedModelingConfig = ratingModel.getAdvancedModelingConfig();
+        if (advancedModelingConfig != null && advancedModelingConfig instanceof CustomEventModelingConfig) {
+            CustomEventModelingConfig customEventModelingConfig = (CustomEventModelingConfig) advancedModelingConfig;
+            if (CustomEventModelingType.LPI.equals(customEventModelingConfig.getCustomEventModelingType())) {
+                shouldHaveParentSegment = false;
+            }
         }
-        ratingModel.setRatingModelAttributes(new HashSet<>(segmentService.findDependingAttributes(segments)));
+        if (shouldHaveParentSegment) {
+            MetadataSegment segment = aiModelEntityMgr.inflateParentSegment(ratingModel);
+            if (segment != null) {
+                segments.add(segment);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(segments)) {
+            ratingModel.setRatingModelAttributes(new HashSet<>(segmentService.findDependingAttributes(segments)));
+        }
     }
 
     public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
