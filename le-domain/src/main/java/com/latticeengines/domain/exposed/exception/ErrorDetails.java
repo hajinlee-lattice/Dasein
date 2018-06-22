@@ -15,6 +15,7 @@ public class ErrorDetails {
     }
 
     public ErrorDetails() {
+        // do nothing
     }
 
     @JsonProperty

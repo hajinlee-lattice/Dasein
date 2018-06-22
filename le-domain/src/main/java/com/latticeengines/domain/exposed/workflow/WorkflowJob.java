@@ -159,7 +159,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     public Map<String, String> getInputContext() {
         if (inputContextString == null) {
             log.info("input context is empty.");
-            setInputContext(new HashMap<String, String>());
+            setInputContext(new HashMap<>());
         }
         Map<?, ?> raw = JsonUtils.deserialize(inputContextString, Map.class);
         return JsonUtils.convertMap(raw, String.class, String.class);
@@ -305,10 +305,6 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     public String getErrorDetailsString() {
         return errorDetailsString;
-    }
-    
-    public void setErrorDetailsString(String errorDetailsString) {
-        this.errorDetailsString = errorDetailsString;
     }
 
     public Long getParentJobId() {

@@ -2,7 +2,9 @@ package com.latticeengines.workflowapi.yarn.runtime;
 
 import java.util.Collection;
 
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -100,16 +102,24 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
                 workflowId = workflowService.start(workflowConfig, workflowJob);
             }
             workflowService.sleepForCompletion(workflowId);
-        } catch (Exception e) {
+        } catch (Exception exc) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
-            workflowJob.setErrorDetailsString(e.getMessage());
+
+            ErrorDetails details;
+            if (exc instanceof LedpException) {
+                LedpException casted = (LedpException) exc;
+                details = casted.getErrorDetails();
+            } else {
+                details = new ErrorDetails(LedpCode.LEDP_00002, exc.getMessage(), ExceptionUtils.getStackTrace(exc));
+            }
+            workflowJob.setErrorDetails(details);
             workflowJobEntityMgr.updateErrorDetails(workflowJob);
 
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
             jobUpdate.setLastUpdateTime(System.currentTimeMillis());
             workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
-            throw new RuntimeException(e);
+            throw new RuntimeException(exc);
         }
         return null;
     }

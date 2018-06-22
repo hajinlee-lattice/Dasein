@@ -22,6 +22,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -368,7 +370,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJobEntityMgr.create(workflowJob);
         WorkflowJob workflowJob2 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
         assertNull(workflowJob2.getErrorDetailsString());
-        workflowJob2.setErrorDetailsString("abc");
+        workflowJob2.setErrorDetails(new ErrorDetails(LedpCode.LEDP_00002, "abc", "abc"));
         workflowJobEntityMgr.updateErrorDetails(workflowJob2);
         WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
         assertEquals(workflowJob2.getErrorDetailsString(), workflowJob3.getErrorDetailsString());

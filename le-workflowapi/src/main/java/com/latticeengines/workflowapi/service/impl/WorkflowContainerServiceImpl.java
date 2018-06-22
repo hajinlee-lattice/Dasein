@@ -17,6 +17,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.Job;
@@ -101,7 +104,15 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         } catch (Exception exc) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
-            workflowJob.setErrorDetailsString(exc.getMessage());
+
+            ErrorDetails details;
+            if (exc instanceof LedpException) {
+                LedpException casted = (LedpException) exc;
+                details = casted.getErrorDetails();
+            } else {
+                details = new ErrorDetails(LedpCode.LEDP_00002, exc.getMessage(), ExceptionUtils.getStackTrace(exc));
+            }
+            workflowJob.setErrorDetails(details);
             workflowJobEntityMgr.updateErrorDetails(workflowJob);
             log.warn("Failed to launch a YARN container. Setting status to FAILED for workflowJob, pid=" +
                     workflowJob.getPid() + "\n" + ExceptionUtils.getStackTrace(exc));
@@ -145,7 +156,15 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         } catch (Exception exc) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
-            workflowJob.setErrorDetailsString(exc.getMessage());
+
+            ErrorDetails details;
+            if (exc instanceof LedpException) {
+                LedpException casted = (LedpException) exc;
+                details = casted.getErrorDetails();
+            } else {
+                details = new ErrorDetails(LedpCode.LEDP_00002, exc.getMessage(), ExceptionUtils.getStackTrace(exc));
+            }
+            workflowJob.setErrorDetails(details);
             workflowJobEntityMgr.updateErrorDetails(workflowJob);
             log.warn("Failed to submit job request to AWS batch. Setting status to FAILED for workflowJob, pid=" +
                     workflowJob.getPid() + "\n" + ExceptionUtils.getStackTrace(exc));
