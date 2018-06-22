@@ -89,13 +89,15 @@ angular.module('lp.jobs.import.row', ['mainApp.appCommon.directives.modal.window
             $scope.isOneActionCompleted = function (job) {
                 var subJobs = job.subJobs;
                 var oneCompleted = false;
-                if (subJobs) {
+                if (subJobs && subJobs.length > 0) {
                     subJobs.forEach(function (job) {
                         if (job.jobStatus === 'Completed') {
                             oneCompleted = true;
                             return oneCompleted;
                         }
                     });
+                }else{
+                    oneCompleted = true;
                 }
                 if(job.jobStatus === 'Ready' && oneCompleted === false){
                     job.jobStatus = 'Waiting';
