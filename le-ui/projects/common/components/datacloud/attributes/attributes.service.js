@@ -62,7 +62,7 @@ angular.module('common.attributes')
         var data = this.getData().overview;
         var tab = [];
 
-        if (data) {
+        if (data && data.Selections) {
             tab = data.Selections.filter(function(tab) {
                 return tab.DisplayName == active;
             });
