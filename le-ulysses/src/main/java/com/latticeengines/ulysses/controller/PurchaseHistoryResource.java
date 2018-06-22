@@ -1,7 +1,7 @@
 package com.latticeengines.ulysses.controller;
 
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -72,7 +72,6 @@ public class PurchaseHistoryResource {
     public FrontEndResponse<List<String>> getPurchaseHistoryAccountById(RequestEntity<String> requestEntity,
             @PathVariable String crmAccountId) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-
         try {
             DataPage accountData = dataLakeService.getAccountById(crmAccountId, ColumnSelection.Predefined.TalkingPoint,
                     tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
@@ -87,13 +86,13 @@ public class PurchaseHistoryResource {
                     throw new LedpException(LedpCode.LEDP_39006, new String[] { crmAccountId, customerSpace });
                 }
                 BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
-                Date startDate;
+                LocalDate startDate;
                 if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
-                    startDate = java.sql.Date.valueOf(BusinessCalendarUtils
-                            .parseLocalDateFromStartingDate(businessCalendar.getStartingDate(), DEFAULT_START_YEAR));
+                    startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
+                            DEFAULT_START_YEAR);
                 } else {
-                    startDate = java.sql.Date.valueOf(BusinessCalendarUtils
-                            .parseLocalDateFromStartingDay(businessCalendar.getStartingDay(), DEFAULT_START_YEAR));
+                    startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
+                            DEFAULT_START_YEAR);
                 }
                 return new FrontEndResponse<>(Arrays.asList(purchaseHistoryDanteFormatter.format(crmAccountId,
                         startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
@@ -122,16 +121,15 @@ public class PurchaseHistoryResource {
         }
 
         BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
-        Date startDate;
+        LocalDate startDate;
         if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
-            startDate = java.sql.Date.valueOf(BusinessCalendarUtils
-                    .parseLocalDateFromStartingDate(businessCalendar.getStartingDate(), DEFAULT_START_YEAR));
+            startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
+                    DEFAULT_START_YEAR);
         } else {
-            startDate = java.sql.Date.valueOf(BusinessCalendarUtils
-                    .parseLocalDateFromStartingDay(businessCalendar.getStartingDay(), DEFAULT_START_YEAR));
+            startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
+                    DEFAULT_START_YEAR);
         }
         return new FrontEndResponse<>(Arrays.asList(purchaseHistoryDanteFormatter.format(spendAnalyticsSegment,
                 startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
     }
-
 }

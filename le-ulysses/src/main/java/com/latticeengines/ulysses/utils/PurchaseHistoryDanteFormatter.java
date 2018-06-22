@@ -1,11 +1,13 @@
 package com.latticeengines.ulysses.utils;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -19,9 +21,9 @@ public class PurchaseHistoryDanteFormatter {
         private static final String notionName = "DantePurchaseHistory";
         private List<PeriodTransaction> periodTransactions;
         private String accountId;
-        private Date periodStartDate;
+        private LocalDate periodStartDate;
 
-        public PurchaseHistory(String accountId, Date startDate, List<PeriodTransaction> periodTransactions) {
+        public PurchaseHistory(String accountId, LocalDate startDate, List<PeriodTransaction> periodTransactions) {
             this.accountId = accountId;
             this.periodStartDate = startDate;
             this.periodTransactions = periodTransactions;
@@ -53,12 +55,13 @@ public class PurchaseHistoryDanteFormatter {
 
         @JsonProperty(value = "PeriodStartDate", index = 5)
         @JsonView(DanteFormatter.DanteFormat.class)
-        public Date getPeriodStartDate() {
-            return periodStartDate;
+        public Long getPeriodStartDate() {
+            return periodStartDate.atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
         }
 
         @JsonProperty(value = "PurchaseHistoryAttributes", index = 6)
         @JsonView(DanteFormatter.DanteFormat.class)
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER)
         public List<DantePurchaseHistoryAttribute> getDantePurchaseHistoryAttributes() {
             return periodTransactions.stream().map(x -> new DantePurchaseHistoryAttribute(accountId, x))
                     .collect(Collectors.toList());
@@ -66,8 +69,8 @@ public class PurchaseHistoryDanteFormatter {
 
         @JsonProperty(value = "FinalTransactionDate", index = 8)
         @JsonView(DanteFormatter.DanteFormat.class)
-        public Date getFinalTransactionDate() {
-            return new Date();
+        public Long getFinalTransactionDate() {
+            return LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
         }
 
         @JsonProperty(value = "PurchaseHistoryID", index = 7)
@@ -152,7 +155,7 @@ public class PurchaseHistoryDanteFormatter {
         }
     }
 
-    public String format(String accountId, Date startDate, List<PeriodTransaction> periodTransactions) {
+    public String format(String accountId, LocalDate startDate, List<PeriodTransaction> periodTransactions) {
         return new PurchaseHistory(accountId, startDate, periodTransactions).toString();
     }
 }
