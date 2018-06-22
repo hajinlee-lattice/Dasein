@@ -1,5 +1,9 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +12,7 @@ import javax.inject.Inject;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -19,11 +24,6 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -31,7 +31,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
     @Inject
-    private RatingEngineProxy ratingEngineProxy;
+    private RatingEngineService ratingEngineService;
 
     @BeforeClass(groups = "functional")
     public void setup() { setupTestEnvironmentWithDummySegment(); }
@@ -105,7 +105,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
 
-        return ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
+        return ratingEngineService.createOrUpdate(ratingEngine);
     }
 
     protected void setRestriction(MetadataSegment segment, RatingEngine ratingEngine) {
