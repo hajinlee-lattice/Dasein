@@ -15,7 +15,7 @@
 
     <li class="attr-text pull-right">
         <span>
-            {{$ctrl.store.getSelected().length|number}} <span class="attr-tiny-uppercase">{{$ctrl.store.getLimit() >= 0 ? '/ ' + $ctrl.store.getLimit() + ' ' : ''}}selected</span>
+            {{$ctrl.store.getSelectedTotal()|number}} <span class="attr-tiny-uppercase">{{$ctrl.store.getLimit() >= 0 ? '/ ' + $ctrl.store.getLimit() + ' ' : ''}}selected</span>
         </span>
     </li>
 </ul>

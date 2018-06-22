@@ -22,6 +22,7 @@ angular.module('common.attributes')
 
         this.limit = -1;
         this.selected = [];
+        this.start_selected = [];
         this.category = '';
 
         this.data = {
@@ -54,8 +55,39 @@ angular.module('common.attributes')
         return this.filters;
     };
 
-    this.getTabMetadata = function(section) {
-        return this.tabs[section];
+    this.getActiveTabData = function() {
+        var page = this.getSection();
+        var param = page == 'activate' ? 'category' : 'section';
+        var active = $stateParams[param];
+        var data = this.getData().overview;
+        var tab = [];
+
+        if (data) {
+            tab = data.Selections.filter(function(tab) {
+                return tab.DisplayName == active;
+            });
+        }
+
+        return tab[0] || {};
+    };
+
+    this.getSelectedTotal = function() {
+        var selected = this.selected;
+        var section = this.getSection();
+        var total = selected.length;
+        var tab, started;
+
+        if (section == 'enable') {
+            started = this.getStartSelected();
+            tab = this.getActiveTabData();
+
+            if (tab.Selected) {
+                total = tab.Selected + (total - started.length);
+            }
+        }
+
+        //console.log('getSelectedTotal', section, total, tab, started);
+        return total;
     };
 
     this.getSelected = function() {
@@ -64,6 +96,14 @@ angular.module('common.attributes')
 
     this.setSelected = function(total) {
         this.selected = total;
+    };
+
+    this.getStartSelected = function() {
+        return this.start_selected;
+    };
+
+    this.setStartSelected = function(total) {
+        this.start_selected = total;
     };
 
     this.getLimit = function() {
@@ -141,14 +181,14 @@ angular.module('common.attributes')
         var category = $stateParams.category;
         var usage = {};
         var data = {
-            Select: []
+            Select: [],
+            Deselect: []
         };
 
         var original = this.getData('original').original;
 
         if (!activate) {
             usage.usage = $stateParams.section;
-            data.Deselect = [];
         }
 
         this.data.config.Subcategories.forEach(function(item, index) {
@@ -163,7 +203,7 @@ angular.module('common.attributes')
 
                 if (attr.Selected) {
                     data.Select.push(attr.Attribute);
-                } else if (!activate) {
+                } else {
                     data.Deselect.push(attr.Attribute);
                 }
             });

@@ -64,10 +64,11 @@ angular.module('common.attributes.list', [])
                 vm.allCheckedMap[item.DisplayName] = item.checked == item.TotalAttrs;
                 vm.attributes[item.DisplayName] = item.Attributes;
 
-                total.concat(selected);
+                total = total.concat(selected);
             });
 
             vm.store.setSelected(total);
+            vm.store.setStartSelected(total);
         };
 
         vm.countSelected = function() {
@@ -196,7 +197,7 @@ angular.module('common.attributes.list', [])
             var overLimit = false;
 
             if (vm.store.getLimit() >= 0) {
-                overLimit = vm.store.getSelected().length >= vm.store.getLimit() && !vm.isChecked(item);
+                overLimit = vm.store.getSelectedTotal() >= vm.store.getLimit() && !vm.isChecked(item);
             }
             
             return item.Attributes ? overLimit : (isFrozen || overLimit);

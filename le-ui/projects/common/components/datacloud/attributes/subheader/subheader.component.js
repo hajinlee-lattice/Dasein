@@ -7,11 +7,15 @@ angular.module('common.attributes.subheader', [])
     controller: function ($state, $stateParams, AttrConfigStore, StateHistory) {
         var vm = this;
 
+        vm.store = AttrConfigStore;
+
         vm.$onInit = function() {
-            vm.section = AttrConfigStore.getSection();
+            vm.section = vm.store.getSection();
             vm.params = $stateParams;
             vm.supplemental = vm.section == 'enable' ? 'ENABLED' : 'ACTIVE';
             vm.tabs = vm.overview.Selections;
+            
+            vm.store.setData('overview', vm.overview);
         };
 
         vm.click = function(name) {
@@ -24,7 +28,7 @@ angular.module('common.attributes.subheader', [])
                 },
                 enable: {
                     section: name,
-                    category: 'Intent', 
+                    category: '', 
                     subcategory: '' 
                 },
                 edit: {

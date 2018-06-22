@@ -37,7 +37,6 @@ angular.module('common.attributes.enable', [])
 
                     if (!category) {
                         Object.keys(overview.AttrNums).some(function(key) {
-                            console.log('blah', key, overview.AttrNums[key], category);
                             if (key != 'Lattice Ratings' && overview.AttrNums[key] > 0) {
                                 return category = key;
                             }
