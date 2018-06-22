@@ -18,13 +18,18 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.util.StringUtils;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -67,6 +72,11 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
     @JsonProperty("other_ids")
     @Column(name = "OTHER_IDS", length = 4000)
     private String otherIds;
+
+    @JsonProperty("id_mapping")
+    @Column(name = "ID_MAPPING", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private String idMapping;
 
     @Override
     public Long getPid() {
@@ -210,6 +220,50 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
             otherIds = "";
         } else {
             otherIds = String.join(",", idList);
+        }
+    }
+
+    public String getIdMapping() {
+        return idMapping;
+    }
+
+    public void setIdMapping(String idMapping) {
+        this.idMapping = idMapping;
+    }
+
+    @JsonIgnore
+    @Transient
+    public void setIdMapping(List<Pair<String, String>> idMappings) {
+        if (CollectionUtils.isNotEmpty(idMappings)) {
+            ObjectNode node = JsonUtils.createObjectNode();
+            idMappings.forEach(mapping -> node.put(mapping.getLeft(), mapping.getRight()));
+            this.idMapping = JsonUtils.serialize(node);
+        }
+    }
+
+    @JsonIgnore
+    @Transient
+    public void addIdMapping(List<Pair<String, String>> idMappings) {
+        if (CollectionUtils.isEmpty(idMappings)) {
+            return;
+        }
+        if (StringUtils.isEmpty(idMapping)) {
+            setIdMapping(idMappings);
+        } else {
+            ObjectNode node = JsonUtils.deserialize(idMapping, ObjectNode.class);
+            idMappings.forEach(mapping -> node.put(mapping.getLeft(), mapping.getRight()));
+            this.idMapping = JsonUtils.serialize(node);
+        }
+    }
+
+    @JsonIgnore
+    @Transient
+    public String getDisplayNameById(String id) {
+        if (StringUtils.isEmpty(idMapping)) {
+            return StringUtils.EMPTY;
+        } else {
+            ObjectNode node = JsonUtils.deserialize(idMapping, ObjectNode.class);
+            return node.get(id) == null ? StringUtils.EMPTY : node.get(id).asText();
         }
     }
 }

@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -157,9 +158,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             String source, String feedType) {
         decodeFieldMapping(fieldMappingDocument);
         regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity));
-        if (BusinessEntity.getByName(entity).equals(BusinessEntity.Account)) {
-            setCDLExternalSystems(fieldMappingDocument);
-        }
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -190,10 +188,17 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<String> mapIds = new ArrayList<>();
         List<String> erpIds = new ArrayList<>();
         List<String> otherIds = new ArrayList<>();
+        List<Pair<String, String>> idMappings = new ArrayList<>();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getCdlExternalSystemType() != null) {
+                String displayName = fieldMapping.getMappedField();
+                if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
+                    fieldMapping.setMappedField(fieldMapping.getMappedField() + "_ID");
+                }
                 fieldMapping.setMappedField(
                         ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
+                String attrName = fieldMapping.getMappedField();
+                idMappings.add(Pair.of(attrName, displayName));
                 switch (fieldMapping.getCdlExternalSystemType()) {
                 case CRM:
                     crmIds.add(fieldMapping.getMappedField());
@@ -218,6 +223,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             cdlExternalSystem.setMAPIdList(mapIds);
             cdlExternalSystem.setERPIdList(erpIds);
             cdlExternalSystem.setOtherIdList(otherIds);
+            cdlExternalSystem.setIdMapping(idMappings);
             cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
                     cdlExternalSystem);
         } else {
@@ -225,6 +231,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             originalSystem.setMAPIdList(mergeList(originalSystem.getMAPIdList(), mapIds));
             originalSystem.setERPIdList(mergeList(originalSystem.getERPIdList(), erpIds));
             originalSystem.setOtherIdList(mergeList(originalSystem.getOtherIdList(), otherIds));
+            originalSystem.addIdMapping(idMappings);
             cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
                     originalSystem);
         }
@@ -254,12 +261,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             return;
         }
         // 1.set external system column name
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getCdlExternalSystemType() != null) {
-                if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
-                    fieldMapping.setMappedField(fieldMapping.getMappedField() + "ID");
-                }
-            }
+        if (BusinessEntity.Account.equals(entity)) {
+            setCDLExternalSystems(fieldMappingDocument);
         }
         Table standardTable = SchemaRepository.instance().getSchema(entity);
         Set<String> reservedName = standardTable.getAttributes().stream()

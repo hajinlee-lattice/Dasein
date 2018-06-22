@@ -175,6 +175,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
         Assert.assertNotNull(system);
         Assert.assertTrue(system.getCRMIdList().contains("SFDC_ID"));
+        Assert.assertEquals(system.getDisplayNameById("SFDC_ID"), "SFDC ID");
     }
 
     private void validateImportAction(List<Action> actions) {

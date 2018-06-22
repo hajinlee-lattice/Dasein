@@ -61,6 +61,7 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
             existingSystem.setErpIds(cdlExternalSystem.getErpIds());
             existingSystem.setMapIds(cdlExternalSystem.getMapIds());
             existingSystem.setOtherIds(cdlExternalSystem.getOtherIds());
+            existingSystem.setIdMapping(cdlExternalSystem.getIdMapping());
             cdlExternalSystemEntityMgr.update(existingSystem);
         }
     }
