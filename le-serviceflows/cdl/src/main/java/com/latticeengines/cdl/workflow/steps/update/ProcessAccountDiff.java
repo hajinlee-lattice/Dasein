@@ -6,15 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -48,11 +43,6 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
-
-    @Inject
-    private ServingStoreProxy servingStoreProxy;
-
-    private List<ColumnMetadata> allAttrs;
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
@@ -109,18 +99,10 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
             }
         }
 
-        allAttrs = servingStoreProxy
-                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive)
-                .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()))
-                .collectList().block();
-
         List<ColumnMetadata> dcCols = columnMetadataProxy.getAllColumns(dataCloudVersion);
-        Set<String> allAttrNames = allAttrs.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
         List<Column> cols = new ArrayList<>();
         for (ColumnMetadata cm : dcCols) {
-            if (allAttrNames.contains(cm.getAttrName())) {
-                cols.add(new Column(cm.getAttrName()));
-            }
+            cols.add(new Column(cm.getAttrName()));
         }
         ColumnSelection cs = new ColumnSelection();
         cs.setColumns(cols);

@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -76,8 +75,6 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     private static int segmentProfileStep;
     private static int segmentBucketStep;
 
-    private List<ColumnMetadata> allAttrs;
-
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
@@ -99,10 +96,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     protected PipelineTransformationRequest getTransformRequest() {
         String masterTableName = masterTable.getName();
         try {
-            allAttrs = servingStoreProxy
-                    .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive)
-                    .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()))
-                    .collectList().block();
+
 
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("ProfileAccountStep");
@@ -176,12 +170,9 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         }
 
         List<ColumnMetadata> dcCols = columnMetadataProxy.getAllColumns(dataCloudVersion);
-        Set<String> allAttrNames = allAttrs.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
         List<Column> cols = new ArrayList<>();
         for (ColumnMetadata cm : dcCols) {
-            if (allAttrNames.contains(cm.getAttrName())) {
-                cols.add(new Column(cm.getAttrName()));
-            }
+            cols.add(new Column(cm.getAttrName()));
         }
         ColumnSelection cs = new ColumnSelection();
         cs.setColumns(cols);
@@ -264,10 +255,15 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         filterGroups.add(ColumnSelection.Predefined.ID);
         filterGroups.add(ColumnSelection.Predefined.LookupId);
 
-        List<ColumnMetadata> retainAttrs = allAttrs.stream().filter(cm -> Boolean.TRUE.equals(cm.getCanSegment())
-                || filterGroups.stream().anyMatch(cm::isEnabledFor)).collect(Collectors.toList());
-        List<String> retainAttrNames = retainAttrs.stream().map(ColumnMetadata::getAttrName)
-                .collect(Collectors.toList());
+        List<String> retainAttrNames = servingStoreProxy
+                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive) //
+                .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
+                .filter(cm -> Boolean.TRUE.equals(cm.getCanSegment()) || filterGroups.stream().anyMatch(cm::isEnabledFor)) //
+                .map(ColumnMetadata::getAttrName) //
+                .collectList().block();
+        if (retainAttrNames == null) {
+            retainAttrNames = new ArrayList<>();
+        }
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }

@@ -17,7 +17,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dante.service.TalkingPointAttributeService;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -27,7 +26,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
@@ -38,8 +36,6 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
 
     private ServingStoreProxy spiedServingStoreProxy;
 
-    private final Path metadataDocumentPath = new Path("/MetadataDocument.json");
-
     private final String tenantName = "TalkingPointAttributeTestTenant";
     private final String accountAttributePrefix = "Account.";
 
@@ -47,22 +43,6 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
     public void setup() {
 
         spiedServingStoreProxy = spy(new ServingStoreProxy() {
-            @Override
-            public Mono<Long> getDecoratedMetadataCount(String customerSpace, BusinessEntity entity) {
-                return null;
-            }
-
-            @Override
-            public Mono<Long> getDecoratedMetadataCount(String customerSpace, BusinessEntity entity,
-                    List<ColumnSelection.Predefined> groups) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity) {
-                return null;
-            }
-
             @Override
             public List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity) {
                 return null;

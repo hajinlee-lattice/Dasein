@@ -33,6 +33,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     pushd $ARTIFACT_DIR
     sudo bash $ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
     popd
+    $ANACONDA_HOME/bin/pip install -r $WSHOME/le-dev/scripts/requirements.txt
     sudo chown -R $USER $ANACONDA_HOME
 fi
 

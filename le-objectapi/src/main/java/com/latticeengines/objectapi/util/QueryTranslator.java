@@ -97,7 +97,7 @@ abstract class QueryTranslator {
     }
 
     Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction,
-                                             TimeFilterTranslator timeTranslator, String sqlUser) {
+            TimeFilterTranslator timeTranslator, String sqlUser) {
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction);
         if (restriction == null) {
             return null;
@@ -188,7 +188,8 @@ abstract class QueryTranslator {
     }
 
     // this is only used by non-event-table translations
-    private Restriction translateTransactionRestriction(Restriction restriction, TimeFilterTranslator timeTranslator, String sqlUser) {
+    private Restriction translateTransactionRestriction(Restriction restriction, TimeFilterTranslator timeTranslator,
+            String sqlUser) {
         restriction = RestrictionOptimizer.groupMetrics(restriction);
         Restriction translated;
         if (restriction instanceof LogicalRestriction) {
@@ -197,7 +198,8 @@ abstract class QueryTranslator {
                 if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
                     modifyTxnRestriction(txRestriction, timeTranslator);
-                    Restriction concrete = new DateRangeTranslator().convert(txRestriction, queryFactory, repository, sqlUser);
+                    Restriction concrete = new DateRangeTranslator().convert(txRestriction, queryFactory, repository,
+                            sqlUser);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(txRestriction);
                     parent.getRestrictions().add(concrete);

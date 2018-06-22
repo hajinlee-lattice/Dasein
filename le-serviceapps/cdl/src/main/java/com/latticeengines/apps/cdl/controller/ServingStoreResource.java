@@ -23,12 +23,10 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.metadata.mds.impl.AttrConfigMetadataStore;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Api(value = "serving store", description = "REST resource for serving stores")
 @RestController
@@ -43,61 +41,27 @@ public class ServingStoreResource {
     @Inject
     private DataCollectionService dataCollectionService;
 
-    @Inject
-    private AttrConfigMetadataStore attrConfigMetadataStore;
-
-    @GetMapping(value = "/decoratedmetadata/count")
-    @ResponseBody
-    @ApiOperation(value = "Get decorated serving store metadata")
-    public Mono<Long> getDecoratedMetadataCount( //
-            @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
-            @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups,
-            @RequestParam(name = "version", required = false) DataCollection.Version version
-    ) {
-        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, version, groups, false);
-        return flux.count();
-    }
-
     @GetMapping(value = "/decoratedmetadata")
     @ResponseBody
     @ApiOperation(value = "Get decorated serving store metadata")
     public Flux<ColumnMetadata> getDecoratedMetadata( //
             @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
             @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
-            @RequestParam(name = "offset", required = false) Integer offset, //
-            @RequestParam(name = "limit", required = false) Integer limit, //
             @RequestParam(name = "version", required = false) DataCollection.Version version
     ) {
-        boolean ordered = (offset != null || limit != null);
-        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, version, groups, ordered);
-        if (offset != null && offset > 0) {
-            flux = flux.skip(offset);
-        }
-        if (limit != null && limit > 0) {
-            flux = flux.take(limit);
-        }
-        return flux;
+        return getFlux(customerSpace, entity, version, groups);
     }
 
     private Flux<ColumnMetadata> getFlux(String customerSpace, BusinessEntity entity, DataCollection.Version version,
-            List<ColumnSelection.Predefined> groups, boolean ordered) {
+            List<ColumnSelection.Predefined> groups) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         Flux<ColumnMetadata> flux;
-        if (ordered) {
-            if (version == null) {
-                flux = servingStoreService.getFullyDecoratedMetadataInOrder(entity,
-                        dataCollectionService.getActiveVersion(customerSpace));
-            } else {
-                flux = servingStoreService.getFullyDecoratedMetadataInOrder(entity, version);
-            }
+        if (version == null) {
+            flux = servingStoreService.getFullyDecoratedMetadata(entity,
+                    dataCollectionService.getActiveVersion(customerSpace)).sequential();
         } else {
-            if (version == null) {
-                flux = servingStoreService.getFullyDecoratedMetadata(entity,
-                        dataCollectionService.getActiveVersion(customerSpace)).sequential();
-            } else {
-                flux = servingStoreService.getFullyDecoratedMetadata(entity, version).sequential();
-            }
+            flux = servingStoreService.getFullyDecoratedMetadata(entity, version).sequential();
         }
         flux = flux //
                 .doOnSubscribe(s -> {
