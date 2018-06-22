@@ -29,8 +29,8 @@
                 ng-class="{disabled: (vm.datacollectionPrecheck && vm.datacollectionPrecheck.disableAll) || !vm.datacollectionPrecheck}"
                 ng-disabled="(vm.datacollectionPrecheck && vm.datacollectionPrecheck.disableAll) || !vm.datacollectionPrecheck" 
                 ui-sref="home.configureattributes">
-            <i class="fa fa-spinner fa-pulse fa-fw" ng-if="!vm.datacollectionPrecheck"></i>
-            <i class="fa fa-wrench" ng-if="vm.datacollectionPrecheck"></i>
+            <i class="fa fa-spinner fa-pulse fa-fw" ng-if="vm.datacollectionPrechecking"></i>
+            <i class="fa fa-wrench" ng-if="!vm.datacollectionPrechecking"></i>
         </button>
     </li>
     <li class="attributeadmin show-tooltip title-tooltip top" ng-if="vm.showAtributeAdmin() === true">

@@ -357,6 +357,8 @@ angular.module('common.datacloud.query.results', [
     }
 
     vm.showNoResultsText = function(accounts, contacts) {
+        var accounts = accounts || {},
+            contacts = contacts || {};
         switch (vm.page) {
             case 'Accounts': 
                 return accounts.length === 0;
