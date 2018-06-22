@@ -78,6 +78,7 @@ module.exports = [{
     folders: {
         '/dante': '/assets',
         '/dante/CommonAssets': '/assets/CommonAssets',
+        '/dante/styles': '/assets/styles',
         '/dante/images': '/assets/images'
     }
 },{  
