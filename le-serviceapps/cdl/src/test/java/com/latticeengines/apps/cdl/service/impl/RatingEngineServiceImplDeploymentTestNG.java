@@ -23,6 +23,9 @@ import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -34,12 +37,17 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -431,6 +439,29 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(ratingEngineList.size(), 0);
     }
 
+    @Test(groups = "deployment", dependsOnMethods = { "testDelete" })
+    public void testCyclicDependency() {
+        MetadataSegment segment1 = createSegment(SEGMENT_NAME + "1");
+        MetadataSegment segment2 = createSegment(SEGMENT_NAME + "2");
+
+        RatingEngine ratingEngine1 = createRatingEngine(segment2);
+        RatingEngine ratingEngine2 = createRatingEngine(segment1);
+
+        setRestriction(segment1, ratingEngine1);
+        setRestriction(segment2, ratingEngine2);
+
+        boolean exception = false;
+        try {
+            ratingEngine2.setNote("Test");
+            createOrUpdate(ratingEngine2);
+        } catch (Exception e) {
+            exception = true;
+            assertTrue(e instanceof LedpException);
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40024);
+        }
+        assertTrue(exception);
+    }
+
     protected void deleteSoftRatingEngine(String ratingEngineId) {
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
         String createdRatingEngineStr = ratingEngine.toString();
@@ -503,5 +534,35 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         ratingEngine.setId(ratingEngineId);
         ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
         createOrUpdate(ratingEngine);
+    }
+
+    protected MetadataSegment createSegment(String segmentName) {
+        MetadataSegment segment = new MetadataSegment();
+        segment.setDisplayName(segmentName);
+        MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
+
+        try {
+            Thread.sleep(2 * 1000);
+        } catch (InterruptedException e) {
+        }
+
+        return segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), createdSegment.getName());
+    }
+
+    protected RatingEngine createRatingEngine(MetadataSegment segment) {
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setSegment(segment);
+        ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setType(RatingEngineType.RULE_BASED);
+        ratingEngine.setNote(RATING_ENGINE_NOTE);
+
+        return createOrUpdate(ratingEngine);
+    }
+
+    protected void setRestriction(MetadataSegment segment, RatingEngine ratingEngine) {
+        Restriction accountRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Rating,
+                RatingEngine.RATING_ENGINE_PREFIX + "_" + ratingEngine.getId()), Bucket.notNullBkt());
+        segment.setAccountRestriction(accountRestriction);
+        segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
     }
 }

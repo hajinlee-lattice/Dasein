@@ -258,10 +258,7 @@ public class SegmentServiceImpl implements SegmentService {
         if (metadataSegment != null) {
             MetadataSegment existing = findByName(metadataSegment.getName());
             if (existing != null) {
-                // Map<Long, String> segmentMap =
-                // segmentCyclicDependency(existing, new LinkedHashMap<>(), new
-                // ArrayList<>());
-                Map<Long, String> segmentMap = null;
+                Map<Long, String> segmentMap = segmentCyclicDependency(existing, new LinkedHashMap<>());
                 if (segmentMap != null) {
                     StringBuilder message = new StringBuilder();
                     for (Map.Entry<Long, String> entry : segmentMap.entrySet()) {
@@ -279,32 +276,26 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Long, String> segmentCyclicDependency(MetadataSegment metadataSegment, LinkedHashMap<Long, String> map,
-            ArrayList<Long> list) {
-        LinkedHashMap<Long, String> segmentMap = (LinkedHashMap<Long, String>) map.clone();
-        ArrayList<Long> ratingEnginesPid = (ArrayList<Long>) list.clone();
+    private Map<Long, String> segmentCyclicDependency(MetadataSegment segment, LinkedHashMap<Long, String> map) {
+        LinkedHashMap<Long, String> segmentMap = (LinkedHashMap<Long, String>)map.clone();
+        segmentMap.put(segment.getPid(), segment.getName());
 
-        segmentMap.put(metadataSegment.getPid(), metadataSegment.getName());
-        List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(metadataSegment));
-        List<RatingEngine> ratingEngines = ratingEngineService
-                .getDependingRatingEngines(convertAttributeLookupList(attributeLookups));
+        List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(segment));
+        for (AttributeLookup attributeLookup : attributeLookups) {
+            if (attributeLookup.getEntity() == BusinessEntity.Rating) {
+                RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(
+                        RatingEngine.toEngineId(attributeLookup.getAttribute()), false);
 
-        List<RatingEngine> unRepeatRatingEngines = new ArrayList<>();
-        for (RatingEngine ratingEngine : ratingEngines) {
-            if (!ratingEnginesPid.contains(ratingEngine.getPid())) {
-                ratingEnginesPid.add(ratingEngine.getPid());
-                unRepeatRatingEngines.add(ratingEngine);
-            }
-        }
-
-        for (RatingEngine ratingEngine : unRepeatRatingEngines) {
-            MetadataSegment segment = ratingEngine.getSegment();
-            if (!segment.getPid().equals(metadataSegment.getPid())) {
-                if (segmentMap.containsKey(segment.getPid())) {
-                    segmentMap.put(new Long(-1l), segment.getName());
-                    return segmentMap;
-                } else {
-                    return segmentCyclicDependency(segment, segmentMap, ratingEnginesPid);
+                if (ratingEngine != null) {
+                    MetadataSegment childSegment = ratingEngine.getSegment();
+                    if (childSegment != null) {
+                        if (segmentMap.containsKey(childSegment.getPid())) {
+                            segmentMap.put(new Long(-1l), childSegment.getName());
+                            return segmentMap;
+                        } else {
+                            return segmentCyclicDependency(childSegment, segmentMap);
+                        }
+                    }
                 }
             }
         }
