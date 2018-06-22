@@ -1,9 +1,10 @@
 package com.latticeengines.domain.exposed.ulysses;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 
 public class FrontEndResponse<T> {
@@ -11,26 +12,26 @@ public class FrontEndResponse<T> {
     public boolean success;
 
     @JsonProperty("Errors")
-    public Map<String, String> errors;
+    public List<KeyValuePair> errors;
 
     @JsonProperty("Result")
     public T result;
 
     public FrontEndResponse() {
         this.success = true;
-        this.errors = new HashMap<>();
+        this.errors = new ArrayList<>();
     }
 
     public FrontEndResponse(T result) {
         this.result = result;
         this.success = true;
-        this.errors = new HashMap<>();
+        this.errors = new ArrayList<>();
     }
 
     public FrontEndResponse(ErrorDetails error) {
         this.success = false;
-        this.errors = new HashMap<>();
-        this.errors.put(error.getErrorCode().toString(), error.getErrorMsg());
+        this.errors = new ArrayList<>();
+        errors.add(new KeyValuePair(error.getErrorCode().toString(), error.getErrorMsg()));
     }
 
     public boolean isSuccess() {
@@ -41,11 +42,11 @@ public class FrontEndResponse<T> {
         this.success = success;
     }
 
-    public Map<String, String> getErrors() {
+    public List<KeyValuePair> getErrors() {
         return errors;
     }
 
-    public void setErrors(Map<String, String> errors) {
+    public void setErrors(List<KeyValuePair> errors) {
         this.errors = errors;
     }
 
@@ -55,5 +56,39 @@ public class FrontEndResponse<T> {
 
     public void setResult(T result) {
         this.result = result;
+    }
+
+    private class KeyValuePair {
+        @JsonProperty("Key")
+        private String key;
+
+        @JsonProperty("Value")
+        private String value;
+
+        public KeyValuePair(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return JsonUtils.serialize(this);
+        }
     }
 }
