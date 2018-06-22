@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessS
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -52,6 +53,9 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
@@ -82,6 +86,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         updateBucketMetadata();
 
         // update segment and rating engine counts
+        SegmentCountUtils.invokeMetadataApi(servingStoreProxy, customerSpace.toString());
         SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
         updateActiveRuleModelCounts();
         setPublishedModels();

@@ -79,9 +79,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @Inject
     private ActionProxy actionProxy;
 
-    @Inject
-    private RatingEngineProxy ratingEngineProxy;
-
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
