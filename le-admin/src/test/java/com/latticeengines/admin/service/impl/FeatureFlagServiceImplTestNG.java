@@ -1,13 +1,11 @@
 package com.latticeengines.admin.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -30,9 +28,6 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
 
     private static FeatureFlagDefinition definition = newFlagDefinition();
     private static final String FLAG_ID = "TestFlag";
-
-    @Value("${admin.overwrite.cdl.autoschedule:true}")
-    private boolean autoSchedule;
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
@@ -90,11 +85,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_BUNDLE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, //
-                LatticeFeatureFlag.PLAYBOOK_MODULE);
-        if (autoSchedule ^ true) {
-            expectedDefaultFalseFlags = new ArrayList<>(expectedDefaultFalseFlags);
-            expectedDefaultFalseFlags.add(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
-        }
+                LatticeFeatureFlag.PLAYBOOK_MODULE, //
+                LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);

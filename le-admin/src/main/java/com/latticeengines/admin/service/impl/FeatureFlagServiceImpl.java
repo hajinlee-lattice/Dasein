@@ -11,7 +11,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.service.FeatureFlagService;
@@ -31,8 +30,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
 
     private Map<LatticeFeatureFlag, FeatureFlagDefinition> flagDefinitionMap = new HashMap<>();
 
-    @Value("${admin.overwrite.cdl.autoschedule:true}")
-    private boolean autoSchedule;
 
     @Autowired
     private BatonService batonService;
@@ -141,7 +138,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CDL, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, cg).setDefaultValue(true);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, cg).setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.SCORE_EXTERNAL_FILE, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_FILE_IMPORT, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, cg);
@@ -170,7 +167,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         overwriteDefaultValueForDeprecatedFlag(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, false);
         overwriteDefaultValueForDeprecatedFlag(LatticeFeatureFlag.BYPASS_DNB_CACHE, false);
         overwriteDefaultValueForDeprecatedFlag(LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, false);
-        overwriteDefaultValue(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, true, autoSchedule);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(LatticeFeatureFlag featureFlag,
@@ -207,11 +203,4 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         }
     }
 
-    private void overwriteDefaultValue(LatticeFeatureFlag flag, boolean defaultValue, boolean realValue) {
-        if (defaultValue ^ realValue) {
-            FeatureFlagDefinition def = flagDefinitionMap.get(flag);
-            def.setDefaultValue(realValue);
-            FeatureFlagClient.setDefinition(flag.getName(), def);
-        }
-    }
 }
