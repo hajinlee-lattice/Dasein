@@ -145,10 +145,14 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private void setupSourceFile(CustomEventModelingType type) {
         Resource csvResource = new ClassPathResource("end2end/csv/CustomEventModelTest.csv",
                 Thread.currentThread().getContextClassLoader());
+        SchemaInterpretation schemaInterpretation = type == CustomEventModelingType.CDL ? SchemaInterpretation.Account
+                : SchemaInterpretation.SalesforceAccount;
+        String entity = type == CustomEventModelingType.CDL ? SchemaInterpretation.Account.name() : null;
         testSourceFile = fileUploadProxy.uploadFile(getSourceFileName(type), false, "CustomEventModelTest.csv",
-                SchemaInterpretation.Account, "Account", csvResource);
+                schemaInterpretation, entity, csvResource);
 
-        FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(getSourceFileName(type), "Account");
+        FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(getSourceFileName(type),
+                schemaInterpretation.name());
         fmDoc.setIgnoredFields(new ArrayList<>());
         for (FieldMapping fm : fmDoc.getFieldMappings()) {
             if (fm.getUserField().equals("Event")) {
