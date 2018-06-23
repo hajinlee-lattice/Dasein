@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -343,39 +342,29 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             String tenantId = MultiTenantContext.getShortTenantId();
             mergeConfigWithExisting(tenantId, attrConfigGrps, toDeleteEntities);
 
-            List<AttrConfig> renderedList;
-            Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new HashMap<>();
+            ConcurrentMap<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new ConcurrentHashMap<>();
 
             if (attrConfigGrps.size() == 1) {
                 BusinessEntity entity = new ArrayList<>(attrConfigGrps.keySet()).get(0);
-                renderedList = renderForEntity(attrConfigs, entity);
+                List<AttrConfig> renderedList = renderForEntity(attrConfigGrps.get(entity), entity);
                 attrConfigGrpsForTrim.put(entity, renderedList);
             } else {
                 log.info("Saving attr configs for " + attrConfigGrps.size() + " entities in parallel.");
                 // distribute to tasklets
                 final Tenant tenant = MultiTenantContext.getTenant();
-                List<Callable<List<AttrConfig>>> callables = new ArrayList<>();
+                List<Runnable> runnables = new ArrayList<>();
                 attrConfigGrps.forEach((entity, configList) -> {
-                    Callable<List<AttrConfig>> callable = () -> {
+                    Runnable runnable = () -> {
                         MultiTenantContext.setTenant(tenant);
                         List<AttrConfig> renderedConfigList = renderForEntity(configList, entity);
                         attrConfigGrpsForTrim.put(entity, renderedConfigList);
-                        return renderedConfigList;
                     };
-                    callables.add(callable);
+                    runnables.add(runnable);
                 });
 
                 // fork join execution
                 ExecutorService threadPool = ThreadPoolUtils.getForkJoinThreadPool("attr-config", 4);
-                List<List<AttrConfig>> lists = ThreadPoolUtils.runCallablesInParallel(threadPool, callables, 30, 1);
                 new Thread(threadPool::shutdown).run();
-                renderedList = lists.stream().flatMap(list -> {
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        return list.stream();
-                    } else {
-                        return Stream.empty();
-                    }
-                }).collect(Collectors.toList());
             }
             return attrConfigGrpsForTrim;
         }
@@ -385,8 +374,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     /**
      * Merge with existing configs in Document DB
      */
-    private void mergeConfigWithExisting(String tenantId,
-            Map<BusinessEntity, List<AttrConfig>> attrConfigGrps, List<AttrConfigEntity> toDeleteEntities) {
+    private void mergeConfigWithExisting(String tenantId, Map<BusinessEntity, List<AttrConfig>> attrConfigGrps,
+            List<AttrConfigEntity> toDeleteEntities) {
 
         attrConfigGrps.forEach((entity, configList) -> {
             List<AttrConfigEntity> existingConfigEntities = attrConfigEntityMgr.findAllByTenantAndEntity(tenantId,
