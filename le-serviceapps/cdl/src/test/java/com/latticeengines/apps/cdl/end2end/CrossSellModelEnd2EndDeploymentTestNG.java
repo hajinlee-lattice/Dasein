@@ -33,8 +33,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
-    private static final String EXISTING_TENANT = "LETest1529268570843"; // LETest1528844192916-14
+    private static final boolean USE_EXISTING_TENANT = false;
+    private static final String EXISTING_TENANT = "LETest1529773529695"; // LETest1528844192916-14
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
@@ -133,7 +133,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-        setupAndRunModeling(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.EXPECTED_VALUE);
+        setupAndRunModeling(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
     }
 
     private void setupAndRunModeling(ModelingStrategy strategy, PredictionType predictionType) {
@@ -217,8 +217,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
             Assert.assertEquals(trainingCount, 332, errorMsg);
             Assert.assertEquals(eventCount, 282, errorMsg);
         } else {
-            Assert.assertEquals(targetCount, 525, errorMsg);
-            Assert.assertEquals(trainingCount, 2858, errorMsg);
+            Assert.assertEquals(targetCount, 554, errorMsg);
+            Assert.assertEquals(trainingCount, 3026, errorMsg);
             Assert.assertEquals(eventCount, 68, errorMsg);
         }
     }

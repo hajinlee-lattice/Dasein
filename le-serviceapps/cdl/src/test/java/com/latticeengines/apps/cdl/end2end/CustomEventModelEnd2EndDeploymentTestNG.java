@@ -15,6 +15,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -37,8 +38,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
-    private static final String EXISTING_TENANT = "JLM1529352733821";
+    private static final boolean USE_EXISTING_TENANT = false;
+    private static final String EXISTING_TENANT = "LETest1529773529695";
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
     private MetadataSegment testSegment;
@@ -86,6 +87,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             testBed.useExistingTenantAsMain(EXISTING_TENANT);
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
+            mainCustomerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         } else {
             setupEnd2EndTestEnvironment();
             resumeCheckpoint(LOADING_CHECKPOINT);

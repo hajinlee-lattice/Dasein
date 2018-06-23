@@ -111,10 +111,15 @@ public class BucketedScoreSummaryUtils {
             BucketedScore upperBond = boundaries.get(i + 1);
             int totolLeads = lowerBond.getLeftNumLeads() + lowerBond.getNumLeads();
             totolLeads -= upperBond.getLeftNumLeads() + upperBond.getNumLeads();
-            double totolConverted = lowerBond.getLeftNumConverted() + lowerBond.getNumConverted();
-            totolConverted -= upperBond.getLeftNumConverted() + upperBond.getNumConverted();
-            double conversionRate = totolLeads == 0 ? 0 : totolConverted / totolLeads;
-            double lift = conversionRate / overallConversion;
+            double lift;
+            if (scoreSummary.getTotalNumConverted() == 0) {
+                lift = 0.0D;
+            } else {
+                double totolConverted = lowerBond.getLeftNumConverted() + lowerBond.getNumConverted();
+                totolConverted -= upperBond.getLeftNumConverted() + upperBond.getNumConverted();
+                double conversionRate = totolLeads == 0 ? 0 : totolConverted / totolLeads;
+                lift = conversionRate / overallConversion;
+            }
             bucketMetadataList.get(i).setLift(lift);
             bucketMetadataList.get(i).setNumLeads(totolLeads);
         }
