@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
@@ -80,8 +81,6 @@ public class RatingEngineServiceImplUnitTestNG {
     public void testAIRatingModel() {
         AIModel aiModel = new AIModel();
         aiModel.setId(AIModel.generateIdStr());
-
-        System.out.println(aiModel);
     }
 
     @Test(groups = "unit")
@@ -121,6 +120,9 @@ public class RatingEngineServiceImplUnitTestNG {
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setCreated(DATE);
         ratingEngine.setUpdated(DATE);
+        AIModel am = new AIModel();
+        am.setId(AIModel.generateIdStr());
+        ratingEngine.setLatestIteration(am);
         return ratingEngine;
     }
 
@@ -151,9 +153,16 @@ public class RatingEngineServiceImplUnitTestNG {
         RatingEngine r1 = new RatingEngine();
         r1.setId(id1);
         r1.setType(RatingEngineType.RULE_BASED);
+        RuleBasedModel rm = new RuleBasedModel();
+        rm.setId(RuleBasedModel.generateIdStr());
+        r1.setLatestIteration(rm);
+
         RatingEngine r2 = new RatingEngine();
         r2.setId(id2);
         r2.setType(RatingEngineType.RULE_BASED);
+        rm = new RuleBasedModel();
+        rm.setId(RuleBasedModel.generateIdStr());
+        r1.setLatestIteration(rm);
         ratingEngineList = Arrays.asList(r1, r2);
         return ratingEngineList;
     }
