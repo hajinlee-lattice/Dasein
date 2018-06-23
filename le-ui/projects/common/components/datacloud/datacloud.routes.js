@@ -64,62 +64,21 @@ angular
 
                     return deferred.promise;
                 }], 
-                EnrichmentTopAttributes: ['$q', '$state', '$stateParams', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', 'QueryStore', 'FeatureFlagService', function($q, $state, $stateParams, DataCloudStore, ApiHost, EnrichmentCount, QueryStore, FeatureFlagService) {
+                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', 'CollectionStatus', 'FeatureFlagService', function($q, DataCloudStore, ApiHost, EnrichmentCount, CollectionStatus, FeatureFlagService) {
                     var deferred = $q.defer();
 
                     DataCloudStore.setHost(ApiHost);
 
-                    FeatureFlagService.GetAllFlags().then(function(result) {
-                        var flags = FeatureFlagService.Flags();
+                    var flags = FeatureFlagService.Flags();
+                    var enabledCDL = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+                    var hasCollectionStatus = CollectionStatus != null && (CollectionStatus.AccountCount > 0 || CollectionStatus.ContactCount > 0);
 
-                        if (FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)) {
-                            var query = {
-                               "free_form_text_search":"",
-                               "account_restriction":{
-                                  "restriction":{
-                                     "logicalRestriction":{
-                                        "operator":"AND",
-                                        "restrictions":[]
-                                     }
-                                  }
-                               },
-                               "contact_restriction":{
-                                  "restriction":{
-                                     "logicalRestriction":{
-                                        "operator":"AND",
-                                        "restrictions":[]
-                                     }
-                                  }
-                               },
-                               "restrict_without_sfdcid":false,
-                               "page_filter":{
-                                  "num_rows":10,
-                                  "row_offset":0
-                               }
-                            };
+                    if ((enabledCDL && hasCollectionStatus) || (!enabledCDL && EnrichmentCount !== 0)) {
+                        DataCloudStore.getAllTopAttributes().then(function(result) {
+                            deferred.resolve(result['Categories'] || result || {});
+                        });
+                    }
 
-                            QueryStore.getEntitiesCounts(query).then(function(result) {
-                                if (result && (result.Account != 0 || result.Contact != 0)) {
-                                    DataCloudStore.getAllTopAttributes().then(function(result) {
-                                        deferred.resolve(result['Categories'] || result || {});
-                                    });
-                                } else {
-                                    $state.go('home.nodata', { 
-                                        tenantName: $stateParams.tenantName,
-                                        segment: $stateParams.segment
-                                    });
-                                }
-                            });
-                        } else {
-
-                            if (EnrichmentCount !== 0) { //PLS-5894
-                                DataCloudStore.getAllTopAttributes().then(function(result) {
-                                    deferred.resolve(result['Categories'] || result || {});
-                                });
-                            }
-                        }
-                    });
-                    
                     return deferred.promise;
                 }], 
                 EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
@@ -295,14 +254,14 @@ angular
                 QueryStore.clear();
             }],
             resolve: angular.extend({}, DataCloudResolves, {
-                // RerouteToNoData: ['$state', '$stateParams', 'CollectionStatus', function($state, $stateParams, CollectionStatus) {
-                //     if (CollectionStatus && (CollectionStatus.AccountCount == 0 && CollectionStatus.ContactCount == 0)) {
-                //         $state.go('home.nodata', { 
-                //             tenantName: $stateParams.tenantName,
-                //             segment: $stateParams.segment
-                //         }); 
-                //     }
-                // }],
+                RerouteToNoData: ['$state', '$stateParams', 'CollectionStatus', function($state, $stateParams, CollectionStatus) {
+                    if (CollectionStatus && (CollectionStatus.AccountCount == 0 && CollectionStatus.ContactCount == 0)) {
+                        $state.go('home.nodata', { 
+                            tenantName: $stateParams.tenantName,
+                            segment: $stateParams.segment
+                        }); 
+                    }
+                }],
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var resolveQueryRestriction = function() {
                         var accountRestriction = QueryStore.getAccountRestriction(),
@@ -397,22 +356,6 @@ angular
             resolve: {
                 LookupResponse: [ function() {
                     return { attributes: null };
-                }],
-                RerouteToNoData: ['$state', '$stateParams', 'EnrichmentCount', 'QueryService', 'QueryStore', function($state, $stateParams, EnrichmentCount, QueryService, QueryStore) {
-                    var query = {};
-                    if (EnrichmentCount == 0 && QueryStore.counts.accounts.value == 0 && QueryStore.counts.contacts.value == 0) {
-                        QueryService.GetEntitiesCounts(query).then(function(result) {
-                            if ((!result || (result.Account == 0 && result.Contact == 0))) {
-                                $state.go('home.nodata', { 
-                                    tenantName: $stateParams.tenantName,
-                                    segment: $stateParams.segment
-                                });
-                            } else {
-                                QueryStore.counts.accounts.value = result.Account;
-                                QueryStore.counts.contacts.value = result.Contact;
-                            }
-                        });
-                    }
                 }]
             },
             views: {
@@ -432,14 +375,15 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, BrowserStorageUtility, FeatureFlagService) {
+                    controller: function($scope, AuthorizationUtility, FeatureFlagService) {
                         var flags = FeatureFlagService.Flags();
-                        var ClientSession = BrowserStorageUtility.getClientSession();
-                        var hasAccessLevel = ['EXTERNAL_ADMIN', 'INTERNAL_USER', 'INTERNAL_ADMIN', 'SUPER_ADMIN'].indexOf(ClientSession.AccessLevel) >= 0;
-                        var vdbMigration = FeatureFlagService.FlagIsEnabled(flags.VDB_MIGRATION);
-                        var fileImportEnabled = FeatureFlagService.FlagIsEnabled(flags.ENABLE_FILE_IMPORT);
+                        var featureFlagsConfig = {};
+                        featureFlagsConfig[flags.VDB_MIGRATION] = false;
+                        featureFlagsConfig[flags.ENABLE_FILE_IMPORT] = true;
 
-                        $scope.showImportButton = hasAccessLevel && !vdbMigration && fileImportEnabled;
+                        $scope.showImportButton = AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) && 
+                                                    AuthorizationUtility.checkFeatureFlags(featureFlagsConfig);
+
                     },
                     templateUrl: '/components/datacloud/explorer/nodata/nodata.component.html'
                 }

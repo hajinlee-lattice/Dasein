@@ -20,8 +20,9 @@ angular.module('lp.delete.entry', [])
             uploadParams: DeleteDataStore.getFileUploadParams(),
             fileName: '',
             counts: {
-                'accounts': EntitiesCount.Account,
-                'contacts': EntitiesCount.Contact 
+                'accounts': EntitiesCount.AccountCount,
+                'contacts': EntitiesCount.ContactCount,
+                'transactions': EntitiesCount.TransactionCount
             },
             periodTimeConf: {
                 from: { name: 'from-time', initial: undefined, position: 0, type: 'Time', visible: true },

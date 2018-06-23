@@ -8,7 +8,7 @@ angular
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
         controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, 
-            DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore, BrowserStorageUtility, FeatureFlagService) {
+            DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore, BrowserStorageUtility, FeatureFlagService, AuthorizationUtility) {
             var vm = $scope.vm;
 
             angular.extend(vm, {
@@ -29,18 +29,9 @@ angular
                 view: 'list',
                 queryText: '',
                 QueryStore: QueryStore,
-                saved: false
+                saved: false,
+                hasDeleteAccessRights: AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser)
             });
-
-            var ClientSession = BrowserStorageUtility.getClientSession();
-
-            if (ClientSession) {
-                vm.hasDeleteAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
-                vm.hasImportAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
-            } else {
-                vm.hasDeleteAccessRights = false;
-                vm.hasImportAccessRights = false;
-            }
 
             // remove highlighting
             if (!vm.showHighlighting()) {
@@ -323,10 +314,12 @@ angular
 
             vm.showFileImport = function() {
                 var flags = FeatureFlagService.Flags();
+                var featureFlags = {};
+                featureFlags[flags.VDB_MIGRATION] = false;
+                featureFlags[flags.ENABLE_FILE_IMPORT] = true;
 
-                var vdbMigration = FeatureFlagService.FlagIsEnabled(flags.VDB_MIGRATION);
-                return vm.hasImportAccessRights && !vdbMigration && 
-                                    ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
+                return AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) && AuthorizationUtility.checkFeatureFlags(featureFlags) &&
+                                ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
             }
 
             vm.init_filters();

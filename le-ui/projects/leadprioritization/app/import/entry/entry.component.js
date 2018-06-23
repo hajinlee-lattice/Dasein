@@ -6,7 +6,7 @@ angular.module('lp.import.entry', [
     'lp.import.entry.producthierarchy'
 ])
 .controller('ImportEntry', function(
-    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportStore
+    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportStore, AuthorizationUtility
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -22,11 +22,15 @@ angular.module('lp.import.entry', [
         },
         uploaded: false,
         goState: null,
-        next: false
+        next: false,
+        showProductBundleImport: false,
+        showProductHierarchyImport: false,
+        showProductPurchaseImport: false
     });
 
     vm.init = function() {
         ImportWizardStore.clear();
+        vm.setFeatureFlagPermissions();
         vm.changingEntity = false;    
         var state = $state.current.name;
         switch (state) {
@@ -109,6 +113,16 @@ angular.module('lp.import.entry', [
 
     vm.click = function() {
         $state.go('home.import.data.' + vm.goState + '.ids');
+    }
+
+    vm.setFeatureFlagPermissions = function() {
+        var featureFlags = {};
+        featureFlags[flags.VDB_MIGRATION] = false;
+        featureFlags[flags.ENABLE_FILE_IMPORT] = true;
+
+        vm.showProductPurchaseImport = AuthorizationUtility.checkFeatureFlags(featureFlags) && FeatureFlagService.FlagIsEnabled(flags.ENABLE_PRODUCT_PURCHASE_IMPORT);
+        vm.showProductBundleImport = AuthorizationUtility.checkFeatureFlags(featureFlags) && FeatureFlagService.FlagIsEnabled(flags.ENABLE_PRODUCT_BUNDLE_IMPORT);
+        vm.showProductHierarchyImport = AuthorizationUtility.checkFeatureFlags(featureFlags) && FeatureFlagService.FlagIsEnabled(flags.ENABLE_PRODUCT_HIERARCHY_IMPORT);
     }
 
     vm.init();

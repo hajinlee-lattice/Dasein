@@ -13,18 +13,20 @@ angular
     'lp.import.wizard.productids',
     'lp.import.wizard.producthierarchyids',
     'lp.import.wizard.producthierarchy',
-    'lp.import.utils'
+    'lp.import.utils',
+    'mainApp.core.utilities.AuthorizationUtility'
 ])
 .config(function($stateProvider) {
     $stateProvider
         .state('home.import', {
             url: '/import',
-            onEnter: ['$state', 'BrowserStorageUtility', function($state, BrowserStorageUtility) {
-                var ClientSession = BrowserStorageUtility.getClientSession();
-                var hasAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
-                if (!hasAccessRights) {
-                    $state.go('home');
-                }
+            onEnter: ['AuthorizationUtility', 'FeatureFlagService', function(AuthorizationUtility, FeatureFlagService) {
+                var flags = FeatureFlagService.Flags();
+                var featureFlagsConfig = {};
+                featureFlagsConfig[flags.VDB_MIGRATION] = false;
+                featureFlagsConfig[flags.ENABLE_FILE_IMPORT] = true;
+
+                AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.excludeExternalUser, featureFlagsConfig, 'home');
             }],
             redirectTo: 'home.import.entry.accounts'
         })

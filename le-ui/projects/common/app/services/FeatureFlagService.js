@@ -86,6 +86,7 @@ mod = angular.module('mainApp.core.services.FeatureFlagService', [
         ENABLE_PRODUCT_BUNDLE_IMPORT: 'EnableProductBundleImport',
         ENABLE_PRODUCT_HIERARCHY_IMPORT: 'EnableProductHierarchyImport',
         ENABLE_PRODUCT_PURCHASE_IMPORT: 'EnableProductPurchaseImport',
+        PLAYBOOK_MODULE: 'PlaybookModule',
 
         //TODO: deprecated flags
         CAMPAIGNS_PAGE: 'EnableCampaignUI',

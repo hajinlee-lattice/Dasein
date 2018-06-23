@@ -1,9 +1,12 @@
 angular.module('lp.ratingsengine.ratingsenginetype', [])
-.controller('RatingsEngineType', function ($state, $stateParams, RatingsEngineStore) {
+.controller('RatingsEngineType', function ($state, $stateParams, RatingsEngineStore, FeatureFlagService) {
     var vm = this;
 
     vm.setType = function(wizardSteps, engineType) {
         // RatingsEngineStore.setType(type, engineType);
         $state.go('home.ratingsengine.' + wizardSteps, {engineType: engineType});
     }
+
+    var flags = FeatureFlagService.Flags();
+    vm.showCrossSellModeling = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CROSS_SELL_MODELING);
 });

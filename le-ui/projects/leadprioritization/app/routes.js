@@ -165,6 +165,16 @@ angular
                 // placeholder for when this is set to /ulysses in insights iframe
                 ApiHost: function() {
                     return '/pls'; // don't remove this. -Lazarus
+                }, 
+                CollectionStatus: function($q, FeatureFlags, FeatureFlagService, QueryStore) {
+                    var deferred = $q.defer();
+                    var flags = FeatureFlagService.Flags();
+                    if (FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)) {
+                        QueryStore.getCollectionStatus().then(function(result) {
+                            deferred.resolve(result);
+                        });
+                        return deferred.promise;
+                    }
                 }
             },
             views: {

@@ -43,7 +43,7 @@ angular
 })
 .service('SidebarStore', function(
     $state, $stateParams, StateHistory, ResourceUtility, 
-    FeatureFlagService, DataCloudStore
+    FeatureFlagService, DataCloudStore, QueryStore, QueryService
 ) {
     var store = this;
 
@@ -68,9 +68,9 @@ angular
     }
 
     this.init = function() {
-        this.isDataAvailable = (DataCloudStore.metadata.enrichmentsTotal == 0) ? false : true;
 
         FeatureFlagService.GetAllFlags().then(function(result) {
+
             var flags = FeatureFlagService.Flags();
             
             store.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
@@ -81,12 +81,15 @@ angular
             store.showSalesforceSettings = FeatureFlagService.FlagIsEnabled(flags.USE_SALESFORCE_SETTINGS);
             store.showCampaignsPage = FeatureFlagService.FlagIsEnabled(flags.CAMPAIGNS_PAGE);
             store.showAnalysisPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
-            store.showPlayBook = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+            store.showPlayBook = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL) && FeatureFlagService.FlagIsEnabled(flags.PLAYBOOK_MODULE);
             store.showRatingsEngine = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             store.showSegmentationPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             store.showCdlEnabledPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             store.showLatticeInsightsPage = FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS);
             store.showContactUs = false;
+
+            store.isDataAvailable = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL) && QueryStore.collectionStatus != null ? 
+                                    QueryStore.collectionStatus.AccountCount > 0 || QueryStore.collectionStatus.ContactCount > 0 : store.isDataAvailable;
 
             store.sources = {
                 root: [{
@@ -97,6 +100,7 @@ angular
                         icon: "ico-analysis ico-light-gray"
                     },{
                         if: store.showSegmentationPage,
+                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
                         active: store.checkSegmentationActiveState,
                         sref: "home.segments",
                         label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SEGMENTATION"),
@@ -126,7 +130,7 @@ angular
                         icon: "ico-playbook"
                     },{
                         if: !store.showCdlEnabledPage,
-                        disabled: !store.isDataAvailablstoree && store.showCdlEnabledPage,
+                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
                         active: function() {
                             return store.state.includes('home.models') || store.state.includes('home.models.history') && !store.isTransitingFrom(['home.models','home.models.history']);
                         },

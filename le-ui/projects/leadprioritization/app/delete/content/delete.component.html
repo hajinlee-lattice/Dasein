@@ -43,7 +43,7 @@
           <div class="button {{ $ctrl.currentTab == 'transaction' ? 'blue' : 'white' }}-button" ng-click="$ctrl.setEntity('Transaction', 'transaction');">
             <span>Transactions</span>
             <img src="{{$ctrl.getEntityImage('transaction', 'purchase')}}"/>
-            <span>0</span>
+            <span>{{$ctrl.counts.transactions}}</span>
           </div>
         </div>
 
@@ -101,7 +101,7 @@
                 </li>
               </ul>
         </div>
-        <div ng-if="$ctrl.currentTab == 'transaction' " class="options-text"> 
+        <div ng-if="$ctrl.currentTab == 'transaction' && $ctrl.counts[$ctrl.currentTab + 's'] > 0" class="options-text"> 
                 <ul>
                   <li>
                       <label>

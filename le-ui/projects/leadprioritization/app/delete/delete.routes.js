@@ -1,28 +1,24 @@
 angular
 .module('lp.delete', [
-    'lp.delete.entry'
+    'lp.delete.entry',
+    'mainApp.core.utilities.AuthorizationUtility'
 ])
 .config(function($stateProvider) {
     $stateProvider
         .state('home.delete', {
             url: '/delete',
-            onEnter: ['$state', 'BrowserStorageUtility', function($state, BrowserStorageUtility) {
-                var ClientSession = BrowserStorageUtility.getClientSession();
-                var hasAccessRights = ClientSession.AccessLevel != 'EXTERNAL_USER';
-                if (!hasAccessRights) {
-                    $state.go('home');
-                }
+            onEnter: ['AuthorizationUtility', function(AuthorizationUtility) {
+                AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.excludeExternalUser, {}, 'home');
             }],
             resolve: {
                 EntitiesCount: function($q, QueryStore) {
                     var deferred = $q.defer();
 
-                    QueryStore.getEntitiesCounts().then(function(result) {
+                    QueryStore.getCollectionStatus().then(function(result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
-
                 }
             },
             views: {
