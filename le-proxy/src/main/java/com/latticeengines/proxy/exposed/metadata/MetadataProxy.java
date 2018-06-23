@@ -105,13 +105,13 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         List<Attribute> attributes = null;
         try {
-//            if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
-//                log.info("CreateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
-//                attributes = table.getAttributes();
-//                table.setAttributes(null);
-//            }
+            if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
+                log.info("CreateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
+                attributes = table.getAttributes();
+                table.setAttributes(Collections.emptyList());
+            }
             post("createTable", url, table, null);
-//            addTableAttributes(customerSpace, tableName, attributes);
+            addTableAttributes(customerSpace, tableName, attributes);
         } catch(Exception e) {
             deleteTable(customerSpace, tableName);
             throw e;
@@ -138,17 +138,33 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return post("reset", url, null, Boolean.class);
     }
 
+    public void renameTable(String customerSpace, String tableName, String newTableName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/rename/{newTableName}", customerSpace, tableName, newTableName);
+        try {
+            post("renameTable", url, null);
+        } catch(Exception e) {
+            throw e;
+        }
+    }
+    
     public void updateTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         List<Attribute> attributes = null;
         try {
-//            if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
-//                log.info("UpdateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
-//                attributes = table.getAttributes();
-//                table.setAttributes(null);
-//            }
+            // This is to take care of backward compatibility changes for rename usecase.
+            if (!tableName.equals(table.getName())) {
+                log.info("Performing renameTable op from {} - to  {}", table.getName(), tableName);
+                renameTable(customerSpace, table.getName(), tableName);
+                table.setName(tableName);
+            }
+            //- End of rename usecase
+            if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
+                log.info("UpdateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
+                attributes = table.getAttributes();
+                table.setAttributes(Collections.emptyList());
+            }
             put("updateTable", url, table);
-            // addTableAttributes(customerSpace, tableName, attributes);
+            addTableAttributes(customerSpace, tableName, attributes);
         } catch(Exception e) {
             deleteTable(customerSpace, tableName);
             throw e;
@@ -194,7 +210,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     
     public Long getTableAttributeCount(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attribute_count", customerSpace, tableName);
-        return get("getTableColumnCount", url, Long.class);
+        Long count = get("getTableColumnCount", url, Long.class);
+        log.info("GetTableAttributeCount for {}-{} , Count: {}", customerSpace, tableName, count);
+        return count;
     }
     
     /**
@@ -238,6 +256,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public List<Attribute> getTableAttributes(String customerSpace, String tableName, Long columnCount) {
         long attributeCount = columnCount == null ? getTableAttributeCount(customerSpace, tableName) : columnCount;
         List<Attribute> attributeLst = Collections.synchronizedList(new ArrayList<>());
+        
+        log.info("Getting Table: {} with Attributes: {} in chunks of {} ", tableName, attributeCount, ATTRIBUTE_BATCH_SIZE);
         
         IntStream.range(0, (int) (Math.ceil((double)attributeCount/ATTRIBUTE_BATCH_SIZE))).forEach(page -> {
             List<Attribute> attributePage = getTableAttributes(customerSpace, tableName, page+1, ATTRIBUTE_BATCH_SIZE);

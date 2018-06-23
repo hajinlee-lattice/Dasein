@@ -187,7 +187,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         String prefix = String.join("_", customerSpace.getTenantId(), servingEntity.name());
         String goodName = NamingUtils.timestamp(prefix);
         log.info("Renaming table " + servingStoreTable.getName() + " to " + goodName);
-        metadataProxy.updateTable(customerSpace.toString(), goodName, servingStoreTable);
+        metadataProxy.renameTable(customerSpace.toString(), servingStoreTable.getName(), goodName);
         servingStoreTable.setName(goodName);
         return goodName;
     }

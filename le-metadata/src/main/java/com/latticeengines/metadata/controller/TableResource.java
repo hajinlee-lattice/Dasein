@@ -110,6 +110,15 @@ public class TableResource extends BaseRestResource {
             @RequestBody Table table) {
         return tableResourceHelper.updateTable(customerSpace, tableName, table);
     }
+    
+    @PostMapping(value = "/tables/{tableName}/rename/{newTableName}")
+    @ResponseBody
+    @ApiOperation(value = "Update table")
+    public Boolean renameTable(@PathVariable String customerSpace, //
+            @PathVariable String tableName, //
+            @PathVariable String newTableName) {
+        return tableResourceHelper.renameTable(customerSpace, tableName, newTableName);
+    }
 
     @DeleteMapping(value = "/tables/{tableName}")
     @ResponseBody

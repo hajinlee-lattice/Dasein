@@ -105,6 +105,16 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(storageMechanism.getDatabaseName(), JdbcStorage.DatabaseName.REDSHIFT);
     }
 
+    @Test(groups = "functional", dependsOnMethods = { "addStorageMechanism" })
+    public void renameTable() {
+        Table table = mdService.getTable(CustomerSpace.parse(customerSpace1), TABLE1, true);
+        assertNotNull(table);
+        String newName = table.getName() + "-rename1";
+        mdService.renameTable(CustomerSpace.parse(customerSpace1), table.getName(), newName);
+        Table newTable = mdService.getTable(CustomerSpace.parse(customerSpace1), newName, true);
+        assertEquals(newTable.getPid(), table.getPid());
+    }
+    
     @DataProvider(name = "tableProvider")
     public Object[][] tableProvider() {
         return new Object[][] { {customerSpace1, TABLE1 }, {customerSpace2, TABLE1 }, };

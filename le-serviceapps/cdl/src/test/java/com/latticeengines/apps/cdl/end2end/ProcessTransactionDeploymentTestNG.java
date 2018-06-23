@@ -1,9 +1,13 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -21,7 +25,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
-
+        verifyNumAttrsInAccount();
         new Thread(() -> {
             createTestSegment1();
             createTestSegment2();
@@ -46,6 +50,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
     private void verifyProcess() {
         runCommonPAVerifications();
         verifyProcessAnalyzeReport(processAnalyzeAppId);
+        verifyNumAttrsInAccount();
         verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 
         long numAccounts = 500;
@@ -73,6 +78,12 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 //                RatingBucketName.F, RATING_F_COUNT_1);
         // TODO: Rating engine needs to be activated
         // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
+    }
+    
+    private void verifyNumAttrsInAccount() {
+        String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, BusinessEntity.Account.getServingStore());
+        List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);
+        Assert.assertTrue(cms.size() < 20000, "Should not have more than 20000 account attributes");
     }
 
 }

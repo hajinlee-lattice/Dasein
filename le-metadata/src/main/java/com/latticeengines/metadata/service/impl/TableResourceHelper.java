@@ -78,7 +78,7 @@ public class TableResourceHelper {
     public Boolean createTable(String customerSpace, //
             String tableName, //
             Table table) {
-        log.info(String.format("createTable(%s)", table.getName()));
+        log.info(String.format("createTable(%s), with Attributes: %d", table.getName(), table.getAttributes().size()));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.createTable(space, table);
         return true;
@@ -87,14 +87,24 @@ public class TableResourceHelper {
     public Boolean updateTable(String customerSpace, //
             String tableName, //
             Table table) {
-        log.info(String.format("updateTable(%s)", table.getName()));
+        log.info(String.format("updateTable(%s), with Attributes: %d", table.getName(), table.getAttributes().size()));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         if (!tableName.equals(table.getName())) {
+            log.info(String.format("renameTable (Deprecated. Instead use renameTable) from (%s), to : (%s)", table.getName(), tableName));
             mdService.renameTable(space, table.getName(), tableName);
             table.setName(tableName);
         } else {
             mdService.updateTable(space, table);
         }
+        return true;
+    }
+    
+    public Boolean renameTable(String customerSpace, //
+            String tableName, //
+            String newTableName) {
+        log.info(String.format("renameTable from (%s), to : (%s)", tableName, newTableName));
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        mdService.renameTable(space, tableName, newTableName);
         return true;
     }
 
