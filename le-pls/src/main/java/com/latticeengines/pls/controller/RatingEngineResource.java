@@ -239,6 +239,7 @@ public class RatingEngineResource {
     private void registerAction(Action action, Tenant tenant) {
         if (action != null) {
             action.setTenant(tenant);
+            action.setActionInitiator(MultiTenantContext.getEmailAddress());
             log.info(String.format("Registering action %s", action));
             ActionConfiguration actionConfig = action.getActionConfiguration();
             if (actionConfig != null) {
