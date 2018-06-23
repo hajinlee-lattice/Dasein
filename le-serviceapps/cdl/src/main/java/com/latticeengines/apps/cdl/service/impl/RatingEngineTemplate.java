@@ -6,18 +6,25 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
 public abstract class RatingEngineTemplate {
+
+    private static Logger log = LoggerFactory.getLogger(RatingEngineTemplate.class);
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
@@ -60,17 +67,23 @@ public abstract class RatingEngineTemplate {
             ratingEngineSummary.setContactsInSegment(segment.getContacts());
         }
 
-        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
-            Map<String, Long> counts = ratingEngine.getCountsAsMap();
-            if (counts != null)
-                ratingEngineSummary.setBucketMetadata(counts.keySet().stream()
-                        .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
-                        .collect(Collectors.toList()));
-        } else {
-            ratingEngineSummary.setBucketMetadata(
-                    bucketedScoreProxy.getLatestABCDBucketsByEngineId(tenantId, ratingEngine.getId()));
+        try {
+            if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
+                Map<String, Long> counts = ratingEngine.getCountsAsMap();
+                if (counts != null)
+                    ratingEngineSummary.setBucketMetadata(counts.keySet().stream()
+                            .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
+                            .collect(Collectors.toList()));
+            } else {
+                AIModel a = ((AIModel) ratingEngine.getLatestIteration());
+                if (a.getModelingJobStatus() == JobStatus.COMPLETED) {
+                    ratingEngineSummary.setBucketMetadata(
+                            bucketedScoreProxy.getLatestABCDBucketsByEngineId(tenantId, ratingEngine.getId()));
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Could not get bucket metadata for rating engine", ex);
         }
-
         ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);
         return ratingEngineSummary;
     }
