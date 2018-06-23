@@ -59,6 +59,15 @@ public class RatingEngineSummary {
     @JsonProperty("coverage")
     private Map<String, Long> coverage;
 
+    @JsonProperty("latestIterationId")
+    private String latestIterationId;
+
+    @JsonProperty("scoringIterationId")
+    private String scoringIterationId;
+
+    @JsonProperty("publishedIterationId")
+    private String publishedIterationId;
+
     @JsonProperty("activeModelId")
     private String activeModelId;
 
@@ -194,6 +203,30 @@ public class RatingEngineSummary {
         this.activeModelId = activeModelId;
     }
 
+    public String getLatestIterationId() {
+        return latestIterationId;
+    }
+
+    public void setLatestIterationId(String latestIterationId) {
+        this.latestIterationId = latestIterationId;
+    }
+
+    public String getScoringIterationId() {
+        return scoringIterationId;
+    }
+
+    public void setScoringIterationId(String scoringIterationId) {
+        this.scoringIterationId = scoringIterationId;
+    }
+
+    public String getPublishedIterationId() {
+        return publishedIterationId;
+    }
+
+    public void setPublishedIterationId(String publishedIterationId) {
+        this.publishedIterationId = publishedIterationId;
+    }
+
     public List<BucketMetadata> getBucketMetadata() {
         return bucketMetadata;
     }
@@ -210,9 +243,13 @@ public class RatingEngineSummary {
         this.advancedRatingConfig = advancedRatingConfig;
     }
 
-    public boolean isPublished() { return isPublished; }
+    public boolean isPublished() {
+        return isPublished;
+    }
 
-    public void setPublished(boolean published) { isPublished = published; }
+    public void setPublished(boolean published) {
+        isPublished = published;
+    }
 
     public Boolean getDeleted() {
         return deleted;

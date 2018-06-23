@@ -60,6 +60,11 @@ public abstract class RatingEngineTemplate {
         ratingEngineSummary.setCoverage(ratingEngine.getCountsAsMap());
         ratingEngineSummary.setAdvancedRatingConfig(ratingEngine.getAdvancedRatingConfig());
         ratingEngineSummary.setPublished(ratingEngine.getPublishedIteration() != null);
+        ratingEngineSummary.setLatestIterationId(ratingEngine.getLatestIteration().getId());
+        ratingEngineSummary.setScoringIterationId(
+                ratingEngine.getScoringIteration() != null ? ratingEngine.getScoringIteration().getId() : null);
+        ratingEngineSummary.setPublishedIterationId(
+                ratingEngine.getPublishedIteration() != null ? ratingEngine.getPublishedIteration().getId() : null);
 
         MetadataSegment segment = ratingEngine.getSegment();
         if (segment != null) {
@@ -75,14 +80,13 @@ public abstract class RatingEngineTemplate {
                             .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
                             .collect(Collectors.toList()));
             } else {
-                AIModel a = ((AIModel) ratingEngine.getLatestIteration());
-                if (a.getModelingJobStatus() == JobStatus.COMPLETED) {
+                if (((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() == JobStatus.COMPLETED) {
                     ratingEngineSummary.setBucketMetadata(
                             bucketedScoreProxy.getLatestABCDBucketsByEngineId(tenantId, ratingEngine.getId()));
                 }
             }
         } catch (Exception ex) {
-            log.error("Could not get bucket metadata for rating engine", ex);
+            log.error("Unable to populate bucket metadata for rating engine :" + ratingEngine.getId(), ex);
         }
         ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);
         return ratingEngineSummary;
