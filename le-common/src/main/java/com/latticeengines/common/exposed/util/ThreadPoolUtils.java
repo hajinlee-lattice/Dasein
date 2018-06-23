@@ -56,6 +56,7 @@ public class ThreadPoolUtils {
 
     public static <T> List<T> runCallablesInParallel(ExecutorService executorService, List<Callable<T>> callables,
             int timeoutInMinutes, int intervalInSeconds) {
+        int numTasks = CollectionUtils.size(callables);
         List<Future<T>> futures = callables.stream().map(executorService::submit).collect(Collectors.toList());
         List<T> results = new ArrayList<>();
         long startTime = System.currentTimeMillis();
@@ -79,6 +80,8 @@ public class ThreadPoolUtils {
             });
             toBeRemoved.forEach(futures::remove);
         }
+        double duration = (System.currentTimeMillis() - startTime) * 0.001;
+        log.info("Finished all of " + numTasks + " callable futures in " + duration + " sec.");
         return results;
     }
 
@@ -92,7 +95,6 @@ public class ThreadPoolUtils {
             if (System.currentTimeMillis() - startTime > timeout) {
                 throw new RuntimeException("Cannot finish all runnables within timeout.");
             }
-            log.info("Checking status of " + CollectionUtils.size(futures) + " runnable futures.");
             List<Future> toBeRemoved = new ArrayList<>();
             futures.forEach(future -> {
                 try {
