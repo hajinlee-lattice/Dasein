@@ -65,7 +65,7 @@
                     ng-mouseleave="vm.current.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
                     ng-if="vm.current.ratings.length > 0"
                     class="{{ rating.tileClass }}"
-                    ng-class="{editing: vm.current.tileStates[rating.id].editRating, noRatings: (rating.bucketMetadata === undefined || rating.bucketMetadata.length === 0)}">
+                    ng-class="{editing: vm.current.tileStates[rating.id].editRating, noRatings: (rating.bucketMetadata === undefined || rating.bucketMetadata.length === 0) || !rating.isPublished }">
 
                     <div class="tile-header" ng-if="!vm.current.tileStates[rating.id].editRating">
                         <h2 title="{{rating.displayName}}">{{rating.displayName}}</h2>
