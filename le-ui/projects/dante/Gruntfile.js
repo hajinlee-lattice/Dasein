@@ -264,21 +264,46 @@ module.exports = function (grunt) {
         },
         run: {}
     },
+    // sass: {
+    //     options: {
+    //         sourcemap: 'auto',
+    //         style:     'compressed'
+    //     },
+    //     dist:    {
+    //         files: {
+    //             '<%= pls.assets %>/css/production.css': [
+    //                 '<%= pls.app %>/app.component.scss'
+    //             ]
+    //         }
+    //     },
+    //     dev:     {
+    //         files: {
+    //             '<%= pls.assets %>/css/production.css': [
+    //                 '<%= pls.app %>/app.component.scss'
+    //             ]
+    //         }
+    //     }
+    // },
 
     // Compiles Sass to CSS
     sass: {
         options: {
+            sourcemap: 'auto',
             style: 'compressed'
         },
         dist: {
-          files: {
-            '<%= dante.app %>/assets/styles/production.css' : '<%= dante.app %>/assets/styles/main.scss'
-          }
+            files: {
+                '<%= dante.dist %>/assets/styles/production.css': [
+                    '<%= dante.app %>/assets/styles/main.scss'
+                ]
+            }
         },
         dev: {
-          files: {
-            '<%= dante.app %>/assets/styles/production.css' : '<%= dante.app %>/assets/styles/main.scss'
-          }
+            files: {
+                '<%= dante.dist %>/assets/styles/production.css': [
+                    '<%= dante.app %>/assets/styles/main.scss'
+                ]
+            }
         }
     },
 
