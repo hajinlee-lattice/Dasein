@@ -86,7 +86,9 @@ module.exports = function (grunt) {
             },
             dist:    {
                 files: {
-                    '<%= pls.assets %>/css/production.css': '<%= pls.app %>/app.component.scss'
+                    '<%= pls.assets %>/css/production.css': [
+                        '<%= pls.app %>/app.component.scss'
+                    ]
                 }
             },
             dev:     {

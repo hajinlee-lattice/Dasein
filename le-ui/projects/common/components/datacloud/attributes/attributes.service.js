@@ -176,9 +176,9 @@ angular.module('common.attributes')
     };
 
     this.saveConfig = function() {
+        var category = this.getCategory();
         var activate = this.getSection() == 'activate';
         var type = activate ? 'activation' : 'usage';
-        var category = $stateParams.category;
         var usage = {};
         var data = {
             Select: [],

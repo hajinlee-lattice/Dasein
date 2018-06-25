@@ -236,6 +236,10 @@ a.button, .button a:link, .button a:focus, .button a:visited {
   	background: #f9f9f9;
     border-color: #dfdfdf;
     color: #d0d0d0;
+    &.borderless-button {
+    	border-color: transparent;
+    	background-color: transparent;
+    }
     &:hover {
       cursor: default;
       color: #d0d0d0;
