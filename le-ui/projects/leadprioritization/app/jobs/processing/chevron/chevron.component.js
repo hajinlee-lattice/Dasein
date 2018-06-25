@@ -22,7 +22,6 @@ angular.module('lp.jobs.chevron', [])
 
 
             vm.isStepDone = function (index) {
-
                 if (isStepStatusMatching(vm.chevronConfig[index].name, 'Completed') || $scope.jobstatus == 'Completed') {
                     return true;
                 } else {
