@@ -313,7 +313,7 @@ module.exports = function (grunt) {
         options: {
             blockReplacements: {
                 sass: function(block) {
-                    return '<link rel="stylesheet" href="' + block.dest + '">';
+                    return '<link rel="stylesheet" type="text/css" href="' + block.dest + '">';
                 }
             }
         }
