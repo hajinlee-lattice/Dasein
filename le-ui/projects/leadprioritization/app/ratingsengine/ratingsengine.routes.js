@@ -393,6 +393,16 @@ angular
                     gotoNonemptyCategory: true
                 },
                 resolve: {
+                    JobStatus : function($q, $stateParams){
+                        var jobStatus = $stateParams.modelingJobStatus;
+                        var deferred = $q.defer();
+                        if(jobStatus == null){
+                            deferred.resolve({modelingJobStatus: 'Completed'});
+                        }else{
+                            deferred.resolve({modelingJobStatus: jobStatus});
+                        }
+                        return deferred.promise;
+                    },
                     CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 
@@ -430,13 +440,21 @@ angular
                 },
                 views: {
                     "navigation@home": {
-                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
+                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine, JobStatus) {
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
                             $scope.stateName = function () {
                                 return $state.current.name;
-                            }
+                            };
+                            $scope.isJobCompleted = function(){
+                                switch(JobStatus.modelingJobStatus){
+                                case 'Completed':{
+                                    return true;
+                                }
+                                default: return false;
+                                }
+                            };
                         },
                         templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
                     },
