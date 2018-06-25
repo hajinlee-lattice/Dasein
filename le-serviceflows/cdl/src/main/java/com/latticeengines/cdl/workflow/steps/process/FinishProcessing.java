@@ -99,7 +99,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                 if (RatingEngineType.RULE_BASED.equals(container.getEngineSummary().getType())) {
                     String engineId = container.getEngineSummary().getId();
                     try {
-                        Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace.toString(), engineId);
+                        Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace.toString(),
+                                engineId);
                         log.info("Updated the counts of rating engine " + engineId + " to "
                                 + (MapUtils.isNotEmpty(counts) ? JsonUtils.pprint(counts) : null));
                     } catch (Exception e) {
@@ -114,16 +115,17 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         List<RatingModelContainer> containers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
         if (CollectionUtils.isNotEmpty(containers)) {
             containers.forEach(container -> {
-                if (!RatingEngineType.RULE_BASED.equals(container.getEngineSummary().getType())) {
-                    try {
-                        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.toString(), container.getEngineSummary().getId());
-                        ratingEngine.setPublishedIteration(container.getModel());
-                        ratingEngineProxy.createOrUpdateRatingEngine(customerSpace.toString(), ratingEngine);
-                        log.info("Updated the published iteration  of Rating Engine: " + ratingEngine.getId() + " to Rating model: "
-                                + container.getModel().getId());
-                    } catch (Exception e) {
-                        log.error("Failed to update the published Iteration of rating engine " + container.getEngineSummary().getId(), e);
-                    }
+                try {
+                    RatingEngine ratingEngine = new RatingEngine();
+                    ratingEngine.setId(container.getEngineSummary().getId());
+                    ratingEngine.setPublishedIteration(container.getModel());
+                    ratingEngineProxy.createOrUpdateRatingEngine(customerSpace.toString(), ratingEngine);
+                    log.info("Updated the published iteration  of Rating Engine: " + ratingEngine.getId()
+                            + " to Rating model: " + container.getModel().getId());
+                } catch (Exception e) {
+                    log.error("Failed to update the published Iteration of rating engine: "
+                            + container.getEngineSummary().getId() + " and rating model: "
+                            + container.getModel().getId(), e);
                 }
             });
         }
@@ -156,12 +158,14 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
             });
         }
         Map<String, List> listMap = getMapObjectFromContext(BUCKET_METADATA_MAP, String.class, List.class);
-        Map<String, String> modelGuidToEngineIdMap = getMapObjectFromContext(MODEL_GUID_ENGINE_ID_MAP, String.class, String.class);
+        Map<String, String> modelGuidToEngineIdMap = getMapObjectFromContext(MODEL_GUID_ENGINE_ID_MAP, String.class,
+                String.class);
         if (MapUtils.isNotEmpty(listMap)) {
             log.info("Found " + listMap.size() + " bucket metadata lists to update");
             listMap.forEach((modelGuid, list) -> {
                 List<BucketMetadata> bucketMetadata = JsonUtils.convertList(list, BucketMetadata.class);
-                String engineId = MapUtils.isNotEmpty(modelGuidToEngineIdMap) ? modelGuidToEngineIdMap.get(modelGuid) : null;
+                String engineId = MapUtils.isNotEmpty(modelGuidToEngineIdMap) ? modelGuidToEngineIdMap.get(modelGuid)
+                        : null;
                 if (bucketMetadata.get(0).getCreationTimestamp() == 0) {
                     // actually create bucket metadata
                     log.info("Create timestamp is 0, change to create bucketed metadata");
@@ -172,7 +176,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                     request.setBucketMetadataList(bucketMetadata);
                     bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
                 } else {
-                    log.info("Updating bucket metadata for modelGUID=" + modelGuid + " : " + JsonUtils.serialize(bucketMetadata));
+                    log.info("Updating bucket metadata for modelGUID=" + modelGuid + " : "
+                            + JsonUtils.serialize(bucketMetadata));
                     UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
                     request.setModelGuid(modelGuid);
                     request.setBucketMetadataList(bucketMetadata);

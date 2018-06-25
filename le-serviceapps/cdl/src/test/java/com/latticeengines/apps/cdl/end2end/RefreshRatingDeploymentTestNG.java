@@ -165,7 +165,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Assert.assertNotNull(newEngine.getActiveModel(), JsonUtils.pprint(newEngine));
         log.info("Created rating engine " + newEngine.getId());
 
-        AIModel model = (AIModel) newEngine.getActiveModel();
+        AIModel model = (AIModel) newEngine.getLatestIteration();
         configureCrossSellModel(model, predictionType, ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, targetProducts,
                 targetProducts);
         model.setModelSummaryId(modelSummary.getId());
@@ -175,10 +175,11 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         final String modelGuid = modelSummary.getId();
         final String engineId = newEngine.getId();
-        ratingEngineProxy.setScoringIteration(mainCustomerSpace, engineId, model.getId(),
-                BucketMetadataUtils.getDefaultMetadata());
         new Thread(() -> insertBucketMetadata(modelGuid, engineId)).start();
         Thread.sleep(300);
+
+        ratingEngineProxy.setScoringIteration(mainCustomerSpace, engineId, model.getId(),
+                BucketMetadataUtils.getDefaultMetadata());
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
 
@@ -218,6 +219,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     private void verifyProcess() {
+        refreshRatingEngines();
         runCommonPAVerifications();
         verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory,
                 BusinessEntity.Rating);
@@ -226,7 +228,24 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         if (ENABLE_AI_RATINGS) {
             verifyBucketMetadata(ai1.getId());
             verifyBucketMetadata(ai2.getId());
+            verifyPublishedIterations(ai1);
+            verifyPublishedIterations(ai2);
         }
+
+    }
+
+    private void refreshRatingEngines() {
+        rule1 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, rule1.getId());
+        rule2 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, rule2.getId());
+        rule3 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, rule3.getId());
+        ai1 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai1.getId());
+        ai2 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai2.getId());
+    }
+
+    private void verifyPublishedIterations(RatingEngine ratingEngine) {
+        RatingEngine re = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ratingEngine.getId());
+        Assert.assertNotNull(re.getPublishedIteration());
+        Assert.assertEquals(re.getPublishedIteration().getId(), ratingEngine.getScoringIteration().getId());
     }
 
     private void verifyRuleBasedEngines() {
@@ -235,12 +254,16 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 RatingBucketName.D, 9L);
         verifyRatingEngineCount(rule1.getId(), ratingCounts);
         verifyRatingEngineCount(rule2.getId(), ratingCounts);
+        verifyPublishedIterations(rule1);
+        verifyPublishedIterations(rule2);
     }
 
     private void verifyDecoratedMetadata() {
         List<ColumnMetadata> ratingMetadata = getFullyDecoratedMetadata(BusinessEntity.Rating);
-        log.info("Rating attrs: " + ratingMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList()));
-//        Assert.assertEquals(ratingMetadata.size(), 12, JsonUtils.serialize(ratingMetadata));
+        log.info("Rating attrs: "
+                + ratingMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList()));
+        // Assert.assertEquals(ratingMetadata.size(), 12,
+        // JsonUtils.serialize(ratingMetadata));
     }
 
     private ProcessAnalyzeRequest constructRequest() {
@@ -257,7 +280,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         buckets.add(BucketMetadataUtils.bucket(85, 40, BucketName.C));
         buckets.add(BucketMetadataUtils.bucket(40, 5, BucketName.D));
         long currentTime = System.currentTimeMillis();
-        buckets.forEach(bkt ->  bkt.setCreationTimestamp(currentTime));
+        buckets.forEach(bkt -> bkt.setCreationTimestamp(currentTime));
         return buckets;
     }
 
