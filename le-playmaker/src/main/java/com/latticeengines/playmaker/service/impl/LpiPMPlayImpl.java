@@ -117,10 +117,14 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     private String getPlayWorkFlowType(RatingEngine ratingEngine) {
+        final String defaultValue = "ADefault"; // RulesBased
+        if (ratingEngine == null) {
+            return defaultValue;
+        }
         try {
             switch (ratingEngine.getType()) {
             case RULE_BASED:
-                return "List";
+                return defaultValue;
             case CUSTOM_EVENT:
             case PROSPECTING:
                 return "Prospecting";
@@ -128,17 +132,18 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                 ModelingStrategy strategy = ((CrossSellModelingConfig) ((AIModel) ratingEngine.getPublishedIteration())
                         .getAdvancedModelingConfig()).getModelingStrategy();
                 if (strategy == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE) {
-                    return "Cross-sell";
+                    return "Cross-Sell";
                 }
                 if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
                     return "Upsell";
                 }
             default:
-                return "List";
+                return defaultValue;
             }
         } catch (Exception e) {
-            log.error("Failed to get the correct PlayType.", e);
-            return "List";
+            log.error("Failed to translate the Rating Engine into the Play's WorkFlowType for RatingEngine: "
+                    + ratingEngine.getId(), e);
+            return defaultValue;
         }
     }
 
