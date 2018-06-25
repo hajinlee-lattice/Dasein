@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.inject.Inject;
 
@@ -167,8 +168,16 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     private Map<String, Object> findProductById(String toFind) {
-        return allProducts.stream().filter(prod -> prod.get(InterfaceName.ProductId.name()).equals(toFind)).findFirst()
-                .get();
+        try {
+            return allProducts.stream().filter(prod -> prod.get(InterfaceName.ProductId.name()).equals(toFind))
+                    .findFirst().get();
+        } catch (NoSuchElementException e) {
+            log.error("Unable to find the product id: " + toFind);
+            return null;
+        } catch (Exception e) {
+            log.error("Failed to find the product id: " + toFind);
+            return null;
+        }
     }
 
     private long secondsFromEpoch(Play play) {
