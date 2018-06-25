@@ -4,7 +4,6 @@ angular
     return {
         restrict: 'A',
         scope: {
-            parent:'=?',
             params:'=',
             label:'@',
             inputName:'@',
@@ -34,9 +33,6 @@ angular
         link: function(scope, element, attrs, ngModel) {
             var model = $parse(attrs.fileUploader);
             var modelSetter = model.assign;
-            if(scope.parent){
-                scope.parent.clearFileImport = scope.vm_uploader.cancel;
-            }
             element.bind('change', function(){
                 scope.$apply(function(){
                     modelSetter(scope, element[0].files[0]);

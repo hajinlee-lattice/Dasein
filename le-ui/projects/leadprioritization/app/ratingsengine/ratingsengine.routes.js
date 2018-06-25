@@ -489,11 +489,30 @@ angular
             .state('home.ratingsengine.dashboard.notes', {
                 url: '/notes',
                 resolve: {
+                    JobStatus : function($q, $stateParams, RatingsEngineStore){
+                        var jobStatus = $stateParams.modelingJobStatus;
+                        var deferred = $q.defer();
+                        if(jobStatus == null){
+                            var ratingId = $stateParams.rating_id;
+                            RatingsEngineStore.getModel(ratingId).then(function(model){
+
+                                if(model.AI){
+                                    var jobStatus = model.AI.modelingJobStatus;
+                                    deferred.resolve({modelingJobStatus: jobStatus});
+                                }else {
+                                    deferred.resolve({modelingJobStatus: 'Completed'});
+                                }
+                            });
+                        }else{
+                            deferred.resolve({modelingJobStatus: jobStatus});
+                        }
+                        return deferred.promise;
+                    },
                     Rating: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 
                         RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
-                            deferred.resolve(result)
+                            deferred.resolve(result);
                         });
 
                         return deferred.promise;
@@ -515,11 +534,14 @@ angular
                 params: {
                     pageIcon: 'ico-notes',
                     pageTitle: 'Notes',
-                    section: 'dashboard.notes'
+                    section: 'dashboard.notes',
+                    rating_id: '',
+                    modelId: '',
+                    modelingJobStatus: null
                 },
                 views: {
                     "navigation@home": {
-                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
+                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine, JobStatus) {
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
@@ -544,7 +566,16 @@ angular
 
                             $scope.stateName = function () {
                                 return $state.current.name;
-                            }
+                            };
+
+                            $scope.isJobCompleted = function(){
+                                switch(JobStatus.modelingJobStatus){
+                                case 'Completed':{
+                                    return true;
+                                }
+                                default: return false;
+                                }
+                            };
                         },
                         templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
                     },

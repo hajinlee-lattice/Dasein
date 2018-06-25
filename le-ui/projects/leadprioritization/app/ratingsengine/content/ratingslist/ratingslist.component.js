@@ -6,7 +6,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 ])
 .controller('RatingsEngineListController', function (
     $scope, $timeout, $location, $element, $state, $stateParams, $filter, $interval, $rootScope,
-    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory, JobsStore, JobsService
+    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory, JobsStore, JobsService, ModelRatingsService
 ) {
     var vm = this;
 
@@ -216,14 +216,14 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.hasRules = function(rating) {
         var hasRules = RatingsEngineStore.hasRules(rating);
         return hasRules;
-    }
+    };
 
     vm.isAIRating = function(rating){
-        if(rating && rating.type === "CROSS_SELL"){
+        if(rating && rating.type != 'RULE_BASED'){
             return true;
         }
         return false;
-    }
+    };
 
     vm.customMenuClick = function ($event, rating) {
         if ($event != null) {
@@ -231,7 +231,7 @@ angular.module('lp.ratingsengine.ratingslist', [
         }
 
         var tileState = vm.current.tileStates[rating.id];
-        tileState.showCustomMenu = !tileState.showCustomMenu
+        tileState.showCustomMenu = !tileState.showCustomMenu;
 
         if (tileState.showCustomMenu) {
             $(document).bind('click', function(event){
@@ -293,25 +293,45 @@ angular.module('lp.ratingsengine.ratingslist', [
         tileState.editRating = !tileState.editRating;
     };
 
+    /**
+     * This method 
+     * @param {*} rating 
+     */
+    function activateRating (rating){
+
+        vm.saveInProgress = true;
+        var newStatus = (rating.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE');
+        if(vm.isAIRating(rating)) {
+            var aiModelId = rating.latestIterationId;
+            ModelRatingsService.CreateABCDBucketsRatingEngine(rating.id, aiModelId, rating.bucketMetadata).then(function(result){
+                if (result != null && result.success === true) {
+                    updateRating(rating,{
+                        id: rating.id,
+                        status: newStatus,
+                    });
+                }else {
+                    vm.saveInProgress = false;
+                }
+            });
+        }else{
+            updateRating(rating,{
+                id: rating.id,
+                status: newStatus,
+            });
+        }
+    }
 
     vm.editStatusClick = function($event, rating, disable){
         $event.stopPropagation();
 
         // console.log(rating, disable);
         
-        if (disable && !vm.isAIRating(rating)) {
+        if (disable) {
             return false;
+        }else{
+            activateRating(rating);
         }
-
-        var newStatus = (rating.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE');
-        var updatedRating = {
-                id: rating.id,
-                status: newStatus,
-            }
-
-        // console.log(updatedRating);
-
-        updateRating(rating, updatedRating);
+        // updateRating(rating, updatedRating);
         RatingsEngineStore.setRatings(vm.current.ratings, true);
 
     };

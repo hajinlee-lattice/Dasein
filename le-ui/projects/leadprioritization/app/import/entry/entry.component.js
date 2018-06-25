@@ -50,10 +50,10 @@ angular.module('lp.import.entry', [
         vm.goState = goState || type.toLowerCase();
         ImportWizardStore.setEntityType(type);
         ImportWizardStore.setFeedType(feedType || null);
-        if(vm.clearFileImport){
-            vm.clearFileImport();
-            vm.next = false;
+        if(vm.params.scope){
+            vm.params.scope.cancel();
         }
+        vm.next = false;
     }
 
     vm.fileLoad = function(headers) {

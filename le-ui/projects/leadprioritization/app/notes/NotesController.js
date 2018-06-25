@@ -87,7 +87,7 @@ angular.module('lp.notes', [
     }
 
     vm.deleteNote = function($event, noteId) {
-        console.log(vm.id, noteId);
+        // console.log(vm.id, noteId);
         DeleteNoteModal.show(vm.id, noteId);
 	}
 
