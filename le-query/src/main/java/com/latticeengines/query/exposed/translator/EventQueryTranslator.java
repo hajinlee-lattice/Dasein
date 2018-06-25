@@ -96,8 +96,8 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                         String period, int periodCount, String sqlUser) {
         BooleanExpression matchedPeriod = periodName.eq(period);
         return (periodCount <= 0)
-                ? matchedPeriod
-                : matchedPeriod.and(periodId.gt(translateValidPeriodId(queryFactory, repository, period, periodCount, sqlUser)));
+            ? matchedPeriod
+            : matchedPeriod.and(periodId.gt(translateValidPeriodId(queryFactory, repository, period, periodCount, sqlUser)));
     }
 
     @SuppressWarnings({"unchecked", "rawtype"})
@@ -109,20 +109,20 @@ public class EventQueryTranslator extends TranslatorCommon {
         StringPath tablePath = Expressions.stringPath(txTableName);
         NumberPath minPid = Expressions.numberPath(BigDecimal.class, periodRange, MIN_PID);
         SQLQuery periodRangeSubQuery = factory.query() //
-                .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
-                .from(tablePath) //
-                .where(limitPeriodByNameAndCount(queryFactory, repository, period, periodCount,sqlUser)) //
-                .groupBy(accountId);
+            .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
+            .from(tablePath) //
+            .where(limitPeriodByNameAndCount(queryFactory, repository, period, periodCount, sqlUser)) //
+            .groupBy(accountId);
 
         SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
-                factory.selectDistinct(accountId).from(tablePath).where(periodName.eq(period)).as(ALL_ACCOUNTS),
-                factory.selectDistinct(periodId).from(tablePath)
-                        .where(periodName.eq(period))
-                        .as(ALL_PERIODS));
+            factory.selectDistinct(accountId).from(tablePath).where(periodName.eq(period)).as(ALL_ACCOUNTS),
+            factory.selectDistinct(periodId).from(tablePath)
+                .where(periodName.eq(period))
+                .as(ALL_PERIODS));
 
         SQLQuery crossProdSubQuery = factory.query().from(crossProdQuery, crossProd)
-                .innerJoin(periodRangeSubQuery, periodRange).on(periodAccountId.eq(crossAccountId))
-                .where(crossPeriodId.goe(minPid.subtract(NUM_ADDITIONAL_PERIOD)));
+            .innerJoin(periodRangeSubQuery, periodRange).on(periodAccountId.eq(crossAccountId))
+            .where(crossPeriodId.goe(minPid.subtract(NUM_ADDITIONAL_PERIOD)));
         SQLQuery minusProdSubQuery = crossProdSubQuery.select(crossAccountId, periodId);
 
         SubQuery subQuery = new SubQuery();
@@ -145,16 +145,16 @@ public class EventQueryTranslator extends TranslatorCommon {
         NumberExpression trxnAmount = Expressions.numberPath(BigDecimal.class, trxnAmountVal.getMetadata());
 
         SQLQuery productQuery = factory.query()
-                .select(accountId, periodId, amountVal.as(AMOUNT_VAL))
-                .from(tablePath) //
-                .where(periodFilter.and(productFilter));
+            .select(accountId, periodId, amountVal.as(AMOUNT_VAL))
+            .from(tablePath) //
+            .where(periodFilter.and(productFilter));
 
         SQLQuery revenueSubQuery = factory.query()
-                .select(keysAccountId, keysPeriodId, trxnAmount.sum().coalesce(BigDecimal.ZERO))
-                .from(keysPath)
-                .leftJoin(productQuery, trxnPath)
-                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)))
-                .groupBy(keysAccountId, keysPeriodId);
+            .select(keysAccountId, keysPeriodId, trxnAmount.sum().coalesce(BigDecimal.ZERO))
+            .from(keysPath)
+            .leftJoin(productQuery, trxnPath)
+            .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)))
+            .groupBy(keysAccountId, keysPeriodId);
 
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(revenueSubQuery);
@@ -169,12 +169,12 @@ public class EventQueryTranslator extends TranslatorCommon {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
         NumberExpression revenueNumber = Expressions.numberPath(BigDecimal.class, revenueRevenue.getMetadata());
         WindowFunction windowAgg = SQLExpressions.sum(revenueNumber.coalesce(BigDecimal.ZERO)).over()
-                .partitionBy(revenueAccountId).orderBy(revenuePeriodId)
-                .rows().between().following(ONE_LAG_BEHIND_OFFSET).following(laggingPeriodCount);
+            .partitionBy(revenueAccountId).orderBy(revenuePeriodId)
+            .rows().between().following(ONE_LAG_BEHIND_OFFSET).following(laggingPeriodCount);
 
         SQLQuery revenueSubQuery = factory.query() //
-                .select(revenueAccountId, revenuePeriodId, windowAgg) //
-                .from(revenuePath);
+            .select(revenueAccountId, revenuePeriodId, windowAgg) //
+            .from(revenuePath);
 
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(revenueSubQuery);
@@ -194,8 +194,8 @@ public class EventQueryTranslator extends TranslatorCommon {
         NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
 
         return factory.query().from(tablePath) //
-                .where(periodName.eq(period)) //
-                .select(periodId.max().subtract(periodCount).as(MAX_PID));
+            .where(periodName.eq(period)) //
+            .select(periodId.max().subtract(periodCount).as(MAX_PID));
 
     }
 
@@ -212,8 +212,8 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         if (evaluationPeriodId < 0) {
             return factory.query().from(tablePath) //
-                    .where(periodName.eq(periodNameStr)) //
-                    .select(periodId.max().as(MAX_PID));
+                .where(periodName.eq(periodNameStr)) //
+                .select(periodId.max().as(MAX_PID));
         } else {
             return Expressions.constant(String.valueOf(evaluationPeriodId));
         }
@@ -233,8 +233,8 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         if (evaluationPeriodId < 0) {
             return factory.query().from(tablePath) //
-                    .where(periodName.eq(periodNameStr)) //
-                    .select(periodId.max().subtract(laggingPeriodCount));
+                .where(periodName.eq(periodNameStr)) //
+                .select(periodId.max().subtract(laggingPeriodCount));
         } else {
             return Expressions.constant(String.valueOf(evaluationPeriodId - laggingPeriodCount));
         }
@@ -253,9 +253,9 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                          int laggingPeriodCount,
                                                          String sqlUser) {
         return (isScoring)
-                ? periodId.eq(translateEvaluationPeriodId(queryFactory, repository, periodName, evaluationPeriodId, sqlUser))
-                : periodId.loe(translateMaxTrainingPeriodId(queryFactory, repository, periodName, evaluationPeriodId,
-                                                            laggingPeriodCount, sqlUser));
+            ? periodId.eq(translateEvaluationPeriodId(queryFactory, repository, periodName, evaluationPeriodId, sqlUser))
+            : periodId.loe(translateMaxTrainingPeriodId(queryFactory, repository, periodName, evaluationPeriodId,
+                                                        laggingPeriodCount, sqlUser));
     }
 
     @SuppressWarnings("unchecked")
@@ -275,10 +275,10 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                                          periodName, evaluationPeriodId,
                                                                          laggingPeriodCount, sqlUser);
         return factory.query().select(keysAccountId, keysPeriodId)
-                .from(keysPath)
-                .join(accountViewPath)
-                .on(keysAccountId.eq(qualifiedAccountId))
-                .where(periodIdPredicate);
+            .from(keysPath)
+            .join(accountViewPath)
+            .on(keysAccountId.eq(qualifiedAccountId))
+            .where(periodIdPredicate);
     }
 
     @SuppressWarnings("unchecked")
@@ -292,9 +292,9 @@ public class EventQueryTranslator extends TranslatorCommon {
         StringPath tupleAccountId = Expressions.stringPath(eventViewPath, ACCOUNT_ID);
         StringPath tuplePeriodId = Expressions.stringPath(eventViewPath, PERIOD_ID);
         return factory.query().select(shiftedAccountId, shiftedPeriodId, shiftedRevenue)
-                .from(shiftedRevenuePath)
-                .join(eventViewPath)
-                .on(tupleAccountId.eq(shiftedAccountId).and(tuplePeriodId.eq(shiftedPeriodId)));
+            .from(shiftedRevenuePath)
+            .join(eventViewPath)
+            .on(tupleAccountId.eq(shiftedAccountId).and(tuplePeriodId.eq(shiftedPeriodId)));
     }
 
     @SuppressWarnings("unchecked")
@@ -339,24 +339,24 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         String period = txRestriction.getTimeFilter().getPeriod();
         SQLQuery productQuery = factory.query()
-                .select(productSelectList.toArray(new Expression[0]))
-                .from(tablePath) //
-                .where(periodName.eq(period)) //
-                .where(translateProductId(txRestriction.getProductId()));
+            .select(productSelectList.toArray(new Expression[0]))
+            .from(tablePath) //
+            .where(periodName.eq(period)) //
+            .where(translateProductId(txRestriction.getProductId()));
 
         SQLQuery apsQuery = factory.query()
-                .select(apsSelectList.toArray(new Expression[0]))
-                .from(keysPath)
-                .leftJoin(productQuery, trxnPath)
-                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
+            .select(apsSelectList.toArray(new Expression[0]))
+            .from(keysPath)
+            .leftJoin(productQuery, trxnPath)
+            .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
 
         BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, period,
                                                                          evaluationPeriodId, laggingPeriodCount, sqlUser);
 
         SQLQuery subQueryExpression = factory.query().select(accountId, periodId, amountAggr, quantityAggr) //
-                .from(apsQuery, apsPath) //
-                .where(periodIdPredicate);
+            .from(apsQuery, apsPath) //
+            .where(periodIdPredicate);
 
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
@@ -400,16 +400,16 @@ public class EventQueryTranslator extends TranslatorCommon {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
 
         EntityPath<String> apsUnionAllPath = (products.length == 1) ?
-                new PathBuilder<>(String.class, apsUnionAll.getAlias()) :
-                new PathBuilder<>(String.class, apsUnionAllNoNull.getAlias());
+            new PathBuilder<>(String.class, apsUnionAll.getAlias()) :
+            new PathBuilder<>(String.class, apsUnionAllNoNull.getAlias());
 
         AggregationFilter spentFilter = txOld.getSpentFilter();
         AggregationFilter unitFilter = txOld.getUnitFilter();
 
         BooleanExpression aggrAmountPredicate =
-                (spentFilter != null) ? translateAggregatePredicate(amountAggr, spentFilter, true) : Expressions.TRUE;
+            (spentFilter != null) ? translateAggregatePredicate(amountAggr, spentFilter, true) : Expressions.TRUE;
         BooleanExpression aggrQuantityPredicate =
-                (unitFilter != null) ? translateAggregatePredicate(quantityAggr, unitFilter, true) : Expressions.TRUE;
+            (unitFilter != null) ? translateAggregatePredicate(quantityAggr, unitFilter, true) : Expressions.TRUE;
 
         BooleanExpression aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate);
 
@@ -418,10 +418,10 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
 
         return factory.query()
-                .select(accountId, periodId)
-                .from(apsUnionAllPath) //
-                .groupBy(accountId, periodId)
-                .having(aggrValPredicate);
+            .select(accountId, periodId)
+            .from(apsUnionAllPath) //
+            .groupBy(accountId, periodId)
+            .having(aggrValPredicate);
     }
 
     @SuppressWarnings("unchecked")
@@ -462,29 +462,34 @@ public class EventQueryTranslator extends TranslatorCommon {
         StringPath tablePath = Expressions.stringPath(txTableName);
         String period = txRestriction.getTimeFilter().getPeriod();
 
-        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnAmountVal.getMetadata());
+        NumberExpression trxnAmountValNumber = Expressions.numberPath(BigDecimal.class, trxnAmountVal.getMetadata());
+        NumberExpression trxnQuantityValNumber = Expressions.numberPath(BigDecimal.class, trxnQuantityVal.getMetadata());
         CaseBuilder caseBuilder = new CaseBuilder();
-        NumberExpression trxnValExists = caseBuilder.when(trxnValNumber.goe(0)).then(1).otherwise(0);
+        NumberExpression trxnValExists = caseBuilder.when(trxnAmountValNumber.gt(0)).then(1)
+            .when(trxnQuantityValNumber.gt(0)).then(1)
+            .otherwise(0);
 
         Expression windowAgg = translateTimeWindow(timeFilter, SQLExpressions.max(trxnValExists).over()
-                .partitionBy(keysAccountId).orderBy(keysPeriodId)).as(amountAggr);
+            .partitionBy(keysAccountId).orderBy(keysPeriodId)).as(amountAggr);
 
-        SQLQuery productQuery = factory.query().select(accountId, periodId, amountVal.as(AMOUNT_VAL)).from(tablePath)
-                .where(periodName.eq(period)) //
-                .where(translateProductId(productIdStr));
+        SQLQuery productQuery = factory.query()  //
+            .select(accountId, periodId, amountVal.as(AMOUNT_VAL), quantityVal.as(QUANTITY_VAL)).from(tablePath) //
+            .where(periodName.eq(period)) //
+            .where(translateProductId(productIdStr));
 
         SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnAmountVal, windowAgg)
-                .from(keysPath).leftJoin(productQuery, trxnPath)
-                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
+            .from(keysPath).leftJoin(productQuery, trxnPath)
+            .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
         BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, period,
-                                                                         evaluationPeriodId, laggingPeriodCount, sqlUser);
+                                                                         evaluationPeriodId, laggingPeriodCount,
+                                                                         sqlUser);
 
         int expectedResult = (returnPositive) ? 1 : 0;
 
         return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
-                .where(amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate))
-                .groupBy(accountId, periodId);
+            .where(amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate))
+            .groupBy(accountId, periodId);
 
     }
 
@@ -562,8 +567,8 @@ public class EventQueryTranslator extends TranslatorCommon {
     private TransactionRestriction translateToPrior(TransactionRestriction priorOnly) {
 
         TimeFilter timeFilter = new TimeFilter(
-                priorOnly.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
-                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+            priorOnly.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
+            priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
         return new TransactionRestriction(priorOnly.getProductId(), //
                                           timeFilter, //
                                           false, //
@@ -574,8 +579,8 @@ public class EventQueryTranslator extends TranslatorCommon {
     private TransactionRestriction translateToNotEngagedWithin(TransactionRestriction priorOnly) {
 
         TimeFilter timeFilter = new TimeFilter(
-                priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
-                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+            priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
+            priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
         return new TransactionRestriction(priorOnly.getProductId(), //
                                           timeFilter, //
@@ -587,8 +592,8 @@ public class EventQueryTranslator extends TranslatorCommon {
     private TransactionRestriction translateToEngagedWithin(TransactionRestriction priorOnly) {
 
         TimeFilter timeFilter = new TimeFilter(
-                priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
-                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+            priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
+            priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
         return new TransactionRestriction(priorOnly.getProductId(), //
                                           timeFilter, //
@@ -600,8 +605,8 @@ public class EventQueryTranslator extends TranslatorCommon {
     private TransactionRestriction translateToNotEngagedEver(TransactionRestriction priorOnly) {
 
         TimeFilter timeFilter = new TimeFilter(
-                priorOnly.getTimeFilter().getLhs(), ComparisonType.EVER, //
-                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+            priorOnly.getTimeFilter().getLhs(), ComparisonType.EVER, //
+            priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
         return new TransactionRestriction(priorOnly.getProductId(), //
                                           timeFilter, //
@@ -818,7 +823,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     if (parent != null) {
                         SQLQuery childQuery = (SQLQuery)
-                                translateSelectAll(queryFactory, repository, mergedTableAlias, sqlUser).getSubQueryExpression();
+                            translateSelectAll(queryFactory, repository, mergedTableAlias, sqlUser).getSubQueryExpression();
 
                         UnionCollector parentCollector = unionMap.getOrDefault(parent, new UnionCollector());
                         unionMap.put(parent, parentCollector.withUnion(childQuery));
@@ -913,7 +918,7 @@ public class EventQueryTranslator extends TranslatorCommon {
     @SuppressWarnings({"unchecked", "rawtype"})
     private Union<?> mergeQueryResult(LogicalOperator ops, SubQueryExpression[] childQueries) {
         return (LogicalOperator.AND == ops) //
-                ? SQLExpressions.intersect(childQueries)
-                : SQLExpressions.union(childQueries);
+            ? SQLExpressions.intersect(childQueries)
+            : SQLExpressions.union(childQueries);
     }
 }
