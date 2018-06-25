@@ -71,6 +71,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     protected abstract List<ColumnMetadata> getSystemMetadata(Category category);
 
     public static final long DEFAULT_LIMIT = 500L;
+    private static ExecutorService workers;
 
     @Override
     public List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render) {
@@ -109,9 +110,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             runnables.add(runnable);
         });
         // fork join execution
-        ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("attr-config-overview", 4);
-        ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 30, 1);
-        new Thread(threadPool::shutdown).run();
+        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
         return attrConfigOverview;
     }
 
@@ -363,8 +362,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 });
 
                 // fork join execution
-                ExecutorService threadPool = ThreadPoolUtils.getForkJoinThreadPool("attr-config", 4);
-                new Thread(threadPool::shutdown).run();
+                ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
             }
             return attrConfigGrpsForTrim;
         }
@@ -634,5 +632,16 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
         }
         return results;
+    }
+
+    private static ExecutorService getWorkers() {
+        if (workers == null) {
+            synchronized (AbstractAttrConfigService.class) {
+                if (workers == null) {
+                    workers = ThreadPoolUtils.getCachedThreadPool("attr-config-svc");
+                }
+            }
+        }
+        return workers;
     }
 }

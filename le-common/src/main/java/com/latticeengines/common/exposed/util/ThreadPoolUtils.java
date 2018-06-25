@@ -25,20 +25,24 @@ public class ThreadPoolUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ThreadPoolUtils.class);
 
-    private static long TIMEOUT = TimeUnit.HOURS.toMillis(1);
-
     public static ExecutorService getFixedSizeThreadPool(String name, int size) {
         ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
-        return Executors.newFixedThreadPool(size, threadFac);
+        ExecutorService executorService = Executors.newFixedThreadPool(size, threadFac);
+        Runtime.getRuntime().addShutdownHook(new Thread(executorService::shutdownNow));
+        return executorService;
     }
 
     public static ExecutorService getCachedThreadPool(String name) {
         ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
-        return Executors.newCachedThreadPool(threadFac);
+        ExecutorService executorService = Executors.newCachedThreadPool(threadFac);
+        Runtime.getRuntime().addShutdownHook(new Thread(executorService::shutdownNow));
+        return executorService;
     }
 
     public static ForkJoinPool getForkJoinThreadPool(String name) {
-        return getForkJoinThreadPool(name, null);
+        ForkJoinPool pool = getForkJoinThreadPool(name, null);
+        Runtime.getRuntime().addShutdownHook(new Thread(pool::shutdownNow));
+        return pool;
     }
     
     public static ForkJoinPool getForkJoinThreadPool(String name, Integer size) {
