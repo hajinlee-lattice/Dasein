@@ -144,7 +144,7 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                     .history-bar-current {
                         position: relative;
                         &:after {
-                            content: 'Relaunched';
+                            content: 'Last Launched';
                             position: absolute;
                             bottom: -19px;
                             left: 0;
