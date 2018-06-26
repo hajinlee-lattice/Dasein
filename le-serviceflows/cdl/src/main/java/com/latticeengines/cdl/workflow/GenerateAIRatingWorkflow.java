@@ -64,10 +64,10 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
         }
         builder.next(matchDataCloud) //
                 .next(addStandardAttributes) //
-            .next(scoreEventTable) //
-            .next(recalculatePercentileScore); //
+            .next(scoreEventTable); //
         if (!isLPI) {
-            builder.next(scoreAggregate); //
+            builder.next(recalculatePercentileScore) //
+            .next(scoreAggregate); //
         }
         return builder.next(combineInputTableWithScore) //
                 .next(pivotScoreAndEvent) //
