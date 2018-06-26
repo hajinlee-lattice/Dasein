@@ -224,7 +224,10 @@ public class SegmentServiceImpl implements SegmentService {
         if (metadataSegments != null) {
             for (MetadataSegment metadataSegment : metadataSegments) {
                 findSegmentDependingAttributes(metadataSegment);
-                dependingAttributes.addAll(metadataSegment.getSegmentAttributes());
+                Set<AttributeLookup> attributeLookups = metadataSegment.getSegmentAttributes();
+                if (attributeLookups != null) {
+                    dependingAttributes.addAll(metadataSegment.getSegmentAttributes());
+                }
             }
         }
 
@@ -240,10 +243,12 @@ public class SegmentServiceImpl implements SegmentService {
                 for (MetadataSegment metadataSegment : metadataSegments) {
                     findSegmentDependingAttributes(metadataSegment);
                     Set<AttributeLookup> segmentAttributes = metadataSegment.getSegmentAttributes();
-                    for (AttributeLookup attributeLookup : segmentAttributes) {
-                        if (attributes.contains(sanitize(attributeLookup.toString()))) {
-                            dependingMetadataSegments.add(metadataSegment);
-                            break;
+                    if (segmentAttributes != null) {
+                        for (AttributeLookup attributeLookup : segmentAttributes) {
+                            if (attributes.contains(sanitize(attributeLookup.toString()))) {
+                                dependingMetadataSegments.add(metadataSegment);
+                                break;
+                            }
                         }
                     }
                 }

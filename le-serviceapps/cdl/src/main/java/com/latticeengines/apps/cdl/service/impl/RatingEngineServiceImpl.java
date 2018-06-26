@@ -704,7 +704,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingModel ratingModel = ratingModelService.getRatingModelById(modelId);
         if (ratingModel != null) {
             ratingModelService.findRatingModelAttributeLookups(ratingModel);
-            attributes.addAll(ratingModel.getRatingModelAttributes());
+            Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
+            if (attributeLookups != null) {
+                attributes.addAll(attributeLookups);
+            }
         }
         return new ArrayList<>(attributes);
     }
@@ -724,10 +727,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 if (ratingModels != null) {
                     for (RatingModel ratingModel : ratingModels) {
                         ratingModelService.findRatingModelAttributeLookups(ratingModel);
-                        for (AttributeLookup modelAttribute : ratingModel.getRatingModelAttributes()) {
-                            if (attributes.contains(sanitize(modelAttribute.toString()))) {
-                                ratingModelSet.add(ratingModel);
-                                break;
+                        Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
+                        if (attributeLookups != null) {
+                            for (AttributeLookup modelAttribute : attributeLookups) {
+                                if (attributes.contains(sanitize(modelAttribute.toString()))) {
+                                    ratingModelSet.add(ratingModel);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -742,21 +748,27 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public List<RatingEngine> getDependingRatingEngines(List<String> attributes) {
         Set<RatingEngine> ratingEngineSet = new HashSet<>();
-        RatingModelService<RatingModel> ratingModelService;
-        List<RatingEngine> ratingEngines = getAllRatingEngines();
-        if (ratingEngines != null) {
-            for (RatingEngine ratingEngine : ratingEngines) {
-                ratingModelService = getRatingModelService(ratingEngine.getType());
+        if (attributes != null) {
+            RatingModelService<RatingModel> ratingModelService;
+            List<RatingEngine> ratingEngines = getAllRatingEngines();
+            if (ratingEngines != null) {
+                for (RatingEngine ratingEngine : ratingEngines) {
+                    ratingModelService = getRatingModelService(ratingEngine.getType());
 
-                List<RatingModel> ratingModels = ratingModelService
-                        .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
-                if (ratingModels != null) {
-                    rm: for (RatingModel ratingModel : ratingModels) {
-                        ratingModelService.findRatingModelAttributeLookups(ratingModel);
-                        for (AttributeLookup modelAttribute : ratingModel.getRatingModelAttributes()) {
-                            if (attributes.contains(sanitize(modelAttribute.toString()))) {
-                                ratingEngineSet.add(ratingEngine);
-                                break rm;
+                    List<RatingModel> ratingModels = ratingModelService
+                            .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
+                    if (ratingModels != null) {
+                        rm:
+                        for (RatingModel ratingModel : ratingModels) {
+                            ratingModelService.findRatingModelAttributeLookups(ratingModel);
+                            Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
+                            if (attributeLookups != null) {
+                                for (AttributeLookup modelAttribute : attributeLookups) {
+                                    if (attributes.contains(sanitize(modelAttribute.toString()))) {
+                                        ratingEngineSet.add(ratingEngine);
+                                        break rm;
+                                    }
+                                }
                             }
                         }
                     }
