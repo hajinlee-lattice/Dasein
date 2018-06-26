@@ -18,7 +18,6 @@ angular
             function onSuccess(response) {
                 var result = response.data;
                 if (result != null && result !== "") {
-                    result = response.data;
                     deferred.resolve(result);
                 } else {
                     var errors = result.Errors;

@@ -49,9 +49,10 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
 
-        console.log(vm.currentConfiguration);
-        console.log(vm.workingBuckets);
-        console.log(vm.ratingsSummary.total_num_leads);
+        // console.log(vm.currentConfiguration);
+        // console.log(vm.workingBuckets);
+
+        // console.log(vm.ratingsSummary.total_num_leads);
 
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
@@ -110,7 +111,8 @@ angular.module('lp.models.ratings', [
     }
 
     function refreshChartData(){
-        vm.buckets = vm.workingBuckets;
+        vm.buckets = vm.workingBuckets.reverse();
+        vm.bucketsLength = vm.buckets.length;
         vm.updateContent = false;
 
         if (vm.buckets.length === 6) {
@@ -123,7 +125,7 @@ angular.module('lp.models.ratings', [
 
 
         // loop through buckets in object and set their values
-        for (var i = 0, len = vm.buckets.length; i < len; i++) { 
+        for (var i = 0, len = vm.bucketsLength; i < len; i++) { 
 
             var previousBucket = vm.buckets[i-1];
             if (previousBucket != null) {
@@ -148,6 +150,8 @@ angular.module('lp.models.ratings', [
             vm.totalLeads = vm.rightLeads - vm.leftLeads;
             vm.totalConverted = vm.rightConverted - vm.leftConverted;
     
+            // console.log(vm.leftScore + " - " + vm.rightScore + "::: " + vm.rightLeads + " - " + vm.leftLeads + " = " + (vm.rightLeads - vm.leftLeads));
+
             vm.buckets[i].num_leads = vm.rightLeads - vm.leftLeads;
 
             if (vm.totalLeads == 0 || vm.ratingsSummary.total_num_converted == 0 || vm.ratingsSummary.total_num_leads == 0) {
