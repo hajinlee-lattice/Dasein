@@ -131,12 +131,16 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             return;
         }
 
-        StatisticsContainer statsContainer = new StatisticsContainer();
-        statsContainer.setName(NamingUtils.timestamp("Stats"));
-        statsContainer.setStatsCubes(cubeMap);
-        statsContainer.setVersion(inactiveVersion);
-        log.info("Saving stats with " + cubeMap.size() + " cubes.");
-        dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
+        if (MapUtils.isNotEmpty(cubeMap)) {
+            StatisticsContainer statsContainer = new StatisticsContainer();
+            statsContainer.setName(NamingUtils.timestamp("Stats"));
+            statsContainer.setStatsCubes(cubeMap);
+            statsContainer.setVersion(inactiveVersion);
+            log.info("Saving stats with " + cubeMap.size() + " cubes.");
+            dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
+        } else {
+            log.info("Skip saving an empty stats.");
+        }
     }
 
     @Override
