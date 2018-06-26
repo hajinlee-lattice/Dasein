@@ -284,7 +284,7 @@ angular.module('common.datacloud.query.results', [
                             vm.showAccountPagination = false;
                         }
 
-                        vm.ratedTargetsLimit = vm.counts.accounts.value;
+                        vm.topNCount = vm.counts.accounts.value;
 
                     });
                 } else if (vm.search) { 
@@ -321,11 +321,21 @@ angular.module('common.datacloud.query.results', [
 
     };
 
-    vm.updateTargetLimit = function() {
-        PlaybookWizardStore.setRatedTargetsLimit(vm.ratedTargetsLimit);
+    vm.updateTopNCount = function() {
+
+        vm.maxTargetValue = vm.counts.accounts.value;
+
+        if (vm.topNCount <= vm.maxTargetValue) {
+            vm.showError = false;
+            PlaybookWizardStore.setValidation('targets', true);
+            PlaybookWizardStore.setTopNCount(vm.topNCount);
+        } else {
+            vm.showError = true;
+            PlaybookWizardStore.setValidation('targets', false);
+        }
     }
-    vm.ratingLimitInputClick = function($event) {
-        $scope.targetsLimit = true;
+    vm.topNInputClick = function($event) {
+        $scope.topNCount = true;
         $event.target.select();
     }
 

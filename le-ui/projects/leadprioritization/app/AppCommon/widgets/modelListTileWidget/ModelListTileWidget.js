@@ -156,6 +156,9 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             };
 
             $scope.tileClick = function ($event) {
+
+                console.log($scope.data, data);
+
                 if ($event != null && $scope.nameStatus.editing) {
                     $event.preventDefault();
                 }

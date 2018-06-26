@@ -728,13 +728,30 @@ angular.module('lp.import')
 	                'fieldMappings': FieldDocument.fieldMappings,
 	                'ignoredFields': FieldDocument.ignoredFields
 	            }
-	        })
-	        .success(function(data, status, headers, config) {
-	            deferred.resolve(result);
-	        })
-	        .error(function(data, status, headers, config) {
-	            deferred.resolve(result);
-	        });
+	        }).then(
+                function onSuccess(response) {
+                    var result = response.data;
+                    if (result != null && result !== "") {
+                        result = response.data;
+                        deferred.resolve(result);
+                    } else {
+                        var errors = result.Errors;
+                        var result = {
+                                success: false,
+                                errorMsg: errors[0]
+                            };
+                        deferred.resolve(result.errorMsg);
+                    }
+
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.resolve(errorMsg);
+                }
+            );
 
 	        return deferred.promise;
 	    };
@@ -755,13 +772,30 @@ angular.module('lp.import')
 	            url: '/pls/cdl/import/csv',
 	            headers: { 'Content-Type': 'application/json' },
 	            params: params,
-	        })
-	        .success(function(data, status, headers, config) {
-	            deferred.resolve(result);
-	        })
-	        .error(function(data, status, headers, config) {
-	            deferred.resolve(result);
-	        });
+	        }).then(
+                function onSuccess(response) {
+                    var result = response.data;
+                    if (result != null && result !== "") {
+                        result = response.data;
+                        deferred.resolve(result);
+                    } else {
+                        var errors = result.Errors;
+                        var result = {
+                                success: false,
+                                errorMsg: errors[0]
+                            };
+                        deferred.resolve(result.errorMsg);
+                    }
+
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.resolve(errorMsg);
+                }
+            );
 
 	        return deferred.promise;
 	    };
@@ -774,14 +808,26 @@ angular.module('lp.import')
                 headers: { 'Content-Type': 'application/json' }
             }).then(
                 function onSuccess(response) {
-                    result = response.data;
-                    deferred.resolve(result);
+                    var result = response.data;
+                    if (result != null && result !== "") {
+                        result = response.data;
+                        deferred.resolve(result);
+                    } else {
+                        var errors = result.Errors;
+                        var result = {
+                                success: false,
+                                errorMsg: errors[0]
+                            };
+                        deferred.resolve(result.errorMsg);
+                    }
+
                 }, function onError(response) {
                     if (!response.data) {
                         response.data = {};
                     }
+
                     var errorMsg = response.data.errorMsg || 'unspecified error';
-                    deferred.reject(errorMsg);
+                    deferred.resolve(errorMsg);
                 }
             );
 
@@ -797,14 +843,26 @@ angular.module('lp.import')
                 headers: { 'Content-Type': 'application/json' }
             }).then(
                 function onSuccess(response) {
-                    result = response.data;
-                    deferred.resolve(result);
+                    var result = response.data;
+                    if (result != null && result !== "") {
+                        result = response.data;
+                        deferred.resolve(result);
+                    } else {
+                        var errors = result.Errors;
+                        var result = {
+                                success: false,
+                                errorMsg: errors[0]
+                            };
+                        deferred.resolve(result.errorMsg);
+                    }
+
                 }, function onError(response) {
                     if (!response.data) {
                         response.data = {};
                     }
+
                     var errorMsg = response.data.errorMsg || 'unspecified error';
-                    deferred.reject(errorMsg);
+                    deferred.resolve(errorMsg);
                 }
             );
 
@@ -820,14 +878,26 @@ angular.module('lp.import')
                 headers: { 'Content-Type': 'application/json' }
             }).then(
                 function onSuccess(response) {
-                    result = response.data;
-                    deferred.resolve(result);
+                    var result = response.data;
+                    if (result != null && result !== "") {
+                        result = response.data;
+                        deferred.resolve(result);
+                    } else {
+                        var errors = result.Errors;
+                        var result = {
+                                success: false,
+                                errorMsg: errors[0]
+                            };
+                        deferred.resolve(result.errorMsg);
+                    }
+
                 }, function onError(response) {
                     if (!response.data) {
                         response.data = {};
                     }
+
                     var errorMsg = response.data.errorMsg || 'unspecified error';
-                    deferred.reject(errorMsg);
+                    deferred.resolve(errorMsg);
                 }
             );
 

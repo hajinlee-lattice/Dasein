@@ -15,8 +15,18 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            Success: false,
+                            errorMessage: errors[0]
+                        };
+                    deferred.resolve(result.errorMessage);
+                }
 
             }, function onError(response) {
                 if (!response.data) {
@@ -24,7 +34,7 @@ angular
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -44,15 +54,26 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            Success: false,
+                            errorMessage: errors[0]
+                        };
+                    deferred.resolve(result.errorMessage);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -74,12 +95,18 @@ angular
             headers: { 'Content-Type': 'application/json' }
         }).then(
             function onSuccess(response) {
-                var result = {
-                    data: response.data,
-                    success: true
-                };
-                
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            Success: false,
+                            errorMessage: errors[0]
+                        };
+                    deferred.resolve(result.errorMessage);
+                }
 
             }, function onError(response) {
                 if (!response.data) {
@@ -107,18 +134,26 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                result = {
-                    data: response.data,
-                    success: true
-                };
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            Success: false,
+                            errorMessage: errors[0]
+                        };
+                    deferred.resolve(result.errorMessage);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 

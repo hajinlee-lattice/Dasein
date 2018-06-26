@@ -26,17 +26,34 @@ angular
         }).then(
             function onSuccess(response) {
                 var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    // var errors = result.Errors;
+                    // var result = {
+                    //         success: false,
+                    //         errorMsg: errors[0]
+                    //     };
+                    // deferred.resolve(result.errorMsg);
 
-                deferred.resolve(result);
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorCode = response.data.errorCode || 'Error';
+                    var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                    deferred.reject(errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
 
-                var errorCode = response.data.errorCode || 'Error';
-                var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                deferred.reject(errorMsg);
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -51,11 +68,35 @@ angular
             url: '/pls/jobs/' + jobId + '/report/download' 
         }).then(
             function onSuccess(response) {
-                console.log(response);
-                deferred.resolve(response.data);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    // var errors = result.Errors;
+                    // var result = {
+                    //         success: false,
+                    //         errorMsg: errors[0]
+                    //     };
+                    // deferred.resolve(result.errorMsg);
+
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorCode = response.data.errorCode || 'Error';
+                    var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                    deferred.resolve(errorMsg);
+                }
+
             }, function onError(response) {
-                console.log(response);
-                deferred.resolve(response.data);
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -75,17 +116,34 @@ angular
         }).then(
             function onSuccess(response) {
                 var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    // var errors = result.Errors;
+                    // var result = {
+                    //         success: false,
+                    //         errorMsg: errors[0]
+                    //     };
+                    // deferred.resolve(result.errorMsg);
 
-                deferred.resolve(result);
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorCode = response.data.errorCode || 'Error';
+                    var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                    deferred.resolve(errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
 
-                var errorCode = response.data.errorCode || 'Error';
-                var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                deferred.reject(errorMsg);
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -109,55 +167,80 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                result = {
-                    success: true,
-                    resultObj: null
-                };
 
-                var jobs = _.sortBy(response.data, 'startTimestamp');
-                result.resultObj = _.map(jobs, function(job) {
-                    clearNumSteps();
-                    var stepRunning = getStepRunning(job);
-                    var stepsCompleted = getStepsCompleted(job);
-                    var stepFailed = getStepFailed(job);
-                    var subJobs = getSubJobs(job);
-                    var steps = getSteps(job);
-                    // var actions = getActions(job);
-                    // var actionsCount = getActionsCount(job)
-                    
-                    return {
-                        id: job.id,
-                        applicationId: job.applicationId,
-                        timestamp: job.startTimestamp,
-                        note: job.note ? job.note : '',
-                        errorCode: job.errorCode,
-                        errorMsg: job.errorMsg,
-                        jobType: job.jobType,
-                        status: job.jobStatus,
-                        inputs : job.inputs,
-                        source: job.inputs ? job.inputs.SOURCE_DISPLAY_NAME : null,
-                        subJobs: subJobs,
-                        steps: steps,
-                        user: job.user,
-                        jobStatus: job.jobStatus,
-                        modelName: job.inputs ?  job.inputs.MODEL_DISPLAY_NAME : null,
-                        modelId: (job.inputs && job.inputs.MODEL_ID ? job.inputs.MODEL_ID : (job.outputs && job.outputs.MODEL_ID ? job.outputs.MODEL_ID : null)),
-                        modelType: job.inputs ? job.inputs.MODEL_TYPE : null,
-                        sourceFileExists: job.inputs ? job.inputs.SOURCE_FILE_EXISTS == "true" : null,
-                        isDeleted: job.inputs ? job.inputs.MODEL_DELETED == "true": null,
-                        startTimestamp: job.startTimestamp,
-                        applicationLogUrl: job.outputs ? job.outputs.YARN_LOG_LINK_PATH : null,
-                        stepRunning: stepRunning,
-                        stepsCompleted: stepsCompleted,
-                        stepFailed: stepFailed,
-                        completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
-                        reports: job.reports,
+                if (response.data != null && response.data !== "") {
+
+                    result = {
+                        success: true,
+                        resultObj: null
                     };
-                });
 
-                deferred.resolve(result);
-            }, function onError(response) {
+                    var jobs = _.sortBy(response.data, 'startTimestamp');
+                    result.resultObj = _.map(jobs, function(job) {
+                        clearNumSteps();
+                        var stepRunning = getStepRunning(job);
+                        var stepsCompleted = getStepsCompleted(job);
+                        var stepFailed = getStepFailed(job);
+                        var subJobs = getSubJobs(job);
+                        var steps = getSteps(job);
+                        // var actions = getActions(job);
+                        // var actionsCount = getActionsCount(job)
+                        
+                        return {
+                            id: job.id,
+                            applicationId: job.applicationId,
+                            timestamp: job.startTimestamp,
+                            note: job.note ? job.note : '',
+                            errorCode: job.errorCode,
+                            errorMsg: job.errorMsg,
+                            jobType: job.jobType,
+                            status: job.jobStatus,
+                            inputs : job.inputs,
+                            source: job.inputs ? job.inputs.SOURCE_DISPLAY_NAME : null,
+                            subJobs: subJobs,
+                            steps: steps,
+                            user: job.user,
+                            jobStatus: job.jobStatus,
+                            modelName: job.inputs ?  job.inputs.MODEL_DISPLAY_NAME : null,
+                            modelId: (job.inputs && job.inputs.MODEL_ID ? job.inputs.MODEL_ID : (job.outputs && job.outputs.MODEL_ID ? job.outputs.MODEL_ID : null)),
+                            modelType: job.inputs ? job.inputs.MODEL_TYPE : null,
+                            sourceFileExists: job.inputs ? job.inputs.SOURCE_FILE_EXISTS == "true" : null,
+                            isDeleted: job.inputs ? job.inputs.MODEL_DELETED == "true": null,
+                            startTimestamp: job.startTimestamp,
+                            applicationLogUrl: job.outputs ? job.outputs.YARN_LOG_LINK_PATH : null,
+                            stepRunning: stepRunning,
+                            stepsCompleted: stepsCompleted,
+                            stepFailed: stepFailed,
+                            completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
+                            reports: job.reports,
+                        };
+                    });
 
+                    deferred.resolve(result);
+                } else {
+                    // var errors = result.Errors;
+                    // var result = {
+                    //         success: false,
+                    //         errorMsg: errors[0]
+                    //     };
+                    // deferred.resolve(result.errorMsg);
+
+                    if (!result.data) {
+                        result.data = {};
+                    }
+
+                    var errorCode = result.data.errorCode || 'Error';
+                    var errorMsg = result.data.errorMsg || 'unspecified error.';
+
+                    deferred.resolve(errorMsg);
+                }
+            }, function onError(result) {
+                if (!result.data) {
+                    result.data = {};
+                }
+
+                var errorMsg = result.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
             }
         );
         return deferred.promise;
@@ -181,59 +264,84 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                clearNumSteps();
-                var job = response.data;
-                var stepRunning = getStepRunning(job);
-                var stepsCompleted = getStepsCompleted(job);
-                var stepFailed = getStepFailed(job);
-                var subJobs = getSubJobs(job);
-                var steps = getSteps(job);
-                // var actions = getActions(job);
-                // var actionsCount = getActionsCount(job)
-                var source = null;
-                if(job.inputs !== undefined){
-                    source = job.inputs.SOURCE_DISPLAY_NAME;
+                if (result != null && result !== "") {
+                    clearNumSteps();
+                    var job = response.data;
+                    var stepRunning = getStepRunning(job);
+                    var stepsCompleted = getStepsCompleted(job);
+                    var stepFailed = getStepFailed(job);
+                    var subJobs = getSubJobs(job);
+                    var steps = getSteps(job);
+                    // var actions = getActions(job);
+                    // var actionsCount = getActionsCount(job)
+                    var source = null;
+                    if(job.inputs !== undefined){
+                        source = job.inputs.SOURCE_DISPLAY_NAME;
+                    }
+
+                    if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                        stepRunning = "score_training_set";
+                    } else if (stepRunning === "load_data" && stepsCompleted.indexOf("generate_insights") > -1) {
+                        stepRunning = 'generate_insights';
+                    }
+                    result = {
+                        success: true,
+                        resultObj:
+                            {
+                                id: job.id,
+                                user: job.user,
+                                // actions: actions,
+                                // actionsCount: actionsCount,
+                                errorCode: job.errorCode,
+                                errorMsg: job.errorMsg,
+                                jobType: job.jobType,
+                                jobStatus: job.jobStatus,
+                                status: job.jobStatus,
+                                startTimestamp: job.startTimestamp,
+                                stepRunning: stepRunning,
+                                stepsCompleted: stepsCompleted,
+                                stepFailed: stepFailed,
+                                subJobs: subJobs,
+                                steps: steps,
+                                completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
+                                reports: job.reports,
+                                applicationId: job.applicationId,
+                                inputs: job.inputs,
+                                source: source,
+                                modelName: (job.inputs && job.inputs.MODEL_DISPLAY_NAME ? job.inputs.MODEL_DISPLAY_NAME : null) ,
+                                modelId: (job.inputs && job.inputs.MODEL_ID ? job.inputs.MODEL_ID : (job.outputs && job.outputs.MODEL_ID ? job.outputs.MODEL_ID : null)),
+                                modelType: job.inputs ? job.inputs.MODEL_TYPE : null,
+                                sourceFileExists: job.inputs ? job.inputs.SOURCE_FILE_EXISTS == "true" : null,
+                                isDeleted: job.inputs ? job.inputs.MODEL_DELETED == "true": null,
+                                applicationLogUrl: job.outputs ? job.outputs.YARN_LOG_LINK_PATH : null
+                            }
+                    };
+
+                    deferred.resolve(result);
+                } else {
+                    // var errors = result.Errors;
+                    // var result = {
+                    //         success: false,
+                    //         errorMsg: errors[0]
+                    //     };
+                    // deferred.resolve(result.errorMsg);
+
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorCode = response.data.errorCode || 'Error';
+                    var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                    deferred.resolve(errorMsg);
+                }
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
                 }
 
-                if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
-                    stepRunning = "score_training_set";
-                } else if (stepRunning === "load_data" && stepsCompleted.indexOf("generate_insights") > -1) {
-                    stepRunning = 'generate_insights';
-                }
-                result = {
-                    success: true,
-                    resultObj:
-                        {
-                            id: job.id,
-                            user: job.user,
-                            // actions: actions,
-                            // actionsCount: actionsCount,
-                            errorCode: job.errorCode,
-                            errorMsg: job.errorMsg,
-                            jobType: job.jobType,
-                            jobStatus: job.jobStatus,
-                            status: job.jobStatus,
-                            startTimestamp: job.startTimestamp,
-                            stepRunning: stepRunning,
-                            stepsCompleted: stepsCompleted,
-                            stepFailed: stepFailed,
-                            subJobs: subJobs,
-                            steps: steps,
-                            completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
-                            reports: job.reports,
-                            applicationId: job.applicationId,
-                            inputs: job.inputs,
-                            source: source,
-                            modelName: (job.inputs && job.inputs.MODEL_DISPLAY_NAME ? job.inputs.MODEL_DISPLAY_NAME : null) ,
-                            modelId: (job.inputs && job.inputs.MODEL_ID ? job.inputs.MODEL_ID : (job.outputs && job.outputs.MODEL_ID ? job.outputs.MODEL_ID : null)),
-                            modelType: job.inputs ? job.inputs.MODEL_TYPE : null,
-                            sourceFileExists: job.inputs ? job.inputs.SOURCE_FILE_EXISTS == "true" : null,
-                            isDeleted: job.inputs ? job.inputs.MODEL_DELETED == "true": null,
-                            applicationLogUrl: job.outputs ? job.outputs.YARN_LOG_LINK_PATH : null
-                        }
-                };
-
-                deferred.resolve(result);
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
             }
         );
         return deferred.promise;
@@ -253,41 +361,62 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                clearNumSteps();
-                var job = response.data;
-                var stepRunning = getStepRunning(job);
-                var stepsCompleted = getStepsCompleted(job);
-                var stepFailed = getStepFailed(job);
 
-                if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
-                    stepRunning = "score_training_set";
-                } else if (stepRunning === "load_data" && stepsCompleted.indexOf("generate_insights") > -1) {
-                    stepRunning = 'generate_insights';
-                }
-                result = {
-                    success: true,
-                    resultObj: {
-                        id: job.id,
-                        user: job.user,
-                        errorCode: job.errorCode,
-                        errorMsg: job.errorMsg,
-                        jobType: job.jobType,
-                        jobStatus: job.jobStatus,
-                        startTimestamp: job.startTimestamp,
-                        stepRunning: stepRunning,
-                        stepsCompleted: stepsCompleted,
-                        stepFailed: stepFailed,
-                        completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
-                        reports: job.reports
+                if (result != null && result !== "") {
+                    clearNumSteps();
+                    var job = response.data;
+                    var stepRunning = getStepRunning(job);
+                    var stepsCompleted = getStepsCompleted(job);
+                    var stepFailed = getStepFailed(job);
+
+                    if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                        stepRunning = "score_training_set";
+                    } else if (stepRunning === "load_data" && stepsCompleted.indexOf("generate_insights") > -1) {
+                        stepRunning = 'generate_insights';
                     }
-                };
-                deferred.resolve(result);
+                    result = {
+                        success: true,
+                        resultObj: {
+                            id: job.id,
+                            user: job.user,
+                            errorCode: job.errorCode,
+                            errorMsg: job.errorMsg,
+                            jobType: job.jobType,
+                            jobStatus: job.jobStatus,
+                            startTimestamp: job.startTimestamp,
+                            stepRunning: stepRunning,
+                            stepsCompleted: stepsCompleted,
+                            stepFailed: stepFailed,
+                            completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
+                            reports: job.reports
+                        }
+                    };
+                    deferred.resolve(result);
+                } else {
+                    // var errors = result.Errors;
+                    // var result = {
+                    //         success: false,
+                    //         errorMsg: errors[0]
+                    //     };
+                    // deferred.resolve(result.errorMsg);
+
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorCode = response.data.errorCode || 'Error';
+                    var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                    deferred.resolve(errorMsg);
+                }
             },
             function onError(response) {
-                result = {
-                    success: false,
-                };
-                deferred.resolve(result);
+                var errors = result.Errors;
+                var result = {
+                        success: false,
+                        errorMsg: errors[0]
+                    };
+                deferred.resolve(result.errorMsg);
             }
         );
 
@@ -313,10 +442,35 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    // var errors = result.Errors;
+                    // var result = {
+                    //         success: false,
+                    //         errorMsg: errors[0]
+                    //     };
+                    // deferred.resolve(result.errorMsg);
+
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorCode = response.data.errorCode || 'Error';
+                    var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                    deferred.resolve(errorMsg);
+                }
+
             }, function onError(response) {
-                result.success = false;
-                deferred.resolve(result);
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
             }
         );
         return deferred.promise;
@@ -375,11 +529,43 @@ angular
         $http({
             method: 'POST',
             url: '/pls/cdl/processanalyze'
-        }).then(function(response) {
-            deferred.resolve(response.data);
-        }, function(err){
-            job.status = 'Failed';
-        });
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    job.status = 'Failed';
+
+                    // var errors = result.Errors;
+                    // var result = {
+                    //         success: false,
+                    //         errorMsg: errors[0]
+                    //     };
+                    // deferred.resolve(result.errorMsg);
+
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorCode = response.data.errorCode || 'Error';
+                    var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                    deferred.resolve(errorMsg);
+                }
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                job.status = 'Failed';
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+
         return deferred.promise;
     }
 

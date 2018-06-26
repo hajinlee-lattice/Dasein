@@ -1098,14 +1098,26 @@ angular.module('lp.ratingsengine')
             cache: true
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -1125,14 +1137,26 @@ angular.module('lp.ratingsengine')
             }
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -1149,14 +1173,26 @@ angular.module('lp.ratingsengine')
             params: params || {}
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -1182,14 +1218,26 @@ angular.module('lp.ratingsengine')
             }
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
         return deferred.promise;
@@ -1204,14 +1252,26 @@ angular.module('lp.ratingsengine')
             data: opts.model
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -1226,14 +1286,26 @@ angular.module('lp.ratingsengine')
             url: '/pls/ratingengines/' + id
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -1248,14 +1320,26 @@ angular.module('lp.ratingsengine')
             url: '/pls/ratingengines/' + id + '/dashboard'
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -1273,14 +1357,26 @@ angular.module('lp.ratingsengine')
             }
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -1295,14 +1391,26 @@ angular.module('lp.ratingsengine')
             data: opts
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
        
@@ -1316,14 +1424,26 @@ angular.module('lp.ratingsengine')
             url:  '/pls/ratingengines/' + ratingId + '/ratingmodels/' + modelId
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
     
@@ -1341,14 +1461,26 @@ angular.module('lp.ratingsengine')
             data: ratingEngine
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
+
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
     

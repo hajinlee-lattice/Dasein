@@ -181,23 +181,9 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         var tileState = vm.current.tileStates[play.name];
         tileState.launching = !tileState.launching;
 
-        console.log(play);
-
-        var params = {
-            playName: play.name,
-            sortBy: 'created',
-            descending: true,
-            offset: 0
-        };
-        PlaybookWizardStore.getPlayLaunches(params).then(function(result){
-            PlaybookWizardStore.setBucketsToLaunch(result.launchSummaries[0].selectedBuckets);
-            PlaybookWizardStore.setDestinationOrgId(result.launchSummaries[0].destinationOrgId);
-            PlaybookWizardStore.setDestinationSysType(result.launchSummaries[0].destinationSysType);
-            PlaybookWizardStore.setDestinationAccountId(result.launchSummaries[0].destinationAccountId);
-
-            PlaybookWizardStore.launchPlay(play).then(function(data) {
-                vm.lockLaunching = false;
-            });
+        var opts = play.launchHistory.mostRecentLaunch;
+        PlaybookWizardStore.launchPlay(play, opts).then(function(data) {
+            vm.lockLaunching = false;
         });
     }
 

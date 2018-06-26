@@ -49,6 +49,10 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
 
+        console.log(vm.currentConfiguration);
+        console.log(vm.workingBuckets);
+        console.log(vm.ratingsSummary.total_num_leads);
+
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
 

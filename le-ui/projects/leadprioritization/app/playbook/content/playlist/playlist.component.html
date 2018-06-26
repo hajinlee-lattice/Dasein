@@ -98,7 +98,7 @@
 
                         <!-- Ratings chart if play has Launched -->
                         <div 
-                            ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'"
+                            ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched' && vm.current.tileStates[play.name].launching != true"
                             class="{{ play.ratingEngine.tileClass }}">
                             <bar-chart
                                 config="play.ratingEngine.chartConfig" 
@@ -128,7 +128,7 @@
                         <button
                             type="button"
                             class="button gray-button pull-right"
-                            ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launching'">
+                            ng-if="vm.current.tileStates[play.name].launching == true">
                             <i class="fa fa-spinner fa-pulse fw"></i> 
                             Launching...</button>
                         <span ng-if="!vm.current.tileStates[play.name].launching">

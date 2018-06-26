@@ -61,8 +61,18 @@ angular.module('lp.sfdc', [])
             }
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
 
             }, function onError(response) {
                 if (!response.data) {
@@ -70,7 +80,7 @@ angular.module('lp.sfdc', [])
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -85,8 +95,18 @@ angular.module('lp.sfdc', [])
             url: '/pls/lookup-id-mapping/available-lookup-ids?externalSystemType=CRM'
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
 
             }, function onError(response) {
                 if (!response.data) {
@@ -94,7 +114,7 @@ angular.module('lp.sfdc', [])
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -109,8 +129,18 @@ angular.module('lp.sfdc', [])
             url: '/pls/lookup-id-mapping/'
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
 
             }, function onError(response) {
                 if (!response.data) {
@@ -118,7 +148,7 @@ angular.module('lp.sfdc', [])
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 
@@ -134,8 +164,18 @@ angular.module('lp.sfdc', [])
             data: org
         }).then(
             function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
+                var result = response.data;
+                if (result != null && result !== "") {
+                    result = response.data;
+                    deferred.resolve(result);
+                } else {
+                    var errors = result.Errors;
+                    var result = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+                    deferred.resolve(result.errorMsg);
+                }
 
             }, function onError(response) {
                 if (!response.data) {
@@ -143,7 +183,7 @@ angular.module('lp.sfdc', [])
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
         );
 

@@ -16,9 +16,16 @@
         margin: 60px auto 0;
         font-size: 18px;
     }
-    .checkbox-input input[type="number"] {
-        width: 60px;
+    .checkbox-input {
+        input[type="number"] {
+            width: 60px;
+        }
+        p {
+            display: block;
+            padding-left: 22px;
+        }
     }
+
     .bucket-checkboxes li {
         width: 19%;
     }

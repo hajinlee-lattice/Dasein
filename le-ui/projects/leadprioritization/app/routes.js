@@ -258,15 +258,24 @@ angular
                 BackStore.setBackState(backState);
             }],
             resolve: {
-                RatingEngine: function($q, $stateParams, RatingsEngineStore) {
-                    var deferred = $q.defer(),
-                        id = $stateParams.rating_id;
+                IsCdl : function(FeatureFlagService){
+                    var flags = FeatureFlagService.Flags();
+                    var cdl = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+                    return cdl;
+                },
+                RatingEngine: function($q, $stateParams, RatingsEngineStore, IsCdl) {
+                    if(IsCdl){
+                        var deferred = $q.defer(),
+                            id = $stateParams.rating_id;
 
-                    RatingsEngineStore.getRating(id).then(function(engine) {
-                        deferred.resolve(engine);
-                    });
+                        RatingsEngineStore.getRating(id).then(function(engine) {
+                            deferred.resolve(engine);
+                        });
 
-                    return deferred.promise;
+                        return deferred.promise;
+                    } else {
+                        return null;
+                    }
                 },
                 Model: function($q, $stateParams, ModelStore) {
                     var deferred = $q.defer(),
@@ -278,13 +287,6 @@ angular
 
                     return deferred.promise;
                 },
-                
-                IsCdl : function(FeatureFlagService){
-                    var flags = FeatureFlagService.Flags();
-                    var cdl = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
-                    return cdl;
-                },
-                
                 IsRatingEngine: function(Model) {
                     return Model.ModelDetails.Name.substring(0,2) == 'ai';
                 },
@@ -1297,9 +1299,8 @@ angular
                             });
                             if(!found){
                                 org.accountId = null;
+                                SfdcService.saveOrgs(org.configId, org);
                             }
-
-                            SfdcService.saveOrgs(org.configId, org);
                         });
 
                         deferred.resolve(result.CRM);

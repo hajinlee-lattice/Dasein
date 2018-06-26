@@ -21,17 +21,20 @@
             class="checkbox-input">
             <input 
                 type="checkbox"
-                ng-model="targetsLimit"
-                ng-change="targetsLimit && vm.updateTargetLimit()" />
+                ng-model="topNCount"
+                ng-change="topNCount && vm.updateTopNCount()" />
             <label>Limit to only </label>
             <input 
                 type="number" 
-                ng-model="vm.ratedTargetsLimit"
+                ng-model="vm.topNCount"
                 ng-model-options="{ debounce: 500 }"
-                ng-focus="vm.ratingLimitInputClick($event)"
-                ng-change="targetsLimit && vm.updateTargetLimit()"
+                ng-focus="vm.topNInputClick($event)"
+                min="1"
+                ng-max="::vm.topNCount"
+                ng-change="topNCount && vm.updateTopNCount()"
                 class="form-control" />
             <span> highest rated targets</span>
+            <p class="error-text" ng-if="vm.showError == true">Value must be between 1 and {{ vm.maxTargetValue }}</p>
         </div>
 
         <ul 

@@ -76,7 +76,10 @@ angular.module('lp.playbook.dashboard', [
     vm.launchPlay = function() {
         if(!vm.showLaunchSpinner) {
             vm.showLaunchSpinner = true;
-            PlaybookWizardStore.launchPlay(vm.play).then(function(data) {
+
+            var opts = vm.play.launchHistory.mostRecentLaunch;
+
+            PlaybookWizardStore.launchPlay(vm.play, opts).then(function(data) {
                 vm.launchHistory.push(data);
                 vm.showLaunchSpinner = false;
                 if(onpage) {
