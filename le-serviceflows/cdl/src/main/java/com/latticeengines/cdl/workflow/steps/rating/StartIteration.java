@@ -1,9 +1,12 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -13,8 +16,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("startIteration")
@@ -22,6 +29,9 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(StartIteration.class);
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     @Override
     public void execute() {
@@ -62,6 +72,22 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                     inactiveEnginesInIteration.add(engineId);
                 }
             });
+
+            if (CollectionUtils.isNotEmpty(inactiveEnginesInIteration)) {
+                Set<String> existingEngineIds = new HashSet<>();
+                List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadataFromCache(
+                        configuration.getCustomerSpace().toString(), BusinessEntity.Rating);
+                if (CollectionUtils.isNotEmpty(cms)) {
+                    cms.forEach(cm -> {
+                        if (cm.getAttrName().startsWith(RatingEngine.RATING_ENGINE_PREFIX)) {
+                            String engineId = RatingEngine.toEngineId(cm.getAttrName());
+                            existingEngineIds.add(engineId);
+                        }
+                    });
+                }
+                inactiveEnginesInIteration.stream().filter(engineId -> existingEngineIds.contains(engineId))
+                        .collect(Collectors.toList());
+            }
 
             log.info("Active engines for this iteration: " + new ArrayList<>(activeEnginesInIteration));
             log.info("Inactive engines for this iteration: " + inactiveEnginesInIteration);
