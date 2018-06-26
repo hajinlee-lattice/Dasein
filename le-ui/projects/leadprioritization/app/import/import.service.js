@@ -735,12 +735,14 @@ angular.module('lp.import')
                         result = response.data;
                         deferred.resolve(result);
                     } else {
-                        var errors = result.Errors;
-                        var result = {
-                                success: false,
-                                errorMsg: errors[0]
-                            };
-                        deferred.resolve(result.errorMsg);
+                        // var errors = result.Errors;
+                        // var result = {
+                        //         success: false,
+                        //         errorMsg: errors[0]
+                        //     };
+                        result = {};
+                        deferred.resolve(result);
+                        // deferred.resolve(result.errorMsg);
                     }
 
                 }, function onError(response) {
@@ -779,12 +781,14 @@ angular.module('lp.import')
                         result = response.data;
                         deferred.resolve(result);
                     } else {
-                        var errors = result.Errors;
-                        var result = {
-                                success: false,
-                                errorMsg: errors[0]
-                            };
-                        deferred.resolve(result.errorMsg);
+                        // var errors = result.Errors;
+                        // var result = {
+                        //         success: false,
+                        //         errorMsg: errors[0]
+                        //     };
+                        // deferred.resolve(result.errorMsg);
+                        result = {};
+                        deferred.resolve(result);
                     }
 
                 }, function onError(response) {
@@ -813,12 +817,14 @@ angular.module('lp.import')
                         result = response.data;
                         deferred.resolve(result);
                     } else {
-                        var errors = result.Errors;
-                        var result = {
-                                success: false,
-                                errorMsg: errors[0]
-                            };
-                        deferred.resolve(result.errorMsg);
+                        // var errors = result.Errors;
+                        // var result = {
+                        //         success: false,
+                        //         errorMsg: errors[0]
+                        //     };
+                        // deferred.resolve(result.errorMsg);
+                        result = {};
+                        deferred.resolve(result);
                     }
 
                 }, function onError(response) {
@@ -848,12 +854,14 @@ angular.module('lp.import')
                         result = response.data;
                         deferred.resolve(result);
                     } else {
-                        var errors = result.Errors;
-                        var result = {
-                                success: false,
-                                errorMsg: errors[0]
-                            };
-                        deferred.resolve(result.errorMsg);
+                        // var errors = result.Errors;
+                        // var result = {
+                        //         success: false,
+                        //         errorMsg: errors[0]
+                        //     };
+                        // deferred.resolve(result.errorMsg);
+                        result = {};
+                        deferred.resolve(result);
                     }
 
                 }, function onError(response) {
@@ -883,12 +891,14 @@ angular.module('lp.import')
                         result = response.data;
                         deferred.resolve(result);
                     } else {
-                        var errors = result.Errors;
-                        var result = {
-                                success: false,
-                                errorMsg: errors[0]
-                            };
-                        deferred.resolve(result.errorMsg);
+                        // var errors = result.Errors;
+                        // var result = {
+                        //         success: false,
+                        //         errorMsg: errors[0]
+                        //     };
+                        // deferred.resolve(result.errorMsg);
+                        result = {};
+                        deferred.resolve(result);
                     }
 
                 }, function onError(response) {
