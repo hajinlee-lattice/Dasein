@@ -32,6 +32,8 @@ var mainApp = angular.module('insightsApp', [
 .service('SegmentStore', function() {})
 .service('RatingsEngineStore', function(){})
 .service('ConfigureAttributesStore', function(){})
+.service('CollectionStatus', function(){})
+.service('AuthorizationUtility', function(){})
 .service('AuthStore', function($q) {
     this.Authorization = '';
     

@@ -30,7 +30,7 @@ angular
                 queryText: '',
                 QueryStore: QueryStore,
                 saved: false,
-                hasDeleteAccessRights: AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser)
+                hasDeleteAccessRights: ['segment.analysis'].indexOf(vm.section) != -1 ? AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) : false
             });
 
             // remove highlighting
@@ -318,8 +318,9 @@ angular
                 featureFlags[flags.VDB_MIGRATION] = false;
                 featureFlags[flags.ENABLE_FILE_IMPORT] = true;
 
-                return AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) && AuthorizationUtility.checkFeatureFlags(featureFlags) &&
-                                ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard;
+                return ['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard &&
+                        AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) && AuthorizationUtility.checkFeatureFlags(featureFlags);
+                                
             }
 
             vm.init_filters();
