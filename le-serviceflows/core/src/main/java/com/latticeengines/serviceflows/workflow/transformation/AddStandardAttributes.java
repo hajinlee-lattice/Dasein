@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
@@ -23,9 +24,11 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
         AddStandardAttributesConfiguration configuration = getConfiguration();
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         configuration.setTargetTableName(eventTable.getName() + "_with_std_attrib");
-        configuration.setDataFlowParams(DataFlowFactory.getAddStandardAttributesParameters( //
+        AddStandardAttributesParameters parameters = DataFlowFactory.getAddStandardAttributesParameters( //
                 eventTable.getName(), configuration.getTransforms(), configuration.getRuntimeParams(),
-                configuration.getSourceSchemaInterpretation()));
+                configuration.getSourceSchemaInterpretation());
+        parameters.inputSkippedAttributeList = getListObjectFromContext(INPUT_SKIPPED_ATTRIBUTES_KEY, String.class);
+        configuration.setDataFlowParams(parameters);
     }
 
     @Override

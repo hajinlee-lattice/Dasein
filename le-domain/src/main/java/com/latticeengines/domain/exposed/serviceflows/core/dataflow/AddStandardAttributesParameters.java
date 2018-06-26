@@ -19,10 +19,14 @@ public class AddStandardAttributesParameters extends DataFlowParameters {
     @JsonProperty("do_sort")
     public boolean doSort;
 
+    @JsonProperty("input_skipped_attribute_list")
+    public List<String> inputSkippedAttributeList;
+
     @JsonProperty("schema_interpretation")
     public SchemaInterpretation sourceSchemaInterpretation;
 
-    public AddStandardAttributesParameters(String eventTable, List<TransformDefinition> transforms, SchemaInterpretation sourceSchemaInterpretation) {
+    public AddStandardAttributesParameters(String eventTable, List<TransformDefinition> transforms,
+            SchemaInterpretation sourceSchemaInterpretation) {
         this.eventTable = eventTable;
         this.transforms = transforms;
         this.sourceSchemaInterpretation = sourceSchemaInterpretation;

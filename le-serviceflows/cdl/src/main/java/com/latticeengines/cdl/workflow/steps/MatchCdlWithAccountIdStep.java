@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -45,13 +47,19 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
     private DataFlowParameters createDataFlowParameters() {
         Table inputTable = getInputTable();
         String[] attributeNames = inputTable.getAttributeNames();
-        putObjectInContext(CUSTOM_EVENT_MATCH_ATTRIBUTES, Arrays.asList(attributeNames));
+        List<String> inputAttributeList = Arrays.asList(attributeNames);
+        putObjectInContext(CUSTOM_EVENT_MATCH_ATTRIBUTES, inputAttributeList);
         Table accountTable = getAccountTable();
         MatchCdlAccountParameters parameters = new MatchCdlAccountParameters(inputTable.getName(),
                 accountTable.getName());
         parameters.setInputMatchFields(Arrays.asList(configuration.getMatchAccountIdColumn()));
         parameters.setAccountMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
         parameters.setHasAccountId(true);
+
+        List<String> accountAttributeList = Arrays.asList(accountTable.getAttributeNames());
+        List<String> inputSkippedAttributeList = new ArrayList<>(inputAttributeList);
+        inputSkippedAttributeList.removeAll(accountAttributeList);
+        putObjectInContext(INPUT_SKIPPED_ATTRIBUTES_KEY, inputSkippedAttributeList);
         return parameters;
     }
 

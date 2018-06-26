@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.dataflow;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -35,7 +36,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
 
         for (TransformDefinition definition : definitions) {
             resolveDuplicateName(eventTable, definition);
-            last = addFunction(last, eventTable, definition);
+            last = addFunction(last, eventTable, definition, parameters.inputSkippedAttributeList);
         }
 
         if (parameters.doSort) {
@@ -111,12 +112,19 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         }
     }
 
-    private Node addFunction(Node last, Node eventTable, TransformDefinition definition) {
+    private Node addFunction(Node last, Node eventTable, TransformDefinition definition,
+            List<String> inputSkippedAttributeList) {
         log.info("definition: " + definition);
         for (Object value : definition.arguments.values()) {
             Attribute attr = eventTable.getSourceAttribute(String.valueOf(value));
             if (attr == null) {
                 log.info(String.format("Excluding field %s (function %s) because some source columns are not available",
+                        definition.output, definition.name));
+                return last;
+            }
+            if (CollectionUtils.isNotEmpty(inputSkippedAttributeList)
+                    && inputSkippedAttributeList.contains(attr.getName())) {
+                log.info(String.format("Excluding field %s (function %s) because some source columns are skipped",
                         definition.output, definition.name));
                 return last;
             }

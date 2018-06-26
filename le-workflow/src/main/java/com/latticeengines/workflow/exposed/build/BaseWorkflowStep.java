@@ -94,7 +94,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SOURCE_IMPORT_TABLE = "SOURCE_IMPORT_TABLE_NAME";
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
 
-
     // CDL
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
@@ -140,6 +139,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CUSTOM_EVENT_MATCH_ACCOUNT_ID = "CUSTOM_EVENT_MATCH_ACCOUNT_ID";
     protected static final String CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID = "CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID";
 
+    protected static final String INPUT_SKIPPED_ATTRIBUTES_KEY = "INPUT_SKIPPED_ATTRIBUTES_KEY";
+
     public static final String CHOREOGRAPHER_CONTEXT_KEY = "CHOREOGRAPHER_CONTEXT_KEY";
 
     @Autowired
@@ -157,8 +158,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     @Autowired
     protected WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader =
-            new MagicAuthenticationHeaderHttpRequestInterceptor();
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
             .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
