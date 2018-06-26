@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
@@ -493,11 +494,12 @@ public class StatsCubeUtils {
     private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {
         if (attributeStats.getBuckets() != null && attributeStats.getBuckets().getBucketList() != null) {
             Buckets buckets = attributeStats.getBuckets();
-            List<Bucket> top5Bkts = buckets.getBucketList().stream() //
-                    .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0) //
-                    .sorted(Comparator.comparing(bkt -> -bkt.getCount())) //
-                    .limit(5) //
-                    .collect(Collectors.toList());
+            Stream<Bucket> bucketStream = buckets.getBucketList().stream() //
+                    .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0);
+            if (BucketType.Enum.equals(buckets.getType())) {
+                bucketStream = bucketStream.sorted(Comparator.comparing(bkt -> -bkt.getCount()));
+            }
+            List<Bucket> top5Bkts = bucketStream.limit(5).collect(Collectors.toList());
             if (attributeStats.getBuckets().getBucketList().size() > top5Bkts.size()) {
                 buckets.setHasMore(true);
             }
