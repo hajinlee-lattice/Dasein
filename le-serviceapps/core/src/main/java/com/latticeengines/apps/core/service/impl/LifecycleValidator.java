@@ -55,7 +55,7 @@ public class LifecycleValidator extends AttrValidator {
                 }
             }
             // check customer value or system value is equal to Inactive
-            if (AttrState.Inactive.equals(finalState)) {
+            if (!isAdmin && AttrState.Inactive.equals(finalState)) {
                 for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
                     Boolean finalUsageValue = attrConfig.getPropertyFinalValue(group.name(), Boolean.class);
                     if (Boolean.TRUE.equals((finalUsageValue))) {
