@@ -14,35 +14,36 @@ angular
         	'Account',
         	'Contact',
         	'Product',
-        	'Transaction'
+        	'Transaction',
+        	'PurchaseHistory'
         ],
         summaries: {
         	'Account': {},
         	'Contact': {},
         	'Product': {},
-        	'Transaction': {}
+        	'Transaction': {},
+        	'PurchaseHistory': {}
         },
         counts: {
         	'Account': 0,
         	'Contact': 0,
         	'Product': 0,
-        	'Transaction': 0
+        	'Transaction': 0,
+        	'PurchaseHistory': 0
         }
     });
-
-	// console.log(JSON.stringify(vm.job));
 
 	vm.init = function() {
 		vm.actions = vm.job.subJobs;
 		vm.reports = vm.job['reports'];
-		vm.curatedAttributeSubJobs = vm.getCuratedAttributesMetrics(vm.actions);
 		vm.reports.forEach(function(report) {
 			var payload = JSON.parse(report['json']['Payload']);
 			if (report['purpose'] == 'PROCESS_ANALYZE_RECORDS_SUMMARY') {
 				if (payload.EntitiesSummary) {
 					vm.entities.forEach(function(entity) {
-						vm.counts[entity] = payload.EntitiesSummary[entity].EntityStatsSummary ? payload.EntitiesSummary[entity].EntityStatsSummary['TOTAL'] : 0;
-						vm.summaries[entity] = payload.EntitiesSummary[entity].ConsolidateRecordsSummary;
+						vm.counts[entity] = payload.EntitiesSummary[entity] && payload.EntitiesSummary[entity].EntityStatsSummary 
+											? payload.EntitiesSummary[entity].EntityStatsSummary['TOTAL'] : 0;
+						vm.summaries[entity] = payload.EntitiesSummary[entity] ? payload.EntitiesSummary[entity].ConsolidateRecordsSummary : {};
 						if (entity == 'Product') {
 							vm.counts[entity] = payload.EntitiesSummary[entity].ConsolidateRecordsSummary['PRODUCT_ID'] || 0;
 						}
@@ -56,17 +57,6 @@ angular
 		});
 
 	}
-
-	vm.getCuratedAttributesMetrics = function(actions) {
-		var result = [];
-		actions.forEach(function(action) {
-			if (action.jobType == 'purchaseMetricsChange') {
-				result.push(action);
-			}
-		});
-		return result;
-	}
-
 
 	vm.downloadReport = function() {
 		var data, filename, link;

@@ -26,7 +26,9 @@ angular
         		matchedRecords: 0,
         		deletedRecords: 0,
         		unmatchedRecords: 0,
-                hasErrorMessage: false
+                hasErrorMessage: false,
+                showCuratedAttributesTable: $scope.entity == 'PurchaseHistory',
+                showActionsTable: $scope.entity != 'PurchaseHistory'
         	});
         	
         	vm.init = function() {
@@ -38,17 +40,24 @@ angular
                     vm.updatedProductHierarchy = vm.report['PRODUCT_HIERARCHY'] ? vm.report['PRODUCT_HIERARCHY'] : 0;
                     vm.updatedProductBundle = vm.report['PRODUCT_BUNDLE'] ? vm.report['PRODUCT_BUNDLE'] : 0;
                     vm.hasErrorMessage = vm.report['ERROR_MESSAGE'] != undefined ? vm.report['ERROR_MESSAGE'] : false; 
+                    if (vm.entity == 'PurchaseHistory') {
+                        vm.curatedAttributes = vm.report['ACTIONS'] ? vm.report['ACTIONS'] : {};
+                    }
         		}
-        		vm.setFilteredActions();
+                if (vm.showActionsTable) {
+                    vm.setFilteredActions();
+                }
                 vm.config = vm.getConfig();
         	}
 
         	vm.format = function(entity) {
-        		if (entity != 'Transaction') {
+        		if (entity != 'Transaction' && entity != 'PurchaseHistory') {
         			return entity.replace(/_/g, " ") + 's';
-        		} else {
-        			return 'Product Purchases'
-        		}
+        		} else if (entity == 'Transaction'){
+        			return 'Product Purchases';
+        		} else if (entity == 'PurchaseHistory') {
+                    return 'Curated Attributes';
+                }
         	}
 
         	vm.entityIcon = function(entity) {
@@ -83,7 +92,6 @@ angular
 			}
 
             vm.hasErrorMessage = function() {
-                console.log(vm.report);
                 return vm.entity == 'Product' && vm.report['ERROR_MESSAGE'];
             }
 
@@ -112,6 +120,8 @@ angular
                                 'new': true,
                                 'deleted': true
                                 };
+                    case 'PurchaseHistory': 
+                        return {};
                 }
             }
         	

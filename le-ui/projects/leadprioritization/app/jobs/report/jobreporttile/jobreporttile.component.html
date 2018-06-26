@@ -64,5 +64,28 @@
                 </li>
             </ul>
         </div>
-        <import-job-row-sub-jobs subjobs="vm.filteredActions"></import-job-row-sub-jobs>
+
+        <import-job-row-sub-jobs subjobs="vm.filteredActions" ng-if="vm.showActionsTable"></import-job-row-sub-jobs>
+
+        <div class="job-subactions le-row" ng-if="vm.showCuratedAttributesTable">
+            <div class="le-col-start-1 le-col-span-12 le-grid">
+                <div class="le-header le-header-expand le-row">
+                    <div class="le-cell le-col-start-1 le-col-span-2">Start Time</div>
+                    <div class="le-cell le-col-start-3 le-col-span-5">Actions</div>
+                    <div class="le-cell le-col-start-8 le-col-span-3">User</div>
+                </div>
+                
+                <div class="le-row" ng-repeat="curatedAttribute in vm.curatedAttributes | orderBy:'-startTimestamp'">
+                    <div class="le-cell le-col-start-1 le-col-span-2">
+                        {{curatedAttribute.TIME}}
+                    </div>
+                    <div class="le-cell le-col-start-3 le-col-span-5">
+                        {{curatedAttribute.ACTION}}
+                    </div>
+                    <div class="le-cell le-col-start-8 le-col-span-3">
+                        {{curatedAttribute.USER}}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
