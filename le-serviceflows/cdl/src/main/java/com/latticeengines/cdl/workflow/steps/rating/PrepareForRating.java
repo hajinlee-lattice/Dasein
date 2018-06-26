@@ -327,7 +327,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         Map<String, Map<String, Double>> liftMap = new HashMap<>();
         DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         StatisticsContainer statsContainer = dataCollectionProxy.getStats(customerSpace, inactive);
-        if (statsContainer != null) {
+        if (statsContainer != null && statsContainer.getStatsCubes() != null) {
             StatsCube statsCube = statsContainer.getStatsCubes().get(BusinessEntity.Rating.name());
             if (statsCube != null) {
                 statsCube.getStatistics().forEach((attrName, attrStats) -> {
