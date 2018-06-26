@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -124,7 +125,7 @@ public class BucketedScoreSummaryUtils {
             bucketMetadataList.get(i).setNumLeads(totolLeads);
         }
 
-        return bucketMetadataList;
+        return Lists.reverse(bucketMetadataList);
     }
 
     private static void sortBucketMetadata(List<BucketMetadata> bucketMetadata) {
