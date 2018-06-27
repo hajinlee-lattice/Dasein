@@ -24,18 +24,18 @@ public class GenericValidator extends AttrValidator {
     @Override
     public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
         for (AttrConfig attrConfig : attrConfigs) {
-            checkInvalidPropChange(attrConfig, isAdmin);
+            checkInvalidPropChange(attrConfig);
         }
     }
 
 
-    private void checkInvalidPropChange(AttrConfig attrConfig, boolean isAdmin) {
+    private void checkInvalidPropChange(AttrConfig attrConfig) {
         Map<String, AttrConfigProp<?>> attrConfigPropMap = attrConfig.getAttrProps();
         if (MapUtils.isEmpty(attrConfigPropMap)) {
             return;
         }
         for (Map.Entry<String, AttrConfigProp<?>> attrProp : attrConfigPropMap.entrySet()) {
-            if (!isAdmin && !attrProp.getValue().isAllowCustomization()) {
+            if (!attrProp.getValue().isAllowCustomization()) {
                 if(attrProp.getValue().getCustomValue() != null) {
                     addErrorMsg(ValidationErrors.Type.INVALID_PROP_CHANGE,
                             String.format(ValidationMsg.Errors.FORBID_CUSTOMIZATION, attrProp.getKey()),
