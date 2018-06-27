@@ -26,10 +26,6 @@ public class ValidationErrors {
         INVALID_ACTIVATION, //
         INVALID_USAGE_CHANGE, //
         INVALID_PROP_CHANGE, //
-        IMPACTED_SEGMENTS, //
-        IMPACTED_RATING_ENGINES, //
-        IMPACTED_RATING_MODELS, //
-        IMPACTED_PLAYS, //
         OTHER;
     }
 }

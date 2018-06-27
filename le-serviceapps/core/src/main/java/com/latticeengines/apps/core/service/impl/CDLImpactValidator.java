@@ -65,35 +65,19 @@ public class CDLImpactValidator extends AttrValidator {
             AttrConfigProp<?> stateProp = attrConfig.getProperty(ColumnMetadataKey.State);
             if (CollectionUtils.isNotEmpty(impactSegments)) {
                 List<String> names = getImpactSegmentNames(impactSegments);
-                if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
-                    names.forEach(name -> addErrorMsg(ValidationErrors.Type.IMPACTED_SEGMENTS, name, attrConfig));
-                } else {
-                    names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS, name, attrConfig));
-                }
+                names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS, name, attrConfig));
             }
             if (CollectionUtils.isNotEmpty(impactRatingEngines)) {
                 List<String> names = getImpactRatingEngineNames(impactRatingEngines);
-                if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
-                    names.forEach(name -> addErrorMsg(ValidationErrors.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
-                } else {
-                    names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
-                }
+                names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
             }
             if (CollectionUtils.isNotEmpty(impactRatingModels)) {
                 List<String> names = getImpactRatingModleNames(impactRatingModels);
-                if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
-                    names.forEach(name -> addErrorMsg(ValidationErrors.Type.IMPACTED_RATING_MODELS, name, attrConfig));
-                } else {
-                    names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS, name, attrConfig));
-                }
+                names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS, name, attrConfig));
             }
             if (CollectionUtils.isNotEmpty(impactPlays)) {
                 List<String> names = getImpactPlayNames(impactPlays);
-                if (isAdmin && AttrState.Inactive.equals(stateProp.getCustomValue())) {
-                    names.forEach(name -> addErrorMsg(ValidationErrors.Type.IMPACTED_PLAYS, name, attrConfig));
-                } else {
-                    names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, name, attrConfig));
-                }
+                names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, name, attrConfig));
             }
         }
 

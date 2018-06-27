@@ -227,6 +227,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             || columnsInSystem.contains(attrConfig.getAttrName()))
                     .collect(Collectors.toList());
             renderedList = render(columns, customConfigInCategory);
+            modifyInactivateState(renderedList);
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
             String msg = String.format("Rendered %d attr configs", count);
             timer.setTimerMessage(msg);
@@ -540,7 +541,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 mergeConfig.putProperty(group.name(), usageProp);
             }
 
-            modifyInactivateState(mergeConfig);
             map.put(metadata.getAttrName(), mergeConfig);
         }
         // make sure the system metadata include the customer config
@@ -561,19 +561,20 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void modifyInactivateState(AttrConfig attrConfig) {
+    private void modifyInactivateState(List<AttrConfig> renderedConfigs) {
         // set allow customization to false when final value of state prop is
         // inactive
         // in other words, active and deprecated states will not change allow
         // customization
-        AttrState state = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
-        if (AttrState.Inactive.equals(state)) {
-            attrConfig.getAttrProps().forEach((key, value) -> {
-                if (!key.equals(ColumnMetadataKey.State))
-                    value.setAllowCustomization(false);
-            });
-        }
+        renderedConfigs.forEach(attrConfig -> {
+            AttrState state = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
+            if (AttrState.Inactive.equals(state)) {
+                attrConfig.getAttrProps().forEach((key, value) -> {
+                    if (!key.equals(ColumnMetadataKey.State))
+                        value.setAllowCustomization(false);
+                });
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
