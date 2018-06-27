@@ -1,5 +1,5 @@
 angular.module('lp.jobs.export', [])
-    .controller('ExportJobsController', function ($q, $scope, $http, JobsStore, $filter, SegmentService) {
+    .controller('ExportJobsController', function ($q, $scope, $http, JobsStore, $filter, SegmentService, FilterService) {
         var vm = this;
         vm.loading = false;
         vm.loadingJobs = JobsStore.data.loadingJobs;
@@ -15,10 +15,10 @@ angular.module('lp.jobs.export', [])
                 iconclass: 'white-button',
                 iconrotate: true,
                 items: [
-                    { label: '10 items', icon: 'numeric', click: function () { vm.pagesize = 10; vm.currentPage = 1} },
-                    { label: '25 items', icon: 'numeric', click: function () { vm.pagesize = 25; vm.currentPage = 1} },
-                    { label: '50 items', icon: 'numeric', click: function () { vm.pagesize = 50; vm.currentPage = 1} },
-                    { label: '100 items', icon: 'numeric', click: function () { vm.pagesize = 100; vm.currentPage = 1} }
+                    { label: '10 items', icon: 'numeric', click: function () { vm.pagesize = 10; vm.currentPage = 1; FilterService.setFilters('jobs.export.pagesize', {pagesize: vm.pagesize}); } },
+                    { label: '25 items', icon: 'numeric', click: function () { vm.pagesize = 25; vm.currentPage = 1; FilterService.setFilters('jobs.export.pagesize', {pagesize: vm.pagesize}); } },
+                    { label: '50 items', icon: 'numeric', click: function () { vm.pagesize = 50; vm.currentPage = 1; FilterService.setFilters('jobs.export.pagesize', {pagesize: vm.pagesize}); } },
+                    { label: '100 items', icon: 'numeric', click: function () { vm.pagesize = 100; vm.currentPage = 1; FilterService.setFilters('jobs.export.pagesize', {pagesize: vm.pagesize}); } }
                 ]
             },
             sort: {
@@ -42,13 +42,16 @@ angular.module('lp.jobs.export', [])
         });
 
         vm.init = function () {
-
             // vm.loading = true;
             // JobsStore.getJobs(false).then(function (result) {
                 vm.jobs = JobsStore.getList('export');
             //     vm.loading = false;
             // });
 
+            var filterStore = FilterService.getFilters('jobs.export.pagesize');
+            if(filterStore) {
+                vm.pagesize = filterStore.pagesize;
+            }
         }
 
         this.init();

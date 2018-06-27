@@ -195,6 +195,11 @@ angular
         })
         .state('home.models', {
             url: '/models',
+            onEnter: function($state, FilterService) {
+                if(['home.models'].indexOf($state.current.name) < 0) {
+                    FilterService.clear();
+                }
+            },
             params: {
                 pageTitle: 'Models',
                 pageIcon: 'ico-model'

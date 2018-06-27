@@ -6,8 +6,7 @@ angular.module('lp.jobs.model', [
     '720kb.tooltips'
 ])
 .controller('JobsListCtrl', function($scope, $state, $stateParams, $http, $timeout, $interval, $filter,
-    JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal, HealthService, 
-    ModelConfig) {
+    JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal, HealthService, ModelConfig, FilterService) {
     $scope.expanded = {};
     $scope.statuses = {};
     $scope.cancelling = {};
@@ -71,10 +70,10 @@ angular.module('lp.jobs.model', [
                 iconclass: 'white-button',
                 iconrotate: true,
                 items: [
-                    { label: '10 items',  icon: 'numeric', click: function() { $scope.pagesize = 10;  } },
-                    { label: '25 items',  icon: 'numeric', click: function() { $scope.pagesize = 25;  } },
-                    { label: '50 items',  icon: 'numeric', click: function() { $scope.pagesize = 50;  } },
-                    { label: '100 items', icon: 'numeric', click: function() { $scope.pagesize = 100; } }
+                    { label: '10 items',  icon: 'numeric', click: function() { $scope.pagesize = 10; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); }},
+                    { label: '25 items',  icon: 'numeric', click: function() { $scope.pagesize = 25; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); }},
+                    { label: '50 items',  icon: 'numeric', click: function() { $scope.pagesize = 50; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); }},
+                    { label: '100 items', icon: 'numeric', click: function() { $scope.pagesize = 100; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); }}
                 ]
             },
             sort: {
@@ -151,6 +150,11 @@ angular.module('lp.jobs.model', [
         });
 
         $scope.handleJobCreationSuccess($stateParams.jobCreationSuccess);
+
+        var filterStore = FilterService.getFilters('jobs.list.pagesize');
+        if(filterStore) {
+            $scope.pagesize = filterStore.pagesize;
+        }
     };
 
     $scope.handleJobCreationSuccess = function(data) {

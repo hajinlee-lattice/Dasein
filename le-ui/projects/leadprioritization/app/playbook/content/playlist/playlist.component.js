@@ -1,8 +1,9 @@
 angular.module('lp.playbook.plays', [
-    'mainApp.playbook.content.playlist.modals.deletePlayModal'
+    'mainApp.playbook.content.playlist.modals.deletePlayModal',
+    'mainApp.appCommon.services.FilterService'
 ])
-.controller('PlayListController', function ($scope, $timeout, $element, $state, 
-$stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal, QueryStore) {
+.controller('PlayListController', function ($scope, $timeout, $element, $state, $stateParams, $interval, 
+    PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal, QueryStore) {
 
     var vm = this,
         onpage = true,
@@ -49,9 +50,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
     });
 
     vm.init = function($q) {
-
         // console.log(vm.current.plays);
-        
         PlaybookWizardStore.clear();
 
         $scope.$watch('vm.current.plays', function() {

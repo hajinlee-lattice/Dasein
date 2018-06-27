@@ -128,6 +128,14 @@ angular
     $stateProvider
         .state('home.segments', {
             url: '/segments',
+            onEnter: function($state, FilterService) {
+                if([
+                    'home.segment.explorer.attributes',
+                    'home.segment.explorer.builder'
+                ].indexOf($state.current.name) < 0) {
+                    FilterService.clear();
+                }
+            },
             params: {
                 pageTitle: 'Segments',
                 pageIcon: 'ico-segments',

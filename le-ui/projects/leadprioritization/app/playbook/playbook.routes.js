@@ -19,6 +19,9 @@ angular
     $stateProvider
         .state('home.playbook', {
             url: '/playbook',
+            onExit: function(FilterService) {
+                FilterService.clear();
+            },
             resolve: {
                 Model: function(){
                     return null;

@@ -4,6 +4,9 @@ angular
     $stateProvider
         .state('home.jobs', {
             url: '/jobs',
+            onExit: function(FilterService) {
+                FilterService.clear();
+            },
             views: {
                 // "navigation@": {
                 //     controller: 'SidebarRootController',

@@ -10,16 +10,32 @@ angular
         restrict: 'EA',
         scope: {
             config:'=',
+            store: '@',
             callback: '&?callbackFunction'
         },
         templateUrl: 'app/AppCommon/modules/menus/filterby/FilterByView.html',
-        controller: function ($scope, $filter, $document) {
+        controller: function ($scope, $filter, $document, FilterService) {
             angular.extend($scope, $scope.config, {
                 visible: false
             }, {
                 init: function() {
                     if (!$scope.label) {
                         $scope.label = $scope.items[0].label;
+                    }
+
+                    var filterStore = ($scope.store ? FilterService.getFilters($scope.store) : null);
+                    if(filterStore) {
+                        $scope.config.label = filterStore.label;
+                        $scope.config.value = filterStore.value;
+                        $scope.config.items = filterStore.items;
+                        $scope.config.filtered = filterStore.filtered;
+                        $scope.config.unfiltered = filterStore.unfiltered;
+
+                        $scope.label = filterStore.label;
+                        $scope.value = filterStore.value;
+                        $scope.items = filterStore.items;
+                        $scope.filtered = filterStore.filtered;
+                        $scope.unfiltered = filterStore.unfiltered;
                     }
                 },
                 toggle: function($event) {
@@ -61,6 +77,16 @@ angular
                     }
 
                     $scope.callCallback();
+
+                    FilterService.setFilters($scope.store, {
+                        label: item.label,
+                        value: item.action,
+                        items: $scope.items,
+                        filtered: item.filtered,
+                        unfiltered: $scope.unfiltered,
+                        callback: $scope.callback
+                    });
+
                 }
             });
 

@@ -47,7 +47,7 @@ angular.module('lp.jobs.import', [
             }
         }
     }])
-    .controller('DataProcessingComponent', function ($q, $scope, $http, JobsStore, $filter, ModalStore) {
+    .controller('DataProcessingComponent', function ($q, $scope, $http, JobsStore, $filter, ModalStore, FilterService) {
         var vm = this;
         vm.loading = false;
         vm.rowStatus = {};
@@ -77,10 +77,10 @@ angular.module('lp.jobs.import', [
                 iconclass: 'white-button',
                 iconrotate: true,
                 items: [
-                    { label: '10 items', icon: 'numeric', click: function () { vm.pagesize = 10; } },
-                    { label: '25 items', icon: 'numeric', click: function () { vm.pagesize = 25; } },
-                    { label: '50 items', icon: 'numeric', click: function () { vm.pagesize = 50; } },
-                    { label: '100 items', icon: 'numeric', click: function () { vm.pagesize = 100; } }
+                    { label: '10 items', icon: 'numeric', click: function () { vm.pagesize = 10; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); } },
+                    { label: '25 items', icon: 'numeric', click: function () { vm.pagesize = 25; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); } },
+                    { label: '50 items', icon: 'numeric', click: function () { vm.pagesize = 50; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); } },
+                    { label: '100 items', icon: 'numeric', click: function () { vm.pagesize = 100; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); } }
                 ]
             },
             sort: {
@@ -153,6 +153,11 @@ angular.module('lp.jobs.import', [
         vm.init = function () {
             vm.jobs = JobsStore.getList('import');
             vm.initModalWindow();
+
+            var filterStore = FilterService.getFilters('jobs.dataprocessing.pagesize');
+            if(filterStore) {
+                vm.pagesize = filterStore.pagesize;
+            }
         };
 
         vm.viewUrl = function () {

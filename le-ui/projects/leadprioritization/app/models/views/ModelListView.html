@@ -4,8 +4,8 @@
         <div class="row">
             <div class="list-header">
                 <div class="pull-left number-of-items" ng-if="vm.totalLength > 0">
-                    <menu-filter-by config="vm.header.filter"></menu-filter-by>
-                    <menu-sort-by config="vm.header.sort"></menu-sort-by>
+                    <menu-filter-by config="vm.header.filter" store="models.filter"></menu-filter-by>
+                    <menu-sort-by config="vm.header.sort" store="models.sort"></menu-sort-by>
                     <search-filter query="vm.query.DisplayName" current="vm.currentPage"></search-filter> 
                 </div>
                 <div class="create-model-menu pull-right">

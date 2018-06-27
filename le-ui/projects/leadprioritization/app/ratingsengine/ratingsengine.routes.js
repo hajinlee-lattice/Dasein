@@ -22,8 +22,9 @@ angular
         $stateProvider
             .state('home.ratingsengine', {
                 url: '/ratings_engine',
-                onExit: function(QueryStore) {
+                onExit: function(QueryStore, FilterService) {
                     QueryStore.clear();
+                    FilterService.clear();
                 },
                 redirectTo: 'home.ratingsengine.list'
             })
