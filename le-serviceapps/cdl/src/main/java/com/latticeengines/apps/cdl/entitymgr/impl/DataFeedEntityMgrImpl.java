@@ -20,6 +20,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.apps.cdl.repository.writer.DataFeedRepository;
 import com.latticeengines.common.exposed.util.HibernateUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -146,7 +147,8 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
         if (DataFeedExecution.Status.Completed == status && Status.Active == datafeedStatus) {
             datafeed.setLastPublished(new Date());
         }
-        log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName, datafeed));
+        log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName,
+                JsonUtils.serialize(datafeed)));
         datafeedDao.update(datafeedDao.merge(datafeed));
         return execution;
     }
