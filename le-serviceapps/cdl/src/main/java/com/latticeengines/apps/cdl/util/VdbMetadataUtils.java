@@ -86,26 +86,49 @@ public class VdbMetadataUtils {
             AttrConfigProp prop = new AttrConfigProp();
             prop.setCustomValue(false);
             attrConfig.putProperty(ColumnSelection.Predefined.Segment.getName(), prop);
+        } else {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(true);
+            attrConfig.putProperty(ColumnSelection.Predefined.Segment.getName(), prop);
         }
+
         if (excludeFlag[1]) {
             AttrConfigProp prop = new AttrConfigProp();
             prop.setCustomValue(false);
             attrConfig.putProperty(ColumnSelection.Predefined.Enrichment.getName(), prop);
+        } else {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(true);
+            attrConfig.putProperty(ColumnSelection.Predefined.Enrichment.getName(), prop);
         }
+
         if (excludeFlag[2]) {
             AttrConfigProp prop = new AttrConfigProp();
             prop.setCustomValue(false);
             attrConfig.putProperty(ColumnSelection.Predefined.TalkingPoint.getName(), prop);
+        } else {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(true);
+            attrConfig.putProperty(ColumnSelection.Predefined.TalkingPoint.getName(), prop);
         }
+
         if (excludeFlag[3]) {
             AttrConfigProp prop = new AttrConfigProp();
             prop.setCustomValue(false);
+            attrConfig.putProperty(ColumnSelection.Predefined.CompanyProfile.getName(), prop);
+        } else {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(true);
             attrConfig.putProperty(ColumnSelection.Predefined.CompanyProfile.getName(), prop);
         }
 
         if (excludeFlag[4]) {
             AttrConfigProp prop = new AttrConfigProp();
             prop.setCustomValue(AttrState.Inactive);
+            attrConfig.putProperty(ColumnMetadataKey.State, prop);
+        } else {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(AttrState.Active);
             attrConfig.putProperty(ColumnMetadataKey.State, prop);
         }
 
