@@ -85,7 +85,7 @@ public class FlinkConnector extends FlowConnector {
 
 		public FlinkDagRuleRegistry() {
 
-			enableDebugLogging();
+			// enableDebugLogging(); //DP-6438
 
 			// PreBalance
 			addRule( new LoneGroupAssert() );
