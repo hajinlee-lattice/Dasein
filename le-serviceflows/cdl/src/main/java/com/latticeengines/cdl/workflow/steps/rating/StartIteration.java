@@ -85,6 +85,7 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                         }
                     });
                 }
+                log.info("Existing engines in serving store for this iteration: " + existingEngineIds);
                 inactiveEnginesInIteration.stream().filter(engineId -> existingEngineIds.contains(engineId))
                         .collect(Collectors.toList());
             }
