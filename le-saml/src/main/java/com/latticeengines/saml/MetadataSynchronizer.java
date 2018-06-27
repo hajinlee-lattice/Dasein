@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.EntityDescriptor;
@@ -17,12 +19,12 @@ import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.xml.parse.ParserPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.metadata.MetadataMemoryProvider;
+import org.springframework.security.saml.websso.WebSSOProfileConsumerImpl;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
@@ -34,20 +36,23 @@ public class MetadataSynchronizer {
 
     private static final String SP_METADATA_TEMPLATE = "/metadata/applatticeenginescom_sp.xml";
 
-    @Autowired
+    @Inject
     private MetadataManager metadataManager;
 
-    @Autowired
+    @Inject
     private IdentityProviderEntityMgr identityProviderEntityMgr;
 
-    @Autowired
+    @Inject
     private ExtendedMetadata baseServiceProviderMetadata;
 
-    @Autowired
+    @Inject
     private ExtendedMetadata baseIdentityProviderMetadata;
 
-    @Autowired
+    @Inject
     private ParserPool parserPool;
+
+    @Inject
+    private WebSSOProfileConsumerImpl webSSOProfileConsumer;
 
     @Value("${security.app.public.url:https://localhost:3000}")
     private String publicBaseAddress;
@@ -55,12 +60,16 @@ public class MetadataSynchronizer {
     @Value("${saml.metadata.refresh.frequency:5000}")
     private Integer refreshFrequency;
 
+    @Value("${saml.timeout.authNInstant.hours:12}")
+    private Integer authNInstantTimeoutHours;
+
     private Timer timer;
 
     @PostConstruct
     private void postConstruct() {
         this.timer = new Timer("Metadata-refresh", true);
         this.timer.schedule(new MetadataSynchronizer.RefreshTask(), 0, refreshFrequency);
+        webSSOProfileConsumer.setMaxAuthenticationAge(TimeUnit.HOURS.toSeconds(authNInstantTimeoutHours));
     }
 
     @Transactional
