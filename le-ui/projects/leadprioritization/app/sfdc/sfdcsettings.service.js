@@ -62,18 +62,7 @@ angular.module('lp.sfdc', [])
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -96,18 +85,7 @@ angular.module('lp.sfdc', [])
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -130,18 +108,7 @@ angular.module('lp.sfdc', [])
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -165,18 +132,7 @@ angular.module('lp.sfdc', [])
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};

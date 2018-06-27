@@ -111,7 +111,7 @@ angular.module('lp.models.ratings', [
     }
 
     function refreshChartData(){
-        vm.buckets = vm.workingBuckets.reverse();
+        vm.buckets = vm.workingBuckets;
         vm.bucketsLength = vm.buckets.length;
         vm.updateContent = false;
 

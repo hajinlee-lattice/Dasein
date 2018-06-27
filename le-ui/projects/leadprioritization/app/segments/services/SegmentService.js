@@ -239,18 +239,7 @@ angular
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            Success: false,
-                            errorMessage: errors[0]
-                        };
-                    deferred.resolve(result.errorMessage);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -277,18 +266,7 @@ angular
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            Success: false,
-                            errorMessage: errors[0]
-                        };
-                    deferred.resolve(result.errorMessage);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -314,22 +292,11 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                var result = response.data;
-                if (result != null && result !== "") {
-                    result = {
+                var result = {
                         data: response.data,
                         success: true
                     }
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -356,22 +323,11 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                var result = response.data;
-                if (result != null && result !== "") {
-                    result = {
+                var result = {
                         data: response.data,
                         success: true
                     }
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -399,18 +355,7 @@ angular
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -437,18 +382,8 @@ angular
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
+                
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -475,22 +410,11 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                var result = response.data;
-                if (result != null && result !== "") {
-                    result = {
+                var result = {
                         data: response.data,
                         success: true
                     }
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -516,22 +440,11 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                var result = response.data;
-                if (result != null && result !== "") {
-                    result = {
+                var result = {
                         data: response.data,
                         success: true
                     }
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -559,18 +472,7 @@ angular
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    var errors = result.Errors;
-                    var result = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
-                    deferred.resolve(result.errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};

@@ -607,31 +607,8 @@ angular.module('lp.playbook')
             }
         }).then(
             function onSuccess(response) {
-
-                console.log(response);
-
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -657,27 +634,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -703,27 +660,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -745,27 +682,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -787,27 +704,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -834,28 +731,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    canceler.resolve(result);
-                } else {
-                    
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    canceler.resolve(errorMsg);
-                }
-
+                canceler.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -896,27 +772,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -947,27 +803,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -993,27 +829,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -1043,27 +859,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -1085,27 +881,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -1127,27 +903,7 @@ angular.module('lp.playbook')
         }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
-                    result = response.data;
-                    deferred.resolve(result);
-                } else {
-                    // var errors = result.Errors;
-                    // var result = {
-                    //         success: false,
-                    //         errorMsg: errors[0]
-                    //     };
-                    // deferred.resolve(result.errorMsg);
-
-                    if (!response.data) {
-                        response.data = {};
-                    }
-
-                    var errorCode = response.data.errorCode || 'Error';
-                    var errorMsg = response.data.errorMsg || 'unspecified error.';
-
-                    deferred.resolve(errorMsg);
-                }
-
+                deferred.resolve(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};

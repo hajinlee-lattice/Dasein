@@ -22,7 +22,7 @@ angular.module('mainApp.login.services.LoginService', [
          }).then(
             function onSuccess(response) {
                 var result = response.data;
-                if (result != null && result !== "") {
+                if (result != null && result !== "" && result.Success == true) {
                     BrowserStorageUtility.setTokenDocument(result.Uniqueness + "." + result.Randomness);
                     result.Result.UserName = username;
                     BrowserStorageUtility.setLoginDocument(result.Result);
