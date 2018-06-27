@@ -192,7 +192,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             customEventMatchWorkflowConfigurationBuilder.modelingType(customEventModelingType);
             generateAIRating.modelingType(customEventModelingType);
             String scoreField = CustomEventModelingType.LPI == customEventModelingType ? InterfaceName.Event.name()
-                    : ScoreResultField.Percentile.displayName;
+                    : ScoreResultField.RawScore.name();
             generateAIRating.scoreField(scoreField);
             setConfigForScoring.setCustomEventModelingType(customEventModelingType);
             return this;
