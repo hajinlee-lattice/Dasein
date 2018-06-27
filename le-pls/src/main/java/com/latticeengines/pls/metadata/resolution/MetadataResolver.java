@@ -80,7 +80,11 @@ public class MetadataResolver {
 
         result.metadata = metadata;
         result.fieldMappings = new ArrayList<>();
-        calculateHelper();
+        if(cdlResolve) {
+            calculateHelperCDL();
+        } else {
+            calculateHelper();
+        }
         fieldMappingsDocument.setFieldMappings(result.fieldMappings);
 
         return fieldMappingsDocument;
@@ -204,6 +208,56 @@ public class MetadataResolver {
 
     public void setFieldMappingDocument(FieldMappingDocument fieldMappingDocument) {
         this.fieldMappingDocument = fieldMappingDocument;
+    }
+
+    private void calculateHelperCDL() {
+        Set<String> headerFields = getHeaderFields();
+        List<Attribute> attributes = result.metadata.getAttributes();
+        Iterator<Attribute> attrIterator = attributes.iterator();
+        while (attrIterator.hasNext()) {
+            Attribute attribute = attrIterator.next();
+            if (headerFields.contains(attribute.getDisplayName())) {
+                FieldMapping knownColumn = new FieldMapping();
+                knownColumn.setUserField(attribute.getDisplayName());
+                knownColumn.setMappedField(attribute.getName());
+                knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+                knownColumn.setMappedToLatticeField(true);
+                result.fieldMappings.add(knownColumn);
+                headerFields.remove(attribute.getDisplayName());
+            } else {
+                Iterator<String> headerIterator = headerFields.iterator();
+                FieldMapping knownColumn = new FieldMapping();
+                while (headerIterator.hasNext()) {
+                    String header = headerIterator.next();
+                    if (isUserFieldMatchWithAttribute(header, attribute)) {
+                        attribute.setDisplayName(header);
+                        headerIterator.remove();
+
+                        knownColumn.setUserField(header);
+                        knownColumn.setMappedField(attribute.getName());
+                        knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+                        knownColumn.setMappedToLatticeField(true);
+                        result.fieldMappings.add(knownColumn);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (final String headerField : headerFields) {
+            FieldMapping unknownColumn = new FieldMapping();
+
+            unknownColumn.setUserField(StringEscapeUtils.escapeHtml4(headerField));
+            unknownColumn.setFieldType(getFieldTypeFromColumnContent(headerField));
+            unknownColumn.setMappedToLatticeField(false);
+
+            result.fieldMappings.add(unknownColumn);
+        }
+
+        Attribute lastModified = result.metadata.getAttribute(InterfaceName.LastModifiedDate);
+        if (lastModified == null) {
+            result.metadata.setLastModifiedKey(null);
+        }
     }
 
     private void calculateHelper() {
