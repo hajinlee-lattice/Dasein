@@ -3,8 +3,10 @@ package com.latticeengines.domain.exposed.util;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -28,6 +30,7 @@ public class BucketedScoreSummaryUtils {
     public static BucketedScoreSummary generateBucketedScoreSummary(List<GenericRecord> pivotedRecords) {
         int cumulativeNumLeads = 0;
         double cumulativeNumConverted = 0;
+        pivotedRecords = combineNullAndMinScoreRecord(pivotedRecords);
         pivotedRecords.sort(Comparator.comparingDouble(g -> Double.valueOf(g.get(SCORE).toString())));
         int idx = pivotedRecords.size() - 1;
         int currentScore = MAX_SCORE;
@@ -41,24 +44,24 @@ public class BucketedScoreSummaryUtils {
             GenericRecord pivotedRecord = pivotedRecords.get(idx);
 
             if (pivotedRecord != null
-                    && Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue() == currentScore) {
+                && Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue() == currentScore) {
                 bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
-                        Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
-                        Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
-                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()), cumulativeNumLeads,
-                        cumulativeNumConverted);
+                    Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
+                    Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
+                    Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()), cumulativeNumLeads,
+                    cumulativeNumConverted);
                 cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
                 cumulativeNumConverted += (double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS);
                 idx--;
             } else {
                 bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0, cumulativeNumLeads,
-                        cumulativeNumConverted);
+                                                                 cumulativeNumConverted);
             }
             currentScore--;
         }
         for (; currentScore > 3; currentScore--) {
             bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0, cumulativeNumLeads,
-                    cumulativeNumConverted);
+                                                             cumulativeNumConverted);
         }
 
         double totalLift = cumulativeNumConverted / cumulativeNumLeads;
@@ -69,9 +72,9 @@ public class BucketedScoreSummaryUtils {
 
         for (int i = bucketedScoreSummary.getBarLifts().length; i > 0; i--) {
             int totalLeadsInBar = bucketedScores[i * 3 + 1].getNumLeads() + bucketedScores[i * 3 + 2].getNumLeads()
-                    + bucketedScores[i * 3 + 3].getNumLeads();
+                                  + bucketedScores[i * 3 + 3].getNumLeads();
             double totalLeadsConvertedInBar = bucketedScores[i * 3 + 1].getNumConverted()
-                    + bucketedScores[i * 3 + 2].getNumConverted() + bucketedScores[i * 3 + 3].getNumConverted();
+                                              + bucketedScores[i * 3 + 2].getNumConverted() + bucketedScores[i * 3 + 3].getNumConverted();
             if (totalLeadsInBar == 0) {
                 bucketedScoreSummary.getBarLifts()[32 - i] = 0;
             } else {
@@ -79,6 +82,45 @@ public class BucketedScoreSummaryUtils {
             }
         }
         return bucketedScoreSummary;
+    }
+
+    private static List<GenericRecord> combineNullAndMinScoreRecord(List<GenericRecord> pivotedRecords) {
+
+        Double totalNullEvents = 0.;
+        Double totalNullPositiveEvents = 0.;
+        GenericRecord minScoreRecord = null;
+        boolean hasNullScoreRecord = false;
+        int currentMinScore = MAX_SCORE;
+
+        for (GenericRecord record : pivotedRecords) {
+            if (record.get(SCORE) == null) {
+                Double nullEvents = record.get(TOTAL_EVENTS) == null ?
+                    0. : Double.valueOf(record.get(TOTAL_EVENTS).toString());
+                Double nullPositiveEvents = record.get(TOTAL_POSITIVE_EVENTS) == null ?
+                    0. : Double.valueOf(record.get(TOTAL_POSITIVE_EVENTS).toString());
+                totalNullEvents += nullEvents;
+                totalNullPositiveEvents += nullPositiveEvents;
+                hasNullScoreRecord = true;
+            } else {
+                int score = Double.valueOf(record.get(SCORE).toString()).intValue();
+                if (score <= currentMinScore) {
+                    minScoreRecord = record;
+                    currentMinScore = score;
+                }
+            }
+        }
+        if (hasNullScoreRecord && minScoreRecord != null) {
+            Double minTotalEvents = minScoreRecord.get(TOTAL_EVENTS) == null ?
+                0. : Double.valueOf(minScoreRecord.get(TOTAL_EVENTS).toString());
+            Double minTotalPositiveEvents = minScoreRecord.get(TOTAL_POSITIVE_EVENTS) == null ?
+                0. : Double.valueOf(minScoreRecord.get(TOTAL_POSITIVE_EVENTS).toString());
+            minTotalEvents += totalNullEvents;
+            minTotalPositiveEvents += totalNullPositiveEvents;
+            minScoreRecord.put(TOTAL_EVENTS, minTotalEvents.longValue());
+            minScoreRecord.put(TOTAL_POSITIVE_EVENTS, minTotalPositiveEvents);
+        }
+
+        return pivotedRecords.stream().filter(record -> record.get(SCORE) != null).collect(Collectors.toList());
     }
 
     public static List<BucketMetadata> computeLift(BucketedScoreSummary scoreSummary,
@@ -96,7 +138,7 @@ public class BucketedScoreSummaryUtils {
             throw new RuntimeException("Not enough lower bonds");
         }
         List<BucketedScore> boundaries = new ArrayList<>();
-        boundaries.add( new BucketedScore(0, 0, 0, scoreSummary.getTotalNumLeads(), scoreSummary.getTotalNumConverted()));
+        boundaries.add(new BucketedScore(0, 0, 0, scoreSummary.getTotalNumLeads(), scoreSummary.getTotalNumConverted()));
         for (BucketedScore bucketedScore : scoreSummary.getBucketedScores()) {
             if (bucketedScore != null) {
                 if (lowerBonds.contains(bucketedScore.getScore())) {
@@ -104,7 +146,7 @@ public class BucketedScoreSummaryUtils {
                 }
             }
         }
-        boundaries.add( new BucketedScore(100, 0, 0, 0, 0));
+        boundaries.add(new BucketedScore(100, 0, 0, 0, 0));
 
         double overallConversion = scoreSummary.getTotalNumConverted() / scoreSummary.getTotalNumLeads();
         for (int i = 0; i < bucketMetadataList.size(); i++) {

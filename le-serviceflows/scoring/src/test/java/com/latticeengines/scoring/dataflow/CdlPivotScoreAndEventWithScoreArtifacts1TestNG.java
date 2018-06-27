@@ -145,6 +145,26 @@ public class CdlPivotScoreAndEventWithScoreArtifacts1TestNG extends ServiceFlows
         Assert.assertEquals(7733, bucketedScoreSummary.getTotalNumLeads());
     }
 
+    @Test(groups = "functional")
+    public void testStandardParameters3() throws Exception {
+        executeDataFlow(getStandardParameters());
+        List<GenericRecord> outputRecords = readOutput();
+        // reverse the output list to test we sort it later
+        Collections.sort(
+            outputRecords,
+            (GenericRecord g1, GenericRecord g2) ->
+                Double.compare(Double.valueOf(g2.get("Score").toString()), Double.valueOf(g1.get("Score").toString()))
+        );
+        assertEquals(outputRecords.size(), 95);
+        GenericRecord nullRecord = outputRecords.get(0);
+        nullRecord.put("Score", null);
+
+        BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
+            .generateBucketedScoreSummary(outputRecords);
+        System.out.println(bucketedScoreSummary);
+        Assert.assertEquals(7733, bucketedScoreSummary.getTotalNumLeads());
+    }
+
     private String loadScoreDerivation(String resourceName) {
         try {
             InputStream inputStream = ClassLoader.class.getResourceAsStream(resourceName);
