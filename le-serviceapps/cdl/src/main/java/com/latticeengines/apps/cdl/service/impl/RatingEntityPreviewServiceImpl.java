@@ -42,7 +42,6 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     private EntityProxy entityProxy;
 
     List<String> accountFields = Arrays.asList(InterfaceName.AccountId.name(), //
-            InterfaceName.SalesforceAccountID.name(), //
             InterfaceName.CompanyName.name(), //
             InterfaceName.Domain.name(), //
             InterfaceName.Website.name(), //
@@ -80,12 +79,11 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         DataPage cachedDataPage = null;
         try {
-            String lookupIdColumnWithDefaultSfdcAccId = StringUtils.isBlank(lookupIdColumn)
-                    ? InterfaceName.SalesforceAccountID.name() : lookupIdColumn;
+            lookupIdColumn = StringUtils.isBlank(lookupIdColumn) ? null : lookupIdColumn.trim();
 
             cachedDataPage = fetchData(tenant, ratingEngine, offset, maximum, entityType, sortBy, descending,
                     bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets,
-                    lookupIdColumnWithDefaultSfdcAccId, ratingField);
+                    lookupIdColumn, ratingField);
         } catch (Exception ex) {
             log.info("Ignoring exception and trying without lookup Id now", ex);
             cachedDataPage = fetchData(tenant, ratingEngine, offset, maximum, entityType, sortBy, descending,
@@ -139,12 +137,10 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         Long count = null;
 
         try {
-            String lookupIdColumnWithDefaultSfdcAccId = StringUtils.isBlank(lookupIdColumn)
-                    ? InterfaceName.SalesforceAccountID.name() : lookupIdColumn;
+            lookupIdColumn = StringUtils.isBlank(lookupIdColumn) ? null : lookupIdColumn.trim();
 
             FrontEndQuery entityFrontEndQuery = createBasicFronEndQuery(ratingEngine, entityType,
-                    restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField,
-                    lookupIdColumnWithDefaultSfdcAccId);
+                    restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField, lookupIdColumn);
 
             count = entityProxy.getCount(tenant.getId(), entityFrontEndQuery);
             log.info(String.format("Entity query => %s, count = %s", JsonUtils.serialize(entityFrontEndQuery), count));
@@ -207,7 +203,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         if (entityType == BusinessEntity.Account) {
             Restriction accRestriction = entityFrontEndQuery.getAccountRestriction().getRestriction();
             Restriction effectiveRestriction = accRestriction;
-            if (lookupIdColumn != null && restrictNotNullSalesforceId) {
+            if (StringUtils.isNotBlank(lookupIdColumn) && restrictNotNullSalesforceId) {
                 Restriction restrictionForNonNullLookupId = Restriction.builder().let(entityType, lookupIdColumn)
                         .isNotNull().build();
                 effectiveRestriction = Restriction.builder().and(accRestriction, restrictionForNonNullLookupId).build();

@@ -133,11 +133,13 @@ public class RecommendationCreator {
         recommendation.setAccountId(accountId.toString());
         recommendation.setLeAccountExternalID(accountId.toString());
 
-        String destinationAccountId = InterfaceName.SalesforceAccountID.name();
         if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
-            destinationAccountId = playLaunch.getDestinationAccountId();
+            String destinationAccountId = playLaunch.getDestinationAccountId().trim();
+            recommendation.setSfdcAccountID(checkAndGet(account, destinationAccountId));
+        } else {
+            recommendation.setSfdcAccountID(null);
         }
-        recommendation.setSfdcAccountID(checkAndGet(account, destinationAccountId));
+
         Double value = 0D;
         recommendation.setMonetaryValue(value);
 

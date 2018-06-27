@@ -100,11 +100,13 @@ public class FrontEndQueryCreator {
         if (StringUtils.isBlank(destinationAccountId)) {
             tempAccLookupFields = accountLookupFields;
         } else {
+            final String fDestinationAccountId = destinationAccountId.trim();
+
             tempAccLookupFields = new HashMap<>();
             List<String> colList = accountLookupFields.get(BusinessEntity.Account).stream()
-                    .filter(c -> !InterfaceName.SalesforceAccountID.name().equals(c)) //
+                    .filter(c -> !fDestinationAccountId.equals(c)) //
                     .collect(Collectors.toList());
-            colList.add(destinationAccountId);
+            colList.add(fDestinationAccountId);
             tempAccLookupFields.put(BusinessEntity.Account, colList);
         }
         final Map<BusinessEntity, List<String>> accLookupFields = tempAccLookupFields;
@@ -223,7 +225,6 @@ public class FrontEndQueryCreator {
         accountLookupFields = new HashMap<>();
         accountLookupFields.put(BusinessEntity.Account,
                 Arrays.asList(InterfaceName.AccountId.name(), //
-                        InterfaceName.SalesforceAccountID.name(), //
                         InterfaceName.CompanyName.name(), //
                         InterfaceName.LDC_Name.name()));
 

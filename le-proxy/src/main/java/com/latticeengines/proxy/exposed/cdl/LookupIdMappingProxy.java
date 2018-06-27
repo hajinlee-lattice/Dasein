@@ -18,7 +18,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -141,10 +140,7 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
         }
 
         if (StringUtils.isBlank(lookupIdColumn)) {
-            lookupIdColumn = InterfaceName.SalesforceAccountID.name();
-            log.info(String.format(
-                    "Didn't find any valid lookup id mapping for org = %s. Therefore using default column = %s as lookup id column",
-                    orgId, lookupIdColumn));
+            log.info(String.format("Didn't find any valid lookup id mapping for org = %s.", orgId));
         } else {
             log.info(String.format(
                     "Found a valid lookup id mapping for org = %s, therefore using column = %s as lookup id column",
