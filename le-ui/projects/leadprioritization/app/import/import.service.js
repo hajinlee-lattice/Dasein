@@ -625,7 +625,7 @@ angular.module('lp.import')
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility, ImportUtils) {
 
-	this.GetSchemaToLatticeFields = function(csvFileName, entity, feedType) {
+	   this.GetSchemaToLatticeFields = function(csvFileName, entity, feedType) {
 	        var deferred = $q.defer();
 	        var params = { 
                 'entity':  entity,
@@ -642,39 +642,39 @@ angular.module('lp.import')
 	            url: '/pls/models/uploadfile/latticeschema',
 	            params: params,
 	            headers: { 'Content-Type': 'application/json' }
-	        }).then(function(response) {
-
+	        }).then(
                 function onSuccess(response) {
 
-                var result = response.data;
+                    var result = response.data;
 
-                if (result != null && result !== "" && result.Success == true) {
-                    console.log("!!!!!!!!!!!!!!!!!!!", result);
+                    if (result != null && result !== "" && result.Success == true) {
+                        console.log("!!!!!!!!!!!!!!!!!!!", result);
 
-                    ImportUtils.setLatticeSchema(result.Result);
-                    deferred.resolve(result.Result);
+                        ImportUtils.setLatticeSchema(result.Result);
+                        deferred.resolve(result.Result);
 
-                } else {
+                    } else {
 
-                    var errors = result.Errors;
-                    var response = {
-                            success: false,
-                            errorMsg: errors[0]
-                        };
+                        var errors = result.Errors;
+                        var response = {
+                                success: false,
+                                errorMsg: errors[0]
+                            };
 
-                    console.log("????????????????????", response);
-                    deferred.resolve(response.errorMsg);
+                        console.log("????????????????????", response);
+                        deferred.resolve(response.errorMsg);
+                    }
+
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+                    job.status = 'Failed';
+
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.resolve(errorMsg);
                 }
-
-            }, function onError(response) {
-                if (!response.data) {
-                    response.data = {};
-                }
-                job.status = 'Failed';
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.resolve(errorMsg);
-            }
+            );
 
 	        return deferred.promise;
 	    };
