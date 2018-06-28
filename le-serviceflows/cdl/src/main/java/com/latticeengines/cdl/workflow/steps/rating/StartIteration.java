@@ -66,12 +66,12 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
             }
             Set<String> activeEnginesInIteration = containersInIteration.stream()
                     .map(container -> container.getEngineSummary().getId()).collect(Collectors.toSet());
-            containers.forEach(container -> {
+            for (RatingModelContainer container : containers) {
                 String engineId = container.getEngineSummary().getId();
                 if (!activeEnginesInIteration.contains(engineId)) {
                     inactiveEnginesInIteration.add(engineId);
                 }
-            });
+            }
 
             if (CollectionUtils.isNotEmpty(inactiveEnginesInIteration)) {
                 Set<String> existingEngineIds = new HashSet<>();
@@ -86,7 +86,8 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                     });
                 }
                 log.info("Existing engines in serving store for this iteration: " + existingEngineIds);
-                inactiveEnginesInIteration.stream().filter(engineId -> existingEngineIds.contains(engineId))
+                inactiveEnginesInIteration = inactiveEnginesInIteration.stream()
+                        .filter(engineId -> existingEngineIds.contains(engineId))
                         .collect(Collectors.toList());
             }
 
