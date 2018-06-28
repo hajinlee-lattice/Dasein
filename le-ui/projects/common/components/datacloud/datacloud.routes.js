@@ -130,9 +130,9 @@ angular
             url: '/segments',
             onEnter: function($state, FilterService) {
                 if([
-                    'home.segment.explorer.attributes',
+                    //'home.segment.explorer.attributes',
                     'home.segment.explorer.builder'
-                ].indexOf($state.current.name) < 0) {
+                ].indexOf($state.current.name) < 0) { // a list of states to not clear when coming from
                     FilterService.clear();
                 }
             },
