@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
@@ -58,7 +57,6 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
 import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -454,15 +452,6 @@ public class StatsCubeUtils {
         return dbl;
     }
 
-    public static StatsCube retainTop5Bkts(StatsCube cube) {
-        Map<String, AttributeStats> newStats = new HashMap<>();
-        cube.getStatistics().forEach((attrName, attrStats) -> newStats.put(attrName, retainTop5Bkts(attrStats)));
-        StatsCube newCube = new StatsCube();
-        newCube.setCount(cube.getCount());
-        newCube.setStatistics(newStats);
-        return newCube;
-    }
-
     public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm) {
         return isDateAttribute(cm) || isSystemAttribute(entity, cm);
     }
@@ -491,23 +480,6 @@ public class StatsCubeUtils {
         return SYSTEM_ATTRS.get(entity);
     }
 
-    private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {
-        if (attributeStats.getBuckets() != null && attributeStats.getBuckets().getBucketList() != null) {
-            Buckets buckets = attributeStats.getBuckets();
-            Stream<Bucket> bucketStream = buckets.getBucketList().stream() //
-                    .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0);
-            if (BucketType.Enum.equals(buckets.getType())) {
-                bucketStream = bucketStream.sorted(Comparator.comparing(bkt -> -bkt.getCount()));
-            }
-            List<Bucket> top5Bkts = bucketStream.limit(5).collect(Collectors.toList());
-            if (attributeStats.getBuckets().getBucketList().size() > top5Bkts.size()) {
-                buckets.setHasMore(true);
-            }
-            buckets.setBucketList(top5Bkts);
-        }
-        return attributeStats;
-    }
-
     @Deprecated
     public static void processPurchaseHistoryCategory(TopNTree topNTree, Map<String, String> productMap) {
         if (MapUtils.isEmpty(productMap) || !topNTree.hasCategory(Category.PRODUCT_SPEND)) {
@@ -525,52 +497,6 @@ public class StatsCubeUtils {
             subcatMap.get(subcategory).add(attr);
         }));
         catTopNTree.setSubcategories(subcatMap);
-    }
-
-    public static void processRatingCategory(TopNTree topNTree, List<RatingEngineSummary> ratingEngineSummaries) {
-        if (CollectionUtils.isEmpty(ratingEngineSummaries) || !topNTree.hasCategory(Category.RATING)) {
-            return;
-        }
-        CategoryTopNTree catTopNTree = topNTree.getCategory(Category.RATING);
-        Map<String, RatingEngineSummary> summaryMap = new HashMap<>();
-        ratingEngineSummaries
-                .forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
-        Map<String, List<TopAttribute>> subcatMap = new HashMap<>();
-        catTopNTree.getSubcategories().values().forEach(attrs -> attrs.forEach(attr -> {
-            String engineId = attr.getAttribute();
-            String subcategory = "Other";
-            if (summaryMap.containsKey(engineId)) {
-                RatingEngineSummary summary = summaryMap.get(engineId);
-                if (StringUtils.isNotBlank(summary.getSegmentDisplayName())) {
-                    subcategory = summary.getSegmentDisplayName();
-                }
-            }
-            if (!subcatMap.containsKey(subcategory)) {
-                subcatMap.put(subcategory, new ArrayList<>());
-            }
-            subcatMap.get(subcategory).add(attr);
-        }));
-        catTopNTree.setSubcategories(subcatMap);
-    }
-
-    public static void injectRatingEngineMetadata(List<ColumnMetadata> cms,
-            List<RatingEngineSummary> ratingEngineSummaries) {
-        if (CollectionUtils.isEmpty(ratingEngineSummaries)) {
-            return;
-        }
-        Map<String, RatingEngineSummary> summaryMap = new HashMap<>();
-        ratingEngineSummaries
-                .forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
-        cms.forEach(cm -> {
-            String attrName = cm.getAttrName();
-            if (summaryMap.containsKey(attrName)) {
-                String engineIdAttr = cm.getAttrName();
-                RatingEngineSummary summary = summaryMap.get(engineIdAttr);
-                if (StringUtils.isNotBlank(summary.getDisplayName())) {
-                    cm.setDisplayName(summary.getDisplayName());
-                }
-            }
-        });
     }
 
     public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap, Map<String, List<ColumnMetadata>> cmMap,
@@ -667,7 +593,7 @@ public class StatsCubeUtils {
         }
     }
 
-    static Comparator<Bucket> getBktComparatorForCategory(Category category, boolean isRating) {
+    private static Comparator<Bucket> getBktComparatorForCategory(Category category, boolean isRating) {
         switch (category) {
         case INTENT:
             return intentBktComparator();
@@ -817,33 +743,19 @@ public class StatsCubeUtils {
     }
 
     private static Comparator<TopAttribute> intentTopAttrComparator() {
-        return (o1, o2) -> {
-            Bucket topBkt1 = o1.getTopBkt();
-            Bucket topBkt2 = o2.getTopBkt();
-            Integer bktId1 = topBkt1 != null ? topBkt1.getId().intValue() : 0;
-            Integer bktId2 = topBkt2 != null ? topBkt2.getId().intValue() : 0;
-            if (bktId1.equals(bktId2)) {
-                Long count1 = topBkt1 != null ? topBkt1.getCount() : 0;
-                Long count2 = topBkt2 != null ? topBkt2.getCount() : 0;
-                if (count1.equals(count2)) {
-                    String attr1 = o1.getAttribute();
-                    String attr2 = o2.getAttribute();
-                    return attr1.compareTo(attr2);
-                } else {
-                    return count2.compareTo(count1);
-                }
-            } else {
-                return bktId2.compareTo(bktId1);
-            }
-        };
+        return topAttrComparatorByIdAnyCnt(0);
     }
 
     private static Comparator<TopAttribute> techTopAttrComparator() {
+        return topAttrComparatorByIdAnyCnt(Integer.MAX_VALUE);
+    }
+
+    private static Comparator<TopAttribute> topAttrComparatorByIdAnyCnt(int defaultId) {
         return (o1, o2) -> {
             Bucket topBkt1 = o1.getTopBkt();
             Bucket topBkt2 = o2.getTopBkt();
-            Integer bktId1 = topBkt1 != null ? topBkt1.getId().intValue() : Integer.MAX_VALUE;
-            Integer bktId2 = topBkt2 != null ? topBkt2.getId().intValue() : Integer.MAX_VALUE;
+            Integer bktId1 = topBkt1 != null ? topBkt1.getId().intValue() : defaultId;
+            Integer bktId2 = topBkt2 != null ? topBkt2.getId().intValue() : defaultId;
             if (bktId1.equals(bktId2)) {
                 Long count1 = topBkt1 != null ? topBkt1.getCount() : 0;
                 Long count2 = topBkt2 != null ? topBkt2.getCount() : 0;

@@ -4,18 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -23,20 +19,16 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket.Change;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
-import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -124,12 +116,6 @@ public class StatsCubeUtilsUnitTestNG {
 
         TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
         verifyDateAttrInTopN(topNTree, cmMap);
-        StatsCube cube = StatsCubeUtils.retainTop5Bkts(cubes.get(BusinessEntity.Account.name()));
-        verifyFirmographicsTopN(topNTree.getCategories().get(Category.FIRMOGRAPHICS), cube);
-        verifyIntentTopN(topNTree.getCategories().get(Category.INTENT), cube);
-        verifyTechTopN(topNTree.getCategories().get(Category.WEBSITE_PROFILE), cube);
-        verifyTechTopN(topNTree.getCategories().get(Category.TECHNOLOGY_PROFILE), cube);
-        verifyPurchaseHistoryTopN(topNTree.getCategories().get(Category.PRODUCT_SPEND));
     }
 
     @Test(groups = "unit", dataProvider = "BktsToChgBkts")
@@ -175,124 +161,6 @@ public class StatsCubeUtilsUnitTestNG {
         }
     }
 
-    private void verifyFirmographicsTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
-        List<TopAttribute> topAttrs = catTopNTree.getSubcategories().get("Other");
-        Assert.assertTrue(topAttrs.size() >= 5, "Should have at least 5 attributes in Firmographics");
-        int idx = 0;
-        Set<String> expectedNoBktAttrs = new HashSet<>(Arrays.asList(DataCloudConstants.ATTR_LDC_DOMAIN));
-        for (String expectedAttr : Arrays.asList(DataCloudConstants.ATTR_LDC_INDUSTRY, //
-                DataCloudConstants.ATTR_REV_RANGE, //
-                DataCloudConstants.ATTR_NUM_EMP_RANGE, //
-                DataCloudConstants.ATTR_LDC_DOMAIN, //
-                DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, //
-                DataCloudConstants.ATTR_COUNTRY, //
-                DataCloudConstants.ATTR_CITY, //
-                DataCloudConstants.ATTR_STATE)) {
-            TopAttribute attr = topAttrs.get(idx++);
-            Assert.assertEquals(attr.getAttribute(), expectedAttr);
-            if (!expectedNoBktAttrs.contains(attr.getAttribute())) {
-                verifyTopBkt(cube, attr.getAttribute(), attr.getTopBkt(), //
-                        StatsCubeUtils.getBktComparatorForCategory( Category.FIRMOGRAPHICS, false));
-            }
-        }
-    }
-
-    private void verifyIntentTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
-        catTopNTree.getSubcategories().values().forEach(attrs -> {
-            Long previousCount = null;
-            int previousBktId = -1;
-            for (TopAttribute attr : attrs) {
-                Bucket topBkt = attr.getTopBkt();
-                if (topBkt != null) {
-                    Long currentCount = topBkt.getCount();
-                    int currentBktId = topBkt.getId().intValue();
-                    if (currentBktId != previousBktId && previousBktId != -1) {
-                        Assert.assertTrue(currentBktId < previousBktId,
-                                String.format("%s: Current bkt id %d is smaller than previous id %d.",
-                                        attr.getAttribute(), currentBktId, previousBktId));
-                    } else if (previousCount != null) {
-                        Assert.assertTrue(currentCount <= previousCount,
-                                String.format("%s: Current count %d is bigger than previous count %d",
-                                        attr.getAttribute(), currentCount, previousCount));
-                    }
-                    previousCount = currentCount;
-                    previousBktId = currentBktId;
-
-                    AttributeStats attributeStats = cube.getStatistics().get(attr.getAttribute());
-                    Buckets buckets = attributeStats.getBuckets();
-                    if (buckets != null) {
-                        List<Bucket> bucketList = buckets.getBucketList();
-                        if (CollectionUtils.isNotEmpty(bucketList)) {
-                            if (topBkt.getLabel().equals("Medium")) {
-                                long unexpectedBkts = bucketList.stream().filter(bkt -> "High".equals(bkt.getLabel()))
-                                        .count();
-                                Assert.assertEquals(unexpectedBkts, 0, attr.getAttribute()
-                                        + ": Should not have any High bkt when the top bkt is Medium");
-                            } else if (topBkt.getLabel().equals("Normal")) {
-                                long unexpectedBkts = bucketList.stream()
-                                        .filter(bkt -> "High".equals(bkt.getLabel()) || "Medium".equals(bkt.getLabel()))
-                                        .count();
-                                Assert.assertEquals(unexpectedBkts, 0, attr.getAttribute()
-                                        + ": Should not have any High or Medium bkt when the top bkt is Normal");
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    private void verifyTechTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
-        catTopNTree.getSubcategories().values().forEach(attrs -> {
-            Long previousCount = null;
-            for (TopAttribute attr : attrs) {
-                Bucket topBkt = attr.getTopBkt();
-                if (topBkt != null) {
-                    if (topBkt.getLabel().equals("Yes")) {
-                        Long currentCount = topBkt.getCount();
-                        if (previousCount != null) {
-                            Assert.assertTrue(currentCount <= previousCount, String.format(
-                                    "Current count %d is bigger than previous count %d", currentCount, previousCount));
-                        }
-                        previousCount = currentCount;
-                    }
-
-                    AttributeStats attributeStats = cube.getStatistics().get(attr.getAttribute());
-                    Buckets buckets = attributeStats.getBuckets();
-                    if (buckets != null) {
-                        List<Bucket> bucketList = buckets.getBucketList();
-                        if (CollectionUtils.isNotEmpty(bucketList)) {
-                            if (topBkt.getLabel().equals("No")) {
-                                long unexpectedBkts = bucketList.stream().filter(bkt -> "Yes".equals(bkt.getLabel()))
-                                        .count();
-                                Assert.assertEquals(unexpectedBkts, 0,
-                                        attr.getAttribute() + ": Should not have any Yes bkt when the top bkt is No");
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    private void verifyPurchaseHistoryTopN(CategoryTopNTree catTopNTree) {
-        catTopNTree.getSubcategories().entrySet().forEach(entry -> {
-            if (!"Other".equalsIgnoreCase(entry.getKey())) {
-                TopAttribute firstAttr = entry.getValue().get(0);
-                Assert.assertTrue(firstAttr.getAttribute().endsWith(StatsCubeUtils.HASEVER_PURCHASED_SUFFIX),
-                        String.format("The first attribute is not a \"Has Ever Purchased\" attribute, but instead %s",
-                                firstAttr.getAttribute()));
-            }
-        });
-    }
-
-    private void verifyTopBkt(StatsCube cube, String attribute, Bucket topBkt, Comparator<Bucket> comparator) {
-        AttributeStats attributeStats = cube.getStatistics().get(attribute);
-        Bucket expectedTopBkt = attributeStats.getBuckets().getBucketList().stream().sorted(comparator).findFirst()
-                .orElse(null);
-        assertSameBucket(topBkt, expectedTopBkt);
-    }
-
     private void verifyDateAttrInTopN(TopNTree topNTree, Map<String, List<ColumnMetadata>> cmMap) {
         Map<AttributeLookup, ColumnMetadata> consolidatedCmMap = new HashMap<>();
         cmMap.forEach((name, cms) -> {
@@ -313,11 +181,6 @@ public class StatsCubeUtilsUnitTestNG {
                 Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Date);
             });
         })));
-    }
-
-    private void assertSameBucket(Bucket bkt1, Bucket bkt2) {
-        Assert.assertEquals(bkt1.getLabel(), bkt2.getLabel());
-        Assert.assertEquals(bkt1.getCount(), bkt2.getCount());
     }
 
     private Iterator<GenericRecord> readAvro() throws IOException {

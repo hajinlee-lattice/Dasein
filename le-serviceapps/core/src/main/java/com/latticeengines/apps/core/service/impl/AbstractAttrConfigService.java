@@ -595,6 +595,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         if (!Boolean.TRUE.equals(cm.getCanSegment())) {
             attrSpec.setSegmentationChange(false);
         }
+        if (!Boolean.TRUE.equals(cm.getCanEnrich()) && !Boolean.TRUE.equals(cm.getCanSegment())) {
+            attrSpec.disableStateChange();
+        }
     }
 
     private void modifyInactivateState(List<AttrConfig> renderedConfigs) {

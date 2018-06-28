@@ -198,6 +198,10 @@ public class AttrSpecification {
         return approvedUsageChange;
     }
 
+    public void disableStateChange() {
+        stateChange = false;
+    }
+
     public void setSegmentationChange(boolean segmentationChange) {
         this.segmentationChange = segmentationChange;
     }

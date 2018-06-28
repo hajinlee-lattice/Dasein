@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
@@ -81,8 +83,10 @@ public abstract class RatingEngineTemplate {
                             .collect(Collectors.toList()));
             } else {
                 if (((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() == JobStatus.COMPLETED) {
-                    ratingEngineSummary.setBucketMetadata(
-                            bucketedScoreProxy.getLatestABCDBucketsByEngineId(tenantId, ratingEngine.getId()));
+                    List<BucketMetadata> bucketMetadataList = bucketedScoreProxy
+                            .getLatestABCDBucketsByEngineId(tenantId, ratingEngine.getId());
+                    bucketMetadataList = BucketedScoreSummaryUtils.sortBucketMetadata(bucketMetadataList, false);
+                    ratingEngineSummary.setBucketMetadata(bucketMetadataList);
                 }
             }
         } catch (Exception ex) {

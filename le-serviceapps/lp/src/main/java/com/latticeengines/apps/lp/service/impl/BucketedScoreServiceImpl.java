@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
+import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 
 @Service("bucketedScoreService")
 public class BucketedScoreServiceImpl implements BucketedScoreService {
@@ -82,6 +83,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             throw new IllegalArgumentException("Must specify model GUID");
         }
         List<BucketMetadata> bucketMetadataList = request.getBucketMetadataList();
+        bucketMetadataList = BucketedScoreSummaryUtils.sortBucketMetadata(bucketMetadataList, false);
         long creationTimestamp = System.currentTimeMillis();
         bucketMetadataList.forEach(bucketMetadata -> {
             bucketMetadata.setCreationTimestamp(creationTimestamp);
@@ -102,6 +104,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         List<BucketMetadata> bucketMetadataList = request.getBucketMetadataList();
         String modelGuid = request.getModelGuid();
         List<BucketMetadata> updated = new ArrayList<>();
+        bucketMetadataList = BucketedScoreSummaryUtils.sortBucketMetadata(bucketMetadataList, false);
         for (BucketMetadata bucketMetadata : bucketMetadataList) {
             if (bucketMetadata.getCreationTimestamp() <= 0) {
                 throw new RuntimeException(
@@ -135,7 +138,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid,
-            BucketedScoreSummary bucketedScoreSummary) {
+                                                                   BucketedScoreSummary bucketedScoreSummary) {
         ModelSummary modelSummary = modelSummaryRepository.findById(modelGuid);
         bucketedScoreSummary.setModelSummary(modelSummary);
         BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.getByModelGuid(modelGuid);
