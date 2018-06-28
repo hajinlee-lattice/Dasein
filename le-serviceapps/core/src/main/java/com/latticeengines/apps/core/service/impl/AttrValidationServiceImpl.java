@@ -18,34 +18,26 @@ public class AttrValidationServiceImpl implements AttrValidationService {
 
     private List<String> validatorList = new ArrayList<>();
 
-    public void setValidateParam(List<AttrConfig> existingConfigs) {
-        LimitationValidator limitationValidator = (LimitationValidator) AttrValidator
-                .getValidator(LimitationValidator.VALIDATOR_NAME);
-        limitationValidator.setDBConfigs(existingConfigs);
-        UsageLimitValidator usageLimitationValidator = (UsageLimitValidator) AttrValidator
-                .getValidator(UsageLimitValidator.VALIDATOR_NAME);
-        usageLimitationValidator.setDBConfigs(existingConfigs);
-    }
-
     @PostConstruct
     private void initializeValidator() {
         validatorList.add(CDLImpactValidator.VALIDATOR_NAME);
         validatorList.add(GenericValidator.VALIDATOR_NAME);
         validatorList.add(LifecycleValidator.VALIDATOR_NAME);
-        validatorList.add(LimitationValidator.VALIDATOR_NAME);
+        validatorList.add(ActivationLimitValidator.VALIDATOR_NAME);
         validatorList.add(UsageValidator.VALIDATOR_NAME);
         validatorList.add(UsageLimitValidator.VALIDATOR_NAME);
     }
 
     @Override
-    public ValidationDetails validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
+    public ValidationDetails validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            boolean isAdmin) {
         for (String validatorName : validatorList) {
             AttrValidator validator = AttrValidator.getValidator(validatorName);
             if (validator != null) {
-                validator.validate(attrConfigs, isAdmin);
+                validator.validate(existingAttrConfigs, userProvidedAttrConfigs, isAdmin);
             }
         }
-        return generateReport(attrConfigs);
+        return generateReport(userProvidedAttrConfigs);
     }
 
     private ValidationDetails generateReport(List<AttrConfig> attrConfigs) {

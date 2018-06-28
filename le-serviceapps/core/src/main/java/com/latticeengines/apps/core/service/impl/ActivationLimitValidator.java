@@ -24,36 +24,36 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
-@Component("limitationValidator")
-public class LimitationValidator extends AttrValidator {
-    public static final String VALIDATOR_NAME = "LIMITATION_VALIDATOR";
+/**
+ * Validate if limit of activation is exceeded.
+ * 
+ */
+
+@Component("activationLimitValidator")
+public class ActivationLimitValidator extends AttrValidator {
+    public static final String VALIDATOR_NAME = "ACTIVAITON_LIMIT_VALIDATOR";
     private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
     private static final String PLS = "PLS";
     private static final String EXPORT = "Export";
 
-    private List<AttrConfig> dbConfigs;
-
-    protected LimitationValidator() {
+    protected ActivationLimitValidator() {
         super(VALIDATOR_NAME);
     }
 
-    public void setDBConfigs(List<AttrConfig> existingConfigs) {
-        this.dbConfigs = existingConfigs;
-    }
-
     @Override
-    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            boolean isAdmin) {
         // make sure user selected attr don't have two same attribute
-        LimitValidatorUtils.checkAmbiguityInFieldNames(attrConfigs);
+        LimitValidatorUtils.checkAmbiguityInFieldNames(userProvidedAttrConfigs);
         // split user selected configs into active and inactive, props always
         // are not empty after render method
-        List<AttrConfig> userSelectedActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(attrConfigs,
+        List<AttrConfig> userSelectedActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(userProvidedAttrConfigs,
                 ColumnMetadataKey.State, AttrState.Active);
-        List<AttrConfig> userSelectedInactiveConfigs = LimitValidatorUtils.returnPropertyConfigs(attrConfigs,
-                ColumnMetadataKey.State, AttrState.Inactive);
+        List<AttrConfig> userSelectedInactiveConfigs = LimitValidatorUtils
+                .returnPropertyConfigs(userProvidedAttrConfigs, ColumnMetadataKey.State, AttrState.Inactive);
 
-        List<AttrConfig> existingActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(dbConfigs,
+        List<AttrConfig> existingActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(existingAttrConfigs,
                 ColumnMetadataKey.State, AttrState.Active);
 
         // dedup, since the user selected configs has merged with the configs in
@@ -92,16 +92,19 @@ public class LimitationValidator extends AttrValidator {
             }
             totalSelectedPremiumNumber += userSelectedNumber;
         }
-        int totalLimit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, null);
-        int selected = totalSelectedPremiumNumber;
-        if (selected > totalLimit) {
-            userSelectedActiveConfigs.forEach(e -> {
-                if (e.getDataLicense() != null) {
-                    addErrorMsg(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT,
-                            String.format(ValidationMsg.Errors.EXCEED_LIMIT, selected, EXPORT, totalLimit), e);
-                }
-            });
-        }
+        // Per PM's requirement, disable the total limit check, will clean it up
+        // int totalLimit =
+        // getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, null);
+        // int selected = totalSelectedPremiumNumber;
+        // if (selected > totalLimit) {
+        // userSelectedActiveConfigs.forEach(e -> {
+        // if (e.getDataLicense() != null) {
+        // addErrorMsg(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT,
+        // String.format(ValidationMsg.Errors.EXCEED_LIMIT, selected, EXPORT,
+        // totalLimit), e);
+        // }
+        // });
+        // }
     }
 
     // check category limit

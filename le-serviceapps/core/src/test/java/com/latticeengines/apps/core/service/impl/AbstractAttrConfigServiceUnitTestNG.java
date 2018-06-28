@@ -43,7 +43,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
     private static int technologyLimit = 32;
     private static final Logger log = LoggerFactory.getLogger(AbstractAttrConfigServiceUnitTestNG.class);
     @Mock
-    private LimitationValidator limitationValidator;
+    private ActivationLimitValidator limitationValidator;
 
     @BeforeTest(groups = "unit")
     public void setup() {

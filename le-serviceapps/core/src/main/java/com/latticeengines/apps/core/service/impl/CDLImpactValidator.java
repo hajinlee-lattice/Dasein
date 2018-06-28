@@ -21,9 +21,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
-import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.proxy.exposed.cdl.CDLDependenciesProxy;
 
 @Component("cdlImpactValidator")
@@ -41,13 +39,14 @@ public class CDLImpactValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
-        for (AttrConfig attrConfig : attrConfigs) {
-            checkImpact(attrConfig, isAdmin);
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            boolean isAdmin) {
+        for (AttrConfig attrConfig : userProvidedAttrConfigs) {
+            checkImpact(attrConfig);
         }
     }
 
-    private void checkImpact(AttrConfig attrConfig, boolean isAdmin) {
+    private void checkImpact(AttrConfig attrConfig) {
         if (attrConfig.getEntity() != null && hasCustomValue(attrConfig)) {
             List<String> attributes = Collections
                     .singletonList(String.format("%s.%s", attrConfig.getEntity().name(), attrConfig.getAttrName()));

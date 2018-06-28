@@ -29,8 +29,9 @@ public class UsageValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
-        for (AttrConfig attrConfig : attrConfigs) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            boolean isAdmin) {
+        for (AttrConfig attrConfig : userProvidedAttrConfigs) {
             checkUsage(attrConfig);
         }
     }

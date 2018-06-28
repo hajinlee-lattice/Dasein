@@ -2,6 +2,7 @@ package com.latticeengines.apps.core.service.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     private AttrValidationService attrValidationService;
 
     @Inject
-    private LimitationValidator limitationValidator;
+    private ActivationLimitValidator limitationValidator;
 
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
 
@@ -155,7 +156,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
         }
 
-        // TODO multithreading
         log.info("Trying to get detailed config for " + category + " with properties: " + propertyNames);
         for (String propertyName : propertyNames) {
             Map<T, Long> valueNumberMap = new HashMap<>();
@@ -235,51 +235,44 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return renderedList;
     }
 
-    @Deprecated
-    @Override
-    public AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin) {
-        try (PerformanceTimer timer = new PerformanceTimer()) {
-            Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs(),
-                    new ArrayList<>());
-            if (MapUtils.isNotEmpty(attrConfigGrpsForTrim)) {
-                List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        return list.stream();
-                    } else {
-                        return Stream.empty();
-                    }
-                }).collect(Collectors.toList());
-                request.setAttrConfigs(renderedList);
-                ValidationDetails details = attrValidationService.validate(request.getAttrConfigs(), isAdmin);
-                request.setDetails(details);
-            }
-            int count = CollectionUtils.isNotEmpty(request.getAttrConfigs()) ? request.getAttrConfigs().size() : 0;
-            String msg = String.format("Validate %d attr configs", count);
-            timer.setTimerMessage(msg);
-        }
-        return request;
-    }
-
     @Override
     public AttrConfigRequest saveRequest(AttrConfigRequest request, boolean isAdmin) {
         AttrConfigRequest toReturn;
-
+        String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> attrConfigs = request.getAttrConfigs();
         List<AttrConfigEntity> toDeleteEntities = new ArrayList<>();
         Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs, toDeleteEntities);
         if (MapUtils.isEmpty(attrConfigGrpsForTrim)) {
             toReturn = request;
         } else {
-            List<AttrConfig> renderedList = generateListFromMap(attrConfigGrpsForTrim);
-
-            log.info("rendered List" + JsonUtils.serialize(renderedList));
+            List<AttrConfig> userProvidedList = generateListFromMap(attrConfigGrpsForTrim);
+            log.info("user provided configs" + JsonUtils.serialize(userProvidedList));
             toReturn = new AttrConfigRequest();
-            toReturn.setAttrConfigs(renderedList);
-            List<AttrConfig> dbConfigs = attrConfigEntityMgr.findAllByTenantId(MultiTenantContext.getShortTenantId());
-            dbConfigs = generateListFromMap(renderConfigs(dbConfigs, new ArrayList<>()));
-            log.info("current db configs " + JsonUtils.serialize(dbConfigs));
-            attrValidationService.setValidateParam(dbConfigs);
-            ValidationDetails details = attrValidationService.validate(renderedList, isAdmin);
+            toReturn.setAttrConfigs(userProvidedList);
+
+            // Render the system metadata decorated by existing custom data
+            List<AttrConfig> existingAttrConfigs = Collections.synchronizedList(new ArrayList<>());
+
+            try (PerformanceTimer timer = new PerformanceTimer()) {
+                final Tenant tenant = MultiTenantContext.getTenant();
+                List<Runnable> runnables = new ArrayList<>();
+                BusinessEntity.SEGMENT_ENTITIES.stream().forEach(entity -> {
+                    Runnable runnable = () -> {
+                        MultiTenantContext.setTenant(tenant);
+                        List<ColumnMetadata> systemMetadataCols = getSystemMetadata(entity);
+                        List<AttrConfig> existingCustomConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId,
+                                entity);
+                        existingAttrConfigs.addAll(render(systemMetadataCols, existingCustomConfig));
+                    };
+                    runnables.add(runnable);
+                });
+                ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+                int count = CollectionUtils.isNotEmpty(existingAttrConfigs) ? existingAttrConfigs.size() : 0;
+                String msg = String.format("Rendered %d attr configs for tenant %s", count, tenantId);
+                timer.setTimerMessage(msg);
+            }
+
+            ValidationDetails details = attrValidationService.validate(existingAttrConfigs, userProvidedList, isAdmin);
             toReturn.setDetails(details);
             if (toReturn.hasWarning()) {
                 log.info("current attribute configs has warnings:" + JsonUtils.serialize(details));
@@ -300,7 +293,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
                 String shortTenantId = MultiTenantContext.getShortTenantId();
                 attrConfigEntityMgr.save(shortTenantId, entity, trim(configList, isAdmin));
-
                 // clear serving metadata cache
                 String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
                 cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);

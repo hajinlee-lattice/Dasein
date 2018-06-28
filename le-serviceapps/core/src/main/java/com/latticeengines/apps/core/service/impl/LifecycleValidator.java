@@ -25,8 +25,9 @@ public class LifecycleValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
-        for (AttrConfig attrConfig : attrConfigs) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            boolean isAdmin) {
+        for (AttrConfig attrConfig : userProvidedAttrConfigs) {
             checkState(attrConfig, isAdmin);
         }
     }
@@ -55,8 +56,11 @@ public class LifecycleValidator extends AttrValidator {
                 }
             }
             // check customer value or system value is equal to Inactive
+            ColumnSelection.Predefined[] usageProperties = { ColumnSelection.Predefined.Segment,
+                    ColumnSelection.Predefined.Enrichment, ColumnSelection.Predefined.TalkingPoint,
+                    ColumnSelection.Predefined.CompanyProfile };
             if (AttrState.Inactive.equals(finalState)) {
-                for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
+                for (ColumnSelection.Predefined group : usageProperties) {
                     Boolean finalUsageValue = attrConfig.getPropertyFinalValue(group.name(), Boolean.class);
                     if (Boolean.TRUE.equals((finalUsageValue))) {
                         addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE, String

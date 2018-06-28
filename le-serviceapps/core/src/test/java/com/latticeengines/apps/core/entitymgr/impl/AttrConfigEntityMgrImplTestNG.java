@@ -1,6 +1,7 @@
 package com.latticeengines.apps.core.entitymgr.impl;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,10 +36,13 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
 
         AttrConfig attrConfig1 = new AttrConfig();
         attrConfig1.setAttrName("Attr1");
+        attrConfig1.setAttrProps(new HashMap<>());
         AttrConfig attrConfig2 = new AttrConfig();
         attrConfig2.setAttrName("Attr2");
+        attrConfig2.setAttrProps(new HashMap<>());
         AttrConfig attrConfig3 = new AttrConfig();
         attrConfig3.setAttrName("Attr3");
+        attrConfig3.setAttrProps(new HashMap<>());
 
         List<AttrConfig> attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
         Assert.assertTrue(CollectionUtils.isEmpty(attrConfigs));
@@ -54,7 +58,9 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         attrConfig2.putProperty(ColumnMetadataKey.DisplayName, attrConfigProp);
         AttrConfig attrConfig4 = new AttrConfig();
         attrConfig4.setAttrName("Attr4");
-        List<AttrConfig> response = attrConfigEntityMgr.save(tenantName, entity, Arrays.asList(attrConfig2, attrConfig4));
+        attrConfig4.setAttrProps(new HashMap<>());
+        List<AttrConfig> response = attrConfigEntityMgr.save(tenantName, entity,
+                Arrays.asList(attrConfig2, attrConfig4));
         Assert.assertEquals(response.size(), 2);
         Thread.sleep(500); // wait for replication lag
         attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
@@ -62,7 +68,8 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         attrConfigs.forEach(attrConfig -> {
             if (attrConfig.getAttrName().equals("Attr2")) {
                 Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.DisplayName));
-                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(), "Display Name 1");
+                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(),
+                        "Display Name 1");
             }
         });
 
@@ -71,7 +78,6 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
         Assert.assertTrue(CollectionUtils.isEmpty(attrConfigs));
     }
-
 
     @Test(groups = "functional")
     public void testCleanupTenant() throws InterruptedException {
@@ -82,10 +88,13 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
 
         AttrConfig attrConfig1 = new AttrConfig();
         attrConfig1.setAttrName("Attr1");
+        attrConfig1.setAttrProps(new HashMap<>());
         AttrConfig attrConfig2 = new AttrConfig();
         attrConfig2.setAttrName("Attr2");
+        attrConfig2.setAttrProps(new HashMap<>());
         AttrConfig attrConfig3 = new AttrConfig();
         attrConfig3.setAttrName("Attr3");
+        attrConfig3.setAttrProps(new HashMap<>());
 
         attrConfigEntityMgr.save(tenant1, entity, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
         attrConfigEntityMgr.save(tenant2, entity, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));

@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
@@ -23,8 +25,6 @@ public class UsageLimitValidator extends AttrValidator {
 
     public static final String VALIDATOR_NAME = "USAGE_LIMIT_VALIDATOR";
 
-    private List<AttrConfig> dbConfigs;
-
     private List<String> usageLimitCheckList = Arrays.asList(ColumnSelection.Predefined.Enrichment.getName(),
             ColumnSelection.Predefined.CompanyProfile.getName());
 
@@ -32,17 +32,14 @@ public class UsageLimitValidator extends AttrValidator {
         super(VALIDATOR_NAME);
     }
 
-    public void setDBConfigs(List<AttrConfig> existingConfigs) {
-        this.dbConfigs = existingConfigs;
-    }
-
     @Override
-    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            boolean isAdmin) {
         String tenantId = MultiTenantContext.getShortTenantId();
         log.info("validate usage limit for tenant " + tenantId);
-        LimitValidatorUtils.checkAmbiguityInFieldNames(attrConfigs);
+        LimitValidatorUtils.checkAmbiguityInFieldNames(userProvidedAttrConfigs);
         for (String usage : usageLimitCheckList) {
-            checkForUsage(attrConfigs, usage, getLimit(usage));
+            checkForUsage(existingAttrConfigs, userProvidedAttrConfigs, usage, getLimit(usage));
         }
     }
 
@@ -62,19 +59,27 @@ public class UsageLimitValidator extends AttrValidator {
         return result;
     }
 
-    private void checkForUsage(List<AttrConfig> attrConfigs, String usage, int limit) {
-        List<AttrConfig> userSelectedEnabledConfigs = LimitValidatorUtils.returnPropertyConfigs(attrConfigs, usage,
-                Boolean.TRUE);
-        List<AttrConfig> userSelectedDisabledConfigs = LimitValidatorUtils.returnPropertyConfigs(attrConfigs, usage,
-                Boolean.FALSE);
+    private void checkForUsage(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            String usage, int limit) {
+        List<AttrConfig> userSelectedEnabledConfigs = LimitValidatorUtils.returnPropertyConfigs(userProvidedAttrConfigs,
+                usage, Boolean.TRUE);
+        List<AttrConfig> userSelectedDisabledConfigs = LimitValidatorUtils
+                .returnPropertyConfigs(userProvidedAttrConfigs, usage, Boolean.FALSE);
+        log.info("user selected enabled configs " + userSelectedEnabledConfigs.size());
+        log.info("user selected disabled configs " + userSelectedDisabledConfigs.size());
 
-        List<AttrConfig> existingActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(dbConfigs, usage,
+        List<AttrConfig> existingEnabledConfigs = LimitValidatorUtils.returnPropertyConfigs(existingAttrConfigs, usage,
                 Boolean.TRUE);
+        log.info("existing enabled configs " + existingEnabledConfigs.size());
+        existingEnabledConfigs = LimitValidatorUtils.returnPropertyConfigs(existingEnabledConfigs,
+                ColumnMetadataKey.State, AttrState.Active);
 
-        List<AttrConfig> activeConfigs = LimitValidatorUtils.generateUnionConfig(existingActiveConfigs,
+        List<AttrConfig> activeConfigs = LimitValidatorUtils.generateUnionConfig(existingEnabledConfigs,
                 userSelectedEnabledConfigs);
-        List<AttrConfig> inactiveConfigs = LimitValidatorUtils.generateInterceptionConfig(existingActiveConfigs,
+        List<AttrConfig> inactiveConfigs = LimitValidatorUtils.generateInterceptionConfig(existingEnabledConfigs,
                 userSelectedDisabledConfigs);
+        log.info("activeConfigs " + activeConfigs.size());
+        log.info("inactiveConfigs " + inactiveConfigs.size());
 
         int totalEnableNumber = activeConfigs.size() - inactiveConfigs.size();
         if (limit < totalEnableNumber) {
@@ -83,7 +88,6 @@ public class UsageLimitValidator extends AttrValidator {
                         String.format(ValidationMsg.Errors.EXCEED_USAGE_LIMIT, totalEnableNumber, usage, limit), e);
             });
         }
-
     }
 
 }

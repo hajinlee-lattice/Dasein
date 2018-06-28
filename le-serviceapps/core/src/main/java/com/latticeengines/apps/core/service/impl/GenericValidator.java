@@ -12,6 +12,11 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
+/**
+ * Validate if any customized attribute's allowCustomization is true
+ * 
+ */
+
 @Component("genericValidator")
 public class GenericValidator extends AttrValidator {
 
@@ -22,12 +27,12 @@ public class GenericValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> attrConfigs, boolean isAdmin) {
-        for (AttrConfig attrConfig : attrConfigs) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            boolean isAdmin) {
+        for (AttrConfig attrConfig : userProvidedAttrConfigs) {
             checkInvalidPropChange(attrConfig);
         }
     }
-
 
     private void checkInvalidPropChange(AttrConfig attrConfig) {
         Map<String, AttrConfigProp<?>> attrConfigPropMap = attrConfig.getAttrProps();
@@ -36,10 +41,9 @@ public class GenericValidator extends AttrValidator {
         }
         for (Map.Entry<String, AttrConfigProp<?>> attrProp : attrConfigPropMap.entrySet()) {
             if (!attrProp.getValue().isAllowCustomization()) {
-                if(attrProp.getValue().getCustomValue() != null) {
+                if (attrProp.getValue().getCustomValue() != null) {
                     addErrorMsg(ValidationErrors.Type.INVALID_PROP_CHANGE,
-                            String.format(ValidationMsg.Errors.FORBID_CUSTOMIZATION, attrProp.getKey()),
-                            attrConfig);
+                            String.format(ValidationMsg.Errors.FORBID_CUSTOMIZATION, attrProp.getKey()), attrConfig);
                 }
             }
         }

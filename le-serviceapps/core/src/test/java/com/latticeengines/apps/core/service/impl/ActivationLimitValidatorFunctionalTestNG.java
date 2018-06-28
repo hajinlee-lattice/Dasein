@@ -23,20 +23,19 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
-public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTestNGBase {
+public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctionalTestNGBase {
 
     private static final int LIMIT = 500;
     private static final int mockHGLimit = 10;
 
     @Spy
-    private LimitationValidator limitationValidator;
+    private ActivationLimitValidator limitationValidator;
 
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {
         MockitoAnnotations.initMocks(this);
         setupTestEnvironment();
         MultiTenantContext.setTenant(mainTestTenant);
-        limitationValidator.setDBConfigs(new ArrayList<>());
         Mockito.doReturn(mockHGLimit).when(limitationValidator)
                 .getMaxPremiumLeadEnrichmentAttributesByLicense(anyString(), anyString());
     }
@@ -54,7 +53,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
             config.putProperty(ColumnMetadataKey.State, prop);
             attrConfigs.add(config);
         }
-        limitationValidator.validate(attrConfigs, false);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), 0);
 
         AttrConfig attrConfig = new AttrConfig();
@@ -62,7 +61,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         attrConfig.setDataLicense("HG");
         attrConfig.putProperty(ColumnMetadataKey.State, prop);
         attrConfigs.add(attrConfig);
-        limitationValidator.validate(attrConfigs, false);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size());
 
         resetConfigs(attrConfigs);
@@ -75,7 +74,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         inactiveProp.setCustomValue(AttrState.Inactive);
         inactiveConfig.putProperty(ColumnMetadataKey.State, inactiveProp);
         attrConfigs.add(inactiveConfig);
-        limitationValidator.validate(attrConfigs, false);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, false);
         // the inactive config should not have error message
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
@@ -97,7 +96,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
             config.putProperty(ColumnMetadataKey.State, stateProp);
             attrConfigs.add(config);
         }
-        limitationValidator.validate(attrConfigs, false);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), 0);
 
         AttrConfig activeConfig = new AttrConfig();
@@ -106,7 +105,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         activeConfig.putProperty(ColumnMetadataKey.Category, cateProp);
         activeConfig.putProperty(ColumnMetadataKey.State, stateProp);
         attrConfigs.add(activeConfig);
-        limitationValidator.validate(attrConfigs, false);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, false);
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size());
 
         resetConfigs(attrConfigs);
@@ -120,7 +119,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
         inactiveProp.setCustomValue(AttrState.Inactive);
         inactiveConfig.putProperty(ColumnMetadataKey.State, inactiveProp);
         attrConfigs.add(inactiveConfig);
-        limitationValidator.validate(attrConfigs, false);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, false);
         // the new config should not have error message
         assertEquals(getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }

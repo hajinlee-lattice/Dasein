@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 
 public interface AttrValidationService {
 
-    ValidationDetails validate(List<AttrConfig> attrConfigs, boolean isAdmin);
+    ValidationDetails validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            boolean isAdmin);
 
-    void setValidateParam(List<AttrConfig> existingConfigs);
 }

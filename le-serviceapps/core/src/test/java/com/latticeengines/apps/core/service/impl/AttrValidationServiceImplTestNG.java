@@ -42,7 +42,7 @@ public class AttrValidationServiceImplTestNG extends ServiceAppsFunctionalTestNG
         prop1.setCustomValue(99);
         attrConfig.putProperty("IntValue", prop1);
         attrConfigs.add(attrConfig);
-        ValidationDetails details = attrValidationService.validate(attrConfigs, false);
+        ValidationDetails details = attrValidationService.validate(attrConfigList, attrConfigs, false);
         Assert.assertNotNull(details);
         Assert.assertEquals(details.getValidations().size(), 1);
         ValidationDetails.AttrValidation validation = details.getValidations().get(0);

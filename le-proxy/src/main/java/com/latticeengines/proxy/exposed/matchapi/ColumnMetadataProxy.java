@@ -7,14 +7,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
@@ -26,9 +23,11 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -74,8 +73,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     @Override
     public List<ColumnMetadata> columnSelection(Predefined selectName, String dataCloudVersion) {
-        String msg = "Load mdatadata of predefined selection " + selectName + " data cloud version "
-                + dataCloudVersion;
+        String msg = "Load mdatadata of predefined selection " + selectName + " data cloud version " + dataCloudVersion;
         try (PerformanceTimer timer = new PerformanceTimer(msg)) {
             if (dataCloudVersion.startsWith("1.0")) {
                 return requestColumnSelection(selectName, dataCloudVersion);
@@ -99,7 +97,8 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             compatibleVersion = DEFAULT;
         }
         initializeLatestVersionCache();
-        DataCloudVersion version = latestDataCloudVersionCache.getWatcherCache().get(KEY_PREFIX + "|" + compatibleVersion);
+        DataCloudVersion version = latestDataCloudVersionCache.getWatcherCache()
+                .get(KEY_PREFIX + "|" + compatibleVersion);
         if (version == null) {
             throw new NullPointerException("Cannot find latest version compatible with " + compatibleVersion);
         }
@@ -119,10 +118,10 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     }
 
     private List<ColumnMetadata> requestAllColumnsWithRetry(String dataCloudVersion) {
-        ProxyRetryTemplate retry = getRetryTemplate("get AM metadata", HttpMethod.GET, "metadata api", false,
-        null);
+        ProxyRetryTemplate retry = getRetryTemplate("get AM metadata", HttpMethod.GET, "metadata api", false, null);
         return retry.execute(context -> {
-            String msg = "(Attempt=" + (context.getRetryCount() + 1) + ") Load metadata of data cloud version " + dataCloudVersion;
+            String msg = "(Attempt=" + (context.getRetryCount() + 1) + ") Load metadata of data cloud version "
+                    + dataCloudVersion;
             return requestAllColumns(dataCloudVersion, msg);
         });
     }
@@ -138,7 +137,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                     .doOnError(Flux::error) //
                     .sequential();
             List<ColumnMetadata> cms = flux.collectList() //
-                    .block(Duration.of(1, ChronoUnit.MINUTES));
+                    .block(Duration.of(10, ChronoUnit.MINUTES));
             if (cms != null) {
                 log.info("Loaded in total " + cms.size() + " columns from matchapi");
             }
@@ -178,9 +177,11 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     }
 
     /**
-     * Retrieve {@link TopNTree} and filter out all the attributes that can be internal enriched if the
-     * flag is set
-     * @param excludeInternalEnrichment flag to filter out internal attributes
+     * Retrieve {@link TopNTree} and filter out all the attributes that can be
+     * internal enriched if the flag is set
+     * 
+     * @param excludeInternalEnrichment
+     *            flag to filter out internal attributes
      * @return
      */
     public TopNTree getTopNTree(boolean excludeInternalEnrichment) {
@@ -209,7 +210,8 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         TopNTree topNTree = getKryo("get AM top n tree", constructUrl("/topn"), TopNTree.class);
         List<ColumnMetadata> cms = columnSelection(ColumnSelection.Predefined.Enrichment);
         Boolean excludeInternalEnrichment = excludeInternal;
-        Set<String> internalAttrs = cms.stream().filter(cm -> excludeInternalEnrichment.equals(cm.getCanInternalEnrich()))
+        Set<String> internalAttrs = cms.stream()
+                .filter(cm -> excludeInternalEnrichment.equals(cm.getCanInternalEnrich()))
                 .map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
         topNTree.getCategories().forEach((cat, catTree) -> catTree.getSubcategories()
                 .forEach((subCat, attrs) -> attrs.removeIf(attr -> internalAttrs.contains(attr.getAttribute()))));
