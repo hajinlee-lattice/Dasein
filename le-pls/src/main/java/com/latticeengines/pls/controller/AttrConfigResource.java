@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
@@ -61,14 +62,13 @@ public class AttrConfigResource {
 
     @PutMapping(value = "/usage/config/category/{categoryName}")
     @ApiOperation("update Usage Config")
-    public String updateUsageConfig(@PathVariable String categoryName,
+    public void updateUsageConfig(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usageName,
             @RequestBody AttrConfigSelectionRequest request, HttpServletResponse response) {
         UpdateUsageResponse updateUsageResponse = attrConfigService.updateUsageConfig(categoryName, usageName, request);
         if (updateUsageResponse.getMessage() != null) {
-            response.setStatus(HttpStatus.ORDINAL_500_Internal_Server_Error);
+            throw new LedpException(LedpCode.LEDP_18190, new String[] { updateUsageResponse.getMessage() });
         }
-        return updateUsageResponse.getMessage();
     }
 
     @GetMapping(value = "/activation/config/category/{categoryName}")
