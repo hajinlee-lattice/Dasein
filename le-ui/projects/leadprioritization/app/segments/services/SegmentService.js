@@ -471,8 +471,7 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                var result = response.data;
-                deferred.resolve(result);
+                deferred.resolve(response);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};

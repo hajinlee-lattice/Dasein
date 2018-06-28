@@ -680,13 +680,16 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer();
 
         RatingsEngineService.deleteRating(ratingId).then(function(result) {
+            if (result) {
+                // immediately remove deleted rating from ratinglist
+                this.setRatings(this.current.ratings.filter(function(rating) { 
+                    return rating.id != ratingId;
+                }), true);
+            }
             deferred.resolve(result);
         });
 
-        // immediately remove deleted rating from ratinglist
-        this.setRatings(this.current.ratings.filter(function(rating) { 
-            return rating.id != ratingId;
-        }), true);
+
 
         return deferred.promise;
     }
