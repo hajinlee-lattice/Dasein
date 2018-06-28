@@ -636,15 +636,45 @@ angular.module('lp.import')
                 params = {};
             }
 
+
 	        $http({
 	            method: 'GET',
 	            url: '/pls/models/uploadfile/latticeschema',
 	            params: params,
 	            headers: { 'Content-Type': 'application/json' }
-	        }).then(function(data) {
-            ImportUtils.setLatticeSchema(data.data.Result);
-	            deferred.resolve(data.data.Result);
-	        });
+	        }).then(function(response) {
+
+                function onSuccess(response) {
+
+                var result = response.data;
+
+                if (result != null && result !== "" && result.Success == true) {
+                    console.log("!!!!!!!!!!!!!!!!!!!", result);
+
+                    ImportUtils.setLatticeSchema(result.Result);
+                    deferred.resolve(result.Result);
+
+                } else {
+
+                    var errors = result.Errors;
+                    var response = {
+                            success: false,
+                            errorMsg: errors[0]
+                        };
+
+                    console.log("????????????????????", response);
+                    deferred.resolve(response.errorMsg);
+                }
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                job.status = 'Failed';
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
 
 	        return deferred.promise;
 	    };
@@ -730,6 +760,7 @@ angular.module('lp.import')
 	            }
 	        }).then(
                 function onSuccess(response) {
+
                     var result = response.data;
                     if (result != null && result !== "") {
                         result = response.data;

@@ -28,10 +28,12 @@ angular.module('lp.jobs.import.row', ['mainApp.appCommon.directives.modal.window
                     }
                     $scope.disableButton = true;
                     JobsStore.runJob($scope.job).then(function (result) {
+
                         $scope.disableButton = true;
                         if(result.Success === true && action.obj) {
                             action.obj.jobStatus = 'Pending';
                         }
+                        
                     });
                 }else{
                     $scope.disableButton = false;

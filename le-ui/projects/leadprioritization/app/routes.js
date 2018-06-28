@@ -1291,27 +1291,13 @@ angular
                     return deferred.promise;
                 },
                 orgs: function($q, SfdcService, SfdcStore, accountids) {
-                    var deferred = $q.defer();
-
-                    var orgs = [];
+                    var deferred = $q.defer(),
+                        orgs = [];
 
                     SfdcStore.getOrgs().then(function (result) {
-                        var returnedOrgs = result.CRM;
-
-                        angular.forEach(returnedOrgs, function(org) {
-                            var found = accountids.some(function(el) {
-                                return el.fieldName == org.accountId;
-                            });
-                            if(!found){
-                                org.accountId = null;
-                                SfdcService.saveOrgs(org.configId, org);
-                            }
-                        });
-
                         deferred.resolve(result.CRM);
                     });
                     
-
                     return deferred.promise;
                 }
             },

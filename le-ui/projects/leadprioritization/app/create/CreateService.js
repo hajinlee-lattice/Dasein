@@ -187,6 +187,9 @@ angular
             }
         })
         .success(function(data, status, headers, config) {
+
+            console.log("GetFieldDocument:", data);
+
             if (data == null || !data.Success) {
                 if (data && data.Errors.length > 0) {
                     var errors = data.Errors.join('\n');
@@ -237,6 +240,7 @@ angular
             }
         })
         .success(function(data, status, headers, config) {
+            console.log("SaveFieldDocuments:", data);
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
@@ -271,6 +275,7 @@ angular
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
+            console.log("StartModeling:", data);
             if (data == null) {
                 result = {
                     Success: false,
@@ -315,6 +320,8 @@ angular
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
+
+            console.log("StartPMMLModeling:", data);
             if (data == null) {
                 result = {
                     Success: false,
@@ -357,6 +364,7 @@ angular
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
+            console.log("StartTestingSet:", data);
             if (data == null) {
                 result = {
                     Success: false,
