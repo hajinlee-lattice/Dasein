@@ -19,8 +19,10 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.proxy.exposed.cdl.CDLDependenciesProxy;
 
@@ -55,31 +57,49 @@ public class CDLImpactValidator extends AttrValidator {
                 return;
             }
             String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-            List<MetadataSegment> impactSegments = cdlDependenciesProxy.getDependingSegments(customerSpace, attributes);
-            List<RatingEngine> impactRatingEngines = cdlDependenciesProxy.getDependingRatingEngines(customerSpace,
-                    attributes);
-            List<RatingModel> impactRatingModels = cdlDependenciesProxy.getDependingRatingModels(customerSpace,
-                    attributes);
-            List<Play> impactPlays = cdlDependenciesProxy.getDependingPlays(customerSpace, attributes);
-            AttrConfigProp<?> stateProp = attrConfig.getProperty(ColumnMetadataKey.State);
-            if (CollectionUtils.isNotEmpty(impactSegments)) {
-                List<String> names = getImpactSegmentNames(impactSegments);
-                names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS, name, attrConfig));
-            }
-            if (CollectionUtils.isNotEmpty(impactRatingEngines)) {
-                List<String> names = getImpactRatingEngineNames(impactRatingEngines);
-                names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
-            }
-            if (CollectionUtils.isNotEmpty(impactRatingModels)) {
-                List<String> names = getImpactRatingModleNames(impactRatingModels);
-                names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS, name, attrConfig));
-            }
-            if (CollectionUtils.isNotEmpty(impactPlays)) {
-                List<String> names = getImpactPlayNames(impactPlays);
-                names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, name, attrConfig));
+            AttrState attrState = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
+            if (!AttrState.Inactive.equals(attrState)) { // skip impact checking for inactive attributes
+                if (isToBeDisabledForSegment(attrConfig)) {
+                    List<MetadataSegment> impactSegments = cdlDependenciesProxy.getDependingSegments(customerSpace,
+                            attributes);
+                    List<RatingEngine> impactRatingEngines = cdlDependenciesProxy
+                            .getDependingRatingEngines(customerSpace, attributes);
+                    List<RatingModel> impactRatingModels = cdlDependenciesProxy.getDependingRatingModels(customerSpace,
+                            attributes);
+                    if (CollectionUtils.isNotEmpty(impactSegments)) {
+                        List<String> names = getImpactSegmentNames(impactSegments);
+                        names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS, name, attrConfig));
+                    }
+                    if (CollectionUtils.isNotEmpty(impactRatingEngines)) {
+                        List<String> names = getImpactRatingEngineNames(impactRatingEngines);
+                        names.forEach(
+                                name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
+                    }
+                    if (CollectionUtils.isNotEmpty(impactRatingModels)) {
+                        List<String> names = getImpactRatingModleNames(impactRatingModels);
+                        names.forEach(
+                                name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS, name, attrConfig));
+                    }
+                }
+                if (isToBeDisabledForTalkingPoint(attrConfig)) {
+                    List<Play> impactPlays = cdlDependenciesProxy.getDependingPlays(customerSpace, attributes);
+                    if (CollectionUtils.isNotEmpty(impactPlays)) {
+                        List<String> names = getImpactPlayNames(impactPlays);
+                        names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, name, attrConfig));
+                    }
+                }
             }
         }
+    }
 
+    private boolean isToBeDisabledForSegment(AttrConfig attrConfig) {
+        return !Boolean.TRUE
+                .equals(attrConfig.getPropertyFinalValue(ColumnSelection.Predefined.Segment.name(), Boolean.class));
+    }
+
+    private boolean isToBeDisabledForTalkingPoint(AttrConfig attrConfig) {
+        return !Boolean.TRUE.equals(
+                attrConfig.getPropertyFinalValue(ColumnSelection.Predefined.TalkingPoint.name(), Boolean.class));
     }
 
     private List<String> getImpactSegmentNames(List<MetadataSegment> impactSegments) {
