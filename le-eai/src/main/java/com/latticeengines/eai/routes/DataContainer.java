@@ -108,7 +108,8 @@ public class DataContainer {
                 record.put(attribute.getName(), AvroTypeConverter.convertIntoJavaValueForAvroType(valueConverter,
                         type, attribute, value));
             } catch (Exception e) {
-                System.out.println(attribute.getName());
+                throw new RuntimeException(String.format("Cannot convert value %s to Type %s for attribute %s",
+                        String.valueOf(value), attribute.getPhysicalDataType(), attribute.getName()));
             }
         }
     }

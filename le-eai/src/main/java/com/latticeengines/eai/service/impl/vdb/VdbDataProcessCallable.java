@@ -176,14 +176,25 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
         for (int i = 0; i < rowSize; i++) {
             if (validateRecord(vdbQueryDataResult, i)) {
                 dataContainer.newRecord();
-                for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
-                    if (attributeMap.containsKey(column.getColumnName())) {
-                        Attribute attr = attributeMap.get(column.getColumnName());
-                        dataContainer.setValueForAttribute(attr, column.getValues().get(i));
+                try {
+                    for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
+                        try {
+                            if (attributeMap.containsKey(column.getColumnName())) {
+                                Attribute attr = attributeMap.get(column.getColumnName());
+                                dataContainer.setValueForAttribute(attr, column.getValues().get(i));
+                            }
+                        } catch (RuntimeException e) {
+                            errorMap.put(column.getColumnName(), e.getMessage());
+                            throw e;
+                        }
+                    }
+                    dataContainer.endRecord();
+                    rowsAppend++;
+                } catch (RuntimeException e) {
+                    if (errorMap.size() > 0) {
+                        handleError();
                     }
                 }
-                dataContainer.endRecord();
-                rowsAppend++;
             } else {
                 if (errorMap.size() > 0) {
                     handleError();
