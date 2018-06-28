@@ -1369,7 +1369,6 @@ public class SchemaRepository {
             switch (entity) {
             case Account:
                 sysAttrs.add(InterfaceName.LatticeAccountId);
-                sysAttrs.add(InterfaceName.IsMatched);
                 sysAttrs.add(InterfaceName.CustomerParentAccountID);
                 break;
             }
@@ -1396,6 +1395,7 @@ public class SchemaRepository {
             case Account:
                 stdAttrs.add(InterfaceName.AccountId);
                 stdAttrs.add(InterfaceName.Website);
+                stdAttrs.add(InterfaceName.IsMatched);
                 break;
             case Contact:
                 stdAttrs.add(InterfaceName.ContactId);
