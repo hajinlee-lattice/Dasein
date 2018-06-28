@@ -20,4 +20,6 @@ public interface AttrConfigService {
 
     AttrConfigRequest saveRequest(AttrConfigRequest request, boolean isAdmin);
 
+    AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin);
+
 }

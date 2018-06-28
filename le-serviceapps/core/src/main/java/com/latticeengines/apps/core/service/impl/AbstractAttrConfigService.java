@@ -235,6 +235,50 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return renderedList;
     }
 
+    @Deprecated
+    @Override
+    public AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs(),
+                    new ArrayList<>());
+            if (MapUtils.isNotEmpty(attrConfigGrpsForTrim)) {
+                List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
+                    if (CollectionUtils.isNotEmpty(list)) {
+                        return list.stream();
+                    } else {
+                        return Stream.empty();
+                    }
+                }).collect(Collectors.toList());
+                request.setAttrConfigs(renderedList);
+                // Render the system metadata decorated by existing custom data
+                List<AttrConfig> existingAttrConfigs = Collections.synchronizedList(new ArrayList<>());
+
+                final Tenant tenant = MultiTenantContext.getTenant();
+                List<Runnable> runnables = new ArrayList<>();
+                BusinessEntity.SEGMENT_ENTITIES.stream().forEach(entity -> {
+                    Runnable runnable = () -> {
+                        MultiTenantContext.setTenant(tenant);
+                        List<ColumnMetadata> systemMetadataCols = getSystemMetadata(entity);
+                        List<AttrConfig> existingCustomConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId,
+                                entity);
+                        existingAttrConfigs.addAll(render(systemMetadataCols, existingCustomConfig));
+                    };
+                    runnables.add(runnable);
+                });
+                ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+
+                ValidationDetails details = attrValidationService.validate(existingAttrConfigs,
+                        request.getAttrConfigs(), isAdmin);
+                request.setDetails(details);
+            }
+            int count = CollectionUtils.isNotEmpty(request.getAttrConfigs()) ? request.getAttrConfigs().size() : 0;
+            String msg = String.format("Validate %d attr configs", count);
+            timer.setTimerMessage(msg);
+        }
+        return request;
+    }
+
     @Override
     public AttrConfigRequest saveRequest(AttrConfigRequest request, boolean isAdmin) {
         AttrConfigRequest toReturn;

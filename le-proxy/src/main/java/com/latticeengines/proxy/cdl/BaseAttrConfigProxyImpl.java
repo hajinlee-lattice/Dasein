@@ -83,4 +83,12 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         return result;
     }
 
+    public AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/validate", //
+                shortenCustomerSpace(customerSpace));
+        AttrConfigRequest result = post("validate attr config request", url, request, AttrConfigRequest.class);
+        result.fixJsonDeserialization();
+        return result;
+    }
+
 }

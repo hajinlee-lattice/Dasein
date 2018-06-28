@@ -1,6 +1,5 @@
 package com.latticeengines.apps.lp.service.impl;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
