@@ -19,4 +19,7 @@ public interface DataFeedExecutionEntityMgr extends BaseEntityMgrRepository<Data
 
     int countByDataFeedAndJobType(DataFeed datafeed, DataFeedExecutionJobType jobType);
 
+    DataFeedExecution findByStatusAndWorkflowId(DataFeedExecution.Status status, Long workflowId);
+
+    DataFeedExecution updateStatus(DataFeedExecution execution);
 }

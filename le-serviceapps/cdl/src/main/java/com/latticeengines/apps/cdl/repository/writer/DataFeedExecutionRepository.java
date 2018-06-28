@@ -14,4 +14,6 @@ public interface DataFeedExecutionRepository extends BaseJpaRepository<DataFeedE
     int countByDataFeedAndJobType(DataFeed datafeed, DataFeedExecutionJobType jobType);
 
     DataFeedExecution findFirstByDataFeedAndJobTypeOrderByPidDesc(DataFeed datafeed, DataFeedExecutionJobType jobType);
+
+    DataFeedExecution findByStatusAndWorkflowId(DataFeedExecution.Status status, Long workflowId);
 }

@@ -48,4 +48,6 @@ public interface DataFeedService {
     boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
     Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
+
+    Boolean unblockPA(String customerSpace, Long workflowId);
 }

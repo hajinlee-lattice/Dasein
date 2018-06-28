@@ -90,6 +90,16 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataFeed findByPid(Long pid) {
+        if (pid == null) {
+            return null;
+        }
+
+        return datafeedRepository.findById(pid).orElse(null);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByName(String datafeedName) {
         datafeedName = StringUtils.isBlank(datafeedName) ? findDefaultFeed().getName() : datafeedName;
         DataFeed datafeed = datafeedRepository.findByName(datafeedName);
@@ -166,7 +176,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findDefaultFeedReadOnly() {
-        DataCollection collection = null;
+        DataCollection collection;
         try {
             collection = dataCollectionEntityMgr.findDefaultCollection();
         } catch (RuntimeException e) {
@@ -206,5 +216,11 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
         List<DataFeed> dataFeeds = findAll();
         return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public DataFeed updateStatus(DataFeed feed) {
+        return datafeedDao.updateStatus(feed);
     }
 }

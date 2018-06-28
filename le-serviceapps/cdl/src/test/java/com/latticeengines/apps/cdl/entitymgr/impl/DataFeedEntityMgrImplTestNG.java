@@ -130,6 +130,17 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
+    public void updateStatus() {
+        assertEquals(DataFeed.Status.ProcessAnalyzing, datafeed.getStatus());
+        datafeed.setStatus(DataFeed.Status.Active);
+        datafeed = datafeedEntityMgr.updateStatus(datafeed);
+        assertEquals(DataFeed.Status.Active, datafeed.getStatus());
+        datafeed.setStatus(DataFeed.Status.ProcessAnalyzing);
+        datafeed = datafeedEntityMgr.updateStatus(datafeed);
+        assertEquals(DataFeed.Status.ProcessAnalyzing, datafeed.getStatus());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "updateStatus")
     public void retrieve() {
         DataFeed retrieved = datafeedEntityMgr.findByNameInflated(uniqueDataFeedName);
         assertEquals(retrieved.getName(), datafeed.getName());

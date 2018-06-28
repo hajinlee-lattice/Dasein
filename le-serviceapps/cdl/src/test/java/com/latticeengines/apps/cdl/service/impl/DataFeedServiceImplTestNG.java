@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -155,7 +156,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
-    public void startExecution() throws Exception {
+    public void startExecution() {
         String customerSpace = MultiTenantContext.getTenant().getId();
         ExecutorService executor = Executors.newFixedThreadPool(1);
         Tenant t = MultiTenantContext.getTenant();
@@ -233,5 +234,44 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(exec1.getPid(), df.getActiveExecution().getPid());
         assertEquals(exec1.getPid(), new Long(exec0.getPid() + 1L));
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testUnblock() {
+        DataCollection dataCollection = new DataCollection();
+        dataCollection.setName(NamingUtils.uuid("DATA_COLLECTION_NAME"));
+        dataCollection.setTenant(MultiTenantContext.getTenant());
+        dataCollection.setVersion(Version.Blue);
+        dataCollectionEntityMgr.create(dataCollection);
+
+        DataFeed feed = new DataFeed();
+        feed.setName(NamingUtils.uuid("test_datafeed"));
+        feed.setTenant(mainTestTenant);
+        feed.setDataCollection(dataCollection);
+        datafeedEntityMgr.create(feed);
+
+        Long workflowId = 999L;
+        DataFeedExecution execution = new DataFeedExecution();
+        execution.setDataFeed(feed);
+        execution.setStatus(DataFeedExecution.Status.Started);
+        execution.setWorkflowId(workflowId);
+        execution.setDataFeedExecutionJobType(DataFeedExecutionJobType.PA);
+        datafeedExecutionEntityMgr.create(execution);
+
+        assertEquals(feed.getStatus(), Status.Initing);
+        assertEquals(execution.getStatus(), DataFeedExecution.Status.Started);
+        assertFalse(datafeedService.unblockPA(mainCustomerSpace, workflowId));
+        feed.setStatus(Status.ProcessAnalyzing);
+        feed = datafeedEntityMgr.updateStatus(feed);
+        assertEquals(feed.getStatus(), Status.ProcessAnalyzing);
+        assertTrue(datafeedService.unblockPA(mainCustomerSpace, workflowId));
+        execution = datafeedExecutionEntityMgr.findByPid(execution.getPid());
+        feed = datafeedEntityMgr.findByPid(feed.getPid());
+        assertEquals(feed.getStatus(), Status.Active);
+        assertEquals(execution.getStatus(), DataFeedExecution.Status.Failed);
+
+        dataCollectionEntityMgr.delete(dataCollection);
+        datafeedExecutionEntityMgr.delete(execution);
+        datafeedEntityMgr.delete(feed);
     }
 }

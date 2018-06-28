@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 
 public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Long> {
 
+    DataFeed findByPid(Long pid);
+
     DataFeed findByName(String datafeedName);
 
     DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
@@ -26,4 +28,6 @@ public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Lon
     List<DataFeed> getAllDataFeeds();
 
     List<SimpleDataFeed> getAllSimpleDataFeeds();
+
+    DataFeed updateStatus(DataFeed dataFeed);
 }

@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.dao.impl;
 
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.dao.DataFeedExecutionDao;
@@ -14,4 +16,17 @@ public class DataFeedExecutionDaoImpl extends BaseDaoImpl<DataFeedExecution> imp
         return DataFeedExecution.class;
     }
 
+    @Override
+    public DataFeedExecution updateStatus(DataFeedExecution execution) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<DataFeedExecution> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s execution set execution.status=:status where execution.pid=:pid",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("status", execution.getStatus());
+        query.setParameter("pid", execution.getPid());
+        query.executeUpdate();
+        return execution;
+    }
 }

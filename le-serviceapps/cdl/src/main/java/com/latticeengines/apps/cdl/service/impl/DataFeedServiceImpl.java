@@ -403,4 +403,23 @@ public class DataFeedServiceImpl implements DataFeedService {
 
         return execution.getWorkflowId();
     }
+
+    @Override
+    public Boolean unblockPA(String customerSpace, Long workflowId) {
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findByStatusAndWorkflowId(
+                DataFeedExecution.Status.Started, workflowId);
+        if (execution == null) {
+            return false;
+        }
+        DataFeed feed = datafeedEntityMgr.findByPid(execution.getDataFeed().getPid());
+        if (feed.getStatus() == Status.ProcessAnalyzing) {
+            execution.setStatus(DataFeedExecution.Status.Failed);
+            datafeedExecutionEntityMgr.updateStatus(execution);
+            feed.setStatus(Status.Active);
+            datafeedEntityMgr.updateStatus(feed);
+            return true;
+        }
+
+        return false;
+    }
 }

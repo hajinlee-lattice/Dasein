@@ -106,4 +106,25 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<
             }
         }
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
+    public DataFeedExecution findByStatusAndWorkflowId(DataFeedExecution.Status status, Long workflowId) {
+        if (status == null || workflowId == null) {
+            return null;
+        }
+        DataFeedExecution execution = dataFeedExecutionRepository.findByStatusAndWorkflowId(status, workflowId);
+        inflateDataFeedImport(execution);
+        return execution;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public DataFeedExecution updateStatus(DataFeedExecution execution) {
+        if (execution == null) {
+            return null;
+        }
+
+        return datafeedExecutionDao.updateStatus(execution);
+    }
 }
