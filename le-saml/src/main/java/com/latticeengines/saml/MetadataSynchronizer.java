@@ -75,8 +75,8 @@ public class MetadataSynchronizer {
             webSSOProfileConsumerBeans.stream() //
                     .filter(consumer -> consumer instanceof WebSSOProfileConsumerImpl) //
                     .forEach(consumer -> {
-                        log.info(String.format("Setting authNInstantTimeout limit to %d hours.",
-                                authNInstantTimeoutHours));
+                        log.info(String.format("Setting authNInstantTimeout limit to %d hours in bean of classtype %s.",
+                                authNInstantTimeoutHours, consumer.getClass().getName()));
                         ((WebSSOProfileConsumerImpl) consumer)
                                 .setMaxAuthenticationAge(TimeUnit.HOURS.toSeconds(authNInstantTimeoutHours));
                     });
