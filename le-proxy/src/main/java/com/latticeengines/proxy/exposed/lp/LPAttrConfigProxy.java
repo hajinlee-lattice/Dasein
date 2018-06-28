@@ -11,6 +11,4 @@ public interface LPAttrConfigProxy {
 
     AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request);
 
-    AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request);
-
 }
