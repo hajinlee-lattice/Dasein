@@ -25,7 +25,7 @@
                 {{ item.label }}
             </a>
             <i class="{{ item.icon }}" ng-if="item.icon"></i>
-            <span class="badge blue-badge" ng-if="item.total">{{ item.total }}</span>
+            <span class="badge blue-badge" ng-if="item.total != undefined">{{ item.total }}</span>
         </li>
     </ul>
 </div> 

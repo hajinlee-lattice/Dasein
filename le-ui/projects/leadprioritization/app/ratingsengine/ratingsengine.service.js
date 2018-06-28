@@ -682,7 +682,7 @@ angular.module('lp.ratingsengine')
         RatingsEngineService.deleteRating(ratingId).then(function(result) {
             if (result) {
                 // immediately remove deleted rating from ratinglist
-                this.setRatings(this.current.ratings.filter(function(rating) { 
+                RatingsEngineStore.setRatings(RatingsEngineStore.current.ratings.filter(function(rating) { 
                     return rating.id != ratingId;
                 }), true);
             }
