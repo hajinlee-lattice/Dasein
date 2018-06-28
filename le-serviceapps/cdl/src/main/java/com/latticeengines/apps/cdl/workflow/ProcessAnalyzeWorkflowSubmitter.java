@@ -102,7 +102,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @WithWorkflowJobPid
     public ApplicationId submit(String customerSpace, ProcessAnalyzeRequest request, WorkflowPidWrapper pidWrapper) {
-        log.info("WorkflowJob created with pid=" + pidWrapper.getPid());
+        log.info(String.format("WorkflowJob created for customer=%s with pid=%s", customerSpace, pidWrapper.getPid()));
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
@@ -113,15 +113,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         Status datafeedStatus = datafeed.getStatus();
-        log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
+        log.info(String.format("customer: %s, data feed: %s, status: %s", customerSpace, datafeed.getName(),
+                datafeedStatus.getName()));
 
         if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
             String errorMessage;
             if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
-                errorMessage = "We can't start processAnalyze workflow, need to import data first.";
+                errorMessage = String.format(
+                        "We can't start processAnalyze workflow for %s, need to import data first.",
+                        customerSpace);
             } else {
-                errorMessage = String.format("We can't start processAnalyze workflow by dataFeedStatus %s",
-                        datafeedStatus.getName());
+                errorMessage = String.format("We can't start processAnalyze workflow for %s by dataFeedStatus %s",
+                        customerSpace, datafeedStatus.getName());
             }
 
             throw new RuntimeException(errorMessage);
@@ -129,7 +132,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
 
-        log.info(String.format("data feed %s initial status: %s", datafeed.getName(), initialStatus.getName()));
+        log.info(String.format("customer %s data feed %s initial status: %s", customerSpace, datafeed.getName(),
+                initialStatus.getName()));
 
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
@@ -145,9 +149,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
             return workflowJobService.submit(configuration, pidWrapper.getPid());
         } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
+                    + ExceptionUtils.getStackTrace(e));
             dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
-            throw new RuntimeException(String.format("Failed to submit %s's P&A workflow", customerSpace));
+            throw new RuntimeException(String.format("Failed to submit %s's P&A workflow", customerSpace), e);
         }
     }
 
