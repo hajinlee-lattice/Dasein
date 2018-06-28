@@ -227,6 +227,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 isComplete = true;
             } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
                 ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+                if (importActionConfiguration == null) {
+                    log.error("Import action configuration is null!");
+                    return false;
+                }
                 if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
                     isComplete = true;
                 }

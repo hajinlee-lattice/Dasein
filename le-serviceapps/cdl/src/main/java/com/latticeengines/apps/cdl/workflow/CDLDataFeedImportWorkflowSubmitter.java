@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -52,6 +53,8 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Registering an import action for datafeedTask=%s, tenant=%s",
                 dataFeedTask.getUniqueId(), customerSpace.toString()));
         Action action = new Action();
+        ImportActionConfiguration config = new ImportActionConfiguration();
+        config.setDataFeedTaskId(dataFeedTask.getUniqueId());
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action.setActionInitiator(csvImportFileInfo.getFileUploadInitiator());
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
@@ -60,6 +63,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                     String.format("Tenant with id=%s cannot be found", customerSpace.toString()));
         }
         action.setTenant(tenant);
+        action.setActionConfiguration(config);
         log.info(String.format("Action=%s", action));
         return actionService.create(action);
     }
