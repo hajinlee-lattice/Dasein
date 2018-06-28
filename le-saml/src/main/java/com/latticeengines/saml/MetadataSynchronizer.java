@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
@@ -24,6 +25,7 @@ import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.metadata.MetadataMemoryProvider;
+import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 import org.springframework.security.saml.websso.WebSSOProfileConsumerImpl;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +54,7 @@ public class MetadataSynchronizer {
     private ParserPool parserPool;
 
     @Inject
-    private WebSSOProfileConsumerImpl webSSOProfileConsumer;
+    private List<WebSSOProfileConsumer> webSSOProfileConsumerBeans;
 
     @Value("${security.app.public.url:https://localhost:3000}")
     private String publicBaseAddress;
@@ -69,7 +71,16 @@ public class MetadataSynchronizer {
     private void postConstruct() {
         this.timer = new Timer("Metadata-refresh", true);
         this.timer.schedule(new MetadataSynchronizer.RefreshTask(), 0, refreshFrequency);
-        webSSOProfileConsumer.setMaxAuthenticationAge(TimeUnit.HOURS.toSeconds(authNInstantTimeoutHours));
+        if (CollectionUtils.isNotEmpty(webSSOProfileConsumerBeans)) {
+            webSSOProfileConsumerBeans.stream() //
+                    .filter(consumer -> consumer instanceof WebSSOProfileConsumerImpl) //
+                    .forEach(consumer -> {
+                        log.info(String.format("Setting authNInstantTimeout limit to %d hours.",
+                                authNInstantTimeoutHours));
+                        ((WebSSOProfileConsumerImpl) consumer)
+                                .setMaxAuthenticationAge(TimeUnit.HOURS.toSeconds(authNInstantTimeoutHours));
+                    });
+        }
     }
 
     @Transactional
