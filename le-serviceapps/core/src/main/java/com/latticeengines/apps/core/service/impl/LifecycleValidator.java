@@ -42,11 +42,8 @@ public class LifecycleValidator extends AttrValidator {
         if (stateProp != null) {
             if (stateProp.getCustomValue() != null) {
                 AttrState customState = AttrState.valueOf(stateProp.getCustomValue().toString());
-                if (!isAdmin && customState.equals(AttrState.Inactive)) {
-                    addErrorMsg(ValidationErrors.Type.INVALID_ACTIVATION,
-                            String.format(ValidationMsg.Errors.FORBID_SET_INACTIVE, attrConfig.getAttrName()),
-                            attrConfig);
-                } else if (customState.equals(AttrState.Active)) {
+                // do not allow activation of deprecated attributes
+                if (customState.equals(AttrState.Active)) {
                     AttrState systemState = AttrState.valueOf(stateProp.getSystemValue().toString());
                     if (systemState.equals(AttrState.Deprecated)) {
                         addErrorMsg(ValidationErrors.Type.INVALID_ACTIVATION,

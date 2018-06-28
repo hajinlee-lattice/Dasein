@@ -654,22 +654,22 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         for (AttrConfig config : customConfig) {
             config.setImpactWarnings(null);
             config.setValidationErrors(null);
-            AttrState state = config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
-            if (isAdmin || AttrState.Active.equals(state)) {
-                AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) config
-                        .getProperty(ColumnMetadataKey.State);
-                if (AttrState.Deprecated.equals(stateProp.getCustomValue())) {
-                    stateProp.setCustomValue(AttrState.Active);
-                }
-                config.getAttrProps().values().removeIf(v -> (v.getCustomValue() == null));
-                if (config.getAttrProps().size() != 0) {
-                    config.getAttrProps().values().forEach(prop -> {
-                        prop.setSystemValue(null);
-                        prop.setAllowCustomization(null);
-                    });
-                    results.add(config);
-                }
+
+            AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) config
+                    .getProperty(ColumnMetadataKey.State);
+            if (AttrState.Deprecated.equals(stateProp.getCustomValue())) {
+                stateProp.setCustomValue(AttrState.Active);
             }
+            // save only the minimum information into database
+            config.getAttrProps().values().removeIf(v -> (v.getCustomValue() == null));
+            if (config.getAttrProps().size() != 0) {
+                config.getAttrProps().values().forEach(prop -> {
+                    prop.setSystemValue(null);
+                    prop.setAllowCustomization(null);
+                });
+                results.add(config);
+            }
+
         }
         return results;
     }
