@@ -476,7 +476,26 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             } catch (Exception ex) {
                 log.info("Got error in fetching contact count", ex);
             }
+            
+            List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
+            for (RatingBucketName bucket : RatingBucketName.values()) {
+                Long countInBucket = 0L;
 
+                if (countInfo.containsKey(bucket.getName())) {
+                    countInBucket = countInfo.get(bucket.getName());
+                } else if (countInfo.containsKey(bucket.name())) {
+                    countInBucket = countInfo.get(bucket.name());
+                } else {
+                    // do not put bucket info for bucket which is not defined
+                    continue;
+                }
+
+                RatingBucketCoverage coveragePair = new RatingBucketCoverage();
+                coveragePair.setBucket(bucket.getName());
+                coveragePair.setCount(countInBucket);
+                bucketCoverageCounts.add(coveragePair);
+            }
+            coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
             ratingEngineIdCoverageMap.put(ratingIdLookupColumnPair.getResponseKeyId(), coverageInfo);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for rating id: " + ratingIdLookupColumnPair, ex);

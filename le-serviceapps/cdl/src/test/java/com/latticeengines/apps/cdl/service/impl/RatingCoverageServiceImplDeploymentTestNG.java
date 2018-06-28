@@ -266,7 +266,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
                 Assert.assertNotNull(coverage);
                 Assert.assertNotNull(coverage.getAccountCount());
                 Assert.assertNotNull(coverage.getContactCount());
-                Assert.assertNull(coverage.getBucketCoverageCounts());
+                Assert.assertNotNull(coverage.getBucketCoverageCounts());
             }
         }
     }
