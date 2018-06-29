@@ -204,12 +204,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
-        if (request.getSelect() != null) {
+        if (CollectionUtils.isNotEmpty(request.getSelect())) {
             for (String attr : request.getSelect()) {
                 updateAttrConfigsForState(category, attrConfigs, attr, ColumnMetadataKey.State, AttrState.Active);
             }
         }
-        if (request.getDeselect() != null) {
+        if (CollectionUtils.isNotEmpty(request.getDeselect())) {
             verifyAccessLevel();
             for (String attr : request.getDeselect()) {
                 updateAttrConfigsForState(category, attrConfigs, attr, ColumnMetadataKey.State, AttrState.Inactive);

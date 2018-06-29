@@ -211,6 +211,16 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof LedpException);
             Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18185);
         }
+
+        // test external admin can activate attributes
+        doReturn(AccessLevel.EXTERNAL_ADMIN).when(userService).getAccessLevel(anyString(), nullable(String.class));
+        try {
+            request.setDeselect(new ArrayList<>());
+            attrConfigRequest = attrConfigService
+                    .generateAttrConfigRequestForActivation(Category.CONTACT_ATTRIBUTES.getName(), request);
+        } catch (Exception e) {
+            Assert.fail("Should not throw any exception");
+        }
     }
 
     @Test(groups = "unit")
