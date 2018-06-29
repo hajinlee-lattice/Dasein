@@ -640,7 +640,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.DoNotMail.name()) //
-                .allowedDisplayNames(Sets.newHashSet("DONOTMAIL")) //
+                .allowedDisplayNames(Sets.newHashSet("DONOTMAIL", "DO_NOT_MAIL", "EMAIL_OPT_OUT")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.DoNotMail) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
