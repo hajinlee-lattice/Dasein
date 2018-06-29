@@ -35,6 +35,12 @@
                     position: relative;
                     top: 2px;
                 }
+
+                &.disabled {
+                    label {
+                        color: #aaa;
+                    }
+                }
             }
         }
 

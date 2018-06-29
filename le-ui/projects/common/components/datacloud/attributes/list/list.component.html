@@ -39,11 +39,15 @@
         </li>
 
         <li ng-repeat="item in (filteredList = ($ctrl.getResults()
+                        | filter: $ctrl.searchFilter
                         | filter: $ctrl.getFiltering()))
                         | orderBy: [ $ctrl.filters.sortPrefix + 'DisplayName' ]
                         | startFrom: ($ctrl.filters.page - 1) * $ctrl.filters.pagesize
                         | limitTo: $ctrl.filters.pagesize"
-            ng-class="{ 'category': item.Attributes }">
+            ng-class="{
+                'disabled': $ctrl.isDisabled(item),
+                'category': item.Attributes
+            }">
             <div class="attr-result-checkbox" ng-click="$ctrl.toggleSelected(item)">
                 <!--input  ng-checked="$ctrl.isChecked(item)" 
                         ng-disabled="$ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)"

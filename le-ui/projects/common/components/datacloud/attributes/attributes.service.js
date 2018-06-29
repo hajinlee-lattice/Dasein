@@ -17,6 +17,10 @@ angular.module('common.attributes')
             hide: { 
                 Selected: false,
                 IsPremium: false 
+            },
+            disabled: { 
+                Selected: false,
+                IsPremium: true 
             }
         };
 
@@ -86,7 +90,6 @@ angular.module('common.attributes')
             }
         }
 
-        //console.log('getSelectedTotal', section, total, tab, started);
         return total;
     };
 

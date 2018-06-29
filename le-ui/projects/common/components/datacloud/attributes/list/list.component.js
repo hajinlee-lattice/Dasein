@@ -29,7 +29,7 @@ angular.module('common.attributes.list', [])
             vm.countSelected();
 
             vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
-            //console.log('attrResultsList', vm);
+            console.log('attrResultsList', vm);
         };
         
         vm.setAccessRestriction = function() {
@@ -51,6 +51,9 @@ angular.module('common.attributes.list', [])
 
             vm.data.config.Subcategories.forEach(function(item) {
                 var selected = item.Attributes.filter(function(attr) {
+                    if (attr.IsPremium) {
+                        vm.filters.disabled = false;
+                    }
                     return attr.Selected;
                 });
 
@@ -80,6 +83,8 @@ angular.module('common.attributes.list', [])
                 var selected = [];
 
                 attributes.forEach(function(attr, index) {
+                    attr.SubCategory = key;
+
                     if (attr.Selected === true) {
                         selected.push(attr);
                         total.push(attr);
@@ -303,12 +308,31 @@ angular.module('common.attributes.list', [])
             return a.toLowerCase().localeCompare(b.toLowerCase());
         };
 
+        vm.searchFilter = function(attr) {
+            var text = vm.filters.queryText; 
+
+            if (text) {
+                var chkName = attr.DisplayName.indexOf(text) >= 0;
+                var chkSub = (attr.SubCategory || '').indexOf(text) >= 0;
+                
+                if (chkName || chkSub) {
+                    return true;
+                } else if (attr.Attributes) {
+                    for (var i=0; i<attr.Attributes.length; i++) {
+                        if (attr.Attributes[i].DisplayName.indexOf(text) >= 0) {
+                            return true;
+                        }
+                    }
+                }
+            } else {
+                return true;
+            }
+
+            return false;
+        };
+
         vm.getFiltering = function() {
             var obj = {};
-
-            if (vm.filters.queryText) {
-                obj.DisplayName = vm.filters.queryText;
-            }
 
             Object.keys(vm.filters.show).forEach(function(property) {
                 if (vm.filters.show[property] === true) {

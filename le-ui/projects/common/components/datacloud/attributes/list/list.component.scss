@@ -5,6 +5,10 @@ ul.attr-list-results {
         vertical-align: middle;
         display: flex;
         align-items: center;
+        -webkit-transition: none;
+        -moz-transition: none;
+        -ms-transition: none;
+        transition: none;
         
         &:first-child {
             font-weight: bold;
@@ -48,12 +52,11 @@ ul.attr-list-results {
             }
         }
 
-        &:not(.category):hover {
+        &:not(.category):not(.disabled):hover {
             background: #fff;
-            transition: none;
         }
         
-        &.category div.attr-result-checkbox {
+        &.category:not(.disabled) div.attr-result-checkbox {
             &:hover {
                 background: #fff; //#457eba;
                 transition: none;
@@ -64,8 +67,6 @@ ul.attr-list-results {
             color: #ef6a30;
         }
 
-        i.fa {
-        }
         .fa-square {
             position: relative;
             bottom: 2px;
@@ -137,8 +138,6 @@ ul.attr-list-results {
             div.attr-result-label-container {
                 width: 33%;
                 flex-shrink: 1;
-                overflow: hidden;
-                text-overflow: ellipsis;
             }
         }
 
@@ -180,10 +179,6 @@ ul.attr-list-results {
                 right: 2em;
                 font-size: 12px;
             }
-        
-            &:hover {
-                background: #fff;
-            }
 
             .attr-result-buckets {
                 display: flex;
@@ -222,10 +217,13 @@ ul.attr-list-results {
             }
         }
         
-        &.category div.attr-result-label {
+        &.category:not(.disabled) div.attr-result-label {
+            -webkit-transition: none;
+            -moz-transition: none;
+            -ms-transition: none;
+            transition: none;
             &:hover {
                 background: #fff;
-                transition: none;
             }
         }
     }
