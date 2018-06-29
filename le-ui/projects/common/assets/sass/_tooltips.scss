@@ -344,6 +344,7 @@ tooltip {
             padding: 20px;
             padding-right: 10px;
             overflow: hidden;
+            white-space: normal;
         }
         &:before {
             box-shadow: inherit;

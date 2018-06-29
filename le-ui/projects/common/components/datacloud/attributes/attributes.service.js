@@ -151,10 +151,14 @@ angular.module('common.attributes')
     this.getBucketData = function(category, subcategory) {
         var deferred = $q.defer();
         
-        AttrConfigService.getBucketData(category, subcategory).then(function(data) {
-            store.data.buckets[subcategory] = data.data;
-            deferred.resolve(data);
-        });
+        if (['Intent','Technology Profile'].indexOf(category) < 0) {
+            deferred.resolve([]);
+        } else {
+            AttrConfigService.getBucketData(category, subcategory).then(function(data) {
+                store.data.buckets[subcategory] = data.data;
+                deferred.resolve(data);
+            });
+        }
 
         return deferred.promise;
     };
@@ -202,8 +206,6 @@ angular.module('common.attributes')
                     return attr.DisplayName == item.DisplayName;
                 });
 
-                console.log(i, attr.DisplayName, subcategory, oSub, attr, oAttr);
-                
                 if (oAttr.length === 0 || oAttr[0].Selected === attr.Selected) {
                     return;
                 }
