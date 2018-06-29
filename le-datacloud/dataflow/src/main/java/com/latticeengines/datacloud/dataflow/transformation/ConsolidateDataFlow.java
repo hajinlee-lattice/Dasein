@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,11 +15,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.cdl.TrimFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateDataFuction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 import cascading.operation.Function;
@@ -83,7 +86,21 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         if (config.isAddTimestamps()) {
             result = ConsolidateDataHelper.addTimestampColumns(result);
         }
+        result = trimResult(result, config.getTrimFields());
         return result;
+    }
+
+    private Node trimResult(Node source, List<String> trimFields) {
+        if (CollectionUtils.isNotEmpty(trimFields)) {
+            Set<String> existingFields = source.getFieldNames().stream().collect(Collectors.toSet());
+            for (String trimField : trimFields) {
+                if (CollectionUtils.isNotEmpty(existingFields) && existingFields.contains(trimField)) {
+                    source = source.apply(new TrimFunction(trimField), new FieldList(trimField),
+                            new FieldMetadata(trimField, String.class));
+                }
+            }
+        }
+        return source;
     }
 
     private void addIdColumn(List<Node> sources, String idColumn) {

@@ -1,7 +1,11 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
@@ -15,6 +19,7 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
     private boolean dedupeSource;
     private boolean addTimestamps;
     private boolean mergeOnly;
+    private List<String> trimFields = getDefaultTrimFields();
 
     public String getSrcIdField() {
         return srcIdField;
@@ -78,5 +83,22 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     public void setMergeOnly(boolean mergeOnly) {
         this.mergeOnly = mergeOnly;
+    }
+
+    public List<String> getTrimFields() {
+        return trimFields;
+    }
+
+    public void setTrimFields(List<String> trimFields) {
+        this.trimFields = trimFields;
+    }
+
+    public static List<String> getDefaultTrimFields() {
+        return new ArrayList<>(Arrays.asList(InterfaceName.CompanyName.name(),
+                InterfaceName.City.name(),
+                InterfaceName.State.name(),
+                InterfaceName.Country.name(),
+                InterfaceName.Website.name(),
+                InterfaceName.ContactName.name()));
     }
 }
