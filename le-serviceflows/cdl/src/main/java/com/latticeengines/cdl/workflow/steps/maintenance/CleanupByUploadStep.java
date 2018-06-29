@@ -339,12 +339,10 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
         CleanupConfig.JoinedColumns joinedColumns = new CleanupConfig.JoinedColumns();
         switch (entity) {
         case Account:
-            joinedColumns.setAccountId(masterTable == null ? InterfaceName.AccountId.name()
-                    : masterTable.getAttribute(InterfaceName.AccountId).getName());
+            joinedColumns.setAccountId(InterfaceName.AccountId.name());
             break;
         case Contact:
-            joinedColumns.setContactId(masterTable == null ? InterfaceName.ContactId.name()
-                    : masterTable.getAttribute(InterfaceName.ContactId).getName());
+            joinedColumns.setContactId(InterfaceName.ContactId.name());
             break;
         case Transaction:
             switch (type) {
@@ -352,17 +350,13 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
                 joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                 break;
             case BYUPLOAD_MINDATEANDACCOUNT:
-                joinedColumns.setAccountId(masterTable == null ? InterfaceName.AccountId.name()
-                        : masterTable.getAttribute(InterfaceName.AccountId).getName());
+                joinedColumns.setAccountId(InterfaceName.AccountId.name());
                 joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                 break;
             case BYUPLOAD_ACPD:
-                joinedColumns.setAccountId(masterTable == null ? InterfaceName.AccountId.name()
-                        : masterTable.getAttribute(InterfaceName.AccountId).getName());
-                joinedColumns.setContactId(masterTable == null ? InterfaceName.ContactId.name()
-                        : masterTable.getAttribute(InterfaceName.ContactId).getName());
-                joinedColumns.setProductId(masterTable == null ? InterfaceName.ProductId.name()
-                        : masterTable.getAttribute(InterfaceName.ProductId).getName());
+                joinedColumns.setAccountId(InterfaceName.AccountId.name());
+                joinedColumns.setContactId(InterfaceName.ContactId.name());
+                joinedColumns.setProductId(InterfaceName.ProductId.name());
                 joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                 break;
             default:
