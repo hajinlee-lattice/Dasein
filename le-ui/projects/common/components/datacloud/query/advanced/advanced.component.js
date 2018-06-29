@@ -381,6 +381,7 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.getRuleCount = function(bkt, entity) {
+        // console.log(bkt, ' = ', entity);
         if (bkt) {
             var buckets = [
                 vm.rating_rule.bucketToRuleMap[bkt.bucket] 
@@ -401,14 +402,13 @@ angular.module('common.datacloud.query.builder', [
             contactRestrictions = QueryStore.getAllBuckets(bucket['contact_restriction'].logicalRestriction.restrictions);
 
             filteredAccounts = filteredAccounts.concat(accountRestrictions.filter(function(value, index) {
-                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
+                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id && !value.bucketRestriction.ignored;
             }));
 
             filteredContacts = filteredContacts.concat(contactRestrictions.filter(function(value, index) {
-                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
+                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id && !value.bucketRestriction.ignored;
             }));
-        })
-
+        });
         if (entity) {
             var counts = {
                         'account': filteredAccounts.length, 
