@@ -109,7 +109,7 @@
             <h5><label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? 'Attribute range' : 'Attribute values'}}</label><label>Records</label></h5>
             
             <ul class="attribute-stats">
-                <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | orderBy: ['-Cnt', 'Lbl'] | limitTo: 5"
+                <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
                     class="attribute attribute-stat delay top"
                     ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
