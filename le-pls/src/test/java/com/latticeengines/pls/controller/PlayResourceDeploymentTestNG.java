@@ -158,7 +158,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                     String row = JsonUtils.serialize(d);
                     Assert.assertTrue(d.containsKey(bucketFieldName), row);
                     Assert.assertTrue(d.containsKey(InterfaceName.CompanyName.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.SalesforceAccountID.name()), row);
+                    Assert.assertFalse(d.containsKey(InterfaceName.SalesforceAccountID.name()), row);
                     Assert.assertTrue(d.containsKey(InterfaceName.Website.name()), row);
                     Assert.assertTrue(d.containsKey(InterfaceName.AccountId.name()), row);
                     Assert.assertTrue(d.containsKey(InterfaceName.LDC_Name.name()), row);
