@@ -194,13 +194,17 @@ angular.module('common.attributes')
             usage.usage = $stateParams.section;
         }
 
-        this.data.config.Subcategories.forEach(function(item, index) {
+        this.data.config.Subcategories.forEach(function(subcategory, index) {
             var oSub = original.Subcategories[index];
 
-            item.Attributes.forEach(function(attr, i) {
-                var oAttr = oSub.Attributes[i];
+            subcategory.Attributes.forEach(function(attr, i) {
+                var oAttr = oSub.Attributes.filter(function(item) {
+                    return attr.DisplayName == item.DisplayName;
+                });
+
+                console.log(i, attr.DisplayName, subcategory, oSub, attr, oAttr);
                 
-                if (oAttr.Selected === attr.Selected) {
+                if (oAttr.length === 0 || oAttr[0].Selected === attr.Selected) {
                     return;
                 }
 
