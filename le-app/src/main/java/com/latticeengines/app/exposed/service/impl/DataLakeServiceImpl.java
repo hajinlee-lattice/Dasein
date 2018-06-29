@@ -491,8 +491,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         metadataMap.putAll(concurrentMetadataMap);
         columnNamesMap.putAll(concurrentColumnNamesMap);
         statsCubeMap.putAll(concurrentStatsCubeMap);
-        log.info("Finished collection metadata artifacts in parallel. Used " + stopWatch.getTime(TimeUnit.SECONDS)
-                + " sec.");
+        log.info(String.format("Finished collection metadata artifacts in parallel for %s. Used %d secs.", tenantId,
+                stopWatch.getTime(TimeUnit.SECONDS)));
     }
 
     public List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
