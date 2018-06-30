@@ -82,6 +82,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                 .rowsRequested(count.intValue()) //
                 .progress(0.05f) //
                 .commit();
+
+        log.info("Execution Context=" + JsonUtils.serialize(executionContext));
     }
 
     private Integer[] determineBlockSizes(Long count) {
