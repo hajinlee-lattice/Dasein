@@ -30,19 +30,18 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     });
 
     vm.init = function() {
-
         vm.noData = (vm.launchesCount === 0 && vm.orgId === '' && vm.externalSystemType === '' && vm.playName === '') ? true : false;
-
         vm.offset = (vm.currentPage - 1) * vm.pagesize;
-        
-        vm.updateLaunchData();
-        vm.parseLaunchData();
 
+        vm.updateLaunchData();
     };
 
 
     // Set sort
     vm.sort = function(header) {
+
+        console.log("sort");
+
         vm.sortBy = header;
 
         vm.currentPage = 1;
@@ -52,6 +51,9 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
     // Set play name
     vm.playSelectChange = function(play){
+
+        console.log("play change");
+
         if(play === undefined || play.length == 0){
             vm.playName = null;
         } else {
@@ -98,10 +100,6 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.noFilteredData = (vm.launchesCount === 0 && (vm.orgId !== '' || vm.externalSystemType !== '' || vm.playName !== '')) ? true : false;
 
         vm.defaultPlayLaunchList = angular.copy(vm.launches.uniquePlaysWithLaunches);
-        vm.defaultPlayLaunchList.unshift({playName: null, displayName: 'All Launched Plays'});
-
-        vm.header.filter.filtered = vm.defaultPlayLaunchList;
-        vm.header.filter.unfiltered = vm.defaultPlayLaunchList;
 
         vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
 
@@ -123,18 +121,28 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
 
+        vm.defaultPlayLaunchList.unshift({playName: null, displayName: 'All Launched Plays'});
+
+        vm.header.filter.filtered = vm.defaultPlayLaunchList;
+        vm.header.filter.unfiltered = vm.defaultPlayLaunchList;
+
     }
 
     // Watch for change in pagination
     $scope.$watch('vm.currentPage', function(newValue, oldValue) {
         vm.loading = true;
         if (newValue != oldValue) {
+
+            console.log("watch");
             vm.offset = (vm.currentPage - 1) * vm.pagesize,
             vm.updateLaunchData();
         }
     });
 
     vm.filterChange = function(org) {
+
+        console.log("filter");
+
         var orgData = org[1];
 
         vm.orgId = orgData.destinationOrgId;

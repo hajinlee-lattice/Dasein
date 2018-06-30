@@ -467,23 +467,18 @@ angular
             url: '/pls/cdl/processanalyze'
         }).then(
             function onSuccess(response) {
-
                 var result = response.data;
 
                 if (result != null && result !== "" && result.Success == true) {
-                    console.log("!!!!!!!!!!!!!!!!!!!", result);
                     deferred.resolve(result);
                 } else {
 
                     job.status = 'Failed';
-
                     var errors = result.Errors;
                     var response = {
                             success: false,
                             errorMsg: errors[0]
                         };
-
-                    console.log("????????????????????", response);
 
                     deferred.resolve(response.errorMsg);
                 }

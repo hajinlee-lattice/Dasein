@@ -9,7 +9,12 @@ angular.module('lp.cg.talkingpoint.attributepane', [
             entities: '='
         },
         templateUrl: 'app/cgtalkingpoint/attributepane/attributepane.component.html',
-        controller: function($scope, $element, $window) {
+        link: function($scope, $element) {
+            $scope.$on("deleteClicked", function (event, args) {
+                $element[0].style.top = '';
+            });
+        },
+        controller: function($scope, $element, $window, CgTalkingPointStore) {
             // console.log($scope.entities);
             $scope.selected = $scope.entities[0];//Object.keys($scope.opts)[0];
 
@@ -20,10 +25,12 @@ angular.module('lp.cg.talkingpoint.attributepane', [
             });
 
             var originalTop = $element[0].offsetTop;
+
             function handleWindowScroll(evt) {
+
                 var scrollY = evt.currentTarget.scrollY,
                     paneBottom = $element.offset().top + $element.outerHeight(),
-                    container = $element.parents('.container')[0],
+                    container = $element.parents('.section-body')[0],
                     $container = angular.element(container),
                     containerBottom = $container.offset().top + $container.outerHeight();
 

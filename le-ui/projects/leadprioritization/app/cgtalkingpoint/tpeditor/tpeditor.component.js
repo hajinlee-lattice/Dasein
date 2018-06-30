@@ -124,6 +124,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
     vm.setDeleteClicked = function(bool) {
         vm.deleteClicked = bool;
         CgTalkingPointStore.deleteClicked = bool;
+        $rootScope.$broadcast("deleteClicked");
     }
 
     $rootScope.$on('talkingPoints:lock', function(e, bool){

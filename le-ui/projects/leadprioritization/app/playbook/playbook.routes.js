@@ -686,9 +686,12 @@ angular
 
                     var deferred = $q.defer();
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
+                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(play){
 
-                        var engineId = data.ratingEngine.id,
+                        console.log(play);
+                        console.log(PlaybookWizardStore.getExcludeItems());
+
+                        var engineId = play.ratingEngine.id,
                             query = { 
                                     free_form_text_search: '',
                                     restrictNotNullSalesforceId: false,

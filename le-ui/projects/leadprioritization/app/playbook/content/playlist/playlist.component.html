@@ -65,7 +65,7 @@
                         <ul>
                             <li>Created by <span class="blue-text">{{play.createdBy}}</span></li>
                             <li>Created on <span class="blue-text">{{play.created | date}}</span></li>
-                            <li>
+                            <li class="text-ellipsis">
                                 Segment: 
                                 <span ng-if="play.ratingEngine.segment != null" class="blue-text">{{play.ratingEngine.segment.display_name}}</span>
                                 <span ng-if="play.ratingEngine.segment == null" class="gray-text">Segment not selected</span>

@@ -24,6 +24,10 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         this.init();
     }
 
+    this.getDeleteClicked = function() {
+        return this.deleteClicked;
+    }
+
     this.setEditedTalkingPoint = function(talkingPoint, propertyName) {
         if(talkingPoint && !propertyName) {
             this.editedTalkingPoint = talkingPoint;
