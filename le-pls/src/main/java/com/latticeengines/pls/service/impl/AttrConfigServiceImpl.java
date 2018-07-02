@@ -172,7 +172,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     private void createUpdateActivationActions(String categoryName, AttrConfigSelectionRequest request) {
-        if (request.getSelect() != null) {
+        if (CollectionUtils.isNotEmpty(request.getSelect())) {
             Action activationAction = new Action();
             activationAction.setActionInitiator(MultiTenantContext.getEmailAddress());
             activationAction.setType(ActionType.ATTRIBUTE_MANAGEMENT_ACTIVATION);
@@ -184,7 +184,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             activationAction.setDescription(ac.serialize());
             actionService.create(activationAction);
         }
-        if (request.getDeselect() != null) {
+        if (CollectionUtils.isNotEmpty(request.getDeselect())) {
             Action deActivationAction = new Action();
             deActivationAction.setActionInitiator(MultiTenantContext.getEmailAddress());
             deActivationAction.setType(ActionType.ATTRIBUTE_MANAGEMENT_DEACTIVATION);
@@ -282,12 +282,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
-        if (request.getSelect() != null) {
+        if (CollectionUtils.isNotEmpty(request.getSelect())) {
             for (String attr : request.getSelect()) {
                 updateAttrConfigs(category, attrConfigs, attr, property, Boolean.TRUE);
             }
         }
-        if (request.getDeselect() != null) {
+        if (CollectionUtils.isNotEmpty(request.getDeselect())) {
             for (String attr : request.getDeselect()) {
                 updateAttrConfigs(category, attrConfigs, attr, property, Boolean.FALSE);
             }
