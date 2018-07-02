@@ -48,7 +48,7 @@ public class BucketedScore implements Serializable {
         return numConverted;
     }
 
-    public void setNumConverted(int numConverted) {
+    public void setNumConverted(double numConverted) {
         this.numConverted = numConverted;
     }
 
@@ -66,7 +66,7 @@ public class BucketedScore implements Serializable {
         return leftNumConverted;
     }
 
-    public void setLeftNumConverted(int leftNumConverted) {
+    public void setLeftNumConverted(double leftNumConverted) {
         this.leftNumConverted = leftNumConverted;
     }
 
