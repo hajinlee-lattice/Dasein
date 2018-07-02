@@ -79,7 +79,7 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), (long) PRODUCT_IMPORT_SIZE_1);
+//        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), (long) PRODUCT_IMPORT_SIZE_1);
         verifyFailedToCountTableRole(BusinessEntity.Contact.getBatchStore());
         verifyFailedToCountTableRole(TableRoleInCollection.ConsolidatedRawTransaction);
 

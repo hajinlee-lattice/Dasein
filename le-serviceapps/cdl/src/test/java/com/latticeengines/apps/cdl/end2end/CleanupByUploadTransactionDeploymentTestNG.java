@@ -68,12 +68,11 @@ public class CleanupByUploadTransactionDeploymentTestNG extends CDLEnd2EndDeploy
             templateSize = 1;
         }
         CSVPrinter csvPrinter = new CSVPrinter(new FileWriter(CLEANUP_FILE_TEMPLATE),
-                LECSVFormat.format.withHeader("AccountId", "ContactId", "ProductId", "TransactionTime"));
+                LECSVFormat.format.withHeader("AccountId", "ProductId", "TransactionTime"));
         Set<Integer> dayPeriods = new HashSet<>();
         //get records from last
         for(int i = recordsBeforeDelete.size() - 1; i >= recordsBeforeDelete.size() - templateSize; i--) {
             csvPrinter.printRecord(recordsBeforeDelete.get(i).get("AccountId").toString(),
-                    recordsBeforeDelete.get(i).get("ContactId").toString(),
                     recordsBeforeDelete.get(i).get("ProductId").toString(),
                     recordsBeforeDelete.get(i).get("TransactionTime").toString());
             dayPeriods.add(Integer.parseInt(recordsBeforeDelete.get(i).get("TransactionDayPeriod").toString()));
@@ -94,7 +93,7 @@ public class CleanupByUploadTransactionDeploymentTestNG extends CDLEnd2EndDeploy
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(status, JobStatus.COMPLETED);
         List<GenericRecord> records = getRecords(masterTable);
-        assertEquals(records.size() + templateSize, originalRecordsCount);
+        assertTrue(records.size() + templateSize <= originalRecordsCount);
         originalRecordsCount = records.size();
     }
 
