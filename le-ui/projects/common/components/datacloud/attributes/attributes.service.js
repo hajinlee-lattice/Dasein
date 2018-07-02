@@ -1,6 +1,6 @@
 
 angular.module('common.attributes')
-.service('AttrConfigStore', function($q, $state, $stateParams, $timeout, AttrConfigService) {
+.service('AttrConfigStore', function($q, $state, $stateParams, $timeout, AttrConfigService, DataCloudStore) {
     var store = this;
 
     this.init = function(){
@@ -218,9 +218,10 @@ angular.module('common.attributes')
             });
         });
         
-        
         this.putConfig(type, category, usage, data).then(function() {
             store.setData('original', JSON.parse(JSON.stringify(store.data.config)));
+
+            DataCloudStore.clear();
 
             $timeout(function() {
                 $state.reload();
