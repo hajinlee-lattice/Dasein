@@ -24,7 +24,11 @@ public class VdbValueConverter implements ValueConverter {
         } else if (targetType.equals(Float.class)) {
             return (T) new Float(valueStr);
         } else if (targetType.equals(Integer.class)) {
-            return (T) new Integer(valueStr);
+            try {
+                return (T) new Integer(valueStr);
+            } catch (NumberFormatException e) {
+                return (T) new Integer(new Double(valueStr).intValue());
+            }
         } else if (targetType.equals(Long.class)) {
             return (T) new Long(valueStr);
         } else if (targetType.equals(String.class)) {

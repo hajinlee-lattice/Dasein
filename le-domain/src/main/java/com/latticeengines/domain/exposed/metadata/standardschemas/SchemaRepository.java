@@ -806,7 +806,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.Quantity.name()) //
                 .allowedDisplayNames(Sets.newHashSet("QUANTITY")) //
-                .type(Schema.Type.INT) //
+                .type(Schema.Type.DOUBLE) //
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.Quantity) //
@@ -815,7 +815,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.Amount.name()) //
                 .allowedDisplayNames(Sets.newHashSet("AMOUNT")) //
-                .type(Schema.Type.INT) //
+                .type(Schema.Type.DOUBLE) //
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.Amount) //
@@ -824,7 +824,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.Cost.name()) //
                 .allowedDisplayNames(Sets.newHashSet("COST")) //
-                .type(Schema.Type.INT) //
+                .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.Cost) //
                 .logicalType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
