@@ -8,6 +8,7 @@ public class VdbValueConverterUnitTestNG {
 
     private VdbValueConverter converter = new VdbValueConverter();
 
+    @SuppressWarnings("unchecked")
     @Test(groups = "unit", dataProvider = "valueDataProvider")
     public void testConvert(Class targetType, Object value, Object expectedValue) {
         Assert.assertEquals(converter.convertTo(targetType, value), expectedValue);
