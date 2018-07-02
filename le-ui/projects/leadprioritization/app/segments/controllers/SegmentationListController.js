@@ -68,9 +68,11 @@ angular.module('lp.segments.segments', [
 
         if ($stateParams.edit && vm.isValid($stateParams.edit)) {
             var tileState = vm.tileStates[$stateParams.edit];
-            tileState.editSegment = !tileState.editSegment;
-            tileState.saveEnabled = true;
-            $stateParams.edit = null;
+            if(tileState) {
+                tileState.editSegment = !tileState.editSegment;
+                tileState.saveEnabled = true;
+                $stateParams.edit = null;
+            }
         }
     }
 
