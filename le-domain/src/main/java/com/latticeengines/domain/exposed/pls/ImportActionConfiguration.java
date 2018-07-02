@@ -47,7 +47,11 @@ public class ImportActionConfiguration extends ActionConfiguration {
     }
 
     public Long getImportCount() {
-        return importCount;
+        if (importCount == null) {
+            return 0L;
+        } else {
+            return importCount;
+        }
     }
 
     public void setImportCount(Long importCount) {
