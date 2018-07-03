@@ -253,7 +253,7 @@ Wizard Steps
 	border: #959595 solid 1px;
 	li {
 		display: block;
-		margin-bottom: 10px;
+		margin-bottom: 12px;
 		padding: 20px 20px 10px;
 		border-bottom: dotted #959595 1px;
 		width: 100%;
@@ -376,7 +376,7 @@ Wizard Steps
 				background: #fff;
 				border: #959595 solid 1px;
 				border-right: 0;
-				top: 1px;
+				top: 0px;
 				&:after, &:before {
 					left: 100%;
 					transform: none;
@@ -433,6 +433,7 @@ Wizard Steps
 			    }
 				&:first-child {
 					border: #82c460 solid 1px;
+					border-right: 0px;
 					&:before {
 						border-color: rgba(130, 196, 96, 0);
 						border-left-color: #82c460;
@@ -449,6 +450,7 @@ Wizard Steps
 			    }
 				&:first-child {
 					border: #ca2b2b solid 1px;
+					border-right: 0px;
 					&:before {
 						border-color: rgba(202, 43, 43, 0);
 						border-left-color: #ca2b2b;
