@@ -299,12 +299,6 @@ angular
             };
 
             vm.showAtributeAdmin = function() {
-                var session = BrowserStorageUtility.getSessionDocument();
-
-                if (session === null || session.User === null || session.User.AccessLevel == "EXTERNAL_USER") {
-                    return false;
-                }
-
                 if (vm.section == 'insight' || vm.section == 'wizard.ratingsengine_segment'){
                     return false;
                 } 
