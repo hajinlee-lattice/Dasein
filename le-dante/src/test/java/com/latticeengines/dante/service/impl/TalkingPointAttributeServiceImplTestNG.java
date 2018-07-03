@@ -3,6 +3,7 @@ package com.latticeengines.dante.service.impl;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,7 +56,8 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
             }
 
             @Override
-            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
+            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+                    List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
                 return null;
             }
         });
@@ -65,16 +67,26 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
         at.setColumnId("something");
         at.setAttrName("something");
         at.setDisplayName("something more");
-        Flux<ColumnMetadata> attrFlux = Flux.just(at);
+        at.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
+        List<ColumnMetadata> attrList = new ArrayList<>();
+        attrList.add(at);
 
         at = new ColumnMetadata();
         at.setColumnId("something1");
         at.setAttrName("something1");
         at.setDisplayName("something more 1");
-        attrFlux = Flux.concat(attrFlux, Flux.just(at));
+        at.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
+        attrList.add(at);
 
-        doReturn(attrFlux).when(spiedServingStoreProxy).getDecoratedMetadata(tenantName, BusinessEntity.Account,
-                Arrays.asList(ColumnSelection.Predefined.TalkingPoint));
+        at = new ColumnMetadata();
+        at.setColumnId("something2");
+        at.setAttrName("something3");
+        at.setDisplayName("something more 2");
+        at.enableGroupIfNotPresent(ColumnSelection.Predefined.CompanyProfile);
+        attrList.add(at);
+
+        doReturn(attrList).when(spiedServingStoreProxy).getDecoratedMetadataFromCache(tenantName,
+                BusinessEntity.Account);
     }
 
     @Test(groups = "functional")

@@ -3,7 +3,6 @@ package com.latticeengines.dante.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,11 +50,16 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     public List<TalkingPointAttribute> getAccountAttributes(String customerSpace) {
         log.info("Attempting to find Account attributes for customer space : " + customerSpace);
         try {
-            List<ColumnMetadata> rawAttrs = servingStoreProxy.getDecoratedMetadata(customerSpace,
-                    BusinessEntity.Account, Arrays.asList(TalkingPointAttributeGroup)).collectList().block();
-            if (rawAttrs == null || rawAttrs.isEmpty()) {
+            List<ColumnMetadata> allAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.Account);
+
+            if (allAttrs == null || allAttrs.isEmpty()) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });
             }
+
+            List<ColumnMetadata> rawAttrs = allAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
+                    .collect(Collectors.toList());
+
             // The Prefix is added since Dante UI looks for it to identify
             // Account attributes
             return JsonUtils.convertList(rawAttrs, ColumnMetadata.class).stream()
