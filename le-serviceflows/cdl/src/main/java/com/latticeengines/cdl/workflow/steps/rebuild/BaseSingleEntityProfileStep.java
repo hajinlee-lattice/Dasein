@@ -32,7 +32,8 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
-
+    protected Boolean tableFromActiveVersion = false;
+    
     protected String profileTablePrefix;
     protected String statsTablePrefix;
     protected String servingStoreTablePrefix;
@@ -98,6 +99,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
                         active);
                 if (StringUtils.isNotBlank(masterTableName)) {
                     log.info("Found the batch store in active version " + active + ": " + masterTableName);
+                    tableFromActiveVersion = true;
                 }
             } else {
                 log.info("Found the batch store in inactive version " + inactive + ": " + masterTableName);

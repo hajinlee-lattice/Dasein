@@ -256,7 +256,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         filterGroups.add(ColumnSelection.Predefined.LookupId);
 
         List<String> retainAttrNames = servingStoreProxy
-                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive) //
+                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, tableFromActiveVersion ? active : inactive) //
                 .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
                 .filter(cm -> Boolean.TRUE.equals(cm.getCanSegment()) || filterGroups.stream().anyMatch(cm::isEnabledFor)) //
                 .map(ColumnMetadata::getAttrName) //
