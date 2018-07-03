@@ -75,7 +75,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             TimeUnit.MILLISECONDS.convert(5L, TimeUnit.MINUTES);
 
     private static final long SPRING_BATCH_FAILURE_THRESHOLD =
-            TimeUnit.MILLISECONDS.convert(24L, TimeUnit.HOURS);
+            TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
 
     @Override
     @WithCustomerSpace
