@@ -25,6 +25,8 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
@@ -64,9 +66,17 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
             if (outputField(field)) {
                 String header = "";
                 if (exportUsingDisplayName) {
-                    header = table.getAttribute(field.name()).getDisplayName();
+                    String displayName = table.getAttribute(field.name()).getDisplayName();
+                    header = displayName;
                     if (headers.contains(header)) {
-                        header += "_" + System.currentTimeMillis();
+                        header = displayName + "_" + field.name();
+                        if (headers.contains(header)) {
+                            header = displayName + "_" + System.currentTimeMillis();
+                            if (headers.contains(header)) {
+                                throw new LedpException(LedpCode.LEDP_18109,
+                                        new String[] { displayName + " has conflicts with naming convention." });
+                            }
+                        }
                     }
                 } else {
                     header = field.name();
