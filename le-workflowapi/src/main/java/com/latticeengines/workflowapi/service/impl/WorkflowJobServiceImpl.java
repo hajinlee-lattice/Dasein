@@ -74,10 +74,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final long HEARTBEAT_FAILURE_THRESHOLD =
             TimeUnit.MILLISECONDS.convert(5L, TimeUnit.MINUTES);
 
+    private static final long SPRING_BATCH_FAILURE_THRESHOLD =
+            TimeUnit.MILLISECONDS.convert(24L, TimeUnit.HOURS);
+
     @Override
     @WithCustomerSpace
     public WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId) {
-        return workflowJobEntityMgr.findByApplicationId(applicationId).getAsWorkflowId();
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        if (workflowJob == null) {
+            return null;
+        }
+        return workflowJob.getAsWorkflowId();
     }
 
     @Override
@@ -98,6 +105,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (workflowJob == null) {
             return null;
         }
+        workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
         return JobStatus.fromString(workflowJob.getStatus());
     }
@@ -118,6 +126,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(workflowPids,
                 null,null);
         workflowJobs.removeIf(Objects::isNull);
+        workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
         return workflowJobs.stream().map(job -> JobStatus.fromString(job.getStatus())).collect(Collectors.toList());
     }
@@ -140,6 +149,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (workflowJob == null) {
             return null;
         }
+        workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
         return assembleJob(workflowJob, includeDetails);
     }
@@ -151,6 +161,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (workflowJob == null) {
             return null;
         }
+        workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
         return assembleJob(workflowJob, includeDetails);
     }
@@ -160,6 +171,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public List<Job> getJobsByCustomerSpace(String customerSpace, Boolean includeDetails) {
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         workflowJobs.removeIf(Objects::isNull);
+        workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
@@ -205,6 +217,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         workflowJobs.removeIf(Objects::isNull);
+        workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
 
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
@@ -296,6 +309,31 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPid);
         Long workflowId = workflowJob != null ? workflowJob.getWorkflowId() : -1L;
         workflowService.stop(new WorkflowExecutionId(workflowId));
+    }
+
+    private List<WorkflowJob> checkExecutionId(List<WorkflowJob> workflowJobs) {
+        if (workflowJobs == null) {
+            return null;
+        }
+
+        for (WorkflowJob workflowJob : workflowJobs) {
+            if (workflowJob == null) {
+                log.warn("Found null workflowJob. Skip checking executionId.");
+                continue;
+            }
+
+            if (JobStatus.fromString(workflowJob.getStatus()).isTerminated()) {
+                continue;
+            }
+
+            if ((System.currentTimeMillis() - workflowJob.getStartTimeInMillis()) > SPRING_BATCH_FAILURE_THRESHOLD
+                    && workflowJob.getWorkflowId() == null) {
+                workflowJob.setStatus(JobStatus.FAILED.name());
+                workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            }
+        }
+
+        return workflowJobs;
     }
 
     private List<WorkflowJob> checkLastUpdateTime(List<WorkflowJob> workflowJobs) {

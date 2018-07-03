@@ -488,6 +488,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         stepExecutionDao.saveStepExecutions(steps);
         workflowJob1 = new WorkflowJob();
         workflowJob1.setApplicationId(applicationId);
+        workflowJob1.setStartTimeInMillis(1530327693564L);
         workflowJob1.setInputContext(inputContext);
         workflowJob1.setTenant(tenant);
         workflowJob1.setStatus(
@@ -518,6 +519,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         stepExecutionDao.saveStepExecutions(steps);
         workflowJob11 = new WorkflowJob();
         workflowJob11.setApplicationId(applicationId);
+        workflowJob11.setStartTimeInMillis(1530327693564L);
         workflowJob11.setInputContext(inputContext);
         workflowJob11.setTenant(tenant);
         workflowJob11.setStatus(JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name()).name());
@@ -545,6 +547,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         stepExecutionDao.saveStepExecutions(steps);
         workflowJob12 = new WorkflowJob();
         workflowJob12.setApplicationId(applicationId);
+        workflowJob12.setStartTimeInMillis(1530327693564L);
         workflowJob12.setInputContext(inputContext);
         workflowJob12.setTenant(tenant);
         workflowJob12.setStatus(JobStatus.fromString(FinalApplicationStatus.SUCCEEDED.name()).name());
@@ -574,6 +577,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         stepExecutionDao.saveStepExecutions(steps);
         workflowJob13 = new WorkflowJob();
         workflowJob13.setApplicationId(applicationId);
+        workflowJob13.setStartTimeInMillis(1530327693564L);
         workflowJob13.setInputContext(inputContext);
         workflowJob13.setTenant(tenant);
         workflowJob13.setStatus(JobStatus.fromString(FinalApplicationStatus.FAILED.name()).name());
@@ -609,6 +613,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         stepExecutionDao.saveStepExecutions(steps);
         workflowJob2 = new WorkflowJob();
         workflowJob2.setApplicationId(applicationId);
+        workflowJob2.setStartTimeInMillis(1530327693564L);
         workflowJob2.setInputContext(inputContext);
         workflowJob2.setTenant(tenant);
         workflowJob2.setStatus(JobStatus.fromString(FinalApplicationStatus.KILLED.name()).name());
@@ -636,6 +641,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         stepExecutionDao.saveStepExecutions(steps);
         workflowJob3 = new WorkflowJob();
         workflowJob3.setApplicationId(applicationId);
+        workflowJob3.setStartTimeInMillis(1530327693564L);
         workflowJob3.setInputContext(inputContext);
         workflowJob3.setTenant(tenant3);
         workflowJob3.setStatus(JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name()).name());
@@ -665,6 +671,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         stepExecutionDao.saveStepExecutions(steps);
         workflowJob31 = new WorkflowJob();
         workflowJob31.setApplicationId(applicationId);
+        workflowJob31.setStartTimeInMillis(1530327693564L);
         workflowJob31.setInputContext(inputContext);
         workflowJob31.setTenant(tenant3);
         workflowJob31.setStatus(
