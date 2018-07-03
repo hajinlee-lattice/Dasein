@@ -47,6 +47,17 @@ angular.module('lp.jobs.import', [
             }
         }
     }])
+    .filter('jobEmpty', ['AuthorizationUtility', function (AuthorizationUtility) {
+        var right = AuthorizationUtility.checkAccessLevel(['INTERNAL_ADMIN', 'SUPER_ADMIN']);
+        return function (jobs){
+            var ret = jobs.filter(function(job){
+                if((job && job.id == 0 && job.subJobs.length == 0 && right) || job.id != 0 || job.subJobs.length > 0 ){
+                    return job;
+                }
+            });
+            return ret;
+        };
+    }])
     .controller('DataProcessingComponent', function ($q, $scope, $http, JobsStore, $filter, ModalStore, FilterService) {
         var vm = this;
         vm.loading = false;
@@ -209,4 +220,5 @@ angular.module('lp.jobs.import', [
             vm.errorMsg = null;
             vm.queuedMsg = null;
         };
+        
     });
