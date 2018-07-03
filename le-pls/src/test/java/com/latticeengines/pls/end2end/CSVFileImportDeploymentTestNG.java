@@ -352,8 +352,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
         Assert.assertEquals(schema.getField("TransactionTime").schema().getTypes().get(0).getType(),
                 Schema.Type.STRING);
-        Assert.assertEquals(schema.getField("Amount").schema().getTypes().get(0).getType(), Schema.Type.INT);
-        Assert.assertEquals(schema.getField("Quantity").schema().getTypes().get(0).getType(), Schema.Type.INT);
+        Assert.assertEquals(schema.getField("Amount").schema().getTypes().get(0).getType(), Schema.Type.DOUBLE);
+        Assert.assertEquals(schema.getField("Quantity").schema().getTypes().get(0).getType(), Schema.Type.DOUBLE);
     }
 
     @Test(groups = "deployment")
