@@ -178,6 +178,11 @@ public class DataLakeServiceImpl implements DataLakeService {
                     } else {
                         Flux<ColumnMetadata> flux = Flux.fromIterable(cms);
                         Set<String> availableAttrs = colsInServingStore.getOrDefault(entity, Collections.emptySet());
+                        Map<String, AttributeStats> statsMap = statsCube.getStatistics();
+                        if (MapUtils.isEmpty(statsMap)) {
+                            statsMap = Collections.emptyMap();
+                        }
+                        Set<String> attrsInStats = statsMap.keySet();
                         flux = flux //
                                 .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
                                 .filter(cm -> !StatsCubeUtils.shouldHideAttr(entity, cm)) //
@@ -186,6 +191,14 @@ public class DataLakeServiceImpl implements DataLakeService {
                                     if (!avail) {
                                         log.info("Filtering out  " + cm.getAttrName() + " in " + entity
                                                 + " because it is not in serving store.");
+                                    }
+                                    return avail;
+                                }) //
+                                .filter(cm -> {
+                                    boolean avail = attrsInStats.contains(cm.getAttrName());
+                                    if (!avail) {
+                                        log.info("Filtering out  " + cm.getAttrName() + " in " + entity
+                                                + " because it is not in stats cube.");
                                     }
                                     return avail;
                                 });
