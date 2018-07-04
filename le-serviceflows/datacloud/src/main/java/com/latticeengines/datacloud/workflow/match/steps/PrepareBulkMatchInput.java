@@ -167,26 +167,32 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                 jobConfiguration.setAppName(String.format("%s~DataCloudMatch[%s]~Block[%d/%d]",
                         getConfiguration().getCustomerSpace().getTenantId(), appId, blockIdx, blocks.length));
             }
-            writeInputBuffer(jobConfiguration);
+            writeMatchInput(jobConfiguration);
             configurations.add(jobConfiguration);
         }
 
         return configurations;
     }
 
-    private void writeInputBuffer(DataCloudJobConfiguration jobConfiguration) {
+    private void writeMatchInput(DataCloudJobConfiguration jobConfiguration) {
         String avroPath = jobConfiguration.getAvroPath();
-        String inputBufferFile = FilenameUtils.getFullPath(avroPath) + "InputBuffer.json";
+        String matchInputFile = FilenameUtils.getFullPath(avroPath) + "MatchInput.json";
         try {
-            if (jobConfiguration.getMatchInput().getInputBuffer() != null) {
-                HdfsUtils.writeToFile(yarnConfiguration, inputBufferFile,
-                        JsonUtils.serialize(jobConfiguration.getMatchInput().getInputBuffer()));
+            MatchInput matchInput = jobConfiguration.getMatchInput();
+            if (matchInput.getInputBuffer() != null) {
+                HdfsUtils.writeToFile(yarnConfiguration, matchInputFile, JsonUtils.serialize(matchInput));
+                jobConfiguration.setMatchInputPath(matchInputFile);
+                log.info("Write MatchInput on to hdfs, path=" + matchInputFile);
+                matchInput.setInputBuffer(null);
+                matchInput.setCustomSelection(null);
+                matchInput.setPredefinedSelection(null);
+                matchInput.setUnionSelection(null);
+                matchInput.setFields(null);
+                matchInput.setKeyMap(null);
+                matchInput.setData(null);
             }
-            jobConfiguration.setInputBufferPath(inputBufferFile);
-            jobConfiguration.getMatchInput().setInputBuffer(null);
-            log.info("Write InputBuffer on to hdfs, path=" + inputBufferFile);
         } catch (Exception e) {
-            log.warn("Can not write InputBuffer on hdfs, path=" + inputBufferFile + ", error=" + e.getMessage());
+            log.warn("Can not write MatchInput on hdfs, path=" + matchInputFile + ", error=" + e.getMessage());
         }
 
     }

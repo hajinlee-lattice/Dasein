@@ -39,8 +39,8 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private String yarnQueue;
     @JsonProperty("realtime_proxy_url")
     private String realTimeProxyUrl;
-    @JsonProperty("input_buffer_path")
-    private String inputBufferPath;
+    @JsonProperty("match_input_path")
+    private String matchInputPath;
 
     private Schema inputAvroSchema;
 
@@ -165,12 +165,12 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.realTimeProxyUrl = realTimeProxyUrl;
     }
 
-    public String getInputBufferPath() {
-        return inputBufferPath;
+    public String getMatchInputPath() {
+        return matchInputPath;
     }
 
-    public void setInputBufferPath(String inputBufferPath) {
-        this.inputBufferPath = inputBufferPath;
+    public void setMatchInputPath(String matchInputPath) {
+        this.matchInputPath = matchInputPath;
     }
 
     @Override

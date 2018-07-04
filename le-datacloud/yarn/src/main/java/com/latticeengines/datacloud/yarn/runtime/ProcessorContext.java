@@ -42,7 +42,6 @@ import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.datacloud.match.service.impl.MatchPlannerBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
-import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -295,9 +294,9 @@ public class ProcessorContext {
             throws Exception {
         this.jobConfiguration = jobConfiguration;
         this.dataCloudProcessor = dataCloudProcessor;
+        setMatchInput(jobConfiguration);
         dataCloudVersion = jobConfiguration.getMatchInput().getDataCloudVersion();
 
-        setInputBuffer(jobConfiguration);
         receivedAt = new Date();
 
         podId = jobConfiguration.getHdfsPodId();
@@ -421,16 +420,15 @@ public class ProcessorContext {
         log.info("Partial match enabled=" + originalInput.isPartialMatchEnabled() + " partial match=" + partialMatch);
     }
 
-    private void setInputBuffer(DataCloudJobConfiguration jobConfiguration) {
+    private void setMatchInput(DataCloudJobConfiguration jobConfiguration) {
         if (jobConfiguration.getMatchInput().getInputBuffer() == null
-                && StringUtils.isNotBlank(jobConfiguration.getInputBufferPath())) {
+                && StringUtils.isNotBlank(jobConfiguration.getMatchInputPath())) {
             try {
-                String jsonStr = HdfsUtils.getHdfsFileContents(yarnConfiguration,
-                        jobConfiguration.getInputBufferPath());
-                jobConfiguration.getMatchInput().setInputBuffer(JsonUtils.deserialize(jsonStr, AvroInputBuffer.class));
-                log.info("Read InputBuffer from hdfs, file=" + jobConfiguration.getInputBufferPath());
+                String jsonStr = HdfsUtils.getHdfsFileContents(yarnConfiguration, jobConfiguration.getMatchInputPath());
+                jobConfiguration.setMatchInput(JsonUtils.deserialize(jsonStr, MatchInput.class));
+                log.info("Read MatchInput from hdfs, file=" + jobConfiguration.getMatchInputPath());
             } catch (Exception e) {
-                log.warn("Can not read InputBuffer from hdfs, file=" + jobConfiguration.getInputBufferPath());
+                log.warn("Can not read MatchInput from hdfs, file=" + jobConfiguration.getMatchInputPath());
             }
         }
 
