@@ -152,7 +152,7 @@ public class PlayLaunchProcessor {
                     // loop over to required number of pages
                     for (int pageNo = 0; pageNo < pages; pageNo++) {
                         // fetch and process a single page
-                        processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, totalAccountsCount,
+                        processedSegmentAccountsCount =  fetchAndProcessPage(playLaunchContext, totalAccountsCount,
                                 processedSegmentAccountsCount, pageNo, dataFileWriter);
                     }
                 }

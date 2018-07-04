@@ -73,18 +73,14 @@ public class TestPlayCreationHelper {
     private EntityProxyImpl entityProxy;
 
     private String tenantIdentifier;
-
     private Tenant tenant;
-
+    private MetadataSegment segment;
+    private RatingEngine rulesBasedRatingEngine;
+    private RatingEngine crossSellRatingEngine;
     private Play play;
-
-    private RatingEngine ratingEngine;
-
     private PlayLaunch playLaunch;
 
-    private MetadataSegment segment;
-
-    public void setupTenant() {
+    public void setupTenantAndData() {
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier);
@@ -97,7 +93,7 @@ public class TestPlayCreationHelper {
         playResourceDeploymentTestNG.setShouldSkipAutoTenantCreation(true);
         playResourceDeploymentTestNG.setShouldSkipCdlTestDataPopulation(true);
         playResourceDeploymentTestNG.setMainTestTenant(tenant);
-        playResourceDeploymentTestNG.setup();
+        playResourceDeploymentTestNG.setupTenantAndData();
 
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();
@@ -106,18 +102,18 @@ public class TestPlayCreationHelper {
         log.info("Tenant = " + tenant.getId());
         segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
         log.info("Tenant = " + tenant.getId());
-        ratingEngine = playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
+        rulesBasedRatingEngine = playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
+        crossSellRatingEngine = playResourceDeploymentTestNG.createCrossSellRatingEngineWithPublishedRating(segment);
 
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
+        cdlTestDataService.mockRatingTable(tenant.getId(),
+                Arrays.asList(rulesBasedRatingEngine.getId(), crossSellRatingEngine.getId()), null);
     }
 
     public void createPlay() {
-        playResourceDeploymentTestNG.getCrud();
+        playResourceDeploymentTestNG.testCreateAndUpdate();
         play = playResourceDeploymentTestNG.getPlay();
         Assert.assertNotNull(play);
         Assert.assertNotNull(play.getRatingEngine());
-        // Assert.assertNotNull(play.getRatingEngine().getBucketMetadata());
-        // Assert.assertTrue(CollectionUtils.isNotEmpty(play.getRatingEngine().getBucketMetadata()));
     }
 
     public void createPlayLaunch(boolean isDryRunMode) {
@@ -138,7 +134,7 @@ public class TestPlayCreationHelper {
 
     public void setupTenantAndCreatePlay(Set<RatingBucketName> bucketsToLaunch, Boolean excludeItemsWithoutSalesforceId,
             Long topNCount) throws Exception {
-        setupTenant();
+        setupTenantAndData();
         setupPlayTestEnv();
         createPlay();
         createPlayLaunch(true, bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount);
@@ -200,8 +196,8 @@ public class TestPlayCreationHelper {
         return playLaunch;
     }
 
-    public RatingEngine getRatingEngine() {
-        return ratingEngine;
+    public RatingEngine getRulesBasedRatingEngine() {
+        return rulesBasedRatingEngine;
     }
 
     public RatingProxy initRatingProxy() throws NoSuchFieldException, IllegalAccessException {

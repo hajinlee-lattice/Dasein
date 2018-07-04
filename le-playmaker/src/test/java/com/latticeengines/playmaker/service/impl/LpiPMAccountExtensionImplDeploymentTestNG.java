@@ -61,7 +61,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenant();
+        testPlayCreationHelper.setupTenantAndData();
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
         lpiPMAccountExtensionImpl = new LpiPMAccountExtensionImpl();

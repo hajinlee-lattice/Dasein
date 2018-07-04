@@ -14,7 +14,7 @@ public class CDLEndToEndDeploymentTestNG extends CDLDeploymentTestNGBase {
 //
 //    @BeforeClass(groups = "deployment")
 //    public void setup() throws Exception {
-//        setupTenant();
+//        setupTenantAndData();
 //        // initial verification
 //        verifyMasterStats();
 //    }

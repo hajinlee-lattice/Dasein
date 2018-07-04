@@ -1,7 +1,7 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,6 +23,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -126,13 +128,12 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(ratingCounts.get(RatingBucketName.F.getName()), new Long(88), counts);
     }
 
-    private Map<String, Map<RatingBucketName, Long>> generateRatingCounts(String ratingEngineId) {
-        Map<RatingBucketName, Long> coverage = new HashMap<>();
-        coverage.put(RatingBucketName.A, 136L);
-        coverage.put(RatingBucketName.D, 1018L);
-        coverage.put(RatingBucketName.F, 88L);
-        Map<String, Map<RatingBucketName, Long>> ratingCounts = ImmutableMap.of(ratingEngineId, coverage);
-        return ratingCounts;
+    private Map<String, List<BucketMetadata>> generateRatingCounts(String ratingEngineId) {
+        List<BucketMetadata> coverage = Arrays.asList(//
+                new BucketMetadata(BucketName.A, 136), //
+                new BucketMetadata(BucketName.D, 1018), //
+                new BucketMetadata(BucketName.F, 88));
+        return ImmutableMap.of(ratingEngineId, coverage);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testCreate")

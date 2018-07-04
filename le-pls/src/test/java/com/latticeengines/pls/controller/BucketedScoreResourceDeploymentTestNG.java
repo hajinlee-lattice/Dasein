@@ -120,12 +120,12 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
         return ratingEngine;
     }
 
-    private ModelSummary createModelSummary(String modelId, Tenant tenant) throws Exception {
+    public static ModelSummary createModelSummary(String modelId, Tenant tenant) throws Exception {
         ModelSummary modelSummary = new ModelSummary();
         modelSummary.setId(modelId);
         modelSummary.setDisplayName(modelId);
         modelSummary.setName(modelId);
-        modelSummary.setApplicationId("application_id_0000");
+        modelSummary.setApplicationId("application_1527712195731_0000");
         modelSummary.setRocScore(0.75);
         modelSummary.setLookupId("TENANT1|Q_EventTable_TENANT1|abcde");
         modelSummary.setTrainingRowCount(8000L);
@@ -145,7 +145,7 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
         return modelSummary;
     }
 
-    private void setDetails(ModelSummary summary) throws Exception {
+    public static void setDetails(ModelSummary summary) throws Exception {
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
                 "com/latticeengines/pls/functionalframework/modelsummary-marketo-UI-issue.json");
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);

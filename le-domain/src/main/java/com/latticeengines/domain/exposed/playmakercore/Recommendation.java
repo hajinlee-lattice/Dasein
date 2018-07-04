@@ -131,6 +131,18 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     @JsonProperty("synchronizationDestination")
     private String synchronizationDestination;
 
+    @Column(name = "LIFT")
+    @JsonProperty("lift")
+    private Double lift;
+
+    @Column(name = "RATING_MODEL_ID")
+    @JsonProperty("rating_model_id")
+    private String ratingModelId;
+
+    @Column(name = "MODEL_SUMMARY_ID")
+    @JsonProperty("modelSummaryId")
+    private String modelSummaryId;
+
     @Index(name = "DESTINATION_ORG_ID")
     @Column(name = "DESTINATION_ORG_ID", nullable = true)
     @JsonProperty("destinationOrgId")
@@ -303,6 +315,30 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
         this.synchronizationDestination = synchronizationDestination;
     }
 
+    public String getRatingModelId() {
+        return ratingModelId;
+    }
+
+    public void setRatingModelId(String ratingModelId) {
+        this.ratingModelId = ratingModelId;
+    }
+
+    public Double getLift() {
+        return lift;
+    }
+
+    public void setLift(Double lift) {
+        this.lift = lift;
+    }
+
+    public String getModelSummaryId() {
+        return modelSummaryId;
+    }
+
+    public void setModelSummaryId(String modelSummaryId) {
+        this.modelSummaryId = modelSummaryId;
+    }
+
     public String getDestinationOrgId() {
         return destinationOrgId;
     }
@@ -369,6 +405,9 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
         setAttribute(schema, index++, "PRIORITY_ID", Schema.Type.STRING);
         setAttribute(schema, index++, "PRIORITY_DISPLAY_NAME", Schema.Type.STRING);
         setAttribute(schema, index++, "MONETARY_VALUE_ISO4217_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "LIFT", Schema.Type.STRING);
+        setAttribute(schema, index++, "RATING_MODEL_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "MODEL_SUMMARY_ID", Schema.Type.STRING);
         setAttribute(schema, index++, "CONTACTS", Schema.Type.STRING);
         setAttribute(schema, index++, "SYNC_DESTINATION", Schema.Type.STRING);
         setAttribute(schema, index++, "DESTINATION_ORG_ID", Schema.Type.STRING);
@@ -404,6 +443,9 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
             recMap.put("PRIORITY_ID", rec.getPriorityID().name());
             recMap.put("PRIORITY_DISPLAY_NAME", rec.getPriorityDisplayName());
             recMap.put("MONETARY_VALUE_ISO4217_ID", rec.getMonetaryValueIso4217ID());
+            recMap.put("LIFT", rec.getLift());
+            recMap.put("RATING_MODEL_ID", rec.getRatingModelId());
+            recMap.put("MODEL_SUMMARY_ID", rec.getModelSummaryId());
             recMap.put("CONTACTS", rec.getContacts());
             recMap.put("SYNC_DESTINATION", rec.getSynchronizationDestination());
             recMap.put("DESTINATION_ORG_ID", rec.getDestinationOrgId());

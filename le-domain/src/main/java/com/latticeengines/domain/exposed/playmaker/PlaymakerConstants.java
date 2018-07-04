@@ -47,4 +47,11 @@ public class PlaymakerConstants {
     public static final String LaunchDate = "LaunchDate";
     public static final String LastModificationDate = "LastModificationDate";
 
+    public static final String Lift = "Lift";
+    public static final String RatingModelId = "RatingModelId";
+    public static final String ModelSummaryId = "ModelSummaryId";
+
+    public static final String RatingScoreColumnSuffix = "_score";
+    public static final String RatingEVColumnSuffix = "_ev";
+
 }

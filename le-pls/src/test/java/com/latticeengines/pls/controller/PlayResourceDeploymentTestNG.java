@@ -22,11 +22,16 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -40,6 +45,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -52,6 +59,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String MODELSUMMARY_ID = "DeploymentTestModelSummary";
     private Play play;
     private String name;
     private PlayLaunch playLaunch;
@@ -64,7 +72,12 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Inject
     private SegmentProxy segmentProxy;
 
-    private RatingEngine ratingEngine1;
+    @Inject
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    private RatingEngine ruleBasedRatingEngine;
+    private RatingEngine crossSellRatingEngine;
+    private ModelSummary modelSummary;
     private MetadataSegment segment;
     @Inject
     private PlayProxy playProxy;
@@ -83,6 +96,12 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        setupTenantAndData();
+        MetadataSegment retrievedSegment = createSegment();
+        createRatingEngine(retrievedSegment, new RatingRule());
+    }
+
+    public void setupTenantAndData() throws Exception {
         if (shouldSkipAutoTenantCreation) {
             tenant = mainTestTenant;
         } else {
@@ -94,26 +113,87 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         if (!shouldSkipCdlTestDataPopulation) {
             cdlTestDataService.populateData(tenant.getId());
         }
+    }
 
-        MetadataSegment retrievedSegment = createSegment();
+    public RatingEngine createCrossSellRatingEngineWithPublishedRating(MetadataSegment retrievedSegment) {
+        crossSellRatingEngine = new RatingEngine();
+        crossSellRatingEngine.setSegment(retrievedSegment);
+        crossSellRatingEngine.setCreatedBy(CREATED_BY);
+        crossSellRatingEngine.setType(RatingEngineType.CROSS_SELL);
 
-        createRatingEngine(retrievedSegment, new RatingRule());
+        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(),
+                crossSellRatingEngine);
+        Assert.assertNotNull(createdRatingEngine);
+        Assert.assertNotNull(createdRatingEngine.getLatestIteration());
+
+        try {
+            modelSummary = BucketedScoreResourceDeploymentTestNG
+                    .createModelSummary(String.format("ms__%s__LETest", UUID.randomUUID().toString()), mainTestTenant);
+            modelSummaryEntityMgr.create(modelSummary);
+        } catch (Exception e) {
+            Assert.fail("Failed to create ModelSummary for the test");
+        }
+
+        AIModel aiModel = (AIModel) createdRatingEngine.getLatestIteration();
+        aiModel.setModelingJobId(modelSummary.getApplicationId());
+        aiModel.setModelingJobStatus(JobStatus.COMPLETED);
+        aiModel.setModelSummaryId(modelSummary.getId());
+        aiModel.setPredictionType(PredictionType.EXPECTED_VALUE);
+        ratingEngineProxy.updateRatingModel(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(), aiModel);
+
+        ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(),
+                getBucketMetadata(createdRatingEngine, modelSummary));
+        createdRatingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), createdRatingEngine.getId());
+
+        RatingEngine toPub = new RatingEngine();
+        toPub.setId(createdRatingEngine.getId());
+        toPub.setStatus(RatingEngineStatus.ACTIVE);
+        toPub.setPublishedIteration(createdRatingEngine.getScoringIteration());
+        ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), toPub);
+
+        return ratingEngineProxy.getRatingEngine(tenant.getId(), createdRatingEngine.getId());
+    }
+
+    private List<BucketMetadata> getBucketMetadata(RatingEngine ratingEngine, ModelSummary modelSummary) {
+        List<BucketMetadata> buckets = new ArrayList<>();
+        BucketMetadata bkt = new BucketMetadata(BucketName.A, 15);
+        bkt.setModelSummary(modelSummary);
+        bkt.setRatingEngine(ratingEngine);
+        buckets.add(bkt);
+
+        bkt = new BucketMetadata(BucketName.B, 15);
+        bkt.setModelSummary(modelSummary);
+        bkt.setRatingEngine(ratingEngine);
+        buckets.add(bkt);
+
+        bkt = new BucketMetadata(BucketName.C, 15);
+        bkt.setModelSummary(modelSummary);
+        bkt.setRatingEngine(ratingEngine);
+        buckets.add(bkt);
+
+        bkt = new BucketMetadata(BucketName.D, 15);
+        bkt.setModelSummary(modelSummary);
+        bkt.setRatingEngine(ratingEngine);
+        buckets.add(bkt);
+
+        return buckets;
     }
 
     public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
-        ratingEngine1 = new RatingEngine();
-        ratingEngine1.setSegment(retrievedSegment);
-        ratingEngine1.setCreatedBy(CREATED_BY);
-        ratingEngine1.setType(RatingEngineType.RULE_BASED);
-        ratingEngine1.setStatus(RatingEngineStatus.ACTIVE);
+        ruleBasedRatingEngine = new RatingEngine();
+        ruleBasedRatingEngine.setSegment(retrievedSegment);
+        ruleBasedRatingEngine.setCreatedBy(CREATED_BY);
+        ruleBasedRatingEngine.setType(RatingEngineType.RULE_BASED);
+        ruleBasedRatingEngine.setStatus(RatingEngineStatus.ACTIVE);
 
-        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
+        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(),
+                ruleBasedRatingEngine);
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getLatestIteration());
 
         ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(),
                 createdRatingEngine.getLatestIteration().getId(), null);
-        createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
+        createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ruleBasedRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getScoringIteration());
 
         RatingEngine re = new RatingEngine();
@@ -123,22 +203,24 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), re);
         Assert.assertNotNull(createdRatingEngine.getPublishedIteration());
 
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
-        ratingEngine1.setId(createdRatingEngine.getId());
+        // cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(),
+        // createdRatingEngine.getId(), null);
+        ruleBasedRatingEngine.setId(createdRatingEngine.getId());
 
-        List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());
+        List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ruleBasedRatingEngine.getId());
         for (RatingModel model : models) {
             if (model instanceof RuleBasedModel) {
                 ((RuleBasedModel) model).setRatingRule(ratingRule);
-                ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngine1.getId(), model.getId(), model);
+                ratingEngineProxy.updateRatingModel(tenant.getId(), ruleBasedRatingEngine.getId(), model.getId(),
+                        model);
             }
         }
 
-        ratingEngine1 = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngine1.getId());
+        ruleBasedRatingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ruleBasedRatingEngine.getId());
 
-        checkAccountPreviewForRating(ratingEngine1);
-        checkContactPreviewForRating(ratingEngine1);
-        return ratingEngine1;
+        // checkAccountPreviewForRating(ruleBasedRatingEngine);
+        // checkContactPreviewForRating(ruleBasedRatingEngine);
+        return ruleBasedRatingEngine;
     }
 
     private void checkAccountPreviewForRating(RatingEngine re) {
@@ -213,10 +295,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = "deployment")
-    public void getCrud() {
+    public void testCreateAndUpdate() {
         logInterceptor();
 
-        int existingPlays = createPlayOnly();
+        int existingPlays = getNoOfExistingPlays();
+        createPlayOnly();
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(name);
         List<TalkingPointDTO> createTPResponse = restTemplate.postForObject( //
@@ -234,13 +317,13 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         Assert.assertEquals(playList.size(), existingPlays + 2);
 
-        playList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play?ratingEngineId=" + ratingEngine1.getId(),
-                List.class);
+        playList = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/play?ratingEngineId=" + ruleBasedRatingEngine.getId(), List.class);
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 2);
 
         Play retrievedPlay = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/" + name, Play.class);
-        assertPlay(retrievedPlay);
+        assertRulesBasedPlay(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getTalkingPoints().size(), 2);
 
         String jsonValue = JsonUtils.serialize(retrievedPlay);
@@ -248,18 +331,21 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         this.play = retrievedPlay;
     }
 
-    public int createPlayOnly() {
+    public int getNoOfExistingPlays() {
         List<?> playList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
-        int existingPlaysCount = playList == null ? 0 : playList.size();
+        return playList == null ? 0 : playList.size();
+    }
+
+    public Play createPlayOnly() {
         Play createdPlay1 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createDefaultPlay(),
                 Play.class);
         name = createdPlay1.getName();
         play = createdPlay1;
-        assertPlay(createdPlay1);
-        return existingPlaysCount;
+        assertRulesBasedPlay(createdPlay1);
+        return createdPlay1;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
+    @Test(groups = "deployment", dependsOnMethods = { "testCreateAndUpdate" })
     public void createPlayLaunch() {
         createPlayLaunch(false);
     }
@@ -393,7 +479,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = { "testGetFullPlays" })
     private void testIdempotentCreateOrUpdatePlays() {
         Play createdPlay1 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", play, Play.class);
-        assertPlay(createdPlay1);
+        assertRulesBasedPlay(createdPlay1);
         Assert.assertNotNull(createdPlay1.getTalkingPoints());
 
         List<Play> retrievedFullPlayList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play", List.class);
@@ -479,7 +565,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Play play = new Play();
         play.setCreatedBy(CREATED_BY);
         RatingEngine ratingEngine = new RatingEngine();
-        ratingEngine.setId(ratingEngine1.getId());
+        ratingEngine.setId(ruleBasedRatingEngine.getId());
         play.setRatingEngine(ratingEngine);
         return play;
     }
@@ -506,13 +592,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         return tps;
     }
 
-    private void assertPlay(Play play) {
+    private void assertRulesBasedPlay(Play play) {
         Assert.assertNotNull(play);
         Assert.assertEquals(play.getName(), name);
         Assert.assertNotNull(play.getRatingEngine());
-        Assert.assertEquals(play.getRatingEngine().getId(), ratingEngine1.getId());
-        // Assert.assertNotNull(play.getRatingEngine().getBucketMetadata());
-        // Assert.assertTrue(CollectionUtils.isNotEmpty(play.getRatingEngine().getBucketMetadata()));
+        Assert.assertEquals(play.getRatingEngine().getId(), ruleBasedRatingEngine.getId());
     }
 
     public Play getPlay() {
@@ -548,7 +632,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     public RatingEngine getRatingEngine() {
-        return this.ratingEngine1;
+        return this.ruleBasedRatingEngine;
     }
 
     private void logInterceptor() {

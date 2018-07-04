@@ -50,7 +50,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenant();
+        testPlayCreationHelper.setupTenantAndData();
     }
 
     @Test(groups = "deployment")

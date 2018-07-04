@@ -21,11 +21,14 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component
@@ -86,7 +89,7 @@ public class RecommendationCreator {
     private Recommendation processSingleAccount(PlayLaunchContext playLaunchContext,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
         RatingBucketName bucket = getBucketInfo(playLaunchContext, account);
-        Recommendation recommendation = null;
+        Recommendation recommendation;
 
         // prepare recommendation
         recommendation = //
@@ -140,9 +143,6 @@ public class RecommendationCreator {
             recommendation.setSfdcAccountID(null);
         }
 
-        Double value = 0D;
-        recommendation.setMonetaryValue(value);
-
         // give preference to lattice data cloud field LDC_Name. If not found
         // then try to get company name from customer data itself.
         recommendation.setCompanyName(checkAndGet(account, InterfaceName.LDC_Name.name()));
@@ -151,12 +151,24 @@ public class RecommendationCreator {
         }
 
         recommendation.setTenantId(tenant.getPid());
-        recommendation.setLikelihood(getDefaultLikelihood(bucket));
+        String score = checkAndGet(account,
+                playLaunchContext.getRatingId() + PlaymakerConstants.RatingScoreColumnSuffix);
+        recommendation.setLikelihood(
+                StringUtils.isNotEmpty(score) ? Double.parseDouble(score) : getDefaultLikelihood(bucket));
+
+        String expectedValue = checkAndGet(account,
+                playLaunchContext.getRatingId() + PlaymakerConstants.RatingEVColumnSuffix);
+        recommendation.setMonetaryValue(StringUtils.isNotEmpty(expectedValue) ? Double.parseDouble(expectedValue) : 0D);
 
         setSyncDestination(playLaunch, recommendation);
 
         recommendation.setPriorityID(bucket);
         recommendation.setPriorityDisplayName(bucket.getName());
+
+        recommendation.setRatingModelId(playLaunchContext.getPublishedIteration().getId());
+        recommendation.setModelSummaryId(
+                playLaunchContext.getPlay().getRatingEngine().getType() != RatingEngineType.RULE_BASED
+                        ? ((AIModel) playLaunchContext.getPublishedIteration()).getModelSummaryId() : "");
 
         if (mapForAccountAndContactList.containsKey(accountId)) {
             List<Map<String, String>> contactsForRecommendation = PlaymakerUtils
@@ -168,8 +180,8 @@ public class RecommendationCreator {
     }
 
     private void setSyncDestination(PlayLaunch playLaunch, Recommendation recommendation) {
-        String synchronizationDestination = null;
-        String destinationSysType = null;
+        String synchronizationDestination;
+        String destinationSysType;
         if (playLaunch.getDestinationSysType() == null
                 || playLaunch.getDestinationSysType() == CDLExternalSystemType.CRM) {
             synchronizationDestination = SynchronizationDestinationEnum.SFDC.name();

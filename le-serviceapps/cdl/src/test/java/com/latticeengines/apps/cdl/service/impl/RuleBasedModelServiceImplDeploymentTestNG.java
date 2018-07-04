@@ -1,9 +1,9 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -14,11 +14,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -191,12 +192,11 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         Assert.assertEquals(ratingEngineList.size(), 0);
     }
 
-    private Map<RatingBucketName, Long> generateCoverageMap() {
-        return new ImmutableMap.Builder<RatingBucketName, Long>() //
-                .put(RatingBucketName.A, RATING_A_COUNT) //
-                .put(RatingBucketName.D, RATING_D_COUNT) //
-                .put(RatingBucketName.F, RATING_F_COUNT) //
-                .build();
+    private List<BucketMetadata> generateCoverageMap() {
+        return Arrays.asList(//
+                new BucketMetadata(BucketName.A, RATING_A_COUNT.intValue()), //
+                new BucketMetadata(BucketName.D, RATING_D_COUNT.intValue()), //
+                new BucketMetadata(BucketName.F, RATING_F_COUNT.intValue()));
     }
 
     protected void deleteRatingEngine(String ratingEngineId) {

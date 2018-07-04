@@ -115,9 +115,17 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     private Tenant tenant;
 
-    private Play play;
+    private Play rulesBasedPlay;
 
-    private PlayLaunch playLaunch;
+    private PlayLaunch rulesBasedPlayLaunch;
+
+    private Play crossSellPlay;
+
+    private PlayLaunch crossSellPlayLaunch;
+
+    private Play customeEventPlay;
+
+    private PlayLaunch customEventPlayLaunch;
 
     private CustomerSpace customerSpace;
 
@@ -129,20 +137,21 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-
         bucketsToLaunch = new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B));
         excludeItemsWithoutSalesforceId = true;
         topNCount = 5L;
 
-        testPlayCreationHelper.setupTenantAndCreatePlay(bucketsToLaunch, //
-                excludeItemsWithoutSalesforceId, topNCount);
+        testPlayCreationHelper.setupTenantAndData();
+        testPlayCreationHelper.setupPlayTestEnv();
+        testPlayCreationHelper.createPlay();
+        testPlayCreationHelper.createPlayLaunch(true, bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount);
 
         tenant = testPlayCreationHelper.getTenant();
-        play = testPlayCreationHelper.getPlay();
-        playLaunch = testPlayCreationHelper.getPlayLaunch();
+        rulesBasedPlay = testPlayCreationHelper.getPlay();
+        rulesBasedPlayLaunch = testPlayCreationHelper.getPlayLaunch();
 
-        String playId = play.getName();
-        String playLaunchId = playLaunch.getId();
+        String playId = rulesBasedPlay.getName();
+        String playLaunchId = rulesBasedPlayLaunch.getId();
         long pageSize = 20L;
 
         MockitoAnnotations.initMocks(this);
@@ -166,7 +175,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     public void teardown() throws Exception {
         testPlayCreationHelper.cleanupArtifacts();
 
-        List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
 
@@ -177,24 +186,24 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     }
 
     @Test(groups = "deployment")
-    public void testExecute() {
-        Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
-        Assert.assertNotNull(playLaunch.getAccountsSelected());
-        Assert.assertTrue(playLaunch.getAccountsSelected().longValue() > 0L);
-        Assert.assertEquals(playLaunch.getAccountsLaunched().longValue(), 0L);
-        Assert.assertEquals(playLaunch.getContactsLaunched().longValue(), 0L);
-        Assert.assertEquals(playLaunch.getAccountsErrored().longValue(), 0L);
-        Assert.assertEquals(playLaunch.getAccountsSuppressed().longValue(), 0L);
-        Assert.assertEquals(playLaunch.getLaunchCompletionPercent(), 0.0D);
+    public void testCrossSellPlayLaunch() {
+        Assert.assertEquals(rulesBasedPlayLaunch.getLaunchState(), LaunchState.Launching);
+        Assert.assertNotNull(rulesBasedPlayLaunch.getAccountsSelected());
+        Assert.assertTrue(rulesBasedPlayLaunch.getAccountsSelected() > 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsLaunched().longValue(), 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getContactsLaunched().longValue(), 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsErrored().longValue(), 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsSuppressed().longValue(), 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getLaunchCompletionPercent(), 0.0D);
 
-        List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
         Assert.assertNotNull(recommendations);
         Assert.assertEquals(recommendations.size(), 0);
 
         playLaunchInitStep.execute();
 
-        PlayLaunch updatedPlayLaunch = playProxy.getPlayLaunch(customerSpace.toString(), play.getName(),
-                playLaunch.getId());
+        PlayLaunch updatedPlayLaunch = playProxy.getPlayLaunch(customerSpace.toString(), rulesBasedPlay.getName(),
+                rulesBasedPlayLaunch.getId());
 
         Assert.assertNotNull(updatedPlayLaunch);
         Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.Launched);
@@ -203,9 +212,36 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testExecute" })
+    @Test(groups = "deployment")
+    public void testRuleBasedPlayLaunch() {
+        Assert.assertEquals(rulesBasedPlayLaunch.getLaunchState(), LaunchState.Launching);
+        Assert.assertNotNull(rulesBasedPlayLaunch.getAccountsSelected());
+        Assert.assertTrue(rulesBasedPlayLaunch.getAccountsSelected() > 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsLaunched().longValue(), 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getContactsLaunched().longValue(), 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsErrored().longValue(), 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsSuppressed().longValue(), 0L);
+        Assert.assertEquals(rulesBasedPlayLaunch.getLaunchCompletionPercent(), 0.0D);
+
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
+        Assert.assertNotNull(recommendations);
+        Assert.assertEquals(recommendations.size(), 0);
+
+        playLaunchInitStep.execute();
+
+        PlayLaunch updatedPlayLaunch = playProxy.getPlayLaunch(customerSpace.toString(), rulesBasedPlay.getName(),
+                rulesBasedPlayLaunch.getId());
+
+        Assert.assertNotNull(updatedPlayLaunch);
+        Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.Launched);
+        Assert.assertTrue(updatedPlayLaunch.getAccountsLaunched() > 0);
+        Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
+
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testRuleBasedPlayLaunch" })
     public void verifyRecommendationsDirectly() {
-        List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         AtomicInteger contactCounts = new AtomicInteger();
@@ -223,12 +259,12 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
             Assert.assertNotNull(rec.getTenantId());
             Assert.assertNotNull(rec.getDestinationOrgId());
             Assert.assertNotNull(rec.getDestinationSysType());
-            Assert.assertEquals(rec.getDestinationOrgId(), playLaunch.getDestinationOrgId());
+            Assert.assertEquals(rec.getDestinationOrgId(), rulesBasedPlayLaunch.getDestinationOrgId());
             Assert.assertEquals(CDLExternalSystemType.valueOf(rec.getDestinationSysType()),
-                    playLaunch.getDestinationSysType());
+                    rulesBasedPlayLaunch.getDestinationSysType());
 
-            Assert.assertEquals(rec.getPlayId(), play.getName());
-            Assert.assertEquals(rec.getLaunchId(), playLaunch.getId());
+            Assert.assertEquals(rec.getPlayId(), rulesBasedPlay.getName());
+            Assert.assertEquals(rec.getLaunchId(), rulesBasedPlayLaunch.getId());
             if (CollectionUtils.isNotEmpty(rec.getExpandedContacts())) {
                 contactCounts.addAndGet(rec.getExpandedContacts().size());
             }

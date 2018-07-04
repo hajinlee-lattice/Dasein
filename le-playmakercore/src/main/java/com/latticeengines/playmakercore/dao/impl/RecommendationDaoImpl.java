@@ -44,16 +44,6 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setParameter("recommendationId", recommendationId);
         query.setParameter("deleted", Boolean.FALSE);
         return (Recommendation) query.uniqueResult();
-
-        //
-        // CriteriaBuilder builder = session.getCriteriaBuilder();
-        // CriteriaQuery<Recommendation> query =
-        // builder.createQuery(Recommendation.class);
-        // Root<Recommendation> root = query.from(Recommendation.class);
-        // query.select(root).where(builder.equal(root.get("recommendationId"),
-        // recommendationId));
-        //
-        // return session.createQuery(query).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
@@ -168,6 +158,9 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + ", priorityDisplayName AS " + PlaymakerConstants.PriorityDisplayName //
                 + ", monetaryValueIso4217ID AS " + PlaymakerConstants.MonetaryValueIso4217ID //
                 + ", contacts AS " + PlaymakerConstants.Contacts //
+                + ", lift AS " + PlaymakerConstants.Lift//
+                + ", ratingModelId AS " + PlaymakerConstants.RatingModelId //
+                + ", modelSummaryId AS " + PlaymakerConstants.ModelSummaryId //
                 + ") " //
                 + "FROM %s " //
                 + "WHERE synchronizationDestination = :syncDestination " //

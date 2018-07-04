@@ -34,7 +34,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenant();
+        testPlayCreationHelper.setupTenantAndData();
 
     }
 

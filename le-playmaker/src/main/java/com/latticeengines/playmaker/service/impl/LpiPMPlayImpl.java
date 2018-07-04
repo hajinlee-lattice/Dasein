@@ -117,7 +117,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     private String getPlayWorkFlowType(RatingEngine ratingEngine) {
-        final String defaultValue = "ADefault"; // RulesBased
+        final String defaultValue = PlaymakerConstants.DefaultWorkflowType; // RulesBased
         if (ratingEngine == null) {
             return defaultValue;
         }

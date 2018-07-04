@@ -18,11 +18,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -191,6 +194,14 @@ public class FrontEndQueryCreator {
         List<Lookup> lookups = accountFrontEndQuery.getLookups();
         Lookup lookup = new AttributeLookup(BusinessEntity.Rating, ratingId);
         lookups.add(lookup);
+        if (ratingEngine.getType() != RatingEngineType.RULE_BASED) {
+            lookups.add(new AttributeLookup(BusinessEntity.Rating, ratingId + "_score"));
+        }
+        if (ratingEngine.getType() == RatingEngineType.CROSS_SELL
+                && ((AIModel) playLaunchContext.getPublishedIteration())
+                        .getPredictionType() == PredictionType.EXPECTED_VALUE) {
+            lookups.add(new AttributeLookup(BusinessEntity.Rating, ratingId + "_ev"));
+        }
     }
 
     private FrontEndRestriction createAccountQueryWithAllowedRating(PlayLaunchContext playLaunchContext,
