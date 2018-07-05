@@ -190,7 +190,6 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             matchInput.setUnionSelection(null);
             matchInput.setFields(null);
             matchInput.setKeyMap(null);
-            matchInput.setData(null);
 
         } catch (Exception e) {
             log.warn("Can not write MatchInput on hdfs, path=" + matchInputFile, e);
