@@ -79,9 +79,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(combineStatistics) //
                 .next(exportToRedshift) //
                 .next(exportToDynamo) //
-                .next(awsApsGeneratorStep) //
                 .next(processRatingWorkflow) //
                 .next(generateProcessingReport) //
+                .next(awsApsGeneratorStep) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //
                 .choreographer(choreographer) //
