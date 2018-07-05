@@ -209,7 +209,7 @@ def parse_profile(profile, profile_vars):
     return params
 
 def update_xmx_by_type(catalina_opts, instance_type):
-    max_mem = TYPE_DEF[instance_type]['mem_gb'] * 1024 - 300
+    max_mem = TYPE_DEF[instance_type]['mem_gb'] * 1024 - 1024
     opt = '-Xmx%dm' % max_mem
     opt2 = "-XX:ReservedCodeCacheSize=256m"
 
