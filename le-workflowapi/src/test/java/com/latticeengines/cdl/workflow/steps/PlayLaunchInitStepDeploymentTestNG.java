@@ -185,7 +185,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         });
     }
 
-    @Test(groups = "deployment")
+    // @Test(groups = "deployment")
     public void testCrossSellPlayLaunch() {
         Assert.assertEquals(rulesBasedPlayLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNotNull(rulesBasedPlayLaunch.getAccountsSelected());
