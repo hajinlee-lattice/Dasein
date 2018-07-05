@@ -181,18 +181,19 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             MatchInput matchInput = jobConfiguration.getMatchInput();
             if (matchInput.getInputBuffer() != null) {
                 HdfsUtils.writeToFile(yarnConfiguration, matchInputFile, JsonUtils.serialize(matchInput));
-                jobConfiguration.setMatchInputPath(matchInputFile);
                 log.info("Write MatchInput on to hdfs, path=" + matchInputFile);
-                matchInput.setInputBuffer(null);
-                matchInput.setCustomSelection(null);
-                matchInput.setPredefinedSelection(null);
-                matchInput.setUnionSelection(null);
-                matchInput.setFields(null);
-                matchInput.setKeyMap(null);
-                matchInput.setData(null);
             }
+            jobConfiguration.setMatchInputPath(matchInputFile);
+            matchInput.setInputBuffer(null);
+            matchInput.setCustomSelection(null);
+            matchInput.setPredefinedSelection(null);
+            matchInput.setUnionSelection(null);
+            matchInput.setFields(null);
+            matchInput.setKeyMap(null);
+            matchInput.setData(null);
+
         } catch (Exception e) {
-            log.warn("Can not write MatchInput on hdfs, path=" + matchInputFile + ", error=" + e.getMessage());
+            log.warn("Can not write MatchInput on hdfs, path=" + matchInputFile, e);
         }
 
     }

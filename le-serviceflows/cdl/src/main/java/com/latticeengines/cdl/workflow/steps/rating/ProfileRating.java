@@ -69,6 +69,12 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
     }
 
     private void initializeConfiguration() {
+        hasRuleRating = false;
+        hasAIRating = false;
+        ruleSrcIdx = -1;
+        aiSrcIdx = -1;
+        inactiveSrcIdx = -1;
+
         BusinessEntity entity = getEntity();
         customerSpace = configuration.getCustomerSpace();
         ratingTablePrefix = TableRoleInCollection.PivotedRating.name();
