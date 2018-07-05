@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlAccou
 public class MatchCdlAccountFlow extends TypesafeDataFlowBuilder<MatchCdlAccountParameters> {
 
     private static final Logger log = LoggerFactory.getLogger(MatchCdlAccountFlow.class);
+    private static final String UUID = "__Id__";
 
     @Override
     public Node construct(MatchCdlAccountParameters parameters) {
@@ -42,12 +43,15 @@ public class MatchCdlAccountFlow extends TypesafeDataFlowBuilder<MatchCdlAccount
                     String.format(lidFieldName + " != null ? " + lidFieldName + " : %s", notExistingLid), lidField,
                     lidMetadata);
 
+            result = result.addUUID(UUID);
             result = result.join(lidField, accountTable, lidField, JoinType.LEFT);
+
             Node notNullLidNode = result.filter(String.format("!" + lidFieldName + ".equals(%s)", notExistingLid),
                     lidField);
+            notNullLidNode = notNullLidNode.groupByAndLimit(new FieldList(UUID), 1);
+
             Node nullLidNode = result.filter(String.format(lidFieldName + ".equals(%s)", notExistingLid), lidField);
-            result = notNullLidNode.groupByAndLimit(lidField, 1);
-            result = result.merge(nullLidNode);
+            result = notNullLidNode.merge(nullLidNode);
 
             result = result.apply(String.format(lidFieldName + ".equals(%s) ? null : " + lidFieldName, notExistingLid),
                     lidField, lidMetadata);
