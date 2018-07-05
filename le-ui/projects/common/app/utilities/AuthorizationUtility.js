@@ -11,6 +11,7 @@ angular.module('mainApp.core.utilities.AuthorizationUtility', [])
         this.clientAccessLevel = this.ClientSession.AccessLevel;
 
         //common access level groupings
+        this.allAccessLevels = ['EXTERNAL_USER', 'EXTERNAL_ADMIN', 'INTERNAL_USER', 'INTERNAL_ADMIN', 'SUPER_ADMIN'];
         this.excludeExternalUser = ['EXTERNAL_ADMIN', 'INTERNAL_USER', 'INTERNAL_ADMIN', 'SUPER_ADMIN'];
         this.admins = ['EXTERNAL_ADMIN', 'INTERNAL_ADMIN', 'SUPER_ADMIN']; 
     }

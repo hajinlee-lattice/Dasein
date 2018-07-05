@@ -25,7 +25,7 @@
                     </button>
                     <button
                         class="button orange-button"
-                        ng-if="vm.isRulesBased"
+                        ng-if="vm.isRulesBased && vm.playbookEnabled"
                         ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })" 
                         ng-disabled="!vm.canCreatePlay()">
                         <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata && !vm.status_toggle" -->
@@ -41,7 +41,7 @@
                     </button>
                     <button
                         class="button orange-button"
-                        ng-if="!vm.isRulesBased"
+                        ng-if="!vm.isRulesBased && vm.playbookEnabled"
                         ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })"
                         ng-disabled="!vm.canCreatePlay()">
                         <!-- ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata || vm.ratingEngine.status === 'INACTIVE'" -->

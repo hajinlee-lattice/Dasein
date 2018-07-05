@@ -19,6 +19,13 @@ angular
     $stateProvider
         .state('home.playbook', {
             url: '/playbook',
+            onEnter: ['AuthorizationUtility', 'FeatureFlagService', function(AuthorizationUtility, FeatureFlagService) {
+                var flags = FeatureFlagService.Flags();
+                var featureFlagsConfig = {};
+                featureFlagsConfig[flags.PLAYBOOK_MODULE] = true;
+
+                AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.allAccessLevels, featureFlagsConfig, 'home');
+            }],
             onExit: function(FilterService) {
                 FilterService.clear();
             },

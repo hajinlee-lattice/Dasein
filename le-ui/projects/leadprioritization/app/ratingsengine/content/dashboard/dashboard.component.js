@@ -4,11 +4,16 @@ angular.module('lp.ratingsengine.dashboard', [
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, 
     RatingsEngineStore, RatingsEngineService,  ModalStore,
-    Dashboard, RatingEngine, Model, IsRatingEngine, IsPmml, Products
+    Dashboard, RatingEngine, Model, IsRatingEngine, IsPmml, Products, AuthorizationUtility, FeatureFlagService
 ) {
-    var vm = this;
+    var vm = this,
+        flags = FeatureFlagService.Flags();
+
+    var featureFlagsConfig = {};
+    featureFlagsConfig[flags.PLAYBOOK_MODULE] = true;
 
     angular.extend(vm, {
+        playbookEnabled: AuthorizationUtility.checkFeatureFlags(featureFlagsConfig),
         deactivateInProgress: false,
         dashboard: Dashboard,
         ratingEngine: RatingEngine,
