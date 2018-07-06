@@ -695,8 +695,7 @@ angular
 
                     PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(play){
 
-                        console.log(play);
-                        console.log(PlaybookWizardStore.getExcludeItems());
+                        // console.log(PlaybookWizardStore.getExcludeItems());
 
                         var engineId = play.ratingEngine.id,
                             query = { 

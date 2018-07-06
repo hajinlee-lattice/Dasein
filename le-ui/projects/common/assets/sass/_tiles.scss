@@ -64,7 +64,7 @@
                 border-color: #457eba;
                 border-style: solid;
                 & * {
-                    border: none;
+                    border-color: transparent;
                     transition: none;
                 }
             }

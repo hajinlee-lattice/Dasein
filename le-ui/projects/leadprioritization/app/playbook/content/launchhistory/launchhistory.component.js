@@ -7,6 +7,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     angular.extend(vm, {
         stored: PlaybookWizardStore.settings_form,
         current: PlaybookWizardStore.current,
+        currentPlay: PlaybookWizardStore.currentPlay,
         launches: LaunchHistoryData,
         launchesCount: LaunchHistoryCount,
         summaryData: {},
@@ -32,6 +33,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     vm.init = function() {
         vm.noData = (vm.launchesCount === 0 && vm.orgId === '' && vm.externalSystemType === '' && vm.playName === '') ? true : false;
         vm.offset = (vm.currentPage - 1) * vm.pagesize;
+
+        vm.defaultPlayLaunchList = angular.copy(vm.launches.uniquePlaysWithLaunches);
 
         vm.updateLaunchData();
     };
@@ -99,7 +102,10 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
         vm.noFilteredData = (vm.launchesCount === 0 && (vm.orgId !== '' || vm.externalSystemType !== '' || vm.playName !== '')) ? true : false;
 
-        vm.defaultPlayLaunchList = angular.copy(vm.launches.uniquePlaysWithLaunches);
+        vm.defaultPlayLaunchList.unshift({playName: null, displayName: 'All Launched Plays'});
+
+        vm.header.filter.filtered = vm.defaultPlayLaunchList;
+        vm.header.filter.unfiltered = vm.defaultPlayLaunchList;
 
         vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
 
@@ -120,11 +126,6 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             recommendationsLaunched: stats.recommendationsLaunched,
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
-
-        vm.defaultPlayLaunchList.unshift({playName: null, displayName: 'All Launched Plays'});
-
-        vm.header.filter.filtered = vm.defaultPlayLaunchList;
-        vm.header.filter.unfiltered = vm.defaultPlayLaunchList;
 
     }
 
@@ -157,10 +158,20 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
         vm.launching = true;
 
-        PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
-            PlaybookWizardStore.launchPlay(play).then(function(result){
-                $state.reload();
-            });
+        console.log();
+
+        var play = vm.currentPlay,
+            opts = {
+                bucketsToLaunch: play.launchHistory.mostRecentLaunch.bucketsToLaunch,
+                topNCount: play.launchHistory.mostRecentLaunch.topNCount,
+                destinationOrgId: play.launchHistory.mostRecentLaunch.destinationOrgId,
+                destinationSysType: play.launchHistory.mostRecentLaunch.destinationSysType,
+                destinationAccountId: play.launchHistory.mostRecentLaunch.destinationAccountId,
+                excludeItems: play.launchHistory.mostRecentLaunch.excludeItems
+            };
+
+        PlaybookWizardStore.launchPlay(play, opts).then(function(result){
+            $state.reload();
         });
     };
 

@@ -755,8 +755,6 @@ angular.module('lp.playbook')
             destinationAccountId = opts.destinationAccountId,
             excludeItems = opts.excludeItems;
 
-        console.log(destinationOrgId, destinationSysType, destinationAccountId);
-
         $http({
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',
