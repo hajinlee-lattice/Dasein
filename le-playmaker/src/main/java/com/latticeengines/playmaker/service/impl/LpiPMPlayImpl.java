@@ -53,6 +53,12 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
+        List<Play> plays = getPlayList(start, playgroupIds);
+        allProducts = allProducts == null ? getAllProducts() : allProducts;
+        return handlePagination(start, offset, maximum, plays);
+    }
+
+    private List<Play> getPlayList(long start, List<Integer> playgroupIds) {
         // following API has sub-second performance even for large number of
         // plays (50+). This API returns only those plays for with there is
         // at least one play launch. Implementing pagination in this API may not
@@ -61,8 +67,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         PlayLaunchDashboard dashboard = playProxy.getPlayLaunchDashboard(
                 MultiTenantContext.getCustomerSpace().toString(), null, null, 0L, 0L, 1L, null, null, null, null, null);
         List<Play> plays = dashboard.getUniquePlaysWithLaunches();
-        allProducts = allProducts == null ? getAllProducts() : allProducts;
-        return handlePagination(start, offset, maximum, plays);
+        return plays;
     }
 
     private List<Map<String, Object>> getAllProducts() {
@@ -196,7 +201,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
     @Override
     public int getPlayCount(long start, List<Integer> playgroupIds) {
-        List<Map<String, Object>> plays = getPlays(start, 0, Integer.MAX_VALUE, null);
+        List<Play> plays = getPlayList(start, playgroupIds);
         return plays.size();
     }
 

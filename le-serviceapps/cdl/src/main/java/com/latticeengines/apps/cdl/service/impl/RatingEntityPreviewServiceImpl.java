@@ -93,13 +93,17 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         DataPage resultDataPage = cachedDataPage;
 
-        if (entityType == BusinessEntity.Account && StringUtils.isNotBlank(bucketFieldName)) {
+        if (shouldHandleBucketFieldName(entityType, bucketFieldName)) {
             resultDataPage = handleBucketFieldName(cachedDataPage, ratingField, bucketFieldName);
         }
 
         log.info(String.format("Got # %d elements", resultDataPage.getData().size()));
         return resultDataPage;
 
+    }
+
+    private boolean shouldHandleBucketFieldName(BusinessEntity entityType, String bucketFieldName) {
+        return entityType == BusinessEntity.Account && StringUtils.isNotBlank(bucketFieldName);
     }
 
     private DataPage fetchData(Tenant tenant, RatingEngine ratingEngine, long offset, long maximum,
@@ -111,7 +115,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         entityFrontEndQuery.setPageFilter(new PageFilter(offset, maximum));
 
-        setSortField(entityType, sortBy, descending, entityFrontEndQuery);
+        setSortField(entityType, sortBy, descending, bucketFieldName, ratingField, entityFrontEndQuery);
 
         setLookups(entityType, entityFrontEndQuery, ratingField, lookupFieldNames);
 
@@ -215,14 +219,30 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         entityFrontEndQuery.setFreeFormTextSearch(freeFormTextSearch);
     }
 
-    private void setSortField(BusinessEntity entityType, String sortBy, boolean descending,
-            FrontEndQuery entityFrontEndQuery) {
+    private void setSortField(BusinessEntity entityType, String sortBy, boolean descending, String bucketFieldName,
+            String ratingField, FrontEndQuery entityFrontEndQuery) {
         List<AttributeLookup> lookups = new ArrayList<>();
-        AttributeLookup attrLookup = new AttributeLookup(entityType,
-                // StringUtils.isNotBlank(sortBy) ? sortBy :
-                // InterfaceName.LastModifiedDate.name());
-                StringUtils.isNotBlank(sortBy) ? sortBy : InterfaceName.AccountId.name());
+        boolean hasEntityIdInSort = false;
+        String entityIdColumn = null;
+        if (entityType == BusinessEntity.Account) {
+            entityIdColumn = InterfaceName.AccountId.name();
+        } else if (entityType == BusinessEntity.Contact) {
+            entityIdColumn = InterfaceName.ContactId.name();
+        }
+        AttributeLookup attrLookup;
+
+        if (shouldHandleBucketFieldName(entityType, bucketFieldName) //
+                && bucketFieldName.equals(sortBy)) {
+            attrLookup = new AttributeLookup(BusinessEntity.Rating, ratingField);
+        } else {
+            attrLookup = new AttributeLookup(entityType, StringUtils.isNotBlank(sortBy) ? sortBy : entityIdColumn);
+            hasEntityIdInSort = entityIdColumn.equalsIgnoreCase(attrLookup.getAttribute());
+        }
         lookups.add(attrLookup);
+
+        if (!hasEntityIdInSort && entityIdColumn != null) {
+            lookups.add(new AttributeLookup(entityType, entityIdColumn));
+        }
 
         FrontEndSort sort = new FrontEndSort(lookups, descending);
         entityFrontEndQuery.setSort(sort);

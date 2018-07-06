@@ -260,9 +260,16 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     }
 
     public Set<String> testEntityPreview(Long offset, Long max, boolean expectingSomeAccounts) {
-        DataPage response = ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, max,
-                BusinessEntity.Account, InterfaceName.AccountId.name(), false, RATING_BUCKET_FIELD, null, false, null,
-                null, InterfaceName.SalesforceAccountID.name());
+        testEntityPreview(offset, max, expectingSomeAccounts, true);
+        return testEntityPreview(offset, max, expectingSomeAccounts, false);
+    }
+
+    public Set<String> testEntityPreview(Long offset, Long max, boolean expectingSomeAccounts, boolean sortOnRating) {
+        DataPage response = ratingEntityPreviewService.getEntityPreview( //
+                ratingEngine, offset, max, BusinessEntity.Account, //
+                sortOnRating ? RATING_BUCKET_FIELD : InterfaceName.AccountId.name(), //
+                false, RATING_BUCKET_FIELD, null, false, null, null, //
+                InterfaceName.SalesforceAccountID.name());
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getData());
 
