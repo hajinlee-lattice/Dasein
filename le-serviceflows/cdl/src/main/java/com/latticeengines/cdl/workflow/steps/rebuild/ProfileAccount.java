@@ -267,6 +267,9 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }
+        if (!retainAttrNames.contains(InterfaceName.CDLUpdatedTime.name())) {
+            retainAttrNames.add(InterfaceName.CDLUpdatedTime.name());
+        }
 
         conf.setRetainAttrs(retainAttrNames);
         String confStr = appendEngineConf(conf, heavyEngineConfig());

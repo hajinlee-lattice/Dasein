@@ -564,6 +564,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.ContactName.name()) //
                 .allowedDisplayNames(Sets.newHashSet("NAME", "CONTACT NAME", "CONTACT_NAME", "DISPLAY_NAME")) //
                 .type(Schema.Type.STRING) //
+                .defaultValueStr("")
                 .interfaceName(InterfaceName.ContactName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1278,6 +1279,7 @@ public class SchemaRepository {
         Attribute accountCompanyName = attr(InterfaceName.CompanyName.name()) //
                 .allowedDisplayNames(Sets.newHashSet("NAME", "COMPANY_NAME", "ACCOUNT_NAME", "DISPLAY_NAME")) //
                 .type(Schema.Type.STRING) //
+                .defaultValueStr("")
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
