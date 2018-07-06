@@ -70,10 +70,10 @@ angular.module('lp.jobs.model', [
                 iconclass: 'white-button',
                 iconrotate: true,
                 items: [
-                    { label: '10 items',  icon: 'numeric', click: function() { $scope.pagesize = 10; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); }},
-                    { label: '25 items',  icon: 'numeric', click: function() { $scope.pagesize = 25; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); }},
-                    { label: '50 items',  icon: 'numeric', click: function() { $scope.pagesize = 50; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); }},
-                    { label: '100 items', icon: 'numeric', click: function() { $scope.pagesize = 100; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); }}
+                    { label: '10 items',  icon: 'numeric', click: function() { $scope.pagesize = 10; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); $scope.currentPage = 1;}},
+                    { label: '25 items',  icon: 'numeric', click: function() { $scope.pagesize = 25; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); $scope.currentPage = 1;}},
+                    { label: '50 items',  icon: 'numeric', click: function() { $scope.pagesize = 50; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); $scope.currentPage = 1;}},
+                    { label: '100 items', icon: 'numeric', click: function() { $scope.pagesize = 100; FilterService.setFilters('jobs.list.pagesize', {pagesize: $scope.pagesize}); $scope.currentPage = 1;}}
                 ]
             },
             sort: {

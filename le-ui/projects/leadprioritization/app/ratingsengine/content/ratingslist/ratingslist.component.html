@@ -4,7 +4,7 @@
         
         <div class="list-header">
             <div class="pull-left number-of-items" ng-if="vm.current.ratings.length > 0">
-                <menu-filter-by config="vm.header.filter" store="ratings.filter"></menu-filter-by>
+                <menu-filter-by config="vm.header.filter" store="ratings.filter" current="vm.currentPage"></menu-filter-by>
                 <menu-sort-by config="vm.header.sort" store="ratings.sort"></menu-sort-by>
                 <search-filter query="vm.query" current="vm.currentPage"></search-filter>
             </div>

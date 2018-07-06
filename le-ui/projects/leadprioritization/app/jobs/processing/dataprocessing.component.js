@@ -88,10 +88,10 @@ angular.module('lp.jobs.import', [
                 iconclass: 'white-button',
                 iconrotate: true,
                 items: [
-                    { label: '10 items', icon: 'numeric', click: function () { vm.pagesize = 10; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); } },
-                    { label: '25 items', icon: 'numeric', click: function () { vm.pagesize = 25; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); } },
-                    { label: '50 items', icon: 'numeric', click: function () { vm.pagesize = 50; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); } },
-                    { label: '100 items', icon: 'numeric', click: function () { vm.pagesize = 100; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); } }
+                    { label: '10 items', icon: 'numeric', click: function () { vm.pagesize = 10; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); vm.currentPage = 1;} },
+                    { label: '25 items', icon: 'numeric', click: function () { vm.pagesize = 25; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); vm.currentPage = 1;} },
+                    { label: '50 items', icon: 'numeric', click: function () { vm.pagesize = 50; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); vm.currentPage = 1;} },
+                    { label: '100 items', icon: 'numeric', click: function () { vm.pagesize = 100; FilterService.setFilters('jobs.dataprocessing.pagesize', {pagesize: vm.pagesize}); vm.currentPage = 1;} }
                 ]
             },
             sort: {

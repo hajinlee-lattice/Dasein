@@ -11,7 +11,8 @@ angular
         scope: {
             config:'=',
             store: '@',
-            callback: '&?callbackFunction'
+            callback: '&?callbackFunction',
+            current: '=?'
         },
         templateUrl: 'app/AppCommon/modules/menus/filterby/FilterByView.html',
         controller: function ($scope, $filter, $document, FilterService) {
@@ -66,6 +67,8 @@ angular
                     }
                 },
                 click: function(item) {
+                    $scope.current = 1;
+
                     $scope.label = item.label;
                     $scope.config.filtered = item.filtered;
                     $scope.config.value = item.action;

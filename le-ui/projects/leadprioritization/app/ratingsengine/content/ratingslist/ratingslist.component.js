@@ -135,9 +135,9 @@ angular.module('lp.ratingsengine.ratingslist', [
             lastRouteContainsSegmentOrAttributes = (referringRoute.split('.').indexOf("products") > -1 || referringRoute.split('.').indexOf("attributes") > -1);
 
         
-        $scope.$watch('vm.header.filter.filtered', function() {
-            vm.currentPage = 1;
-        });
+        // $scope.$watch('vm.header.filter.filtered', function() {
+        //     vm.currentPage = 1;
+        // });
 
         $scope.$watch('vm.current.ratings', function() {
 
