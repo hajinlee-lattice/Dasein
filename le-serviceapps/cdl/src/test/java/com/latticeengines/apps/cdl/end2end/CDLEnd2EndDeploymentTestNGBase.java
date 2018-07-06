@@ -107,7 +107,6 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
-import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -144,7 +143,20 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String S3_AVRO_VERSION = "1";
 
     static final Long ACCOUNT_1 = 500L;
+    static final Long ACCOUNT_2 = 600L;
+    static final Long ACCOUNT_3 = 1000L;
     static final Long CONTACT_1 = 500L;
+    static final Long CONTACT_2 = 100L;
+    static final Long CONTACT_3 = 1000L;
+    static final Long PRODUCT_ID = 40L;
+    static final Long PRODUCT_HIERARCHY = 5L;
+    static final Long PRODUCT_BUNDLE = 14L;
+    static final String PRODUCT_ERROR_MESSAGE = null;
+    static final String PRODUCT_WARN_MESSAGE = "whatever warn message as it is not null or empty string";
+    static final Long TRANSACTION_1 = 29264L;
+    static final Long TRANSACTION_2 = 39004L;
+    static final Long TRANSACTION_3 = 68268L;
+    static final Long PURCHASE_HISTORY_1 = 5L;
 
     static final Long BATCH_STORE_PRODUCTS = 99L;
     static final Long SERVING_STORE_PRODUCTS = 30L;
@@ -778,15 +790,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertTrue(dataCollectionStatus.getAccountCount() > 0);
     }
 
-    void verifyProcessAnalyzeReport(String appId) {
+    void verifyProcessAnalyzeReport(String appId, Map<BusinessEntity, Map<String, Object>> expectedReport) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 1);
         Report summaryReport = reports.get(0);
-        verifyConsolidateSummaryReport(summaryReport);
+        verifyConsolidateSummaryReport(summaryReport, expectedReport);
     }
 
-    void verifyConsolidateSummaryReport(Report summaryReport) {
-
+    private void verifyConsolidateSummaryReport(Report summaryReport,
+                                                Map<BusinessEntity, Map<String, Object>> expectedReport) {
         Assert.assertNotNull(summaryReport);
         Assert.assertNotNull(summaryReport.getJson());
         Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
@@ -798,42 +810,34 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
             ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
 
-            BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
-                    BusinessEntity.Transaction };
-            for (BusinessEntity entity : entities) {
+            expectedReport.forEach((entity, entityReport) -> {
                 Assert.assertTrue(entitiesSummaryNode.has(entity.name()));
                 ObjectNode entityNode = (ObjectNode) entitiesSummaryNode.get(entity.name());
                 Assert.assertNotNull(entityNode);
-
-                ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
-                        .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+                ObjectNode consolidateSummaryNode = (ObjectNode) entityNode.get(
+                        ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
                 Assert.assertNotNull(consolidateSummaryNode);
-
+                ObjectNode entityNumberNode = (ObjectNode) entityNode.get(
+                        ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
                 if (entity != BusinessEntity.Product) {
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.NEW));
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.DELETE));
-                } else {
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.PRODUCT_ID));
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.PRODUCT_BUNDLE));
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.PRODUCT_HIERARCHY));
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.ERROR_MESSAGE));
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.WARN_MESSAGE));
-                }
-
-                if (entity == BusinessEntity.Account || entity == BusinessEntity.Contact) {
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.UPDATE));
-                }
-                if (entity == BusinessEntity.Account) {
-                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.UNMATCH));
-                }
-
-                if (entity != BusinessEntity.Product) {
-                    ObjectNode entityNumberNode = (ObjectNode) entityNode
-                            .get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
                     Assert.assertNotNull(entityNumberNode);
-                    Assert.assertTrue(entityNumberNode.has(ReportConstants.TOTAL));
                 }
-            }
+
+                entityReport.forEach((reportKey, reportValue) -> {
+                    String[] keySplits = reportKey.split("_");
+                    if (keySplits[0].equals(ReportPurpose.ENTITIES_SUMMARY.name())) {
+                        Assert.assertTrue(consolidateSummaryNode.has(keySplits[1]));
+                        if (reportValue instanceof Long) {
+                            Assert.assertEquals(consolidateSummaryNode.get(keySplits[1]).asLong(), reportValue);
+                        } else if (reportValue instanceof String) {
+                            Assert.assertFalse(consolidateSummaryNode.get(keySplits[1]).isNull());
+                        }
+                    } else if (keySplits[0].equals(ReportPurpose.ENTITY_STATS_SUMMARY.name())) {
+                        Assert.assertTrue(entityNumberNode.has(keySplits[1]));
+                        Assert.assertEquals(entityNumberNode.get(keySplits[1]).asLong(), reportValue);
+                    }
+                });
+            });
         } catch (IOException e) {
             throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
         }

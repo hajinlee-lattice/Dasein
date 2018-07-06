@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 /**
  * Process Transaction imports after ProcessAccountDeploymentTestNG
@@ -49,7 +53,20 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 
     private void verifyProcess() {
         runCommonPAVerifications();
-        verifyProcessAnalyzeReport(processAnalyzeAppId);
+
+        Map<String, Object> transactionReport = new HashMap<>();
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, TRANSACTION_1);
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
+        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, TRANSACTION_1);
+
+        Map<String, Object> purchaseHistoryReport = new HashMap<>();
+        purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, PURCHASE_HISTORY_1);
+
+        Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
+        expectedReport.put(BusinessEntity.Transaction, transactionReport);
+        expectedReport.put(BusinessEntity.PurchaseHistory, purchaseHistoryReport);
+
+        verifyProcessAnalyzeReport(processAnalyzeAppId, expectedReport);
         verifyNumAttrsInAccount();
         verifyStats(false, BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 

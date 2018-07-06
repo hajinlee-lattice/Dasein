@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.end2end;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,8 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 /**
  * Process Account, Contact and Product for a new tenant
@@ -50,7 +52,32 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
 
-        verifyProcessAnalyzeReport(processAnalyzeAppId);
+        Map<String, Object> accountReport = new HashMap<>();
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, ACCOUNT_1);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UNMATCH, 1L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_1);
+
+        Map<String, Object> contactReport = new HashMap<>();
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_1);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_1);
+
+        Map<String, Object> productReport = new HashMap<>();
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID, PRODUCT_ID);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_HIERARCHY, PRODUCT_HIERARCHY);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE, PRODUCT_BUNDLE);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.WARN_MESSAGE, PRODUCT_WARN_MESSAGE);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.ERROR_MESSAGE, PRODUCT_ERROR_MESSAGE);
+
+        Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
+        expectedReport.put(BusinessEntity.Account, accountReport);
+        expectedReport.put(BusinessEntity.Contact, contactReport);
+        expectedReport.put(BusinessEntity.Product, productReport);
+
+        verifyProcessAnalyzeReport(processAnalyzeAppId, expectedReport);
         verifyDataCollectionStatus(DataCollection.Version.Green);
         verifyNumAttrsInAccount();
 
