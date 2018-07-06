@@ -74,7 +74,7 @@
                     class="form-control" 
                     placeholder="Search {{vm.resourceType=='contacts' ? vm.counts.contacts.value : vm.counts.accounts.value | number}} {{vm.resourceType=='contacts' ? 'Contacts' : 'Accounts'}}"
                     ng-model="vm.search"
-                    ng-model-options='{ debounce: 1000 }'
+                    ng-model-options='{ debounce: 500 }'
                     ng-change='vm.submitQuery()'
                     ng-model-options="vm.searchOptions"
                 />
@@ -153,40 +153,28 @@
     <table ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
-                <th class="sortable" ng-click="sortType = 'CompanyName'; sortReverse = !sortReverse">
+                <!-- <th class="sortable" ng-click="sortType = 'CompanyName'; sortReverse = !sortReverse"> -->
+                <th class="sortable" ng-click="vm.sort('CompanyName')">
                     Company Name
-                    <span ng-show="sortType == 'CompanyName' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'CompanyName' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="vm.sortType == 'CompanyName' && !vm.sortDesc" class="fa fa-caret-down"></span>
+                    <span ng-show="vm.sortType == 'CompanyName' && vm.sortDesc" class="fa fa-caret-up"></span>
                 </th>
                 <th>Website</th>
-                <!-- <th>SalesForce ID</th> -->
-                <th class="sortable" ng-click="sortType = 'ScoreBucket'; sortReverse = !sortReverse">
+                <th class="sortable" ng-click="vm.sort('ScoreBucket')">
                     Rating
-                    <span ng-show="sortType == 'ScoreBucket' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'ScoreBucket' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="vm.sortType == 'ScoreBucket' && !vm.sortDesc" class="fa fa-caret-down"></span>
+                    <span ng-show="vm.sortType == 'ScoreBucket' && vm.sortDesc" class="fa fa-caret-up"></span>
                 </th>
             </tr>
         </thead>
         <tbody ng-if="!vm.loading && vm.selectedBuckets.length != 0">
             <tr 
-                ng-repeat="account in (vm.tmpAccounts = (vm.accounts | 
-                            orderBy:sortType:sortReverse))">
+                ng-repeat="account in vm.accounts">
                 <td>{{account.CompanyName}}</td>
                 <td>
                     <span ng-if="account.Website">{{account.Website}}</span>
                     <span ng-if="!account.Website" class="gray-text">N/A</span>
                 </td>
-                <!-- <td>
-                    <span 
-                        class="gray-text"
-                        ng-if="!account.SalesforceAccountID">
-                        N/A
-                    </span>
-                    <span
-                        ng-if="account.SalesforceAccountID">
-                        {{account.SalesforceAccountID}}
-                    </span>
-                </td> -->
                 <td>{{account.ScoreBucket}}</td>
             </tr>
         </tbody>

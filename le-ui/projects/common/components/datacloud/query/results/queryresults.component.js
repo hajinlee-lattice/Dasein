@@ -36,6 +36,7 @@ angular.module('common.datacloud.query.results', [
         accountsCoverage: AccountsCoverage,
         excludeNonSalesForce: false,
         sortType: 'CompanyName',
+        sortDesc: false,
         sortReverse: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
         saving: false,
@@ -196,14 +197,14 @@ angular.module('common.datacloud.query.results', [
 
             // Targets page for create Play flow
             var dataQuery = { 
-                    freeFormTextSearch: vm.search || '',
-                    restrictNotNullSalesforceId: vm.excludeNonSalesForce,
+                    free_form_text_search: vm.search || '',
+                    restrictNotNullSalesforceId: false,
                     entityType: 'Account',
                     bucketFieldName: 'ScoreBucket',
                     maximum: vm.pagesize,
                     offset: offset,
-                    sortBy: 'CompanyName',
-                    descending: false,
+                    sortBy: vm.sortType,
+                    descending: vm.sortDesc,
                     selectedBuckets: vm.selectedBuckets
                 };
 
@@ -411,7 +412,7 @@ angular.module('common.datacloud.query.results', [
 
 
     vm.sort = function(columnName) {
-        vm.sortBy = columnName;
+        vm.sortType = columnName;
         vm.sortDesc = !vm.sortDesc;
         vm.current = 1;
 

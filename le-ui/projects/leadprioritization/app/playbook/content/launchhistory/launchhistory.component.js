@@ -102,8 +102,6 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
         vm.noFilteredData = (vm.launchesCount === 0 && (vm.orgId !== '' || vm.externalSystemType !== '' || vm.playName !== '')) ? true : false;
 
-        vm.defaultPlayLaunchList.unshift({playName: null, displayName: 'All Launched Plays'});
-
         vm.header.filter.filtered = vm.defaultPlayLaunchList;
         vm.header.filter.unfiltered = vm.defaultPlayLaunchList;
 

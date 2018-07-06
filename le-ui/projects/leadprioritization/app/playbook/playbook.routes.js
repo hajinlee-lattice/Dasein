@@ -19,13 +19,6 @@ angular
     $stateProvider
         .state('home.playbook', {
             url: '/playbook',
-            onEnter: ['AuthorizationUtility', 'FeatureFlagService', function(AuthorizationUtility, FeatureFlagService) {
-                var flags = FeatureFlagService.Flags();
-                var featureFlagsConfig = {};
-                featureFlagsConfig[flags.PLAYBOOK_MODULE] = true;
-
-                AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.allAccessLevels, featureFlagsConfig, 'home');
-            }],
             onExit: function(FilterService) {
                 FilterService.clear();
             },
@@ -694,8 +687,6 @@ angular
                     var deferred = $q.defer();
 
                     PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(play){
-
-                        // console.log(PlaybookWizardStore.getExcludeItems());
 
                         var engineId = play.ratingEngine.id,
                             query = { 

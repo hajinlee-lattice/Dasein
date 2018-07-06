@@ -273,8 +273,6 @@ angular.module('lp.playbook')
                 excludeItems: PlaybookWizardStore.getExcludeItems()
             }
 
-        console.log(opts);
-
         PlaybookWizardStore.launchPlay(play, opts).then(function(data) {
             $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
         });
