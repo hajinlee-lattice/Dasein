@@ -240,7 +240,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     public AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin) {
         String tenantId = MultiTenantContext.getShortTenantId();
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs());
+            Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs(),
+                    new ArrayList<>());
             if (MapUtils.isNotEmpty(attrConfigGrpsForTrim)) {
                 List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
                     if (CollectionUtils.isNotEmpty(list)) {
@@ -283,15 +284,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         AttrConfigRequest toReturn;
         String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> attrConfigs = request.getAttrConfigs();
-        // record the case property value is empty , after render, the case will
-        // lose
-        Map<String, List<String>> emptyPropsInUserConfigs = generateEmptyPropertiesMapping(attrConfigs);
-        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs);
+        List<AttrConfigEntity> toDeleteEntities = new ArrayList<>();
+        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs, toDeleteEntities);
         if (MapUtils.isEmpty(attrConfigGrpsForTrim)) {
             toReturn = request;
         } else {
             List<AttrConfig> userProvidedList = generateListFromMap(attrConfigGrpsForTrim);
-            log.info(tenantId + "user provided configs" + JsonUtils.serialize(userProvidedList));
+            log.info("user provided configs" + JsonUtils.serialize(userProvidedList));
             toReturn = new AttrConfigRequest();
             toReturn.setAttrConfigs(userProvidedList);
 
@@ -328,13 +327,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                         + JsonUtils.serialize(toReturn.getDetails()));
             }
 
-            List<AttrConfigEntity> toDeleteEntities = new ArrayList<>();
-            mergeConfigWithExisting(tenantId, attrConfigGrpsForTrim, toDeleteEntities, emptyPropsInUserConfigs);
             // after validation, delete the entities with empty props
             if (CollectionUtils.isNotEmpty(toDeleteEntities)) {
                 attrConfigEntityMgr.deleteConfigs(toDeleteEntities);
             }
-            log.info(tenantId + "AttrConfig before saving is " + JsonUtils.serialize(toReturn));
+            log.info("AttrConfig before saving is " + JsonUtils.serialize(toReturn));
             CacheService cacheService = CacheServiceBase.getCacheService();
             // trim and save
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
@@ -350,20 +347,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return toReturn;
     }
 
-    private Map<String, List<String>> generateEmptyPropertiesMapping(List<AttrConfig> attrConfigs) {
-        Map<String, List<String>> map = new HashMap<>();
-        attrConfigs.forEach(config -> config.getAttrProps().forEach((propName, propValue) -> {
-            if (propValue.getCustomValue() == null) {
-                if (!map.containsKey(config.getAttrName())) {
-                    map.put(config.getAttrName(), new ArrayList<String>());
-                }
-                List<String> propList = map.get(config.getAttrName());
-                propList.add(propName);
-            }
-        }));
-        return map;
-    }
-
     private List<AttrConfig> generateListFromMap(Map<BusinessEntity, List<AttrConfig>> map) {
         return map.values().stream().flatMap(list -> {
             if (CollectionUtils.isNotEmpty(list)) {
@@ -377,7 +360,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     /*
      * split configs by entity, then distribute thread to render separately
      */
-    private Map<BusinessEntity, List<AttrConfig>> renderConfigs(List<AttrConfig> attrConfigs) {
+    private Map<BusinessEntity, List<AttrConfig>> renderConfigs(List<AttrConfig> attrConfigs,
+            List<AttrConfigEntity> toDeleteEntities) {
         // split by entity
         Map<BusinessEntity, List<AttrConfig>> attrConfigGrps = new HashMap<>();
         attrConfigs.forEach(attrConfig -> {
@@ -392,6 +376,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             return attrConfigGrps;
         } else {
             String tenantId = MultiTenantContext.getShortTenantId();
+            mergeConfigWithExisting(tenantId, attrConfigGrps, toDeleteEntities);
 
             ConcurrentMap<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new ConcurrentHashMap<>();
 
@@ -400,7 +385,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 List<AttrConfig> renderedList = renderForEntity(attrConfigGrps.get(entity), entity);
                 attrConfigGrpsForTrim.put(entity, renderedList);
             } else {
-                log.info(tenantId + "Saving attr configs for " + attrConfigGrps.size() + " entities in parallel.");
+                log.info("Saving attr configs for " + attrConfigGrps.size() + " entities in parallel.");
                 // distribute to tasklets
                 final Tenant tenant = MultiTenantContext.getTenant();
                 List<Runnable> runnables = new ArrayList<>();
@@ -423,12 +408,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     /**
      * Merge with existing configs in Document DB
-     * 
-     * @param emptyPropsInUserConfigs
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void mergeConfigWithExisting(String tenantId, Map<BusinessEntity, List<AttrConfig>> attrConfigGrps,
-            List<AttrConfigEntity> toDeleteEntities, Map<String, List<String>> emptyPropsInUserConfigs) {
+            List<AttrConfigEntity> toDeleteEntities) {
 
         attrConfigGrps.forEach((entity, configList) -> {
             List<AttrConfigEntity> existingConfigEntities = attrConfigEntityMgr.findAllByTenantAndEntity(tenantId,
@@ -448,11 +430,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 AttrConfig existingConfig = existingMap.get(attrName);
                 if (existingConfig != null) {
                     // write user changed prop
-                    List<String> emptyProps = emptyPropsInUserConfigs.get(attrName);
                     existingConfig.getAttrProps().forEach((propName, propValue) -> {
-                        AttrConfigProp prop = config.getAttrProps().get(propName);
-                        if (prop.getCustomValue() == null && !(emptyProps != null && emptyProps.contains(propName))) {
-                            prop.setCustomValue(propValue.getCustomValue());
+                        if (!config.getAttrProps().containsKey(propName)) {
+                            config.getAttrProps().put(propName, propValue);
                         }
                     });
 
