@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -421,8 +422,20 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private boolean compareAttribute(Attribute attr1, Attribute attr2) {
         if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
-            log.error("PhysicalDataType is not the same for attribute: " + attr1.getName());
-            return false;
+            // A temp fix for schema update in maint_4.8.0.
+            if (InterfaceName.Amount.equals(attr1.getInterfaceName())
+                    || InterfaceName.Quantity.equals(attr1.getInterfaceName())
+                    || InterfaceName.Cost.equals(attr1.getInterfaceName()))
+            {
+                if (!attr2.getPhysicalDataType().equalsIgnoreCase("int")
+                        && !attr2.getPhysicalDataType().equalsIgnoreCase("double")) {
+                    log.error(String.format("Attribute %s has wrong physicalDataType %s", attr2.getName(), attr2.getPhysicalDataType()));
+                    return false;
+                }
+            } else {
+                log.error("PhysicalDataType is not the same for attribute: " + attr1.getName());
+                return false;
+            }
         }
         if (!attr1.getRequired().equals(attr2.getRequired())) {
             log.error("Required flag is not the same for attribute: " + attr1.getName());
