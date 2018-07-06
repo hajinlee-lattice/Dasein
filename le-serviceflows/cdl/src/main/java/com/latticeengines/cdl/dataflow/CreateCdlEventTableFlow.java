@@ -67,20 +67,23 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         if (apsTable != null) {
             retainFields.addAll(apsTable.getFieldNames());
         }
-        retainFields.addAll(accountTable.getFieldNames());
-        if (inputTable.getFieldNames().contains(parameters.eventColumn))
-            retainFields.add(parameters.eventColumn);
-        potentialFieldsToRetain().forEach(attr -> {
-            if (inputTable.getFieldNames().contains(attr))
+        accountTable.getFieldNames().forEach(attr -> {
+            if (!retainFields.contains(attr)) {
+                retainFields.add(attr);
+            }
+        });
+        potentialFieldsToRetain(parameters).forEach(attr -> {
+            if (inputTable.getFieldNames().contains(attr) && !retainFields.contains(attr))
                 retainFields.add(attr);
         });
-        retainFields.removeAll(Arrays.asList(InterfaceName.CDLCreatedTime.name(),
-                InterfaceName.CDLUpdatedTime.name()));
+        retainFields.removeAll(Arrays.asList(InterfaceName.CDLCreatedTime.name(), InterfaceName.CDLUpdatedTime.name()));
         return retainFields;
     }
 
-    private Collection<String> potentialFieldsToRetain() {
+
+    private Collection<String> potentialFieldsToRetain(CreateCdlEventTableParameters parameters) {
         return Arrays.asList( //
+                parameters.eventColumn, //
                 InterfaceName.Train.name(), //
                 InterfaceName.__Revenue.name(), //
                 ScoreResultField.ModelId.displayName, //
