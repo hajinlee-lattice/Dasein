@@ -413,16 +413,23 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             '<h3 class="modal-title">Delete tenant</h3></div>' +
             '<div class="modal-body">' +
             'Are you sure you want to delete the tenant {{ tenantId }}?' +
+            '<div>Type "DELETE ME" into the the text area below to confirm you want to delete this tenant</div>' + 
+            '<div><input ng-model="confirm"></div>' +
             '</div>' +
             '<div class="modal-footer">' +
-            '<button class="btn btn-primary" ng-click="ok()">YES</button>' +
+            '<button class="btn btn-primary" ng-disabled="confirm !== deleteMe" ng-click="ok()">YES</button>' +
             '<button class="btn btn-default" ng-click="cancel()">NO</button>' +
             '</div>',
             controller: function($scope, $state, $uibModalInstance, tenantId, contractId, TenantService){
                 $scope.tenantId = tenantId;
                 $scope.contractId = contractId;
+                $scope.confirm = '';
+                $scope.deleteMe = 'DELETE ME';
 
                 $scope.ok = function() {
+                    if ($scope.confirm !== $scope.deleteMe) {
+                        return;
+                    }
                     TenantService.DeleteTenant(tenantId, contractId).then(function(result){
                         if (result.success) {
                             $uibModalInstance.dismiss();
