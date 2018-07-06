@@ -332,9 +332,14 @@ angular
                 if (!response.data) {
                     response.data = {};
                 }
+                var result = {
+                    data: {},
+                    errorMessage: response.data.errorMsg || 'unspecified error',
+                    success: false
+                };
 
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.resolve(errorMsg);
+                // var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(result);
             }
         );
 

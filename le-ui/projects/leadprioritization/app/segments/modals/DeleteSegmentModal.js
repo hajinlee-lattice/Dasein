@@ -54,8 +54,8 @@ angular.module('mainApp.segments.modals.DeleteSegmentModal', [
                     $state.go('home.segments', {}, { reload: true } );
                 }
             } else {
-                $scope.deleteSegmentErrorMessage = result.ResultErrors;
-                $("#deleteSegmentError").fadeIn();
+                $scope.deleteSegmentErrorMessage = result.errorMessage;
+                $("#modalContainer").modal('hide');
             }
         });
     }
