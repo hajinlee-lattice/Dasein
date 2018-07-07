@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,12 +50,9 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     @Inject
     private EntityProxy entityProxy;
 
-    private static List<Map<String, Object>> allProducts;
-
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
         List<Play> plays = getPlayList(start, playgroupIds);
-        allProducts = allProducts == null ? getAllProducts() : allProducts;
         return handlePagination(start, offset, maximum, plays);
     }
 
@@ -82,6 +80,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     private List<Map<String, Object>> handlePagination(long start, int offset, int maximum, List<Play> plays) {
+        List<Map<String, Object>> allProducts = getAllProducts();
         List<Map<String, Object>> result = new ArrayList<>();
         int skipped = 0;
         int rowNum = offset + 1;
@@ -95,13 +94,14 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                 if (result.size() >= maximum) {
                     break;
                 }
-                generatePlayObjForSync(result, rowNum++, play);
+                generatePlayObjForSync(result, rowNum++, play, allProducts);
             }
         }
         return result;
     }
 
-    private Map<String, Object> generatePlayObjForSync(List<Map<String, Object>> result, int rowNum, Play play) {
+    private Map<String, Object> generatePlayObjForSync(List<Map<String, Object>> result, int rowNum, Play play,
+            List<Map<String, Object>> allProducts) {
         Map<String, Object> playMap = new HashMap<>();
         playMap.put(PlaymakerConstants.ID, play.getPid());
         playMap.put(PlaymakerConstants.ID + PlaymakerConstants.V2, play.getName());
@@ -113,7 +113,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         playMap.put(PlaymakerConstants.PlayGroups, null);
         RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getCustomerSpace().toString(),
                 play.getRatingEngine().getId());
-        playMap.put(PlaymakerConstants.TargetProducts, getTargetProducts(ratingEngine));
+        playMap.put(PlaymakerConstants.TargetProducts, getTargetProducts(ratingEngine, allProducts));
         playMap.put(PlaymakerConstants.Workflow, getPlayWorkFlowType(ratingEngine));
 
         playMap.put(PlaymakerConstants.RowNum, rowNum);
@@ -153,7 +153,8 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     // TODO - remove following when we have products associated with plays
-    private List<Map<String, String>> getTargetProducts(RatingEngine ratingEngine) {
+    private List<Map<String, String>> getTargetProducts(RatingEngine ratingEngine,
+            List<Map<String, Object>> allProducts) {
         if (ratingEngine == null) {
             return null;
         }
@@ -166,7 +167,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<Map<String, String>> toReturn = new ArrayList<>();
 
         targetProductIds.forEach(productId -> {
-            Map<String, Object> foundProduct = findProductById(productId);
+            Map<String, Object> foundProduct = findProductById(productId, allProducts);
             if (foundProduct != null) {
                 HashMap<String, String> prod = new HashMap<>();
                 prod.put(PlaymakerConstants.DisplayName, (String) foundProduct.get(InterfaceName.ProductName.name()));
@@ -177,7 +178,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         return toReturn;
     }
 
-    private Map<String, Object> findProductById(String toFind) {
+    private Map<String, Object> findProductById(String toFind, List<Map<String, Object>> allProducts) {
         try {
             return allProducts.stream().filter(prod -> prod.get(InterfaceName.ProductId.name()).equals(toFind))
                     .findFirst().get();
@@ -190,7 +191,8 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         }
     }
 
-    private long secondsFromEpoch(Play play) {
+    @VisibleForTesting
+    long secondsFromEpoch(Play play) {
         try {
             return play.getUpdated().getTime() / 1000;
         } catch (Exception ex) {
@@ -202,7 +204,16 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     @Override
     public int getPlayCount(long start, List<Integer> playgroupIds) {
         List<Play> plays = getPlayList(start, playgroupIds);
-        return plays.size();
+        int count = 0;
+        if (CollectionUtils.isNotEmpty(plays)) {
+            count = new Long( //
+                    plays.stream() //
+                            .filter(p -> secondsFromEpoch(p) >= start) //
+                            .count()) //
+                                    .intValue();
+        }
+
+        return count;
     }
 
     @VisibleForTesting

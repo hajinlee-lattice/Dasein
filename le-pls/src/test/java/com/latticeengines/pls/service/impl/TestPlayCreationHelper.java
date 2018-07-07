@@ -144,6 +144,9 @@ public class TestPlayCreationHelper {
         playResourceDeploymentTestNG.createPlayOnly();
     }
 
+    public Play createPlayOnlyAndGet() {
+        return playResourceDeploymentTestNG.createPlayOnly();
+    }
     private Restriction createAccountRestriction() {
         Restriction b2 = //
                 createBucketRestriction(1, ComparisonType.EQUAL, //

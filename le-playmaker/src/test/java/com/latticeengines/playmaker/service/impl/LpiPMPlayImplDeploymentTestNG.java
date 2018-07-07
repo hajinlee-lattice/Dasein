@@ -2,6 +2,7 @@ package com.latticeengines.playmaker.service.impl;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
@@ -34,6 +36,9 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     private TestPlayCreationHelper testPlayCreationHelper;
 
     private long accountCount;
+
+    private Play firstPlayWithLaunch;
+    private Play secondPlayWithLaunch;
 
     List<String> accountFields = Arrays.asList( //
             "LatticeAccountId", //
@@ -71,21 +76,47 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountAfterCreatingPlayWithoutLaunch" })
     public void testGetPlayCountAfterCreatingPlayWithLaunch() throws Exception {
         testPlayCreationHelper.createPlayLaunch(true);
-
+        firstPlayWithLaunch = testPlayCreationHelper.getPlay();
         int playCount = lpiPMPlayImpl.getPlayCount(0, null);
         Assert.assertEquals(playCount, 1);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountAfterCreatingPlayWithLaunch" })
     public void testGetPlayCountAfterCreatingAnotherPlayWithoutLaunch() throws Exception {
-        testPlayCreationHelper.createPlayOnly();
+        Thread.sleep(TimeUnit.SECONDS.toMillis(4));
+        Play secondPlay = testPlayCreationHelper.createPlayOnlyAndGet();
 
         int playCount = lpiPMPlayImpl.getPlayCount(0, null);
         Assert.assertEquals(playCount, 1);
 
         testPlayCreationHelper.createPlayLaunch(true);
-
         playCount = lpiPMPlayImpl.getPlayCount(0, null);
         Assert.assertEquals(playCount, 2);
+        secondPlayWithLaunch = secondPlay;
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountAfterCreatingAnotherPlayWithoutLaunch" })
+    public void testGetPlayCountForFutureTimestamp() throws Exception {
+
+        System.out.println("firstPlayWithLaunch.getUpdated() = " + firstPlayWithLaunch.getUpdated());
+        System.out.println("lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch) = "
+                + lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch));
+
+        System.out.println("secondPlayWithLaunch.getUpdated() = " + secondPlayWithLaunch.getUpdated());
+        System.out.println("lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) = "
+                + lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch));
+
+        int playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch), null);
+        Assert.assertEquals(playCount, 2);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch) - 2, null);
+        Assert.assertEquals(playCount, 2);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch) + 2, null);
+        Assert.assertEquals(playCount, 1);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) - 2, null);
+        Assert.assertEquals(playCount, 1);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch), null);
+        Assert.assertEquals(playCount, 1);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) + 2, null);
+        Assert.assertEquals(playCount, 0);
     }
 }
