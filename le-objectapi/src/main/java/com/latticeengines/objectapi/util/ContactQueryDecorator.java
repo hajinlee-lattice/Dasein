@@ -26,7 +26,6 @@ public class ContactQueryDecorator extends QueryDecorator {
     public AttributeLookup[] getFreeTextSearchAttrs() {
         return new AttributeLookup[] { //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
-                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
         };
     }
