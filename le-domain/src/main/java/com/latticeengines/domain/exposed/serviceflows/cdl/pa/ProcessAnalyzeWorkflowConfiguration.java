@@ -178,6 +178,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder apsRollingPeriod(String apsRollingPeriod) {
             awsPythonDataConfiguration.setRollingPeriod(apsRollingPeriod);
             processStepConfiguration.setApsRollingPeriod(apsRollingPeriod);
+            processTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
+
             return this;
         }
 

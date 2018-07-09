@@ -62,6 +62,11 @@ public class UpdateTransactionWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder apsRollingPeriod(String apsRollingPeriod) {
+            awsPythonDataConfiguration.setRollingPeriod(apsRollingPeriod);
+            return this;
+        }
+
         public UpdateTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("updateTransactionWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

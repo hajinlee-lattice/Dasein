@@ -56,6 +56,13 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
+        public Builder apsRollingPeriod(String apsRollingPeriod) {
+            updateTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
+            rebuildTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
+
+            return this;
+        }
+
         public ProcessTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processTransactionWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
