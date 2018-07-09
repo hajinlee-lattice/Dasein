@@ -30,7 +30,9 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
             switch (cmp) {
                 case 'GTE_AND_LT':
                 case 'BETWEEN':
-                case 'BETWEEN_DATE': {
+                case 'BETWEEN_DATE':
+                case 'EQUAL':
+                case 'NOT_EQUAL': {
                     return valsArray[position];
                 }
                 case 'GREATER_THAN':
