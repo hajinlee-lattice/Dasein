@@ -165,8 +165,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 cacheQueue.add(cache);
                 log.info(String.format(
                         "Added Id=%s to %s DnBCache queue. DUNS=%s, DnBCode=%s, OutOfBusiness=%s, DunsInAM=%s",
-                        cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDnbCode(),
-                        context.getDuns(), context.isOutOfBusinessString(), context.isDunsInAMString()));
+                        cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDuns(),
+                        context.getDnbCode(), context.isOutOfBusinessString(), context.isDunsInAMString()));
             }
         }
         return cache;

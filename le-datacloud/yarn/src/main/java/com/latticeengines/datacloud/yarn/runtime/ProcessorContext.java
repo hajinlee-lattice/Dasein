@@ -296,6 +296,7 @@ public class ProcessorContext {
         this.dataCloudProcessor = dataCloudProcessor;
         setMatchInput(jobConfiguration);
         dataCloudVersion = jobConfiguration.getMatchInput().getDataCloudVersion();
+        log.info("Use DataCloudVersion=" + dataCloudVersion);
 
         receivedAt = new Date();
 
