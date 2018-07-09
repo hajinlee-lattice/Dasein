@@ -91,7 +91,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         Table schemaTable2 = SchemaRepository.instance().getSchema(BusinessEntity.Account);
         Table resolved1 = vdbDataFeedMetadataService.resolveMetadata(test1Table, schemaTable1);
         Table resolved2 = vdbDataFeedMetadataService.resolveMetadata(test2Table, schemaTable2);
-        Assert.assertNull(resolved2.getAttribute(InterfaceName.CompanyName));
+        Assert.assertNotNull(resolved2.getAttribute(InterfaceName.CompanyName));
         Table mergedTable = dataFeedTaskManagerService.mergeTable(resolved2, resolved1);
         Assert.assertNotNull(mergedTable.getAttribute(InterfaceName.CompanyName));
         Assert.assertNotNull(mergedTable.getAttribute(InterfaceName.CompanyName).getSourceAttrName());
