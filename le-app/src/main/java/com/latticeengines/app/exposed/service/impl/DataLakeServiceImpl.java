@@ -389,7 +389,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                 .eq(accountId) //
                 .build();
 
-        if (shouldAddLookupIdClause) {
+        if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
             Restriction sfdcRestriction = Restriction.builder() //
                     .let(BusinessEntity.Account, lookupIdColumn) //
                     .eq(accountId) //
