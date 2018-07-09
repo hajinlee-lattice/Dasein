@@ -430,7 +430,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         } catch (Exception e) {
             ex = e;
         }
-        Assert.assertNotNull(ex);
+        Assert.assertNull(ex);
     }
 
     private Set<String> getHeaderFields(URL sourceFileURL) {
