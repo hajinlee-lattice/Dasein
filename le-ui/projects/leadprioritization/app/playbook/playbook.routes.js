@@ -546,6 +546,13 @@ angular
                 pageTitle: 'Playbook',
                 play_name: ''
             },
+            onExit: function($transition$, PlaybookWizardStore){
+                var to = $transition$._targetState._definition.name;
+
+                if (!to.includes('home.playbook.create')){
+                    PlaybookWizardStore.clear();                
+                }
+            },
             resolve: {
                 WizardValidationStore: function(PlaybookWizardStore) {
                     return PlaybookWizardStore;
@@ -581,11 +588,6 @@ angular
             },
             views: {
                 'summary@': {
-                    controller: function($scope, PlaybookWizardStore) {
-                        $scope.$on('$destroy', function () {
-                            PlaybookWizardStore.clear();
-                        });
-                    },
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 'main@': {
