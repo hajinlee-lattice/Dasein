@@ -10,12 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -116,7 +118,13 @@ public class PLSComponentManager {
         if (products.contains(LatticeProduct.LPA3) || products.contains(LatticeProduct.PD)) {
             tenant.setUiVersion("3.0");
         }
-
+        try {
+            TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
+            tenant.setPurpose(info.properties.purpose);
+            LOGGER.info("registered tenant's purpose is " + tenant.getPurpose());
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Failed to retrieve tenants properties", e);
+        }
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails);
     }
 

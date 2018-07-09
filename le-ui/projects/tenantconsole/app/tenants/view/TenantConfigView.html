@@ -34,6 +34,15 @@
                     <input type="text" class="form-control" ng-model="tenantInfo.properties.displayName">
                     </input>
                 </div>
+                 <div class="col col-md-12 col-sm-12 col-xs-12">
+                 	<label class="control-label">
+                        Purpose
+                    </label>
+                     <select class="form-control"
+	                                ng-options="option for option in availablePurposes"
+	                                ng-model="tenantInfo.properties.purpose">
+	                 </select>
+                </div>
                 <div class="col col-md-12 col-sm-12 col-xs-12">
                     <label class="control-label">
                         Description

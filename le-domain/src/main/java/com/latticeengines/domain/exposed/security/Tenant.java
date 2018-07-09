@@ -72,6 +72,10 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Column(name = "EXTERNAL_USER_EMAIL_SENT")
     private Boolean emailSent = false;
 
+    @JsonProperty("Purpose")
+    @Column(name = "PURPOSE")
+    private String purpose;
+
     @JsonIgnore
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
     private List<TargetMarket> targetMarkets;
@@ -145,6 +149,14 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
 
     public void setEmailSent(Boolean emailSent) {
         this.emailSent = emailSent;
+    }
+
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
     }
 
     // TODO: Note - this is a terrible hack to avoid DP-2243

@@ -14,4 +14,5 @@ public class TenantProperties extends BaseProperties {
 
     public Long created;
     public Long lastModified;
+    public String purpose;
 }
