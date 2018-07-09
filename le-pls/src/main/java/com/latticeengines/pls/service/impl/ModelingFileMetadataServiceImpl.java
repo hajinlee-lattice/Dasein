@@ -157,15 +157,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
             String source, String feedType) {
         decodeFieldMapping(fieldMappingDocument);
-        regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity));
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask == null) {
             table = getTableFromParameters(sourceFile.getSchemaInterpretation());
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
         } else {
             table = dataFeedTask.getImportTemplate();
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), table);
         }
         resolveMetadata(sourceFile, fieldMappingDocument, table, true);
     }
@@ -255,7 +256,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return merged;
     }
 
-    private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity) {
+    private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity,
+                                      Table templateTable) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
                 || fieldMappingDocument.getFieldMappings().size() == 0) {
             return;
@@ -264,7 +266,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (BusinessEntity.Account.equals(entity)) {
             setCDLExternalSystems(fieldMappingDocument);
         }
-        Table standardTable = SchemaRepository.instance().getSchema(entity);
+        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity) : templateTable;
         Set<String> reservedName = standardTable.getAttributes().stream()
                 .map(Attribute::getName)
                 .collect(Collectors.toSet());
