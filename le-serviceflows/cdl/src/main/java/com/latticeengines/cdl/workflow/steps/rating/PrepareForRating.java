@@ -331,7 +331,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             StatsCube statsCube = statsContainer.getStatsCubes().get(BusinessEntity.Rating.name());
             if (statsCube != null) {
                 statsCube.getStatistics().forEach((attrName, attrStats) -> {
-                    if (attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX) && BucketType.Enum.equals(attrStats.getBuckets().getType())) {
+                    if (attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX) && (attrStats.getBuckets() != null) && BucketType.Enum.equals(attrStats.getBuckets().getType())) {
                         Map<String, Double> lifts = new HashMap<>();
                         attrStats.getBuckets().getBucketList().forEach(bucket -> {
                             if (StringUtils.isNotBlank(bucket.getLabel()) && bucket.getLift() != null) {

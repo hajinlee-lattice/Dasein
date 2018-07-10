@@ -107,8 +107,8 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
             List<String> inactiveEngines = config.getInactiveEngines();
             List<String> inactiveToRetain = new ArrayList<>();
             Set<String> existing = new HashSet<>(inactive.getFieldNames());
-            for (String inactiveEngine: inactiveEngines) {
-                for (RatingEngine.ScoreType scoreType: RatingEngine.ScoreType.values()) {
+            for (String inactiveEngine : inactiveEngines) {
+                for (RatingEngine.ScoreType scoreType : RatingEngine.ScoreType.values()) {
                     String scoreAttr = RatingEngine.toRatingAttrName(inactiveEngine, scoreType);
                     inactiveToRetain.add(scoreAttr);
                 }
@@ -188,6 +188,8 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
     private FieldList findFieldsToDiscard(Node joined) {
         List<String> toDiscard = joined.getFieldNames().stream() //
                 .filter(f -> f.contains(idCol) && !f.equals(idCol)) //
+                .filter(f -> !f.contains(RatingEngine.RATING_ENGINE_PREFIX) //
+                        || f.startsWith(RatingEngine.RATING_ENGINE_PREFIX)) //
                 .collect(Collectors.toList());
         return new FieldList(toDiscard);
     }
