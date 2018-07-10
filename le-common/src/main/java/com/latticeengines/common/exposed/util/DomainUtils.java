@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class DomainUtils {
 
-    private static Pattern pDomainNameOnly = Pattern.compile("((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}");
+    private static Pattern pDomainNameOnly = Pattern.compile("((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,}");
 
     public static String parseDomain(String url) {
         if (StringUtils.isEmpty(url)

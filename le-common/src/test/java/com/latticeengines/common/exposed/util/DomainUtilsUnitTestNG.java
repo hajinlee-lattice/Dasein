@@ -27,6 +27,8 @@ public class DomainUtilsUnitTestNG {
                 {"@", null},
                 {"greg.perrott@", null},
                 {"greg.perrott@domain", null},
+                { "www.abc.technology", "abc.technology" },
+                { "www.abc.com.technology", "abc.com.technology" },
         };
     }
 }
