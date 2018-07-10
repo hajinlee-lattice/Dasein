@@ -202,6 +202,8 @@ public class AMSeedManualFixTestNG
     }
 
     private Object[][] expectedDataValues = {
+            // Id, EmployeeTotal, Domain, DUNS, salesVolume, LE_IS_PRIMARY_DOMAIN, LE_PRIMARY_DUNS, City, IsPrimaryAccount,
+            // LE_EMPLOYEE_RANGE, LE_REVENUE_RANGE, DomainSource
             { 13, 76789, "google.com", "DUNS99", 12312312313L, "Y", "DUNS99", "Menlo Park", "N", ">10,000", ">10B",
                     "DnB" },
             { 6, 77773, "intuit.com", "DUNS23", 3555555880L, "N", "DUNS99", "Gilroy", "N", ">10,000", "1-5B", "DnB" },
@@ -214,7 +216,7 @@ public class AMSeedManualFixTestNG
                     "RTS" },
             { 12, 8000, "microsoft.com", "DUNS11", 88887203333L, "Y", "DUNS11", "Foster City", "N", "5001-10,000",
                     ">10B", "RTS" },
-            { 21, 2600, "sbi.com", "DUNS63", 1000000L, "Y", "DUNS63", "Tahoe", "Y", "2501-5000", "0-1M", "DnB" },
+            { 21, 2600, "sbi.com", "DUNS63", 1000000L, "Y", "DUNS63", "Tahoe", "Y", "2501-5000", "0-1M", "Manual" },
             { 18, 90872, "intel.com", "DUNS56", 18160000000L, "Y", "DUNS14", "Union City", "N", ">10,000", ">10B",
                     "Hg" },
             { 10, 10001, "lenevo.com", "DUNS67", 35970000000L, "Y", "DUNS91", "Burlingame", "N", ">10,000", ">10B",

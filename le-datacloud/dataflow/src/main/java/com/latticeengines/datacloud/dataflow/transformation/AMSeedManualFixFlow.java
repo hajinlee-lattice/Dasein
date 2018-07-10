@@ -29,6 +29,7 @@ public class AMSeedManualFixFlow extends AccountMasterBase<ManualSeedTransformer
     private final static String LE_HQ = "LE_HQ";
     private final static String INDICATOR = "INDICATOR";
     public final static String MANUAL_SEED_LE_HQ = "MANUAL_SEED_LE_HQ";
+    private final static String MANUAL_DOMAIN_SOURCE = "Manual";
 
     @Override
     public String getDataFlowBeanName() {
@@ -240,11 +241,19 @@ public class AMSeedManualFixFlow extends AccountMasterBase<ManualSeedTransformer
         String checkDomainDunsValue = String.format("%s != null && %s != null", config.getManualSeedDomain(),
                 config.getManualSeedDuns());
 
+        // check isPrimaryAccount = TRUE
+        String checkIsPrimaryAcc = String.format("\"" + PRIMARY_ACCOUNT_YES + "\"" + ".equals(%s)", config.getIsPrimaryAccount());
+
         amSeedFields.add(config.getIsPrimaryAccount());
         Node addedPrimaryAccount = isPrimaryAccount //
                 .apply(String.format("%s ? \"%s\" : \"%s\"", checkDomainDunsValue, PRIMARY_ACCOUNT_YES,
                         PRIMARY_ACCOUNT_NO), new FieldList(config.getManualSeedDomain(), config.getManualSeedDuns()),
                         new FieldMetadata(config.getIsPrimaryAccount(), String.class)) //
+                .apply(String.format("%s ? \"%s\" : %s", checkIsPrimaryAcc, MANUAL_DOMAIN_SOURCE, DOMAIN_SOURCE),
+                        new FieldList(config.getIsPrimaryAccount(), DOMAIN_SOURCE),
+                        new FieldMetadata("NewDomainSource", String.class))
+                .discard(new FieldList(DOMAIN_SOURCE)) //
+                .rename(new FieldList("NewDomainSource"), new FieldList(DOMAIN_SOURCE)) //
                 .retain(new FieldList(amSeedFields));
         return addedPrimaryAccount;
 
