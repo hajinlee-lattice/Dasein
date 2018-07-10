@@ -526,10 +526,14 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
             if (actions != null) {
                 actions.forEach(action -> {
-                    if (action.getType() == ActionType.ACTIVITY_METRICS_CHANGE) {
+                    if (action != null && action.getType() == ActionType.ACTIVITY_METRICS_CHANGE) {
                         ObjectNode on = mapper.createObjectNode();
                         on.put(ReportConstants.TIME, sdf.format(action.getCreated()));
-                        on.put(ReportConstants.ACTION, action.getActionConfiguration().serialize());
+                        if (action.getActionConfiguration() != null) {
+                            on.put(ReportConstants.ACTION, action.getActionConfiguration().serialize());
+                        } else {
+                            on.put(ReportConstants.ACTION, action.getDescription());
+                        }
                         on.put(ReportConstants.USER, action.getActionInitiator());
                         actionNode.add(on);
                     }
