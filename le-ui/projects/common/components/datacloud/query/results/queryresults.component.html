@@ -169,7 +169,7 @@
         </thead>
         <tbody ng-if="!vm.loading && vm.selectedBuckets.length != 0">
             <tr 
-                ng-repeat="account in vm.accounts">
+                ng-repeat="account in (vm.tmpAccounts = vm.accounts)">
                 <td>{{account.CompanyName}}</td>
                 <td>
                     <span ng-if="account.Website">{{account.Website}}</span>
