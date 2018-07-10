@@ -3,7 +3,9 @@ package com.latticeengines.proxy.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,35 +39,39 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
 
     @Override
     public List<Action> getActions(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/actions", //
-                shortenCustomerSpace(customerSpace));
-        List list = get("get actions", url, List.class);
+        String url = constructUrl("/customerspaces/{customerSpace}/actions", shortenCustomerSpace(customerSpace));
+        Map<String, Object> actionParameter = new HashMap<>();
+        actionParameter.put("pids", null);
+        actionParameter.put("nullOwnerId", false);
+        actionParameter.put("ownerId", null);
+        List list = post("get actions", url, actionParameter, List.class);
         return JsonUtils.convertList(list, Action.class);
     }
 
     @Override
     public List<Action> getActionsByOwnerId(String customerSpace, Long ownerId) {
-        String url;
+        String url = constructUrl("/customerspaces/{customerSpace}/actions", shortenCustomerSpace(customerSpace));
+        Map<String, Object> actionParameter = new HashMap<>();
+        actionParameter.put("pids", null);
         if (ownerId == null) {
-            url = constructUrl("/customerspaces/{customerSpace}/actions?nullOwnerId=1",
-                    shortenCustomerSpace(customerSpace));
+            actionParameter.put("nullOwnerId", true);
+            actionParameter.put("ownerId", null);
         } else {
-            url = constructUrl("/customerspaces/{customerSpace}/actions?ownerId={ownerId}",
-                    shortenCustomerSpace(customerSpace), ownerId);
+            actionParameter.put("nullOwnerId", false);
+            actionParameter.put("ownerId", ownerId);
         }
-
-        List list = get("get actions by owner", url, List.class);
+        List list = post("get actions by owner", url, actionParameter, List.class);
         return JsonUtils.convertList(list, Action.class);
     }
 
     @Override
     public List<Action> getActionsByPids(String customerSpace, List<Long> actionPids) {
-        String url = constructUrl("/customerspaces/{customerSpace}/actions", //
-                shortenCustomerSpace(customerSpace));
-        if (CollectionUtils.isNotEmpty(actionPids)) {
-            url += "?pids=" + StringUtils.join(actionPids, ",");
-        }
-        List list = get("get actions by pids", url, List.class);
+        String url = constructUrl("/customerspaces/{customerSpace}/actions", shortenCustomerSpace(customerSpace));
+        Map<String, Object> actionParameter = new HashMap<>();
+        actionParameter.put("pids", actionPids);
+        actionParameter.put("ownerId", null);
+        actionParameter.put("nullOwnerId", false);
+        List list = post("get actions by pids", url, actionParameter, List.class);
         return JsonUtils.convertList(list, Action.class);
     }
 

@@ -1,11 +1,11 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,12 +28,13 @@ public class ActionResource {
     @Inject
     private ActionService actionService;
 
-    @GetMapping(value = "")
+    @PostMapping(value = "")
     @ApiOperation(value = "Get all actions")
-    public List<Action> findAll(@PathVariable String customerSpace, //
-            @RequestParam(name = "pids", required = false) List<Long> pids, //
-            @RequestParam(name = "ownerId", required = false) Long ownerId,
-            @RequestParam(name = "nullOwnerId", required = false, defaultValue = "0") boolean nullOwnerId) {
+    @SuppressWarnings("unchecked")
+    public List<Action> findAll(@PathVariable String customerSpace, @RequestBody Map<String, Object> actionParameter) {
+        List<Long> pids = (List<Long>) actionParameter.get("pids");
+        Long ownerId = (Long) actionParameter.get("ownerId");
+        boolean nullOwnerId = (boolean) actionParameter.get("nullOwnerId");
         List<Action> actions;
         if (CollectionUtils.isNotEmpty(pids)) {
             actions = actionService.findByPidIn(pids);
