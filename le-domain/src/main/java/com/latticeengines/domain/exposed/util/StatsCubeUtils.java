@@ -600,12 +600,11 @@ public class StatsCubeUtils {
         case WEBSITE_PROFILE:
         case TECHNOLOGY_PROFILE:
             return techBktComparator();
-        case PRODUCT_SPEND:
-            return productBktComparator();
         case RATING:
             return ratingBktComparator(isRating);
+        case PRODUCT_SPEND:
         default:
-            return Comparator.comparing(Bucket::getCount).reversed();
+            return defaultBktComparator();
         }
     }
 
@@ -625,7 +624,7 @@ public class StatsCubeUtils {
         }
     }
 
-    private static Comparator<Bucket> productBktComparator() {
+    private static Comparator<Bucket> defaultBktComparator() {
         return (o1, o2) -> {
             if (isBooleanBkt(o1) || isBooleanBkt(o2)) {
                 return Comparator.comparing(Bucket::getId).compare(o1, o2);
@@ -698,10 +697,9 @@ public class StatsCubeUtils {
         case WEBSITE_PROFILE:
         case TECHNOLOGY_PROFILE:
             return techTopAttrComparator();
-        case PRODUCT_SPEND:
-            return productTopAttrComparator();
         case RATING:
             return ratingTopAttrComparator(techTopAttrComparator(), defaultTopAttrComparator());
+        case PRODUCT_SPEND:
         default:
             return defaultTopAttrComparator();
         }
@@ -711,14 +709,8 @@ public class StatsCubeUtils {
         return (o1, o2) -> {
             String attr1 = o1.getAttribute();
             String attr2 = o2.getAttribute();
-            Long count1 = o1.getCount();
-            Long count2 = o2.getCount();
-            if (count1 == null) {
-                count1 = 0L;
-            }
-            if (count2 == null) {
-                count2 = 0L;
-            }
+            Long count1 = (o1.getTopBkt() == null || o1.getTopBkt().getCount() == null) ? 0L : o1.getTopBkt().getCount();
+            Long count2 = (o2.getTopBkt() == null || o2.getTopBkt().getCount() == null) ? 0L : o2.getTopBkt().getCount();
             int countCmp = Long.compare(count2, count1);
             if (countCmp == 0) {
                 return StringUtils.compare(attr1, attr2);
