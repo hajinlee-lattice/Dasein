@@ -28,7 +28,7 @@ public class ActionResource {
     @Inject
     private ActionService actionService;
 
-    @PostMapping(value = "")
+    @PostMapping(value = "/find")
     @ApiOperation(value = "Get all actions")
     @SuppressWarnings("unchecked")
     public List<Action> findAll(@PathVariable String customerSpace, @RequestBody Map<String, Object> actionParameter) {

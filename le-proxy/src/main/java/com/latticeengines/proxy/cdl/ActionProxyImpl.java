@@ -39,7 +39,7 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
 
     @Override
     public List<Action> getActions(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/actions", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/actions/find", shortenCustomerSpace(customerSpace));
         Map<String, Object> actionParameter = new HashMap<>();
         actionParameter.put("pids", null);
         actionParameter.put("nullOwnerId", false);
@@ -50,7 +50,7 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
 
     @Override
     public List<Action> getActionsByOwnerId(String customerSpace, Long ownerId) {
-        String url = constructUrl("/customerspaces/{customerSpace}/actions", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/actions/find", shortenCustomerSpace(customerSpace));
         Map<String, Object> actionParameter = new HashMap<>();
         actionParameter.put("pids", null);
         if (ownerId == null) {
@@ -66,7 +66,7 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
 
     @Override
     public List<Action> getActionsByPids(String customerSpace, List<Long> actionPids) {
-        String url = constructUrl("/customerspaces/{customerSpace}/actions", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/actions/find", shortenCustomerSpace(customerSpace));
         Map<String, Object> actionParameter = new HashMap<>();
         actionParameter.put("pids", actionPids);
         actionParameter.put("ownerId", null);
