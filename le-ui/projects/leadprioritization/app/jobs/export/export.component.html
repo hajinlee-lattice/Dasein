@@ -19,7 +19,7 @@
                     <div class="le-cell le-col-start-3 le-col-span-3">Segment Name</div>
                     <div class="le-cell le-col-start-6 le-col-span-2">Export Type</div>
                     <div class="le-cell le-col-start-8 le-col-span-3">User</div>
-                    <div class="le-cell le-col-start-11 le-col-span-1">Status</div>
+                    <div class="le-cell le-col-start-11 le-col-span-2">Status</div>
                 </div>
                 
                 <div class="le-row export-row" ng-if="vm.jobs.length != 0"
@@ -38,13 +38,15 @@
                     </div>
                     <div class="le-cell le-col-start-6 le-col-span-2"> {{export.inputs['EXPORT_OBJECT_TYPE'] || '--'}} </div>
                     <div class="le-cell le-col-start-8 le-col-span-3">{{export.user}}</div>
-                    <div class="le-cell le-col-start-11 le-col-span-1">
+                    <div class="le-cell le-col-start-11 le-col-span-2">
                         <a ng-if="export.jobStatus == 'Completed' && !vm.isExpired(export)" href="javascript:void(0)" ng-click="vm.downloadSegmentExport(export.inputs['SEGMENT_EXPORT_ID'])" class="blue-text text-ellipsis">
                             <span>Download</span>
                         </a>
-                        <span ng-if="export.jobStatus != 'Completed' || vm.isExpired(export)" class="text-ellipsis">{{vm.getStatus(export)}}
+                        <span ng-if="export.jobStatus != 'Completed' || vm.isExpired(export)"  >
+                            <span class="text-ellipsis">{{vm.getStatus(export)}}</span>
                             <i class="fa fa-spinner fa-spin spinner-icon" aria-hidden="true" ng-if="export.jobStatus != 'Failed' && !vm.isExpired(export)"></i>
                         </span>
+                        
 
                     </div>
 
