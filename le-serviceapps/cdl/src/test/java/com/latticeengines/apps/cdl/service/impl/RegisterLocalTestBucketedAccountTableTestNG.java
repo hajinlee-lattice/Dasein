@@ -27,6 +27,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -93,6 +94,11 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends CDLFunctionalTe
         container.setName(NamingUtils.timestamp("Stats"));
         container.setVersion(collection.getVersion());
         dataCollectionService.addStats(customerSpace, collection.getName(), container);
+
+        DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, collection.getVersion());
+        status.setAccountCount(1L);
+        status.setDataCloudBuildNumber("2.0.12.0");
+        dataCollectionService.saveOrUpdateStatus(customerSpace, status, collection.getVersion());
     }
 
     private void registerTables() {
