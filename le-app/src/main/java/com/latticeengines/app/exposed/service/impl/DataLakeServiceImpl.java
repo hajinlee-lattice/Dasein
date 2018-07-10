@@ -1,7 +1,5 @@
 package com.latticeengines.app.exposed.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,7 +39,6 @@ import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -498,15 +495,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             log.info("Getting stats cubes for " + tenantId);
             Map<String, StatsCube> cubes = _dataLakeService.getStatsCubesFromCache(tenantId);
             if (MapUtils.isNotEmpty(cubes)) {
-                Map<String, StatsCube> mapCopy = new HashMap<>();
-                cubes.forEach((key, cube) -> {
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    KryoUtils.write(bos, cube);
-                    ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-                    StatsCube cubeCopy = KryoUtils.read(bis, StatsCube.class);
-                    mapCopy.put(key, cubeCopy);
-                });
-                concurrentStatsCubeMap.putAll(mapCopy);
+                concurrentStatsCubeMap.putAll(cubes);
             }
             log.info("Finished getting stats cubes for " + tenantId);
         };
