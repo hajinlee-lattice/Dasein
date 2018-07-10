@@ -635,7 +635,7 @@ public class StatsCubeUtils {
     }
 
     private static boolean isBooleanBkt(Bucket bkt) {
-        return bkt != null && (bkt.getLabel().equalsIgnoreCase("Yes") || bkt.getLabel().equalsIgnoreCase("No"));
+        return bkt != null && ("yes".equalsIgnoreCase(bkt.getLabel()) || "no".equalsIgnoreCase(bkt.getLabel()));
     }
 
     public static Flux<ColumnMetadata> sortByCategory(Flux<ColumnMetadata> cmFlux, StatsCube statsCube) {
