@@ -69,7 +69,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void getCrud() {
-        playCreationHelper.getCrud();
+        playCreationHelper.testCrud();
         playName = playCreationHelper.getPlayName();
     }
 

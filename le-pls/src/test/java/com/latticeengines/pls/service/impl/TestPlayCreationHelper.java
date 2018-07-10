@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -104,9 +105,10 @@ public class TestPlayCreationHelper {
         log.info("Tenant = " + tenant.getId());
         rulesBasedRatingEngine = playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
         crossSellRatingEngine = playResourceDeploymentTestNG.createCrossSellRatingEngineWithPublishedRating(segment);
+    }
 
-        cdlTestDataService.mockRatingTable(tenant.getId(),
-                Arrays.asList(rulesBasedRatingEngine.getId(), crossSellRatingEngine.getId()), null);
+    public void publishRatingEngines(List<String> ratingIdsToPublish) {
+        cdlTestDataService.mockRatingTable(tenant.getId(), ratingIdsToPublish, null);
     }
 
     public void createPlay() {
@@ -147,6 +149,7 @@ public class TestPlayCreationHelper {
     public Play createPlayOnlyAndGet() {
         return playResourceDeploymentTestNG.createPlayOnly();
     }
+
     private Restriction createAccountRestriction() {
         Restriction b2 = //
                 createBucketRestriction(1, ComparisonType.EQUAL, //

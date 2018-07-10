@@ -114,7 +114,7 @@ public class TestPlayCreationHelper {
 
     private String destinationOrgId;
 
-    public void setupTenantAndPopuldateData() {
+    public void setupTenantAndPopulateData() {
         destinationOrgId = "O_" + System.currentTimeMillis();
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
         tenantIdentifier = tenant.getId();
@@ -150,7 +150,7 @@ public class TestPlayCreationHelper {
     }
 
     public void setupTenantAndCreatePlay() {
-        setupTenantAndPopuldateData();
+        setupTenantAndPopulateData();
 
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();
@@ -161,7 +161,7 @@ public class TestPlayCreationHelper {
 
         cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
 
-        getCrud();
+        testCrud();
         createPlayLaunch();
 
         Assert.assertNotNull(play);
@@ -255,7 +255,7 @@ public class TestPlayCreationHelper {
         return playLaunch;
     }
 
-    public void getCrud() {
+    public void testCrud() {
         List<Play> playList = playProxy.getPlays(tenant.getId(), null, null);
         int existingPlays = playList == null ? 0 : playList.size();
         Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());

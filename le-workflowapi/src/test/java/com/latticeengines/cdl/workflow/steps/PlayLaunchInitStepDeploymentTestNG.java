@@ -209,7 +209,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.Launched);
         Assert.assertTrue(updatedPlayLaunch.getAccountsLaunched() > 0);
         Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
-
     }
 
     @Test(groups = "deployment")
@@ -236,7 +235,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.Launched);
         Assert.assertTrue(updatedPlayLaunch.getAccountsLaunched() > 0);
         Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
-
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testRuleBasedPlayLaunch" })

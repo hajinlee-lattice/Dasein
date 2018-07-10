@@ -203,8 +203,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), re);
         Assert.assertNotNull(createdRatingEngine.getPublishedIteration());
 
-        // cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(),
-        // createdRatingEngine.getId(), null);
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
         ruleBasedRatingEngine.setId(createdRatingEngine.getId());
 
         List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ruleBasedRatingEngine.getId());
