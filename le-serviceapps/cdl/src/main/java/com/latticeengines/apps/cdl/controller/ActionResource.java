@@ -33,7 +33,8 @@ public class ActionResource {
     @SuppressWarnings("unchecked")
     public List<Action> findAll(@PathVariable String customerSpace, @RequestBody Map<String, Object> actionParameter) {
         List<Long> pids = (List<Long>) actionParameter.get("pids");
-        Long ownerId = (Long) actionParameter.get("ownerId");
+        Long ownerId = actionParameter.get("ownerId") != null ?
+                Long.valueOf(actionParameter.get("ownerId").toString()) : null;
         boolean nullOwnerId = (boolean) actionParameter.get("nullOwnerId");
         List<Action> actions;
         if (CollectionUtils.isNotEmpty(pids)) {
