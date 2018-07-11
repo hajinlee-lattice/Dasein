@@ -1,5 +1,7 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +22,7 @@ import java.util.stream.IntStream;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import com.latticeengines.common.exposed.util.KryoUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -494,9 +497,15 @@ public class DataLakeServiceImpl implements DataLakeService {
         Runnable statsCubeRunnable = () -> {
             log.info("Getting stats cubes for " + tenantId);
             Map<String, StatsCube> cubes = _dataLakeService.getStatsCubesFromCache(tenantId);
-            if (MapUtils.isNotEmpty(cubes)) {
-                concurrentStatsCubeMap.putAll(cubes);
-            }
+            Map<String, StatsCube> mapCopy = new HashMap<>();
+            cubes.forEach((key, cube) -> {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                KryoUtils.write(bos, cube);
+                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+                StatsCube cubeCopy = KryoUtils.read(bis, StatsCube.class);
+                mapCopy.put(key, cubeCopy);
+            });
+            concurrentStatsCubeMap.putAll(mapCopy);
             log.info("Finished getting stats cubes for " + tenantId);
         };
         runnables.add(statsCubeRunnable);
