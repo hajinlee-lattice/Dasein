@@ -176,7 +176,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     private void writeMatchInput(DataCloudJobConfiguration jobConfiguration) {
         String avroPath = jobConfiguration.getAvroPath();
-        String matchInputFile = FilenameUtils.getFullPath(avroPath) + "MatchInput.json";
+        String matchInputFile = FilenameUtils.getFullPath(avroPath)
+                + "MatchInput_" + jobConfiguration.getRootOperationUid() + ".json";
         try {
             MatchInput matchInput = jobConfiguration.getMatchInput();
             if (matchInput.getInputBuffer() != null) {
