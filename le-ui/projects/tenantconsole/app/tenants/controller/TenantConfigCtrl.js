@@ -210,7 +210,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             properties: {
                 displayName: $scope.tenantId,
                 description: "A Lattice tenant under the contract " + $scope.contractId,
-                purpose: "PRODUCTION"
+                status: "PRODUCTION"
             }
         };
 
@@ -570,8 +570,8 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                         case "Template_Path":
                             $scope.availableTemplatePath = node.Options;
                             break;
-                        case "Purpose":
-                        	$scope.availablePurposes = node.Options;
+                        case "Status":
+                        	$scope.availableStatuses = node.Options;
                         	break;
                     }
                 });

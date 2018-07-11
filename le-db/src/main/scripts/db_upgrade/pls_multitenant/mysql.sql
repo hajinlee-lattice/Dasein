@@ -92,6 +92,15 @@ CREATE PROCEDURE `UpdateWorkflowJob`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdatePLSTables`()
+  BEGIN
+    ALTER TABLE `PLS_MultiTenant`.`TENANT` ADD COLUMN `TYPE` varchar(255) DEFAULT NULL;
+    ALTER TABLE `PLS_MultiTenant`.`TENANT` ADD COLUMN `STATUS` varchar(255) DEFAULT NULL;
+  END;
+//
+DELIMITER ;
+
 CALL `UpdateSchema`();
 CALL `UpdateWorkflowJobUpdate`();
 CALL `UpdateWorkflowJob`();
+CALL `UpdatePLSTables`();

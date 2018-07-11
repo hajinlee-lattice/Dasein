@@ -11,6 +11,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -72,9 +74,14 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Column(name = "EXTERNAL_USER_EMAIL_SENT")
     private Boolean emailSent = false;
 
-    @JsonProperty("Purpose")
-    @Column(name = "PURPOSE")
-    private String purpose;
+    @JsonProperty("Status")
+    @Column(name = "STATUS")
+    private String status;
+
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("Type")
+    @Column(name = "TYPE")
+    private TenantType type;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
@@ -151,12 +158,20 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
         this.emailSent = emailSent;
     }
 
-    public String getPurpose() {
-        return purpose;
+    public String getStatus() {
+        return status;
     }
 
-    public void setPurpose(String purpose) {
-        this.purpose = purpose;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public TenantType getType() {
+        return type;
+    }
+
+    public void setType(TenantType type) {
+        this.type = type;
     }
 
     // TODO: Note - this is a terrible hack to avoid DP-2243
