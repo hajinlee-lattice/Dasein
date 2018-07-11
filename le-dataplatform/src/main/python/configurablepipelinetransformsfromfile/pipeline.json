@@ -1,5 +1,19 @@
 {
   "columnTransformFiles": {
+    "HighNumberUniqueValuesRemovalStep": {
+      "KeyWhenSortingByAscending": 7,
+      "Name": "highnumberuniquevaluesremovalstep",
+      "MainClassName": "HighNumberUniqueValuesRemovalStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "maxNumberUniqueValues": 200,
+        "categoricalColumns": "categoricalColumns",
+        "params": "params",
+        "profile": "dataprofile"
+      },
+      "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
+    },
     "CategoricalGroupingStep": {
       "KeyWhenSortingByAscending": 6,
       "Name": "categoricalgroupingstep",
@@ -22,20 +36,6 @@
         "enabled": "false"
       },
       "ColumnTransformFilePath": "categoricalgroupingstep.py"
-    },
-    "HighNumberUniqueValuesRemovalStep": {
-      "KeyWhenSortingByAscending": 7,
-      "Name": "highnumberuniquevaluesremovalstep",
-      "MainClassName": "HighNumberUniqueValuesRemovalStep",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "maxNumberUniqueValues": 200,
-        "categoricalColumns": "categoricalColumns",
-        "params": "params",
-        "profile": "dataprofile"
-      },
-      "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
     },
     "PivotStep": {
       "KeyWhenSortingByAscending": 8,
