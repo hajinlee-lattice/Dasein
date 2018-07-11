@@ -48,7 +48,7 @@ public class DedupeHelperImpl implements DedupeHelper {
             } else {
                 dedupeId = outputRecord.getMatchedDomain() != null ? outputRecord.getMatchedDomain() : domain;
             }
-            log.debug("Matched, domain=" + domain + " dedupeId=" + dedupeId);
+            log.info("Matched, domain=" + domain + " dedupeId=" + dedupeId);
             addDedupeValues(allValues, dedupeId, isRemoved);
             return;
         }
@@ -57,12 +57,13 @@ public class DedupeHelperImpl implements DedupeHelper {
         boolean isPublicDomain = !processorContext.getOriginalInput().isPublicDomainAsNormalDomain()
                 && publicDomainService.isPublicDomain(domain);
         int numFeatureValue = outputRecord.getNumFeatureValue();
+        numFeatureValue = 0; // Disable it now
         NameLocation nameLocation = outputRecord.getPreMatchNameLocation();
         String name = nameLocation != null ? nameLocation.getName() : null;
         String country = nameLocation != null ? nameLocation.getCountry() : null;
         boolean hasNoNameLocation = StringUtils.isEmpty(name) && StringUtils.isEmpty(country);
 
-        log.debug("No matched, domain=" + domain + " name=" + name + " country=" + country + ", has nameloation="
+        log.info("No matched, domain=" + domain + " name=" + name + " country=" + country + ", has nameloation="
                 + hasNoNameLocation + " is public=" + isPublicDomain + " Feature num=" + numFeatureValue
                 + " name location=" + nameLocation);
 

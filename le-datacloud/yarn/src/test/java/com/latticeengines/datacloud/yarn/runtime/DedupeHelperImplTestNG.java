@@ -66,14 +66,12 @@ public class DedupeHelperImplTestNG {
 
                 new Object[] { true, false, null, null, null, null, "lattice.com", null, null, 1 }, //
 
-                new Object[] { false, true, null, null, null, "lattice", null, "USA", "Nw79Her_B75t4qmy5lXDGQ", 0 }, //
-                new Object[] { false, true, null, null, null, "lattice", null, null, "Nw79Her_B75t4qmy5lXDGQ", 0 }, //
-                new Object[] { false, true, null, null, null, null, "lattice.com", "USA", "6Lz7PZ3j8botd6YLHFYggA", 0 }, //
-                new Object[] { false, true, null, null, null, null, "lattice.com", null, "O1PHfxXxmvFFBwBNaGYdXQ", 0 }, //
-                new Object[] { false, true, null, null, null, "lattice", "lattice.com", "USA",
-                        "6Lz7PZ3j8botd6YLHFYggA", 0 }, //
-                new Object[] { false, true, null, null, null, "lattice", "lattice.com", null, "O1PHfxXxmvFFBwBNaGYdXQ",
-                        0 }, //
+                new Object[] { false, true, null, null, null, "lattice", null, "USA", null, 0 }, //
+                new Object[] { false, true, null, null, null, "lattice", null, null, null, 0 }, //
+                new Object[] { false, true, null, null, null, null, "lattice.com", "USA", null, 0 }, //
+                new Object[] { false, true, null, null, null, null, "lattice.com", null, null, 0 }, //
+                new Object[] { false, true, null, null, null, "lattice", "lattice.com", "USA", null, 0 }, //
+                new Object[] { false, true, null, null, null, "lattice", "lattice.com", null, null, 0 }, //
                 new Object[] { false, true, null, null, null, null, null, null, null, 1 }, //
                 new Object[] { false, true, null, null, null, " none ", null, null, null, 1 }, //
                 new Object[] { false, true, null, null, null, " no ", null, null, null, 1 }, //
@@ -94,10 +92,10 @@ public class DedupeHelperImplTestNG {
                 new Object[] { true, true, null, null, null, " noname ", "lattice.com", "USA", null, 1 }, //
                 new Object[] { true, true, null, null, null, " nocompany ", "lattice.com", "USA", null, 1 }, //
 
-                new Object[] { false, true, null, null, null, " nocompany ", "lattice.com", "USA", "6Lz7PZ3j8botd6YLHFYggA", 0 }, //
+                new Object[] { false, true, null, null, null, " nocompany ", "lattice.com", "USA", null, 0 }, //
 
-                new Object[] { true, true, null, null, null, "lattice", null, "USA", "Nw79Her_B75t4qmy5lXDGQ", 0 }, //
-                new Object[] { true, true, null, null, null, "lattice", null, null, "Nw79Her_B75t4qmy5lXDGQ", 0 }, //
+                new Object[] { true, true, null, null, null, "lattice", null, "USA", null, 0 }, //
+                new Object[] { true, true, null, null, null, "lattice", null, null, null, 0 }, //
 
         };
     }
