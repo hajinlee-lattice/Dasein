@@ -119,15 +119,15 @@ public abstract class BaseScoring extends CommonBase {
     }
 
     protected List<ModelDetail> getPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,
-            boolean considerAllStatus, CustomerSpace customerSpace) throws ParseException {
+            boolean considerAllStatus, boolean considerDeleted, CustomerSpace customerSpace) throws ParseException {
         start = validateStartValue(start);
-        return fetchPaginatedModels(request, start, offset, maximum, considerAllStatus, customerSpace);
+        return fetchPaginatedModels(request, start, offset, maximum, considerAllStatus, considerDeleted, customerSpace);
     }
 
     protected int getModelCount(HttpServletRequest request, String start, boolean considerAllStatus,
-            CustomerSpace customerSpace) throws ParseException {
+            boolean considerDeleted, CustomerSpace customerSpace) throws ParseException {
         start = validateStartValue(start);
-        return fetchModelCount(request, start, considerAllStatus, customerSpace);
+        return fetchModelCount(request, start, considerAllStatus, considerDeleted, customerSpace);
     }
 
     protected ScoreResponse scorePercentileRecord(HttpServletRequest request, ScoreRequest scoreRequest,
@@ -263,16 +263,16 @@ public abstract class BaseScoring extends CommonBase {
     }
 
     private List<ModelDetail> fetchPaginatedModels(HttpServletRequest request, String start, int offset, int maximum,
-            boolean considerAllStatus, CustomerSpace customerSpace) {
+            boolean considerAllStatus, boolean considerDeleted, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            return modelRetriever.getPaginatedModels(customerSpace, start, offset, maximum, considerAllStatus);
+            return modelRetriever.getPaginatedModels(customerSpace, start, offset, maximum, considerAllStatus, considerDeleted);
         }
     }
 
     private int fetchModelCount(HttpServletRequest request, String start, boolean considerAllStatus,
-            CustomerSpace customerSpace) {
+            boolean considerDeleted, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            return modelRetriever.getModelsCount(customerSpace, start, considerAllStatus);
+            return modelRetriever.getModelsCount(customerSpace, start, considerAllStatus, considerDeleted);
         }
     }
 

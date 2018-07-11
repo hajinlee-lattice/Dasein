@@ -80,8 +80,11 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     private List<Map<String, Object>> handlePagination(long start, int offset, int maximum, List<Play> plays) {
-        List<Map<String, Object>> allProducts = getAllProducts();
+        // init empty array for all products, we'll try to populate it only when
+        // we need to (means some cross-sell model present)
+        List<Map<String, Object>> allProducts = new ArrayList<>();
         List<Map<String, Object>> result = new ArrayList<>();
+
         int skipped = 0;
         int rowNum = offset + 1;
 
@@ -166,15 +169,26 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                 .getAdvancedModelingConfig()).getTargetProducts();
         List<Map<String, String>> toReturn = new ArrayList<>();
 
-        targetProductIds.forEach(productId -> {
-            Map<String, Object> foundProduct = findProductById(productId, allProducts);
-            if (foundProduct != null) {
-                HashMap<String, String> prod = new HashMap<>();
-                prod.put(PlaymakerConstants.DisplayName, (String) foundProduct.get(InterfaceName.ProductName.name()));
-                prod.put(PlaymakerConstants.ExternalName, (String) foundProduct.get(InterfaceName.ProductId.name()));
-                toReturn.add(prod);
+        if (CollectionUtils.isNotEmpty(targetProductIds)) {
+            if (CollectionUtils.isEmpty(allProducts)) {
+                // initialize allProducts only once and only when it is needed
+                // (CROSS_SELL model)
+                log.info("Loading info about all products");
+                allProducts.addAll(getAllProducts());
             }
-        });
+
+            targetProductIds.forEach(productId -> {
+                Map<String, Object> foundProduct = findProductById(productId, allProducts);
+                if (foundProduct != null) {
+                    HashMap<String, String> prod = new HashMap<>();
+                    prod.put(PlaymakerConstants.DisplayName,
+                            (String) foundProduct.get(InterfaceName.ProductName.name()));
+                    prod.put(PlaymakerConstants.ExternalName,
+                            (String) foundProduct.get(InterfaceName.ProductId.name()));
+                    toReturn.add(prod);
+                }
+            });
+        }
         return toReturn;
     }
 

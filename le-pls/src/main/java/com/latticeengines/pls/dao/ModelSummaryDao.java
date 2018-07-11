@@ -22,11 +22,12 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     List<ModelSummary> findAllActive();
 
-    int findTotalCount(long lastUpdateTime, boolean considerAllStatus);
+    int findTotalCount(long lastUpdateTime, boolean considerAllStatus, boolean considerDeleted);
+
+    List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum,
+            boolean considerDeleted);
 
     ModelSummary findValidByModelId(String modelId);
-
-    List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum);
 
     ModelSummary getByModelNameInTenant(String modelName, Tenant tenant);
 

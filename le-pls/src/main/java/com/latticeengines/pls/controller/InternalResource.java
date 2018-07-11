@@ -410,6 +410,7 @@ public class InternalResource extends InternalResourceBase {
     public int getModelSummariesCount(
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
             @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus,
+            @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted,
             @PathVariable("tenantId") String tenantId, HttpServletRequest request) throws ParseException {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
@@ -418,7 +419,7 @@ public class InternalResource extends InternalResourceBase {
             log.info("getModelSummariesCount - start = " + start + ", tenant = " + tenantId);
             lastUpdateTime = DateTimeUtils.convertToLongUTCISO8601(start);
         }
-        return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus);
+        return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus, considerDeleted);
 
     }
 
@@ -431,6 +432,7 @@ public class InternalResource extends InternalResourceBase {
             @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus,
             @ApiParam(value = "Offset", required = false) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum entries in page", required = true) @RequestParam(value = "maximum", required = true) int maximum,
+            @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted,
             @PathVariable("tenantId") String tenantId, HttpServletRequest request) throws ParseException {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
@@ -439,8 +441,8 @@ public class InternalResource extends InternalResourceBase {
             log.info("getPaginatedModelSummaries - start = " + start + ", tenant = " + tenantId);
             lastUpdateTime = DateTimeUtils.convertToLongUTCISO8601(start);
         }
-        return postProcessModelSummaryList(
-                modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum), false);
+        return postProcessModelSummaryList(modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus,
+                offset, maximum, considerDeleted), false);
 
     }
 
@@ -848,15 +850,15 @@ public class InternalResource extends InternalResourceBase {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String url = appPublicUrl + "/lp/tenant/" + tenantName + "/export/" + exportID;
                     switch (result) {
-                        case "COMPLETED":
-                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType);
-                            break;
-                        case "FAILED":
-                            emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportType);
-                            break;
-                        case "STARTED":
-                            emailService.sendPlsExportSegmentRunningEmail(user, exportID);
-                            break;
+                    case "COMPLETED":
+                        emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType);
+                        break;
+                    case "FAILED":
+                        emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportType);
+                        break;
+                    case "STARTED":
+                        emailService.sendPlsExportSegmentRunningEmail(user, exportID);
+                        break;
                     }
                 }
             }

@@ -141,10 +141,12 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus) {
+    public int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus,
+            boolean considerDeleted) {
         try {
             String url = constructUrl("pls/internal/modelsummarydetails/count", customerSpace.toString());
-            url += "?" + "considerAllStatus" + "=" + considerAllStatus;
+            url += "?" + "considerAllStatus=" + considerAllStatus;
+            url += "&" + "considerDeleted=" + considerDeleted;
             if (!StringUtils.isEmpty(start)) {
                 url += "&" + "start" + "=" + start;
             }
@@ -160,11 +162,13 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     public List<ModelSummary> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
-            boolean considerAllStatus) {
+            boolean considerAllStatus, boolean considerDeleted) {
         try {
             String url = constructUrl("pls/internal/modelsummarydetails/paginate", customerSpace.toString());
             url += "?" + "considerAllStatus" + "=" + considerAllStatus + "&" + "offset" + "=" + offset + "&" + "maximum"
                     + "=" + maximum;
+            url += "&" + "considerDeleted=" + considerDeleted;
+
             if (!StringUtils.isEmpty(start)) {
                 url += "&" + "start" + "=" + start;
             }

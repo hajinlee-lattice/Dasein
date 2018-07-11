@@ -671,8 +671,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public int getModelsCount(CustomerSpace customerSpace, //
             String start, //
-            boolean considerAllStatus) {
-        return internalResourceRestApiProxy.getModelsCount(customerSpace, start, considerAllStatus);
+            boolean considerAllStatus, boolean considerDeleted) {
+        return internalResourceRestApiProxy.getModelsCount(customerSpace, start, considerAllStatus, considerDeleted);
     }
 
     @Override
@@ -680,11 +680,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
             String start, //
             int offset, //
             int maximum, //
-            boolean considerAllStatus) {
+            boolean considerAllStatus, //
+            boolean considerDeleted) {
         List<ModelSummary> modelSummaries = internalResourceRestApiProxy.getPaginatedModels(customerSpace, start,
-                offset, maximum, considerAllStatus);
+                offset, maximum, considerAllStatus, considerDeleted);
         List<ModelDetail> models = new ArrayList<>();
-        convertModelSummaryToModelDetail(models, modelSummaries, customerSpace);
+        convertModelSummaryToModelDetail(models, modelSummaries, considerDeleted, customerSpace);
         return models;
     }
 
@@ -709,16 +710,23 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     private void convertModelSummaryToModelDetail(List<ModelDetail> models, //
             List<ModelSummary> modelSummaries, //
-            CustomerSpace customerSpace) {
+            boolean considerDeleted, CustomerSpace customerSpace) {
         if (modelSummaries != null) {
             for (ModelSummary modelSummary : modelSummaries) {
                 ModelDetail modelDetail = null;
 
                 if (modelSummary.getStatus() == ModelSummaryStatus.DELETED) {
-                    log.info(String.format(
-                            "Creating model detail with known information for model summary: %s with status: %s.",
-                            modelSummary.getId(), modelSummary.getStatus().name()));
-                    modelDetail = createDefaultModelDetail(modelSummary);
+                    // PLS-9034 and PLS-9499
+                    if (considerDeleted) {
+                        log.info(String.format(
+                                "Creating model detail with known information for model summary: %s with status: %s.",
+                                modelSummary.getId(), modelSummary.getStatus().name()));
+                        modelDetail = createDefaultModelDetail(modelSummary);
+                    } else {
+                        log.info(String.format("Ignore model summary: %s with status: %s.", modelSummary.getId(),
+                                modelSummary.getStatus().name()));
+                        continue;
+                    }
                 } else {
                     try {
                         modelDetail = modelDetailsCache.getCache()
@@ -745,6 +753,10 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
         Model model = new Model(modelSummary.getId(), modelSummary.getDisplayName(), modelType);
         modelDetail.setModel(model);
+        Fields emptyFields = new Fields();
+        emptyFields.setModelId(modelSummary.getId());
+        emptyFields.setFields(new ArrayList<>());
+        modelDetail.setFields(emptyFields);
         return modelDetail;
     }
 

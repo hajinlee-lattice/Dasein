@@ -1,5 +1,6 @@
 package com.latticeengines.pls.dao.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Table;
@@ -129,17 +130,27 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     }
 
     @Override
-    public int findTotalCount(long lastUpdateTime, boolean considerAllStatus) {
+    public int findTotalCount(long lastUpdateTime, boolean considerAllStatus, boolean considerDeleted) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
         String basicQueryStr = "select count(*) from %s where lastUpdateTime >= :lastUpdateTime ";
-        if (!considerAllStatus) {
+        if (considerAllStatus) {
+            if (!considerDeleted) {
+                basicQueryStr += " and status IN (:statusIds) ";
+            }
+        } else {
             basicQueryStr += " and status = :statusId ";
         }
         String queryStr = String.format(basicQueryStr, entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("lastUpdateTime", lastUpdateTime);
-        if (!considerAllStatus) {
+        if (considerAllStatus) {
+            if (!considerDeleted) {
+                List<ModelSummaryStatus> statusIds = Arrays.asList(ModelSummaryStatus.ACTIVE,
+                        ModelSummaryStatus.INACTIVE);
+                query.setParameterList("statusIds", statusIds);
+            }
+        } else {
             query.setInteger("statusId", ModelSummaryStatus.ACTIVE.getStatusId());
         }
         return ((Long) query.uniqueResult()).intValue();
@@ -148,11 +159,15 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     @SuppressWarnings("unchecked")
     @Override
     public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
-            int maximum) {
+            int maximum, boolean considerDeleted) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
         String basicQueryStr = "from %s where lastUpdateTime >= :lastUpdateTime ";
-        if (!considerAllStatus) {
+        if (considerAllStatus) {
+            if (!considerDeleted) {
+                basicQueryStr += " and status IN (:statusIds) ";
+            }
+        } else {
             basicQueryStr += " and status = :statusId ";
         }
 
@@ -161,7 +176,13 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         String queryStr = String.format(basicQueryStr, entityClz.getSimpleName());
         Query query = session.createQuery(queryStr).setFirstResult(offset).setMaxResults(maximum);
         query.setLong("lastUpdateTime", lastUpdateTime);
-        if (!considerAllStatus) {
+        if (considerAllStatus) {
+            if (!considerDeleted) {
+                List<ModelSummaryStatus> statusIds = Arrays.asList(ModelSummaryStatus.ACTIVE,
+                        ModelSummaryStatus.INACTIVE);
+                query.setParameterList("statusIds", statusIds);
+            }
+        } else {
             query.setInteger("statusId", ModelSummaryStatus.ACTIVE.getStatusId());
         }
         return query.list();

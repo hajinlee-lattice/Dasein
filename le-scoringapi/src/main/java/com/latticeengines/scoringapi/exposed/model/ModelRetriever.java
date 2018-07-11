@@ -25,10 +25,10 @@ public interface ModelRetriever {
 
     ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace customerSpace, String modelId);
 
-    int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus);
+    int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus, boolean considerDeleted);
 
     List<ModelDetail> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
-            boolean considerAllStatus);
+            boolean considerAllStatus, boolean considerDeleted);
 
     ScoringArtifacts getModelArtifactsIfPresent(CustomerSpace customerSpace, String modelId);
 
