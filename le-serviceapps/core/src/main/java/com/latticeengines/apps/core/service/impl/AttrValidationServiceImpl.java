@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 
@@ -33,8 +34,13 @@ public class AttrValidationServiceImpl implements AttrValidationService {
             boolean isAdmin) {
         for (String validatorName : validatorList) {
             AttrValidator validator = AttrValidator.getValidator(validatorName);
-            if (validator != null) {
-                validator.validate(existingAttrConfigs, userProvidedAttrConfigs, isAdmin);
+            try (PerformanceTimer timer = new PerformanceTimer()) {
+                if (validator != null) {
+                    validator.validate(existingAttrConfigs, userProvidedAttrConfigs, isAdmin);
+                }
+                String msg = String.format("Validator %s for tenant %s", validatorName,
+                        MultiTenantContext.getShortTenantId());
+                timer.setTimerMessage(msg);
             }
         }
         return generateReport(userProvidedAttrConfigs);
