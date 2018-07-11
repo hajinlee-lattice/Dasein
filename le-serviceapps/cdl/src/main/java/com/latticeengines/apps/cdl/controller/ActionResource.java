@@ -1,7 +1,9 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -20,6 +22,8 @@ import com.latticeengines.domain.exposed.pls.Action;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import static java.util.stream.Collectors.toList;
+
 @Api(value = "actions", description = "REST resource for actions")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/actions")
@@ -32,9 +36,11 @@ public class ActionResource {
     @ApiOperation(value = "Get all actions")
     @SuppressWarnings("unchecked")
     public List<Action> findAll(@PathVariable String customerSpace, @RequestBody Map<String, Object> actionParameter) {
-        List<Long> pids = (List<Long>) actionParameter.get("pids");
-        Long ownerId = actionParameter.get("ownerId") != null ?
-                Long.valueOf(actionParameter.get("ownerId").toString()) : null;
+        List<Long> pids = actionParameter.get("pids") == null ? null :
+                ((List<Integer>) actionParameter.get("pids")).stream()
+                        .mapToLong(Integer::longValue).boxed().collect(Collectors.toList());
+        Long ownerId = actionParameter.get("ownerId") == null ? null :
+                Long.valueOf(actionParameter.get("ownerId").toString());
         boolean nullOwnerId = (boolean) actionParameter.get("nullOwnerId");
         List<Action> actions;
         if (CollectionUtils.isNotEmpty(pids)) {
