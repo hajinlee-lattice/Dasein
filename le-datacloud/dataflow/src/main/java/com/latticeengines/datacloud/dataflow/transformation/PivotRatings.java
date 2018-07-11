@@ -120,7 +120,10 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
             String expression = StringUtils.join(expressionTokens, " || ");
             inactiveToRetain.add(InterfaceName.AccountId.name());
             inactive = inactive.retain(new FieldList(inactiveToRetain));
-            inactive = inactive.filter(expression, filterFields);
+            // 255 is maximum number of method parameters allowed by java
+            if (filterFields.getFields() != null && filterFields.getFields().length <= 255) {
+                inactive = inactive.filter(expression, filterFields);
+            }
             String idCol2 = idCol + "_2";
             inactive = inactive.rename(new FieldList(idCol), new FieldList(idCol2));
             pivoted = pivoted.outerJoin(idCol, inactive, idCol2);
