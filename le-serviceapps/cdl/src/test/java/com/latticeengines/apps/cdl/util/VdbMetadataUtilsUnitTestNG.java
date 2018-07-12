@@ -146,6 +146,11 @@ public class VdbMetadataUtilsUnitTestNG {
                 {"bit", "int", false},
                 {"Double", "BYTE", false},
                 {"short", "dateTime", false},
+                {"Date", "Date", true},
+                {"Date", "DateTime", true},
+                {"DateTime", "Date", true},
+                {"datetime", "datetime", true},
+                {"Date", "time", false},
         };
     }
 

@@ -279,6 +279,14 @@ public class VdbMetadataUtils {
                         && !destType.toLowerCase().startsWith("nvarchar")) {
                     return false;
                 }
+            } else if (srcType.equalsIgnoreCase("date")) {
+                if (!destType.equalsIgnoreCase("datetime")) {
+                    return false;
+                }
+            } else if (srcType.equalsIgnoreCase("datetime")) {
+                if (!destType.equalsIgnoreCase("date")) {
+                    return false;
+                }
             } else {
                 return false;
             }
