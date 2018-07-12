@@ -37,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -66,7 +67,8 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     private static final Logger log = LoggerFactory.getLogger(SecurityFunctionalTestNGBase.class);
 
-    public static final String adminUsername = "bnguyen@lattice-engines.com";
+    public static final String adminUsername = NamingUtils.timestamp(SecurityFunctionalTestNGBase.class.getSimpleName())
+            + "@lattice-engines.com";
     public static final String adminPassword = "tahoe";
     public static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
     public static final String generalUsername = "lming@lattice-engines.com";

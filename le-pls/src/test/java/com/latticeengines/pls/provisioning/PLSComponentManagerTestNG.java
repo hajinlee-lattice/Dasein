@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -27,8 +28,15 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "functional" })
     public void testProvisionTenant() {
         Tenant tenant = createTestTenant();
-        List<String> superAdmins = Collections.singletonList("bnguyen@lattice-engines.com");
-        List<String> latticeAdmins = Collections.singletonList("ysong@lattice-engines.com");
+        List<String> superAdmins = Collections.singletonList(
+                NamingUtils.timestamp(this.getClass().getSimpleName()) + "@lattice-engines.com");
+        // wait 1s, generate different name
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+        List<String> latticeAdmins = Collections
+                .singletonList(NamingUtils.timestamp(this.getClass().getSimpleName()) + "@lattice-engines.com");
         List<String> externalAdmins = Collections.singletonList("latticeengines8@gmail.com");
         List<String> thirdPartyUsers = Collections.singletonList("thirdPartyUser1@gmail.com");
         componentManager.provisionTenant(tenant, superAdmins, latticeAdmins, externalAdmins, thirdPartyUsers);

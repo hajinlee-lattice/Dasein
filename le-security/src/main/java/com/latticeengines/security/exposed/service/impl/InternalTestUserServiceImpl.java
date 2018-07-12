@@ -8,6 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -21,7 +22,7 @@ import com.latticeengines.security.exposed.service.UserService;
 
 @Component("internalTestUserService")
 public class InternalTestUserServiceImpl implements InternalTestUserService {
-    private static final String ADMIN_USERNAME = "bnguyen@lattice-engines.com";
+    private static final String ADMIN_USERNAME = NamingUtils.timestamp(InternalTestUserServiceImpl.class.getSimpleName()) + "@lattice-engines.com";
     private static final String ADMIN_PASSWORD = "tahoe";
     private static final String ADMIN_PASSWORD_HASH = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
     private static final String GENERAL_PASSWORD = "admin";
@@ -82,7 +83,6 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     public Map<AccessLevel, User> createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(
             List<Tenant> testingTenants) {
         if (shouldRecreateUserWithUsernameAndPassword(ADMIN_USERNAME, ADMIN_PASSWORD)) {
-            globalUserManagementService.deleteUser("bnguyen");
             globalUserManagementService.deleteUser(ADMIN_USERNAME);
             createUser(ADMIN_USERNAME, ADMIN_USERNAME, "Super", "User", ADMIN_PASSWORD_HASH);
             for (Tenant testingTenant : testingTenants) {
