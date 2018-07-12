@@ -35,7 +35,7 @@ public class ActivityMetricsServiceImpl implements ActivityMetricsService {
         validation.setDisableMargin(true);
 
         List<ColumnMetadata> prodCMList = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.Product);
-        List<ColumnMetadata> trxCMList = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.Transaction);
+        List<ColumnMetadata> trxCMList = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.PeriodTransaction);
         List<ColumnMetadata> acctCMList = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.Account);
 
         if (CollectionUtils.isNotEmpty(prodCMList) && CollectionUtils.isNotEmpty(trxCMList) &&
@@ -46,7 +46,7 @@ public class ActivityMetricsServiceImpl implements ActivityMetricsService {
         }
 
         for (ColumnMetadata metadata : trxCMList) {
-            if (metadata.getAttrName().equalsIgnoreCase(InterfaceName.Cost.name())) {
+            if (metadata.getAttrName().equalsIgnoreCase(InterfaceName.TotalCost.name())) {
                 validation.setDisableMargin(false);
                 break;
             }
