@@ -260,6 +260,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
             Assert.assertEquals(rec.getDestinationOrgId(), rulesBasedPlayLaunch.getDestinationOrgId());
             Assert.assertEquals(CDLExternalSystemType.valueOf(rec.getDestinationSysType()),
                     rulesBasedPlayLaunch.getDestinationSysType());
+            Assert.assertNull(rec.getMonetaryValue());
 
             Assert.assertEquals(rec.getPlayId(), rulesBasedPlay.getName());
             Assert.assertEquals(rec.getLaunchId(), rulesBasedPlayLaunch.getId());

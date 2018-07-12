@@ -158,7 +158,8 @@ public class RecommendationCreator {
 
         String expectedValue = checkAndGet(account,
                 playLaunchContext.getRatingId() + PlaymakerConstants.RatingEVColumnSuffix);
-        recommendation.setMonetaryValue(StringUtils.isNotEmpty(expectedValue) ? Double.parseDouble(expectedValue) : 0D);
+        recommendation
+                .setMonetaryValue(StringUtils.isNotEmpty(expectedValue) ? Double.parseDouble(expectedValue) : null);
 
         setSyncDestination(playLaunch, recommendation);
 
