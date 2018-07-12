@@ -143,7 +143,7 @@ public class Node {
     }
 
     public Node outerJoin(String lhsField, Node rhs, String rhsField) {
-        return leftJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
+        return outerJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
     }
 
     public Node hashJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {

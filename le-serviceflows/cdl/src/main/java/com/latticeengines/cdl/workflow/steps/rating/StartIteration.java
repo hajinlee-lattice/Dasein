@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -75,8 +76,12 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
 
             if (CollectionUtils.isNotEmpty(inactiveEnginesInIteration)) {
                 Set<String> existingEngineIds = new HashSet<>();
-                List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadataFromCache(
-                        configuration.getCustomerSpace().toString(), BusinessEntity.Rating);
+                DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION,
+                        DataCollection.Version.class);
+                List<ColumnMetadata> cms = servingStoreProxy
+                        .getDecoratedMetadata(configuration.getCustomerSpace().toString(), BusinessEntity.Rating, null,
+                                inactive)
+                        .collectList().block();
                 if (CollectionUtils.isNotEmpty(cms)) {
                     cms.forEach(cm -> {
                         if (cm.getAttrName().startsWith(RatingEngine.RATING_ENGINE_PREFIX)) {
@@ -86,8 +91,8 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                     });
                 }
                 log.info("Existing engines in serving store for this iteration: " + existingEngineIds);
-                inactiveEnginesInIteration = inactiveEnginesInIteration.stream()
-                        .filter(engineId -> existingEngineIds.contains(engineId))
+                inactiveEnginesInIteration = inactiveEnginesInIteration.stream() //
+                        .filter(existingEngineIds::contains) //
                         .collect(Collectors.toList());
             }
 

@@ -221,6 +221,15 @@ public class Query implements GraphNode {
                 }
             }
         });
+        List<FreeFormTextSearchAttribute> ftAttrs = getFreeFormTextSearchAttributes();
+        if (CollectionUtils.isNotEmpty(ftAttrs)) {
+            ftAttrs.forEach(ftAttr -> {
+                BusinessEntity entity = ftAttr.getEntity();
+                if (entity != null) {
+                    entitiesForJoin.add(entity);
+                }
+            });
+        }
     }
 
     private void resolveMainEntity() {

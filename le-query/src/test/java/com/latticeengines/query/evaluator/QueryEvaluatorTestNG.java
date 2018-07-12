@@ -307,16 +307,22 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("%s.%s is not null", ACCOUNT, ATTR_ACCOUNT_NAME));
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testFreeText() {
         // freetext
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
-                .freeText("intel", new AttributeLookup(BusinessEntity.Account, "LDC_Domain"), new AttributeLookup(BusinessEntity.Account, "LDC_Name")) //
+                .freeText("intel", //
+                        new AttributeLookup(BusinessEntity.Account, "LDC_Domain"), //
+                        new AttributeLookup(BusinessEntity.Account, "LDC_Name"), //
+                        new AttributeLookup(BusinessEntity.Contact, "Title") //
+                ) //
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        sqlContains(sqlQuery, String.format("upper(%s.LDC_Domain) like ?", ACCOUNT));
-        sqlContains(sqlQuery, String.format("upper(%s.LDC_Name) like ?", ACCOUNT));
+        sqlContains(sqlQuery, "join query_test_contact as Contact");
+        sqlContains(sqlQuery, "Account.LDC_Domain ilike ?");
+        sqlContains(sqlQuery, "Account.LDC_Name ilike ?");
+        sqlContains(sqlQuery, "Contact.Title ilike ?");
     }
 
     @Test(groups = "functional")

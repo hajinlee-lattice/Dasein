@@ -194,7 +194,9 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                 };
                 log.info(StringUtils.join(msgs, ", "));
                 iterationFinished = iteration > effectiveIterations;
-                log.info(String.format("All %d effective iterations are finished", effectiveIterations));
+                if (iterationFinished) {
+                    log.info(String.format("All %d effective iterations are finished", effectiveIterations));
+                }
             } else {
                 log.info("Skip dummy iteration " + (++iteration));
             }
