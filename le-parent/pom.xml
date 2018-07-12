@@ -134,7 +134,7 @@
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
         <spring.batch.version>4.0.0.RELEASE</spring.batch.version>
         <spring.security.version>5.0.1.RELEASE</spring.security.version>
-        <spring.saml2.version>1.0.4.RELEASE</spring.saml2.version>
+        <spring.saml2.version>1.0.3.RELEASE</spring.saml2.version>
         <spring.oauth2.version>2.2.1.RELEASE</spring.oauth2.version>
         <!-- Camel -->
         <camel.version>2.19.1</camel.version>
