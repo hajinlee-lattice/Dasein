@@ -193,7 +193,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
             Object dedupeId = record.get(MatchConstants.INT_LDC_DEDUPE_ID);
             Object isRemoved = record.get(MatchConstants.INT_LDC_REMOVED);
             System.out.println(record.get("ID") + " : " + id + " - " + dedupeId + " - " + isRemoved);
-            Assert.assertTrue(id != null || dedupeId != null);
+            Assert.assertTrue(id != null || dedupeId == null);
             Assert.assertTrue(isRemoved instanceof Integer);
             Assert.assertEquals(isRemoved, 0);
         });
