@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,8 +20,6 @@ import com.latticeengines.domain.exposed.pls.Action;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import static java.util.stream.Collectors.toList;
 
 @Api(value = "actions", description = "REST resource for actions")
 @RestController
