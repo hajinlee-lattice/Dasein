@@ -37,7 +37,7 @@ angular.module('lp.cg.talkingpoint.attributepane', [
                 if (scrollY > originalTop) {
                     $element.addClass('loose');
                     if(paneBottom < containerBottom) {
-                        $element[0].style.top = (scrollY - originalTop + 78) + 'px';
+                        $element[0].style.top = (scrollY - originalTop + 10) + 'px';
                     }
                 } else {
                     $element.removeClass('loose');

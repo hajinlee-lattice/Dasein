@@ -499,16 +499,37 @@
     }
 }
 
-.history-list {
-    li {
-    	border-top: solid 1px #eeecec;
-        margin-top: 20px;
-        padding-top: 20px;
-    }
-    & > li:first-child {
-    	padding-top: 0;
-    	margin-top: 0;
-    	border-top: none;
-    }
+.model-ratings.history {
+	.header {
+		border-bottom: #d8d8d8 solid 1px;
+		padding: 3px 8px;
+		font-size: 14px;
+		span {
+			display: inline-block;
+			font-weight: bold;
+			&:last-of-type {
+				float: right;
+			}
+		}
+		&.stick {
+			position: fixed;
+			top: 0;
+		}
+	}
+	.history-list {
+		padding: 0 8px;
+	    li {
+	    	border-top: solid 1px #eeecec;
+	        margin-top: 10px;
+	        padding-top: 10px;
+	    }
+	    & > li:first-child {	
+	    	margin-top: 0;
+	    	border-top: none;
+	    }
+	}
+	.list-data {
+		font-size: 14px;
+	}
 }
 

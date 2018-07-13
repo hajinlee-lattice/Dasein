@@ -5,11 +5,15 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     'ngSanitize'
 ])
 
-.controller('TopPredictorAttributeWidgetController', function ($scope, _, $sce, $filter, ResourceUtility, TopPredictorService) {
+.controller('TopPredictorAttributeWidgetController', function ($scope, _, $sce, $filter, ResourceUtility, TopPredictorService, ModelStore) {
 
     var MISC_BUCKET_NAME = 'Other, Less Popular';
 
     var data = $scope.data;
+    var modelData = ModelStore.data;
+
+    console.log(modelData);
+
     $scope.attributeName = data.name;
     $scope.attributeFullDescription = data.description;
     $scope.attributeDescription = data.description;
@@ -45,7 +49,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         labelSize = "10px",
         fontSize = "12px",
         commonDy = "0em",
-        labelDx = 0;
+        labelDx = 0,
+        modelType = modelData.ModelDetails.SourceSchemaInterpretation;
 
     function setHoverPosition(xPos, chartHeight) {
         var attributeHover = $(".attribute-hover"),
@@ -315,15 +320,16 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .style("fill", "#666")
         .text(function(d) { return d + "%"; } );
 
-    // This is the %Leads label to the right of the chart
-    var leadsText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
+    // This is the % Leads or % Accounts label to the right of the chart
+    var isAccountBased = modelType == 'Account';
+    var percentText = isAccountBased ? ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_ACCOUNTS_LABEL").toUpperCase() : ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
     chart.append("text")
         .attr("x", width + 142)
         .attr("y", 5)
         .attr("dy", "0.36em")
         .attr("font-size", labelSize)
         .style("fill", "#999")
-        .text(leadsText);
+        .text(percentText);
 
     // These are the bucket names to the left of the chart
     chart.selectAll("text.name")

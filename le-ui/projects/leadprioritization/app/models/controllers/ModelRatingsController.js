@@ -232,14 +232,18 @@ angular.module('lp.models.ratings', [
         var leftCheck = right <= vm.sliderBoundaryLeft;
         var rightCheck = right >= vm.sliderBoundaryRight;
 
-        vm.right = right;
-
         if (leftCheck && rightCheck) {
             this.right = right;
             vm.slider.style.right = right + '%';
+            vm.right = right;
+
+        } else if (!leftCheck && rightCheck) {
+            vm.right = 98;
+        } else if (leftCheck && !rightCheck) {
+            vm.right = 5;
         } else {
             vm.slider.style.right = (leftCheck ? vm.sliderBoundaryRight : vm.sliderBoundaryLeft) + '%';
-        } 
+        }
 
         if (vm.workingBuckets.length > 2 && (ev.clientY > vm.containerBox.bottom + 10)) {
             vm.showRemoveBucketText = true;
@@ -312,7 +316,7 @@ angular.module('lp.models.ratings', [
         vm.savingConfiguration = true;
 
         var rating_id = $stateParams.rating_id;
-        
+
         if(vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') {
             var aiModelId = vm.ratingModelId;
             ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
@@ -363,7 +367,8 @@ angular.module('lp.models.ratings', [
     vm.init();
 
 })
-.controller('ModelRatingsHistoryController', function ($scope, $rootScope, $stateParams,
+.controller('ModelRatingsHistoryController', function (
+    $scope, $rootScope, $stateParams, $window,
     ResourceUtility, Model, ModelStore, ModelRatingsService, HistoricalABCDBuckets, FeatureFlags) {
 
     var vm = this;
@@ -403,8 +408,7 @@ angular.module('lp.models.ratings', [
 
         vm.historicalBuckets = ordered;
 
-        
-        // Set value for total leads in set
+         // Set value for total leads in set
         // This will need to get changed when we're saving configurations
         vm.historyTotalLeads = pluckDeepKey("num_leads", vm.historicalBuckets);
 
@@ -421,6 +425,25 @@ angular.module('lp.models.ratings', [
         vm.cdlIsEnabled = FeatureFlags.EnableCdl;
 
     };
+
+    // $window.addEventListener('scroll', handleWindowScroll);
+
+    // $scope.$on('$destroy', function() {
+    //     $window.removeEventListener('scroll', handleWindowScroll);
+    // });
+
+    // function handleWindowScroll() {
+
+    //     var historyHeader = document.getElementById('historyHeader'),
+    //         windowTop = $window.pageYOffset,
+    //         offsetTop = historyHeader.getBoundingClientRect().top;
+
+    //     console.log(windowTop, offsetTop);
+
+    //     vm.stickHeader = (windowTop >= offsetTop) ? true : false;
+
+    //     console.log(vm.stickHeader);
+    // }
 
     vm.init();
 })

@@ -24,7 +24,7 @@
                                     id="{{org.orgId}}" 
                                     name="{{org.orgId}}" 
                                     ng-value="org"
-                                    ng-change="$ctrl.checkValid(crmselection_form, org.accountId)" 
+                                    ng-change="$ctrl.checkValid(crmselection_form, org.accountId, org.isRegistered)" 
                                     ng-model="$ctrl.stored.crm_selection" />
                                 <label for="{{org.orgId}}">{{ org.orgId }}</label>
                             </td>
