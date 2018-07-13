@@ -93,7 +93,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
 
         newTenant = tenantService.findByTenantId(tenant.getId());
         Assert.assertEquals(newTenant.getName(), tenantName);
-        Assert.assertEquals(newTenant.getUiVersion(), "3.0");
+        Assert.assertEquals(newTenant.getUiVersion(), "4.0");
 
         componentManager.discardTenant(tenant);
         Assert.assertFalse(tenantService.hasTenantId(tenant.getId()));
