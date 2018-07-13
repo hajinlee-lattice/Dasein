@@ -61,7 +61,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
     private List<String> servingStoreSortKeys;
 
     @Inject
-    private MetadataProxy metadataProxy;
+    protected MetadataProxy metadataProxy;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {

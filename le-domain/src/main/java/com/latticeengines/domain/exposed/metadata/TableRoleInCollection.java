@@ -31,6 +31,8 @@ public enum TableRoleInCollection {
 
     AnalyticPurchaseState, //
 
+    AccountFeatures,
+
     AccountMaster;
 
     private InterfaceName primaryKey;

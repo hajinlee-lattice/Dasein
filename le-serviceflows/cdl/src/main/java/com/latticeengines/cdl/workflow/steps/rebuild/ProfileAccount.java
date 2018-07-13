@@ -47,16 +47,20 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
@@ -75,6 +79,8 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     private static int segmentProfileStep;
     private static int segmentBucketStep;
 
+    protected String accountFeaturesTablePrefix = "AccountFeatures";
+
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
@@ -89,6 +95,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
+        createAccountFeatures();
         registerDynamoExport();
     }
 
@@ -122,6 +129,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
 
             TransformationStepConfig sort = sort(customerSpace);
             TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
+            TransformationStepConfig accountFeature = filterAccountFeature(customerSpace, accountFeaturesTablePrefix);
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
                     match, //
@@ -132,7 +140,8 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                     segmentProfile,
                     segmentBucket,
                     sort, //
-                    sortProfile //
+                    sortProfile, //
+                    accountFeature //
             );
             // -----------
             request.setSteps(steps);
@@ -241,6 +250,41 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
         step.setConfiguration(appendEngineConf(conf, heavyEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig filterAccountFeature(CustomerSpace customerSpace, String accountFeaturesTablePrefix) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = Collections.singletonList(matchStep);
+        step.setInputSteps(inputSteps);
+        step.setTransformer(TRANSFORMER_COPIER);
+
+        CopierConfig conf = new CopierConfig();
+        Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
+        filterGroups.add(ColumnSelection.Predefined.ID);
+        filterGroups.add(ColumnSelection.Predefined.Model);
+
+        List<String> retainAttrNames = servingStoreProxy
+                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, tableFromActiveVersion ? active : inactive) //
+                .filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor)) //
+                .map(ColumnMetadata::getAttrName) //
+                .collectList().block();
+        if (retainAttrNames == null) {
+            retainAttrNames = new ArrayList<>();
+        }
+        if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
+            retainAttrNames.add(InterfaceName.AccountId.name());
+        }
+
+        conf.setRetainAttrs(retainAttrNames);
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        step.setConfiguration(confStr);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(accountFeaturesTablePrefix);
+        step.setTargetTable(targetTable);
+
         return step;
     }
 
@@ -387,6 +431,44 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         } else {
             return str;
         }
+    }
+
+    private void createAccountFeatures() {
+        String customerSpace = configuration.getCustomerSpace().toString();
+        String accountFeatureTableName = TableUtils.getFullTableName(accountFeaturesTablePrefix, pipelineVersion);
+        Table accountFeatureTable = metadataProxy.getTable(customerSpace, accountFeatureTableName);
+        if (accountFeatureTable == null) {
+            throw new RuntimeException(
+                    "Failed to find accountFeature table " + accountFeatureTableName + " in customer " + customerSpace);
+        }
+        setAccountFeatureTableSchema(accountFeatureTable);
+        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
+        dataCollectionProxy.upsertTable(customerSpace, accountFeatureTableName, TableRoleInCollection.AccountFeatures, inactiveVersion);
+        accountFeatureTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AccountFeatures, inactiveVersion);
+        if (accountFeatureTable == null) {
+            throw new IllegalStateException("Cannot find the upserted " + TableRoleInCollection.AccountFeatures + " table in data collection.");
+        }
+    }
+
+    private void setAccountFeatureTableSchema(Table table) {
+        String dataCloudVersion = configuration.getDataCloudVersion();
+        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model,
+                dataCloudVersion);
+        Map<String, ColumnMetadata> amColMap = new HashMap<>();
+        amCols.forEach(cm -> amColMap.put(cm.getAttrName(), cm));
+        List<Attribute> attrs = new ArrayList<>();
+        table.getAttributes().forEach(attr0 -> {
+           Attribute attr = attr0;
+           if (amColMap.containsKey(attr0.getName())) {
+               ColumnMetadata cm = amColMap.get(attr0.getName());
+               if (Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())) {
+                   attr.setTags(Tag.INTERNAL);
+               }
+           }
+           attrs.add(attr);
+        });
+        table.setAttributes(attrs);
+        metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
     }
 
     private void registerDynamoExport() {
