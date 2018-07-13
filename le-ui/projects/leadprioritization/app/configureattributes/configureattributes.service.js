@@ -53,7 +53,6 @@ angular.module('lp.configureattributes')
                     delete option[j].null;
                 }
             }
-
             ConfigureAttributesStore.options[key] = options[key];
         }
     }

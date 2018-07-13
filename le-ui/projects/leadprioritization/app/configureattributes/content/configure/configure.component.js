@@ -65,10 +65,15 @@ angular.module('lp.configureattributes.configure', [])
             completed: ConfigureAttributesStore.getSaved(),
             PurchaseHistory: PurchaseHistory,
             hasChanges: false,
+            disabledObj: {},
             precheck: Precheck
         });
 
         vm.steps_count = Object.keys(vm.steps).length;
+
+        vm.log = function(log) {
+            console.log(log);
+        }
 
         vm.newArray = function(count) {
            return new Array(count).join().split(',').map(function(item, index){ return ++index;});
@@ -114,6 +119,27 @@ angular.module('lp.configureattributes.configure', [])
             if(form) {
                 vm.checkValid(form);
             }
+        }
+
+        vm.setDisabled = function(key, debug) {
+            var options = vm.options[key];
+
+            vm.disabledObj[key] = {};
+
+            for(var i in options) {
+                var option = options[i].null;
+                if(!vm.disabledObj[key][option.Period]) {
+                    vm.disabledObj[key][option.Period] = [];
+                }
+                vm.disabledObj[key][option.Period].push(option.Val);
+            }
+        }
+
+        vm.disableSpendOvertime = function(option, period, value) {
+            if(vm.disabledObj[option] && vm.disabledObj[option][period]) {
+                return vm.disabledObj[option][period].indexOf(""+value) >= 0;
+            }
+            return false;
         }
 
         vm.addPeriod = function(array, type, form) {
@@ -348,26 +374,49 @@ angular.module('lp.configureattributes.configure', [])
             //console.log(form.$valid);
         }
 
-        vm.validateSendOvertime = function(name) {
+        vm.validateSendOvertime = function(name, debug) {
+            if(debug) {
+                console.group();
+                console.log('validateSendOvertime', 'start', name, vm.options[name]);
+            }
             var model = vm.options[name] || {},
                 spendOvertime = vm.spendOvertime[name] || [];
-
             if(!model) {
+                if(debug) {
+                    console.log('if(!model)');
+                    console.groupEnd();
+                }
                 return false;
             }
             if(Object.keys(model).length !== spendOvertime.length) {
+                if(debug) {
+                    console.log('if(Object.keys(model).length !== spendOvertime.length)');
+                    console.groupEnd();
+                }
                 return false;
             }
-
             var valid = [];
             for(var i in model) {
                 for(var j in model[i]) {
+                    if(debug) {
+                        console.log('for(var j in model[i])', i, model[i]);
+                    }
                     if(model[i][j].Val && model[i][j].Period) {
+                        if(debug) {
+                            console.log('validateSendOvertime', 'if(model[i][j].Val && model[i][j].Period)', model[i][j]);
+                        }
                         valid.push(true);
                     } else {
+                        if(debug) {
+                            console.log('if(model[i][j].Val && model[i][j].Period) -- else', model[i][j]);
+                        }
                         valid.push(false);
                     }
                 }
+            }
+            if(debug) {
+                console.log('validateSendOvertime', 'completed', '(valid.indexOf(false) === -1)', (valid.indexOf(false) === -1), valid);
+                console.groupEnd();
             }
             return (valid.indexOf(false) === -1);
         }
@@ -448,14 +497,35 @@ angular.module('lp.configureattributes.configure', [])
         vm.$onInit = function() {
             vm.initModalWindow();
             makePeriodsObject(vm.periods);
-            var completedSteps = ConfigureAttributesStore.getSaved();
+            var completedSteps = ConfigureAttributesStore.getSaved(),
+                totalSpendOvertimeOptionsAr,
+                avgSpendOvertimeOptionsAr;
+
             completedSteps.forEach(function(step) {
                 vm.steps[step].completed = true;
             });
+
             vm.steps = ConfigureAttributesStore.getSteps(ConfigureAttributesStore.purchaseHistory, vm.steps);
+
+            if(vm.options.TotalSpendOvertime) {
+                totalSpendOvertimeOptionsAr = [];
+                for(var i in vm.options.TotalSpendOvertime) {
+                    var option = angular.copy(vm.options.TotalSpendOvertime[i]);
+                    totalSpendOvertimeOptionsAr.push(option);
+                }
+            }
+            
+            if(vm.options.AvgSpendOvertime) {
+                avgSpendOvertimeOptionsAr = [];
+                for(var i in vm.options.AvgSpendOvertime) {
+                    var option =  angular.copy(vm.options.AvgSpendOvertime[i]);
+                    avgSpendOvertimeOptionsAr.push(option);
+                }
+            }
+
             vm.spendOvertime = {
-                TotalSpendOvertime: vm.steps.spend_over_time.data.TotalSpendOvertime || [defaultOption],
-                AvgSpendOvertime: vm.steps.spend_over_time.data.AvgSpendOvertime || [defaultOption]
+                TotalSpendOvertime: totalSpendOvertimeOptionsAr || vm.steps.spend_over_time.data.TotalSpendOvertime || [defaultOption],
+                AvgSpendOvertime: avgSpendOvertimeOptionsAr || vm.steps.spend_over_time.data.AvgSpendOvertime || [defaultOption]
             };
         }
     }
