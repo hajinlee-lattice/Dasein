@@ -18,6 +18,7 @@ angular.module('lp.import.entry', [
             infoTemplate: "<div class='row divider'><div class='twelve columns'><h4>What is a Training File?</h4><p>A training set is a CSV file with records of your historical successes. It is used to build your ideal customer profile by leveraging the Lattice Predictive Insights platform. Ideal training set should have at least 7,000 accounts, 150 success events and a conversion rate of less than 10%.</p></div></div><div class='row'><div class='six columns'><h4>Account Model:</h4><p>Upload a CSV file with accounts</p><p>Required: Id (any unique value for each record), Website (domain of company website), Event (1 for success, 0 otherwise)</p><p>Optional fields: Additional internal attributes about the accounts you would like to use as predictive attributes.</p></div><div class='six columns'><h4>Lead Model:</h4><p>Upload a CSV file with leads</p><p>Required: Id (any unique value for each record), Email, Event (1 for success, 0 otherwise)</p><p>Optional: Lead engagement data can be used as predictive attributes. Below are supported attributes:<ul><li>Marketo (4 week counts): Email Bounces (Soft), Email Clicks, Email Opens, Email Unsubscribes, Form Fills, Web-Link Clicks, Webpage Visits, Interesting Moments</li><li>Eloqua (4 week counts): Email Open, Email Send, Email Click Though, Email Subscribe, Email Unsubscribe, Form Submit, Web Visit, Campaign Membership, External Activity</li></ul></p></div></div>",
             compressed: true,
             importError: false,
+            invalidcolumns:[],
             importErrorMsg: '',
         },
         uploaded: false,
@@ -56,7 +57,25 @@ angular.module('lp.import.entry', [
         vm.next = false;
     }
 
+    function getInvalidColumns(columns){
+        var invalid = columns.filter(function(element){
+            if(element.includes('^/')){
+                return true;
+            }
+        });
+        return invalid;
+    }
+
+    vm.closeWarning = function(){
+        vm.next = false;
+        vm.invalidcolumns = [];
+        if(vm.params.scope){
+            vm.params.scope.cancel();
+        }
+    }
+
     vm.fileLoad = function(headers) {
+        vm.closeWarning();
         var columns = headers.split(','),
             nonDuplicatedColumns = [],
             duplicatedColumns = [],
@@ -64,9 +83,9 @@ angular.module('lp.import.entry', [
 
         vm.params.importError = false;
         vm.showImportError = false;
-
+    
         vm.params.infoTemplate = "<p>Please prepare a CSV file with the data you wish to import, using the sample CSV file above as a guide.</p><p>You will be asked to map your fields to the Lattice system, so you may want to keep the uploaded file handy for the next few steps.</p>";
-
+        vm.invalidcolumns = getInvalidColumns(columns);
         if (columns.length > 0) {
             for (var i = 0; i < columns.length; i++) {
                 if (nonDuplicatedColumns.indexOf(columns[i]) < 0) {
@@ -97,7 +116,7 @@ angular.module('lp.import.entry', [
     vm.fileDone = function(result) {
         vm.uploaded = true;
 
-        if (result.Result) {
+        if (result.Result && vm.invalidcolumns.length === 0) {
             vm.fileName = result.Result.name;
             vm.next = vm.goState;
         }

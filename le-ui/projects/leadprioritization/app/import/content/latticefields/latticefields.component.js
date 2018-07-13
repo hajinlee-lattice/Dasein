@@ -57,7 +57,7 @@ angular.module('lp.import.wizard.latticefields', [])
         }
         return ;
     }
-
+    
     vm.init = function() {
         ImportWizardStore.setValidation('latticefields', false);
 
@@ -97,7 +97,7 @@ angular.module('lp.import.wizard.latticefields', [])
      * @param {*} delimiter 
      */
     var makeObject = function(string, delimiter) {
-        var delimiter = delimiter || ':',
+        var delimiter = delimiter || '^/',
             string = string || '',
             pieces = string.split(delimiter);
 

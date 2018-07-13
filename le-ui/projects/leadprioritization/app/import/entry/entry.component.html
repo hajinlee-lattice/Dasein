@@ -27,8 +27,15 @@
             <span>Product Hierarchy</span>
           </div>
         </div>
-
+        
         <div class="import-additional-info import-additional-info-{{vm.goState}}" ui-view="entry_content"></div>
+        <div ng-if="vm.invalidcolumns.length > 0" class="invalid-columns-container">
+            <div>
+                <i class="fa fa-exclamation-triangle"></i>
+                <p> The uploaded file containes a reserved character (^/). Please check and upload again.</p>
+            </div>
+            <span ng-click="vm.closeWarning()">x</span>
+        </div>
         <div
             file-uploader-container
             label="Select and Upload File"

@@ -26,9 +26,9 @@
                     <option value="">{{vm.ignoredFieldLabel}}</option>
         			<option 
                         ng-repeat="availableField in vm.availableFields" 
-                        value="{{field.name}}:{{availableField.userField}}" 
+                        value="{{field.name}}^/{{availableField.userField}}" 
                         ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
-                        ng-init="(availableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + ':' + availableField.userField : '')">
+                        ng-init="(availableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + '^/' + availableField.userField : '')">
     					{{availableField.userField}}
     				</option>
 
@@ -50,9 +50,9 @@
                         <option value="">{{vm.ignoredFieldLabel}}</option>
                         <option 
                             ng-repeat="availableField in vm.availableFields" 
-                            value="{{field.name}}:{{availableField.userField}}" 
+                            value="{{field.name}}^/{{availableField.userField}}" 
                             ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
-                            ng-init="(availableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + ':' + availableField.userField : '')">
+                            ng-init="(availableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + '^/' + availableField.userField : '')">
                             {{availableField.userField}}
                         </option>
                     </select>
