@@ -75,7 +75,8 @@ angular.module('lp.import.entry', [
     }
 
     vm.fileLoad = function(headers) {
-        vm.closeWarning();
+        vm.next = false;
+        vm.invalidcolumns = [];
         var columns = headers.split(','),
             nonDuplicatedColumns = [],
             duplicatedColumns = [],
