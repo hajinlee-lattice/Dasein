@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -46,8 +47,8 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
     @BeforeClass(groups = { "deployment", "functional", "lp2" })
     public void setup() throws Exception {
         serviceName = getServiceName();
-        contractId = TestContractId + serviceName + "Tenant";
-        tenantId = TestContractId + serviceName + "Tenant";
+        contractId = NamingUtils.timestamp(this.getClass().getSimpleName());
+        tenantId = contractId;
 
         loginAD();
         try {

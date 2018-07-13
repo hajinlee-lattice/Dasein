@@ -67,7 +67,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     private static final Logger log = LoggerFactory.getLogger(SecurityFunctionalTestNGBase.class);
 
-    public static final String adminUsername = NamingUtils.timestamp(SecurityFunctionalTestNGBase.class.getSimpleName())
+    public final String adminUsername = NamingUtils.timestamp(this.getClass().getSimpleName())
             + "@lattice-engines.com";
     public static final String adminPassword = "tahoe";
     public static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";

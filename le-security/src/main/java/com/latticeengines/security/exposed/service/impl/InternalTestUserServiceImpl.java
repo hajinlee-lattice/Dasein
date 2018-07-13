@@ -22,7 +22,8 @@ import com.latticeengines.security.exposed.service.UserService;
 
 @Component("internalTestUserService")
 public class InternalTestUserServiceImpl implements InternalTestUserService {
-    private static final String ADMIN_USERNAME = NamingUtils.timestamp(InternalTestUserServiceImpl.class.getSimpleName()) + "@lattice-engines.com";
+    private final String ADMIN_USERNAME = NamingUtils.timestamp(this.getClass().getSimpleName())
+            + "@lattice-engines.com";
     private static final String ADMIN_PASSWORD = "tahoe";
     private static final String ADMIN_PASSWORD_HASH = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
     private static final String GENERAL_PASSWORD = "admin";
