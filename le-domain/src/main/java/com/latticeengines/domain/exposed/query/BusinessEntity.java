@@ -200,4 +200,7 @@ public enum BusinessEntity implements GraphNode {
         throw new IllegalArgumentException(String.format("There is no entity name %s in BusinessEntity", entity));
     }
 
+    public enum DataStore {
+        Batch, Serving
+    }
 }
