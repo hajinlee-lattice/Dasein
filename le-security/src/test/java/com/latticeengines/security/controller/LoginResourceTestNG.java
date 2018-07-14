@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -32,7 +33,11 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-
+        try {
+            login(adminUsername, adminPassword);
+        } catch (Exception e) {
+            createAdminUser();
+        }
     }
 
     @Test(groups = { "functional", "deployment" })

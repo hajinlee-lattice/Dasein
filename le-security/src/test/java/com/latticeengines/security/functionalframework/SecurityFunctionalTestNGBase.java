@@ -34,6 +34,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
+import org.testng.annotations.AfterClass;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -412,6 +413,11 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         Mockito.when(token.getSession()).thenReturn(session);
         Mockito.when(securityContext.getAuthentication()).thenReturn(token);
         SecurityContextHolder.setContext(securityContext);
+    }
+
+    @AfterClass(groups = { "functional", "deployment" })
+    public void tearDown() {
+        globalUserManagementService.deleteUser(adminUsername);
     }
 
 }
