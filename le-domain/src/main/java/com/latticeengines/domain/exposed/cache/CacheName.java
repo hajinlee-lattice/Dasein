@@ -17,6 +17,7 @@ public enum CacheName {
     MetadataCache(Constants.MetadataCacheName), //
     ServingMetadataCache(Constants.ServingMetadataCacheName), //
     TableRoleMetadataCache(Constants.TableRoleMetadataCacheName), //
+    DantePreviewTokenCache(Constants.DantePreviewTokenCacheName), //
 
     DataCloudCMCache(Constants.DataCloudCMCacheName), //
     DataCloudStatsCache(Constants.DataCloudStatsCacheName), //
@@ -48,8 +49,7 @@ public enum CacheName {
                 EntityRatingCountCache, //
                 RatingCoverageCache, //
                 ServingMetadataCache, //
-                TableRoleMetadataCache
-        };
+                TableRoleMetadataCache };
     }
 
     public static CacheName[] getCdlLocalCacheGroup() {
@@ -76,5 +76,6 @@ public enum CacheName {
         public static final String DataCloudVersionCacheName = "DataCloudVersionCache";
         public static final String ServingMetadataCacheName = "ServingMetadataCache";
         public static final String TableRoleMetadataCacheName = "TableRoleMetadataCache";
+        public static final String DantePreviewTokenCacheName = "DantePreviewTokenCache";
     }
 }

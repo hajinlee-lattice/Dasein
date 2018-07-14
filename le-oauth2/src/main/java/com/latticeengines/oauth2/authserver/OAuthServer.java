@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
@@ -70,10 +71,21 @@ public class OAuthServer extends SpringBootServletInitializer {
             LatticeTokenServices tokenServices = new LatticeTokenServices(tokenStore);
             tokenServices.setTokenStore(tokenStore);
             tokenServices.setSupportRefreshToken(true);
-            tokenServices.setRefreshTokenValiditySeconds(60 * 60 * 24 * 180); // 180 days
-            tokenServices.setAccessTokenValiditySeconds(60 * 60 * 24 * 180); // 180 days
-            
+            tokenServices.setRefreshTokenValiditySeconds(60 * 60 * 24 * 180); // 180
+                                                                              // days
+            tokenServices.setAccessTokenValiditySeconds(60 * 60 * 24 * 180); // 180
+                                                                             // days
+
             return tokenServices;
+        }
+
+        @Bean
+        public ClientCredentialsTokenEndpointFilter checkTokenEndpointFilter() {
+            ClientCredentialsTokenEndpointFilter filter = new ClientCredentialsTokenEndpointFilter(
+                    "/oauth/check_token");
+            filter.setAuthenticationManager(authenticationManager);
+            filter.setAllowOnlyPost(true);
+            return filter;
         }
 
         @Override
@@ -90,9 +102,11 @@ public class OAuthServer extends SpringBootServletInitializer {
         }
 
         @Override
-        public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+        public void configure(AuthorizationServerSecurityConfigurer securityConfigurer) throws Exception {
+            securityConfigurer.allowFormAuthenticationForClients() //
+                    .checkTokenAccess("permitAll()") //
+                    .addTokenEndpointAuthenticationFilter(checkTokenEndpointFilter()); //
         }
     }
-
 
 }

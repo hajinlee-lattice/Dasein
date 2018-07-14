@@ -3,7 +3,6 @@ package com.latticeengines.dante.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.dante.testFramework.DanteDeploymentTestNGBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -18,7 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dante.entitymgr.PublishedTalkingPointEntityMgr;
-import com.latticeengines.dante.testFramework.DanteTestNGBase;
+import com.latticeengines.dante.testFramework.DanteDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
@@ -163,7 +162,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteDeploymentTestNGB
         Assert.assertNotNull(previewResources.getoAuthToken());
         Assert.assertNotNull(previewResources.getServerUrl());
 
-        String url = previewResources.getServerUrl() + "/playmaker/tenants/oauthtotenant";
+        String url = previewResources.getServerUrl() + "/ulysses/generic/oauthtotenant";
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + previewResources.getoAuthToken());
@@ -172,6 +171,9 @@ public class TalkingPointResourceDeploymentTestNG extends DanteDeploymentTestNGB
         String tenantNameViaToken = restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
         Assert.assertNotNull(tenantNameViaToken);
         Assert.assertEquals(tenantNameViaToken, mainTestTenant.getId());
+
+        DantePreviewResources previewResources1 = talkingPointProxy.getPreviewResources(mainTestTenant.getId());
+        Assert.assertEquals(previewResources.getoAuthToken(), previewResources1.getoAuthToken());
     }
 
     @AfterClass(groups = "deployment")

@@ -8,10 +8,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.dante.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
 import com.latticeengines.dante.service.TalkingPointService;
+import com.latticeengines.dante.utils.OAuthAccessTokenCache;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPointValue;
@@ -28,11 +30,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.multitenant.TalkingPoint;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
-import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 @Component("talkingPointService")
 public class TalkingPointServiceImpl implements TalkingPointService {
@@ -41,25 +41,23 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     @Value("${common.dante.url}")
     private String danteUrl;
 
-    @Value("${common.playmaker.url}")
-    private String playmakerApiUrl;
+    @Value("${common.ulysses.url}")
+    private String ulyssesUrl;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private final String oAuth2DanteAppId = "lattice.web.dante";
-
-    @Autowired
+    @Inject
     private PlayProxy playProxy;
 
-    @Autowired
-    private Oauth2RestApiProxy oauth2RestApiProxy;
-
-    @Autowired
+    @Inject
     private PublishedTalkingPointEntityMgr publishedTalkingPointEntityMgr;
 
-    @Autowired
+    @Inject
     private TalkingPointEntityMgr talkingPointEntityMgr;
+
+    @Inject
+    private OAuthAccessTokenCache oAuthAccessTokenCache;
 
     @VisibleForTesting
     void setPlayProxy(PlayProxy playProxy) {
@@ -132,10 +130,14 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
     @Override
     public DantePreviewResources getPreviewResources(String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         try {
-            String token = oauth2RestApiProxy.createOAuth2AccessToken(CustomerSpace.parse(customerSpace).toString(),
-                    oAuth2DanteAppId, OauthClientType.PLAYMAKER).getValue();
-            return new DantePreviewResources(danteUrl, playmakerApiUrl, token);
+            String token = oAuthAccessTokenCache.getOauthTokenFromCache(customerSpace);
+
+            if (oAuthAccessTokenCache.isInvalidToken(customerSpace, token)) {
+                token = oAuthAccessTokenCache.refreshOauthTokenInCache(customerSpace);
+            }
+            return new DantePreviewResources(danteUrl, ulyssesUrl, token);
         } catch (LedpException e) {
             throw e;
         } catch (Exception e) {

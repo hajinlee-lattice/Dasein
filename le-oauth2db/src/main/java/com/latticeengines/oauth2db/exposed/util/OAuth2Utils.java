@@ -43,7 +43,7 @@ public class OAuth2Utils {
     public static String extractHeaderToken(HttpServletRequest request) {
         Enumeration<String> headers = request.getHeaders("Authorization");
         while (headers.hasMoreElements()) { // typically there is only one (most
-                                            // servers enforce that)
+            // servers enforce that)
             String value = headers.nextElement();
             if ((value.toLowerCase().startsWith(OAuth2AccessToken.BEARER_TYPE.toLowerCase()))) {
                 String authHeaderValue = value.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
@@ -145,17 +145,17 @@ public class OAuth2Utils {
     }
 
     public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
-            String clientId) {
+                                                      String clientId) {
         return getOauthTemplate(authHostPort, username, password, clientId, null);
     }
 
     public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
-            String clientId, String appId) {
+                                                      String clientId, String appId) {
         return getOauthTemplate(authHostPort, username, password, clientId, appId, null, null);
     }
 
     public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
-            String clientId, String appId, String orgId, String externalSystemType) {
+                                                      String clientId, String appId, String orgId, String externalSystemType) {
         ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
         resource.setUsername(username);
         resource.setPassword(password);
@@ -217,5 +217,4 @@ public class OAuth2Utils {
         RandomValueStringGenerator generator = new RandomValueStringGenerator(12);
         return generator.generate();
     }
-
 }

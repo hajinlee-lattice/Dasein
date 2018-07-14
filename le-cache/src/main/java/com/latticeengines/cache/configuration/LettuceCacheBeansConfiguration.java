@@ -140,6 +140,19 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         // END: objectapi proxy
         // =====================
 
+        // =========================
+        // BEGIN: dante microservice
+        // =========================
+        RedisCacheConfiguration dantePreviewTokenCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofDays(ttl)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.DantePreviewTokenCacheName));
+        // =======================
+        // END: dante microservice
+        // =======================
+
         RedisCacheConfiguration servingMetadataCache = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
@@ -173,6 +186,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.RatingCoverageCacheName, ratingCoverageCacheConfig);
         cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);
         cacheConfigs.put(CacheName.Constants.TableRoleMetadataCacheName, tableRoleMetadataCacheConfig);
+        cacheConfigs.put(CacheName.Constants.DantePreviewTokenCacheName, dantePreviewTokenCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.DataCloudVersionCacheName, dataCloudVersionCacheConfig);
 
