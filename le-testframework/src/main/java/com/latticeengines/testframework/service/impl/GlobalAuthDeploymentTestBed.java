@@ -342,7 +342,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
-        Long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L);
+        Long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10L);
         BootstrapState state = BootstrapState.createInitialState();
         while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
                 && System.currentTimeMillis() <= timeout) {

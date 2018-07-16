@@ -416,7 +416,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     }
 
     @AfterClass(groups = { "functional", "deployment" })
-    public void tearDown() {
+    public void tearDown() throws Exception {
         globalUserManagementService.deleteUser(adminUsername);
     }
 
