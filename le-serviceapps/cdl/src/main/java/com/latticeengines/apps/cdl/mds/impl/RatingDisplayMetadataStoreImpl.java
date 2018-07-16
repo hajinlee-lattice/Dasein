@@ -87,7 +87,14 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             } else {
                 reAttr.disableGroup(ColumnSelection.Predefined.Segment);
             }
-            reAttr.setCanEnrich(false);
+            reAttr.setCanEnrich(true);
+            if (isExportByDefault(suffix)) {
+                reAttr.enableGroup(ColumnSelection.Predefined.Enrichment);
+            } else {
+                reAttr.disableGroup(ColumnSelection.Predefined.Enrichment);
+            }
+            reAttr.disableGroup(ColumnSelection.Predefined.TalkingPoint);
+            reAttr.disableGroup(ColumnSelection.Predefined.CompanyProfile);
             return reAttr;
         });
     }
@@ -118,6 +125,10 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             segmentable = false;
         }
         return segmentable;
+    }
+
+    private boolean isExportByDefault(String suffix) {
+        return StringUtils.isBlank(suffix);
     }
 
     private List<RatingEngineSummary> getRatingSummaries(String tenantId) {
