@@ -140,12 +140,12 @@ public class ScoringFileUploadResource {
             }
             return ResponseDocument.successResponse(sourceFile);
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18053, new String[] { displayName }));
         } finally {
             try {
                 closeableResourcePool.close();
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
+                return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18053, new String[] { displayName }));
             }
         }
     }

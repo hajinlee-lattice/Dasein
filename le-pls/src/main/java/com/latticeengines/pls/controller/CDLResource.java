@@ -61,7 +61,8 @@ public class CDLResource {
             return ResponseDocument.successResponse(result.toString());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit processAnalyze job: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] {"ProcessAnalyze", e.getMessage()});
+            return ResponseDocument.failedResponse(
+                    new LedpException(LedpCode.LEDP_18182, new String[] {"ProcessAnalyze", e.getMessage()}));
         }
     }
 
