@@ -121,7 +121,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         matchInput.setExcludePublicDomain(false);
-        matchInput.setPublicDomainAsNormalDomain(true);
+        matchInput.setPublicDomainAsNormalDomain(false);
         matchInput.setDataCloudVersion(getDataCloudVersion());
         matchInput.setKeyMap(getMatchKeys());
         matchInput.setSkipKeyResolution(false);
