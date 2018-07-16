@@ -373,6 +373,10 @@ angular
         return true;
     };
 
+    vm.getModelingType = function() {
+        return RatingsEngineStore.getCustomEventModelingType();
+    }
+
     if (FieldDocument) {
         vm.init();
     }

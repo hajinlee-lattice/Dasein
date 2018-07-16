@@ -329,14 +329,18 @@ section.container.custom-fields {
             padding: 0.3em 1em;
             margin: 0;
             vertical-align: middle;
-
+            &.info-row {
+                text-align: left;
+                padding-top: 1em;
+                padding-bottom: 0.5em;
+            }
             &:last-child {
                 .custom-select {
                     width: 100px;
                     padding: 0.3em;
                 }
             }
-            &:first-child {
+            &:first-child:not(.info-row) {
                 text-align: right;
             }
             &:nth-child(3) {

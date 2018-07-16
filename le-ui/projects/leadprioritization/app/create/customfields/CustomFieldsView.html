@@ -52,14 +52,22 @@
 
 				<table class="section-body unstyled field-mapping-standard">
 					<thead>
-						<tr>
+						<tr ng-if="!vm.cdlEnabled">
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
+							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
+						</tr>
+						<tr ng-if="vm.cdlEnabled">
+							<th>Uploaded Fields</th>
+							<th>Lattice Fields</th>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
 						</tr>
 					</thead>
 
 					<tbody>
+						<tr ng-if="vm.getModelingType() == 'CDL' && vm.AvailableFields.length"> 
+							<td class="info-row" colspan="100"> {{vm.AvailableFields.length}} Lattice {{vm.AvailableFields.length != 1 ? 'fields are' : 'field is'}} unmapped and will be ignored. </td>
+						</tr> 
 						<tr ng-repeat="field in vm.standardFieldsList | limitTo:2"
 							ng-init="fieldMapping = vm.standardFieldMappings[field]"
 							ng-include="'field-mapping-row-template.html'">

@@ -16,25 +16,23 @@ angular.module('lp.ratingsengine.wizard.attributes', [])
         if (RatingsEngineStore.getCustomEventModelingType() == 'LPI' || Rating.segment == null) {
             vm.disableCDLAttributes = true;
             vm.scoringAttributes['CDL'] = false;
-            vm.scoringAttributes['CustomFileAttributes'] = Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores ? 
+            vm.scoringAttributes['CustomFileAttributes'] = vm.checkDataStores(Rating) ? 
                         Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores.indexOf('CustomFileAttributes') >= 0 : true;
         } else if ( RatingsEngineStore.getCustomEventModelingType() == 'CDL' || Rating.segment != null) {
             vm.disableTrainingAttributes = true;
-            vm.scoringAttributes['CDL'] = Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores ? 
+            vm.scoringAttributes['CDL'] =  vm.checkDataStores(Rating) ? 
                         Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores.indexOf('CDL') >= 0 : true;
             vm.scoringAttributes['CustomFileAttributes'] = false;
-        }
-
-        if (Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores) {
-            console.log(Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores);
-            Object.keys(vm.scoringAttributes).forEach(function(attr) {
-                vm.scoringAttributes[attr] = Rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores.indexOf(attr) >= 0;
-            });  
         }
         var dataStores = filterDataStores(vm.scoringAttributes);
         RatingsEngineStore.setDataStores(dataStores);
         RatingsEngineStore.setValidation("attributes", true);
     }
+
+    vm.checkDataStores = function(rating) {
+        return rating && rating.activeModel && rating.activeModel.AI && rating.activeModel.AI.advancedModelingConfig && rating.activeModel.AI.advancedModelingConfig.custom_event
+                && rating.activeModel.AI.advancedModelingConfig.custom_event.dataStores;
+    } 
 
     vm.setScoringAttributes = function(option) {
     	vm.scoringAttributes[option] = !vm.scoringAttributes[option];
