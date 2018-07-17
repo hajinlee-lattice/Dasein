@@ -197,7 +197,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             log.info("Specified to ignore data cloud change.");
         } else {
             String currentBuildNumber = configuration.getDataCloudBuildNumber();
-            DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
             DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(
                     customerSpace.toString(), activeVersion);
             if (status != null

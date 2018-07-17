@@ -371,14 +371,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    @Deprecated
     public String updateDataCloudBuildNumber(String customerSpace, String collectionName, String dataCloudBuildNumber) {
         DataCollection collection = getDataCollection(customerSpace, collectionName);
-        DataCollectionStatus status = getOrCreateDataCollectionStatus(customerSpace, collection.getVersion());
-        status.setDataCloudBuildNumber(dataCloudBuildNumber);
+        collection.setDataCloudBuildNumber(dataCloudBuildNumber);
         log.info("Setting DataCloudBuildNumber of " + collection.getName() + " in " + customerSpace + " to "
                 + dataCloudBuildNumber);
-        dataCollectionStatusEntityMgr.update(status);
-        return status.getDataCloudBuildNumber();
+        dataCollectionEntityMgr.update(collection);
+        return collection.getDataCloudBuildNumber();
     }
 
     @Override

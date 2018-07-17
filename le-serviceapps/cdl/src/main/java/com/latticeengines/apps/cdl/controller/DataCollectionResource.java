@@ -82,8 +82,7 @@ public class DataCollectionResource {
     public DataCollectionStatus getDataCollectionStatus(@PathVariable String customerSpace,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
-        return status;
+        return dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
     }
 
     @PostMapping(value = "/version/{version}/status")
@@ -101,9 +100,11 @@ public class DataCollectionResource {
     public ResponseDocument<String> updateDataCloudVersion(@PathVariable String customerSpace,
             @PathVariable("dataCloudBuildNumber") String dataCloudBuildNumber) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        String newDataCloudVersion = dataCollectionService.updateDataCloudBuildNumber(customerSpace, null,
-                dataCloudBuildNumber);
-        return ResponseDocument.successResponse(newDataCloudVersion);
+        DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
+        DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
+        status.setDataCloudBuildNumber(dataCloudBuildNumber);
+        saveDataCollectionStatus(customerSpace, version, status);
+        return ResponseDocument.successResponse(status.getDataCloudBuildNumber());
     }
 
     @GetMapping(value = "/tables")
@@ -243,10 +244,9 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get mocked metadat of attribute group for company profile and talking point")
     public List<String> getAttributeGroupsForCompanyProfileAndTalkingPoints(@PathVariable String customerSpace) {
-        List<String> result = Arrays.asList(InterfaceName.CompanyName.toString(), InterfaceName.City.toString(),
+        return Arrays.asList(InterfaceName.CompanyName.toString(), InterfaceName.City.toString(),
                 InterfaceName.Country.toString(), InterfaceName.Industry.toString(), InterfaceName.Website.toString(),
                 InterfaceName.YearStarted.toString());
-        return result;
     }
 
     @PostMapping(value = "/reset")
