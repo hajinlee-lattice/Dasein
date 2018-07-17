@@ -25,4 +25,9 @@ public class ModelSummaryProxy extends PlsRestApiProxyBase {
         return get("get model summary", url, ModelSummary.class);
     }
 
+    public ModelSummary createModelSummary(ModelSummary modelSummary) {
+        String url = constructUrl("/");
+        return post("create model summary", url, modelSummary, ModelSummary.class);
+    }
+
 }
