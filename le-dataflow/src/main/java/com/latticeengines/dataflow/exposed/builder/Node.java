@@ -298,6 +298,11 @@ public class Node {
                 builder);
     }
 
+    public Node pivot(String[] groupyByFields, PivotStrategy pivotStrategy, boolean caseInsensitiveGroupBy) {
+        return new Node(builder.register(new PivotOperation(opInput(identifier), groupyByFields, pivotStrategy, caseInsensitiveGroupBy)),
+                builder);
+    }
+
     public Node depivot(String[] targetFields, String[][] sourceFieldTuples) {
         DepivotOperation operation = new DepivotOperation(opInput(identifier), targetFields, sourceFieldTuples);
         return new Node(builder.register(operation), builder);

@@ -573,7 +573,7 @@ public class StatsCubeUtils {
                 isRating = (attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX)
                         && RatingEngine.toEngineId(attrName).equals(attrName));
             }
-            Comparator<Bucket> comparator = getBktComparatorForCategory(category, isRating);
+            Comparator<Bucket> comparator = getTopBktComparatorForCategory(category, isRating);
             Bucket topBkt = getTopBkt(attributeStats, comparator);
             if (topBkt != null) {
                 topAttribute.setTopBkt(topBkt);
@@ -593,30 +593,30 @@ public class StatsCubeUtils {
         }
     }
 
-    private static Comparator<Bucket> getBktComparatorForCategory(Category category, boolean isRating) {
+    private static Comparator<Bucket> getTopBktComparatorForCategory(Category category, boolean isRating) {
         switch (category) {
-        case INTENT:
-            return intentBktComparator();
-        case WEBSITE_PROFILE:
-        case TECHNOLOGY_PROFILE:
-            return techBktComparator();
-        case RATING:
-            return ratingBktComparator(isRating);
-        case PRODUCT_SPEND:
-        default:
-            return defaultBktComparator();
+            case INTENT:
+                return intentTopBktComparator();
+            case WEBSITE_PROFILE:
+            case TECHNOLOGY_PROFILE:
+                return techTopBktComparator();
+            case RATING:
+                return ratingTopBktComparator(isRating);
+            case PRODUCT_SPEND:
+            default:
+                return defaultTopBktComparator();
         }
     }
 
-    private static Comparator<Bucket> intentBktComparator() {
+    private static Comparator<Bucket> intentTopBktComparator() {
         return Comparator.comparing(Bucket::getId).reversed();
     }
 
-    private static Comparator<Bucket> techBktComparator() {
+    private static Comparator<Bucket> techTopBktComparator() {
         return Comparator.comparing(Bucket::getId);
     }
 
-    private static Comparator<Bucket> ratingBktComparator(boolean isRating) {
+    private static Comparator<Bucket> ratingTopBktComparator(boolean isRating) {
         if (isRating) {
             return Comparator.comparing(Bucket::getId);
         } else {
@@ -624,7 +624,7 @@ public class StatsCubeUtils {
         }
     }
 
-    private static Comparator<Bucket> defaultBktComparator() {
+    private static Comparator<Bucket> defaultTopBktComparator() {
         return (o1, o2) -> {
             if (isBooleanBkt(o1) || isBooleanBkt(o2)) {
                 return Comparator.comparing(Bucket::getId).compare(o1, o2);

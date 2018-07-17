@@ -107,23 +107,25 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
             List<String> inactiveEngines = config.getInactiveEngines();
             List<String> inactiveToRetain = new ArrayList<>();
             Set<String> existing = new HashSet<>(inactive.getFieldNames());
-            for (String inactiveEngine : inactiveEngines) {
-                for (RatingEngine.ScoreType scoreType : RatingEngine.ScoreType.values()) {
+            for (String inactiveEngine: inactiveEngines) {
+                for (RatingEngine.ScoreType scoreType: RatingEngine.ScoreType.values()) {
                     String scoreAttr = RatingEngine.toRatingAttrName(inactiveEngine, scoreType);
                     inactiveToRetain.add(scoreAttr);
                 }
             }
             inactiveToRetain.retainAll(existing);
+
             FieldList filterFields = new FieldList(new ArrayList<>(inactiveToRetain));
             List<String> expressionTokens = new ArrayList<>();
             inactiveToRetain.forEach(attr -> expressionTokens.add(attr + " != null"));
             String expression = StringUtils.join(expressionTokens, " || ");
-            inactiveToRetain.add(InterfaceName.AccountId.name());
-            inactive = inactive.retain(new FieldList(inactiveToRetain));
             // 255 is maximum number of method parameters allowed by java
             if (filterFields.getFields() != null && filterFields.getFields().length <= 255) {
                 inactive = inactive.filter(expression, filterFields);
             }
+
+            inactiveToRetain.add(InterfaceName.AccountId.name());
+            inactive = inactive.retain(new FieldList(inactiveToRetain));
             String idCol2 = idCol + "_2";
             inactive = inactive.rename(new FieldList(idCol), new FieldList(idCol2));
             pivoted = pivoted.outerJoin(idCol, inactive, idCol2);
@@ -162,9 +164,9 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
     }
 
     private <T extends Serializable> Node pivotField(Node rawRatings, Set<String> pivotedKeys, String valCol,
-            Class<T> resultClz, String suffix) {
-        PivotStrategyImpl pivotStrategy = PivotStrategyImpl.max(keyCol, valCol, pivotedKeys, resultClz, null);
-        Node pivoted = rawRatings.pivot(new String[] { idCol }, pivotStrategy);
+                                                     Class<T> resultClz, String suffix) {
+        PivotStrategyImpl pivotStrategy = PivotStrategyImpl.any(keyCol, valCol, pivotedKeys, resultClz, null);
+        Node pivoted = rawRatings.pivot(new String[] { idCol }, pivotStrategy, false);
 
         List<String> retainFields = new ArrayList<>();
         retainFields.add(idCol);
@@ -191,8 +193,7 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
     private FieldList findFieldsToDiscard(Node joined) {
         List<String> toDiscard = joined.getFieldNames().stream() //
                 .filter(f -> f.contains(idCol) && !f.equals(idCol)) //
-                .filter(f -> f.contains(RatingEngine.RATING_ENGINE_PREFIX) //
-                        && !f.startsWith(RatingEngine.RATING_ENGINE_PREFIX)) //
+                .filter(f -> f.contains(RatingEngine.RATING_ENGINE_PREFIX) && !f.startsWith(RatingEngine.RATING_ENGINE_PREFIX)) //
                 .collect(Collectors.toList());
         return new FieldList(toDiscard);
     }
