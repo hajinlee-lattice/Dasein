@@ -53,7 +53,6 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -198,16 +197,18 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             log.info("Specified to ignore data cloud change.");
         } else {
             String currentBuildNumber = configuration.getDataCloudBuildNumber();
-            DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
-            if (dataCollection != null
-                    && (dataCollection.getDataCloudBuildNumber() == null
-                            || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))
+            DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
+            DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(
+                    customerSpace.toString(), activeVersion);
+            if (status != null
+                    && (status.getDataCloudBuildNumber() == null
+                    || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
                     && hasAccountBatchStore()) {
                 changed = true;
             }
             log.info("Data cloud changed?=" + changed + " current LDC build number=" + currentBuildNumber
-                    + ", the LDC builder number in data collection="
-                    + (dataCollection == null ? "" : dataCollection.getDataCloudBuildNumber()));
+                    + ", the LDC builder number in data collection status="
+                    + (status == null ? "" : status.getDataCloudBuildNumber()));
         }
         return changed;
     }

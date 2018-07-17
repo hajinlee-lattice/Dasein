@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
@@ -38,10 +38,10 @@ public class StartProcessingUnitTestNG {
 
     @Test(groups = { "unit" })
     public void testRebuildOnDLVersionChange() {
-        DataCollection dataCollection = new DataCollection();
-        dataCollection.setDataCloudBuildNumber("1001");
+        DataCollectionStatus dataCollectionStatus = new DataCollectionStatus();
+        dataCollectionStatus.setDataCloudBuildNumber("1001");
         DataCollectionProxy dataCollectionProxy = mock(DataCollectionProxy.class);
-        when(dataCollectionProxy.getDefaultDataCollection(anyString())).thenReturn(dataCollection);
+        when(dataCollectionProxy.getOrCreateDataCollectionStatus(anyString(), any())).thenReturn(dataCollectionStatus);
 
         StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, null, null,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
@@ -67,10 +67,10 @@ public class StartProcessingUnitTestNG {
         Job job = new Job();
         job.setOutputs(ImmutableMap.<String, String> builder() //
                 .put(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES,
-                        JsonUtils.serialize(Arrays.asList(BusinessEntity.Contact.name()))) //
+                        JsonUtils.serialize(Collections.singletonList(BusinessEntity.Contact.name()))) //
                 .build());
 
-        List<Job> jobs = Arrays.asList(job);
+        List<Job> jobs = Collections.singletonList(job);
         InternalResourceRestApiProxy internalResourceProxy = mock(InternalResourceRestApiProxy.class);
         when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
 
@@ -80,7 +80,7 @@ public class StartProcessingUnitTestNG {
         CleanupActionConfiguration cleanupActionConfiguration = new CleanupActionConfiguration();
         cleanupActionConfiguration.addImpactEntity(BusinessEntity.Contact);
         action.setActionConfiguration(cleanupActionConfiguration);
-        List<Action> actions = Arrays.asList(action);
+        List<Action> actions = Collections.singletonList(action);
         ActionProxy actionProxy = mock(ActionProxy.class);
         when(actionProxy.getActionsByPids(any(), any())).thenReturn(actions);
 
@@ -88,7 +88,7 @@ public class StartProcessingUnitTestNG {
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
-        config.setActionIds(Arrays.asList(1111L));
+        config.setActionIds(Collections.singletonList(1111L));
         startProcessing.setConfiguration(config);
         Set<BusinessEntity> entities = startProcessing.new RebuildOnDeleteJobTemplate().getRebuildEntities();
         assertTrue(entities.contains(BusinessEntity.Contact));
@@ -101,7 +101,7 @@ public class StartProcessingUnitTestNG {
                                 BusinessEntity.Product.name(), BusinessEntity.Transaction.name()))) //
                 .build());
 
-        jobs = Arrays.asList(job);
+        jobs = Collections.singletonList(job);
         internalResourceProxy = mock(InternalResourceRestApiProxy.class);
         when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
 

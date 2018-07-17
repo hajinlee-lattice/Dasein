@@ -1,4 +1,5 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
+
 import javax.inject.Inject;
 
 import org.testng.Assert;
@@ -35,7 +36,7 @@ public class DataCollectionStatusEntityMgrImplTestNG extends CDLFunctionalTestNG
         DataCollectionStatus retrievedStatus = dataCollectionStatusEntityMgr.findByTenantAndVersion(mainTestTenant,
                 DataCollection.Version.Blue);
         System.out.print(JsonUtils.serialize(retrievedStatus));
-        Assert.assertTrue(retrievedStatus.getAccountCount() == 10L);
+        Assert.assertEquals(retrievedStatus.getAccountCount(), new Long(10L));
 
         status.setAccountCount(20L);
         dataCollectionStatusEntityMgr.createOrUpdate(status);
@@ -43,7 +44,7 @@ public class DataCollectionStatusEntityMgrImplTestNG extends CDLFunctionalTestNG
         Thread.sleep(500);
         retrievedStatus = dataCollectionStatusEntityMgr.findByTenantAndVersion(mainTestTenant,
                 DataCollection.Version.Blue);
-        Assert.assertTrue(retrievedStatus.getAccountCount() == 20L);
+        Assert.assertEquals(retrievedStatus.getAccountCount(), new Long(20L));
     }
 
 }

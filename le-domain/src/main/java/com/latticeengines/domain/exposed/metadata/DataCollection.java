@@ -87,6 +87,7 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
     @Column(name = "VERSION", nullable = false)
     private Version version;
 
+    @Deprecated
     @JsonProperty("data_cloud_build_number")
     @Column(name = "DATA_CLOUD_BUILD_NUMBER", nullable = true)
     private String dataCloudBuildNumber;
@@ -142,10 +143,12 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
         this.version = version;
     }
 
+    @Deprecated
     public String getDataCloudBuildNumber() {
         return dataCloudBuildNumber;
     }
 
+    @Deprecated
     public void setDataCloudBuildNumber(String dataCloudBuildNumber) {
         this.dataCloudBuildNumber = dataCloudBuildNumber;
     }

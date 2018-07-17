@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
@@ -31,6 +33,9 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Inject
+    private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -81,9 +86,12 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
     @Override
     public Namespace1<String> resolveDataCloudVersion() {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        String dcBuildNumber = dataCollectionService.getDataCollection(customerSpace, "").getDataCloudBuildNumber();
+        DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
+        DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
+        String dcBuildNumber = status.getDataCloudBuildNumber();
         String dcVersion;
-        if (StringUtils.isBlank(dcBuildNumber)) {
+        log.info("Data cloud build number = " + dcBuildNumber);
+        if (StringUtils.isBlank(dcBuildNumber) || !dcBuildNumber.matches("^\\d+.*")) {
             log.warn("Tenant " + customerSpace + " does not have a data cloud build number.");
             dcVersion = "";
         } else {

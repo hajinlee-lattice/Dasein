@@ -50,7 +50,7 @@ public class DataCollectionStatusEntityMgrImpl extends BaseEntityMgrRepositoryIm
             return stats.get(0);
         }
         throw new RuntimeException(
-                "There are " + stats.size() + " data collections in current tenant with the version " + version);
+                "There are " + stats.size() + " data collection status in current tenant with the version " + version);
     }
 
 
