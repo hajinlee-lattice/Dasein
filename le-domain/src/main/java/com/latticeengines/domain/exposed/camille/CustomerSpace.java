@@ -20,9 +20,9 @@ public class CustomerSpace {
     }
 
     public CustomerSpace(String contractId, String tenantId, String spaceId) {
-        this.contractId = contractId;
-        this.tenantId = tenantId;
-        this.spaceId = spaceId;
+        this.contractId = contractId.trim();
+        this.tenantId = tenantId.trim();
+        this.spaceId = spaceId.trim();
     }
 
     /**

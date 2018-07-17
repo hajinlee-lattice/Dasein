@@ -55,7 +55,7 @@ public class TenantResource {
     public boolean createTenant(@PathVariable String tenantId, //
             @RequestParam(value = "contractId") String contractId, //
             @RequestBody TenantRegistration registration) {
-        return tenantService.createTenant(contractId, tenantId, registration);
+        return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration);
     }
 
     @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")
