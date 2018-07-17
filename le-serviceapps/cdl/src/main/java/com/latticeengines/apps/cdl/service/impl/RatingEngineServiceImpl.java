@@ -92,6 +92,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Value("${cdl.rating.service.threadpool.size:20}")
     private Integer fetcherNum;
 
+    @Value("${cdl.rating.crossell.minimum.events:50}")
+    private Long minimumEvents;
+
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
@@ -515,6 +518,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 throw new LedpException(LedpCode.LEDP_40012,
                         new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() });
             }
+            Long noOfEvents = getModelingQueryCount(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT,
+                    null);
+            if (noOfEvents < minimumEvents) {
+                throw new LedpException(LedpCode.LEDP_40033,
+                        new String[] { aiModel.getId(), ratingEngine.getId(), noOfEvents.toString(),
+                                minimumEvents.toString(), CustomerSpace.parse(customerSpace).toString() });
+            }
             modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
             DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpace);
             RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
@@ -758,8 +768,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     List<RatingModel> ratingModels = ratingModelService
                             .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
                     if (ratingModels != null) {
-                        rm:
-                        for (RatingModel ratingModel : ratingModels) {
+                        rm: for (RatingModel ratingModel : ratingModels) {
                             ratingModelService.findRatingModelAttributeLookups(ratingModel);
                             Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
                             if (attributeLookups != null) {
@@ -813,8 +822,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         ratingEngineMap.put(ratingEngine.getPid(), ratingEngine.getDisplayName());
 
         if (ratingEngine.getSegment() != null) {
-            List<AttributeLookup> attributeLookups = segmentService.findDependingAttributes(
-                    Collections.singletonList(ratingEngine.getSegment()));
+            List<AttributeLookup> attributeLookups = segmentService
+                    .findDependingAttributes(Collections.singletonList(ratingEngine.getSegment()));
 
             for (AttributeLookup attributeLookup : attributeLookups) {
                 if (attributeLookup.getEntity() == BusinessEntity.Rating) {

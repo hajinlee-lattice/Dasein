@@ -735,6 +735,7 @@ public enum LedpCode {
     LEDP_40030("BucketMetadata not provided for AIModel {0} while setting ScoringIteration for RatingEngine {1}"), //
     LEDP_40031("No ModelSummary for AIModel {0}, cannot set it as the ScoringIteration for RatingEngine {1}"), //
     LEDP_40032("Curated attribute validation failed due to: {0}"), //
+    LEDP_40033("Cannot model iteration {0} of the Cross-Sell Model {1} since number of positive events({2}) is less then minimum required({3}). Customer Space {4}"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
