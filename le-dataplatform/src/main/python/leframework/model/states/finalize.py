@@ -42,11 +42,18 @@ class Finalize(State):
         # add the key data and append the scored data
         keyData = mediator.data[mediator.schema["keys"]].as_matrix().astype(str)
         eventData = mediator.data[mediator.schema["target"]].as_matrix().astype(str)
+        
         # write the scored data to file
+        predictedRevenue = None
+        if mediator.revenueColumn is not None:
+            predictedRevenue = mediator.data[mediator.schema["reserved"]["predictedrevenue"]].as_matrix()
         with open(mediator.modelLocalDir + mediator.name + "_scored.txt", 'wb') as scoredFile:
             scoredWriter = csv.writer(scoredFile)
             for i in range(0,keyData.size):
-                scoredWriter.writerow([keyData[i][0], '{:.6f}'.format(scored[i])])
+                if predictedRevenue is None:
+                    scoredWriter.writerow([keyData[i][0], '{:.6f}'.format(scored[i])])
+                else:
+                    scoredWriter.writerow([keyData[i][0], '{:.6f}'.format(scored[i]), '{:.6f}'.format(predictedRevenue[i])])
         # write the target data to file
         numpy.savetxt(mediator.modelLocalDir + mediator.name + "_target.txt", eventData, delimiter=",", fmt="%s")
 
