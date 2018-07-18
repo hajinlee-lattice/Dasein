@@ -107,8 +107,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     boolean isCdlMatch(MatchInput input) {
         CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
-        return  !Boolean.TRUE.equals(input.getDataCloudOnly())
-                && zkConfigurationService.isCDLTenant(customerSpace);
+        return !Boolean.TRUE.equals(input.getDataCloudOnly()) && zkConfigurationService.isCDLTenant(customerSpace);
     }
 
     @VisibleForTesting
@@ -204,9 +203,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (CollectionUtils.isNotEmpty(metadatas)) {
             output = appendMetadata(output, metadatas);
         } else {
-            output = appendMetadata(output, columnSelection, input.getDataCloudVersion());
+            output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());
         }
-        output = parseOutputFields(output);
+        output = parseOutputFields(output, input.getMetadataFields());
         MatchStatistics statistics = initializeStatistics(input);
         output.setStatistics(statistics);
         return output;
@@ -427,7 +426,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private void parseRecordForLookupId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-                                                InternalOutputRecord record) {
+            InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.LookupId)) {
             List<Integer> idPosList = keyPositionMap.get(MatchKey.LookupId);
             Integer idPos = idPosList.get(0);
@@ -460,10 +459,13 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep(threshold = 100L)
-    private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection, String dataCloudVersion) {
-        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
-        List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection, dataCloudVersion);
-        matchOutput.setMetadata(metadata);
+    private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection, String dataCloudVersion,
+            List<ColumnMetadata> metadatas) {
+        if (CollectionUtils.isEmpty(metadatas)) {
+            ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
+            metadatas = columnMetadataService.fromSelection(selection, dataCloudVersion);
+        }
+        matchOutput.setMetadata(metadatas);
         return matchOutput;
     }
 
@@ -473,13 +475,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return matchOutput;
     }
 
-    private MatchOutput parseOutputFields(MatchOutput matchOutput) {
-        List<ColumnMetadata> metadata = matchOutput.getMetadata();
-        List<String> fields = new ArrayList<>();
-        for (ColumnMetadata column : metadata) {
-            fields.add(column.getColumnId());
+    private MatchOutput parseOutputFields(MatchOutput matchOutput, List<String> metadataFields) {
+        if (CollectionUtils.isEmpty(metadataFields)) {
+            List<ColumnMetadata> metadata = matchOutput.getMetadata();
+            metadataFields = new ArrayList<>();
+            for (ColumnMetadata column : metadata) {
+                metadataFields.add(column.getColumnId());
+            }
         }
-        matchOutput.setOutputFields(fields);
+        matchOutput.setOutputFields(metadataFields);
         return matchOutput;
     }
 

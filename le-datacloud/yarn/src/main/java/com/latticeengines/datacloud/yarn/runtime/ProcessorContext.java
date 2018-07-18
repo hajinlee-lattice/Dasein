@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.I
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_REMOVED;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -141,6 +142,9 @@ public class ProcessorContext {
     private boolean disableDunsValidation;
 
     private MatchInput originalInput;
+
+    private List<ColumnMetadata> metadatas;
+    private List<String> metadataFields;
 
     public DataCloudJobConfiguration getJobConfiguration() {
         return jobConfiguration;
@@ -288,6 +292,14 @@ public class ProcessorContext {
 
     public ColumnSelection getColumnSelection() {
         return columnSelection;
+    }
+
+    public List<ColumnMetadata> getMetadatas() {
+        return metadatas;
+    }
+
+    public List<String> getMetadataFields() {
+        return metadataFields;
     }
 
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
@@ -483,9 +495,10 @@ public class ProcessorContext {
             } else {
                 log.info("Generating output schema using custom/union selection with "
                         + columnSelection.getColumns().size() + " columns");
-                List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
+                metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
                 outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
                         dataCloudVersion);
+                metadataFields = parseMetadataFields();
             }
             log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
             if (inputSchema == null) {
@@ -501,6 +514,14 @@ public class ProcessorContext {
         } else {
             throw new UnsupportedOperationException("Cannot support cdl bulk match yet.");
         }
+    }
+
+    private List<String> parseMetadataFields() {
+        List<String> fields = new ArrayList<>();
+        for (ColumnMetadata column : metadatas) {
+            fields.add(column.getColumnId());
+        }
+        return fields;
     }
 
     private Schema prefixFieldName(Schema schema, Schema offendingSchema, String prefix) {

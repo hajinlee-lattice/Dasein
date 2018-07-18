@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -74,6 +75,12 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("UnionSelection")
     private UnionSelection unionSelection;
+
+    @JsonIgnore
+    private List<ColumnMetadata> metadatas;
+    @JsonIgnore
+    private List<String> metadataFields;
+
     // =========================
     // END: column selections
     // =========================
@@ -170,7 +177,7 @@ public class MatchInput implements Fact, Dimension {
     // use cascading bulk match
     @JsonProperty("BulkOnly")
     private boolean bulkOnly;
-    
+
     @JsonProperty("PartialMatchEnabled")
     private boolean partialMatchEnabled;
 
@@ -394,6 +401,22 @@ public class MatchInput implements Fact, Dimension {
 
     public void setUnionSelection(UnionSelection unionSelection) {
         this.unionSelection = unionSelection;
+    }
+
+    public List<ColumnMetadata> getMetadatas() {
+        return metadatas;
+    }
+
+    public void setMetadatas(List<ColumnMetadata> metadatas) {
+        this.metadatas = metadatas;
+    }
+
+    public List<String> getMetadataFields() {
+        return metadataFields;
+    }
+
+    public void setMetadataFields(List<String> metadataFields) {
+        this.metadataFields = metadataFields;
     }
 
     @MetricTag(tag = "MatchEngine")
