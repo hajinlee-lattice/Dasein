@@ -100,7 +100,7 @@ public class DynamoPublishService extends AbstractPublishService
             }
             String sourceVersion = progress.getSourceVersion();
             String sourceName = progress.getPublication().getSourceName();
-            uploadData(tableName, sourceName, sourceVersion, configuration);
+            uploadData(dynamoService, tableName, sourceName, sourceVersion, configuration);
             progress = progressService.update(progress).destination(progress.getDestination()).progress(0.9f).commit();
             break;
         default:
@@ -146,13 +146,15 @@ public class DynamoPublishService extends AbstractPublishService
         log.info("Tagged dynamo table " + tableName + ": " + JsonUtils.serialize(tags));
     }
 
-    private void uploadData(String tableName, String sourceName, String sourceVersion, PublishToDynamoConfiguration configuration) {
+    private void uploadData(DynamoService dynamoService, String tableName, String sourceName, String sourceVersion,
+            PublishToDynamoConfiguration configuration) {
         log.info("Uploading data to dynamo table " + tableName);
         HdfsToDynamoConfiguration eaiConfig = generateEaiConfig(tableName, sourceName, sourceVersion, configuration);
         AppSubmission appSubmission = eaiProxy.submitEaiJob(eaiConfig);
         String appId = appSubmission.getApplicationIds().get(0);
         JobStatus jobStatus = jobService.waitFinalJobStatus(appId, ONE_DAY.intValue());
         if (!FinalApplicationStatus.SUCCEEDED.equals(jobStatus.getStatus())) {
+            resumeThroughput(dynamoService, tableName, configuration);
             throw new RuntimeException("Yarn application " + appId + " did not finish in SUCCEEDED status, but " //
                     + jobStatus.getStatus() + " instead.");
         }
