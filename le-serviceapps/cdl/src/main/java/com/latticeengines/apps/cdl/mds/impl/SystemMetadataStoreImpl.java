@@ -37,10 +37,12 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.mds.ChainedDecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratedMetadataStore;
+import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.mds.MdsDecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.mds.MetadataStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace0;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -222,9 +224,11 @@ public class SystemMetadataStoreImpl extends
         DecoratorFactory<Namespace1<String>> ratingDisplayDecorator = getRatingDecorator(ratingDisplayMetadataStore);
         DecoratorFactory<Namespace2<String, BusinessEntity>> lookupIdDecorator = getLookupIdDecorator(
                 externalSystemMetadataStore);
+        Decorator postRenderDecorator = new SystemPostRenderDecorator();
         List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList( //
                 lookupIdDecorator, //
-                ratingDisplayDecorator //
+                ratingDisplayDecorator, //
+                postRenderDecorator
 
         );
 
@@ -235,7 +239,7 @@ public class SystemMetadataStoreImpl extends
                 String tenantId = MultiTenantContext.getShortTenantId();
                 Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
                 Namespace lookupIdNs = Namespace.as(tenantId, entity);
-                return Arrays.asList(lookupIdNs, ratingNs);
+                return Arrays.asList(lookupIdNs, ratingNs, Namespace0.NS);
             }
         };
     }

@@ -69,7 +69,7 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 export JAVA_OPTS="${JAVA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
-if [ -f "/var/lib/jmxtrans-agent.jar" ]; then
+if [ "${DISABLE_JMXTRANS}" != "true" ] && [ -f "/var/lib/jmxtrans-agent.jar" ]; then
     echo "Found jmxtrans-agent.jar, setting its java agent"
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:/var/lib/jmxtrans-agent.jar=${CATALINA_HOME}/conf/jmxtrans-tomcat-query.xml"
 fi
