@@ -29,6 +29,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                 'prioritizeBy': false,
                 'modelSettingsTitle': false
             }
+        },
+        statusLabels: {
+            'custom_event': [ 'Job Started', 'Processing File', 'Matching to Data Cloud', 'Modeling and Scoring' ],
+            'cross_sell': [ 'Gathering Data', 'Profiling', 'Modeling', 'Scoring' ]
         }
     });
 
@@ -175,6 +179,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     vm.showSetting = function(setting) {
         // console.log('SETTINGS', setting, vm.modelSettingsSummary[vm.type][setting]);
         return vm.modelSettingsSummary[vm.type][setting];
+    }
+
+    vm.getStatusLabel = function(type, step) {
+        return vm.statusLabels[type][step];
     }
 
     vm.init();

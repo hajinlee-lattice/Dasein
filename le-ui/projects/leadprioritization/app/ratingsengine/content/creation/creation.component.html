@@ -82,7 +82,7 @@
 
             <h3>Job Status</h3>
             <dl class="step-progression">
-                <dt ng-class="{ 'started': (!vm.jobStarted || vm.startTimestamp)}">Job Started</dt>
+                <dt ng-class="{ 'started': (!vm.jobStarted || vm.startTimestamp)}">{{vm.getStatusLabel(vm.type, 0)}}</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
@@ -93,7 +93,7 @@
                         {{vm.startTimestamp | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
-                <dt ng-class="{ 'started': (vm.loadingData || vm.completedSteps.load_data) }">Processing File</dt>
+                <dt ng-class="{ 'started': (vm.loadingData || vm.completedSteps.load_data) }">{{vm.getStatusLabel(vm.type, 1)}}</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
@@ -104,7 +104,8 @@
                         {{vm.completedSteps.load_data | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
-                <dt ng-class="{ 'started': (vm.matchingToDataCloud || vm.completedSteps.create_global_target_market || vm.completedSteps.create_global_model) }">Matching to Data Cloud</dt>
+                <dt ng-class="{ 'started': (vm.matchingToDataCloud || vm.completedSteps.create_global_target_market || vm.completedSteps.create_global_model) }">{{vm.getStatusLabel(vm.type, 2)}}</dt>
+
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
@@ -120,7 +121,7 @@
                         {{vm.completedSteps.create_global_model | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
-                <dt ng-class="{ 'started': (vm.scoringTrainingSet || vm.completedSteps.score_training_set) }">Scoring Training Set</dt>
+                <dt ng-class="{ 'started': (vm.scoringTrainingSet || vm.completedSteps.score_training_set) }">{{vm.getStatusLabel(vm.type, 3)}}</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
