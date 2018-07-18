@@ -60,6 +60,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         put("get default dataCollection", url);
     }
 
+    @Deprecated
     public void updateDataCloudBuildNumber(String customerSpace, String dataCloudBuildNumber) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datacollection/datacloudbuildnumber/{dataCloudBuildNumber}",

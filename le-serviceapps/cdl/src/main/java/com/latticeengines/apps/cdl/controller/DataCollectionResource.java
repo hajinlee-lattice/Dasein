@@ -100,11 +100,9 @@ public class DataCollectionResource {
     public ResponseDocument<String> updateDataCloudVersion(@PathVariable String customerSpace,
             @PathVariable("dataCloudBuildNumber") String dataCloudBuildNumber) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
-        DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
-        status.setDataCloudBuildNumber(dataCloudBuildNumber);
-        saveDataCollectionStatus(customerSpace, version, status);
-        return ResponseDocument.successResponse(status.getDataCloudBuildNumber());
+        String newDataCloudVersion = dataCollectionService.updateDataCloudBuildNumber(customerSpace, null,
+                dataCloudBuildNumber);
+        return ResponseDocument.successResponse(newDataCloudVersion);
     }
 
     @GetMapping(value = "/tables")

@@ -722,7 +722,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     protected void updateDataCloudBuildNumber() {
         String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
-        dataCollectionProxy.updateDataCloudBuildNumber(mainTestTenant.getId(), currentDataCloudBuildNumber);
+        DataCollection.Version version = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(
+                mainTestTenant.getId(), version);
+        status.setDataCloudBuildNumber(currentDataCloudBuildNumber);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainTestTenant.getId(), status, version);
     }
 
     long countTableRole(TableRoleInCollection role) {

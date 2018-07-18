@@ -71,6 +71,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
+
+        // TODO: @kliu dataCloudBuildNumber has already been saved to DB in GenerateProcessingReport step.
         if (StringUtils.isNotBlank(configuration.getDataCloudBuildNumber())) {
             dataCollectionProxy.updateDataCloudBuildNumber(customerSpace.toString(),
                     configuration.getDataCloudBuildNumber());
