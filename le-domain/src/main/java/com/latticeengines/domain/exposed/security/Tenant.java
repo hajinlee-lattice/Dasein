@@ -78,11 +78,6 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Column(name = "STATUS")
     private String status;
 
-    @Enumerated(EnumType.STRING)
-    @JsonProperty("Type")
-    @Column(name = "TYPE")
-    private TenantType type;
-
     @JsonIgnore
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
     private List<TargetMarket> targetMarkets;
@@ -164,14 +159,6 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public TenantType getType() {
-        return type;
-    }
-
-    public void setType(TenantType type) {
-        this.type = type;
     }
 
     // TODO: Note - this is a terrible hack to avoid DP-2243

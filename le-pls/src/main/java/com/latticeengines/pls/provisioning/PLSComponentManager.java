@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -118,14 +117,6 @@ public class PLSComponentManager {
         List<LatticeProduct> products = tenantConfigService.getProducts(PLSTenantId);
         if (products.contains(LatticeProduct.LPA3) || products.contains(LatticeProduct.PD)) {
             tenant.setUiVersion("4.0");
-        }
-
-        if (products.contains(LatticeProduct.CG) && products.contains(LatticeProduct.LPA3)) {
-            tenant.setType(TenantType.CDL);
-        } else if (products.contains(LatticeProduct.LPA3)) {
-            tenant.setType(TenantType.LPI);
-        } else if (products.contains(LatticeProduct.LPA)) {
-            tenant.setType(TenantType.LP2);
         }
 
         try {
