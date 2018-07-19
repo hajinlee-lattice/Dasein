@@ -127,8 +127,8 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     private String fileName;
 
     @JsonProperty("table_name")
-    @Column(name = "TABLE_NAME", nullable = true)
-    private String tableName = "_DEPRECATED_";
+    @Column(name = "TABLE_NAME", nullable = false)
+    private String tableName;
 
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore

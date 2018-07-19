@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -73,7 +74,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         }
         String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExportJob.getExportPrefix(),
                 displayName, metadataSegmentExportJob.getType());
+        String tableName = "segment_export_" + UUID.randomUUID().toString().replaceAll("-", "_");
+
         metadataSegmentExportJob.setFileName(exportedFileName);
+        metadataSegmentExportJob.setTableName(tableName);
 
         metadataSegmentExportEntityMgr.create(metadataSegmentExportJob);
 

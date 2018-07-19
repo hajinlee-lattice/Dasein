@@ -118,8 +118,9 @@ public abstract class SegmentExportProcessor {
             configuredContactAttributes = getSchema(tenant.getId(), BusinessEntity.Contact);
         }
 
-        metadataSegmentExport = registerTableForExport(customerSpace, metadataSegmentExport,
-                configuredAccountAttributes, configuredContactAttributes, configuredRatingAttributes);
+        registerTableForExport(customerSpace, metadataSegmentExport, configuredAccountAttributes,
+                configuredContactAttributes, configuredRatingAttributes);
+
         config.setMetadataSegmentExport(metadataSegmentExport);
 
         Table segmentExportTable = metadataProxy.getTable(tenant.getId(), metadataSegmentExport.getTableName());
@@ -162,23 +163,18 @@ public abstract class SegmentExportProcessor {
 
     }
 
-    private MetadataSegmentExport registerTableForExport( //
+    private void registerTableForExport( //
             CustomerSpace customerSpace, MetadataSegmentExport metadataSegmentExportJob, //
             List<Attribute> configuredAccountAttributes, //
             List<Attribute> configuredContactAttributes, //
             List<Attribute> configuredRatingAttributes) {
 
         Tenant tenant = new Tenant(customerSpace.toString());
-        Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(tenant,
-                metadataSegmentExportJob.getType(), metadataSegmentExportJob.getFileName(), //
+        Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(tenant, metadataSegmentExportJob,
                 configuredAccountAttributes, configuredContactAttributes, configuredRatingAttributes);
 
         metadataProxy.createTable(tenant.getId(), segmentExportTable.getName(), segmentExportTable);
         segmentExportTable = metadataProxy.getTable(tenant.getId(), segmentExportTable.getName());
-
-        metadataSegmentExportJob.setTableName(segmentExportTable.getName());
-
-        return metadataSegmentExportJob;
     }
 
     private SegmentExportContext initSegmentExportContext(Tenant tenant, //

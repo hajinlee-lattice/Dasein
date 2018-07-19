@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -36,10 +36,14 @@ public class SegmentExportUtil {
     }
 
     public static Table constructSegmentExportTable(//
-            Tenant tenant, MetadataSegmentExportType exportType, String displayName,
+            Tenant tenant, MetadataSegmentExport metadataSegmentExportJob, //
             List<Attribute> configuredAccountAttributes, //
             List<Attribute> configuredContactAttributes, //
             List<Attribute> configuredRatingAttributes) {
+
+        String tableName = metadataSegmentExportJob.getTableName();
+        MetadataSegmentExportType exportType = metadataSegmentExportJob.getType();
+        String displayName = metadataSegmentExportJob.getFileName();
 
         Map<String, Attribute> combinedAttributes = new HashMap<>();
 
@@ -65,7 +69,6 @@ public class SegmentExportUtil {
         Table segmentExportTable = new Table();
         segmentExportTable.addAttributes(attributes);
 
-        String tableName = "segment_export_" + UUID.randomUUID().toString().replaceAll("-", "_");
         segmentExportTable.setName(tableName);
         segmentExportTable.setTableType(TableType.DATATABLE);
 
