@@ -12,8 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmaker.service.RecommendationCleanupService;
@@ -35,6 +38,9 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
     private PlayProxy playProxy;
 
     @Inject
+    private BatonService batonService;
+
+    @Inject
     private LpiPMRecommendation lpiPMRecommendation;
 
     @Override
@@ -43,6 +49,8 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
         List<Tenant> tenants = tenantEntityMgr.findAll();
         if (CollectionUtils.isNotEmpty(tenants)) {
             tenants.stream() //
+                    .filter(tenant -> batonService.isEnabled(CustomerSpace.parse(tenant.getId()),
+                            LatticeFeatureFlag.PLAYBOOK_MODULE))
                     .forEach(tenant -> cleanupForTenant(tenant));
         }
     }
