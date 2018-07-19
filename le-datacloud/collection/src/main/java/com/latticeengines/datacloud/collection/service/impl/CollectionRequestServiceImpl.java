@@ -236,10 +236,10 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         for (int i = 0; i < resultList.size(); ++i) {
             CollectionRequest curReq = resultList.get(i);
 
-            int reqRetries = curReq.getRetryAttempts() + 1;
-            curReq.setRetryAttempts(reqRetries);
+            int reqRetries = curReq.getRetryAttempts();
 
             if (reqRetries < maxRetries) {
+                curReq.setRetryAttempts(reqRetries + 1);
                 curReq.setPickupTime(null);
                 curReq.setPickupWorker(null);
                 curReq.setStatus(CollectionRequest.STATUS_READY);

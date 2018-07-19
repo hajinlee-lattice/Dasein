@@ -38,6 +38,7 @@ import com.latticeengines.datacloud.collection.service.CollectionRequestService;
 import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
@@ -74,6 +75,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     String ecrImageName;
     @Value("${datacloud.collection.ecs.cluster.name}")
     String ecsClusterName;
+    @Value("${datacloud.collection.ecs.task.def.name}")
+    String ecsTaskDefName;
     @Value("${datacloud.collection.ecs.task.cpu}")
     String ecsTaskCpu;
     @Value("${datacloud.collection.ecs.task.memory}")
@@ -82,8 +85,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     String ecsTaskSubnets;
     @Inject
     YarnConfiguration yarnConfiguration;
-    @Value("${datacloud.collection.hdfs.dir}")
-    String collectorHdfsDir;
+    @Inject
+    HdfsPathBuilder hdfsPathBuilder;
 
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
         return rawCollectionRequestService.addNewDomains(domains, vendor, reqId);
@@ -246,7 +249,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                             .withValue("true"));*/
             String taskArn = ecsService.spawECSTask(
                     ecsClusterName,
-                    vendor,
+                    ecsTaskDefName,
                     "python",
                     cmdLine,
                     ecsTaskSubnets);
@@ -375,7 +378,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             return false;
 
         //copy to hdfs
-        String hdfsDir = collectorHdfsDir + vendor + "/" + workerId + "/";
+        String hdfsDir = hdfsPathBuilder.constructCollectorWorkerDir(vendor, workerId).toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsDir);
         for (int i = 0; i < tmpFiles.size(); ++i)
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, tmpFiles.get(i).getPath(), hdfsDir);
@@ -480,6 +483,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     }
 
     private long prevMillis = 0;
+    private int prevActiveTasks = 0;
     public void service() {
         if (prevMillis == 0)
             log.info("datacloud collection job starts...");
@@ -487,10 +491,11 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         try {
             int activeTasks = getActiveTaskCount();
-            if (prevMillis == 0 || currentMillis - prevMillis >= 60 * 1000) {
+            if (prevMillis == 0 || prevActiveTasks != activeTasks || currentMillis - prevMillis >= 600 * 1000) {
                 prevMillis = currentMillis;
                 log.info("There're " + activeTasks + " tasks");
             }
+            prevActiveTasks = activeTasks;
 
             int reqs = transferRawRequests(true);
             if (reqs > 0)

@@ -18,6 +18,9 @@
 
     <import resource="classpath:ldc-collectiondb-persistence-context.xml" />
 
+    <import resource="classpath:datacloud-core-context.xml" />
+    <import resource="classpath:datacloud-core-persistence-context.xml" />
+
     <jpa:auditing/>
     <jpa:repositories base-package="com.latticeengines.datacloud.collection.repository"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"

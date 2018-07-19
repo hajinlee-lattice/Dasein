@@ -51,6 +51,7 @@ public class HdfsPathBuilder {
     private static final String RAW_DATA_FLOW_TYPE = "Raw";
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
+    private static final String COLLECTORS = "Collectors";
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
@@ -285,6 +286,10 @@ public class HdfsPathBuilder {
 
     public void changeHdfsPodId(String podId) {
         HdfsPodContext.changeHdfsPodId(podId);
+    }
+
+    public Path constructCollectorWorkerDir(String vendor, String workerId) {
+        return propDataDir().append(COLLECTORS).append(vendor).append(workerId);
     }
 
     @VisibleForTesting
