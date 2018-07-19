@@ -36,14 +36,6 @@ public enum MetadataSegmentExportType {
         Set<InterfaceName> attrName = new HashSet<>();
         this.fieldNamePairs = Arrays.asList(entities).stream() //
                 .map(e -> {
-                    String prefix;
-                    if (e == BusinessEntity.Account) {
-                        prefix = MetadataSegmentExport.ACCOUNT_PREFIX;
-                    } else if (e == BusinessEntity.Contact) {
-                        prefix = MetadataSegmentExport.CONTACT_PREFIX;
-                    } else {
-                        prefix = e.name() + "_";
-                    }
                     return getDefaultExportAttributesPair(e).stream() //
                             .map(p -> {
                                 InterfaceName interfaceName = p.getLeft();
@@ -52,7 +44,7 @@ public enum MetadataSegmentExportType {
                                     // give precedence to field from first type
                                     // if there are duplicate field names
                                     attrName.add(interfaceName);
-                                    res = new ImmutablePair<>(prefix + interfaceName.name(), p.getRight());
+                                    res = new ImmutablePair<>(interfaceName.name(), p.getRight());
                                 }
                                 return res;
                             }) //
