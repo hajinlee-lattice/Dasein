@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.serviceapps.cdl.DataCollectionPrechecks;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -22,7 +23,7 @@ public class DataCollectionResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenant();
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);
