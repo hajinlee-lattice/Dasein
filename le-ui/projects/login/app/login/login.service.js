@@ -21,6 +21,7 @@ angular.module('login')
 
     this.redirectToLP = function(Tenant) {
         var pathMap = {
+                "4.0": "/lp/",
                 "3.0": "/lp/",
                 "2.0": "/lp2/"
             },
