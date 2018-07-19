@@ -59,10 +59,21 @@ angular.module('login')
             LoginService.GetSessionDocument(tenant, username).then(function(data) {
                 if (data != null && data.Success === true) {
                     LoginStore.redirectToLP(tenant);
+                    vm.aptrinsic(vm.login, tenant);
                 } else {
                     vm.loginInProgress[tenant.DisplayName] = false;
                     showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
                 }
+            });
+        };
+
+        vm.aptrinsic = function(login, tenant) {
+            window.aptrinsic("identify", { 
+                "id": login.username // Required for logged in app users 
+            },{ 
+            //Account Fields 
+                "id": tenant.Identifier, //Required 
+                "name": tenant.DisplayName
             });
         };
 
