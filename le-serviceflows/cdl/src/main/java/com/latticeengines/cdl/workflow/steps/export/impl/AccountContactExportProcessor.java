@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.DataPage;
 
@@ -106,6 +105,7 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                 if (CollectionUtils.isNotEmpty(accountList)) {
                     for (Map<String, Object> account : accountList) {
                         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+
                         Object accountId = account.get(InterfaceName.AccountId.name());
                         List<Map<String, String>> matchingContacts = mapForAccountAndContactList.get(accountId);
 
@@ -113,15 +113,6 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                             for (Map<String, String> contact : matchingContacts) {
                                 for (Field field : schema.getFields()) {
                                     String fieldNameInAccountLookupResult = field.name();
-                                    if (fieldNameInAccountLookupResult
-                                            .startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
-                                        fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                                .substring(MetadataSegmentExport.ACCOUNT_PREFIX.length());
-                                    } else if (fieldNameInAccountLookupResult
-                                            .startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
-                                        fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                                .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
-                                    }
 
                                     if (contact.get(fieldNameInAccountLookupResult) != null) {
                                         builder.set(field.name(), contact.get(fieldNameInAccountLookupResult));
@@ -136,19 +127,13 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                     }
                 }
             } else if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT //
-                    || segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT_ID) {
+                    || segmentExportContext.getMetadataSegmentExport()
+                            .getType() == MetadataSegmentExportType.ACCOUNT_ID) {
                 for (Map<String, Object> account : accountList) {
                     GenericRecordBuilder builder = new GenericRecordBuilder(schema);
 
                     for (Field field : schema.getFields()) {
                         String fieldNameInAccountLookupResult = field.name();
-                        if (fieldNameInAccountLookupResult.startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
-                            fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                    .substring(MetadataSegmentExport.ACCOUNT_PREFIX.length());
-                        } else if (fieldNameInAccountLookupResult.startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
-                            fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                    .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
-                        }
                         setValueInAvroRecord(account, builder, field, fieldNameInAccountLookupResult);
                     }
                     records.add(builder.build());
@@ -159,13 +144,6 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
 
                     for (Field field : schema.getFields()) {
                         String fieldNameInAccountLookupResult = field.name();
-                        if (fieldNameInAccountLookupResult.startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
-                            fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                    .substring(MetadataSegmentExport.ACCOUNT_PREFIX.length());
-                        } else if (fieldNameInAccountLookupResult.startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
-                            fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                    .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
-                        }
                         setValueInAvroRecord(account, builder, field, fieldNameInAccountLookupResult);
                     }
                     records.add(builder.build());

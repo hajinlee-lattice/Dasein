@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.DataPage;
 
@@ -87,13 +86,7 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
 
                 for (Field field : schema.getFields()) {
                     String fieldNameInContactLookupResult = field.name();
-                    if (fieldNameInContactLookupResult.startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
-                        fieldNameInContactLookupResult = fieldNameInContactLookupResult
-                                .substring(MetadataSegmentExport.ACCOUNT_PREFIX.length());
-                    } else if (fieldNameInContactLookupResult.startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
-                        fieldNameInContactLookupResult = fieldNameInContactLookupResult
-                                .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
-                    }
+
                     setValueInAvroRecord(contact, builder, field, fieldNameInContactLookupResult);
                 }
                 records.add(builder.build());

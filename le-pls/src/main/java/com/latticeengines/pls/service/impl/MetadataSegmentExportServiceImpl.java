@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -8,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -22,13 +20,8 @@ import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -36,12 +29,7 @@ import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.workflow.SegmentExportWorkflowSubmitter;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Component("metadataSegmentExportService")
 public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportService {
@@ -55,22 +43,13 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     private MetadataSegmentExportEntityMgr metadataSegmentExportEntityMgr;
 
     @Inject
-    private MetadataProxy metadataProxy;
-
-    @Inject
     private EntityProxy entityProxy;
 
     @Inject
     private SegmentExportWorkflowSubmitter segmentExportWorkflowSubmitter;
 
-    @Inject
-    private ServingStoreProxy servingStoreProxy;
-
     @Value("${pls.segment.export.max}")
     private Long maxEntryLimitForExport;
-
-    private List<Predefined> filterByPredefinedSelection = //
-            Arrays.asList(ColumnSelection.Predefined.Enrichment);
 
     @Override
     public List<MetadataSegmentExport> getSegmentExports() {
@@ -95,8 +74,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExportJob.getExportPrefix(),
                 displayName, metadataSegmentExportJob.getType());
         metadataSegmentExportJob.setFileName(exportedFileName);
-
-        metadataSegmentExportJob = registerTableForExport(metadataSegmentExportJob);
 
         metadataSegmentExportEntityMgr.create(metadataSegmentExportJob);
 
@@ -190,56 +167,9 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         return new CustomerSpaceHdfsFileDownloader(builder);
     }
 
-    private MetadataSegmentExport registerTableForExport(MetadataSegmentExport metadataSegmentExportJob) {
-        Tenant tenant = MultiTenantContext.getTenant();
-
-        MetadataSegmentExportType exportType = metadataSegmentExportJob.getType();
-        List<Attribute> configuredAccountAttributes = null;
-        List<Attribute> configuredContactAttributes = null;
-        if (exportType == MetadataSegmentExportType.ACCOUNT
-                || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
-            configuredAccountAttributes = getSchema(tenant.getId(), BusinessEntity.Account);
-        }
-
-        if (exportType == MetadataSegmentExportType.CONTACT
-                || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
-            configuredContactAttributes = getSchema(tenant.getId(), BusinessEntity.Contact);
-        }
-
-        Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(tenant,
-                metadataSegmentExportJob.getType(), metadataSegmentExportJob.getFileName(), configuredAccountAttributes,
-                configuredContactAttributes);
-
-        metadataProxy.createTable(tenant.getId(), segmentExportTable.getName(), segmentExportTable);
-        segmentExportTable = metadataProxy.getTable(tenant.getId(), segmentExportTable.getName());
-
-        metadataSegmentExportJob.setTableName(segmentExportTable.getName());
-
-        return metadataSegmentExportJob;
-    }
-
     private MetadataSegmentExport submitExportWorkflowJob(MetadataSegmentExport metadataSegmentExportJob) {
         ApplicationId applicationId = segmentExportWorkflowSubmitter.submit(metadataSegmentExportJob);
         metadataSegmentExportJob.setApplicationId(applicationId.toString());
         return updateSegmentExportJob(metadataSegmentExportJob);
-    }
-
-    private List<Attribute> getSchema(String customerSpace, BusinessEntity entity) {
-        List<ColumnMetadata> cms = servingStoreProxy
-                .getDecoratedMetadata(customerSpace, entity, filterByPredefinedSelection).collectList().block();
-
-        Mono<List<Attribute>> stream = Flux.fromIterable(cms) //
-                .map(metadata -> {
-                    Attribute attribute = new Attribute();
-                    attribute.setName(metadata.getAttrName());
-                    attribute.setDisplayName(metadata.getDisplayName());
-                    attribute.setSourceLogicalDataType(
-                            metadata.getLogicalDataType() == null ? "" : metadata.getLogicalDataType().name());
-                    attribute.setPhysicalDataType(Type.STRING.name());
-                    return attribute;
-                }) //
-                .collectList();
-
-        return stream.block();
     }
 }

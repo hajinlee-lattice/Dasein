@@ -24,8 +24,6 @@ public class MetadataSegmentExportTypeUnitTestNG {
             Assert.assertNotNull(p.getRight());
             Assert.assertTrue(StringUtils.isNotBlank(p.getLeft()));
             Assert.assertTrue(StringUtils.isNotBlank(p.getRight()));
-            Assert.assertTrue(p.getLeft().contains("_"));
-            Assert.assertNotNull(InterfaceName.valueOf(p.getLeft().substring(p.getLeft().indexOf("_") + 1)));
         });
         Assert.assertEquals(fieldNamePairs.size(), 9);
     }
@@ -40,8 +38,6 @@ public class MetadataSegmentExportTypeUnitTestNG {
             Assert.assertNotNull(p.getRight());
             Assert.assertTrue(StringUtils.isNotBlank(p.getLeft()));
             Assert.assertTrue(StringUtils.isNotBlank(p.getRight()));
-            Assert.assertTrue(p.getLeft().contains("_"));
-            Assert.assertNotNull(InterfaceName.valueOf(p.getLeft().substring(p.getLeft().indexOf("_") + 1)));
         });
         Assert.assertEquals(fieldNamePairs.size(), 5);
     }
@@ -56,8 +52,6 @@ public class MetadataSegmentExportTypeUnitTestNG {
             Assert.assertNotNull(p.getRight());
             Assert.assertTrue(StringUtils.isNotBlank(p.getLeft()));
             Assert.assertTrue(StringUtils.isNotBlank(p.getRight()));
-            Assert.assertTrue(p.getLeft().contains("_"));
-            Assert.assertNotNull(InterfaceName.valueOf(p.getLeft().substring(p.getLeft().indexOf("_") + 1)));
         });
         Assert.assertEquals(fieldNamePairs.size(), 12);
     }

@@ -31,7 +31,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -44,9 +43,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFields {
-
-    public static final String ACCOUNT_PREFIX = BusinessEntity.Account + "_";
-    public static final String CONTACT_PREFIX = BusinessEntity.Contact + "_";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -131,8 +127,8 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     private String fileName;
 
     @JsonProperty("table_name")
-    @Column(name = "TABLE_NAME", nullable = false)
-    private String tableName;
+    @Column(name = "TABLE_NAME", nullable = true)
+    private String tableName = "_DEPRECATED_";
 
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore

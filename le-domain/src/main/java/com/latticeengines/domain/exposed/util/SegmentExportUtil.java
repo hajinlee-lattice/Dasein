@@ -9,7 +9,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.avro.Schema.Type;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -37,9 +35,11 @@ public class SegmentExportUtil {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public static Table constructSegmentExportTable(Tenant tenant, MetadataSegmentExportType exportType,
-            String displayName, List<Attribute> configuredAccountAttributes,
-            List<Attribute> configuredContactAttributes) {
+    public static Table constructSegmentExportTable(//
+            Tenant tenant, MetadataSegmentExportType exportType, String displayName,
+            List<Attribute> configuredAccountAttributes, //
+            List<Attribute> configuredContactAttributes, //
+            List<Attribute> configuredRatingAttributes) {
 
         Map<String, Attribute> combinedAttributes = new HashMap<>();
 
@@ -53,11 +53,6 @@ public class SegmentExportUtil {
                     return attribute;
                 }) //
                 .forEach(att -> combinedAttributes.put(att.getName(), att));
-
-        updateCombinedAttributeMap(configuredAccountAttributes, combinedAttributes,
-                MetadataSegmentExport.ACCOUNT_PREFIX);
-        updateCombinedAttributeMap(configuredContactAttributes, combinedAttributes,
-                MetadataSegmentExport.CONTACT_PREFIX);
 
         Mono<List<Attribute>> stream = Flux.fromIterable(combinedAttributes.keySet()) //
                 .map(name -> combinedAttributes.get(name))
@@ -76,23 +71,8 @@ public class SegmentExportUtil {
 
         segmentExportTable.setDisplayName(displayName);
         segmentExportTable.setTenant(tenant);
-        segmentExportTable.setTenantId(tenant.getPid());
         segmentExportTable.setMarkedForPurge(false);
         return segmentExportTable;
-    }
-
-    private static void updateCombinedAttributeMap(List<Attribute> configuredAttributes,
-            Map<String, Attribute> combinedAttributes, String prefix) {
-        if (CollectionUtils.isNotEmpty(configuredAttributes)) {
-            configuredAttributes.stream().map(att -> {
-                Attribute attribute = new Attribute();
-                attribute.setName(prefix + att.getName());
-                attribute.setDisplayName(att.getDisplayName());
-                attribute.setSourceLogicalDataType(att.getSourceLogicalDataType());
-                attribute.setPhysicalDataType(Type.STRING.name());
-                return attribute;
-            }).forEach(att -> combinedAttributes.put(att.getName(), att));
-        }
     }
 
     public static String constructFileName(String exportPrefix, String segmentDisplayName,
