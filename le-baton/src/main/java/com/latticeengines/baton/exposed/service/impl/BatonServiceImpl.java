@@ -36,6 +36,7 @@ import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -189,7 +190,9 @@ public class BatonServiceImpl implements BatonService {
 
     @Override
     public Collection<TenantDocument> getTenantsInCache(String contractId) {
+        PerformanceTimer timer1 = new PerformanceTimer("cache initalized", log);
         TreeCache cache = getTreeCache();
+        timer1.close();
         if (contractId != null) {
             try {
                 ContractInfo contractInfo = ContractLifecycleManager.getInfoInCache(contractId, cache);
@@ -199,7 +202,10 @@ public class BatonServiceImpl implements BatonService {
                 return null;
             }
         } else {
-            return getTenantsInCache(null, null, cache);
+            PerformanceTimer timer2 = new PerformanceTimer("load tenants", log);
+            Collection<TenantDocument> results = getTenantsInCache(null, null, cache);
+            timer2.close();
+            return results;
         }
     }
 
