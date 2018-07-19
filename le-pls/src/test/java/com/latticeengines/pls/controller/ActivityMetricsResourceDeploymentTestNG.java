@@ -25,19 +25,14 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
-import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetricsValidation;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ActionService;
-import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ActivityMetricsResourceDeploymentTestNG.class);
 
     @Inject
     private ActionService actionService;
-
-    @Inject
-    private CDLTestDataService cdlTestDataService;
 
     private List<ActivityMetrics> created, updated, secUpdated, invalid;
 
@@ -118,24 +113,6 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
             Assert.assertTrue(e.getMessage().contains(LedpCode.LEDP_40032.name()));
         }
         Assert.assertTrue(hasException);
-    }
-
-    @Test(groups = "deployment")
-    public void testPrecheck() {
-        ActivityMetricsValidation validation = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/datacollection/metrics/precheck", ActivityMetricsValidation.class);
-        Assert.assertNotNull(validation);
-        Assert.assertTrue(validation.getDisableAll());
-        Assert.assertTrue(validation.getDisableShareOfWallet());
-        Assert.assertTrue(validation.getDisableMargin());
-
-        cdlTestDataService.populateData(mainTestTenant.getId());
-        validation = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/datacollection/metrics/precheck", ActivityMetricsValidation.class);
-        Assert.assertNotNull(validation);
-        Assert.assertTrue(validation.getDisableAll());
-        Assert.assertTrue(validation.getDisableShareOfWallet());
-        Assert.assertTrue(validation.getDisableMargin());
     }
 
     private void verifyActions(int cnt) {

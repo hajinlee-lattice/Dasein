@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller.datacollection;
 
-
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,7 +16,9 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.cdl.DataCollectionPrechecks;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.pls.service.DataCollectionPrecheckService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
@@ -28,13 +29,19 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/datacollection")
 public class DataCollectionResource {
-
     public static final String ATTR_CONFIG_PATH = "/attrconfig";
 
+    private final DataCollectionProxy dataCollectionProxy;
+    private final CDLAttrConfigProxy cdlAttrConfigProxy;
+    private final DataCollectionPrecheckService dataCollectionPrecheckService;
+
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
-    @Inject
-    private CDLAttrConfigProxy cdlAttrConfigProxy;
+    public DataCollectionResource(DataCollectionProxy dataCollectionProxy, CDLAttrConfigProxy cdlAttrConfigProxy,
+                                  DataCollectionPrecheckService dataCollectionPrecheckService) {
+        this.dataCollectionProxy = dataCollectionProxy;
+        this.cdlAttrConfigProxy = cdlAttrConfigProxy;
+        this.dataCollectionPrecheckService = dataCollectionPrecheckService;
+    }
 
     @RequestMapping(value = ATTR_CONFIG_PATH, //
             method = RequestMethod.GET, //
@@ -74,8 +81,14 @@ public class DataCollectionResource {
     @ApiOperation(value = "Get attr data collection status")
     public DataCollectionStatus getCollectionStatus(
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        DataCollectionStatus status = dataCollectionProxy
-                .getOrCreateDataCollectionStatus(MultiTenantContext.getCustomerSpace().toString(), version);
-        return status;
+       return dataCollectionProxy.getOrCreateDataCollectionStatus(
+               MultiTenantContext.getCustomerSpace().toString(), version);
+    }
+
+    @GetMapping(value = "/precheck")
+    @ApiOperation(value = "Check whether Account, Product, Transaction and their attributes exist in serving store.")
+    public DataCollectionPrechecks precheck() {
+        return dataCollectionPrecheckService.validateDataCollectionPrechecks(
+                MultiTenantContext.getCustomerSpace().toString());
     }
 }

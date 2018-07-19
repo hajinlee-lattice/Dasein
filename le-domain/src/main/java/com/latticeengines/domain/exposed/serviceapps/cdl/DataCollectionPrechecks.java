@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ActivityMetricsValidation {
+public class DataCollectionPrechecks {
     @JsonProperty
-    private boolean disableAll;
+    private boolean disableAllCuratedMetrics;
 
     @JsonProperty
     private boolean disableShareOfWallet;
@@ -14,12 +14,15 @@ public class ActivityMetricsValidation {
     @JsonProperty
     private boolean disableMargin;
 
-    public boolean getDisableAll() {
-        return disableAll;
+    @JsonProperty
+    private boolean disableCrossSellModeling;
+
+    public boolean getDisableAllCuratedMetrics() {
+        return disableAllCuratedMetrics;
     }
 
-    public void setDisableAll(boolean disableAll) {
-        this.disableAll = disableAll;
+    public void setDisableAllCuratedMetrics(boolean disableAllCuratedMetrics) {
+        this.disableAllCuratedMetrics = disableAllCuratedMetrics;
     }
 
     public boolean getDisableShareOfWallet() {
@@ -36,5 +39,13 @@ public class ActivityMetricsValidation {
 
     public void setDisableMargin(boolean disableMargin) {
         this.disableMargin = disableMargin;
+    }
+
+    public boolean getDisableCrossSellModeling() {
+        return disableCrossSellModeling;
+    }
+
+    public void setDisableCrossSellModeling(boolean disableCrossSellModeling) {
+        this.disableCrossSellModeling = disableCrossSellModeling;
     }
 }
