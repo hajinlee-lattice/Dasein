@@ -36,6 +36,8 @@ def testOpts(args):
     profile_opts = ['-P%s' % p for p in args.profiles.split(',')]
     group_opts = [] if args.groups is None else ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups]
     extra_opts = []
+    if 'jetty' in args.profiles.split(','):
+        extra_opts.append('-Dorg.eclipse.jetty.annotations.maxWait=120')
     if len(group_opts) == 0:
         if 'functional' in args.profiles.split(',') or 'functional2' in args.profiles.split(','):
             group_opts = [ '-Dfunctional.groups=functional' ]
@@ -45,7 +47,7 @@ def testOpts(args):
         profiles = [p for p in args.profiles.split(",") if p not in ('functional', 'deployment')]
         profiles.append('testng')
         testng_xml = '-Dtestng.xml=src/test/resources/testng/%s.xml' % args.xml
-        extra_opts = [ testng_xml ]
+        extra_opts.append(testng_xml)
         profile_opts = ['-P%s' % p for p in profiles]
     if args.command == "verify":
         return profile_opts + group_opts + extra_opts + [testPattern, 'clean'] + args.command.split(',')
@@ -74,7 +76,7 @@ if __name__ == "__main__":
     my_env = os.environ
     my_env["MAVEN_OPTS"] = "-Xmx1g"
     if args.command == "jetty:run":
-        my_env["MAVEN_OPTS"] += " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n"
+        my_env["MAVEN_OPTS"] += " -Xdebug -Xnoagent -Djava.compiler=NONE -Dorg.eclipse.jetty.annotations.maxWait=120 -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n"
     commands = ['mvn'] + propDirsOpts() + commonOpts() + testOpts(args)
     print('Executing [with common opts added]: ', ' '.join(commands))
     subprocess.call(commands, env=my_env)
