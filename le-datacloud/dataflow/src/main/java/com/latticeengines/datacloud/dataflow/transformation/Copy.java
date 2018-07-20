@@ -3,8 +3,12 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import static com.latticeengines.datacloud.dataflow.transformation.Copy.BEAN_NAME;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,12 +42,14 @@ public class Copy extends TypesafeDataFlowBuilder<CopierParameters> {
             first = first.merge(remaining);
         }
 
-        if (parameters.retainAttrs != null && !parameters.retainAttrs.isEmpty()) {
-            first = first.retain(new FieldList(parameters.retainAttrs));
+        List<String> retainAttrs = filterAttrs(first, parameters.retainAttrs);
+        if (retainAttrs != null && !retainAttrs.isEmpty()) {
+            first = first.retain(new FieldList(retainAttrs));
         }
 
-        if (parameters.discardAttrs != null && !parameters.discardAttrs.isEmpty()) {
-            first = first.discard(new FieldList(parameters.discardAttrs));
+        List<String> discardAttrs = filterAttrs(first, parameters.discardAttrs);
+        if (discardAttrs != null && !discardAttrs.isEmpty()) {
+            first = first.discard(new FieldList(discardAttrs));
         }
 
         if (parameters.sortKeys != null && !parameters.sortKeys.isEmpty()) {
@@ -51,6 +57,16 @@ public class Copy extends TypesafeDataFlowBuilder<CopierParameters> {
         }
 
         return first;
+    }
+
+    private List<String> filterAttrs(Node node, List<String> attrs) {
+        if (CollectionUtils.isEmpty(attrs)) {
+            return attrs;
+        }
+        Set<String> attrSet = new HashSet<>();
+        List<String> fieldNames = node.getFieldNames();
+        return attrs.stream().filter(attr -> fieldNames.contains(attr) && attrSet.add(attr))
+                .collect(Collectors.toList());
     }
 
 }
