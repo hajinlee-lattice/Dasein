@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.avro.Schema.Type;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,9 @@ public class SegmentExportUtil {
                 }) //
                 .forEach(att -> combinedAttributes.put(att.getName(), att));
 
+        updateCombinedAttributeMap(configuredAccountAttributes, combinedAttributes);
+        updateCombinedAttributeMap(configuredContactAttributes, combinedAttributes);
+
         Mono<List<Attribute>> stream = Flux.fromIterable(combinedAttributes.keySet()) //
                 .map(name -> combinedAttributes.get(name))
                 .collectSortedList((a, b) -> a.getName().compareTo(b.getName()));
@@ -76,6 +80,20 @@ public class SegmentExportUtil {
         segmentExportTable.setTenant(tenant);
         segmentExportTable.setMarkedForPurge(false);
         return segmentExportTable;
+    }
+
+    private static void updateCombinedAttributeMap(List<Attribute> configuredAttributes,
+            Map<String, Attribute> combinedAttributes) {
+        if (CollectionUtils.isNotEmpty(configuredAttributes)) {
+            configuredAttributes.stream().map(att -> {
+                Attribute attribute = new Attribute();
+                attribute.setName(att.getName());
+                attribute.setDisplayName(att.getDisplayName());
+                attribute.setSourceLogicalDataType(att.getSourceLogicalDataType());
+                attribute.setPhysicalDataType(Type.STRING.name());
+                return attribute;
+            }).forEach(att -> combinedAttributes.put(att.getName(), att));
+        }
     }
 
     public static String constructFileName(String exportPrefix, String segmentDisplayName,
