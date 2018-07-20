@@ -48,7 +48,7 @@ public class DedupeHelperImpl implements DedupeHelper {
             } else {
                 dedupeId = outputRecord.getMatchedDomain() != null ? outputRecord.getMatchedDomain() : domain;
             }
-            log.info("Matched, domain=" + domain + " dedupeId=" + dedupeId);
+            log.debug("Matched, domain=" + domain + " dedupeId=" + dedupeId);
             addDedupeValues(allValues, dedupeId, isRemoved);
             return;
         }
@@ -63,7 +63,7 @@ public class DedupeHelperImpl implements DedupeHelper {
         String country = nameLocation != null ? nameLocation.getCountry() : null;
         boolean hasNoNameLocation = StringUtils.isEmpty(name) && StringUtils.isEmpty(country);
 
-        log.info("No matched, domain=" + domain + " name=" + name + " country=" + country + ", has nameloation="
+        log.debug("No matched, domain=" + domain + " name=" + name + " country=" + country + ", has nameloation="
                 + hasNoNameLocation + " is public=" + isPublicDomain + " Feature num=" + numFeatureValue
                 + " name location=" + nameLocation);
 
