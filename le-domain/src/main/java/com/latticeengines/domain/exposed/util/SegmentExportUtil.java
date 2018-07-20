@@ -61,6 +61,7 @@ public class SegmentExportUtil {
 
         updateCombinedAttributeMap(configuredAccountAttributes, combinedAttributes);
         updateCombinedAttributeMap(configuredContactAttributes, combinedAttributes);
+        updateCombinedAttributeMap(configuredRatingAttributes, combinedAttributes);
 
         Mono<List<Attribute>> stream = Flux.fromIterable(combinedAttributes.keySet()) //
                 .map(name -> combinedAttributes.get(name))
