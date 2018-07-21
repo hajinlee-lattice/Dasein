@@ -44,6 +44,15 @@
 	                 </select>
                 </div>
                 <div class="col col-md-12 col-sm-12 col-xs-12">
+                 	<label class="control-label">
+                        Type
+                    </label>
+                     <select class="form-control"
+	                                ng-options="option for option in availableTenantTypes"
+	                                ng-model="tenantInfo.properties.tenantType">
+	                 </select>
+                </div>
+                <div class="col col-md-12 col-sm-12 col-xs-12">
                     <label class="control-label">
                         Description
                     </label>

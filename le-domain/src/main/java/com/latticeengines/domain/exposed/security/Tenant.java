@@ -11,8 +11,6 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -77,6 +75,10 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @JsonProperty("Status")
     @Column(name = "STATUS")
     private String status;
+
+    @JsonProperty("TenantType")
+    @Column(name = "TENANT_TYPE")
+    private String tenantType;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
@@ -159,6 +161,14 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getTenantType() {
+        return tenantType;
+    }
+
+    public void setTenantType(String tenantType) {
+        this.tenantType = tenantType;
     }
 
     // TODO: Note - this is a terrible hack to avoid DP-2243

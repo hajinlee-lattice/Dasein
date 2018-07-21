@@ -5,6 +5,7 @@
       "http://bodcdevvint207.dev.lattice.local:8081", "http://bodcdevvint187.dev.lattice.local:8081"] } },
 	{ "Node": "Product", "Data": {"Type": "options", "Options": ["Lead Prioritization"], "DynamicOptions": true } },
     { "Node": "Topology", "Data": {"Type": "options", "Options": ["Marketo"], "DynamicOptions": true } },
-    { "Node": "Status", "Data": {"Type": "options", "Options": ["PRODUCTION", "TEST", "DEMO"]} }
+    { "Node": "Status", "Data": {"Type": "options", "Options": ["ACTIVE", "INACTIVE"]} },
+    { "Node": "TenantType", "Data": {"Type": "options", "Options": ["TRAINING", "QA", "DEMO", "CUSTOMER", "STAGING"]}}
   ]
 }

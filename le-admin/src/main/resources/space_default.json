@@ -5,6 +5,7 @@
 	{ "Node": "Product", "Data": "Lead Prioritization" },
     { "Node": "Products", "Data": "[\"Lead Prioritization\",\"Buyer Insights\"]" },
 	{ "Node": "Topology", "Data": "Marketo" },
-	{ "Node": "Status", "Data": "PRODUCTION" }
+	{ "Node": "Status", "Data": "ACTIVE" },
+	{ "Node": "TenantType", "Data": "TRAINING"}
   ]
 }

@@ -122,7 +122,9 @@ public class PLSComponentManager {
         try {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
             tenant.setStatus(info.properties.status);
-            LOGGER.info("registered tenant's status is " + tenant.getStatus());
+            tenant.setTenantType(info.properties.tenantType);
+            LOGGER.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is "
+                    + tenant.getTenantType());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18028, "Failed to retrieve tenants properties", e);
         }
