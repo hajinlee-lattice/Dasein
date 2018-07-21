@@ -10,7 +10,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -24,27 +26,28 @@ public enum MetadataSegmentExportType {
 
     String displayName;
 
-    List<Pair<String, String>> fieldNamePairs;
+    List<Triple<BusinessEntity, String, String>> defaultAttributeTuples;
 
     MetadataSegmentExportType(String displayName, InterfaceName field, String fieldDisplayName) {
         this.displayName = displayName;
-        this.fieldNamePairs = Collections.singletonList(new ImmutablePair<>(field.name(), fieldDisplayName));
+        this.defaultAttributeTuples = Collections
+                .singletonList(new ImmutableTriple<>(BusinessEntity.Account, field.name(), fieldDisplayName));
     }
 
     MetadataSegmentExportType(String displayName, BusinessEntity... entities) {
         this.displayName = displayName;
         Set<InterfaceName> attrName = new HashSet<>();
-        this.fieldNamePairs = Arrays.asList(entities).stream() //
+        this.defaultAttributeTuples = Arrays.asList(entities).stream() //
                 .map(e -> {
                     return getDefaultExportAttributesPair(e).stream() //
                             .map(p -> {
                                 InterfaceName interfaceName = p.getLeft();
-                                Pair<String, String> res = null;
+                                Triple<BusinessEntity, String, String> res = null;
                                 if (!attrName.contains(interfaceName)) {
                                     // give precedence to field from first type
                                     // if there are duplicate field names
                                     attrName.add(interfaceName);
-                                    res = new ImmutablePair<>(interfaceName.name(), p.getRight());
+                                    res = new ImmutableTriple<>(e, interfaceName.name(), p.getRight());
                                 }
                                 return res;
                             }) //
@@ -59,8 +62,8 @@ public enum MetadataSegmentExportType {
         return displayName;
     }
 
-    public List<Pair<String, String>> getFieldNamePairs() {
-        return fieldNamePairs;
+    public List<Triple<BusinessEntity, String, String>> getDefaultAttributeTuples() {
+        return defaultAttributeTuples;
     }
 
     public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {

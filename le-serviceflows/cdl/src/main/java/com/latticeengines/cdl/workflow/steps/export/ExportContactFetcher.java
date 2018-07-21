@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -100,7 +101,6 @@ public class ExportContactFetcher {
     private void processContToUpdMapForAccContList(Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
             Map<String, Object> contact) {
         Object accountIdObj = contact.get(InterfaceName.AccountId.name());
-
         if (accountIdObj != null) {
             if (!mapForAccountAndContactList.containsKey(accountIdObj)) {
                 mapForAccountAndContactList.put(accountIdObj, new ArrayList<>());
@@ -113,8 +113,10 @@ public class ExportContactFetcher {
     private Map<String, String> convertValuesToString(Map<String, Object> contact) {
         Map<String, String> contactWithStringValues = new HashMap<>();
         for (String key : contact.keySet()) {
-            contactWithStringValues.put(key, contact.get(key) == null ? null : contact.get(key).toString());
+            String keyWithPrefix = BusinessEntity.Contact.name() + SegmentExportProcessor.SEPARATOR + key;
+            contactWithStringValues.put(keyWithPrefix, contact.get(key) == null ? null : contact.get(key).toString());
         }
+
         return contactWithStringValues;
     }
 

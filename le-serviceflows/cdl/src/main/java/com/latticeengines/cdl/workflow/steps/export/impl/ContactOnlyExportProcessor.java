@@ -85,7 +85,9 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
                 GenericRecordBuilder builder = new GenericRecordBuilder(schema);
 
                 for (Field field : schema.getFields()) {
-                    String fieldNameInContactLookupResult = field.name();
+                    String fieldNameInContactLookupResult = field.name()
+                            .substring(field.name().indexOf(SegmentExportProcessor.SEPARATOR)
+                                    + SegmentExportProcessor.SEPARATOR.length());
 
                     setValueInAvroRecord(contact, builder, field, fieldNameInContactLookupResult);
                 }

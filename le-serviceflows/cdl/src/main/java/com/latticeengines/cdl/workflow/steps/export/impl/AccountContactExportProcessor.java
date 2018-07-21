@@ -111,11 +111,14 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
 
                         if (CollectionUtils.isNotEmpty(matchingContacts)) {
                             for (Map<String, String> contact : matchingContacts) {
-                                for (Field field : schema.getFields()) {
-                                    String fieldNameInAccountLookupResult = field.name();
 
-                                    if (contact.get(fieldNameInAccountLookupResult) != null) {
-                                        builder.set(field.name(), contact.get(fieldNameInAccountLookupResult));
+                                for (Field field : schema.getFields()) {
+                                    String fieldNameInAccountLookupResult = field.name()
+                                            .substring(field.name().indexOf(SegmentExportProcessor.SEPARATOR)
+                                                    + SegmentExportProcessor.SEPARATOR.length());
+
+                                    if (contact.get(field.name()) != null) {
+                                        builder.set(field.name(), contact.get(field.name()));
                                     } else {
                                         setValueInAvroRecord(account, builder, field, fieldNameInAccountLookupResult);
                                     }
@@ -133,22 +136,15 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                     GenericRecordBuilder builder = new GenericRecordBuilder(schema);
 
                     for (Field field : schema.getFields()) {
-                        String fieldNameInAccountLookupResult = field.name();
-                        setValueInAvroRecord(account, builder, field, fieldNameInAccountLookupResult);
-                    }
-                    records.add(builder.build());
-                }
-            } else if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.CONTACT) {
-                for (Map<String, Object> account : accountList) {
-                    GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-
-                    for (Field field : schema.getFields()) {
-                        String fieldNameInAccountLookupResult = field.name();
+                        String fieldNameInAccountLookupResult = field.name()
+                                .substring(field.name().indexOf(SegmentExportProcessor.SEPARATOR)
+                                        + SegmentExportProcessor.SEPARATOR.length());
                         setValueInAvroRecord(account, builder, field, fieldNameInAccountLookupResult);
                     }
                     records.add(builder.build());
                 }
             }
+
             for (GenericRecord datum : records) {
                 dataFileWriter.append(datum);
             }

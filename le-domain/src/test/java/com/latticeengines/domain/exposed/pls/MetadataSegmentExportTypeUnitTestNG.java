@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,58 +16,66 @@ public class MetadataSegmentExportTypeUnitTestNG {
 
     @Test(groups = "unit")
     public void testAccountType() {
-        List<Pair<String, String>> fieldNamePairs = MetadataSegmentExportType.ACCOUNT.getFieldNamePairs();
-        Assert.assertTrue(CollectionUtils.isNotEmpty(fieldNamePairs));
-        fieldNamePairs.stream().forEach(p -> {
+        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = MetadataSegmentExportType.ACCOUNT
+                .getDefaultAttributeTuples();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(defaultAttributeTuples));
+        defaultAttributeTuples.stream().forEach(p -> {
             Assert.assertNotNull(p);
             Assert.assertNotNull(p.getLeft());
+            Assert.assertNotNull(p.getMiddle());
             Assert.assertNotNull(p.getRight());
-            Assert.assertTrue(StringUtils.isNotBlank(p.getLeft()));
+            Assert.assertTrue(StringUtils.isNotBlank(p.getMiddle()));
             Assert.assertTrue(StringUtils.isNotBlank(p.getRight()));
         });
-        Assert.assertEquals(fieldNamePairs.size(), 9);
+        Assert.assertEquals(defaultAttributeTuples.size(), 9);
     }
 
     @Test(groups = "unit")
     public void testContactType() {
-        List<Pair<String, String>> fieldNamePairs = MetadataSegmentExportType.CONTACT.getFieldNamePairs();
-        Assert.assertTrue(CollectionUtils.isNotEmpty(fieldNamePairs));
-        fieldNamePairs.stream().forEach(p -> {
+        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = MetadataSegmentExportType.CONTACT
+                .getDefaultAttributeTuples();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(defaultAttributeTuples));
+        defaultAttributeTuples.stream().forEach(p -> {
             Assert.assertNotNull(p);
             Assert.assertNotNull(p.getLeft());
+            Assert.assertNotNull(p.getMiddle());
             Assert.assertNotNull(p.getRight());
-            Assert.assertTrue(StringUtils.isNotBlank(p.getLeft()));
+            Assert.assertTrue(StringUtils.isNotBlank(p.getMiddle()));
             Assert.assertTrue(StringUtils.isNotBlank(p.getRight()));
         });
-        Assert.assertEquals(fieldNamePairs.size(), 5);
+        Assert.assertEquals(defaultAttributeTuples.size(), 5);
     }
 
     @Test(groups = "unit")
     public void testAccountAndContactType() {
-        List<Pair<String, String>> fieldNamePairs = MetadataSegmentExportType.ACCOUNT_AND_CONTACT.getFieldNamePairs();
-        Assert.assertTrue(CollectionUtils.isNotEmpty(fieldNamePairs));
-        fieldNamePairs.stream().forEach(p -> {
+        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = MetadataSegmentExportType.ACCOUNT_AND_CONTACT
+                .getDefaultAttributeTuples();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(defaultAttributeTuples));
+        defaultAttributeTuples.stream().forEach(p -> {
             Assert.assertNotNull(p);
             Assert.assertNotNull(p.getLeft());
+            Assert.assertNotNull(p.getMiddle());
             Assert.assertNotNull(p.getRight());
-            Assert.assertTrue(StringUtils.isNotBlank(p.getLeft()));
+            Assert.assertTrue(StringUtils.isNotBlank(p.getMiddle()));
             Assert.assertTrue(StringUtils.isNotBlank(p.getRight()));
         });
-        Assert.assertEquals(fieldNamePairs.size(), 12);
+        Assert.assertEquals(defaultAttributeTuples.size(), 12);
     }
 
     @Test(groups = "unit")
     public void testAccountIdType() {
-        List<Pair<String, String>> fieldNamePairs = MetadataSegmentExportType.ACCOUNT_ID.getFieldNamePairs();
-        Assert.assertTrue(CollectionUtils.isNotEmpty(fieldNamePairs));
-        fieldNamePairs.stream().forEach(p -> {
+        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = MetadataSegmentExportType.ACCOUNT_ID
+                .getDefaultAttributeTuples();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(defaultAttributeTuples));
+        defaultAttributeTuples.stream().forEach(p -> {
             Assert.assertNotNull(p);
             Assert.assertNotNull(p.getLeft());
+            Assert.assertNotNull(p.getMiddle());
             Assert.assertNotNull(p.getRight());
+            Assert.assertNotNull(InterfaceName.valueOf(p.getMiddle()));
             Assert.assertTrue(StringUtils.isNotBlank(p.getRight()));
-            Assert.assertNotNull(InterfaceName.valueOf(p.getLeft()));
         });
-        Assert.assertEquals(fieldNamePairs.size(), 1);
+        Assert.assertEquals(defaultAttributeTuples.size(), 1);
     }
 
     @Test(groups = "unit")

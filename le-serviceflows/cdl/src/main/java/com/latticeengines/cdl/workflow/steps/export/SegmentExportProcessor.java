@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -60,6 +62,8 @@ public abstract class SegmentExportProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportProcessor.class);
 
+    public static String SEPARATOR = "___";
+
     @Inject
     protected ExportAccountFetcher accountFetcher;
 
@@ -101,6 +105,7 @@ public abstract class SegmentExportProcessor {
             String exportId = config.getMetadataSegmentExportId();
             metadataSegmentExport = internalResourceRestApiProxy.getMetadataSegmentExport(customerSpace, exportId);
         }
+
         MetadataSegmentExportType exportType = metadataSegmentExport.getType();
 
         List<Attribute> configuredAccountAttributes = null;
@@ -110,12 +115,59 @@ public abstract class SegmentExportProcessor {
         if (exportType == MetadataSegmentExportType.ACCOUNT
                 || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
             configuredAccountAttributes = getSchema(tenant.getId(), BusinessEntity.Account);
+
+            Map<String, Attribute> defaultAccountAttributesMap = new HashMap<>();
+            exportType.getDefaultAttributeTuples().stream() //
+                    .filter(tuple -> tuple.getLeft() == BusinessEntity.Account) //
+                    .map(tuple -> {
+                        Attribute attribute = new Attribute();
+                        attribute.setName(BusinessEntity.Account.name() + SEPARATOR + tuple.getMiddle());
+                        attribute.setDisplayName(tuple.getRight());
+                        attribute.setSourceLogicalDataType("");
+                        attribute.setPhysicalDataType(Type.STRING.name());
+                        return attribute;
+                    }) //
+                    .forEach(att -> defaultAccountAttributesMap.put(att.getName(), att));
+
+            configuredAccountAttributes.stream().forEach(attr -> {
+                if (defaultAccountAttributesMap.containsKey(attr.getName())) {
+                    defaultAccountAttributesMap.remove(attr.getName());
+                }
+            });
+
+            if (MapUtils.isNotEmpty(defaultAccountAttributesMap)) {
+                configuredAccountAttributes.addAll(defaultAccountAttributesMap.values());
+            }
+
             configuredRatingAttributes = getSchema(tenant.getId(), BusinessEntity.Rating);
         }
 
         if (exportType == MetadataSegmentExportType.CONTACT
                 || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
             configuredContactAttributes = getSchema(tenant.getId(), BusinessEntity.Contact);
+
+            Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
+            exportType.getDefaultAttributeTuples().stream() //
+                    .filter(tuple -> tuple.getLeft() == BusinessEntity.Contact) //
+                    .map(tuple -> {
+                        Attribute attribute = new Attribute();
+                        attribute.setName(BusinessEntity.Contact.name() + SEPARATOR + tuple.getMiddle());
+                        attribute.setDisplayName(tuple.getRight());
+                        attribute.setSourceLogicalDataType("");
+                        attribute.setPhysicalDataType(Type.STRING.name());
+                        return attribute;
+                    }) //
+                    .forEach(att -> defaultContactAttributesMap.put(att.getName(), att));
+
+            configuredContactAttributes.stream().forEach(attr -> {
+                if (defaultContactAttributesMap.containsKey(attr.getName())) {
+                    defaultContactAttributesMap.remove(attr.getName());
+                }
+            });
+
+            if (MapUtils.isNotEmpty(defaultContactAttributesMap)) {
+                configuredContactAttributes.addAll(defaultContactAttributesMap.values());
+            }
         }
 
         registerTableForExport(customerSpace, metadataSegmentExport, configuredAccountAttributes,
@@ -130,7 +182,7 @@ public abstract class SegmentExportProcessor {
         Schema schema = TableUtils.createSchema(metadataSegmentExport.getTableName(), segmentExportTable);
 
         SegmentExportContext segmentExportContext = initSegmentExportContext(tenant, config, metadataSegmentExport,
-                schema, configuredAccountAttributes, configuredContactAttributes, configuredRatingAttributes);
+                configuredAccountAttributes, configuredContactAttributes, configuredRatingAttributes);
 
         try {
             String csvFileName = metadataSegmentExport.getFileName();
@@ -180,7 +232,6 @@ public abstract class SegmentExportProcessor {
     private SegmentExportContext initSegmentExportContext(Tenant tenant, //
             SegmentExportStepConfiguration config, //
             MetadataSegmentExport metadataSegmentExport, //
-            Schema schema, //
             List<Attribute> configuredAccountAttributes, //
             List<Attribute> configuredContactAttributes, //
             List<Attribute> configuredRatingAttributes) {
@@ -265,20 +316,26 @@ public abstract class SegmentExportProcessor {
             configuredAccountAttributes //
                     .stream() //
                     .forEach( //
-                            a -> accountLookups.add(new AttributeLookup(BusinessEntity.Account, a.getName())));
+                            a -> accountLookups.add(new AttributeLookup(BusinessEntity.Account, //
+                                    a.getName() //
+                                            .substring((BusinessEntity.Account + SEPARATOR).length()))));
         }
         if (CollectionUtils.isNotEmpty(configuredRatingAttributes)) {
             configuredRatingAttributes //
                     .stream() //
                     .forEach( //
-                            r -> accountLookups.add(new AttributeLookup(BusinessEntity.Rating, r.getName())));
+                            r -> accountLookups.add(new AttributeLookup(BusinessEntity.Rating, //
+                                    r.getName() //
+                                            .substring((BusinessEntity.Rating + SEPARATOR).length()))));
         }
         List<Lookup> contactLookups = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(configuredContactAttributes)) {
             configuredContactAttributes //
                     .stream() //
                     .forEach( //
-                            c -> contactLookups.add(new AttributeLookup(BusinessEntity.Contact, c.getName())));
+                            c -> contactLookups.add(new AttributeLookup(BusinessEntity.Contact, //
+                                    c.getName() //
+                                            .substring((BusinessEntity.Contact + SEPARATOR).length()))));
         }
         accountFrontEndQuery.setLookups(accountLookups);
         contactFrontEndQuery.setLookups(contactLookups);
@@ -311,7 +368,7 @@ public abstract class SegmentExportProcessor {
         Mono<List<Attribute>> stream = Flux.fromIterable(cms) //
                 .map(metadata -> {
                     Attribute attribute = new Attribute();
-                    attribute.setName(metadata.getAttrName());
+                    attribute.setName(entity.name() + SEPARATOR + metadata.getAttrName());
                     attribute.setDisplayName(metadata.getDisplayName());
                     attribute.setSourceLogicalDataType(
                             metadata.getLogicalDataType() == null ? "" : metadata.getLogicalDataType().name());
