@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +36,9 @@ public class DataLakeAttributeResource {
     private final DataLakeService dataLakeService;
 
     @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
     public DataLakeAttributeResource(DataLakeService dataLakeService) {
         this.dataLakeService = dataLakeService;
     }
@@ -42,7 +48,13 @@ public class DataLakeAttributeResource {
     @ApiOperation(value = "Get number of attributes")
     public long getAttributesCount() {
         try {
-            return dataLakeService.getAttributesCount();
+            DataCollectionStatus status = dataCollectionProxy
+                    .getOrCreateDataCollectionStatus(MultiTenantContext.getCustomerSpace().toString(), null);
+            if (status.getAccountCount() == 0) {
+                return 0L;
+            } else {
+                return dataLakeService.getAttributesCount();
+            }
         } catch (Exception e) {
             log.error("Failed to get attribute count", e);
             throw new LedpException(LedpCode.LEDP_36002);
