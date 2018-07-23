@@ -16,13 +16,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("startIteration")
@@ -32,7 +32,7 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
     private static final Logger log = LoggerFactory.getLogger(StartIteration.class);
 
     @Inject
-    private ServingStoreProxy servingStoreProxy;
+    private DataCollectionProxy dataCollectionProxy;
 
     @Override
     public void execute() {
@@ -78,14 +78,12 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                 Set<String> existingEngineIds = new HashSet<>();
                 DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION,
                         DataCollection.Version.class);
-                List<ColumnMetadata> cms = servingStoreProxy
-                        .getDecoratedMetadata(configuration.getCustomerSpace().toString(), BusinessEntity.Rating, null,
-                                inactive)
-                        .collectList().block();
-                if (CollectionUtils.isNotEmpty(cms)) {
-                    cms.forEach(cm -> {
-                        if (cm.getAttrName().startsWith(RatingEngine.RATING_ENGINE_PREFIX)) {
-                            String engineId = RatingEngine.toEngineId(cm.getAttrName());
+                Table table = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
+                        BusinessEntity.Rating.getServingStore(), inactive);
+                if (table != null) {
+                    table.getAttributes().forEach(attr -> {
+                        if (attr.getName().startsWith(RatingEngine.RATING_ENGINE_PREFIX)) {
+                            String engineId = RatingEngine.toEngineId(attr.getName());
                             existingEngineIds.add(engineId);
                         }
                     });
