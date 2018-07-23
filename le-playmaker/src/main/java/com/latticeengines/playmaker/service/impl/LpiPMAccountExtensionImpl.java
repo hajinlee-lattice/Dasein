@@ -86,7 +86,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         FrontEndQuery frontEndQuery = entityQueryGenerator.generateEntityQuery(start, offset, maximum, dataRequest);
 
         log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
-        DataPage dataPage = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
+        DataPage dataPage = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery, null, true);
 
         return postProcess(dataPage.getData(), offset, lookupIdColumn);
     }

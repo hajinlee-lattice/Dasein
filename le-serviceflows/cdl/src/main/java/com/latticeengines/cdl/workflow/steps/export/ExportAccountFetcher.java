@@ -45,7 +45,7 @@ public class ExportAccountFetcher {
 
         DataPage accountPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
-                accountFrontEndQuery);
+                accountFrontEndQuery, null, true);
 
         log.info(String.format("Got # %d elements in this loop", accountPage.getData().size()));
         return accountPage;

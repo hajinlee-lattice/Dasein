@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -73,7 +76,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                     attrRepo);
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
-                                                                                            frontEndQuery);
+                    frontEndQuery);
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
@@ -83,13 +86,15 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     @Override
-    public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
-        Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version, sqlUser);
+    public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser,
+            boolean enforceTranslation) {
+        Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version, sqlUser, enforceTranslation);
         List<Map<String, Object>> data = flux.toStream().collect(Collectors.toList());
         return new DataPage(data);
     }
 
-    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+    private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version,
+            String sqlUser, boolean enforceTranslation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -98,29 +103,53 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                     attrRepo);
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
             TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
-                                                                                            frontEndQuery);
+                    frontEndQuery);
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
             if (query.getLookups() == null || query.getLookups().isEmpty()) {
                 query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
             }
             query = preProcess(frontEndQuery.getMainEntity(), query);
+
+            Map<String, Map<Long, String>> translationMapping = new HashMap<>();
+
+            if (enforceTranslation) {
+                query.getLookups() //
+                        .stream() //
+                        .filter(lookup -> lookup instanceof AttributeLookup) //
+                        .map(lookup -> (AttributeLookup) lookup) //
+                        .map(attrLookup -> attrRepo.getColumnMetadata(attrLookup)) //
+                        .filter(cm -> cm != null //
+                                && cm.getStats() != null //
+                                && cm.getStats().getBuckets() != null //
+                                && CollectionUtils.isNotEmpty(cm.getStats().getBuckets().getBucketList()))
+                        .forEach(cm -> {
+                            Map<Long, String> enumMap = new HashMap<>();
+                            List<Bucket> bucketList = cm.getStats().getBuckets().getBucketList();
+                            bucketList.stream() //
+                                    .forEach(bucket -> enumMap.put(bucket.getId(), bucket.getLabel()));
+                            translationMapping.put(cm.getAttrName(), enumMap);
+                        });
+            }
+
             return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser) //
-                    .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
+                    .map(row -> postProcess(frontEndQuery.getMainEntity(), row, enforceTranslation,
+                            translationMapping));
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
     @Override
-    public Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+    public Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version,
+            String sqlUser) {
         String ratingEngineId = frontEndQuery.getRatingEngineId();
         if (StringUtils.isNotBlank(ratingEngineId)) {
             try {
                 String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
                 CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
                 Query query = ratingCountQuery(customerSpace, ratingField, frontEndQuery, version, sqlUser);
-                List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query, sqlUser)
-                        .getData();
+                List<Map<String, Object>> data = queryEvaluatorService
+                        .getData(customerSpace.toString(), version, query, sqlUser).getData();
                 TreeMap<String, Long> counts = new TreeMap<>();
                 data.forEach(map -> {
                     String rating = (String) map.get(ratingField);
@@ -154,7 +183,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                 queryEvaluatorService);
         EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
-        TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService, frontEndQuery);
+        TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
+                frontEndQuery);
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, null, timeTranslator, sqlUser);
         query.setPageFilter(null);
         query.setSort(null);
@@ -197,7 +227,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return false;
     }
 
-    private Map<String, Object> postProcess(BusinessEntity entity, Map<String, Object> result) {
+    private Map<String, Object> postProcess(BusinessEntity entity, Map<String, Object> result,
+            boolean enforceTranslation, Map<String, Map<Long, String>> translationMapping) {
         Map<String, Object> processed = result;
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
             if (result.containsKey(InterfaceName.CompanyName.toString())
@@ -211,6 +242,22 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                     processed.put(InterfaceName.CompanyName.toString(), consolidatedName);
                 }
             }
+        }
+
+        if (enforceTranslation //
+                && MapUtils.isNotEmpty(translationMapping) //
+                && MapUtils.isNotEmpty(processed)) {
+            final Map<String, Object> tempProcessed = processed;
+            processed.keySet() //
+                    .stream() //
+                    .filter(key -> translationMapping.containsKey(key)) //
+                    .forEach(key -> { //
+                        Object val = tempProcessed.get(key);
+                        if (val != null && val instanceof Long) {
+                            Long enumNumeric = (Long) val;
+                            tempProcessed.put(key, translationMapping.get(key).get(enumNumeric));
+                        }
+                    });
         }
         return processed;
     }

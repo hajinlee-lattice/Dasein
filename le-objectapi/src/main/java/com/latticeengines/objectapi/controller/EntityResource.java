@@ -44,8 +44,8 @@ public class EntityResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-                         @RequestParam(value = "version", required = false) DataCollection.Version version,
-                         @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+            @RequestParam(value = "version", required = false) DataCollection.Version version,
+            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
         if (StringUtils.isBlank(sqlUser)) {
             sqlUser = SEGMENT_USER;
         }
@@ -56,13 +56,14 @@ public class EntityResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Mono<DataPage> getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-                            @RequestParam(value = "version", required = false) DataCollection.Version version,
-                                  @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+            @RequestParam(value = "version", required = false) DataCollection.Version version,
+            @RequestParam(value = "sqlUser", required = false) String sqlUser,
+            @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
         final String finalSqlUser = StringUtils.isBlank(sqlUser) ? BATCH_USER : sqlUser;
         final Tenant tenant = MultiTenantContext.getTenant();
         return Mono.fromCallable(() -> {
             MultiTenantContext.setTenant(tenant);
-            return entityQueryService.getData(frontEndQuery, version, finalSqlUser);
+            return entityQueryService.getData(frontEndQuery, version, finalSqlUser, enforceTranslation);
         });
 
     }
@@ -71,9 +72,9 @@ public class EntityResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
-                                            @RequestBody RatingEngineFrontEndQuery frontEndQuery,
-                                            @RequestParam(value = "version", required = false) DataCollection.Version version,
-                                            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+            @RequestBody RatingEngineFrontEndQuery frontEndQuery,
+            @RequestParam(value = "version", required = false) DataCollection.Version version,
+            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
         if (StringUtils.isBlank(sqlUser)) {
             sqlUser = SEGMENT_USER;
         }

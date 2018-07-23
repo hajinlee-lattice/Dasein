@@ -86,7 +86,7 @@ public class ExportContactFetcher {
 
         DataPage contactPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
-                contactFrontEndQuery);
+                contactFrontEndQuery, null, true);
 
         log.info(String.format("Got # %d contact elements in this loop", contactPage.getData().size()));
         processedContactsCount += contactPage.getData().size();
@@ -130,7 +130,7 @@ public class ExportContactFetcher {
 
         DataPage contactPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
-                contactFrontEndQuery);
+                contactFrontEndQuery, null, true);
 
         log.info(String.format("Got # %d elements in this loop", contactPage.getData().size()));
         return contactPage;

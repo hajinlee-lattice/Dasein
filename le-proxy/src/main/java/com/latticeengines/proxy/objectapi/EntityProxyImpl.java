@@ -134,12 +134,20 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
 
     @Override
     public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url;
+        return getDataFromObjectApi(tenantId, frontEndQuery, version, false);
+    }
+
+    @Override
+    public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version,
+            boolean enforceTranslation) {
+        String url = "/{customerSpace}/entity/data?enforceTranslation={enforceTranslation}";
+
         if (version != null) {
-            url = constructUrl("/{customerSpace}/entity/data?version={version}", tenantId, version);
+            url = constructUrl(url + "&version={version}", tenantId, enforceTranslation, version);
         } else {
-            url = constructUrl("/{customerSpace}/entity/data", tenantId);
+            url = constructUrl(url, tenantId, enforceTranslation);
         }
+
         return postKryo("getData", url, frontEndQuery, DataPage.class);
     }
 
