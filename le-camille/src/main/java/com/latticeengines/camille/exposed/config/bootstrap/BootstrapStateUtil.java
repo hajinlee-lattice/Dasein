@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 
@@ -41,6 +42,20 @@ public class BootstrapStateUtil {
         } catch (Exception e) {
             throw new Exception(String.format("Unexpected failure attempting to retrieve bootstrap state at path %s",
                     path), e);
+        }
+    }
+
+    public static BootstrapState getStateInCache(Path serviceDirectory, TreeCache cache) throws Exception {
+        Path path = serviceDirectory.append(PathConstants.BOOTSTRAP_STATE_FILE);
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            Document raw = camille.getInCache(path, cache);
+            return DocumentUtils.toTypesafeDocument(raw, BootstrapState.class);
+        } catch (KeeperException.NoNodeException e) {
+            return BootstrapState.createInitialState();
+        } catch (Exception e) {
+            throw new Exception(
+                    String.format("Unexpected failure attempting to retrieve bootstrap state at path %s", path), e);
         }
     }
 

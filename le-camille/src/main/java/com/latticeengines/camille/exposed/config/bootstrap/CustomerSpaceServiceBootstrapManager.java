@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.latticeengines.domain.exposed.camille.bootstrap.*;
+
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +72,19 @@ public class CustomerSpaceServiceBootstrapManager {
                 serviceName);
         try {
             return BootstrapStateUtil.getState(serviceDirectoryPath);
+        } catch (Exception e) {
+            throw new Exception(String.format(
+                    "Error encountered retrieving bootstrap state for space %s and service %s", space, serviceName), e);
+        }
+
+    }
+
+    public static BootstrapState getBootstrapStateInCache(String serviceName, CustomerSpace space, TreeCache cache)
+            throws Exception {
+        Path serviceDirectoryPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
+                serviceName);
+        try {
+            return BootstrapStateUtil.getStateInCache(serviceDirectoryPath, cache);
         } catch (Exception e) {
             throw new Exception(String.format(
                     "Error encountered retrieving bootstrap state for space %s and service %s", space, serviceName), e);

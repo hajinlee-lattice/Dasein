@@ -26,7 +26,7 @@ public interface TenantService {
 
     BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName);
 
-    BootstrapState getTenantOverallState(String contractId, String tenantId);
+    BootstrapState getTenantOverallState(String contractId, String tenantId, TenantDocument doc);
 
     boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties);
 

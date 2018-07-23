@@ -49,7 +49,13 @@ public interface BatonService {
 
     BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName);
 
+    BootstrapState getTenantServiceBootstrapStateInCache(String contractId, String tenantId, String serviceName,
+            TreeCache cache);
+
     BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String spaceId, String serviceName);
+
+    BootstrapState getTenantServiceBootstrapStateInCache(String contractId, String tenantId, String spaceId,
+            String serviceName, TreeCache cache);
 
     DocumentDirectory getDefaultConfiguration(String serviceName);
 

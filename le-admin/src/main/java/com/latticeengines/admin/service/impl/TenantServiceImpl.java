@@ -40,6 +40,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -226,7 +227,7 @@ public class TenantServiceImpl implements TenantService {
             for (TenantDocument doc : tenants) {
                 String cId = doc.getSpace().getContractId();
                 String tId = doc.getSpace().getTenantId();
-                doc.setBootstrapState(getTenantOverallState(cId, tId));
+                doc.setBootstrapState(getTenantOverallState(cId, tId, doc));
             }
             return tenants;
         }
@@ -235,15 +236,18 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Collection<TenantDocument> getTenantsInCache(String contractId) {
+        PerformanceTimer timer = new PerformanceTimer("geting tenants in backend", log);
         Collection<TenantDocument> tenants = tenantEntityMgr.getTenantsInCache(contractId);
         if (tenants != null) {
             for (TenantDocument doc : tenants) {
                 String cId = doc.getSpace().getContractId();
                 String tId = doc.getSpace().getTenantId();
-                doc.setBootstrapState(getTenantOverallState(cId, tId));
+                doc.setBootstrapState(getTenantOverallState(cId, tId, doc));
             }
+            timer.close();
             return tenants;
         }
+        timer.close();
         return null;
     }
 
@@ -298,7 +302,7 @@ public class TenantServiceImpl implements TenantService {
         if (doc == null) {
             return null;
         }
-        doc.setBootstrapState(getTenantOverallState(contractId, tenantId));
+        doc.setBootstrapState(getTenantOverallState(contractId, tenantId, doc));
         return doc;
     }
 
@@ -308,11 +312,10 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public BootstrapState getTenantOverallState(String contractId, String tenantId) {
+    public BootstrapState getTenantOverallState(String contractId, String tenantId, TenantDocument doc) {
         final String podId = CamilleEnvironment.getPodId();
         final Camille camille = CamilleEnvironment.getCamille();
 
-        TenantDocument doc = tenantEntityMgr.getTenant(contractId, tenantId);
         SpaceConfiguration spaceConfiguration = doc.getSpaceConfig();
         List<LatticeProduct> products = new ArrayList<>();
         if (spaceConfiguration != null) {

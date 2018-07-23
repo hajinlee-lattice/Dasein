@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
@@ -202,7 +204,7 @@ public class BatonServiceImpl implements BatonService {
                 return null;
             }
         } else {
-            PerformanceTimer timer2 = new PerformanceTimer("load tenants", log);
+            PerformanceTimer timer2 = new PerformanceTimer("loading tenants", log);
             Collection<TenantDocument> results = getTenantsInCache(null, null, cache);
             timer2.close();
             return results;
@@ -412,11 +414,30 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
+    public BootstrapState getTenantServiceBootstrapStateInCache(String contractId, String tenantId,
+            String serviceName, TreeCache cache) {
+        return getTenantServiceBootstrapStateInCache(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                serviceName, getTreeCache());
+    }
+
+    @Override
     public BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String spaceId,
             String serviceName) {
         CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId, spaceId);
         try {
             return CustomerSpaceServiceBootstrapManager.getBootstrapState(serviceName, customerSpace);
+        } catch (Exception e) {
+            log.error("Error retrieving tenant service state", e);
+            return null;
+        }
+    }
+
+    @Override
+    public BootstrapState getTenantServiceBootstrapStateInCache(String contractId, String tenantId, String spaceId,
+            String serviceName, TreeCache cache) {
+        CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId, spaceId);
+        try {
+            return CustomerSpaceServiceBootstrapManager.getBootstrapStateInCache(serviceName, customerSpace, cache);
         } catch (Exception e) {
             log.error("Error retrieving tenant service state", e);
             return null;
@@ -593,6 +614,7 @@ public class BatonServiceImpl implements BatonService {
         return products.stream().anyMatch(product -> hasProduct(customerSpace, product));
     }
 
+    @PostConstruct
     private static TreeCache getTreeCache() {
         if (cache == null) {
             synchronized (BatonServiceImpl.class) {
