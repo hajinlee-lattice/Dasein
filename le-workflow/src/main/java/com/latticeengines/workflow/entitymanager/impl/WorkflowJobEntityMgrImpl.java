@@ -2,11 +2,14 @@ package com.latticeengines.workflow.entitymanager.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -17,6 +20,8 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 
 @Component("workflowJobEntityMgr")
 public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> implements WorkflowJobEntityMgr {
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowJobEntityMgrImpl.class);
 
     @Autowired
     private WorkflowJobDao workflowJobDao;
@@ -138,8 +143,18 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public WorkflowJob updateStatusFromYarn(WorkflowJob workflowJob,
                                             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus) {
-        workflowJob.setStatus(JobStatus.fromString(yarnJobStatus.getStatus().name(), yarnJobStatus.getState()).name());
-        workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
+        JobStatus jobStatus = JobStatus.fromString(yarnJobStatus.getStatus().name(), yarnJobStatus.getState());
+        if (jobStatus != null) {
+            workflowJob.setStatus(jobStatus.name());
+        } else {
+            log.warn("Unknown job status. YarnJobStatus = " + JsonUtils.serialize(yarnJobStatus));
+        }
+
+        int ret = workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
+        if (ret != 0) {
+            log.warn("StartTime is null. YarnJobStatus = " + JsonUtils.serialize(yarnJobStatus));
+        }
+
         workflowJobDao.updateStatusAndStartTime(workflowJob);
         return workflowJob;
     }

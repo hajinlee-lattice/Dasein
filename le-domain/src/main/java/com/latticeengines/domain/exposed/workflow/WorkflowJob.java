@@ -283,8 +283,13 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         return startTimeInMillis;
     }
 
-    public void setStartTimeInMillis(Long startTimeInMillis) {
-        this.startTimeInMillis = startTimeInMillis;
+    public int setStartTimeInMillis(Long startTimeInMillis) {
+        if (startTimeInMillis == null) {
+            return -1;
+        } else {
+            this.startTimeInMillis = startTimeInMillis;
+            return 0;
+        }
     }
 
     @Transient
