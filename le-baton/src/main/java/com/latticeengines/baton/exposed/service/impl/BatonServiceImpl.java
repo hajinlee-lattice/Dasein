@@ -416,8 +416,11 @@ public class BatonServiceImpl implements BatonService {
     @Override
     public BootstrapState getTenantServiceBootstrapStateInCache(String contractId, String tenantId,
             String serviceName, TreeCache cache) {
+        if (cache == null) {
+            cache = getTreeCache();
+        }
         return getTenantServiceBootstrapStateInCache(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
-                serviceName, getTreeCache());
+                serviceName, cache);
     }
 
     @Override

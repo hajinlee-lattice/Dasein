@@ -70,7 +70,7 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
 
     @Override
     public BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName) {
-        return batonService.getTenantServiceBootstrapState(contractId, tenantId, serviceName);
+        return batonService.getTenantServiceBootstrapStateInCache(contractId, tenantId, serviceName, null);
     }
 
     @Override
