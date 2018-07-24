@@ -229,6 +229,11 @@
             <artifactId>quartz</artifactId>
             <version>${quartz.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.j2html</groupId>
+            <artifactId>j2html</artifactId>
+            <version>${j2html.version}</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.collections4.MapUtils;
+import com.latticeengines.domain.exposed.metadata.Category;
 
 public class ValidationDetails {
 
@@ -55,6 +56,12 @@ public class ValidationDetails {
         @JsonProperty("attr_name")
         private String attrName;
 
+        @JsonProperty("category")
+        private Category category;
+
+        @JsonProperty("subcategory")
+        private String subcategory;
+
         @JsonProperty("validation_error")
         private ValidationErrors validationErrors;
 
@@ -67,6 +74,22 @@ public class ValidationDetails {
 
         public void setAttrName(String attrName) {
             this.attrName = attrName;
+        }
+
+        public Category getCategory() {
+            return category;
+        }
+
+        public void setCategory(Category category) {
+            this.category = category;
+        }
+
+        public String getSubcategory() {
+            return subcategory;
+        }
+
+        public void setSubcategory(String subcategory) {
+            this.subcategory = subcategory;
         }
 
         public ValidationErrors getValidationErrors() {

@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
@@ -60,9 +61,7 @@ public class LifecycleValidator extends AttrValidator {
                 for (ColumnSelection.Predefined group : usageProperties) {
                     Boolean finalUsageValue = attrConfig.getPropertyFinalValue(group.name(), Boolean.class);
                     if (Boolean.TRUE.equals((finalUsageValue))) {
-                        addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE, String
-                                .format(ValidationMsg.Errors.UPDATE_INACTIVE, group.name(), attrConfig.getAttrName()),
-                                attrConfig);
+                        addWarningMsg(ImpactWarnings.Type.USAGE_ENABLED, group.name(), attrConfig);
                     }
                 }
             }

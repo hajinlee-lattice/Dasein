@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
@@ -35,26 +35,22 @@ import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
-import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
-import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings.Type;
-import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
-import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
-import com.latticeengines.pls.service.impl.AttrConfigServiceImpl.UpdateUsageResponse;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
+@SuppressWarnings("deprecation")
 public class AttrConfigServiceImplUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImplUnitTestNG.class);
@@ -69,30 +65,8 @@ public class AttrConfigServiceImplUnitTestNG {
     @Spy
     private AttrConfigServiceImpl attrConfigService;
 
-    private static final Long intentLimit = 500L;
-    private static final Long activeForIntent = 5000L;
-    private static final Long inactiveForIntent = 4000L;
-    private static final Long totalIntentAttrs = 90000L;
-    private static final Long tpLimit = 500L;
-    private static final Long activeForTp = 5000L;
-    private static final Long inactiveForTp = 4000L;
-    private static final Long totalTpAttrs = 90000L;
-    private static final Long accountLimit = 500L;
-    private static final Long activeForAccount = 5000L;
-    private static final Long inactiveForAccount = 4000L;
-    private static final Long totalAccountAttrs = 90000L;
-    private static final Long contactLimit = 500L;
-    private static final Long activeForContact = 5000L;
-    private static final Long inactiveForContact = 4000L;
-    private static final Long totalContactAttrs = 90000L;
-    private static final Long websiteKeywordLimit = 500L;
-    private static final Long activeForWebsiteKeyword = 5000L;
-    private static final Long inactiveForWebsiteKeyword = 4000L;
-    private static final Long totalWebsiteKeywordAttrs = 90000L;
     private static Tenant tenant;
 
-    private static final String[] select = { "attr1", "attr2", "attr3" };
-    private static final String[] deselect = { "attr4", "attr5", "attr6" };
     private static final String usage = "Export";
 
     @BeforeTest(groups = "unit")
@@ -106,39 +80,40 @@ public class AttrConfigServiceImplUnitTestNG {
     @Test(groups = "unit")
     public void testGetOverallAttrConfigActivationOverview() {
         when(cdlAttrConfigProxy.getAttrConfigOverview(anyString(), Matchers.anyList(), Matchers.anyList(),
-                anyBoolean())).thenReturn(generatePremiumCategoryAttrConfigActivationOverview());
+                anyBoolean())).thenReturn(
+                        AttrConfigServiceImplTestUtils.generatePremiumCategoryAttrConfigActivationOverview());
         AttrConfigStateOverview overview = attrConfigService.getOverallAttrConfigActivationOverview();
         List<AttrConfigSelection> result = overview.getSelections();
         Assert.assertEquals(result.size(), Category.getPremiunCategories().size());
 
         AttrConfigSelection categoryOverview = result.get(0);
-        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalIntentAttrs);
-        Assert.assertEquals(categoryOverview.getLimit(), intentLimit);
-        Assert.assertEquals(categoryOverview.getSelected(), activeForIntent);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalIntentAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.intentLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForIntent);
         Assert.assertEquals(categoryOverview.getDisplayName(), Category.INTENT.getName());
 
         categoryOverview = result.get(1);
-        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalTpAttrs);
-        Assert.assertEquals(categoryOverview.getLimit(), tpLimit);
-        Assert.assertEquals(categoryOverview.getSelected(), activeForTp);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalTpAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.tpLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForTp);
         Assert.assertEquals(categoryOverview.getDisplayName(), Category.TECHNOLOGY_PROFILE.getName());
 
         categoryOverview = result.get(2);
-        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalWebsiteKeywordAttrs);
-        Assert.assertEquals(categoryOverview.getLimit(), websiteKeywordLimit);
-        Assert.assertEquals(categoryOverview.getSelected(), activeForWebsiteKeyword);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalWebsiteKeywordAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.websiteKeywordLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForWebsiteKeyword);
         Assert.assertEquals(categoryOverview.getDisplayName(), Category.WEBSITE_KEYWORDS.getName());
 
         categoryOverview = result.get(3);
-        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalAccountAttrs);
-        Assert.assertEquals(categoryOverview.getLimit(), accountLimit);
-        Assert.assertEquals(categoryOverview.getSelected(), activeForAccount);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalAccountAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.accountLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForAccount);
         Assert.assertEquals(categoryOverview.getDisplayName(), Category.ACCOUNT_ATTRIBUTES.getName());
 
         categoryOverview = result.get(4);
-        Assert.assertEquals(categoryOverview.getTotalAttrs(), totalContactAttrs);
-        Assert.assertEquals(categoryOverview.getLimit(), contactLimit);
-        Assert.assertEquals(categoryOverview.getSelected(), activeForContact);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalContactAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.contactLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForContact);
         Assert.assertEquals(categoryOverview.getDisplayName(), Category.CONTACT_ATTRIBUTES.getName());
 
     }
@@ -147,7 +122,7 @@ public class AttrConfigServiceImplUnitTestNG {
     public void testGetOverallAttrConfigUsageOverview() {
         when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
                 Arrays.asList(AttrConfigServiceImpl.usageProperties), true))
-                        .thenReturn(generatePropertyAttrConfigOverviewForUsage(
+                        .thenReturn(AttrConfigServiceImplTestUtils.generatePropertyAttrConfigOverviewForUsage(
                                 Arrays.asList(AttrConfigServiceImpl.usageProperties)));
         AttrConfigUsageOverview usageOverview = attrConfigService.getOverallAttrConfigUsageOverview();
         log.info("overall usageOverview is " + usageOverview);
@@ -172,12 +147,13 @@ public class AttrConfigServiceImplUnitTestNG {
     @Test(groups = "unit")
     public void testGenerateAttrConfigRequestForUsage() {
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
-        request.setDeselect(Arrays.asList(deselect));
-        request.setSelect(Arrays.asList(select));
+        request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect));
+        request.setSelect(Arrays.asList(AttrConfigServiceImplTestUtils.select));
         AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForUsage(
                 Category.INTENT.getName(), AttrConfigServiceImpl.mapDisplayNameToUsage(usage), request);
         List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
-        Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
+        Assert.assertEquals(attrConfigs.size(),
+                AttrConfigServiceImplTestUtils.select.length + AttrConfigServiceImplTestUtils.deselect.length);
         for (AttrConfig attrConfig : attrConfigs) {
             log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
             Assert.assertNotNull(attrConfig.getAttrName());
@@ -190,12 +166,13 @@ public class AttrConfigServiceImplUnitTestNG {
     public void testGenerateAttrConfigRequestForActivation() {
         doReturn(AccessLevel.SUPER_ADMIN).when(userService).getAccessLevel(anyString(), nullable(String.class));
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
-        request.setDeselect(Arrays.asList(deselect));
-        request.setSelect(Arrays.asList(select));
+        request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect));
+        request.setSelect(Arrays.asList(AttrConfigServiceImplTestUtils.select));
         AttrConfigRequest attrConfigRequest = attrConfigService
                 .generateAttrConfigRequestForActivation(Category.CONTACT_ATTRIBUTES.getName(), request);
         List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
-        Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
+        Assert.assertEquals(attrConfigs.size(),
+                AttrConfigServiceImplTestUtils.select.length + AttrConfigServiceImplTestUtils.deselect.length);
         for (AttrConfig attrConfig : attrConfigs) {
             Assert.assertNotNull(attrConfig.getAttrName());
             Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Contact);
@@ -313,266 +290,97 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testUpdateUsageConfig() {
+
+        // happy path
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
-        request.setDeselect(Arrays.asList(deselect[0]));
+        request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect[0]));
         when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
-                .thenReturn(generateAttrConfigRequest());
-        UpdateUsageResponse updateUsageResponse = attrConfigService.updateUsageConfig(Category.INTENT.getName(),
-                "Company Profile", request);
-        Assert.assertNotNull(updateUsageResponse.getMessage());
-        log.info("message is " + updateUsageResponse.getMessage());
+                .thenReturn(AttrConfigServiceImplTestUtils.generateHappyAttrConfigRequest());
+        UIAction uiAction = attrConfigService.updateUsageConfig(Category.INTENT.getName(), "Company Profile", request);
+        Assert.assertNotNull(uiAction);
+        Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_SUCCESS_TITLE);
+        Assert.assertEquals(uiAction.getView(), View.Notice);
+        Assert.assertEquals(uiAction.getStatus(), Status.Success);
 
-        request.setDeselect(Arrays.asList(deselect));
-        updateUsageResponse = attrConfigService.updateUsageConfig(Category.INTENT.getName(), "Company Profile",
-                request);
-        Assert.assertNotNull(updateUsageResponse.getMessage());
-        log.info("message is " + updateUsageResponse.getMessage());
+        // attribute level
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
+                .thenReturn(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest());
+        try {
+            attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
+            Assert.fail("Should have thrown exception due to dependency check failure");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UIActionException);
+            UIActionException uiActionException = (UIActionException) e;
+            uiAction = uiActionException.getUIAction();
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_FAIL_ATTRIBUTE_TITLE);
+            Assert.assertEquals(uiAction.getView(), View.Modal);
+            Assert.assertEquals(uiAction.getStatus(), Status.Error);
+            Assert.assertNotNull(uiAction.getMessage());
+        }
 
+        // subcategory level
+        request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect));
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
+                .thenReturn(AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest());
+        try {
+            attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
+            Assert.fail("Should have thrown exception due to dependency check failure");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UIActionException);
+            UIActionException uiActionException = (UIActionException) e;
+            uiAction = uiActionException.getUIAction();
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_FAIL_SUBCATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getView(), View.Modal);
+            Assert.assertEquals(uiAction.getStatus(), Status.Error);
+            Assert.assertNotNull(uiAction.getMessage());
+        }
+        // category level
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
+                .thenReturn(AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest());
+        try {
+            attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
+            Assert.fail("Should have thrown exception due to dependency check failure");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UIActionException);
+            UIActionException uiActionException = (UIActionException) e;
+            uiAction = uiActionException.getUIAction();
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_FAIL_CATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getView(), View.Modal);
+            Assert.assertEquals(uiAction.getStatus(), Status.Error);
+            Assert.assertNotNull(uiAction.getMessage());
+        }
     }
 
-    private AttrConfigRequest generateAttrConfigRequest() {
-        AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
-        List<AttrValidation> validations = new ArrayList<>();
-        ValidationDetails details = new ValidationDetails();
-        attrConfigRequest.setDetails(details);
-        details.setValidations(validations);
-        AttrValidation attrValidation = new AttrValidation();
-        validations.add(attrValidation);
-        attrValidation.setAttrName(deselect[0]);
-        attrValidation.setImpactWarnings(new ImpactWarnings());
-        Map<Type, List<String>> warnings = new HashMap<>();
-        warnings.put(ImpactWarnings.Type.IMPACTED_SEGMENTS, Arrays.asList("seg1", "seg2"));
-        warnings.put(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, Arrays.asList("re1", "re2"));
-        attrValidation.getImpactWarnings().setWarnings(warnings);
-        return attrConfigRequest;
+    @Test(groups = "unit")
+    public void testGenerateAttrLevelMsg() {
+        String html = attrConfigService
+                .generateAttrLevelMsg(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest());
+        log.info("html for Attr Level is " + html);
+        Assert.assertTrue(html.contains(
+                "<p>This attribute is in use and cannot be disabled until the dependency has been removed.</p>"));
+        Assert.assertTrue(html.contains("<b>Model(s):</b><ul><li>re1</li><li>re2</li><li>re3</li></ul>"));
+        Assert.assertTrue(html.contains("<b>RatingModel(s):</b><ul><li>rm1</li><li>rm2</li><li>rm3</li></ul>"));
+        Assert.assertTrue(html.contains("<b>Segment(s):</b><ul><li>seg1</li><li>seg2</li><li>seg3</li></ul>"));
     }
 
-    private AttrConfigOverview<AttrState> generateIntentAttrConfigOverview() {
-        AttrConfigOverview<AttrState> intentCategoryAttrConfigOverview = new AttrConfigOverview<>();
-        intentCategoryAttrConfigOverview.setCategory(Category.INTENT);
-        intentCategoryAttrConfigOverview.setLimit(intentLimit);
-        intentCategoryAttrConfigOverview.setTotalAttrs(totalIntentAttrs);
-        Map<String, Map<AttrState, Long>> propSummary = new HashMap<>();
-        intentCategoryAttrConfigOverview.setPropSummary(propSummary);
-        Map<AttrState, Long> valueCountMap = new HashMap<>();
-        valueCountMap.put(AttrState.Active, activeForIntent);
-        valueCountMap.put(AttrState.Inactive, inactiveForIntent);
-        valueCountMap.put(AttrState.Deprecated, 0L);
-        propSummary.put(ColumnMetadataKey.State, valueCountMap);
-        log.info("intentCategoryAttrConfigOverview is " + intentCategoryAttrConfigOverview);
-        return intentCategoryAttrConfigOverview;
+    @Test(groups = "unit")
+    public void testGenerateSubcategoryLevelMsg() {
+        String html = attrConfigService.generateSubcategoryLevelMsg(
+                AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest());
+        log.info("html for Subcategory Level is " + html);
+        Assert.assertEquals(html,
+                "<p>This sub-category is in use and cannot be disabled until the attributes have been removed.</p><b>sub1:</b><ul><li>attr4</li><li>attr5</li></ul>");
     }
 
-    private Map<String, AttrConfigCategoryOverview<?>> generatePremiumCategoryAttrConfigActivationOverview() {
-        Map<String, AttrConfigCategoryOverview<?>> map = new HashMap<>();
-
-        AttrConfigCategoryOverview<AttrState> intentCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
-        map.put(Category.INTENT.getName(), intentCategoryAttrConfigOverview);
-        intentCategoryAttrConfigOverview.setLimit(intentLimit);
-        intentCategoryAttrConfigOverview.setTotalAttrs(totalIntentAttrs);
-        Map<String, Map<AttrState, Long>> propSummary = new HashMap<>();
-        intentCategoryAttrConfigOverview.setPropSummary(propSummary);
-        Map<AttrState, Long> valueCountMap = new HashMap<>();
-        valueCountMap.put(AttrState.Active, activeForIntent);
-        valueCountMap.put(AttrState.Inactive, inactiveForIntent);
-        valueCountMap.put(AttrState.Deprecated, 0L);
-        propSummary.put(ColumnMetadataKey.State, valueCountMap);
-
-        AttrConfigCategoryOverview<AttrState> tpCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
-        map.put(Category.TECHNOLOGY_PROFILE.getName(), tpCategoryAttrConfigOverview);
-        tpCategoryAttrConfigOverview.setLimit(tpLimit);
-        tpCategoryAttrConfigOverview.setTotalAttrs(totalTpAttrs);
-        propSummary = new HashMap<>();
-        tpCategoryAttrConfigOverview.setPropSummary(propSummary);
-        valueCountMap = new HashMap<>();
-        valueCountMap.put(AttrState.Active, activeForTp);
-        valueCountMap.put(AttrState.Inactive, inactiveForTp);
-        propSummary.put(ColumnMetadataKey.State, valueCountMap);
-
-        AttrConfigCategoryOverview<AttrState> accountCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
-        map.put(Category.ACCOUNT_ATTRIBUTES.getName(), accountCategoryAttrConfigOverview);
-        accountCategoryAttrConfigOverview.setLimit(accountLimit);
-        accountCategoryAttrConfigOverview.setTotalAttrs(totalAccountAttrs);
-        propSummary = new HashMap<>();
-        accountCategoryAttrConfigOverview.setPropSummary(propSummary);
-        valueCountMap = new HashMap<>();
-        valueCountMap.put(AttrState.Active, activeForAccount);
-        valueCountMap.put(AttrState.Inactive, inactiveForAccount);
-        propSummary.put(ColumnMetadataKey.State, valueCountMap);
-
-        AttrConfigCategoryOverview<AttrState> contactCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
-        map.put(Category.CONTACT_ATTRIBUTES.getName(), contactCategoryAttrConfigOverview);
-        contactCategoryAttrConfigOverview.setLimit(contactLimit);
-        contactCategoryAttrConfigOverview.setTotalAttrs(totalContactAttrs);
-        propSummary = new HashMap<>();
-        contactCategoryAttrConfigOverview.setPropSummary(propSummary);
-        valueCountMap = new HashMap<>();
-        valueCountMap.put(AttrState.Active, activeForContact);
-        valueCountMap.put(AttrState.Inactive, inactiveForContact);
-        propSummary.put(ColumnMetadataKey.State, valueCountMap);
-
-        AttrConfigCategoryOverview<AttrState> websiteKeywordCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
-        map.put(Category.WEBSITE_KEYWORDS.getName(), websiteKeywordCategoryAttrConfigOverview);
-        websiteKeywordCategoryAttrConfigOverview.setLimit(websiteKeywordLimit);
-        websiteKeywordCategoryAttrConfigOverview.setTotalAttrs(totalWebsiteKeywordAttrs);
-        propSummary = new HashMap<>();
-        websiteKeywordCategoryAttrConfigOverview.setPropSummary(propSummary);
-        valueCountMap = new HashMap<>();
-        valueCountMap.put(AttrState.Active, activeForWebsiteKeyword);
-        valueCountMap.put(AttrState.Inactive, inactiveForWebsiteKeyword);
-        propSummary.put(ColumnMetadataKey.State, valueCountMap);
-
-        log.info("map is " + map);
-        return map;
-    }
-
-    private Map<String, AttrConfigCategoryOverview<?>> generatePropertyAttrConfigOverviewForUsage(
-            List<String> propertyNames) {
-        Map<String, AttrConfigCategoryOverview<?>> result = new HashMap<>();
-        AttrConfigCategoryOverview<Boolean> attrConfig1 = new AttrConfigCategoryOverview<>();
-        result.put(Category.FIRMOGRAPHICS.getName(), attrConfig1);
-        attrConfig1.setLimit(500L);
-        attrConfig1.setTotalAttrs(131L);
-        Map<String, Map<Boolean, Long>> propSummary1 = new HashMap<>();
-        attrConfig1.setPropSummary(propSummary1);
-        for (String propertyName : propertyNames) {
-            Map<Boolean, Long> propDetails1 = new HashMap<>();
-            propDetails1.put(Boolean.FALSE, 46L);
-            propDetails1.put(Boolean.TRUE, 85L);
-            propSummary1.put(propertyName, propDetails1);
-        }
-
-        AttrConfigCategoryOverview<Boolean> attrConfig2 = new AttrConfigCategoryOverview<>();
-        result.put(Category.GROWTH_TRENDS.getName(), attrConfig2);
-        attrConfig2.setLimit(500L);
-        attrConfig2.setTotalAttrs(9L);
-        Map<String, Map<Boolean, Long>> propSummary2 = new HashMap<>();
-        attrConfig2.setPropSummary(propSummary2);
-        for (String propertyName : propertyNames) {
-            Map<Boolean, Long> propDetails2 = new HashMap<>();
-            propDetails2.put(Boolean.FALSE, 9L);
-            propSummary2.put(propertyName, propDetails2);
-        }
-
-        AttrConfigCategoryOverview<Boolean> attrConfig3 = new AttrConfigCategoryOverview<>();
-        result.put(Category.INTENT.getName(), attrConfig3);
-        attrConfig3.setLimit(500L);
-        attrConfig3.setTotalAttrs(10960L);
-        Map<String, Map<Boolean, Long>> propSummary3 = new HashMap<>();
-        attrConfig3.setPropSummary(propSummary3);
-        for (String propertyName : propertyNames) {
-            Map<Boolean, Long> propDetails3 = new HashMap<>();
-            propDetails3.put(Boolean.FALSE, 7368L);
-            propDetails3.put(Boolean.TRUE, 3592L);
-            propSummary3.put(propertyName, propDetails3);
-        }
-
-        AttrConfigCategoryOverview<Boolean> attrConfig4 = new AttrConfigCategoryOverview<>();
-        result.put(Category.LEAD_INFORMATION.getName(), attrConfig4);
-        attrConfig4.setLimit(500L);
-        attrConfig4.setTotalAttrs(1L);
-        Map<String, Map<Boolean, Long>> propSummary4 = new HashMap<>();
-        attrConfig4.setPropSummary(propSummary4);
-        for (String propertyName : propertyNames) {
-            Map<Boolean, Long> propDetails4 = new HashMap<>();
-            propDetails4.put(Boolean.FALSE, 1L);
-            propSummary4.put(propertyName, propDetails4);
-        }
-
-        AttrConfigCategoryOverview<Boolean> attrConfig5 = new AttrConfigCategoryOverview<>();
-        result.put(Category.ACCOUNT_INFORMATION.getName(), attrConfig5);
-        attrConfig5.setLimit(500L);
-        attrConfig5.setTotalAttrs(1L);
-        Map<String, Map<Boolean, Long>> propSummary5 = new HashMap<>();
-        attrConfig5.setPropSummary(propSummary5);
-        for (String propertyName : propertyNames) {
-            Map<Boolean, Long> propDetails5 = new HashMap<>();
-            propDetails5.put(Boolean.FALSE, 1L);
-            propSummary5.put(propertyName, propDetails5);
-        }
-
-        AttrConfigCategoryOverview<Boolean> attrConfig6 = new AttrConfigCategoryOverview<>();
-        result.put(Category.ONLINE_PRESENCE.getName(), attrConfig6);
-        attrConfig6.setLimit(500L);
-        attrConfig6.setTotalAttrs(0L);
-        Map<String, Map<Boolean, Long>> propSummary6 = new HashMap<>();
-        attrConfig6.setPropSummary(propSummary6);
-        for (String propertyName : propertyNames) {
-            Map<Boolean, Long> propDetails6 = new HashMap<>();
-            propSummary6.put(propertyName, propDetails6);
-        }
-        return result;
-    }
-
-    private List<AttrConfigOverview<?>> generatePropertyAttrConfigOverview(String propertyName) {
-        List<AttrConfigOverview<?>> result = new ArrayList<>();
-        AttrConfigOverview<Boolean> attrConfig1 = new AttrConfigOverview<>();
-        attrConfig1.setCategory(Category.FIRMOGRAPHICS);
-        attrConfig1.setLimit(500L);
-        attrConfig1.setTotalAttrs(131L);
-        Map<String, Map<Boolean, Long>> propSummary1 = new HashMap<>();
-        attrConfig1.setPropSummary(propSummary1);
-        Map<Boolean, Long> propDetails1 = new HashMap<>();
-        propDetails1.put(Boolean.FALSE, 46L);
-        propDetails1.put(Boolean.TRUE, 85L);
-        propSummary1.put(propertyName, propDetails1);
-        result.add(attrConfig1);
-
-        AttrConfigOverview<Boolean> attrConfig2 = new AttrConfigOverview<>();
-        attrConfig2.setCategory(Category.GROWTH_TRENDS);
-        attrConfig2.setLimit(500L);
-        attrConfig2.setTotalAttrs(9L);
-        Map<String, Map<Boolean, Long>> propSummary2 = new HashMap<>();
-        attrConfig2.setPropSummary(propSummary2);
-        Map<Boolean, Long> propDetails2 = new HashMap<>();
-        propDetails2.put(Boolean.FALSE, 9L);
-        propSummary2.put(propertyName, propDetails2);
-        result.add(attrConfig2);
-
-        AttrConfigOverview<Boolean> attrConfig3 = new AttrConfigOverview<>();
-        attrConfig3.setCategory(Category.INTENT);
-        attrConfig3.setLimit(500L);
-        attrConfig3.setTotalAttrs(10960L);
-        Map<String, Map<Boolean, Long>> propSummary3 = new HashMap<>();
-        attrConfig3.setPropSummary(propSummary3);
-        Map<Boolean, Long> propDetails3 = new HashMap<>();
-        propDetails3.put(Boolean.FALSE, 7368L);
-        propDetails3.put(Boolean.TRUE, 3592L);
-        propSummary3.put(propertyName, propDetails3);
-        result.add(attrConfig3);
-
-        AttrConfigOverview<Boolean> attrConfig4 = new AttrConfigOverview<>();
-        attrConfig4.setCategory(Category.LEAD_INFORMATION);
-        attrConfig4.setLimit(500L);
-        attrConfig4.setTotalAttrs(1L);
-        Map<String, Map<Boolean, Long>> propSummary4 = new HashMap<>();
-        attrConfig4.setPropSummary(propSummary4);
-        Map<Boolean, Long> propDetails4 = new HashMap<>();
-        propDetails4.put(Boolean.FALSE, 1L);
-        propSummary4.put(propertyName, propDetails4);
-        result.add(attrConfig4);
-
-        AttrConfigOverview<Boolean> attrConfig5 = new AttrConfigOverview<>();
-        attrConfig5.setCategory(Category.ACCOUNT_INFORMATION);
-        attrConfig5.setLimit(500L);
-        attrConfig5.setTotalAttrs(1L);
-        Map<String, Map<Boolean, Long>> propSummary5 = new HashMap<>();
-        attrConfig5.setPropSummary(propSummary5);
-        Map<Boolean, Long> propDetails5 = new HashMap<>();
-        propDetails5.put(Boolean.FALSE, 1L);
-        propSummary5.put(propertyName, propDetails5);
-        result.add(attrConfig5);
-
-        AttrConfigOverview<Boolean> attrConfig6 = new AttrConfigOverview<>();
-        attrConfig6.setCategory(Category.ONLINE_PRESENCE);
-        attrConfig6.setLimit(500L);
-        attrConfig6.setTotalAttrs(0L);
-        Map<String, Map<Boolean, Long>> propSummary6 = new HashMap<>();
-        attrConfig6.setPropSummary(propSummary6);
-        Map<Boolean, Long> propDetails6 = new HashMap<>();
-        propSummary6.put(propertyName, propDetails6);
-        result.add(attrConfig6);
-        return result;
+    @Test(groups = "unit")
+    public void testGenerateCategoryLevelMsg() {
+        String html = attrConfigService
+                .generateCategoryLevelMsg(AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest());
+        log.info("html for Category Level is " + html);
+        Assert.assertTrue(html.contains(
+                "<p>This category is in use and cannot be disabled until the attributes have been removed.</p>"));
+        Assert.assertTrue(html.contains("<b>sub2:</b><ul><li>attr6</li></ul>"));
+        Assert.assertTrue(html.contains("<b>sub1:</b><ul><li>attr4</li><li>attr5</li></ul>"));
     }
 
 }

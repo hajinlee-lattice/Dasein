@@ -15,16 +15,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.pls.service.AttrConfigService;
-import com.latticeengines.pls.service.impl.AttrConfigServiceImpl.UpdateUsageResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,13 +63,12 @@ public class AttrConfigResource {
 
     @PutMapping(value = "/usage/config/category/{categoryName}")
     @ApiOperation("update Usage Config")
-    public void updateUsageConfig(@PathVariable String categoryName,
+    public ModelAndView updateUsageConfig(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usageName,
             @RequestBody AttrConfigSelectionRequest request, HttpServletResponse response) {
-        UpdateUsageResponse updateUsageResponse = attrConfigService.updateUsageConfig(categoryName, usageName, request);
-        if (updateUsageResponse.getMessage() != null) {
-            throw new LedpException(LedpCode.LEDP_18190, new String[] { updateUsageResponse.getMessage() });
-        }
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        UIAction uiAction = attrConfigService.updateUsageConfig(categoryName, usageName, request);
+        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
     @GetMapping(value = "/activation/config/category/{categoryName}")

@@ -1,5 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
+import static j2html.TagCreator.b;
+import static j2html.TagCreator.each;
+import static j2html.TagCreator.li;
+import static j2html.TagCreator.p;
+import static j2html.TagCreator.ul;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,11 +29,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -41,6 +49,9 @@ import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.Subcatego
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -49,6 +60,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
+import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings.Type;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.pls.service.ActionService;
@@ -71,6 +83,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private static final HashMap<String, String> displayNameToUsage = new HashMap<>();
     private static final String defaultDisplayName = "Default Name";
     private static final String defaultDescription = "Default Description";
+
+    public static final String UPDATE_USAGE_SUCCESS_TITLE = "Your change has been saved";
+    public static final String UPDATE_USAGE_FAIL_ATTRIBUTE_TITLE = "Attribute In Use";
+    public static final String UPDATE_USAGE_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be disabled until the dependency has been removed.";
+    public static final String UPDATE_USAGE_FAIL_CATEGORY_TITLE = "Category In Use";
+    public static final String UPDATE_USAGE_FAIL_CATEGORY_MSG = "This category is in use and cannot be disabled until the attributes have been removed.";
+    public static final String UPDATE_USAGE_FAIL_SUBCATEGORY_TITLE = "Sub-category In Use";
+    public static final String UPDATE_USAGE_FAIL_SUBCATEGORY_MSG = "This sub-category is in use and cannot be disabled until the attributes have been removed.";
 
     static {
         usageToDisplayName.put(ColumnSelection.Predefined.Segment.getName(), "Segmentation");
@@ -250,29 +270,154 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public UpdateUsageResponse updateUsageConfig(String categoryName, String usageName,
-            AttrConfigSelectionRequest request) {
-        UpdateUsageResponse updateUsageResponse = new UpdateUsageResponse();
+    public UIAction updateUsageConfig(String categoryName, String usageName, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getShortTenantId();
         String usage = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
         AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
-        if (saveResponse != null && saveResponse.hasWarning()) {
-            List<AttrValidation> attrValidationList = saveResponse.getDetails().getValidations();
-            if (request.getDeselect() != null && request.getDeselect().size() > 1) {
-                // deactivate at subcategory level
-                Set<String> attrSet = attrValidationList.stream().map(AttrValidation::getAttrName)
-                        .collect(Collectors.toSet());
-                updateUsageResponse.setMessage(attrSet.toString());
-            } else if (request.getDeselect() != null && request.getDeselect().size() == 1) {
-                // deactivate at attribute level
-                Map<ImpactWarnings.Type, List<String>> warnings = attrValidationList.get(0).getImpactWarnings()
-                        .getWarnings();
-                updateUsageResponse.setMessage(warnings.toString());
+        return processUpdateUsageResponse(saveResponse, request);
+    }
+
+    private UIAction processUpdateUsageResponse(AttrConfigRequest saveResponse, AttrConfigSelectionRequest request) {
+        UIAction uiAction = new UIAction();
+        if (saveResponse != null) {
+            if (saveResponse.hasError()) {
+                // TODO ygao parse the error message to make it more
+                // user-friendly
+                throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
+                        + JsonUtils.serialize(saveResponse.getDetails()));
+            } else if (saveResponse.hasWarning()) {
+                // parse the mode of the request
+                int mode = parseModeForRequest(saveResponse, request);
+                // form the uiAction and throw exception
+                switch (mode) {
+                case 0:
+                    // attribute level
+                    uiAction.setTitle(UPDATE_USAGE_FAIL_ATTRIBUTE_TITLE);
+                    uiAction.setView(View.Modal);
+                    uiAction.setStatus(Status.Error);
+                    uiAction.setMessage(generateAttrLevelMsg(saveResponse));
+                    throw new UIActionException(uiAction, LedpCode.LEDP_18190);
+                case 1:
+                    // subcategory level
+                    uiAction.setTitle(UPDATE_USAGE_FAIL_SUBCATEGORY_TITLE);
+                    uiAction.setView(View.Modal);
+                    uiAction.setStatus(Status.Error);
+                    uiAction.setMessage(generateSubcategoryLevelMsg(saveResponse));
+                    throw new UIActionException(uiAction, LedpCode.LEDP_18190);
+                case 2:
+                    // category level
+                    uiAction.setTitle(UPDATE_USAGE_FAIL_CATEGORY_TITLE);
+                    uiAction.setView(View.Modal);
+                    uiAction.setStatus(Status.Error);
+                    uiAction.setMessage(generateCategoryLevelMsg(saveResponse));
+                    throw new UIActionException(uiAction, LedpCode.LEDP_18190);
+                default:
+                    return uiAction;
+                }
+            } else {
+                uiAction.setTitle(UPDATE_USAGE_SUCCESS_TITLE);
+                uiAction.setView(View.Notice);
+                uiAction.setStatus(Status.Success);
+            }
+        } else {
+            String tenantId = MultiTenantContext.getShortTenantId();
+            log.warn(String.format("Resposne for request %s of tenant %s is null.", request.toString(), tenantId));
+        }
+        return uiAction;
+    }
+
+    @VisibleForTesting
+    String generateAttrLevelMsg(AttrConfigRequest saveResponse) {
+        AttrValidation attrValidation = saveResponse.getDetails().getValidations().get(0);
+        Map<Type, List<String>> warnings = attrValidation.getImpactWarnings().getWarnings();
+        StringBuilder html = new StringBuilder();
+        html.append(p(UPDATE_USAGE_FAIL_ATTRIBUTE_MSG).render());
+        for (Type type : warnings.keySet()) {
+            html.append(b(mapTypeToDisplayName(type)).render());
+            html.append(ul().with( //
+                    each(warnings.get(type), entity -> //
+                    li(entity))) //
+                    .render());
+        }
+        return html.toString();
+    }
+
+    @VisibleForTesting
+    String generateSubcategoryLevelMsg(AttrConfigRequest saveResponse) {
+        Map<String, List<String>> subcategoryToAttrs = aggregateAttrValidations(saveResponse);
+        StringBuilder html = new StringBuilder();
+        html.append(p(UPDATE_USAGE_FAIL_SUBCATEGORY_MSG).render());
+        subcategoryToAttrs.forEach((k, v) -> {
+            html.append((b(k + ":").render()));
+            html.append(ul().with( //
+                    each(v, attr -> //
+            li(attr))).render());
+        });
+        return html.toString();
+    }
+
+    @VisibleForTesting
+    String generateCategoryLevelMsg(AttrConfigRequest saveResponse) {
+        Map<String, List<String>> subcategoryToAttrs = aggregateAttrValidations(saveResponse);
+        StringBuilder html = new StringBuilder();
+        html.append(p(UPDATE_USAGE_FAIL_CATEGORY_MSG).render());
+        subcategoryToAttrs.forEach((k, v) -> {
+            html.append((b(k + ":").render()));
+            html.append(ul().with( //
+                    each(v, attr -> //
+            li(attr))).render());
+        });
+        return html.toString();
+    }
+
+    private Map<String, List<String>> aggregateAttrValidations(AttrConfigRequest saveResponse) {
+        List<AttrValidation> attrValidations = saveResponse.getDetails().getValidations();
+        Map<String, List<String>> result = new HashMap<>();
+        attrValidations.forEach(attrValidation -> {
+            if (attrValidation.getSubcategory() == null) {
+                log.warn(String.format("Attribute %s does not have valid subcategory info",
+                        attrValidation.getAttrName()));
+                return;
+            }
+            List<String> attrs = result.getOrDefault(attrValidation.getSubcategory(), new ArrayList<>());
+            attrs.add(attrValidation.getAttrName());
+            result.put(attrValidation.getSubcategory(), attrs);
+        });
+        return result;
+    }
+
+    private String mapTypeToDisplayName(ImpactWarnings.Type type) {
+        switch (type) {
+        case IMPACTED_SEGMENTS:
+            return "Segment(s):";
+        case IMPACTED_RATING_ENGINES:
+            return "Model(s):";
+        case IMPACTED_RATING_MODELS:
+            return "RatingModel(s):";
+        case IMPACTED_PLAYS:
+            return "Play(s):";
+        default:
+            throw new IllegalArgumentException("This type conversion is not supported");
+        }
+    }
+
+    private int parseModeForRequest(AttrConfigRequest saveResponse, AttrConfigSelectionRequest request) {
+        // return value -- 0: attribute, 1: subcategory, 2: category
+        if (CollectionUtils.isNotEmpty(request.getDeselect()) && request.getDeselect().size() == 1) {
+            return 0;
+        }
+        List<AttrConfig> attrConfigs = saveResponse.getAttrConfigs();
+        String subcategory = null;
+        for (AttrConfig attrConfig : attrConfigs) {
+            String currSubcategory = attrConfig.getPropertyFinalValue(ColumnMetadataKey.Subcategory, String.class);
+            if (subcategory == null) {
+                subcategory = currSubcategory;
+            } else if (!subcategory.equals(currSubcategory)) {
+                return 2;
             }
         }
-        return updateUsageResponse;
-
+        return 1;
     }
 
     @VisibleForTesting
@@ -412,8 +557,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                 }
             }
         }
-        // TODO change to real limit
-        // attrConfigSelectionDetail.setLimit(500L);
         attrConfigSelectionDetail.setTotalAttrs(totalAttrs);
         attrConfigSelectionDetail.setSelected(selected);
         BusinessEntity entity = CategoryUtils.getEntity(resolveCategory(categoryName));
@@ -505,20 +648,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         });
         return attrs;
-    }
-
-    public static class UpdateUsageResponse {
-
-        String message;
-
-        public void setMessage(String msg) {
-            message = msg;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
     }
 
 }

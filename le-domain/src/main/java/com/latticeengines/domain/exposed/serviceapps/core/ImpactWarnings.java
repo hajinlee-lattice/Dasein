@@ -20,10 +20,13 @@ public class ImpactWarnings {
     }
 
     public enum Type {
-        IMPACTED_SEGMENTS,
-        IMPACTED_RATING_ENGINES,
-        IMPACTED_RATING_MODELS,
-        IMPACTED_PLAYS,
-        IMPACTED_COMPANY_PROFILES;
+        // dependency check warning types
+        IMPACTED_SEGMENTS, //
+        IMPACTED_RATING_ENGINES, //
+        IMPACTED_RATING_MODELS, //
+        IMPACTED_PLAYS, //
+        IMPACTED_COMPANY_PROFILES, //
+        // usage enabled warning types
+        USAGE_ENABLED;
     }
 }

@@ -318,13 +318,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
             ValidationDetails details = attrValidationService.validate(existingAttrConfigs, userProvidedList, isAdmin);
             toReturn.setDetails(details);
-            if (toReturn.hasWarning()) {
-                log.info("current attribute configs has warnings:" + JsonUtils.serialize(details));
+            if (toReturn.hasWarning() || toReturn.hasError()) {
+                log.warn("current attribute configs has warnings or errors:" + JsonUtils.serialize(details));
                 return toReturn;
-            }
-            if (toReturn.hasError()) {
-                throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
-                        + JsonUtils.serialize(toReturn.getDetails()));
             }
 
             // after validation, delete the entities with empty props

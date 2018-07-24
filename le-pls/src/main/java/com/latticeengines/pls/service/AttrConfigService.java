@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
-import com.latticeengines.pls.service.impl.AttrConfigServiceImpl.UpdateUsageResponse;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 
 public interface AttrConfigService {
 
@@ -23,7 +23,7 @@ public interface AttrConfigService {
 
     void updateActivationConfig(String categoryName, AttrConfigSelectionRequest request);
 
-    UpdateUsageResponse updateUsageConfig(String categoryName, String usageName, AttrConfigSelectionRequest request);
+    UIAction updateUsageConfig(String categoryName, String usageName, AttrConfigSelectionRequest request);
 
     Map<String, AttributeStats> getStats(String categoryName, @PathVariable String subcatName);
 }

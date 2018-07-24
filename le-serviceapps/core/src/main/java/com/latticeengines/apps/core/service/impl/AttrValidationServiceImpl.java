@@ -11,6 +11,8 @@ import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 
@@ -53,6 +55,10 @@ public class AttrValidationServiceImpl implements AttrValidationService {
                 if (attrConfig.getImpactWarnings() != null || attrConfig.getValidationErrors() != null) {
                     ValidationDetails.AttrValidation validation = new ValidationDetails.AttrValidation();
                     validation.setAttrName(attrConfig.getAttrName());
+                    validation
+                            .setCategory(attrConfig.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class));
+                    validation.setSubcategory(
+                            attrConfig.getPropertyFinalValue(ColumnMetadataKey.Subcategory, String.class));
                     validation.setImpactWarnings(attrConfig.getImpactWarnings());
                     validation.setValidationErrors(attrConfig.getValidationErrors());
                     details.addValidation(validation);
