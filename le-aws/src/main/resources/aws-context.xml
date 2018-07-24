@@ -19,4 +19,8 @@
         <constructor-arg index="0" ref="awsCredentials" />
     </bean>
 
+    <bean name="emrClient" class="com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceAsyncClient">
+        <constructor-arg index="0" ref="awsCredentials" />
+    </bean>
+
 </beans>
