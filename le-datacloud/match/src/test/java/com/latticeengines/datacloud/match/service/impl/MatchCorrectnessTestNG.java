@@ -38,7 +38,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     // domain only easy cases
     private static final Object[][] TEST_DATA_1 = new Object[][] { //
-            { "google.com", null, null, null, null, null, null, "google.com", "ALPHABET INC.", "California", "USA",
+            { "google.com", null, null, null, null, null, null, "google.com", "GOOGLE LLC", "California", "USA",
                     ">10,000", ">10B" },
             { "microsoft.com", null, null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { "apple.com", null, null, null, null, null, null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
@@ -48,14 +48,14 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     // name location only easy cases
     private static final Object[][] TEST_DATA_2 = new Object[][] { //
-            { null, "Alphabet Inc.", "Mountain View", "California", null, "USA", null, "google.com", "Alphabet Inc.",
+            { null, "Alphabet Inc.", "Mountain View", "California", null, "USA", null, "ABC.XYZ", "Alphabet Inc.",
                     "California", "USA", ">10,000", ">10B" },
             { null, "Chevron Corporation", "San Ramon", "California", null, "USA", null, "chevron.com", "Chevron Corporation", "California", "USA", ">10,000", ">10B" },
     };
 
     // short location, accurate spelling
     private static final Object[][] TEST_DATA_3 = new Object[][] { //
-            { null, "Alphabet", null, null, null, null, null, "google.com", "Alphabet Inc.", "California", "USA",
+            { null, "Alphabet", null, null, null, null, null, "ABC.XYZ", "Alphabet Inc.", "California", "USA",
                     ">10,000", ">10B" },
             /*{ null, "Google", null, null, null, null, null, "google.com", "GOOGLE LLC", "California", "USA", ">10,000",
                     ">10B" },*/
