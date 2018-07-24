@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -89,7 +90,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser,
             boolean enforceTranslation) {
         Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version, sqlUser, enforceTranslation);
-        List<Map<String, Object>> data = flux.toStream().collect(Collectors.toList());
+        List<Map<String, Object>> data = flux.collectList().block();
         return new DataPage(data);
     }
 
@@ -116,17 +117,25 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                 query.getLookups() //
                         .stream() //
                         .filter(lookup -> lookup instanceof AttributeLookup) //
-                        .map(lookup -> (AttributeLookup) lookup) //
-                        .map(attrLookup -> attrRepo.getColumnMetadata(attrLookup)) //
-                        .filter(cm -> cm != null //
+                        .map(lookup -> {
+                            AttributeLookup attributeLookup = (AttributeLookup) lookup;
+                            ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);
+                            if (cm != null) {
+                                ColumnMetadata cm2 = cm.clone(); // avoid in-place mutation of cached objects
+                                cm2.setAttrName(attributeLookup.getAttribute());
+                                return cm2;
+                            } else {
+                                return new ColumnMetadata();
+                            }
+                        }) //
+                        .filter(cm -> StringUtils.isNotBlank(cm.getAttrName()) //
                                 && cm.getStats() != null //
                                 && cm.getStats().getBuckets() != null //
                                 && CollectionUtils.isNotEmpty(cm.getStats().getBuckets().getBucketList()))
                         .forEach(cm -> {
                             Map<Long, String> enumMap = new HashMap<>();
                             List<Bucket> bucketList = cm.getStats().getBuckets().getBucketList();
-                            bucketList.stream() //
-                                    .forEach(bucket -> enumMap.put(bucket.getId(), bucket.getLabel()));
+                            bucketList.forEach(bucket -> enumMap.put(bucket.getId(), bucket.getLabel()));
                             translationMapping.put(cm.getAttrName(), enumMap);
                         });
             }

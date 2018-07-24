@@ -256,8 +256,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Test(groups = "functional")
     public void testAccountDataWithTranslation() {
-        testAccountDataWithTranslation(false);
         testAccountDataWithTranslation(true);
+        testAccountDataWithTranslation(false);
     }
 
     private void testAccountDataWithTranslation(boolean enforceTranslation) {
@@ -275,7 +275,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 "TechIndicator_AdobeTargetStandard");
 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, true);
+        DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, enforceTranslation);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
