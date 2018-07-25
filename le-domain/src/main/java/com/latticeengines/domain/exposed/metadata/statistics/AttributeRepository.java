@@ -74,8 +74,8 @@ public class AttributeRepository {
         return collectionName;
     }
 
-    public String getIdentifier() {
-        return customerSpace.getTenantId() + "-" + collectionName;
+    public String getIdentifier(String sqlUser) {
+        return customerSpace.getTenantId() + "-" + collectionName + "-" + sqlUser;
     }
 
     public boolean hasAttribute(AttributeLookup lookup) {

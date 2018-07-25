@@ -31,12 +31,12 @@ public abstract class QueryProvider implements ApplicationContextAware {
     }
 
     public SQLQueryFactory getCachedSQLQueryFactory(AttributeRepository repository, String sqlUser) {
-        SQLQueryFactory factory = factoryCache.getIfPresent(repository.getIdentifier());
+        SQLQueryFactory factory = factoryCache.getIfPresent(repository.getIdentifier(sqlUser));
         if (factory != null) {
             return factory;
         } else {
             factory = getSQLQueryFactory(sqlUser);
-            factoryCache.put(repository.getIdentifier(), factory);
+            factoryCache.put(repository.getIdentifier(sqlUser), factory);
             return factory;
         }
     }
