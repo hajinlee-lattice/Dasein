@@ -43,7 +43,7 @@
         "port": 9002
     },
     "scoring": {
-        "mem": 1024,
+        "mem": 1536,
         "port": 9003
     },
     "modeling": {
