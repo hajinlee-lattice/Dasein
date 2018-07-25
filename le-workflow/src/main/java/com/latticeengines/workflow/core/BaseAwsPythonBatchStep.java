@@ -75,10 +75,10 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
             config = getObjectFromContext(AWS_PYTHON_BATCH_CONFIGURATION, AWSPythonBatchConfiguration.class);
             if (config != null && config.isRunInAws()) {
                 waitForCompletion();
+                afterComplete(config);
                 return;
             }
             submitAndWaitForCompletion();
-
         } catch (Exception ex) {
             log.error("Failed to run Python App!", ex);
         }
@@ -90,7 +90,7 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
             setupConfig(config);
         }
         if (CollectionUtils.isEmpty(config.getInputPaths())) {
-            log.info("There's no input paths generated for Aps!");
+            log.info("No input path was generated.");
             return;
         }
 
@@ -98,11 +98,13 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         if (config.isRunInAws()) {
             executeInAws();
             result = waitForCompletion();
+            log.info("Submitted Aws Batch Job, result=" + result);
         } else {
             result = executeInline();
+            log.info("Submitted Inline Job, result=" + result);
         }
-        log.info("Submitted Aws Batch Job, result=" + result);
         afterComplete(config);
+
     }
 
     public boolean waitForCompletion() {
