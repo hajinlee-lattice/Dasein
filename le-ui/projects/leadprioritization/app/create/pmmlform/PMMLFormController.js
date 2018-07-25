@@ -18,10 +18,14 @@ angular
         ResourceUtility: ResourceUtility,
         endpoint: '/pls/metadatauploads/modules/',
         pmmlParams: {
-            infoTemplate: "<p>Upload a PMML model file.</p>",
+            infoTemplate: "<p class='template-description'>Upload a PMML model file.</p>",
             defaultMessage: "Example: enterprise-pmml-model.xml",
             compressed: true,
-            metadataFile: true
+            metadataFile: true,
+            tooltipConfiguration: {
+                tooltipSize: 'small',
+                whiteFont: true
+            }
         },
         pivotParams: {
             infoTemplate: "<h4>Pivot Mapping File</h4><p>Choose a Pivot Mapping File</p>",

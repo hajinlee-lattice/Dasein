@@ -1,14 +1,18 @@
 <label for="loadfile" ng-if="vm_uploader_container.label || vm_uploader_container.infoTemplate">
   <span class="tooltip-label">{{ vm_uploader_container.label }} <span ng-if="vm_uploader.fileRequired == 'false'">(optional)</span></span>
-  <span 
-      ng-if="vm_uploader_container.infoTemplate"
-      tooltips 
-      tooltip-template="{{ vm_uploader_container.infoTemplate }}"
-      tooltip-size="large"
-      tooltip-side="{{vm_uploader_container.tooltipSide || 'top'}}"
-      tooltip-close-button="true" 
-      class="more-info">&#105;</span>
+
+    <span ng-if="vm_uploader_container.infoTemplate">
+        <span class="show-tooltip delay {{vm_uploader_container.getTooltipConfig('tooltipSide') || 'top'}}" ng-class="{'gray-tip': vm_uploader_container.getTooltipConfig('whiteBackground')}">
+            <span class="more-info"> &#105; </span>
+            <div class="tooltip_ {{vm_uploader_container.getTooltipConfig('tooltipSize') || 'large'}}">
+                <div class="cover" ng-class="{'white-background': vm_uploader_container.getTooltipConfig('whiteBackground'), 'white-font': vm_uploader_container.getTooltipConfig('whiteFont')}" ng-bind-html="vm_uploader_container.infoTemplate">
+                </div>
+            </div>
+        </span>
+    </span>
+
 </label>
+
 <div class="fileUpload button form-control" ng-class="{ 'required': vm_uploader.fileRequired == 'true' }">
     <span id="csvFileUploadMessage" class="placeholder" ng-if="vm_uploader.showFileIcon()">
       {{ vm_uploader.defaultMessageFn() || vm_uploader.defaultMessage }}

@@ -17,12 +17,16 @@ angular
             fileLoad:'&',
             fileDone:'&',
             fileCancel:'&',
-            tooltipSide:'@'
+            tooltipConfig: '@'
         },
         templateUrl: 'app/create/fileuploader/FileUploaderTemplate.html',
         controllerAs: 'vm_uploader_container',
         controller: function ($scope) {
             angular.extend(this, $scope);
+
+            this.getTooltipConfig = function(key) {
+                return this.tooltipConfig != undefined ? JSON.parse(this.tooltipConfig)[key] : '';
+            }
         }
     };
 })

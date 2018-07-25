@@ -926,8 +926,10 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
   }
   div {
       position: relative;
-      overflow: hidden;
       margin-top: -5px;
+      .template-section {
+        margin-top: 5px;
+      }
       input.upload {
         position: absolute;
         top: 0;

@@ -298,6 +298,10 @@ tooltip {
         font-weight: normal;
         font-size: 125%;
         text-align: left;
+        &.large {
+          width: 500px;
+          padding-top: 15px;
+        }
         h5 {
             color: #eee;
             margin-bottom: 1em;
@@ -307,8 +311,15 @@ tooltip {
             color: #a0a0a0;
             line-height: 1.2em;
             font-size: 12px;
-            &:last-child {
-                margin-bottom: 0;
+            &.white {
+              color: #fff;
+            }
+            &.template-description {
+              margin-top: .5em;
+              font-size: 12px;
+            }
+            &:last-child:not(.template-description) {
+              margin-bottom: 0;
             }
         }
         h3 {
@@ -317,6 +328,17 @@ tooltip {
             font-size: 18px;
             font-weight: normal;
             margin-bottom: .1em;
+        }
+        h4 {
+            color: #000;
+            text-transform: none;
+            font-weight: normal;
+            font-size: 1em;
+            margin: .1em 0em;
+            text-align: center;
+            &.white {
+              color: #fff;
+            }
         }
         em {
             color: #fff;
@@ -328,11 +350,15 @@ tooltip {
         }
         ul {
             color: #666;
-            list-style: disc inside none;
+            list-style: disc outside;
+            margin-left: 1em;
             li {
                 color: #ccc;
                 line-height: 1.2em;
                 font-size: 12px;
+                &.white {
+                  color: #fff;
+                }
             }
         }
         & > .cover {
@@ -345,6 +371,20 @@ tooltip {
             padding-right: 10px;
             overflow: hidden;
             white-space: normal;
+            &.white-background {
+              background-color: #fff;
+              border: solid 1px #d3d3d3;
+              padding-right: 20px;
+              margin-bottom: 15px;
+              > h4, p {
+                color: #000;
+              }
+            }
+            &.white-font {
+              h4, p, li {
+                color: #fff;
+              }
+            }
         }
         &:before {
             box-shadow: inherit;
@@ -397,12 +437,44 @@ tooltip {
             top: -9px;
         }
     }
+   &:not(.top) > .tooltip_.large {
+        top: calc(100% + 7px);
+        
+        &:after,
+        &:before {
+            top: 4px;
+            background: #222831;
+        }
+    }
     &.top > .tooltip_ {
         bottom: calc(1.5em + 11px);
         
         &:after,
         &:before {
             bottom: -9px;
+        }
+    }
+    &.top > .tooltip_.large {
+        bottom: calc(1.5em - 7px);
+
+        &:after,
+        &:before {
+          bottom: 6px;
+          background: #222831;
+        }
+    }
+    &.top > .tooltip_.small {
+        bottom: calc(1.5em - 5px);
+
+        &:after,
+        &:before {
+          bottom: -2px;
+        }
+    }
+    &.gray-tip > .tooltip_.large {
+        &:after,
+        &:before {
+          background: #d3d3d3;
         }
     }
     &.delay {
