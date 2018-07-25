@@ -27,6 +27,8 @@ public interface TenantEntityMgr {
 
     BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName);
 
+    BootstrapState getTenantServiceStateInCache(String contractId, String tenantId, String serviceName);
+
     SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName);
 
     SpaceConfiguration getDefaultSpaceConfig();

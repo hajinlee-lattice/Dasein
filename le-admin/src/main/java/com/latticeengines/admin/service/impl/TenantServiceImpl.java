@@ -312,6 +312,11 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public BootstrapState getTenantServiceStateInCache(String contractId, String tenantId, String serviceName) {
+        return tenantEntityMgr.getTenantServiceStateInCache(contractId, tenantId, serviceName);
+    }
+
+    @Override
     public BootstrapState getTenantOverallState(String contractId, String tenantId, TenantDocument doc) {
         final String podId = CamilleEnvironment.getPodId();
         final Camille camille = CamilleEnvironment.getCamille();
@@ -337,7 +342,7 @@ public class TenantServiceImpl implements TenantService {
                 BootstrapState newState;
                 try {
                     if (camille.exists(tenantServiceStatePath)) {
-                        newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
+                        newState = tenantEntityMgr.getTenantServiceStateInCache(contractId, tenantId, serviceName);
                     } else {
                         newState = BootstrapState.createInitialState();
                     }
@@ -352,7 +357,7 @@ public class TenantServiceImpl implements TenantService {
                     if (state == null) {
                         state = newState;
                     } else if (!serviceName.equals(DanteComponent.componentName)
-                            || danteIsEnabled(contractId, tenantId)) {
+                            || danteIsEnabled(doc)) {
                         state = mergeBootstrapStates(state, newState, serviceName);
                     }
                 }
@@ -398,6 +403,21 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public boolean danteIsEnabled(String contractId, String tenantId) {
         TenantDocument tenant = tenantEntityMgr.getTenant(contractId, tenantId);
+        String str = tenant.getSpaceInfo().featureFlags;
+        if (!str.contains(danteFeatureFlag)) {
+            return false;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode json = mapper.readTree(str);
+            return json.get(danteFeatureFlag).asBoolean();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean danteIsEnabled(TenantDocument tenant) {
         String str = tenant.getSpaceInfo().featureFlags;
         if (!str.contains(danteFeatureFlag)) {
             return false;
