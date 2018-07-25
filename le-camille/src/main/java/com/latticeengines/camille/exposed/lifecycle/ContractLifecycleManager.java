@@ -123,7 +123,7 @@ public class ContractLifecycleManager {
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
             try {
-                ContractInfo contractInfo = getInfo(childPair.getValue().getSuffix());
+                ContractInfo contractInfo = getInfoInCache(childPair.getValue().getSuffix(), cache);
                 if (contractInfo != null) {
                     toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), contractInfo));
                 }
