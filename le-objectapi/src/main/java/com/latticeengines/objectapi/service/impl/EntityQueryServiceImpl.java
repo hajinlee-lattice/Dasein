@@ -120,7 +120,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                         .map(lookup -> {
                             AttributeLookup attributeLookup = (AttributeLookup) lookup;
                             ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);
-                            if (cm != null) {
+                            if (cm != null && cm.getBitOffset() != null) {
                                 ColumnMetadata cm2 = cm.clone(); // avoid in-place mutation of cached objects
                                 cm2.setAttrName(attributeLookup.getAttribute());
                                 return cm2;
@@ -259,12 +259,18 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             final Map<String, Object> tempProcessed = processed;
             processed.keySet() //
                     .stream() //
-                    .filter(key -> translationMapping.containsKey(key)) //
+                    .filter(translationMapping::containsKey) //
                     .forEach(key -> { //
                         Object val = tempProcessed.get(key);
                         if (val != null && val instanceof Long) {
                             Long enumNumeric = (Long) val;
-                            tempProcessed.put(key, translationMapping.get(key).get(enumNumeric));
+                            if (enumNumeric == 0L) { // 0 is null
+                                tempProcessed.put(key, null);
+                            } else if (translationMapping.get(key).containsKey(enumNumeric)) {
+                                tempProcessed.put(key, translationMapping.get(key).get(enumNumeric));
+                            } else {
+                                tempProcessed.put(key, enumNumeric);
+                            }
                         }
                     });
         }
