@@ -240,6 +240,22 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private Expression translateMinPeriodId(QueryFactory queryFactory,
+                                            AttributeRepository repository,
+                                            String periodNameStr,
+                                            int offset,
+                                            String sqlUser) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
+        String txTableName = getPeriodTransactionTableName(repository);
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
+
+        return factory.query().from(tablePath) //
+            .where(periodName.eq(periodNameStr)) //
+            .select(periodId.min().add(offset));
+    }
+
     private BooleanExpression translateProductId(String productIdStr) {
         return productId.in(productIdStr.split(","));
     }
@@ -487,8 +503,18 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         int expectedResult = (returnPositive) ? 1 : 0;
 
+        BooleanExpression resultFilter = amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate);
+
+        if (txRestriction.isNegate() &&
+            (ComparisonType.WITHIN == timeFilter.getRelation() || ComparisonType.PRIOR == timeFilter.getRelation())) {
+            int offset = Integer.valueOf(timeFilter.getValues().get(0).toString());
+
+            resultFilter = resultFilter.and(periodId.gt(translateMinPeriodId(queryFactory, repository, period, //
+                                                                             offset, sqlUser)));
+        }
+
         return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
-            .where(amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate))
+            .where(resultFilter)
             .groupBy(accountId, periodId);
 
     }

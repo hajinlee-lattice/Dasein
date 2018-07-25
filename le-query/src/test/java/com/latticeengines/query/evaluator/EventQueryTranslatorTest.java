@@ -29,15 +29,13 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
     public static class EnhancedEventQueryTranslator extends EventQueryTranslator {
         @Override
         protected String getPeriodTransactionTableName(AttributeRepository repository) {
-            return "tftest_4_transaction_2017_10_31_19_44_08_utc";
+            return "tftest_8_periodtransaction_2018_01_06_00_57_09_utc";
         }
 
     }
 
-    /* prodid used by yuwen's test case
-    private static final String PROD_ID1 = "3872223C9BA06C649D68E415E23A9446";
-    private static final String PROD_ID2 = "A78DF03BAC196BE9A08508FFDB433A31";
-    */
+    //private static final String PROD_ID1 = "3872223C9BA06C649D68E415E23A9446";
+    //private static final String PROD_ID2 = "A78DF03BAC196BE9A08508FFDB433A31";
     private static final String PROD_ID1 = "A3B7BABBB51AD145639DD583D91826AD";
     private static final String PROD_ID2 = "563750D5B351FA4439BF5FB2A1C26DD2";
 
@@ -116,6 +114,17 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
                                                TimeFilter.Period.Month.name(),  //
                                                Collections.singletonList(6));
+        txRestriction.setTimeFilter(timeFilter);
+        txRestriction.setNegate(true);
+        return txRestriction;
+    }
+
+    private TransactionRestriction getHasNotPurchasedWithinOverMaxPeriod() {
+        TransactionRestriction txRestriction = new TransactionRestriction();
+        txRestriction.setProductId(PROD_ID1);
+        TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
+                                               TimeFilter.Period.Month.name(),  //
+                                               Collections.singletonList(40));
         txRestriction.setTimeFilter(timeFilter);
         txRestriction.setNegate(true);
         return txRestriction;
@@ -747,6 +756,19 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         //Assert.assertEquals(count, 86093);
         Assert.assertEquals(count, 1265);
+    }
+
+    @Test(groups = "functional")
+    public void testHasNotPurchasedWithinOverMaxPeriod() {
+        TransactionRestriction txRestriction = getHasNotPurchasedWithinOverMaxPeriod();
+        EventQueryTranslator eventTranslator = getEventQueryTranslator();
+        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
+                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+        System.out.println("sqlQuery = " + sqlQuery);
+        long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
+        //Assert.assertEquals(count, 0);
+        Assert.assertEquals(count, 0);
     }
 
     @Test(groups = "functional")
