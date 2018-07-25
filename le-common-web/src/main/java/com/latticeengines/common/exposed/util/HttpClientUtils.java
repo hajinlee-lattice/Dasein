@@ -2,6 +2,7 @@ package com.latticeengines.common.exposed.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +22,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -55,6 +57,17 @@ public class HttpClientUtils {
         return restTemplate;
     }
 
+    /**
+     * generate a rest template using ssl enforced connection pool and process data in
+     * JSON format.
+     */
+    public static RestTemplate newJsonRestTemplate() {
+        RestTemplate template = newSSLEnforcedRestTemplate();
+        appendJacksonMessageConverters(template);
+        template.getInterceptors().addAll(jsonInterceptors());
+        return template;
+    }
+
     public static RestTemplate newFormURLEncodedRestTemplate() {
         RestTemplate restTemplate = new RestTemplate(SSL_BLIND_HC_FACTORY);
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
@@ -63,7 +76,7 @@ public class HttpClientUtils {
         interceptors.add(new HeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
         restTemplate.setInterceptors(interceptors);
         return restTemplate;
-}
+    }
 
     /**
      * gives a rest template using connection pool and ENFORCE ssl name
@@ -124,10 +137,24 @@ public class HttpClientUtils {
         return interceptors;
     }
 
+    private static List<ClientHttpRequestInterceptor> jsonInterceptors() {
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(new HeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+        interceptors.add(new HeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
+        interceptors.add(new HeaderRequestInterceptor(HttpHeaders.ACCEPT_ENCODING, "gzip"));
+        return interceptors;
+    }
+
     private static void appendKryoMessageConverters(RestTemplate restTemplate) {
         List<HttpMessageConverter<?>> newConverters = new ArrayList<>(restTemplate.getMessageConverters());
         newConverters.add(new KryoHttpMessageConverter());
         restTemplate.setMessageConverters(newConverters);
+    }
+
+    private static void appendJacksonMessageConverters(RestTemplate restTemplate) {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
+        restTemplate.getMessageConverters().add(converter);
     }
 
     /**

@@ -188,8 +188,8 @@ angular.module('mainApp.login.services.LoginService', [
         }
 
         var creds = {
-            OldPassword : CryptoJS.SHA256(oldPassword).toString(),
-            NewPassword : CryptoJS.SHA256(newPassword).toString()
+            OldPassword : oldPassword,
+            NewPassword : newPassword
         };
 
         var username = BrowserStorageUtility.getLoginDocument().UserName;
@@ -198,7 +198,8 @@ angular.module('mainApp.login.services.LoginService', [
             url: '/pls/password/' + username + '/',
             data: creds,
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "X-LE-UpdateFormat": "text/plain"
             }
         })
         .success(function(data, status, headers, config) {

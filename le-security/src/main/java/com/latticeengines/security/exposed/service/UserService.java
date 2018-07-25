@@ -43,6 +43,8 @@ public interface UserService {
 
     boolean updateCredentials(User user, UserUpdateData data);
 
+    boolean updateClearTextCredentials(User user, UserUpdateData data);
+
     String getURLSafeUsername(String username);
 
     String deactiveUserStatus(String userName, String emails);

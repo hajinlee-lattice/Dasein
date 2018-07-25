@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed.service.impl;
 import java.util.Date;
 import java.util.List;
 
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     public TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private GlobalUserManagementService gaUserManagementService;
 
     @Autowired
     private UserService userService;
@@ -78,6 +82,8 @@ public class TenantServiceImpl implements TenantService {
         try {
             for (User user : userService.getUsers(tenant.getId())) {
                 userService.deleteUser(tenant.getId(), user.getUsername());
+                // check if the user has any tenant right, if not, deactivate zendesk user
+                gaUserManagementService.checkRedundant(user.getUsername());
             }
             globalTenantManagementService.discardTenant(tenant);
         } catch (LedpException e) {

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -279,6 +280,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean updateCredentials(User user, UserUpdateData data) {
+        return updateCredentials(user, data, false);
+    }
+
+    @Override
+    public boolean updateClearTextCredentials(User user, UserUpdateData data) {
+        return updateCredentials(user, data, true);
+    }
+
+    /*
+     * if isCredentialsClearText is
+     * true => password in UserUpdateData is clear text
+     * false => password in UserUpdateData is SHA256 hashed
+     */
+    private boolean updateCredentials(User user, UserUpdateData data, boolean isCredentialsClearText) {
         // change password
         String oldPassword = data.getOldPassword();
         String newPassword = data.getNewPassword();
@@ -293,6 +308,9 @@ public class UserServiceImpl implements UserService {
 
             Ticket ticket;
             try {
+                if (isCredentialsClearText) {
+                    oldPassword = DigestUtils.sha256Hex(oldPassword);
+                }
                 ticket = globalAuthenticationService.authenticateUser(user.getUsername(), oldPassword);
                 if (ticket == null) {
                     return false;
@@ -301,7 +319,13 @@ public class UserServiceImpl implements UserService {
                 throw new LoginException(e);
             }
 
-            if (globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds)) {
+            boolean updateSucceeded;
+            if (isCredentialsClearText) {
+                updateSucceeded = globalUserManagementService.modifyClearTextLatticeCredentials(ticket, oldCreds, newCreds);
+            } else {
+                updateSucceeded = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
+            }
+            if (updateSucceeded) {
                 LOGGER.info(String.format("%s changed his/her password", user.getUsername()));
                 return true;
             }

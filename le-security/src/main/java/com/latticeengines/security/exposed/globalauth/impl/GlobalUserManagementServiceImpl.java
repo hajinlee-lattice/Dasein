@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
+import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -45,7 +49,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     private static final Logger log = LoggerFactory.getLogger(GlobalUserManagementServiceImpl.class);
 
     private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
-    
+
     @Value("${monitor.emailsettings.from}")
     private String EMAIL_FROM;
 
@@ -64,6 +68,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     @Value("${monitor.emailsettings.useSSL}")
     private boolean EMAIL_USESSL;
 
+    @Value("${security.zendesk.enabled:false}")
+    private boolean zendeskEnabled;
+
     @Autowired
     private GlobalAuthAuthenticationEntityMgr gaAuthenticationEntityMgr;
 
@@ -81,6 +88,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ZendeskService zendeskService;
 
     @Override
     public synchronized Boolean registerUser(User user, Credentials creds) {
@@ -170,7 +180,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     public Boolean globalAuthGrantRight(String right, String tenant, String username)
             throws Exception {
-        
+
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
 
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
@@ -191,13 +201,22 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         rightData.setGlobalAuthTenant(tenantData);
         rightData.setOperationName(right);
         gaUserTenantRightEntityMgr.create(rightData);
+
+        if (isZendeskEnabled(globalAuthUser.getEmail())) {
+            List<GlobalAuthUserTenantRight> rights = gaUserTenantRightEntityMgr.findByEmail(globalAuthUser.getEmail());
+            if (rights.size() == 1) {
+                // originally no rights, activate zendesk user
+                log.info(String.format("Activating zendesk user %s.", globalAuthUser.getEmail()));
+                zendeskService.unsuspendUserByEmail(globalAuthUser.getEmail());
+            }
+        }
         return true;
     }
 
     protected GlobalAuthUser findGlobalAuthUserByUsername(String username) throws Exception {
         return findGlobalAuthUserByUsername(username, false);
     }
-    
+
     protected GlobalAuthUser findGlobalAuthUserByUsername(String username, boolean assertUserExistence) throws Exception {
         GlobalAuthUser globalAuthUser = findByEmailNoJoin(username);
         if (globalAuthUser != null) {
@@ -209,7 +228,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (latticeAuthenticationData != null) {
             globalAuthUser = latticeAuthenticationData.getGlobalAuthUser();
             return globalAuthUser;
-        } 
+        }
         if (assertUserExistence) {
             throw new Exception("Unable to find the user requested.");
         }
@@ -273,7 +292,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     private Boolean globalAuthRevokeRight(String right, String tenant, String username)
             throws Exception {
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
-        
+
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
         if (tenantData == null) {
             throw new Exception("Unable to find the tenant requested.");
@@ -288,6 +307,15 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
 
         gaUserTenantRightEntityMgr.delete(rightData);
+
+        if (isZendeskEnabled(globalAuthUser.getEmail())) {
+            List<GlobalAuthUserTenantRight> rights = gaUserTenantRightEntityMgr.findByEmail(globalAuthUser.getEmail());
+            if (rights.isEmpty()) {
+                // no rights, deactive zendesk user
+                log.info(String.format("Deactivating zendesk user %s.", globalAuthUser.getEmail()));
+                zendeskService.suspendUserByEmail(globalAuthUser.getEmail());
+            }
+        }
         return true;
     }
 
@@ -346,6 +374,14 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         latticeAuthenticationData.setMustChangePassword(true);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
 
+        if (isZendeskEnabled(userData.getEmail()) && userData.getUserTenantRights() != null &&
+                !userData.getUserTenantRights().isEmpty()) {
+            // user has tenant rights, make sure zendesk account exists and set password
+            ZendeskUser zendeskUser = upsertZendeskUser(userData);
+            log.info(String.format("Resetting credentials for zendesk user %s.", userData.getEmail()));
+            zendeskService.setUserPassword(zendeskUser.getId(), password);
+        }
+
         emailService.sendGlobalAuthForgetCredsEmail(userData.getFirstName(),
                 userData.getLastName(), userData.getAuthentications().get(0)
                         .getUsername(), password, userData.getEmail(), emailsettings);
@@ -357,21 +393,43 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             Credentials newCreds) {
         try {
             log.info(String.format("Modifying credentials for %s.", oldCreds.getUsername()));
-            return globalAuthModifyLatticeCredentials(ticket, oldCreds, newCreds);
+            return globalAuthModifyLatticeCredentials(ticket, oldCreds, newCreds, null);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
         }
     }
 
-    private Boolean globalAuthModifyLatticeCredentials(Ticket ticket, Credentials oldCreds,
-            Credentials newCreds) throws Exception {
+    @Override
+    public Boolean modifyClearTextLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds) {
+        try {
+            String password = newCreds.getPassword();
+            oldCreds.setPassword(DigestUtils.sha256Hex(oldCreds.getPassword()));
+            newCreds.setPassword(DigestUtils.sha256Hex(newCreds.getPassword()));
+            log.info(String.format("Modifying credentials for %s.", oldCreds.getUsername()));
+            return globalAuthModifyLatticeCredentials(ticket, oldCreds, newCreds, (userData) -> {
+                if (!isZendeskEnabled(userData.getEmail())) {
+                    return;
+                }
+                if (userData.getUserTenantRights() != null && !userData.getUserTenantRights().isEmpty()) {
+                    // user has tenant rights, make sure zendesk account exists and set password
+                    ZendeskUser zendeskUser = upsertZendeskUser(userData);
+                    log.info(String.format("Modifying credentials for zendesk user %s.", userData.getEmail()));
+                    zendeskService.setUserPassword(zendeskUser.getId(), password);
+                }
+            });
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
+        }
+    }
+
+    private Boolean globalAuthModifyLatticeCredentials(
+            Ticket ticket, Credentials oldCreds, Credentials newCreds, Consumer<GlobalAuthUser> callback) throws Exception {
         GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
         if (ticketData == null) {
             throw new Exception("Unable to find the ticket requested.");
         }
-        GlobalAuthAuthentication latticeAuthenticationData = gaUserEntityMgr
-                .findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId())
-                .getAuthentications().get(0);
+        GlobalAuthUser userData = gaUserEntityMgr.findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId());
+        GlobalAuthAuthentication latticeAuthenticationData = userData.getAuthentications().get(0);
         if (latticeAuthenticationData == null) {
             throw new Exception("Unable to find the credentials requested.");
         }
@@ -386,6 +444,10 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 .getPassword()));
         latticeAuthenticationData.setMustChangePassword(false);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
+
+        if (callback != null) {
+            callback.accept(userData);
+        }
         return true;
     }
 
@@ -424,6 +486,17 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 .encryptPassword(GlobalAuthPasswordUtils.hash256(password)));
         latticeAuthenticationData.setMustChangePassword(true);
         gaAuthenticationEntityMgr.update(latticeAuthenticationData);
+
+        if (isZendeskEnabled(userData.getEmail())) {
+            List<GlobalAuthUserTenantRight> rights = gaUserTenantRightEntityMgr.findByEmail(userData.getEmail());
+            if (!rights.isEmpty()) {
+                // user has tenant rights, make sure zendesk account exists and set password
+                ZendeskUser zendeskUser = upsertZendeskUser(userData);
+                log.info(String.format("Resetting credentials for zendesk user %s.", userData.getEmail()));
+                zendeskService.setUserPassword(zendeskUser.getId(), password);
+            }
+        }
+
         return password;
     }
 
@@ -449,7 +522,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             authData = userData.getAuthentications().get(0);
         }
         if (authData != null) {
-            user.setUsername(authData.getUsername());    
+            user.setUsername(authData.getUsername());
         }
         if (userData.getEmail() != null) {
             user.setEmail(userData.getEmail());
@@ -490,9 +563,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     private User globalAuthFindUserByUsername(String username) throws Exception {
         User user = new User();
-        
+
         GlobalAuthUser userData = findGlobalAuthUserByUsername(username, true);
-        
+
         user.setUsername(username);
         if (userData.getEmail() != null) {
             user.setEmail(userData.getEmail());
@@ -537,12 +610,18 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (userData == null) {
             return true;
         }
-        
+
         try {
             gaUserEntityMgr.delete(userData);
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
             throw new Exception("Unable to delete the user requested.");
+        }
+
+        // disable zendesk user
+        if (isZendeskEnabled(userData.getEmail())) {
+            log.info(String.format("Deactivating zendesk user %s.", userData.getEmail()));
+            zendeskService.suspendUserByEmail(userData.getEmail());
         }
         return true;
     }
@@ -565,6 +644,15 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         } catch (Exception e) {
             log.error("Failed to check if the user " + username + " is redundant.", e);
             return false;
+        }
+    }
+
+    @Override
+    public void checkRedundant(String username) {
+        if (isZendeskEnabled(username) && isRedundant(username)) {
+            // disable zendesk user
+            log.info(String.format("Deactivating zendesk user %s.", username));
+            zendeskService.suspendUserByEmail(username);
         }
     }
 
@@ -648,7 +736,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             emailSet.add(email.trim());
         }
         StringBuilder filterEmails = new StringBuilder("");
-        for (String email : emailStr) {
+        for (String email : emailSet) {
             GlobalAuthUser gaUser = gaUserEntityMgr.findByEmail(email);
             if (gaUser == null) {
                 log.info(String.format("the email %s is not valid, and can't find user in table GlobalUser", email));
@@ -660,6 +748,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("%s set user %s isActive to false", userName, gaUser.getEmail()));
             gaUserTenantRightEntityMgr.deleteByUserId(gaUser.getPid());
             log.info(String.format("%s delete the %s's GlobalUserTenantRight", userName, gaUser.getEmail()));
+
+            // disable zendesk user
+            if (isZendeskEnabled(email)) {
+                zendeskService.suspendUserByEmail(email);
+            }
         }
         return filterEmails.toString();
     }
@@ -687,6 +780,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("current user %s is deleted", gaUser.getFirstName()));
         } catch (Exception e) {
             throw new RuntimeException("Unable to delete the user requested.");
+        }
+
+        // disable zendesk user
+        if (isZendeskEnabled(email)) {
+            zendeskService.suspendUserByEmail(email);
         }
         return true;
     }
@@ -717,7 +815,38 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 log.info(String.format("user %s is granted to %s", email, level));
                 gaUserTenantRightEntityMgr.create(gaUserTenantRight);
             }
+
+            // active zendesk user
+            if (isZendeskEnabled(email)) {
+                log.info(String.format("Activating zendesk user %s.", email));
+                zendeskService.unsuspendUserByEmail(email);
+            }
         }
         return filterEmails.toString();
+    }
+
+    private boolean isZendeskEnabled(String email) {
+        if (!zendeskEnabled || email == null) {
+            return false;
+        }
+        // disable zendesk feature for Lattice email
+        return !email.trim().toUpperCase().endsWith(LATTICE_ENGINES_COM);
+    }
+
+    /**
+     * Make sure a zendesk user with specified email exists and update its name/verified/suspended properties
+     * @param email target zendesk user's email
+     * @param name display name of the zendesk user
+     * @return entire zendesk user after the operation
+     */
+    private ZendeskUser upsertZendeskUser(GlobalAuthUser user) {
+        String name = user.getFirstName();
+        ZendeskUser req = new ZendeskUser();
+        req.setEmail(user.getEmail());
+        req.setName(name);
+        // verified and unsuspended
+        req.setVerified(true);
+        req.setSuspended(false);
+        return zendeskService.createOrUpdateUser(req);
     }
 }

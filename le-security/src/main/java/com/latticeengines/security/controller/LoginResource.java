@@ -184,7 +184,15 @@ public class LoginResource {
             HttpServletRequest request) {
         User user = new User();
         user.setUsername(userService.getURLSafeUsername(username).toLowerCase());
-        if (userService.updateCredentials(user, data)) {
+        boolean updateSucceeded;
+        // use this header for backward compatibility
+        if (request.getHeader(Constants.PASSWORD_UPDATE_FORMAT_HEADERNAME) != null) {
+            updateSucceeded = userService.updateClearTextCredentials(user, data);
+        } else {
+            // old format (sha256 hashed)
+            updateSucceeded = userService.updateCredentials(user, data);
+        }
+        if (updateSucceeded) {
             return SimpleBooleanResponse.successResponse();
         } else {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList("Could not change password."));
