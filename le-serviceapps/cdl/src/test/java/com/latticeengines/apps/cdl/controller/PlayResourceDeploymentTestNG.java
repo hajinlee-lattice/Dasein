@@ -11,7 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.service.impl.TestPlayCreationHelper;
+//import com.latticeengines.apps.cdl.service.impl.TestPlayCreationHelper;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
+import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 

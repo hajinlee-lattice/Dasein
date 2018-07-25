@@ -38,20 +38,23 @@ import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
-import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 import com.latticeengines.yarn.exposed.service.JobService;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
+@ContextConfiguration(locations = { //"classpath:test-pls-context.xml",
+		"classpath:playmakercore-context.xml",
         "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml", "classpath:proxy-context.xml",
-        "classpath:test-workflowapi-context.xml" })
+        "classpath:test-workflowapi-context.xml", 
+        "classpath:test-testframework-cleanup-context.xml" 
+        })
 public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStepDeploymentTestNG.class);
@@ -137,7 +140,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        bucketsToLaunch = new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B));
+        bucketsToLaunch = new HashSet<>(Arrays.asList(RatingBucketName.values()));
         excludeItemsWithoutSalesforceId = true;
         topNCount = 5L;
 

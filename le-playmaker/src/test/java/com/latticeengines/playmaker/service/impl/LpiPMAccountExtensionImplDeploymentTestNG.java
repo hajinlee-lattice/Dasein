@@ -21,14 +21,16 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
-import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
+@ContextConfiguration(locations = { //"classpath:test-pls-context.xml", 
+		"classpath:test-testframework-cleanup-context.xml", 
+		"classpath:playmakercore-context.xml",
         "classpath:test-playmaker-context.xml" })
 public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 

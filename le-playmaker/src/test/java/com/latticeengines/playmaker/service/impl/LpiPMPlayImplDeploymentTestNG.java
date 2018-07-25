@@ -18,12 +18,14 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
+@ContextConfiguration(locations = { //"classpath:test-pls-context.xml", 
+		"classpath:test-testframework-cleanup-context.xml", 
+		"classpath:playmakercore-context.xml",
         "classpath:test-playmaker-context.xml" })
 public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
