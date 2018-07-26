@@ -9,7 +9,7 @@
 
     <import resource="classpath:hadoop-config-context.xml"/>
 
-    <hdp:configuration id="hadoopConfiguration" configuration-ref="baseConfiguration">
+    <hdp:configuration id="baseHadoopConfiguration" configuration-ref="baseConfiguration">
         yarn.app.mapreduce.am.resource.cpu-vcores=1
         mapreduce.map.memory.mb=${dataplatform.container.mapreduce.memory}
         mapreduce.reduce.memory.mb=${dataplatform.container.mapreduce.memory}
@@ -24,5 +24,7 @@
         mapreduce.jobhistory.webapp.address=${hadoop.mapreduce.jobhistory.webapp.address}
         mapreduce.jobhistory.address=${hadoop.mapreduce.jobhistory.address}
     </hdp:configuration>
+
+    <bean id="hadoopConfiguration" class="com.latticeengines.yarn.exposed.bean.MapReduceConfigurationBeanFactory" />
 
 </beans>

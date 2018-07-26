@@ -27,7 +27,7 @@
         <constructor-arg value="info" />
     </bean>
 
-    <import resource="classpath:yarn-config-context.xml" />
+    <import resource="classpath:hadoop-config-context.xml" />
     <import resource="classpath:yarn-client-context.xml" />
 
     <bean id="appMasterTransactionManager"

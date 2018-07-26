@@ -1,8 +1,10 @@
 package com.latticeengines.aws.emr.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClient;
@@ -22,8 +24,16 @@ public class EMRServiceImpl implements EMRService {
 
     private static final Logger log = LoggerFactory.getLogger(EMRServiceImpl.class);
 
-    @Autowired
+    @Inject
     private AmazonElasticMapReduceClient emrClient;
+
+    @Value("${aws.emr.cluster}")
+    private String clusterName;
+
+    @Override
+    public String getMasterIp() {
+        return getMasterIp(clusterName);
+    }
 
     @Override
     public String getMasterIp(String clusterName) {

@@ -5,6 +5,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <import resource="classpath:aws-context.xml"/>
+
     <yarn:configuration id="baseConfiguration">
         dfs.client.failover.proxy.provider.${hadoop.dfs.nameservices}=${hadoop.dfs.client.failover.proxy.provider}
         dfs.nameservices=${hadoop.dfs.nameservices}
@@ -38,5 +40,7 @@
         mapreduce.jobhistory.webapp.address=${hadoop.mapreduce.jobhistory.webapp.address}
         mapreduce.jobhistory.address=${hadoop.mapreduce.jobhistory.address}
     </yarn:configuration>
+
+    <bean id="yarnConfiguration" class="com.latticeengines.hadoop.bean.HadoopConfigurationBeanFactory" />
 
 </beans>

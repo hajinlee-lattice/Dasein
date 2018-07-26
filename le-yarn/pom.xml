@@ -166,18 +166,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-aws</artifactId>
-            <version>${project.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-aws</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -186,7 +174,11 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-hadoop</artifactId>
             <version>${project.version}</version>
-            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-aws</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

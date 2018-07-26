@@ -15,7 +15,7 @@
     </bean>
 
     <context:property-placeholder location="file:latticeengines.properties"/>
-    <import resource="classpath:yarn-config-context.xml"/>
+    <import resource="classpath:hadoop-config-context.xml"/>
 
     <yarn:localresources>
         <yarn:hdfs path="/app/$$VERSION$$/dataplatform/hadoop-metrics2.properties" />

@@ -19,7 +19,7 @@
     <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:db-context.xml"/>
-    <import resource="classpath:yarn-config-context.xml"/>
+    <import resource="classpath:hadoop-config-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:redshiftdb-context.xml"/>
     <import resource="classpath:cache-context.xml"/>

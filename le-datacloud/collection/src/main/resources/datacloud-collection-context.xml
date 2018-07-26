@@ -37,6 +37,6 @@
 
     <import resource="hadoop-config-context.xml"/>
     <context:property-placeholder location="classpath*:hadoop.properties"/>
-    <yarn:configuration configuration-ref="baseConfiguration"/>
+    <import resource="classpath:hadoop-config-context.xml" />
 
 </beans>
