@@ -30,8 +30,6 @@ angular.module('common.attributes.controls', [])
         vm.save = function() {
             var payload = vm.store.generatePayload();
 
-            console.log('payload', payload, vm.section);
-
             if (vm.section == 'activate' && payload.Select.length > 0) {
                 Modal.warning({
                     title: "Activation",

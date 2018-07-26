@@ -72,7 +72,6 @@ angular.module('common.attributes')
         var modal = Modal.get(args.name);
         var ret = true;
 
-        console.log('modalCallback', args, modal);
         switch (args.action) {
             case "closedForced": 
                 break;
@@ -85,7 +84,6 @@ angular.module('common.attributes')
                 modal.disableDischargeButton(true);
             
                 store.saveConfig().then(function(result) {
-                    console.log('xhr', result);
                     Modal.modalRemoveFromDOM(modal, args);
                 });
 

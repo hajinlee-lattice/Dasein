@@ -31,7 +31,6 @@ angular.module('common.banner', [])
         this.set(angular.extend({
             type: type || 'info'
         }, opts));
-        console.log('generate', this.banners);
     };
 
     this.error = function(opts) {
@@ -59,14 +58,12 @@ angular.module('common.banner', [])
 
         vm.$onInit = function() {
             vm.banners = Banner.get();
-            console.log('bannerMessage', vm.banners);
         };
 
         vm.isVisible = function() {
             var visible = false;
 
             vm.banners.forEach(function(banner, index) {
-                console.log(index, banner)
                 if (banner.show === true) {
                     visible = true;
                 }
