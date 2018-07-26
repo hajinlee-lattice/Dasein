@@ -206,6 +206,14 @@ public class RatingEngineResource {
         return ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngineId);
     }
 
+    @PostMapping(value = "/{ratingEngineId}/ratingmodels")
+    @ResponseBody
+    @ApiOperation(value = "Create a Rating Model iteration associated with a Rating Engine given its id")
+    public RatingModel createModelIteration(@PathVariable String ratingEngineId, @RequestBody RatingModel ratingModel) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.createModelIteration(tenant.getId(), ratingEngineId, ratingModel);
+    }
+
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}")
     @ResponseBody
     @ApiOperation(value = "Get a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")

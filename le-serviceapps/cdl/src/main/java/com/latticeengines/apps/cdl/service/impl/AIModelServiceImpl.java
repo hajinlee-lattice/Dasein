@@ -93,13 +93,13 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingModel.getTrainingSegment() != null) {
             String segmentName = ratingModel.getTrainingSegment().getName();
-            MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(tenant.getId(), segmentName);
+            MetadataSegmentDTO segmentDTO = segmentProxy
+                    .getMetadataSegmentWithPidByName(tenant.getId(), segmentName);
             MetadataSegment segment = segmentDTO.getMetadataSegment();
             segment.setPid(segmentDTO.getPrimaryKey());
             ratingModel.setTrainingSegment(segment);
         }
-        aiModelEntityMgr.createOrUpdateAIModel(ratingModel, ratingEngineId);
-        return ratingModel;
+        return aiModelEntityMgr.createOrUpdateAIModel(ratingModel, ratingEngineId);
     }
 
     @Override
@@ -108,16 +108,18 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     }
 
     @Override
-    public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
-            ModelingQueryType modelingQueryType, DataCollection.Version version) {
-        CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
+    public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine,
+            AIModel aiModel, ModelingQueryType modelingQueryType, DataCollection.Version version) {
+        CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel
+                .getAdvancedModelingConfig();
 
-        if (advancedConf != null
-                && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
+        if (advancedConf != null && Arrays.asList(ModelingStrategy.values())
+                .contains(advancedConf.getModelingStrategy())) {
             PeriodStrategy strategy = periodService.getApsRollupPeriod(version);
             int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy, version);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
-                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, strategy.getName(), maxPeriod);
+                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType,
+                            strategy.getName(), maxPeriod);
             return ratingQueryBuilder.build();
         } else {
             throw new LedpException(LedpCode.LEDP_40009,
@@ -134,9 +136,11 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
         boolean shouldHaveParentSegment = true;
         AdvancedModelingConfig advancedModelingConfig = ratingModel.getAdvancedModelingConfig();
-        if (advancedModelingConfig != null && advancedModelingConfig instanceof CustomEventModelingConfig) {
+        if (advancedModelingConfig != null
+                && advancedModelingConfig instanceof CustomEventModelingConfig) {
             CustomEventModelingConfig customEventModelingConfig = (CustomEventModelingConfig) advancedModelingConfig;
-            if (CustomEventModelingType.LPI.equals(customEventModelingConfig.getCustomEventModelingType())) {
+            if (CustomEventModelingType.LPI
+                    .equals(customEventModelingConfig.getCustomEventModelingType())) {
                 shouldHaveParentSegment = false;
             }
         }
@@ -147,18 +151,20 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             }
         }
         if (CollectionUtils.isNotEmpty(segments)) {
-            ratingModel.setRatingModelAttributes(new HashSet<>(segmentService.findDependingAttributes(segments)));
+            ratingModel.setRatingModelAttributes(
+                    new HashSet<>(segmentService.findDependingAttributes(segments)));
         }
     }
 
-    public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
+    public void updateModelingJobStatus(String ratingEngineId, String aiModelId,
+            JobStatus newStatus) {
         AIModel aiModel = getRatingModelById(aiModelId);
         if (aiModel.getModelingJobStatus().isTerminated()) {
             throw new LedpException(LedpCode.LEDP_40028, new String[] { aiModelId });
         }
         aiModel.setModelingJobStatus(newStatus);
         createOrUpdate(aiModel, ratingEngineId);
-        log.info(String.format("Modeling Job status updated for AIModel:%s, RatingEngine:%s to %s", aiModelId,
-                ratingEngineId, newStatus.name()));
+        log.info(String.format("Modeling Job status updated for AIModel:%s, RatingEngine:%s to %s",
+                aiModelId, ratingEngineId, newStatus.name()));
     }
 }

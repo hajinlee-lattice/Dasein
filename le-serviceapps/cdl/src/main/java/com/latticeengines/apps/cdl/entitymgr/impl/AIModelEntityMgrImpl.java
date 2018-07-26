@@ -21,7 +21,8 @@ import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.AIModel;
 
 @Component("aiModelEntityMgr")
-public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, Long> implements AIModelEntityMgr {
+public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, Long>
+        implements AIModelEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(AIModelEntityMgrImpl.class);
 
@@ -70,11 +71,18 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
     @Transactional(propagation = Propagation.REQUIRED)
     public AIModel createOrUpdateAIModel(AIModel aiModel, String ratingEngineId) {
         if (aiModel.getId() == null) {
-            throw new UnsupportedOperationException("Create new AIModel is not Supported");
+            aiModel.setId(AIModel.generateIdStr());
+            log.info(String.format("Creating an AI model with id %s for ratingEngine %s",
+                    aiModel.getId(), ratingEngineId));
+            getDao().create(aiModel);
+            return aiModel;
         } else {
             AIModel retrievedAIModel = findById(aiModel.getId());
             if (retrievedAIModel == null) {
-                throw new UnsupportedOperationException("Create new AIModel is not yet Supported");
+                log.warn(String.format("AIModel with id %s is not found. Creating a new one",
+                        aiModel.getId()));
+                getDao().create(aiModel);
+                return aiModel;
             } else {
                 updateExistingAIModel(retrievedAIModel, aiModel, ratingEngineId);
                 getDao().update(retrievedAIModel);
@@ -89,15 +97,18 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
         return aiModelDao.findParentSegmentById(aiModel.getId());
     }
 
-    private void updateExistingAIModel(AIModel retrievedAIModel, AIModel aiModel, String ratingEngineId) {
-        log.info(String.format("Updating AI Model with id %s for ratingEngine %s", aiModel.getId(), ratingEngineId));
+    private void updateExistingAIModel(AIModel retrievedAIModel, AIModel aiModel,
+            String ratingEngineId) {
+        log.info(String.format("Updating AI Model with id %s for ratingEngine %s", aiModel.getId(),
+                ratingEngineId));
         retrievedAIModel.setPredictionType(aiModel.getPredictionType());
         retrievedAIModel.setTrainingSegment(aiModel.getTrainingSegment());
         retrievedAIModel.setModelingJobId(
-                aiModel.getModelingYarnJobId() != null ? aiModel.getModelingYarnJobId().toString() : null);
+                aiModel.getModelingYarnJobId() != null ? aiModel.getModelingYarnJobId().toString()
+                        : null);
         retrievedAIModel.setModelingJobStatus(aiModel.getModelingJobStatus());
         retrievedAIModel.setModelSummaryId(aiModel.getModelSummaryId());
-        retrievedAIModel.getAdvancedModelingConfig().copyConfig(aiModel.getAdvancedModelingConfig());
+        retrievedAIModel.getAdvancedModelingConfig()
+                .copyConfig(aiModel.getAdvancedModelingConfig());
     }
-
 }

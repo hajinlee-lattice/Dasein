@@ -145,6 +145,12 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return JsonUtils.convertList(list, RatingModel.class);
     }
 
+    public RatingModel createModelIteration(String customerSpace, String ratingEngineId, RatingModel ratingModel) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels", shortenCustomerSpace(customerSpace),
+                ratingEngineId);
+        return post("create model iteration", url, ratingModel, ratingModel.getClass());
+    }
+
     public RatingModel getRatingModel(String customerSpace, String ratingEngineId, String ratingModelId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);

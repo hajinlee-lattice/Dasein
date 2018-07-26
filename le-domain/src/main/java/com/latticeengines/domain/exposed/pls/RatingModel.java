@@ -57,6 +57,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
 
     private Date updated;
 
+    private String createdBy;
+
     protected RatingEngine ratingEngine;
 
     private Set<AttributeLookup> ratingModelAttributes;
@@ -113,6 +115,16 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     @LastModifiedDate
     public Date getUpdated() {
         return this.updated;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @JsonProperty("createdBy")
+    @Column(name = "CREATED_BY")
+    public String getCreatedBy() {
+        return this.createdBy;
     }
 
     public void setIteration(int iteration) {

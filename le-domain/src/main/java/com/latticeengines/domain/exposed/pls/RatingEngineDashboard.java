@@ -19,6 +19,8 @@ public class RatingEngineDashboard {
 
     private Map<RatingEngineDependencyType, List<String>> dependencies;
 
+    private List<RatingModelDTO> iterations;
+
     public CoverageInfo getCoverageInfo() {
         return coverageInfo;
     }
@@ -51,9 +53,19 @@ public class RatingEngineDashboard {
         this.segment = segment;
     }
 
-    public Map<RatingEngineDependencyType, List<String>> getDependencies() { return dependencies; }
+    public Map<RatingEngineDependencyType, List<String>> getDependencies() {
+        return dependencies;
+    }
 
     public void setDependencies(Map<RatingEngineDependencyType, List<String>> dependencies) {
         this.dependencies = dependencies;
+    }
+
+    public List<RatingModelDTO> getIterations() {
+        return iterations;
+    }
+
+    public void setIterations(List<RatingModelDTO> iterations) {
+        this.iterations = iterations;
     }
 }

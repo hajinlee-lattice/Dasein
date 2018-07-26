@@ -26,20 +26,24 @@ public interface RatingEngineService {
 
     List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status);
 
-    List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status, boolean publishedRatingsOnly);
+    List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status,
+            boolean publishedRatingsOnly);
 
     List<String> getAllRatingEngineIdsInSegment(String segmentName);
 
     List<String> getAllRatingEngineIdsInSegment(String segmentName, //
             boolean considerPublishedOnly);
 
-    RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate, boolean populateActiveModel);
+    RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate,
+            boolean populateActiveModel);
 
     RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate);
 
     RatingEngine createOrUpdate(RatingEngine ratingEngine);
 
     RatingEngine createOrUpdate(RatingEngine ratingEngine, Boolean unlinkSegment);
+
+    RatingModel createOrUpdateModelIteration(RatingEngine ratingEngine, RatingModel ratingModel);
 
     RatingEngine replicateRatingEngine(String id);
 
@@ -55,18 +59,22 @@ public interface RatingEngineService {
 
     RatingModel getRatingModel(String ratingEngineId, String ratingModelId);
 
-    RatingModel updateRatingModel(String ratingEngineId, String ratingModelId, RatingModel ratingModel);
+    RatingModel updateRatingModel(String ratingEngineId, String ratingModelId,
+            RatingModel ratingModel);
 
     Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
             String ratingEngineId);
 
-    EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-            ModelingQueryType modelingQueryType, DataCollection.Version version);
+    EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine,
+            RatingModel ratingModel, ModelingQueryType modelingQueryType,
+            DataCollection.Version version);
 
-    Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-            ModelingQueryType modelingQueryType, DataCollection.Version version);
+    Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine,
+            RatingModel ratingModel, ModelingQueryType modelingQueryType,
+            DataCollection.Version version);
 
-    String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel, String userEmail);
+    String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel,
+            String userEmail);
 
     List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId);
 
@@ -82,5 +90,6 @@ public interface RatingEngineService {
 
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
 
-    void setScoringIteration(String ratingEngineId, String ratingModelId, List<BucketMetadata> bucketMetadatas);
+    void setScoringIteration(String ratingEngineId, String ratingModelId,
+            List<BucketMetadata> bucketMetadatas);
 }

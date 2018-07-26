@@ -8,4 +8,8 @@ public interface AIModelDao extends BaseDao<AIModel> {
 
     MetadataSegment findParentSegmentById(String id);
 
+    void create(AIModel aiModel);
+
+    int findMaxIterationByRatingEngineId(String ratineEngindId);
+
 }

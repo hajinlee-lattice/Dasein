@@ -93,7 +93,8 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
     public List<RatingEngineSummary> getRatingEngineSummaries( //
-            @PathVariable String customerSpace, @RequestParam(value = "status", required = false) String status, //
+            @PathVariable String customerSpace,
+            @RequestParam(value = "status", required = false) String status, //
             @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "publishedratingsonly", required = false, defaultValue = "false") Boolean publishedRatingsOnly) {
         return ratingEngineService.getAllRatingEngineSummaries(type, status, publishedRatingsOnly);
@@ -124,7 +125,8 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Get a Rating Engine given its id")
-    public RatingEngine getRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+    public RatingEngine getRatingEngine(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
         return ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
     }
 
@@ -146,7 +148,8 @@ public class RatingEngineResource {
     @PostMapping(value = "/replicate/{engineId}")
     @ResponseBody
     @ApiOperation(value = "Replicate a Rating Engine")
-    public RatingEngine replicateRatingEngine(@PathVariable String customerSpace, @PathVariable String engineId) {
+    public RatingEngine replicateRatingEngine(@PathVariable String customerSpace,
+            @PathVariable String engineId) {
         return ratingEngineService.replicateRatingEngine(engineId);
     }
 
@@ -154,17 +157,19 @@ public class RatingEngineResource {
     @ResponseBody
     @Action
     @ApiOperation(value = "Register or update a Rating Engine, returns RatingEngineAndActionDTO")
-    public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(@PathVariable String customerSpace,
-            @RequestBody RatingEngine ratingEngine,
+    public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(
+            @PathVariable String customerSpace, @RequestBody RatingEngine ratingEngine,
             @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment) {
-        RatingEngine updatedRatingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine, unlinkSegment);
+        RatingEngine updatedRatingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine,
+                unlinkSegment);
         return new RatingEngineAndActionDTO(updatedRatingEngine, ActionContext.getAction());
     }
 
     @DeleteMapping(value = "/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
-    public Boolean deleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId, //
+    public Boolean deleteRatingEngine(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, //
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         ratingEngineService.deleteById(ratingEngineId, hardDelete);
         return true;
@@ -173,7 +178,8 @@ public class RatingEngineResource {
     @PutMapping(value = "/{ratingEngineId}/revertdelete")
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
-    public Boolean revertDeleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+    public Boolean revertDeleteRatingEngine(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
         ratingEngineService.revertDelete(ratingEngineId);
         return true;
     }
@@ -189,15 +195,25 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")
-    public List<RatingModel> getRatingModels(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+    public List<RatingModel> getRatingModels(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
         return ratingEngineService.getRatingModelsByRatingEngineId(ratingEngineId);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create an iteration for a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
+    public RatingModel createModelIteration(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @RequestBody RatingModel ratingModel) {
+        RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
+        return ratingEngineService.createOrUpdateModelIteration(ratingEngine, ratingModel);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel getRatingModel(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId) {
+    public RatingModel getRatingModel(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
     }
 
@@ -208,22 +224,25 @@ public class RatingEngineResource {
     public RatingModelAndActionDTO updateRatingModelAndActionDTO(@PathVariable String customerSpace,
             @RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
-        RatingModel updatedRatingModel = updateRatingModel(customerSpace, ratingModel, ratingEngineId, ratingModelId);
+        RatingModel updatedRatingModel = updateRatingModel(customerSpace, ratingModel,
+                ratingEngineId, ratingModelId);
         return new RatingModelAndActionDTO(updatedRatingModel, ActionContext.getAction());
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel updateRatingModel(@PathVariable String customerSpace, @RequestBody RatingModel ratingModel,
-            @PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
+    public RatingModel updateRatingModel(@PathVariable String customerSpace,
+            @RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId) {
         return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get all notes for single rating engine via rating engine id.")
-    public List<RatingEngineNote> getAllNotes(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+    public List<RatingEngineNote> getAllNotes(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
         log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s", ratingEngineId));
         return ratingEngineNoteService.getAllByRatingEngineId(ratingEngineId);
     }
@@ -240,9 +259,10 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert one note for a certain rating engine.")
-    public Boolean createNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
-            @RequestBody NoteParams noteParams) {
-        log.info(String.format("RatingEngineId=%s's note createdUser=%s", ratingEngineId, noteParams.getUserName()));
+    public Boolean createNote(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @RequestBody NoteParams noteParams) {
+        log.info(String.format("RatingEngineId=%s's note createdUser=%s", ratingEngineId,
+                noteParams.getUserName()));
         ratingEngineNoteService.create(ratingEngineId, noteParams);
         return Boolean.TRUE;
     }
@@ -260,9 +280,11 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/notes/{noteId}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Update the content of a certain note via note id.")
-    public Boolean updateNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
-            @PathVariable String noteId, @RequestBody NoteParams noteParams) {
-        log.info(String.format("RatingEngineNoteId=%s update by %s", noteId, noteParams.getUserName()));
+    public Boolean updateNote(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @PathVariable String noteId,
+            @RequestBody NoteParams noteParams) {
+        log.info(String.format("RatingEngineNoteId=%s update by %s", noteId,
+                noteParams.getUserName()));
         ratingEngineNoteService.updateById(noteId, noteParams);
         return Boolean.TRUE;
     }
@@ -275,8 +297,8 @@ public class RatingEngineResource {
             @RequestParam(value = "querytype") ModelingQueryType modelingQueryType, //
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
-        return getModelingQueryByRating(customerSpace, ratingEngineId, ratingModelId, modelingQueryType, version,
-                ratingEngine);
+        return getModelingQueryByRating(customerSpace, ratingEngineId, ratingModelId,
+                modelingQueryType, version, ratingEngine);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery", method = RequestMethod.POST)
@@ -293,8 +315,8 @@ public class RatingEngineResource {
         } else {
             ratingModel = ratingEngine.getActiveModel();
         }
-        return ratingEngineService.getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType,
-                version);
+        return ratingEngineService.getModelingQuery(customerSpace, ratingEngine, ratingModel,
+                modelingQueryType, version);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.GET)
@@ -306,8 +328,8 @@ public class RatingEngineResource {
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType, //
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
-        return getModelingQueryCountByRating(customerSpace, ratingEngineId, ratingModelId, modelingQueryType, version,
-                ratingEngine);
+        return getModelingQueryCountByRating(customerSpace, ratingEngineId, ratingModelId,
+                modelingQueryType, version, ratingEngine);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.POST)
@@ -326,8 +348,8 @@ public class RatingEngineResource {
         } else {
             ratingModel = ratingEngine.getActiveModel();
         }
-        return ratingEngineService.getModelingQueryCount(customerSpace, ratingEngine, ratingModel, modelingQueryType,
-                version);
+        return ratingEngineService.getModelingQueryCount(customerSpace, ratingEngine, ratingModel,
+                modelingQueryType, version);
 
     }
 
@@ -342,10 +364,12 @@ public class RatingEngineResource {
         RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
 
         if (!(ratingModel instanceof AIModel)) {
-            throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
+            throw new LedpException(LedpCode.LEDP_31107,
+                    new String[] { ratingModel.getClass().getName() });
         }
 
-        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, (AIModel) ratingModel, userEmail);
+        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine,
+                (AIModel) ratingModel, userEmail);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus", method = RequestMethod.POST)
@@ -381,8 +405,8 @@ public class RatingEngineResource {
     @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
     public RatingEngineDashboard getRatingEngineDashboardById(@PathVariable String customerSpace,
             @PathVariable String ratingEngineId) {
-        return ratingEngineDashboardService.getRatingsDashboard(CustomerSpace.parse(customerSpace).toString(),
-                ratingEngineId);
+        return ratingEngineDashboardService
+                .getRatingsDashboard(CustomerSpace.parse(customerSpace).toString(), ratingEngineId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/entitypreview", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -402,7 +426,8 @@ public class RatingEngineResource {
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
             @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets, //
             @RequestParam(value = "lookupIdColumn", required = false) String lookupIdColumn) {
-        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false, false);
+        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false,
+                false);
 
         descending = descending == null ? false : descending;
         if (StringUtils.isNotBlank(freeFormTextSearch)) {
@@ -413,9 +438,9 @@ public class RatingEngineResource {
             }
         }
 
-        return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
-                descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
-                selectedBuckets, lookupIdColumn);
+        return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum,
+                entityType, sortBy, descending, bucketFieldName, lookupFieldNames,
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, lookupIdColumn);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/entitypreview/count", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -429,10 +454,11 @@ public class RatingEngineResource {
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
             @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets, //
             @RequestParam(value = "lookupIdColumn", required = false) String lookupIdColumn) {
-        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false, false);
+        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false,
+                false);
 
-        return ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, entityType, restrictNotNullSalesforceId,
-                freeFormTextSearch, selectedBuckets, lookupIdColumn);
+        return ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, entityType,
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, lookupIdColumn);
     }
 
     @GetMapping(value = "/dependingattrs/type/{engineType}/model/{modelId}")

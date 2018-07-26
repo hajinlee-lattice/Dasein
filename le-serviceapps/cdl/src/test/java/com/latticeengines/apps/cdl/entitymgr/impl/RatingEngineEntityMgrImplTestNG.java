@@ -47,7 +47,8 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImplTestNG.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(RatingEngineEntityMgrImplTestNG.class);
 
     private static final String PLAY_NAME = "PLAY HARD";
     private static final String RATING_ENGINE_NAME = "Rating Engine";
@@ -109,7 +110,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCreation() {
-        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
+        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine,
+                mainTestTenant.getId());
         log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
@@ -148,7 +150,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         log.info("dc is " + dc);
         log.info("Rating Engine after findById is " + createdRatingEngine.toString());
 
-        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(aiRatingEngine, mainTestTenant.getId());
+        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(aiRatingEngine,
+                mainTestTenant.getId());
         log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
@@ -181,7 +184,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineList.size(), 2);
 
         // test find ids
-        List<String> ratingEngineIds = ratingEngineEntityMgr.findAllIdsInSegment(testSegment.getName());
+        List<String> ratingEngineIds = ratingEngineEntityMgr
+                .findAllIdsInSegment(testSegment.getName());
         Assert.assertNotNull(ratingEngineIds);
         Assert.assertEquals(ratingEngineIds.size(), 2);
 
@@ -192,25 +196,29 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // test find all by type and status
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, null);
         Assert.assertEquals(ratingEngineList.size(), 2);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.CROSS_SELL.name(), null);
+        ratingEngineList = ratingEngineEntityMgr
+                .findAllByTypeAndStatus(RatingEngineType.CROSS_SELL.name(), null);
         Assert.assertEquals(ratingEngineList.size(), 1);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(), null);
+        ratingEngineList = ratingEngineEntityMgr
+                .findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(), null);
         Assert.assertEquals(ratingEngineList.size(), 1);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.INACTIVE.name());
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null,
+                RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 2);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.ACTIVE.name());
-        Assert.assertEquals(ratingEngineList.size(), 0);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null,
                 RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 0);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.INACTIVE.name());
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(
+                RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 0);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(
+                RatingEngineType.RULE_BASED.name(), RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 1);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.INACTIVE.name());
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(
+                RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 1);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.ACTIVE.name());
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(
+                RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 0);
 
         // test find with active model populated
@@ -235,7 +243,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 RatingBucketName.A.getName(), 1L, //
                 RatingBucketName.B.getName(), 2L, //
                 RatingBucketName.C.getName(), 3L));
-        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re,
+                mainTestTenant.getId());
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
         Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
@@ -247,7 +256,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         log.info("The update date for the newly updated one is "
                 + ratingEngineEntityMgr.findById(ratingEngine.getId()).getUpdated());
-        log.info("The create date for the newly updated one is " + createdRatingEngine.getCreated());
+        log.info(
+                "The create date for the newly updated one is " + createdRatingEngine.getCreated());
 
         // Ai Ratings set scoring Iteration first, then mark them as active
         re = new RatingEngine();
@@ -255,12 +265,14 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         re.setNote(RATING_ENGINE_NEW_NOTE);
         re.setId(aiRatingEngine.getId());
         re.setScoringIteration(aiRatingEngine.getLatestIteration());
-        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re,
+                mainTestTenant.getId());
 
         re = new RatingEngine();
         re.setId(aiRatingEngine.getId());
         re.setStatus(RatingEngineStatus.ACTIVE);
-        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re,
+                mainTestTenant.getId());
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
         Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
@@ -293,15 +305,17 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(counts.get(RatingBucketName.B.getName()), new Long(2));
         Assert.assertEquals(counts.get(RatingBucketName.C.getName()), new Long(3));
 
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.ACTIVE.name());
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(
+                RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 1);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.ACTIVE.name());
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null,
+                RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 2);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.INACTIVE.name());
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(
+                RatingEngineType.RULE_BASED.name(), RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 0);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.INACTIVE.name());
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null,
+                RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 0);
 
         // Soft Delete should fail since there are Plays associated with Rating
@@ -380,11 +394,13 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
         Assert.assertEquals(action.getActionInitiator(), CREATED_BY);
-        Assert.assertTrue(action.getActionConfiguration() instanceof RatingEngineActionConfiguration);
-        Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration()).getSubType(),
+        Assert.assertTrue(
+                action.getActionConfiguration() instanceof RatingEngineActionConfiguration);
+        Assert.assertEquals(
+                ((RatingEngineActionConfiguration) action.getActionConfiguration()).getSubType(),
                 RatingEngineActionConfiguration.SubType.ACTIVATION);
-        Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration()).getRatingEngineId(),
-                ratingEngine.getId());
+        Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration())
+                .getRatingEngineId(), ratingEngine.getId());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
@@ -402,22 +418,26 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private void validateRatingModelCreation(RatingEngine ratingEngine) {
-        List<RuleBasedModel> ratingModels = ruleBasedModelEntityMgr.findAllByRatingEngineId(ratingEngine.getId());
+        List<RuleBasedModel> ratingModels = ruleBasedModelEntityMgr
+                .findAllByRatingEngineId(ratingEngine.getId());
         Assert.assertNotNull(ratingModels);
         Assert.assertEquals(ratingModels.size(), 1);
         validateDefaultRuleBasedModel(ratingModels.get(0));
     }
 
     private void validateAIRatingModelCreation(RatingEngine ratingEngine) {
-        List<AIModel> ratingModels = aiModelEntityMgr.findByRatingEngineId(ratingEngine.getId(), null);
+        List<AIModel> ratingModels = aiModelEntityMgr.findByRatingEngineId(ratingEngine.getId(),
+                null);
         Assert.assertNotNull(ratingModels);
         Assert.assertEquals(ratingModels.size(), 1);
         Assert.assertEquals(ratingModels.get(0).getModelingJobStatus(), JobStatus.PENDING);
-        Assert.assertEquals(ratingModels.get(0).getAdvancedModelingConfig().getClass(), CrossSellModelingConfig.class);
+        Assert.assertEquals(ratingModels.get(0).getAdvancedModelingConfig().getClass(),
+                CrossSellModelingConfig.class);
     }
 
     private void validateDefaultRuleBasedModel(RuleBasedModel model) {
-        Assert.assertEquals(model.getRatingRule().getDefaultBucketName(), RatingRule.DEFAULT_BUCKET_NAME);
+        Assert.assertEquals(model.getRatingRule().getDefaultBucketName(),
+                RatingRule.DEFAULT_BUCKET_NAME);
     }
 
     private void validateSelectedAttributesInRuleBasedModel(RuleBasedModel model) {
@@ -439,7 +459,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         addAttrInExpectedSet(expectedResult, BusinessEntity.Account, accountAttributes);
         addAttrInExpectedSet(expectedResult, BusinessEntity.Contact, contactAttributes);
 
-        Assert.assertEquals(usedAttributesInSegment.size(), (accountAttributes.size() + contactAttributes.size()));
+        Assert.assertEquals(usedAttributesInSegment.size(),
+                (accountAttributes.size() + contactAttributes.size()));
         Assert.assertEquals(usedAttributesInSegment.size(), expectedResult.size());
 
         for (String attr : usedAttributesInSegment) {

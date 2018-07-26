@@ -169,11 +169,15 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
 
         if (CollectionUtils.isNotEmpty(playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine,
                 Arrays.asList(PlayStatus.ACTIVE, PlayStatus.INACTIVE)))) {
-            log.error(String.format("Dependency check failed for Rating Engine=%s", ratingEngine.getId()));
-            throw new LedpException(LedpCode.LEDP_18175, new String[] { ratingEngine.getDisplayName() });
+            log.error(String.format("Dependency check failed for Rating Engine=%s",
+                    ratingEngine.getId()));
+            throw new LedpException(LedpCode.LEDP_18175,
+                    new String[] { ratingEngine.getDisplayName() });
         }
-        if (ratingEngine.getStatus() != null && ratingEngine.getStatus() != RatingEngineStatus.INACTIVE) {
-            throw new LedpException(LedpCode.LEDP_18181, new String[] { ratingEngine.getDisplayName() });
+        if (ratingEngine.getStatus() != null
+                && ratingEngine.getStatus() != RatingEngineStatus.INACTIVE) {
+            throw new LedpException(LedpCode.LEDP_18181,
+                    new String[] { ratingEngine.getDisplayName() });
         }
     }
 
@@ -191,7 +195,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment) {
+    public RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId,
+            Boolean unlinkSegment) {
         if (ratingEngine.getId() == null) { // create a new Rating Engine
             ratingEngine.setId(RatingEngine.generateIdStr());
             createNewRatingEngine(ratingEngine, tenantId);
@@ -199,22 +204,23 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         } else {
             RatingEngine retrievedRatingEngine = findById(ratingEngine.getId());
             if (retrievedRatingEngine == null) {
-                log.warn(String.format("Rating Engine with id %s for tenant %s cannot be found", ratingEngine.getId(),
-                        tenantId));
+                log.warn(String.format("Rating Engine with id %s for tenant %s cannot be found",
+                        ratingEngine.getId(), tenantId));
                 createNewRatingEngine(ratingEngine, tenantId);
                 return ratingEngine;
             } else { // update an existing one by updating the delta passed from
                 // front end
-                updateExistingRatingEngine(retrievedRatingEngine, ratingEngine, tenantId, unlinkSegment);
+                updateExistingRatingEngine(retrievedRatingEngine, ratingEngine, tenantId,
+                        unlinkSegment);
                 return retrievedRatingEngine;
             }
         }
     }
 
-    private void updateExistingRatingEngine(RatingEngine retrievedRatingEngine, RatingEngine ratingEngine,
-            String tenantId, Boolean unlinkSegment) {
-        log.info(String.format("Updating existing rating engine with id %s for tenant %s", ratingEngine.getId(),
-                tenantId));
+    private void updateExistingRatingEngine(RatingEngine retrievedRatingEngine,
+            RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment) {
+        log.info(String.format("Updating existing rating engine with id %s for tenant %s",
+                ratingEngine.getId(), tenantId));
         if (ratingEngine.getDisplayName() != null) {
             retrievedRatingEngine.setDisplayName(ratingEngine.getDisplayName());
         }
@@ -229,7 +235,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
                 setActivationActionContext(retrievedRatingEngine);
                 if (retrievedRatingEngine.getScoringIteration() == null) {
                     if (retrievedRatingEngine.getType() == RatingEngineType.RULE_BASED) {
-                        retrievedRatingEngine.setScoringIteration(retrievedRatingEngine.getLatestIteration());
+                        retrievedRatingEngine
+                                .setScoringIteration(retrievedRatingEngine.getLatestIteration());
                     } else {
                         log.error(String.format("No scoring iteration set for Rating Engine: %s",
                                 retrievedRatingEngine.getId()));
@@ -259,9 +266,11 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         }
         if (ratingEngine.getAdvancedRatingConfig() != null) {
             if (retrievedRatingEngine.getAdvancedRatingConfig() != null) {
-                retrievedRatingEngine.getAdvancedRatingConfig().copyConfig(ratingEngine.getAdvancedRatingConfig());
+                retrievedRatingEngine.getAdvancedRatingConfig()
+                        .copyConfig(ratingEngine.getAdvancedRatingConfig());
             } else {
-                retrievedRatingEngine.setAdvancedRatingConfig(ratingEngine.getAdvancedRatingConfig());
+                retrievedRatingEngine
+                        .setAdvancedRatingConfig(ratingEngine.getAdvancedRatingConfig());
             }
         }
 
@@ -282,7 +291,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         }
 
         // PLS-7555 - allow segment to be reset to null for custom event rating
-        if (unlinkSegment == Boolean.TRUE && !retrievedRatingEngine.getType().isTargetSegmentMandatory()) {
+        if (unlinkSegment == Boolean.TRUE
+                && !retrievedRatingEngine.getType().isTargetSegmentMandatory()) {
             retrievedRatingEngine.setSegment(null);
         }
 
@@ -297,22 +307,27 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             log.error(String.format("Cannot Transition Rating Engine: %s from %s to %s.", //
                     retrievedRatingEngine.getId(), retrievedRatingEngine.getStatus().name(),
                     ratingEngine.getStatus().name()));
-            throw new LedpException(LedpCode.LEDP_18174, new String[] { ratingEngine.getDisplayName(),
-                    retrievedRatingEngine.getStatus().name(), ratingEngine.getStatus().name(), });
+            throw new LedpException(LedpCode.LEDP_18174,
+                    new String[] { ratingEngine.getDisplayName(),
+                            retrievedRatingEngine.getStatus().name(),
+                            ratingEngine.getStatus().name(), });
         }
 
         // Check active model of Rating Engine
         if (ratingEngine.getStatus() == RatingEngineStatus.ACTIVE
                 && retrievedRatingEngine.getType() != RatingEngineType.RULE_BASED
                 && retrievedRatingEngine.getScoringIteration() == null) {
-            log.error(String.format("No scoring iteration set for Rating Engine: %s", retrievedRatingEngine.getId()));
-            throw new LedpException(LedpCode.LEDP_18186, new String[] { retrievedRatingEngine.getDisplayName() });
+            log.error(String.format("No scoring iteration set for Rating Engine: %s",
+                    retrievedRatingEngine.getId()));
+            throw new LedpException(LedpCode.LEDP_18186,
+                    new String[] { retrievedRatingEngine.getDisplayName() });
         }
     }
 
     private void createNewRatingEngine(RatingEngine ratingEngine, String tenantId) {
-        log.info(String.format("Creating a new Rating Engine entity with the id of %s for tenant %s",
-                ratingEngine.getId(), tenantId));
+        log.info(
+                String.format("Creating a new Rating Engine entity with the id of %s for tenant %s",
+                        ratingEngine.getId(), tenantId));
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         ratingEngine.setTenant(tenant);
         ratingEngine.setDisplayName(ratingEngine.generateDefaultName());
@@ -321,7 +336,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             throw new LedpException(LedpCode.LEDP_18154, new String[] { ratingEngine.toString() });
         }
         MetadataSegment segment = ratingEngine.getSegment();
-        if (ratingEngine.getType().isTargetSegmentMandatory() && (segment == null || segment.getName() == null)) {
+        if (ratingEngine.getType().isTargetSegmentMandatory()
+                && (segment == null || segment.getName() == null)) {
             throw new LedpException(LedpCode.LEDP_18153, new String[] { ratingEngine.toString() });
         }
 
@@ -380,8 +396,10 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         if (RatingEngineStatus.ACTIVE == ratingEngine.getStatus()) {
             if (ratingEngine.getScoringIteration() == null) {
                 if (ratingEngine.getType() != RatingEngineType.RULE_BASED) {
-                    log.error(String.format("No scoring iteration set for Rating Engine: %s", ratingEngine.getId()));
-                    throw new LedpException(LedpCode.LEDP_18186, new String[] { ratingEngine.getDisplayName() });
+                    log.error(String.format("No scoring iteration set for Rating Engine: %s",
+                            ratingEngine.getId()));
+                    throw new LedpException(LedpCode.LEDP_18186,
+                            new String[] { ratingEngine.getDisplayName() });
                 } else {
                     ratingEngine.setScoringIteration(ratingEngine.getLatestIteration());
                     ratingEngineDao.update(ratingEngine);
@@ -395,6 +413,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         ruleBasedModel.setId(RuleBasedModel.generateIdStr());
         ruleBasedModel.setRatingEngine(ratingEngine);
+        ruleBasedModel.setCreatedBy(ratingEngine.getCreatedBy());
 
         ruleBasedModel.setRatingRule(RatingRule.constructDefaultRule());
         List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
@@ -410,21 +429,25 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         ratingEngineDao.update(ratingEngine);
     }
 
-    private void populateUnusedAttrsInBktRestrictions(RatingEngine ratingEngine, RuleBasedModel ruleBasedModel) {
+    private void populateUnusedAttrsInBktRestrictions(RatingEngine ratingEngine,
+            RuleBasedModel ruleBasedModel) {
         Map<String, Map<String, Restriction>> bucketToRuleMap = //
                 ruleBasedModel.getRatingRule().getBucketToRuleMap();
 
         if (ratingEngine.getSegment() != null) {
             populateUnusedAttrsInBktRestrictions(ratingEngine, bucketToRuleMap,
-                    ratingEngine.getSegment().getAccountRestriction(), FrontEndQueryConstants.ACCOUNT_RESTRICTION);
+                    ratingEngine.getSegment().getAccountRestriction(),
+                    FrontEndQueryConstants.ACCOUNT_RESTRICTION);
 
             populateUnusedAttrsInBktRestrictions(ratingEngine, bucketToRuleMap,
-                    ratingEngine.getSegment().getContactRestriction(), FrontEndQueryConstants.CONTACT_RESTRICTION);
+                    ratingEngine.getSegment().getContactRestriction(),
+                    FrontEndQueryConstants.CONTACT_RESTRICTION);
         }
     }
 
     private void populateUnusedAttrsInBktRestrictions(RatingEngine ratingEngine,
-            Map<String, Map<String, Restriction>> bucketToRuleMap, Restriction partialSegmentRestriction, String type) {
+            Map<String, Map<String, Restriction>> bucketToRuleMap,
+            Restriction partialSegmentRestriction, String type) {
         Set<String> attributesPartialRestrictionInSegment = new HashSet<>();
         traverseAndRestriction(attributesPartialRestrictionInSegment, partialSegmentRestriction);
 
@@ -446,16 +469,19 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             unusedAttributeRestrictions = new ArrayList<>();
         }
 
-        bucketAccountRestriction = LogicalRestriction.builder().and(unusedAttributeRestrictions).build();
+        bucketAccountRestriction = LogicalRestriction.builder().and(unusedAttributeRestrictions)
+                .build();
 
         bucketToRuleMap.keySet() //
                 .forEach(k -> bucketToRuleMap.get(k) //
                         .put(type, bucketAccountRestriction));
     }
 
-    private void createAIModel(RatingEngine ratingEngine, AdvancedModelingConfig advancedModelingConfig) {
+    private void createAIModel(RatingEngine ratingEngine,
+            AdvancedModelingConfig advancedModelingConfig) {
         AIModel aiModel = new AIModel();
         aiModel.setId(AIModel.generateIdStr());
+        aiModel.setCreatedBy(ratingEngine.getCreatedBy());
         aiModel.setRatingEngine(ratingEngine);
         aiModel.setAdvancedModelingConfig(advancedModelingConfig);
         aiModelDao.create(aiModel);
@@ -468,7 +494,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     }
 
     private void setActivationActionContext(RatingEngine ratingEngine) {
-        log.info(String.format("Set Activation Action Context for Rating Engine %s", ratingEngine.getId()));
+        log.info(String.format("Set Activation Action Context for Rating Engine %s",
+                ratingEngine.getId()));
         Action ratingEngineActivateAction = new Action();
         ratingEngineActivateAction.setType(ActionType.RATING_ENGINE_CHANGE);
         ratingEngineActivateAction.setActionInitiator(ratingEngine.getCreatedBy());
@@ -491,7 +518,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         return new ArrayList<>(usedAttributesSetInSegment);
     }
 
-    private void traverseAndRestriction(Set<String> usedAttributesInSegment, Restriction restriction) {
+    private void traverseAndRestriction(Set<String> usedAttributesInSegment,
+            Restriction restriction) {
         if (restriction != null) {
             DepthFirstSearch search = new DepthFirstSearch();
             search.run(restriction, (object, ctx) -> {
@@ -502,7 +530,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
                     if (lookup instanceof AttributeLookup) {
                         usedAttributesInSegment.add(sanitize((lookup).toString()));
                     } else if (lookup instanceof SubQueryAttrLookup) {
-                        usedAttributesInSegment.add(sanitize(((SubQueryAttrLookup) lookup).getAttribute()));
+                        usedAttributesInSegment
+                                .add(sanitize(((SubQueryAttrLookup) lookup).getAttribute()));
                     }
                 } else if (node instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) node;

@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 @Component("aiModelDao")
 public class AIModelDaoImpl extends BaseDaoImpl<AIModel> implements AIModelDao {
 
-	@Override
+    @Override
     protected Class<AIModel> getEntityClass() {
         return AIModel.class;
     }
@@ -28,12 +28,40 @@ public class AIModelDaoImpl extends BaseDaoImpl<AIModel> implements AIModelDao {
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("id", id);
-        List list =  query.list();
+        List list = query.list();
         if (CollectionUtils.size(list) != 1) {
-            throw new RuntimeException(String.format("Found %d segments for AI model %s, while it should be 1.", CollectionUtils.size(list), id));
+            throw new RuntimeException(
+                    String.format("Found %d segments for AI model %s, while it should be 1.",
+                            CollectionUtils.size(list), id));
         } else {
             return (MetadataSegment) list.get(0);
         }
+    }
+
+    @Override
+    public void create(AIModel aiModel) {
+        int maxIteration = findMaxIterationByRatingEngineId(aiModel.getRatingEngine().getId());
+        int latestIteration = aiModel.getRatingEngine().getLatestIteration() != null
+                ? aiModel.getRatingEngine().getLatestIteration().getIteration()
+                : 0;
+        if (maxIteration == latestIteration) {
+            aiModel.setIteration(maxIteration + 1);
+            super.create(aiModel);
+        } else {
+            throw new RuntimeException(
+                    String.format("Latest iteration for AI model is %d, while it should be %d.",
+                            latestIteration, maxIteration));
+        }
+    }
+
+    @Override
+    public int findMaxIterationByRatingEngineId(String ratineEngindId) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryPattern = "select max(model.iteration) from %s as model where model.ratingEngine.id = :id";
+        String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("id", ratineEngindId);
+        return query.uniqueResult() != null ? (int) query.uniqueResult() : 0;
     }
 
 }
