@@ -13,7 +13,7 @@ angular
 
             },
             templateUrl: '/components/charts/bar-chart.component.html',
-            controller: function ($scope, $filter) {
+            controller: function ($scope, $filter, $timeout) {
                 
                 /**
                  * Return the number with decimals truncated to the maxDigits.
@@ -169,8 +169,14 @@ angular
                  * color: color for the rows
                  * showfield: name field to show
                  */
-                $scope.init = function () {
+                
+                $scope.$watch('bktlist', function() {
+                    if($scope.bktlist.length > 0) {
+                        $scope.init();
+                    }
+                });
 
+                $scope.init = function () {
 
                     /************************************* Config ************************************************/
                     validateConfig();

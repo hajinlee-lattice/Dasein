@@ -130,7 +130,7 @@
                         track by enrichment.ColumnId"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.ColumnId]"
                     ng-class="{'active': enrichment.IsSelected, 'disabled-grayout': enrichment.HighlightHidden && vm.section == 'team'}"
-                    vm="vm" enrichment="enrichment">
+                    vm="vm" enrichment="enrichment" cube="vm.cube">
                 </li>
                 <li class="load-status" ng-show="!filteredList.length">
                     <div ng-if="!vm.enrichments_loaded && loading_image" ng-init="loading_image">

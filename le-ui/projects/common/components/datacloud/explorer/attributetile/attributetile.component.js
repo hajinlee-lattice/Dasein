@@ -6,16 +6,21 @@ angular
             scope: {
                 vm: '=',
                 count: '=',
-                enrichment: '='
+                enrichment: '=',
+                cube: '='
             },
             controllerAs: 'vm',
             templateUrl: '/components/datacloud/explorer/attributetile/attributetile.component.html',
             controller: function (
-                $scope, $state, $document, $timeout, $interval, QueryStore,
-                DataCloudStore, NumberUtility, QueryTreeService
+                $scope, $state, $document, $timeout, $interval, 
+                QueryStore, DataCloudStore, NumberUtility, QueryTreeService
             ) {
                 var vm = $scope.vm;
-                angular.extend(vm, {});
+                angular.extend(vm, {
+                    enrichment: $scope.enrichment,
+                    cube: $scope.cube,
+                    bktlist: [],
+                });
 
                 vm.booleanStats = function (stats) {
                     var booleans = {};
@@ -133,6 +138,17 @@ angular
                 }
 
                 vm.getChartConfig = function (list) {
+
+                    vm.bktlist = [];
+                    if(vm.cube) {
+                        vm.bktlist = vm.getData(vm.enrichment.Entity, vm.enrichment.ColumnId);
+                    } else {
+                        DataCloudStore.getCube().then(function(result) {
+                            vm.cube = result;
+                            vm.bktlist = vm.getData(vm.enrichment.Entity, vm.enrichment.ColumnId);
+                        });
+                    }
+
                     // console.log('Request chart config on list ', list);
                     if (list != null && list.length > 0 && list[0].Lift != undefined) {
                         return getBarChartLiftConfig();
@@ -141,9 +157,7 @@ angular
                 }
 
                 vm.getData = function (entity, columnId) {
-                    
                     var data = vm.cube.data[entity].Stats[columnId].Bkts.List;
-                    // console.log('Data ',data);
                     return data;
                 }
 
@@ -187,7 +201,6 @@ angular
                     return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts == undefined || 
                             !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length;
                 }
-
 
                 vm.NumberUtility = NumberUtility;
             }

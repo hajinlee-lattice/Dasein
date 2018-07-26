@@ -67,6 +67,9 @@ div.value-picker {
             pointer-events: none;
             position: relative;
             left: 0;
+            .query-section-item-controls {
+                display: none;
+            }
         }
 
         .query-section-item-box {
