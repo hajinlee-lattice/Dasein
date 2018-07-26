@@ -24,10 +24,10 @@ import com.latticeengines.monitor.exposed.metric.service.MetricService;
 public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final String VALID_DUNS = "079942718";
-    private static final String VALID_DOMAIN = "google.com";
-    private static final String EXPECTED_ID_DOMAIN_DUNS = "260002248202";
-    private static final String EXPECTED_ID_DOMAIN = "260002248202";
-    private static final String EXPECTED_ID_DUNS = "260002248202";
+    private static final String VALID_DOMAIN = "abc.xyz";
+    private static final String EXPECTED_ID_DOMAIN_DUNS = "0280002626626";
+    private static final String EXPECTED_ID_DOMAIN = "0280002626626";
+    private static final String EXPECTED_ID_DUNS = "0280002626626";
 
     @Autowired
     private FuzzyMatchService service;
