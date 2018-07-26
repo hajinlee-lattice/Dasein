@@ -220,35 +220,27 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             DataCloudVersion currentVersion = DataCloudVersion.parseBuildNumber(currentBuildNumber);
             DataCloudVersion statusVersion = DataCloudVersion.parseBuildNumber(statusBuildNumber);
             if (DataCloudVersion.versionComparator.compare(currentVersion, statusVersion) != 0) {
-                Action rebuildAction = createSystemAction(
-                        ActionType.DATA_CLOUD_CHANGE, ActionType.DATA_CLOUD_CHANGE.getDisplayName());
-                List<Long> actionIds = configuration.getActionIds();
-                actionIds.add(rebuildAction.getPid());
-                configuration.setActionIds(actionIds);
-            } else {
-                if (StringUtils.compare(
-                        currentVersion.getRefreshVersionVersion(), statusVersion.getRefreshVersionVersion()) != 0) {
-                    Action refreshAction = createSystemAction(
-                            ActionType.INTENT_CHANGE, ActionType.INTENT_CHANGE.getDisplayName());
-                    List<Long> actionIds = configuration.getActionIds();
-                    actionIds.add(refreshAction.getPid());
-                    configuration.setActionIds(actionIds);
-                }
+                createSystemAction(ActionType.DATA_CLOUD_CHANGE, ActionType.DATA_CLOUD_CHANGE.getDisplayName());
+            } else if (StringUtils.compare(
+                    currentVersion.getRefreshVersionVersion(), statusVersion.getRefreshVersionVersion()) != 0) {
+                createSystemAction(ActionType.INTENT_CHANGE, ActionType.INTENT_CHANGE.getDisplayName());
             }
         }
 
         return changed;
     }
 
-    private Action createSystemAction(ActionType type, String description) {
-        Action rebuildAction = new Action();
-        rebuildAction.setType(type);
-        rebuildAction.setCreated(new Date(System.currentTimeMillis()));
-        rebuildAction.setDescription(description);
-        rebuildAction.setActionInitiator(WorkflowUser.DEFAULT_USER.name());
-        rebuildAction.setOwnerId(configuration.getOwnerId());
-        rebuildAction = actionProxy.createAction(customerSpace.getTenantId(), rebuildAction);
-        return rebuildAction;
+    private void createSystemAction(ActionType type, String description) {
+        Action action = new Action();
+        action.setType(type);
+        action.setCreated(new Date(System.currentTimeMillis()));
+        action.setDescription(description);
+        action.setActionInitiator(WorkflowUser.DEFAULT_USER.name());
+        action.setOwnerId(configuration.getOwnerId());
+        action = actionProxy.createAction(customerSpace.getTenantId(), action);
+        List<Long> actionIds = configuration.getActionIds();
+        actionIds.add(action.getPid());
+        configuration.setActionIds(actionIds);
     }
 
     boolean hasAccountBatchStore() {
