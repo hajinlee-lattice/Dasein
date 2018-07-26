@@ -312,13 +312,21 @@ public abstract class SegmentExportProcessor {
             FrontEndQuery contactFrontEndQuery, //
             List<Attribute> configuredContactAttributes) {
         List<Lookup> accountLookups = new ArrayList<>();
+
+        // by default add AccountId lookup in account query
+        AttributeLookup accountIdAttributeForLookup = new AttributeLookup(BusinessEntity.Account, //
+                InterfaceName.AccountId.name());
+        accountLookups.add(accountIdAttributeForLookup);
+
         if (CollectionUtils.isNotEmpty(configuredAccountAttributes)) {
             configuredAccountAttributes //
                     .stream() //
                     .forEach( //
-                            a -> accountLookups.add(new AttributeLookup(BusinessEntity.Account, //
-                                    a.getName() //
-                                            .substring((BusinessEntity.Account + SEPARATOR).length()))));
+                            a -> {
+                                AttributeLookup attributeForLookup = new AttributeLookup(BusinessEntity.Account, //
+                                        a.getName().substring((BusinessEntity.Account + SEPARATOR).length()));
+                                accountLookups.add(attributeForLookup);
+                            });
         }
         if (CollectionUtils.isNotEmpty(configuredRatingAttributes)) {
             configuredRatingAttributes //
