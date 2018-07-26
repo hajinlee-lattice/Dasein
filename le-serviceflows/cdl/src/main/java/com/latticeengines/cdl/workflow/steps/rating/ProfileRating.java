@@ -131,6 +131,8 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
 
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
 
+        registerDynamoExport(ratingTableName);
+
         cleanupTemporaryTables();
     }
 
@@ -276,6 +278,10 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         if (StringUtils.isNotBlank(scoreResultTableName)) {
             metadataProxy.deleteTable(customerSpace, scoreResultTableName);
         }
+    }
+
+    private void registerDynamoExport(String tableName) {
+        exportToDynamo(tableName, InterfaceName.AccountId.name(), null);
     }
 
 }

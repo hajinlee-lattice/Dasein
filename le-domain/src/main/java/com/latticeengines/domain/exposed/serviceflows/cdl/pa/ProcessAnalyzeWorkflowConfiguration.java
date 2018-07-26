@@ -172,6 +172,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder dynamoSignature(String signature) {
             exportToDynamo.setDynamoSignature(signature);
+            processRatingWorkflowBuilder.dynamoSignature(signature);
             return this;
         }
 

@@ -15,6 +15,7 @@ import com.latticeengines.cdl.workflow.steps.rating.ProfileRatingWrapper;
 import com.latticeengines.cdl.workflow.steps.rating.StartIteration;
 import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -52,6 +53,9 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
     @Inject
     private ExportToRedshift exportToRedshift;
 
+    @Inject
+    private ExportToDynamo exportToDynamo;
+
     @Override
     public Workflow defineWorkflow(ProcessRatingWorkflowConfiguration config) {
         WorkflowBuilder builder = new WorkflowBuilder(name(), config) //
@@ -64,7 +68,9 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
                     .next(generateRatingWorkflow) //
                     .next(profileRatingWrapper) //
                     .next(combineStatistics) //
-                    .next(exportToRedshift);
+                    .next(exportToRedshift) //
+                    .next(exportToDynamo);
+            ;
         }
         return builder.build();
     }

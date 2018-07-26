@@ -166,7 +166,9 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
         publishToRedshift = false;
         super.onPostTransformationCompleted();
-        publishToRedshift = true;
+        // Needs to be after super.onPostTransformationCompleted() to ensure
+        // serving store is renamed
+        registerDynamoExport();
         generateReport();
     }
 
@@ -550,5 +552,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
         }
+    }
+
+    private void registerDynamoExport() {
+        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), getEntity().getServingStore(),
+                inactive);
+        exportToDynamo(tableName, InterfaceName.AccountId.name(), null);
     }
 }

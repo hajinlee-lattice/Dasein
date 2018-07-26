@@ -21,7 +21,8 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -725,10 +726,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected void updateDataCloudBuildNumber() {
         String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
-        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(
-                mainTestTenant.getId(), version);
+        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace, version);
         status.setDataCloudBuildNumber(currentDataCloudBuildNumber);
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainTestTenant.getId(), status, version);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status, version);
+        log.info(String.format("Update datacloud rebuild number as %s for tenant %s with version %s",
+                currentDataCloudBuildNumber, mainCustomerSpace, version));
     }
 
     long countTableRole(TableRoleInCollection role) {
@@ -978,62 +980,44 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private void verifySegmentCounts(String segmentName, Map<BusinessEntity, Long> expectedCounts) {
-        MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
-        int retries = 0;
-        while (segment == null && retries++ < 3) {
-            log.info("Wait for 1 sec to retry getting rating engine.");
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-            segment = testMetadataSegmentProxy.getSegment(segmentName);
-        }
-        Assert.assertNotNull(segment,
-                "Cannot find rating engine " + segmentName + " in tenant " + mainTestTenant.getId());
-        final MetadataSegment immutableSegment = segment;
+        final MetadataSegment immutableSegment = getSegmentByName(segmentName);
         expectedCounts.forEach((entity, count) -> {
             Assert.assertNotNull(immutableSegment.getEntityCount(entity), "Cannot find count of " + entity);
             Assert.assertEquals(immutableSegment.getEntityCount(entity), count, JsonUtils.pprint(immutableSegment));
         });
     }
 
+    Map<BusinessEntity, Long> getSegmentCounts(String segmentName, Set<BusinessEntity> entities) {
+        final MetadataSegment immutableSegment = getSegmentByName(segmentName);
+        Map<BusinessEntity, Long> cnts = new HashMap<>();
+        entities.forEach(entity -> {
+            Assert.assertNotNull(immutableSegment.getEntityCount(entity), "Cannot find count of " + entity);
+            cnts.put(entity, immutableSegment.getEntityCount(entity));
+        });
+        return cnts;
+    }
+
     void verifySegmentCountsNonNegative(String segmentName, Collection<BusinessEntity> entities) {
-        MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
-        int retries = 0;
-        while (segment == null && retries++ < 3) {
-            log.info("Wait for 1 sec to retry getting rating engine.");
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-            segment = testMetadataSegmentProxy.getSegment(segmentName);
-        }
-        Assert.assertNotNull(segment,
-                "Cannot find rating engine " + segmentName + " in tenant " + mainTestTenant.getId());
-        final MetadataSegment immutableSegment = segment;
+        final MetadataSegment immutableSegment = getSegmentByName(segmentName);
         entities.forEach(entity -> {
             Assert.assertNotNull(immutableSegment.getEntityCount(entity), "Cannot find count of " + entity);
             Assert.assertTrue(immutableSegment.getEntityCount(entity) > 0, JsonUtils.pprint(immutableSegment));
         });
     }
 
-    void verityTestSegmentCountDiff(List<BusinessEntity> entities) {
-        final MetadataSegment immutableSegment1 = getSegmentByName(SEGMENT_NAME_1);
-        final MetadataSegment immutableSegment2 = getSegmentByName(SEGMENT_NAME_2);
-        entities.forEach(entity -> {
-            Assert.assertNotNull(immutableSegment1.getEntityCount(entity),
-                    "Cannot find count of " + entity + " in segment1");
-            Assert.assertNotNull(immutableSegment2.getEntityCount(entity),
-                    "Cannot find count of " + entity + " in segment2");
-            Long count1 = immutableSegment1.getEntityCount(entity);
-            Long count2 = immutableSegment2.getEntityCount(entity);
-            Assert.assertTrue(count2.longValue() != count1.longValue());
+    void verifySegmentCountsIncreased(Map<BusinessEntity, Long> segmentCnts,
+            Map<BusinessEntity, Long> segmentCntsUpdated) {
+        Assert.assertTrue(MapUtils.isNotEmpty(segmentCnts));
+        Assert.assertTrue(MapUtils.isNotEmpty(segmentCntsUpdated));
+        Assert.assertEquals(segmentCnts.size(), segmentCntsUpdated.size());
+        segmentCnts.forEach((entity, cnt) -> {
+            Assert.assertNotNull(cnt);
+            Assert.assertNotNull(segmentCntsUpdated.get(entity));
+            Assert.assertTrue(cnt.longValue() < segmentCntsUpdated.get(entity).longValue());
         });
     }
 
-    private MetadataSegment getSegmentByName(String segmentName) {
+    MetadataSegment getSegmentByName(String segmentName) {
         MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
         int retries = 0;
         while (segment == null && retries++ < 3) {
@@ -1047,6 +1031,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         Assert.assertNotNull(segment,
                 "Cannot find rating engine " + segmentName + " in tenant " + mainTestTenant.getId());
+        log.info(String.format("Get segment %s:\n%s", segmentName, JsonUtils.serialize(segment)));
         return segment;
     }
 
