@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -77,6 +79,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private DataCollection.Version active;
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
+    private List<Action> actions;
 
     @Override
     public void execute() {
@@ -128,14 +131,30 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private void registerReport() {
         ObjectNode jsonReport = getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
                 ObjectNode.class);
-        updateReport(jsonReport);
+        updateSystemActionsReport(jsonReport);
+        updateReportEntitiesSummaryReport(jsonReport);
         Report report = createReport(jsonReport.toString(), ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY,
                 UUID.randomUUID().toString());
         registerReport(configuration.getCustomerSpace(), report);
         log.info("Registered report: " + jsonReport.toString());
     }
 
-    private void updateReport(ObjectNode report) {
+    private void updateSystemActionsReport(ObjectNode report) {
+        ArrayNode systemActionNode = report.get(ReportPurpose.SYSTEM_ACTIONS.getKey()) != null
+                ? (ArrayNode) report.get(ReportPurpose.SYSTEM_ACTIONS.getKey())
+                : report.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+        List<Action> dataCloudChangeActions = getDataCloudChangeActions();
+        dataCloudChangeActions.forEach(action -> {
+            ObjectNode actionNode = JsonUtils.createObjectNode();
+            actionNode.put(ReportConstants.TIME, sdf.format(action.getCreated()));
+            actionNode.put(ReportConstants.USER, action.getActionInitiator());
+            actionNode.put(ReportConstants.ACTION, action.getType().getDisplayName());
+            systemActionNode.add(actionNode);
+        });
+    }
+
+    private void updateReportEntitiesSummaryReport(ObjectNode report) {
         Map<BusinessEntity, Long> currentCnts = retrieveCurrentEntityCnts();
         Map<BusinessEntity, Long> deleteCnts = getDeletedCount();
 
@@ -324,9 +343,20 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private List<Action> getDeleteActions() {
-        List<Action> actionList = getActions();
-        return actionList.stream()
+        if (actions == null) {
+            actions = getActions();
+        }
+        return actions.stream()
                 .filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Action> getDataCloudChangeActions() {
+        if (actions == null) {
+            actions = getActions();
+        }
+        return actions.stream()
+                .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
                 .collect(Collectors.toList());
     }
 

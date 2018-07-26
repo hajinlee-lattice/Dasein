@@ -30,6 +30,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("user_id")
     private String userId;
 
+    @JsonProperty("owner_id")
+    private long ownerId;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -84,5 +87,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public long getOwnerId() {
+        return this.ownerId;
+    }
+
+    public void setOwnerId(long ownerId) {
+        this.ownerId = ownerId;
     }
 }

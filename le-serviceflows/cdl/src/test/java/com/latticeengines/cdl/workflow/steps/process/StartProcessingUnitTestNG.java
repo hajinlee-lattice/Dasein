@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,19 +36,23 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public class StartProcessingUnitTestNG {
-
     @Test(groups = { "unit" })
-    public void testRebuildOnDLVersionChange() {
+    public void testRebuildOnDataCloudVersionChange() {
         DataCollectionStatus dataCollectionStatus = new DataCollectionStatus();
-        dataCollectionStatus.setDataCloudBuildNumber("1001");
+        dataCollectionStatus.setDataCloudBuildNumber("2.12.8.7654321");
         DataCollectionProxy dataCollectionProxy = mock(DataCollectionProxy.class);
         when(dataCollectionProxy.getOrCreateDataCollectionStatus(anyString(), any())).thenReturn(dataCollectionStatus);
+        Action mockAction = new Action();
+        mockAction.setPid(1L);
+        ActionProxy actionProxy = mock(ActionProxy.class);
+        when(actionProxy.createAction(anyString(), any())).thenReturn(mockAction);
 
-        StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, null, null,
+        StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, null, actionProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
-        config.setDataCloudBuildNumber("1000");
+        config.setActionIds(new ArrayList<>());
+        config.setDataCloudBuildNumber("2.13.1.1234567");
         startProcessing.setConfiguration(config);
 
         StartProcessing spy = spy(startProcessing);

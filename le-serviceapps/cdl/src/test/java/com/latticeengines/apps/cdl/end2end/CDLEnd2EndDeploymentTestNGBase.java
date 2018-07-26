@@ -37,8 +37,10 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -798,7 +800,27 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 1);
         Report summaryReport = reports.get(0);
+        verifySystemActionReport(summaryReport);
         verifyConsolidateSummaryReport(summaryReport, expectedReport);
+    }
+
+    private void verifySystemActionReport(Report summaryReport) {
+        Assert.assertNotNull(summaryReport);
+        Assert.assertNotNull(summaryReport.getJson());
+        Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
+        log.info("SystemActionReport: " + summaryReport.getJson().getPayload());
+
+        try {
+            ObjectMapper om = JsonUtils.getObjectMapper();
+            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            ArrayNode systemActionNode = (ArrayNode) report.get(ReportPurpose.SYSTEM_ACTIONS.getKey());
+            Assert.assertNotNull(systemActionNode);
+            for (JsonNode n : systemActionNode) {
+                Assert.assertNotNull(n);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+        }
     }
 
     private void verifyConsolidateSummaryReport(Report summaryReport,
@@ -806,7 +828,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(summaryReport);
         Assert.assertNotNull(summaryReport.getJson());
         Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
-
         log.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
 
         try {

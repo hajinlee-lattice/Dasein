@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -56,6 +59,7 @@ import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.user.WorkflowUser;
 
 @Component("startProcessing")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -193,23 +197,58 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private boolean checkDataCloudChange() {
         boolean changed = false;
+        String currentBuildNumber = null, statusBuildNumber = null;
         if (Boolean.TRUE.equals(configuration.getIgnoreDataCloudChange())) {
             log.info("Specified to ignore data cloud change.");
         } else {
-            String currentBuildNumber = configuration.getDataCloudBuildNumber();
+            currentBuildNumber = configuration.getDataCloudBuildNumber();
             DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(
                     customerSpace.toString(), activeVersion);
             if (status != null
                     && (status.getDataCloudBuildNumber() == null
                     || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
                     && hasAccountBatchStore()) {
+                statusBuildNumber = status.getDataCloudBuildNumber();
                 changed = true;
             }
             log.info("Data cloud changed?=" + changed + " current LDC build number=" + currentBuildNumber
                     + ", the LDC builder number in data collection status="
                     + (status == null ? "" : status.getDataCloudBuildNumber()));
         }
+
+        if (changed) {
+            DataCloudVersion currentVersion = DataCloudVersion.parseBuildNumber(currentBuildNumber);
+            DataCloudVersion statusVersion = DataCloudVersion.parseBuildNumber(statusBuildNumber);
+            if (DataCloudVersion.versionComparator.compare(currentVersion, statusVersion) != 0) {
+                Action rebuildAction = createSystemAction(
+                        ActionType.DATA_CLOUD_CHANGE, ActionType.DATA_CLOUD_CHANGE.getDisplayName());
+                List<Long> actionIds = configuration.getActionIds();
+                actionIds.add(rebuildAction.getPid());
+                configuration.setActionIds(actionIds);
+            } else {
+                if (StringUtils.compare(
+                        currentVersion.getRefreshVersionVersion(), statusVersion.getRefreshVersionVersion()) != 0) {
+                    Action refreshAction = createSystemAction(
+                            ActionType.INTENT_CHANGE, ActionType.INTENT_CHANGE.getDisplayName());
+                    List<Long> actionIds = configuration.getActionIds();
+                    actionIds.add(refreshAction.getPid());
+                    configuration.setActionIds(actionIds);
+                }
+            }
+        }
+
         return changed;
+    }
+
+    private Action createSystemAction(ActionType type, String description) {
+        Action rebuildAction = new Action();
+        rebuildAction.setType(type);
+        rebuildAction.setCreated(new Date(System.currentTimeMillis()));
+        rebuildAction.setDescription(description);
+        rebuildAction.setActionInitiator(WorkflowUser.DEFAULT_USER.name());
+        rebuildAction.setOwnerId(configuration.getOwnerId());
+        rebuildAction = actionProxy.createAction(customerSpace.getTenantId(), rebuildAction);
+        return rebuildAction;
     }
 
     boolean hasAccountBatchStore() {
@@ -413,11 +452,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
 
         public void executeRebuildAction() {
+            // do nothing
         }
     }
 
     class RebuildOnDeleteJobTemplate extends RebuildEntitiesTemplate {
-
         @Override
         public Set<BusinessEntity> getRebuildEntities() {
             Set<BusinessEntity> rebuildEntities = new HashSet<>();

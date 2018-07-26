@@ -245,7 +245,7 @@ public class DataCloudVersion implements HasPid, Serializable {
         String x = matcher.group(1);
         String y = matcher.group(2);
         String z = matcher.group(3);
-        String r = matcher.group(3);
+        String r = matcher.group(4);
 
         DataCloudVersion version = new DataCloudVersion();
         version.setVersion(String.format("%s.%s.%s", x, y, z));

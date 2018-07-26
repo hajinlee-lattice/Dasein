@@ -14,9 +14,12 @@ public enum ActionType {
     METADATA_SEGMENT_CHANGE("segmentChange", "Segment Edited"), //
     METADATA_CHANGE("metadataChange", "Metadata Change"), //
     ACTIVITY_METRICS_CHANGE("purchaseMetricsChange", "Curated Attributes Activated"), //
-    // Attribute Management related type
+    // Attribute Management related types
     ATTRIBUTE_MANAGEMENT_ACTIVATION("attributeManagementActivation", "Attributes Activated"), //
-    ATTRIBUTE_MANAGEMENT_DEACTIVATION("attributeManagementDeactivation", "Attributes Deactivated");
+    ATTRIBUTE_MANAGEMENT_DEACTIVATION("attributeManagementDeactivation", "Attributes Deactivated"),
+    // Datacloud related types
+    DATA_CLOUD_CHANGE("datacloudChange", "Data Cloud Refresh"), //
+    INTENT_CHANGE("intentChange", "Intent Data Refresh");
 
     private String name;
     private String displayName;
@@ -29,6 +32,9 @@ public enum ActionType {
 
     private static final Set<ActionType> RATING_RELATED_TYPES = new HashSet<>(
             Arrays.asList(RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE));
+
+    private static final Set<ActionType> DATA_CLOUD_RELATED_TYPES = new HashSet<>(
+            Arrays.asList(DATA_CLOUD_CHANGE, INTENT_CHANGE));
 
     private static Map<String, ActionType> actionTypeMap = new HashMap<>();
 
@@ -65,5 +71,9 @@ public enum ActionType {
 
     public static Set<ActionType> getRatingRelatedTypes() {
         return RATING_RELATED_TYPES;
+    }
+
+    public static Set<ActionType> getDataCloudRelatedTypes() {
+        return DATA_CLOUD_RELATED_TYPES;
     }
 }

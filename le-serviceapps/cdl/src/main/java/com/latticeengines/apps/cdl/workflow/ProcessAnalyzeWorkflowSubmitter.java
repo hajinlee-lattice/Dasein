@@ -143,7 +143,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
-                    actionAndJobIds, initialStatus, currentDataCloudBuildNumber);
+                    actionAndJobIds, initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
             configuration.setFailingStep(request.getFailingStep());
 
@@ -190,27 +190,36 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         List<Long> completedActionIds = actions.stream()
                 .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobIds))
-                .map(Action::getPid).collect(Collectors.toList());
+                .map(Action::getPid)
+                .collect(Collectors.toList());
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
 
         List<Long> attrManagementActionIds = actions.stream()
                 .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
-                .map(Action::getPid).collect(Collectors.toList());
+                .map(Action::getPid)
+                .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(attrManagementActionIds)) {
             log.info(String.format("Actions that associated with the Attr management are: %s", attrManagementActionIds));
             completedActionIds.addAll(attrManagementActionIds);
         }
 
         List<Long> ratingEngineActionIds = actions.stream()
-                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(Action::getPid)
+                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE)
+                .map(Action::getPid)
                 .collect(Collectors.toList());
         log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
+
+        List<Long> datacloudActionIds = actions.stream()
+                .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
+                .map(Action::getPid)
+                .collect(Collectors.toList());
+        log.info(String.format("Data cloud related Actions are: %s", datacloudActionIds));
 
         return new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
     }
 
     private void updateActions(List<Long> actionIds, Long workflowPid) {
-        log.info(String.format("Updating actions=%s with place holder ownerId=%d", Arrays.toString(actionIds.toArray()),
+        log.info(String.format("Updating actions=%s with ownerId=%d", Arrays.toString(actionIds.toArray()),
                 workflowPid));
         if (CollectionUtils.isNotEmpty(actionIds)) {
             actionService.patchOwnerIdByPids(workflowPid, actionIds);
@@ -241,7 +250,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
             ProcessAnalyzeRequest request, Pair<List<Long>, List<Long>> actionAndJobIds, Status status,
-            String currentDataCloudBuildNumber) {
+            String currentDataCloudBuildNumber, long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
 
@@ -260,6 +269,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .initialDataFeedStatus(status) //
                 .importAndDeleteJobIds(actionAndJobIds.getRight()) //
                 .actionIds(actionAndJobIds.getLeft()) //
+                .ownerId(workflowPid) //
                 .rebuildEntities(request.getRebuildEntities()) //
                 .rebuildSteps(request.getRebuildSteps()) //
                 .ignoreDataCloudChange(request.getIgnoreDataCloudChange()) //

@@ -114,6 +114,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder ownerId(long ownerId) {
+            processStepConfiguration.setOwnerId(ownerId);
+            return this;
+        }
+
         public Builder currentDataCloudBuildNumber(String currentDataCloudBuildNumber) {
             processStepConfiguration.setDataCloudBuildNumber(currentDataCloudBuildNumber);
             return this;
