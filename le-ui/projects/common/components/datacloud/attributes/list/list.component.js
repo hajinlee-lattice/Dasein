@@ -9,7 +9,7 @@ angular.module('common.attributes.list', [])
         var vm = this;
 
         vm.store = AttrConfigStore;
-        vm.buckets = vm.store.readBucketData();
+        vm.buckets = [];
         vm.attributes = {};
         vm.indeterminate = {};
         vm.startChecked = {};
@@ -18,26 +18,19 @@ angular.module('common.attributes.list', [])
         vm.allChecked = false;
 
         vm.$onInit = function() {
-            vm.data = vm.store.getData();
+            vm.accesslevel = vm.store.getAccessRestriction();
             vm.section = vm.store.getSection();
+            vm.category = vm.store.get('category');
+            vm.data = vm.store.get('data');
+            vm.buckets = vm.data.buckets;
             vm.params = $stateParams;
-            vm.category = vm.store.getCategory();
 
-            vm.setAccessRestriction();
             vm.autoDrillDown();
             vm.parseData();
             vm.countSelected();
 
             vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
             console.log('attrResultsList', vm);
-        };
-        
-        vm.setAccessRestriction = function() {
-            var session = BrowserStorageUtility.getSessionDocument();
-
-            if (session !== null || session.User !== null) {
-                vm.accesslevel = session.User.AccessLevel;
-            }
         };
         
         vm.autoDrillDown = function() {
@@ -70,8 +63,8 @@ angular.module('common.attributes.list', [])
                 total = total.concat(selected);
             });
 
-            vm.store.setSelected(total);
-            vm.store.setStartSelected(total);
+            vm.store.set('selected', total);
+            vm.store.set('start_selected', total);
         };
 
         vm.countSelected = function() {
@@ -100,8 +93,8 @@ angular.module('common.attributes.list', [])
                 subcategory.checked = selected.length;
             });
 
-            vm.store.setSelected(total);
-            vm.data.config.Selected = vm.store.getSelected().length;
+            vm.store.set('selected', total);
+            vm.data.config.Selected = vm.store.get('selected').length;
         };
 
         vm.getResults = function() {
@@ -182,7 +175,7 @@ angular.module('common.attributes.list', [])
             var subcategory, selected, total, indeterminate;
 
             if (!vm.subcategory) {
-                selected = vm.store.getSelected().length;
+                selected = vm.store.get('selected').length;
                 total = vm.data.config.TotalAttrs;
             } else {
                 subcategory = vm.getSubcategory(vm.subcategory);
@@ -201,15 +194,18 @@ angular.module('common.attributes.list', [])
             var isFrozen = item.IsFrozen;
             var overLimit = false;
 
-            if (vm.store.getLimit() >= 0) {
-                overLimit = vm.store.getSelectedTotal() >= vm.store.getLimit() && !vm.isChecked(item);
+            if (vm.store.get('limit') >= 0) {
+                overLimit = vm.store.getSelectedTotal() >= vm.store.get('limit') && !vm.isChecked(item);
             }
             
             return item.Attributes ? overLimit : (isFrozen || overLimit);
         };
 
         vm.isStartsDisabled = function(item) {
-            if (item.Attributes || vm.section == 'enable' || vm.accesslevel != 'EXTERNAL_USER') {
+            var Users = ['LATTICE_USER','EXTERNAL_USER','EXTERNAL_ADMIN'];
+            var isAdmin = Users.indexOf(this.accesslevel) < 0;
+
+            if (item.Attributes || vm.section == 'enable' || isAdmin) {
                 return false;
             }
 
@@ -236,7 +232,7 @@ angular.module('common.attributes.list', [])
                         attr.Selected = (item.checked != item.TotalAttrs);
 
                         if (attr.Selected) {
-                            vm.store.getSelected().push(attr);
+                            vm.store.get('selected').push(attr);
                         }
                     });
             } else {
@@ -260,7 +256,7 @@ angular.module('common.attributes.list', [])
                         attr.Selected = vm.allCheckedMap[vm.subcategory];
 
                         if (attr.Selected) {
-                            vm.store.getSelected().push(attr);
+                            vm.store.get('selected').push(attr);
                         }
                     });
             } else {
@@ -282,7 +278,7 @@ angular.module('common.attributes.list', [])
                                 attr.Selected = vm.allChecked;
 
                                 if (attr.Selected) {
-                                    vm.store.getSelected().push(attr);
+                                    vm.store.get('selected').push(attr);
                                 }
                             });
                     });
@@ -309,17 +305,26 @@ angular.module('common.attributes.list', [])
         };
 
         vm.searchFilter = function(attr) {
-            var text = vm.filters.queryText; 
+            var text = vm.filters.queryText.toLowerCase(); 
 
             if (text) {
-                var chkName = attr.DisplayName.indexOf(text) >= 0;
-                var chkSub = (attr.SubCategory || '').indexOf(text) >= 0;
+                var SubCategory = (attr.SubCategory || '').toLowerCase();
+                var DisplayName = attr.DisplayName.toLowerCase();
+                var Description = (attr.Description || '').toLowerCase();
                 
-                if (chkName || chkSub) {
+                var chkName = DisplayName.indexOf(text) >= 0;
+                var chkSub = SubCategory.indexOf(text) >= 0;
+                var chkDesc = Description.indexOf(text) >= 0;
+                
+                if (chkName || chkSub || chkDesc) {
                     return true;
                 } else if (attr.Attributes) {
                     for (var i=0; i<attr.Attributes.length; i++) {
-                        if (attr.Attributes[i].DisplayName.indexOf(text) >= 0) {
+                        var item = attr.Attributes[i];
+                        var catName = item.DisplayName.toLowerCase();
+                        var catDesc = (item.Description || '').toLowerCase();
+
+                        if (catName.indexOf(text) >= 0 || catDesc.indexOf(text) >= 0) {
                             return true;
                         }
                     }

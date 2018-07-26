@@ -31,7 +31,7 @@ angular.module('common.attributes.activate', [])
                     var deferred = $q.defer();
                     var category = $stateParams.category;
 
-                    AttrConfigStore.setCategory(category);
+                    AttrConfigStore.set('category', category);
                     
                     AttrConfigService.getConfig('activation', category).then(function(response) {
                         AttrConfigStore.setData('config', response.data || []);
@@ -53,11 +53,19 @@ angular.module('common.attributes.activate', [])
         overview: '<',
         config: '<'
     },
-    controller: function ($state, $stateParams, AttrConfigStore) {
+    controller: function ($state, $stateParams, $timeout, AttrConfigStore, Banner) {
         var vm = this;
 
-        vm.filters = AttrConfigStore.getFilters();
+        vm.store = AttrConfigStore;
+        vm.filters = vm.store.get('filters');
 
-        vm.$onInit = function() {};
+        vm.$onInit = function() {
+                Banner.error({title: '500 Internal Server Error: /pls/jobs', message: 'Generic rest call failure (LEDP_00002)'});
+                Banner.warning({title: 'Warning: Lorem Ipsum Detected', message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'});
+                Banner.success({title: 'Operation Succeeded', message: 'Consectetur orem ipsum dolor sit amet, adipiscing elit, sed.'});
+                Banner.info({title: 'Deprecated Attributes Detected', message: "You can't take any action on these attributes.  It is advised to disable them from your workflows as they are no longer supported"});
+                //$timeout(function(){
+                //}, 10000);
+        };
     }
 });

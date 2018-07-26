@@ -2,7 +2,7 @@ angular.module('lp.jobs.import', [
                 'lp.jobs.import.row', 
                 'lp.jobs.row.subjobs', 
                 'lp.jobs.chevron', 
-                'mainApp.appCommon.directives.modal.window',
+                'common.modal',
                 'mainApp.core.utilities.BrowserStorageUtility'])
     .service('Browser', ['$window', function ($window) {
 
@@ -58,7 +58,7 @@ angular.module('lp.jobs.import', [
             return ret;
         };
     }])
-    .controller('DataProcessingComponent', function ($q, $scope, $http, JobsStore, $filter, ModalStore, FilterService) {
+    .controller('DataProcessingComponent', function ($q, $scope, $http, JobsStore, $filter, Modal, FilterService) {
         var vm = this;
         vm.loading = false;
         vm.rowStatus = {};
@@ -137,7 +137,7 @@ angular.module('lp.jobs.import', [
                 if (vm.config.confirmaction === args.action) {
                     vm.callback({ 'action': 'run', 'obj': args.data });
                 }else{
-                    var data = ModalStore.getData(vm.config.name);
+                    var data = Modal.getData(vm.config.name);
                     vm.callback({ 'action': args.action, 'obj': data });
                 }
                 if('closedForced' !== args.action){
@@ -146,7 +146,7 @@ angular.module('lp.jobs.import', [
                 }
             };
             vm.toggleModal = function (data) {
-                var modal = ModalStore.get(vm.config.name);
+                var modal = Modal.get(vm.config.name);
                 if (modal) {
                     modal.toggle(data);
                 }
@@ -157,7 +157,7 @@ angular.module('lp.jobs.import', [
             };
 
             $scope.$on("$destroy", function () {
-                ModalStore.remove(vm.config.name);
+                Modal.remove(vm.config.name);
             });
         };
 

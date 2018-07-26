@@ -11,4 +11,28 @@ body {
     &.initialized {
         opacity: 1;
     }
+    
+    .login-body, .update-password-body {
+        padding-top: 4em;
+        img {
+            width: 100%;
+            //margin-top: 80px;
+        }
+        i.fa-spinner {
+            vertical-align: baseline;
+            margin-left: 0.6em;
+        }
+        .company-regmark {
+            margin-left: 5px;
+        }
+    }
+    .update-password-body {
+    }
+    .login-content {
+        padding-left: 40px;
+        border-left: #e7e7e7 solid 1px;
+    }
+    .form-signin .form-control.error {
+        border: #f03213 solid 2px;
+    }
 }

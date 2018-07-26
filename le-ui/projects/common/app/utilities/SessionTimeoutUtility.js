@@ -98,7 +98,7 @@ angular.module('common.utilities.SessionTimeout', [
             animation: true,
             backdrop: true,
             scope: $rootScope,
-            templateUrl: '/app/modules/SessionTimeout/WarningModal.html'
+            templateUrl: '/components/timeout/session-timeout.modal.html'
         });
 
         $rootScope.refreshSession = function() {

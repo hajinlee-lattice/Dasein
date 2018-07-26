@@ -5,32 +5,41 @@ angular.module('common.attributes.controls', [])
     bindings: {
         overview: '<'
     },
-    controller: function ($state, $stateParams, AttrConfigStore) {
+    controller: function ($state, $stateParams, AttrConfigStore, Modal) {
         var vm = this;
 
         vm.store = AttrConfigStore;
-        vm.isSaving = false;
 
         vm.$onInit = function() {
-            vm.section = vm.store.getSection();
-            vm.data = vm.store.getData();
             vm.params = $stateParams;
-            vm.category = AttrConfigStore.getCategory();
+            vm.section = vm.store.getSection();
+            vm.data = vm.store.get('data');
+            vm.category = vm.store.get('category');
 
             if (vm.section == 'enable') {
-                vm.store.setLimit(vm.store.getUsageLimit(vm.overview, vm.params.section));
+                vm.store.set('limit', vm.store.getUsageLimit(vm.overview, vm.params.section));
             } else {
                 var tab = vm.overview.Selections.filter(function(tab) {
                     return tab.DisplayName == vm.category;
                 })[0];
 
-                vm.store.setLimit(tab.Limit);
+                vm.store.set('limit', tab.Limit);
             }
         };
 
         vm.save = function() {
-            vm.isSaving = true;
-            vm.store.saveConfig();
+            var payload = vm.store.generatePayload();
+
+            console.log('payload', payload, vm.section);
+
+            if (vm.section == 'activate' && payload.Select.length > 0) {
+                Modal.warning({
+                    title: "Activation",
+                    message: "Once you activate these premium attributes, you won't be able to deactivate.  Contact your lattice representative to upgrade."
+                }, vm.store.modalCallback);
+            } else {
+                vm.store.saveConfig();
+            }
         };
     }
 });

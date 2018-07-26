@@ -2,7 +2,7 @@ angular.module('lp.delete.entry', [])
 .component('deleteEntry', {
     templateUrl: 'app/delete/content/delete.component.html',
     controller: function( 
-        $state, $stateParams, $scope, DeleteDataStore, DeleteDataService, ImportStore, ModalStore, BrowserStorageUtility) 
+        $state, $stateParams, $scope, DeleteDataStore, DeleteDataService, ImportStore, Modal, BrowserStorageUtility) 
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve,
@@ -258,7 +258,7 @@ angular.module('lp.delete.entry', [])
             }
 
             vm.toggleModal = function () {
-                var modal = ModalStore.get(vm.modalConfig.name);
+                var modal = Modal.get(vm.modalConfig.name);
                 if (modal) {
                     modal.toggle();
                 }
@@ -270,7 +270,7 @@ angular.module('lp.delete.entry', [])
             }
 
             $scope.$on("$destroy", function () {
-                ModalStore.remove(vm.modalConfig.name);
+                Modal.remove(vm.modalConfig.name);
             });
         }
 

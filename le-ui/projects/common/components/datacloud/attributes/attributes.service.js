@@ -1,6 +1,8 @@
 
 angular.module('common.attributes')
-.service('AttrConfigStore', function($q, $state, $stateParams, $timeout, AttrConfigService, DataCloudStore) {
+.service('AttrConfigStore', function(
+    $q, $state, $stateParams, $timeout, AttrConfigService, DataCloudStore, Modal, BrowserStorageUtility
+) {
     var store = this;
 
     this.init = function(){
@@ -28,6 +30,7 @@ angular.module('common.attributes')
         this.selected = [];
         this.start_selected = [];
         this.category = '';
+        this.accesslevel = '';
 
         this.data = {
             original: {},
@@ -35,14 +38,62 @@ angular.module('common.attributes')
             overview: {},
             buckets: {}
         };
+
+        this.saving = false;
     };
 
-    this.getData = function() {
-        return this.data;
+    this.set = function(property, value) {
+        this[property] = value;
     };
 
     this.setData = function(type, data) {
         this.data[type] = data;
+    };
+
+    this.get = function(property) {
+        return this[property];
+    };
+    
+    this.getAccessRestriction = function() {
+        var session = BrowserStorageUtility.getSessionDocument();
+
+        if (session !== null || session.User !== null) {
+            this.accesslevel = session.User.AccessLevel;
+        }
+
+        return this.accesslevel;
+    };
+
+    this.getModal = function() {
+        return Modal.get('attribute_admin_save');
+    };
+
+    this.modalCallback = function(args) {
+        var modal = Modal.get(args.name);
+        var ret = true;
+
+        console.log('modalCallback', args, modal);
+        switch (args.action) {
+            case "closedForced": 
+                break;
+
+            case "cancel": 
+                break;
+
+            case "ok": 
+                modal.waiting(true);
+                modal.disableDischargeButton(true);
+            
+                store.saveConfig().then(function(result) {
+                    console.log('xhr', result);
+                    Modal.modalRemoveFromDOM(modal, args);
+                });
+
+                ret = false;
+                break;
+        }
+
+        return ret;
     };
 
     this.getSection = function() {
@@ -55,15 +106,11 @@ angular.module('common.attributes')
         return map[$state.current.name];
     };
 
-    this.getFilters = function() {
-        return this.filters;
-    };
-
     this.getActiveTabData = function() {
         var page = this.getSection();
         var param = page == 'activate' ? 'category' : 'section';
         var active = $stateParams[param];
-        var data = this.getData().overview;
+        var data = this.get('data').overview;
         var tab = [];
 
         if (data && data.Selections) {
@@ -82,7 +129,7 @@ angular.module('common.attributes')
         var tab, started;
 
         if (section == 'enable') {
-            started = this.getStartSelected();
+            started = this.get('start_selected');
             tab = this.getActiveTabData();
 
             if (tab.Selected) {
@@ -91,38 +138,6 @@ angular.module('common.attributes')
         }
 
         return total;
-    };
-
-    this.getSelected = function() {
-        return this.selected;
-    };
-
-    this.setSelected = function(total) {
-        this.selected = total;
-    };
-
-    this.getStartSelected = function() {
-        return this.start_selected;
-    };
-
-    this.setStartSelected = function(total) {
-        this.start_selected = total;
-    };
-
-    this.getLimit = function() {
-        return this.limit;
-    };
-
-    this.setLimit = function(total) {
-        this.limit = total;
-    };
-
-    this.getCategory = function() {
-        return this.category;
-    };
-
-    this.setCategory = function(category) {
-        this.category = category;
     };
 
     this.getUsageLimit = function(overview, area) {
@@ -134,23 +149,9 @@ angular.module('common.attributes')
         return tab.Limit;
     };
 
-    this.putConfig = function(type, category, usage, data) {
-        var deferred = $q.defer();
-        
-        AttrConfigService.putConfig(type, category, usage, data).then(function(data) {
-            deferred.resolve(data);
-        });
-
-        return deferred.promise;
-    };
-
-    this.readBucketData = function(category) {
-        return this.data.buckets;
-    };
-
     this.getBucketData = function(category, subcategory) {
         var deferred = $q.defer();
-        
+
         if (['Intent','Technology Profile'].indexOf(category) < 0) {
             deferred.resolve([]);
         } else {
@@ -182,21 +183,13 @@ angular.module('common.attributes')
         return hasChanged;
     };
 
-    this.saveConfig = function() {
-        var category = this.getCategory();
+    this.generatePayload = function() {
+        var original = this.get('data').original;
         var activate = this.getSection() == 'activate';
-        var type = activate ? 'activation' : 'usage';
-        var usage = {};
         var data = {
             Select: [],
             Deselect: []
         };
-
-        var original = this.getData('original').original;
-
-        if (!activate) {
-            usage.usage = $stateParams.section;
-        }
 
         this.data.config.Subcategories.forEach(function(subcategory, index) {
             var oSub = original.Subcategories[index];
@@ -217,16 +210,52 @@ angular.module('common.attributes')
                 }
             });
         });
-        
-        this.putConfig(type, category, usage, data).then(function() {
-            store.setData('original', JSON.parse(JSON.stringify(store.data.config)));
 
-            DataCloudStore.clear();
+        return data;
+    };
 
+    this.saveConfig = function() {
+        var deferred = $q.defer();
+        var category = this.get('category');
+        var activate = this.getSection() == 'activate';
+        var type = activate ? 'activation' : 'usage';
+        var data = this.generatePayload();
+        var usage = {};
+
+        store.set('saving', true);
+
+        if (!activate) {
+            usage.usage = $stateParams.section;
+        }
+
+        this.putConfig(type, category, usage, data).then(function(result) {
             $timeout(function() {
-                $state.reload();
+                if (result.status >= 200 && result.status < 300) {
+                    store.setData('original', JSON.parse(JSON.stringify(store.data.config)));
+                    
+                    DataCloudStore.clear();
+
+                    ShowSpinner('Refreshing Data');
+                    $state.reload();
+                } else {
+                    store.set('saving', false);
+                }
+
+                deferred.resolve({});
             }, 500);
         });
+
+        return deferred.promise;
+    };
+
+    this.putConfig = function(type, category, usage, data) {
+        var deferred = $q.defer();
+        
+        AttrConfigService.putConfig(type, category, usage, data).then(function(data) {
+            deferred.resolve(data);
+        });
+
+        return deferred.promise;
     };
 
     this.init();
@@ -283,7 +312,9 @@ angular.module('common.attributes')
             url: '/pls/attrconfig/' + section + '/config/category/' + category,
             params: params,
             data: data
-        }).then(function(response) {
+        }).then(function success(response) {
+            deferred.resolve(response);
+        }, function error(response) {
             deferred.resolve(response);
         });
         

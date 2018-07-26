@@ -35,14 +35,12 @@
                 </nav>
 
                 <section id="main" role="main" class="main-content">
-                    <div class="content-wrap">
-                        <div id="mainView">
-                            <div ui-view="header" id="mainHeaderView"></div>
-                            <div ui-view="summary" id="mainSummaryView"></div>
-                            <div ui-view="subsummary" id="subSummaryView"></div>
-                            <div id="mainInfoView"></div>
-                            <div ui-view="main" id="mainContentView"></div>
-                        </div>
+                    <div id="mainView">
+                        <div ui-view="header" id="mainHeaderView"></div>
+                        <div ui-view="summary" id="mainSummaryView"></div>
+                        <div ui-view="subsummary" id="subSummaryView"></div>
+                        <div ui-view="banner" id="mainInfoView"></div>
+                        <div ui-view="main" id="mainContentView"></div>
                     </div>
                 </section>
 
@@ -100,11 +98,9 @@
         <script src="/app/directives/ngQtipDirective.js"></script>
         <script src="/app/directives/chips.directive.js"></script>
         <script src="/app/directives/input-selection.directive.js"></script>
-        <script src="/app/directives/modal-window.directive.js"></script>
         <script src="/app/directives/barchart.directive.js"></script>
         <script src="/app/directives/bar-chart.component.js"></script>
         <script src="/app/directives/formOnChange.directive.js"></script>
-
 
         <script src="/app/utilities/BrowserStorageUtility.js"></script>
         <script src="/app/utilities/DateTimeFormatUtility.js"></script>
@@ -118,6 +114,8 @@
         <script src="/app/utilities/TimestampIntervalUtility.js"></script>
         <script src="/app/utilities/UnderscoreUtility.js"></script>
         <script src="/app/utilities/URLUtility.js"></script>
+        <script src="/app/utilities/AuthorizationUtility.js"></script>
+        <script src="/app/utilities/SessionTimeoutUtility.js"></script>
         <script src="/app/services/ConfigService.js"></script>
         <script src="/app/services/FeatureFlagService.js"></script>
         <script src="/app/services/HelpService.js"></script>
@@ -125,10 +123,6 @@
         <script src="/app/services/MetadataService.js"></script>
         <script src="/app/services/ResourceStringsService.js"></script>
         <script src="/app/services/SessionService.js"></script>
-        <script src="/app/modules/ServiceError/ServiceErrorModule.js"></script>
-        <script src="/app/modules/SessionTimeout/SessionTimeoutUtility.js"></script>
-        <script src="/app/modules/Pagination/Pagination.js"></script>
-        <script src="/app/utilities/AuthorizationUtility.js"></script>
 
         <script src="/components/datacloud/datacloud.routes.js"></script>
         <script src="/components/datacloud/datacloud.service.js"></script>
@@ -185,12 +179,15 @@
         <script src="/components/datacloud/query/advanced/tree/tree.service.js"></script>
         <script src="/components/datacloud/query/advanced/input/input.component.js"></script>
 
+        <script src="/components/pagination/pagination.component.js"></script>
+        <script src="/components/banner/banner.component.js"></script>
+        <script src="/components/modal/modal.component.js"></script>
+        <script src="/components/exceptions/exceptions.component.js"></script>
         <script src="/components/wizard/wizard.component.js"></script>
         <script src="/components/wizard/progress/progress.component.js"></script>
         <script src="/components/wizard/controls/controls.component.js"></script>
         <script src="/components/wizard/header/header.component.js"></script>
         <script src="/components/forms/edit-form.component.js"></script>
-
 
         <!-- endbuild -->
 

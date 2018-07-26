@@ -1,7 +1,7 @@
 angular.module('lp.import.calendar', [])
 .controller('ImportWizardCalendar', function(
     $state, $stateParams, $scope, $timeout, $sce, $window,
-    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory, ModalStore
+    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory, Modal
 ) {
     var vm = this,
         debug = false, // goto /import/calendar
@@ -198,14 +198,14 @@ angular.module('lp.import.calendar', [])
         }
 
         vm.toggleModal = function () {
-            var modal = ModalStore.get(vm.modalConfig.name);
+            var modal = Modal.get(vm.modalConfig.name);
             if (modal) {
                 modal.toggle();
             }
         }
 
         $scope.$on("$destroy", function () {
-            ModalStore.remove(vm.modalConfig.name);
+            Modal.remove(vm.modalConfig.name);
         });
     }
 

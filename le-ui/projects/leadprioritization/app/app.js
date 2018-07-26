@@ -11,6 +11,7 @@ var mainApp = angular.module('mainApp', [
 
     'mainApp.appCommon.Widgets',
 
+    'common.banner',
     'common.modules',
     'common.attributes',
     'common.datacloud',
@@ -18,12 +19,10 @@ var mainApp = angular.module('mainApp', [
     //'lp.header',
     'pd.navigation',
     'lp.jobs',
-    'lp.marketo',
-    'lp.apiconsole',
     'lp.campaigns',
     'lp.campaigns.models',
-    'lp.models.list',
     'lp.segments.segments',
+    'lp.models.list',
     'lp.models.review',
     'lp.models.ratings',
     'lp.notes',
@@ -34,12 +33,14 @@ var mainApp = angular.module('mainApp', [
     'lp.create.import',
     'lp.sfdc',
     'lp.sfdc.credentials',
-    'lp.managefields',
+    'lp.marketo',
     'lp.marketo.enrichment',
+    'lp.apiconsole',
+    'lp.managefields',
     'lp.configureattributes'
 ])
 .controller('MainController', function (
-    $scope, $state, $rootScope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility
+    $scope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility
 ) {
     var previousSession = BrowserStorageUtility.getClientSession();
     var loginDocument = BrowserStorageUtility.getLoginDocument();
@@ -59,6 +60,7 @@ var mainApp = angular.module('mainApp', [
     }
 
     var ClientSession = BrowserStorageUtility.getClientSession();
+
     if (ClientSession != null) {
       var LoginDocument = BrowserStorageUtility.getLoginDocument();
       var Tenant = ClientSession ? ClientSession.Tenant : {};
@@ -135,6 +137,7 @@ var mainApp = angular.module('mainApp', [
         }
     };
 })
+// add authInterceptor factory for Authorization header (above)
 .config(function($httpProvider) {
     $httpProvider.interceptors.push('authInterceptor');
 })

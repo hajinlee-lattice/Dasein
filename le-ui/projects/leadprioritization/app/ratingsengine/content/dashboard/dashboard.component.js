@@ -3,7 +3,7 @@ angular.module('lp.ratingsengine.dashboard', [
 ])
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, 
-    RatingsEngineStore, RatingsEngineService,  ModalStore,
+    RatingsEngineStore, RatingsEngineService,  Modal,
     Dashboard, RatingEngine, Model, IsRatingEngine, IsPmml, Products, AuthorizationUtility, FeatureFlagService
 ) {
     var vm = this,
@@ -99,7 +99,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.toggleModal();
             } else if(vm.config.confirmaction === args.action){
 
-                var modal = ModalStore.get(vm.config.name);
+                var modal = Modal.get(vm.config.name);
                 modal.waiting(true);
                 modal.disableDischargeButton(true);
                 vm.deactivateRating().then(function(result){
@@ -111,7 +111,7 @@ angular.module('lp.ratingsengine.dashboard', [
             }
         }
         vm.toggleModal = function () {
-            var modal = ModalStore.get(vm.config.name);
+            var modal = Modal.get(vm.config.name);
             if(modal){
                 modal.toggle();
             }
@@ -121,7 +121,7 @@ angular.module('lp.ratingsengine.dashboard', [
         }
 
         $scope.$on("$destroy", function() {
-            ModalStore.remove(vm.config.name);
+            Modal.remove(vm.config.name);
         });
     }
 
@@ -187,7 +187,7 @@ angular.module('lp.ratingsengine.dashboard', [
     vm.toggleActive = function() {
         var active = vm.isActive(vm.ratingEngine.status);
         if(active && vm.dashboard.plays.length > 0){
-            var modal = ModalStore.get(vm.config.name);
+            var modal = Modal.get(vm.config.name);
             modal.toggle();
         } else {
             var newStatus = (vm.isActive(vm.ratingEngine.status) ? 'INACTIVE' : 'ACTIVE'),

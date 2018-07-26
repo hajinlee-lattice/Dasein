@@ -4,7 +4,7 @@ angular.module('lp.configureattributes.configure', [])
     templateUrl: 'app/configureattributes/content/configure/configure.component.html',
     controller: function(
         $state, $stateParams, $scope, $timeout, $sce, $window, $q,
-        ResourceUtility, ConfigureAttributesStore, ModalStore, StateHistory
+        ResourceUtility, ConfigureAttributesStore, Modal, StateHistory
     ) {
         var vm = this,
             forceNextStep = false,
@@ -470,14 +470,14 @@ angular.module('lp.configureattributes.configure', [])
             };
 
             vm.toggleModal = function () {
-                var modal = ModalStore.get(vm.modalConfig.name);
+                var modal = Modal.get(vm.modalConfig.name);
                 if (modal) {
                     modal.toggle();
                 }
             }
 
             $scope.$on("$destroy", function () {
-                ModalStore.remove(vm.modalConfig.name);
+                Modal.remove(vm.modalConfig.name);
             });
         }
 

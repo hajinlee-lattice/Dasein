@@ -47,14 +47,14 @@ angular
     // setup StateHistory service and close any error banners left open
     $transitions.onStart({}, function(trans) {
         var StateHistory = trans.injector().get('StateHistory'),
-            ServiceError = trans.injector().get('ServiceErrorUtility'),
-            to = trans.$to(),
-            from = trans.$from();
+            Banner = trans.injector().get('Banner'),
+            from = trans.$from(),
+            to = trans.$to();
         
-        StateHistory.setTo(to, trans.params('to'));
         StateHistory.setFrom(from, trans.params('from'));
+        StateHistory.setTo(to, trans.params('to'));
 
-        ServiceError.hideBanner();
+        Banner.reset();
     });
 
     // when user hits browser Back button after app instantiate, send back to login
@@ -73,11 +73,9 @@ angular
             return state.views['main'] || state.views['main@'];
         } 
     }, function(trans) {
-        var StateHistory = trans.injector().get('StateHistory'),
-            ServiceError = trans.injector().get('ServiceErrorUtility'),
-            to = trans.$to(),
+        var params = trans.params('to') || {},
             from = trans.$from(),
-            params = trans.params('to') || {};
+            to = trans.$to();
 
         if (to.name !== from.name && params.LoadingSpinner !== false) {
             ShowSpinner(params.LoadingText || '');
@@ -85,11 +83,11 @@ angular
     });
 
     $transitions.onBefore({}, function(trans) {
-        var params = Object.assign({}, trans.params('to'));
-        var stateService = trans.router.stateService;
-        var BrowserStorageUtility = trans.injector().get('BrowserStorageUtility');
-        var ClientSession = BrowserStorageUtility.getClientSession();
-        var tenant = ClientSession.Tenant;
+        var BrowserStorageUtility = trans.injector().get('BrowserStorageUtility'),
+            ClientSession = BrowserStorageUtility.getClientSession(),
+            stateService = trans.router.stateService,
+            params = Object.assign({}, trans.params('to')),
+            tenant = ClientSession.Tenant;
       
         if (params.tenantName === '') {
             params.tenantName = tenant.DisplayName;
@@ -99,19 +97,19 @@ angular
     });
 
     $transitions.onSuccess({ to: 'home' }, function(trans) {
-        var stateService = trans.router.stateService;
-        var BrowserStorageUtility = trans.injector().get('BrowserStorageUtility');
-        var ClientSession = BrowserStorageUtility.getClientSession();
-        var tenant = ClientSession.Tenant;
+        var BrowserStorageUtility = trans.injector().get('BrowserStorageUtility'),
+            ClientSession = BrowserStorageUtility.getClientSession(),
+            stateService = trans.router.stateService,
+            tenant = ClientSession.Tenant;
 
         if (trans.$to().params.tenantName != tenant.DisplayName) {
             var FeatureFlags = trans.injector().get('FeatureFlagService');
 
             FeatureFlags.GetAllFlags().then(function(result) {
-                var flags = FeatureFlags.Flags();
-                var sref = FeatureFlags.FlagIsEnabled(flags.ENABLE_CDL)
-                    ? 'home.segment.explorer.attributes'
-                    : 'home.models';
+                var flags = FeatureFlags.Flags(),
+                    sref = FeatureFlags.FlagIsEnabled(flags.ENABLE_CDL)
+                        ? 'home.segment.explorer.attributes'
+                        : 'home.models';
 
                 trans.router.stateService.go(sref, {
                     tenantName: tenant.DisplayName,
@@ -167,17 +165,25 @@ angular
                     return '/pls'; // don't remove this. -Lazarus
                 }, 
                 CollectionStatus: function($q, FeatureFlags, FeatureFlagService, QueryStore) {
-                    var deferred = $q.defer();
-                    var flags = FeatureFlagService.Flags();
+                    var deferred = $q.defer(),
+                        flags = FeatureFlagService.Flags();
+
                     if (FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)) {
                         QueryStore.getCollectionStatus().then(function(result) {
                             deferred.resolve(result);
                         });
+
                         return deferred.promise;
                     }
                 }
             },
             views: {
+                "sidebar": {
+                    templateUrl: 'app/navigation/sidebar/sidebar.component.html'
+                },
+                "navigation@home": {
+                    templateUrl: 'app/navigation/sidebar/root/root.component.html'
+                },
                 "header": {
                     controller: 'HeaderController',
                     templateUrl: 'app/navigation/header/views/MainHeaderView.html'
@@ -185,18 +191,13 @@ angular
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
-                "sidebar": {
-                    templateUrl: 'app/navigation/sidebar/sidebar.component.html'
-                },
-                "navigation@home": {
-                    templateUrl: 'app/navigation/sidebar/root/root.component.html'
-                }
+                "banner": "bannerMessage"
             }
         })
         .state('home.models', {
             url: '/models',
             onEnter: function($state, FilterService) {
-                if(['home.models'].indexOf($state.current.name) < 0) {
+                if (['home.models'].indexOf($state.current.name) < 0) {
                     FilterService.clear();
                 }
             },

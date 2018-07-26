@@ -11,19 +11,26 @@
                     {{modalConfig.title | cut:true:config.titlelength:' ...'}}
                 </p>
             </div>
-
         </div>
-        <div class="le-modal-body">
+
+        <div class="le-modal-body" ng-if="showModalMsg || showWaiting || transclude">
             <div ng-transclude ng-show="!showModalMsg && !showWaiting"></div>
             <div class="le-modal-message" ng-if="showModalMsg">{{modalMsg}}</div>
             <div class="le-modal-spinner" ng-if="showWaiting">
                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
             </div>
         </div>
-        <div class="le-modal-footer">
-            <button ng-click="confirm()" class="button" ng-style ="modalConfig.confirmstyle" ng-class="modalConfig.confirmcolor" ng-disabled="confirmDisabled">{{modalConfig.confirmtext}}</button>
-            <button ng-click="discharge()" class="button  gray-button" ng-disabled="dischargeDisabled">{{modalConfig.dischargetext}}</button>
 
+        <div class="le-modal-footer" ng-if="!showWaiting">
+            <button ng-click="confirm()" 
+                    class="button" 
+                    ng-style ="modalConfig.confirmstyle" 
+                    ng-class="modalConfig.confirmcolor" 
+                    ng-disabled="confirmDisabled">{{modalConfig.confirmtext}}</button>
+            <button ng-click="discharge()" 
+                    class="button  gray-button" 
+                    ng-if="modalConfig.showcancel"
+                    ng-disabled="dischargeDisabled">{{modalConfig.dischargetext}}</button>
         </div>
     </div>
 

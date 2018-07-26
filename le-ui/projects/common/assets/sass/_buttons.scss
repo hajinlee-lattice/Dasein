@@ -43,7 +43,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 	//text-transform: uppercase;
 	border-radius: 3px;
 	font-weight: normal;
-	transition: all 200ms ease;
+	transition: all 133ms ease;
 	outline: none;
 
 	::before, ::after, i {
@@ -51,7 +51,10 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 	}
   
 	&:hover {
-		transition: none;
+    -webkit-transition: none;
+    -moz-transition: none;
+    -ms-transition: none;
+    transition: none;
 	}
  
 	&.link-button, &.link-button a:link,
@@ -69,15 +72,35 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 	&.default-button {
 		border: $black-titanium solid 1px;
 	}
-	&.green-button {
-		background-color: $jade;
-		&:hover {
-			background-color: $jade-two;
-		}
-		&:active {
-			background-color: $jade-three;
-		}
-	}
+  &.red-button {
+    background-color: $ruby;
+    &:hover {
+      background-color: $ruby-two;
+    }
+    &:active {
+      background-color: $ruby-three;
+    }
+  }
+  &.green-button {
+    background-color: $jade;
+    &:hover {
+      background-color: $jade-two;
+    }
+    &:active {
+      background-color: $jade-three;
+    }
+  }
+  &.yellow-button {
+    background-color: #ffbd48;
+    color: #fff;
+    
+    &:hover {
+      background-color: #df9d28;
+    }
+    &:active {
+      background-color: #efad38;
+    }
+  }
 	&.blue-button {
 		background-color: #457EBA;
     border: 1px solid #457EBA;
@@ -237,7 +260,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
     border-color: #dfdfdf;
     color: #d0d0d0;
     &.borderless-button {
-    	border-color: transparent;
+    	border-color: transparent !important;
     	background-color: transparent;
     }
     &:hover {

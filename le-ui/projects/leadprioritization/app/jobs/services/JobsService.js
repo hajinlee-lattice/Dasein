@@ -154,7 +154,7 @@ angular
             url: url,
             headers: {
                 'If-Modified-Since': 0,
-                'ErrorDisplayMethod': 'none'
+                'ErrorDisplayMethod': 'banner'
             }
         }).then(
             function onSuccess(response) {

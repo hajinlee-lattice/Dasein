@@ -45,7 +45,7 @@ angular.module('common.attributes.enable', [])
                         $stateParams.category = category;
                     }
 
-                    AttrConfigStore.setCategory(category);
+                    AttrConfigStore.set('category', category);
                     
                     AttrConfigService.getConfig('usage', category, { 
                         usage: section 
@@ -72,7 +72,8 @@ angular.module('common.attributes.enable', [])
     controller: function($stateParams, AttrConfigStore) {
         var vm = this;
 
-        vm.filters = AttrConfigStore.getFilters();
+        vm.store = AttrConfigStore;
+        vm.filters = vm.store.get('filters');
 
         vm.$onInit = function() {
             vm.categories = vm.overview.AttrNums;

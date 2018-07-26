@@ -7,13 +7,14 @@ angular.module('common.attributes.categories', [])
     controller: function ($state, $stateParams, StateHistory, AttrConfigStore) {
         var vm = this;
 
+        vm.store = AttrConfigStore;
         vm.current = 1;
         vm.pagesize = 6;
         vm.catlength = 1;
 
         vm.$onInit = function() {
             vm.params = $stateParams;
-            vm.category = AttrConfigStore.getCategory();
+            vm.category = vm.store.get('category');
             vm.catmap = vm.pruneEmptyCategories(angular.copy(vm.categories));
             vm.categories = Object.keys(vm.catmap);
             vm.catlength = vm.categories.length;

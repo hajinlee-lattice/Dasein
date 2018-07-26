@@ -1,4 +1,4 @@
-<ul class="controls">
+<ul class="controls" id="attrControls">
     <li class="attr-text">
         <span>
             {{$ctrl.category}} Attributes ({{$ctrl.data.config.TotalAttrs|number}})
@@ -6,16 +6,16 @@
     </li>
 
     <li class="attr-activate-deactivate-button pull-right">
-        <button class="button icon-button blue-button" ng-click="$ctrl.save()" ng-disabled="!$ctrl.store.isChanged() || $ctrl.isSaving">
-            <i class="fa fa-spinner fa-spin fa-fw" ng-if="$ctrl.isSaving"></i>
-            <i class="fa fa-save" ng-if="!$ctrl.isSaving"></i>
-            {{$ctrl.isSaving ? 'SAVING...' : 'SAVE' }}
+        <button class="button icon-button blue-button" ng-click="$ctrl.save()" ng-disabled="!$ctrl.store.isChanged() || $ctrl.store.get('saving')">
+            <i class="fa fa-spinner fa-spin fa-fw" ng-if="$ctrl.store.get('saving')"></i>
+            <i class="fa fa-save" ng-if="!$ctrl.store.get('saving')"></i>
+            {{$ctrl.store.get('saving') ? 'SAVING...' : 'SAVE' }}
         </button>
     </li>
 
     <li class="attr-text pull-right">
         <span>
-            {{$ctrl.store.getSelectedTotal()|number}} <span class="attr-tiny-uppercase">{{$ctrl.store.getLimit() >= 0 ? '/ ' + $ctrl.store.getLimit() + ' ' : ''}}selected</span>
+            {{$ctrl.store.getSelectedTotal()|number}} <span class="attr-tiny-uppercase">{{$ctrl.store.get('limit') >= 0 ? '/ ' + $ctrl.store.get('limit') + ' ' : ''}}selected</span>
         </span>
     </li>
 </ul>

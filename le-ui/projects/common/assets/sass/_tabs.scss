@@ -397,22 +397,32 @@ Chunky Interior Tabs (My Data, Play List, etc...)
         
         li {
             width: 25%;
-            background: #222831;
-            color: #fff;
+            background: #d1d2d3;
+            color: #222;
             padding: 1em 1.1em;
             margin: 0 .75em;
             height: 4.7em;
             cursor: pointer;
+            &, & * {
+                -webkit-transition: none;
+                -moz-transition: none;
+                transition: none;
+            }
             
             &:hover {
                 background-color: #333942;
-                transition: none;
+                &, & * {
+                    color: #ddd;
+                }
             }
             
             &.active {
                 background-color: #457eba;
                 transition: none;
                 pointer-events: none;
+                &, & * {
+                    color: #ddd;
+                }
             }
             
             div {
@@ -426,7 +436,6 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                 
                 h2, div.enrichmentCounts {
                     font-size: 11px;
-                    color: #ddd;
                     text-overflow: ellipsis;
                     overflow: hidden;
                     white-space: nowrap;

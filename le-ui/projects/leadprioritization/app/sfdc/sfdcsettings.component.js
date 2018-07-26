@@ -8,7 +8,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
     },
     controller: function(
         $q, $scope, $state, $timeout, 
-        ResourceUtility, BrowserStorageUtility, SfdcService, ModalStore, SfdcStore
+        ResourceUtility, BrowserStorageUtility, SfdcService, Modal, SfdcStore
     ) {
         var vm = this;
 
@@ -31,14 +31,14 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
             };
         
             vm.toggleModal = function () {
-                var modal = ModalStore.get(vm.config.name);
+                var modal = Modal.get(vm.config.name);
                 if(modal){
                     modal.toggle();
                 }
             }
 
             $scope.$on("$destroy", function() {
-                ModalStore.remove(vm.config.name);
+                Modal.remove(vm.config.name);
             });
         }
 

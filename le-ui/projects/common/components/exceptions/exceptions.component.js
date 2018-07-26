@@ -4,7 +4,6 @@ angular
 ])
 .service('ServiceErrorInterceptor', function ($q, $injector) {
     this.response = function(response) {
-        //console.log('response', response.status, response);
         var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
         ServiceErrorUtility.process(response);
 
@@ -12,7 +11,6 @@ angular
     };
 
     this.request = function(response) {
-        //console.log('request', response.status, response);
         var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
         ServiceErrorUtility.process(response);
 
@@ -20,7 +18,6 @@ angular
     };
 
     this.responseError = function(rejection) {
-        //console.log('responseError', rejection);
         var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
         ServiceErrorUtility.process(rejection);
 
@@ -28,7 +25,6 @@ angular
     };
 
     this.requestError = function(rejection) {
-        //console.log('requestError', rejection);
         var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
         ServiceErrorUtility.process(rejection);
 
@@ -38,14 +34,12 @@ angular
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('ServiceErrorInterceptor');
 })
-.service('ServiceErrorUtility', function ($compile, $templateCache, $http, $rootScope) {
+.service('ServiceErrorUtility', function(Banner, Modal) {
     this.check = function (response) {
-        //console.log('check', response);
         return (response && response.data && (response.data.error || response.data.error_description || response.data.errorMsg || response.data.errorMsg));
     };
 
     this.process = function (response) {
-        //console.log('process', response);
         if (this.check(response)) {
             var config = response.config || { headers: {} },
                 params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),
@@ -64,25 +58,21 @@ angular
         }
     };
 
-    this.hideBanner = function (elementQuery) {
-        $(elementQuery || "#mainInfoView").html('');
-    };
-
     this.showBanner = function (response, elementQuery) {
         if (!this.check(response)) {
             return;
         }
 
-        $http.get('/app/modules/ServiceError/ServiceErrorBanner.html', { cache: $templateCache }).success(function (html) {
-            var scope = $rootScope.$new(),
-                data = response.data;
+        var data = response.data,
+            http_err = response.statusText,
+            http_code = response.status,
+            ledp_code = data.errorCode || data.error,
+            desc = data.errorMsg || data.error_description,
+            url = response.config.url;
 
-            scope.errorCode = data.errorCode || data.error;
-            scope.errorMsg = data.errorMsg || data.error_description;
-            scope.status = response.status;
-            scope.statusText = response.statusText;
-
-            $compile($(elementQuery || "#mainInfoView").html(html))(scope);
+        Banner.error({
+            title: http_code + ' ' + http_err + ': ' + url,
+            message: desc + ' (' + ledp_code + ')',
         });
     };
 
@@ -90,33 +80,18 @@ angular
         if (!this.check(response)) {
             return;
         }
-        
-        $http.get('/app/modules/ServiceError/ServiceErrorModal.html', { cache: $templateCache }).success(function (html) {
-            var modalElement = $("#modalContainer"),
-                scope = $rootScope.$new(),
-                data = response.data,
-                options = {
-                    backdrop: "static"
-                };
 
-            scope.errorCode = data.errorCode;
-            scope.errorMsg = data.errorMsg;
-            scope.status = response.status;
-            scope.state = state;
-            scope.stateParams = stateParams;
-            scope.statusText = response.statusText;
+        var data = response.data,
+            http_err = response.statusText,
+            http_code = response.status,
+            ledp_code = data.errorCode || data.error,
+            desc = data.errorMsg || data.error_description,
+            url = response.config.url;
 
-            $compile(modalElement.html(html))(scope);
-
-            modalElement.modal(options);
-            modalElement.modal('show');
-            
-            // Remove the created HTML from the DOM
-            modalElement.on('hidden.bs.modal', function (event) {
-                modalElement.empty();
-            });
-
-            scope.modalElement = modalElement;
+        Modal.error({
+            type: 'md',
+            title: http_err + ': ' + url,
+            message: desc + ' (' + ledp_code + ')',
         });
     };
 })
