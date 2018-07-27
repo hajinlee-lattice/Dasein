@@ -3,17 +3,17 @@ package com.latticeengines.dataplatform.service.impl.metadata;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.db.service.impl.metadata.MetadataProvider;
 import com.latticeengines.db.service.impl.metadata.SQLServerMetadataProvider;
 import com.latticeengines.domain.exposed.datacloud.MatchClient;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class MetadataProviderUnitTestNG {
 
     @Test(groups = "unit")
     public void testMatchClientUrl() {
-        MatchClientDocument doc = new MatchClientDocument(MatchClient.PD128);
+        MatchClientDocument doc = new MatchClientDocument(MatchClient.PD126);
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(doc.getHost())
@@ -25,10 +25,10 @@ public class MetadataProviderUnitTestNG {
 
         MetadataProvider provider = new SQLServerMetadataProvider();
         Assert.assertEquals(provider.getConnectionString(creds),
-                "jdbc:sqlserver://10.51.15.128:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE");
+                "jdbc:sqlserver://10.51.15.126:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE");
         Assert.assertEquals(
                 provider.replaceUrlWithParamsAndTestConnection(doc.getUrl(), provider.getDriverClass(), creds),
-                "jdbc:sqlserver://10.51.15.128:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE");
+                "jdbc:sqlserver://10.51.15.126:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE");
     }
 
 }

@@ -7,7 +7,6 @@
         <property name="targetDataSources">
             <map key-type="com.latticeengines.domain.exposed.datacloud.MatchClient">
                 <entry key="PD126" value-ref="pd126ClientDataSource" />
-                <entry key="PD128" value-ref="pd128ClientDataSource" />
                 <entry key="PD131" value-ref="pd131ClientDataSource" />
                 <entry key="PD144" value-ref="pd144ClientDataSource" />
                 <entry key="PD130" value-ref="pd130ClientDataSource" />
@@ -19,13 +18,6 @@
     <bean id="pd126ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://10.51.15.126:1433;databaseName=PropDataMatchDB;" />
-        <property name="username" value="${datacloud.user}" />
-        <property name="password" value="${datacloud.password.encrypted}" />
-    </bean>
-
-    <bean id="pd128ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://10.51.15.128:1433;databaseName=PropDataMatchDB;" />
         <property name="username" value="${datacloud.user}" />
         <property name="password" value="${datacloud.password.encrypted}" />
     </bean>
