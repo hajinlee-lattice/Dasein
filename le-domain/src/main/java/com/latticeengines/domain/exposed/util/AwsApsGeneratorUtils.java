@@ -33,7 +33,7 @@ public class AwsApsGeneratorUtils {
                 }
             } else {
                 attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
-                attribute.setCategory(Category.ACCOUNT_INFORMATION);
+                attribute.setCategory(Category.PRODUCT_SPEND);
                 attribute.setDisplayDiscretizationStrategy("{\"unified\": {}}");
                 attribute.setTags(ModelingMetadata.INTERNAL_TAG);
                 setDisplayNameAndOthers(attribute, name, productMap);
