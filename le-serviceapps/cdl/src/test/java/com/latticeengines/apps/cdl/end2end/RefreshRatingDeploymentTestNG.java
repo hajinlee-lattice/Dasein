@@ -179,7 +179,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Thread.sleep(300);
 
         ratingEngineProxy.setScoringIteration(mainCustomerSpace, engineId, model.getId(),
-                BucketMetadataUtils.getDefaultMetadata());
+                BucketMetadataUtils.getDefaultMetadata(), null);
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
 
@@ -203,7 +203,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         final String modelGuid = modelSummary.getId();
         final String engineId = newEngine.getId();
         ratingEngineProxy.setScoringIteration(mainCustomerSpace, engineId, model.getId(),
-                BucketMetadataUtils.getDefaultMetadata());
+                BucketMetadataUtils.getDefaultMetadata(), null);
         new Thread(() -> insertBucketMetadata(modelGuid, engineId)).start();
         Thread.sleep(300);
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());

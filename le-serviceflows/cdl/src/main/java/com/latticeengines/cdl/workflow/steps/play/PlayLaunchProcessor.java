@@ -357,7 +357,6 @@ public class PlayLaunchProcessor {
         Schema schema = TableUtils.createSchema(playLaunch.getTableName(), recommendationTable);
 
         ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
-        // RatingModel activeModel = ratingEngine.getActiveModel();
         RatingModel publishedIteration = ratingEngine.getPublishedIteration();
         String modelId = publishedIteration.getId();
         String ratingId = ratingEngine.getId();

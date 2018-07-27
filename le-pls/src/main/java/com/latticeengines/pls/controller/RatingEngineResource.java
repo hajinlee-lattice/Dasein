@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -235,13 +237,23 @@ public class RatingEngineResource {
         return ratingModelAndAction.getRatingModel();
     }
 
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
+    public Map<String, List<ColumnMetadata>> getIterationMetadata(@PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.getIterationMetadata(tenant.getId(), ratingEngineId, ratingModelId);
+    }
+
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setScoringIteration")
     @ResponseBody
     @ApiOperation(value = "Set the given ratingmodel as the Scoring Iteration for the given rating engine")
     public void setScoringIteration(@PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId, @RequestBody(required = false) List<BucketMetadata> bucketMetadatas) {
         Tenant tenant = MultiTenantContext.getTenant();
-        ratingEngineProxy.setScoringIteration(tenant.getId(), ratingEngineId, ratingModelId, bucketMetadatas);
+        ratingEngineProxy.setScoringIteration(tenant.getId(), ratingEngineId, ratingModelId, bucketMetadatas,
+                MultiTenantContext.getEmailAddress());
     }
 
     private void registerAction(Action action, Tenant tenant) {

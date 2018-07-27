@@ -90,7 +90,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("DataLicense")
     private String dataLicense;
 
-    //TODO: Attribute Customization should be migrated to new metadata framework
+    @JsonProperty("IsCoveredByOptionalRule")
+    private boolean isCoveredByOptionalRule;
+
+    @JsonProperty("IsCoveredByMandatoryRule")
+    private boolean isCoveredByMandatoryRule;
+
+    // TODO: Attribute Customization should be migrated to new metadata
+    // framework
     @Deprecated
     @JsonProperty("AttributeFlagsMap")
     private Map<AttributeUseCase, JsonNode> attributeFlagsMap;
@@ -573,6 +580,24 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setImportanceOrdering(Integer importanceOrdering) {
         this.importanceOrdering = importanceOrdering;
+    }
+
+    @JsonProperty("IsCoveredByOptionalRule")
+    public boolean isCoveredByOptionalRule() {
+        return isCoveredByOptionalRule;
+    }
+
+    @JsonProperty("IsCoveredByOptionalRule")
+    public void setIsCoveredByOptionalRule(boolean isCoveredByOptionalRule) {
+        this.isCoveredByOptionalRule = isCoveredByOptionalRule;
+    }
+
+    public boolean isCoveredByMandatoryRule() {
+        return isCoveredByMandatoryRule;
+    }
+
+    public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
+        this.isCoveredByMandatoryRule = isCoveredByMandatoryRule;
     }
 
     public ColumnMetadata clone() {

@@ -50,18 +50,26 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
 
     private static final long serialVersionUID = -4779448415471374224L;
-    
+
     public static final int MDATTRIBUTE_INIT_VALUE = 300_000_000; // 300M
 
     /*
-    For batching to work, we need to make a schema change to take off AutoIncrement from ID column.
-    Because of code difference between ActiveStack and InActiveStack we can't apply the Schema changes in advance.
-    To introduce batching at this time by considering activities from both Active and InActive stacks, we need to consider addition of new column with backward compatibility support.
-    As it is unnecessary at this point, going back to Identity generator.
-    
-    @TableGenerator(name = "MDAttribute_SEQ_GEN", table = "PLS_MULTITENANT_SEQ_ID", pkColumnName = "SEQUENCE_NAME", valueColumnName = "SEQUENCE_VAL", pkColumnValue = "MDAttribute_SEQUENCE", initialValue = MDATTRIBUTE_INIT_VALUE, allocationSize = 50)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "MDAttribute_SEQ_GEN")
-    */
+     * For batching to work, we need to make a schema change to take off
+     * AutoIncrement from ID column. Because of code difference between
+     * ActiveStack and InActiveStack we can't apply the Schema changes in
+     * advance. To introduce batching at this time by considering activities
+     * from both Active and InActive stacks, we need to consider addition of new
+     * column with backward compatibility support. As it is unnecessary at this
+     * point, going back to Identity generator.
+     * 
+     * @TableGenerator(name = "MDAttribute_SEQ_GEN", table =
+     * "PLS_MULTITENANT_SEQ_ID", pkColumnName = "SEQUENCE_NAME", valueColumnName
+     * = "SEQUENCE_VAL", pkColumnValue = "MDAttribute_SEQUENCE", initialValue =
+     * MDATTRIBUTE_INIT_VALUE, allocationSize = 50)
+     * 
+     * @GeneratedValue(strategy = GenerationType.TABLE, generator =
+     * "MDAttribute_SEQ_GEN")
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -110,7 +118,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     private Integer scale;
 
     @Transient
-    private List<String> cleanedUpEnumValues = new ArrayList<String>();
+    private List<String> cleanedUpEnumValues = new ArrayList<>();
 
     @Column(name = "ENUM_VALUES", nullable = true, length = 2048)
     @JsonProperty("enum_values")
@@ -579,7 +587,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @SuppressWarnings("unchecked")
     public List<String> getAssociatedDataRules() {
         if (!properties.containsKey("AssociatedDataRules")) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
         return (List<String>) properties.get("AssociatedDataRules");
     }
@@ -1071,9 +1079,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (!isInternalAttributeOrTransform) {
             return false;
         }
-        if (getInterfaceName() != null)
-            return false;
-        return true;
+        return getInterfaceName() == null;
     }
 
     @Transient
@@ -1159,6 +1165,10 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         metadata.setBitOffset(getBitOffset());
         metadata.setNumBits(getNumOfBits());
         metadata.setPhysicalName(getPhysicalName());
+        metadata.setApprovedUsageList(
+                getApprovedUsage().stream().map(ApprovedUsage::fromName).collect(Collectors.toList()));
+        metadata.setIsCoveredByMandatoryRule(getIsCoveredByMandatoryRule());
+        metadata.setIsCoveredByOptionalRule(getIsCoveredByOptionalRule());
         return metadata;
     }
 

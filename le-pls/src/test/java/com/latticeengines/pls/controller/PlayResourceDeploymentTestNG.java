@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -142,7 +143,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         ratingEngineProxy.updateRatingModel(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(), aiModel);
 
         ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(), aiModel.getId(),
-                getBucketMetadata(createdRatingEngine, modelSummary));
+                getBucketMetadata(createdRatingEngine, modelSummary), null);
         createdRatingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), createdRatingEngine.getId());
 
         RatingEngine toPub = new RatingEngine();
@@ -192,7 +193,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(createdRatingEngine.getLatestIteration());
 
         ratingEngineProxy.setScoringIteration(tenant.getId(), createdRatingEngine.getId(),
-                createdRatingEngine.getLatestIteration().getId(), null);
+                createdRatingEngine.getLatestIteration().getId(), null, null);
         createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ruleBasedRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getScoringIteration());
 
@@ -332,7 +333,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     public int getNoOfExistingPlays() {
         List<?> playList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
-        return playList == null ? 0 : playList.size();
+        return CollectionUtils.isEmpty(playList) ? 0 : playList.size();
     }
 
     public Play createPlayOnly() {
@@ -412,7 +413,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         playProxy.updatePlayLaunch(tenant.getId(), name, playLaunch.getLaunchId(), LaunchState.Launched);
         playProxy.updatePlayLaunchProgress(tenant.getId(), name, playLaunch.getLaunchId(), 100.0D, 8L, 25L, 0L,
-                (totalRatedAccounts - 8L - 0L));
+                (totalRatedAccounts - 8L));
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Canceled + "&launchStates="
@@ -447,7 +448,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertLaunchStats(retrievedLaunch.getAccountsLaunched(), 8L);
         assertLaunchStats(retrievedLaunch.getContactsLaunched(), 25L);
         assertLaunchStats(retrievedLaunch.getAccountsErrored(), 0L);
-        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), (totalRatedAccounts - 8L - 0L));
+        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), (totalRatedAccounts - 8L));
     }
 
     private void assertLaunchStats(Long count, long expectedVal) {

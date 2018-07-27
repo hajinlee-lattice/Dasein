@@ -736,11 +736,14 @@ public enum LedpCode {
     LEDP_40027("invalid attribute config {0} in DB"), //
     LEDP_40028("Cannot change job Status for ai model {0} since the current status is already terminal"), //
     LEDP_40029("RatingModel {0} not associated with Rating Engine {1}"), //
-    LEDP_40030("BucketMetadata not provided for AIModel {0} while setting ScoringIteration for RatingEngine {1}"), //
-    LEDP_40031("No ModelSummary for AIModel {0}, cannot set it as the ScoringIteration for RatingEngine {1}"), //
+    LEDP_40030("BucketMetadata not provided for Iteration {0} while setting ScoringIteration for Model {1}"), //
+    LEDP_40031("No ModelSummary for Iteration {0}, cannot set it as the ScoringIteration for Model {1}"), //
     LEDP_40032("Curated attribute validation failed due to: {0}"), //
-    LEDP_40033(
-            "Cannot model iteration {0} of the Cross-Sell Model {1} since number of positive events({2}) is less then minimum required({3}). Customer Space {4}"), //
+    LEDP_40033("Cannot model iteration {0} of the Cross-Sell Model {1} since number of positive events({2}) is less " + //
+            "then minimum required({3}). Customer Space {4}"), //
+    LEDP_40034("Modeling not complete yet for Iteration {0} of Model {1}. Customer Space {2}"), //
+    LEDP_40035("Modeling did not succeed for Iteration {0} of Model {1}. Customer Space {2}"), //
+    LEDP_40036("Unable to find {0} for Iteration {1} of Model {2}. Customer Space {3}"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

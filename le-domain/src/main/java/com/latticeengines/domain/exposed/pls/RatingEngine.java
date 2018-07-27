@@ -356,23 +356,47 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.ratingEngineNotes.add(ratingEngineNote);
     }
 
+    /**
+     * @deprecated use one of {@link #getLatestIteration()},
+     *             {@link #getScoringIteration()} or
+     *             {@link #getPublishedIteration()} instead.
+     */
+    @Deprecated()
     @JsonProperty("activeModel")
     @Transient
     public RatingModel getActiveModel() {
         return this.activeModel;
     }
 
+    /**
+     * @deprecated use one of {@link #setLatestIteration(RatingModel)},
+     *             {@link #setScoringIteration(RatingModel)} or
+     *             {@link #setPublishedIteration(RatingModel)} instead.
+     */
+    @Deprecated
     @JsonProperty("activeModel")
     public void setActiveModel(RatingModel model) {
         this.activeModel = model;
     }
 
+    /**
+     * @deprecated use one of {@link #getLatestIteration()},
+     *             {@link #getScoringIteration()} or
+     *             {@link #getPublishedIteration()} instead.
+     */
+    @Deprecated()
     @JsonIgnore
     @Column(name = "ACTIVE_MODEL_PID")
     public Long getActiveModelPid() {
         return this.activeModelPid;
     }
 
+    /**
+     * @deprecated use one of {@link #setLatestIteration(RatingModel)},
+     *             {@link #setScoringIteration(RatingModel)} or
+     *             {@link #setPublishedIteration(RatingModel)} instead.
+     */
+    @Deprecated
     @JsonIgnore
     public void setActiveModelPid(Long pid) {
         this.activeModelPid = pid;

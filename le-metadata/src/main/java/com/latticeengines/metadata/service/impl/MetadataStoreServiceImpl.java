@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.metadata.mds.NamedMetadataStore;
 import com.latticeengines.metadata.mds.impl.AttrConfigMetadataStore;
+import com.latticeengines.metadata.mds.impl.TableMetadataStore;
 import com.latticeengines.metadata.service.MetadataStoreService;
 
 import reactor.core.publisher.Flux;
@@ -21,6 +22,8 @@ public class MetadataStoreServiceImpl implements MetadataStoreService {
 
     @Inject
     private AttrConfigMetadataStore attrConfigMetadataStore;
+    @Inject
+    private TableMetadataStore tableMetadataStore;
 
     private ConcurrentMap<String, NamedMetadataStore> registry;
 
@@ -53,6 +56,7 @@ public class MetadataStoreServiceImpl implements MetadataStoreService {
             registry = new ConcurrentHashMap<>();
 
             registerMetadataStore(attrConfigMetadataStore);
+            registerMetadataStore(tableMetadataStore);
         }
     }
 

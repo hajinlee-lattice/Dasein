@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -62,6 +63,8 @@ public interface RatingEngineService {
     RatingModel updateRatingModel(String ratingEngineId, String ratingModelId,
             RatingModel ratingModel);
 
+    Map<String, List<ColumnMetadata>> getIterationMetadata(String ratingEngineId, String ratingModelId);
+
     Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
             String ratingEngineId);
 
@@ -90,6 +93,6 @@ public interface RatingEngineService {
 
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
 
-    void setScoringIteration(String ratingEngineId, String ratingModelId,
-            List<BucketMetadata> bucketMetadatas);
+    void setScoringIteration(String ratingEngineId, String ratingModelId, List<BucketMetadata> bucketMetadatas,
+            String userEmail);
 }

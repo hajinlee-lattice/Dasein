@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.NoteParams;
@@ -71,7 +72,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
             params.add("type=" + type);
         }
         if (publishedRatingsOnly) {
-            params.add("publishedratingsonly=" + ((Boolean) publishedRatingsOnly).toString());
+            params.add("publishedratingsonly=true");
         }
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
@@ -164,6 +165,15 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("update rating model", url, ratingModel, ratingModel.getClass());
     }
 
+    @SuppressWarnings("unchecked")
+    public Map<String, List<ColumnMetadata>> getIterationMetadata(String customerSpace, String ratingEngineId,
+            String ratingModelId) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}",
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+        return JsonUtils.convertMapWithListValue(get("get rating model", url, Map.class), String.class,
+                ColumnMetadata.class);
+    }
+
     public RatingModelAndActionDTO updateRatingModelAndActionDTO(String customerSpace, String ratingEngineId,
             String ratingModelId, RatingModel ratingModel) {
         String url = constructUrl(URL_PREFIX + "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}",
@@ -172,9 +182,10 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public void setScoringIteration(String customerSpace, String ratingEngineId, String ratingModelId,
-            List<BucketMetadata> bucketMetadatas) {
-        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModel}/setScoringIteration",
-                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+            List<BucketMetadata> bucketMetadatas, String userEmail) {
+        String url = constructUrl(
+                URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModel}/setScoringIteration/?useremail={userEmail}",
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, userEmail);
         post("setScoringIteration", url, bucketMetadatas, Object.class);
     }
 
@@ -302,7 +313,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         post("updateModelingStatus", url, null, Object.class);
     }
 
-    public List<AttributeLookup> getDependingAttrsForModel(String customerSpace, RatingEngineType engineType, String modelId) {
+    public List<AttributeLookup> getDependingAttrsForModel(String customerSpace, RatingEngineType engineType,
+            String modelId) {
         String url = constructUrl(URL_PREFIX + "/dependingattrs/type/{engineType}/model/{modelId}",
                 shortenCustomerSpace(customerSpace), engineType, modelId);
         return getList("get depending attrs for rating model", url, AttributeLookup.class);
