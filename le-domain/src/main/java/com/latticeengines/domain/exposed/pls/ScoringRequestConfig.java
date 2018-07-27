@@ -53,7 +53,7 @@ public class ScoringRequestConfig extends ScoringRequestConfigSummary implements
             + "( src.configId, src.modelUuid ) " 
             + "FROM ScoringRequestConfig src WHERE src.marketoCredential.pid = :credentialPid";
     
-    public static final String NQ_FIND_CONFIGS_BY_CREDENTIAL_ID = "ScoringRequestConfig.findConfigsByCrendetialId";
+    public static final String NQ_FIND_CONFIGS_BY_CREDENTIAL_ID = "ScoringRequestConfig.findConfigsByCredentialId";
     
     private Long pid;
     private Tenant tenant;
