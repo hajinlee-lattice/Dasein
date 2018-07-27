@@ -84,7 +84,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
@@ -95,6 +94,7 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -137,7 +137,7 @@ public class InternalResource extends InternalResourceBase {
     private ModelSummaryService modelSummaryService;
 
     @Inject
-    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Inject
     private AttributeService attributeService;
@@ -352,16 +352,6 @@ public class InternalResource extends InternalResourceBase {
             HttpServletRequest request) {
         checkHeader(request);
         return modelSummaryService.getModelSummariesModifiedWithinTimeFrame(timeframe);
-    }
-
-    @RequestMapping(value = "/modelsummarydownloadflag/"
-            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Set model summary download flag")
-    public void setModelSummaryDownloadFlag(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        manufactureSecurityContextForInternalAccess(tenantId);
-        log.info(String.format("Set model summary download flag for tenant %s", tenantId));
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenantId);
     }
 
     @RequestMapping(value = "/modelsummaries/{modelId}/"

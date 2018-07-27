@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -45,6 +44,7 @@ import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.cdl.CDLModelProxy;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelOperationProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import io.swagger.annotations.Api;
@@ -76,7 +76,7 @@ public class ModelResource {
     private MetadataProxy metadataProxy;
 
     @Inject
-    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Inject
     private SourceFileService sourceFileService;
@@ -160,7 +160,7 @@ public class ModelResource {
                 modelSummary.getEventTableName());
         List<Attribute> userRefinedAttributes = modelMetadataService
                 .getAttributesFromFields(parentModelEventTable.getAttributes(), parameters.getAttributes());
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
+        modelSummaryProxy.setDownloadFlag(MultiTenantContext.getTenant().getId());
         parameters.setUserId(MultiTenantContext.getEmailAddress());
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter.submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
@@ -181,7 +181,7 @@ public class ModelResource {
             log.error(message);
             throw new RuntimeException(message);
         }
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
+        modelSummaryProxy.setDownloadFlag(MultiTenantContext.getTenant().getId());
         String appId = pmmlModelWorkflowSubmitter
                 .submit(modelName, modelDisplayName, moduleName, pivotFileName, pmmlFileName, schemaInterpretation)
                 .toString();
@@ -194,7 +194,7 @@ public class ModelResource {
     @ApiOperation(value = "Copy a model from current tenant to target tenant.")
     public ResponseDocument<Boolean> copyModel(@PathVariable String modelId,
             @RequestParam(value = "targetTenantId") String targetTenantId) {
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(targetTenantId);
+        modelSummaryProxy.setDownloadFlag(MultiTenantContext.getTenant().getId());
         modelCopyProxy.copyModel(MultiTenantContext.getShortTenantId(), targetTenantId, modelId);
         return ResponseDocument.successResponse(true);
     }
@@ -205,7 +205,7 @@ public class ModelResource {
     public ResponseDocument<Boolean> replaceModel(@PathVariable String sourceModelId,
             @RequestParam(value = "targetTenantId") String targetTenantId,
             @RequestParam(value = "targetModelId") String targetModelId) {
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(targetTenantId);
+        modelSummaryProxy.setDownloadFlag(MultiTenantContext.getTenant().getId());
         return ResponseDocument.successResponse( //
                 modelOperationProxy.replaceModel(MultiTenantContext.getShortTenantId(), sourceModelId, targetTenantId, targetModelId));
     }

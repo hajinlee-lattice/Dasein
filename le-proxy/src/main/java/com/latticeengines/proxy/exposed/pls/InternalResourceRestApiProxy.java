@@ -413,16 +413,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public void setModelSummaryDownloadFlag(String tenantId) {
-        try {
-            String url = constructUrl("pls/internal/modelsummarydownloadflag", tenantId);
-            log.info(String.format("Posting to %s", url));
-            restTemplate.exchange(url, HttpMethod.POST, null, Object.class);
-        } catch (Exception e) {
-            throw new RuntimeException("set model summary flag: Remote call failure", e);
-        }
-    }
-
     private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
             String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes) {

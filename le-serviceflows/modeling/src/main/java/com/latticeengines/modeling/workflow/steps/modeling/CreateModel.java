@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -16,7 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 @Component("createModel")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -24,14 +26,12 @@ public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CreateModel.class);
 
-    private InternalResourceRestApiProxy proxy = null;
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public void execute() {
         log.info("Inside CreateModel execute()");
-        if (proxy == null) {
-            proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
-        }
 
         Table eventTable = getEventTable();
         Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
@@ -44,7 +44,7 @@ public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
         }
         String tenantId = configuration.getCustomerSpace().toString();
         log.info(String.format("Set model summary download flag for tenant: %s", tenantId));
-        proxy.setModelSummaryDownloadFlag(tenantId);
+        modelSummaryProxy.setDownloadFlag(tenantId);
 
         for (Attribute event : events) {
             try {

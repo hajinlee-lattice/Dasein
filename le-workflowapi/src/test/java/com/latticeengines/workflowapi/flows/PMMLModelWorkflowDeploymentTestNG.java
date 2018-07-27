@@ -36,8 +36,8 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.PMMLModelWorkflow
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
@@ -47,7 +47,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
     private static final Logger log = LoggerFactory.getLogger(PMMLModelWorkflowDeploymentTestNG.class);
 
     @Autowired
-    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -84,7 +84,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
         System.out.println(workflowConfig.getStepConfigRegistry());
         System.out.println("Model name = " + modelName);
 
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
+        modelSummaryProxy.setDownloadFlag(MultiTenantContext.getTenant().getId());
 
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         waitForCompletion(workflowId);

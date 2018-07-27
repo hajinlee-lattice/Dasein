@@ -45,12 +45,12 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAn
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
@@ -78,7 +78,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
     private MatchAndModelWorkflowSubmitter matchAndModelWorkflowSubmitter;
 
     @Autowired
-    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Autowired
     private ModelNoteService modelNoteService;
@@ -181,7 +181,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         modelNoteService.create(modelSummary.getId(), noteParams);
         MatchAndModelWorkflowConfiguration workflowConfig = matchAndModelWorkflowSubmitter.generateConfiguration(
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
+        modelSummaryProxy.setDownloadFlag(MultiTenantContext.getTenant().getId());
 
         workflowService.registerJob(workflowConfig, applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
