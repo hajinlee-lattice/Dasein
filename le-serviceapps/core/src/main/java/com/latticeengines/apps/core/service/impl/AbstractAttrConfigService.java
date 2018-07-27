@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSpecification;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
@@ -237,7 +238,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Deprecated
     @Override
-    public AttrConfigRequest validateRequest(AttrConfigRequest request, boolean isAdmin) {
+    public AttrConfigRequest validateRequest(AttrConfigRequest request, AttrConfigUpdateMode mode) {
         String tenantId = MultiTenantContext.getShortTenantId();
         try (PerformanceTimer timer = new PerformanceTimer()) {
             Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs(),
@@ -269,7 +270,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
 
                 ValidationDetails details = attrValidationService.validate(existingAttrConfigs,
-                        request.getAttrConfigs(), isAdmin);
+                        request.getAttrConfigs(), mode);
                 request.setDetails(details);
             }
             int count = CollectionUtils.isNotEmpty(request.getAttrConfigs()) ? request.getAttrConfigs().size() : 0;
@@ -280,7 +281,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @Override
-    public AttrConfigRequest saveRequest(AttrConfigRequest request, boolean isAdmin) {
+    public AttrConfigRequest saveRequest(AttrConfigRequest request, AttrConfigUpdateMode mode) {
         AttrConfigRequest toReturn;
         String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> attrConfigs = request.getAttrConfigs();
@@ -316,7 +317,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 timer.setTimerMessage(msg);
             }
 
-            ValidationDetails details = attrValidationService.validate(existingAttrConfigs, userProvidedList, isAdmin);
+            ValidationDetails details = attrValidationService.validate(existingAttrConfigs, userProvidedList, mode);
             toReturn.setDetails(details);
             if (toReturn.hasWarning() || toReturn.hasError()) {
                 log.warn("current attribute configs has warnings or errors:" + JsonUtils.serialize(details));
@@ -332,7 +333,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             // trim and save
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
                 String shortTenantId = MultiTenantContext.getShortTenantId();
-                attrConfigEntityMgr.save(shortTenantId, entity, trim(configList, isAdmin));
+                attrConfigEntityMgr.save(shortTenantId, entity, trim(configList));
                 // clear serving metadata cache
                 String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
                 cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
@@ -645,7 +646,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @SuppressWarnings("unchecked")
-    public List<AttrConfig> trim(List<AttrConfig> customConfig, boolean isAdmin) {
+    public List<AttrConfig> trim(List<AttrConfig> customConfig) {
         List<AttrConfig> results = new ArrayList<>();
         for (AttrConfig config : customConfig) {
             config.setImpactWarnings(null);

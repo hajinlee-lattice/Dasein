@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.DataCollectionPrechecks;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.pls.service.DataCollectionPrecheckService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -60,9 +61,10 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Save attr config request")
     public AttrConfigRequest saveAttrConfigRequest(HttpServletRequest request,
-            @RequestBody AttrConfigRequest config) {
+            @RequestBody AttrConfigRequest config,
+            @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return cdlAttrConfigProxy.saveAttrConfig(tenant.getId(), config);
+        return cdlAttrConfigProxy.saveAttrConfig(tenant.getId(), config, mode);
     }
 
     @RequestMapping(value = ATTR_CONFIG_PATH + "/validate", //
@@ -71,9 +73,10 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Validate attr config request")
     public AttrConfigRequest validateAttrConfigRequest(HttpServletRequest request,
-            @RequestBody AttrConfigRequest config) {
+            @RequestBody AttrConfigRequest config,
+            @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return cdlAttrConfigProxy.validateAttrConfig(tenant.getId(), config);
+        return cdlAttrConfigProxy.validateAttrConfig(tenant.getId(), config, mode);
     }
 
     @GetMapping(value = "/status")

@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -37,13 +39,14 @@ public class ActivationLimitValidator extends AttrValidator {
     private static final String PLS = "PLS";
     private static final String EXPORT = "Export";
 
+    private static final Logger log = LoggerFactory.getLogger(ActivationLimitValidator.class);
     protected ActivationLimitValidator() {
         super(VALIDATOR_NAME);
     }
 
     @Override
-    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
-            boolean isAdmin) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
+        log.info("start to validate limit activation");
         // make sure user selected attr don't have two same attribute
         LimitValidatorUtils.checkAmbiguityInFieldNames(userProvidedAttrConfigs);
         // split user selected configs into active and inactive, props always

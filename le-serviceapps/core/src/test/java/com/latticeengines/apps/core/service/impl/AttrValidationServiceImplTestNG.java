@@ -14,6 +14,7 @@ import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 
@@ -42,7 +43,8 @@ public class AttrValidationServiceImplTestNG extends ServiceAppsFunctionalTestNG
         prop1.setCustomValue(99);
         attrConfig.putProperty("IntValue", prop1);
         attrConfigs.add(attrConfig);
-        ValidationDetails details = attrValidationService.validate(attrConfigList, attrConfigs, false);
+        ValidationDetails details = attrValidationService.validate(attrConfigList, attrConfigs,
+                AttrConfigUpdateMode.Usage);
         Assert.assertNotNull(details);
         Assert.assertEquals(details.getValidations().size(), 1);
         ValidationDetails.AttrValidation validation = details.getValidations().get(0);

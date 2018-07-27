@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.proxy.exposed.lp.LPAttrConfigProxy;
 
 import io.swagger.annotations.Api;
@@ -286,9 +287,10 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save attr config request")
-    public AttrConfigRequest saveAttrConfigRequest(HttpServletRequest request, @RequestBody AttrConfigRequest config) {
+    public AttrConfigRequest saveAttrConfigRequest(HttpServletRequest request, @RequestBody AttrConfigRequest config,
+            @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return proxy.saveAttrConfig(tenant.getId(), config);
+        return proxy.saveAttrConfig(tenant.getId(), config, mode);
     }
 
     @RequestMapping(value = ATTR_CONFIG_PATH + "/validate", //
@@ -297,9 +299,10 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Validate attr config request")
     public AttrConfigRequest validateAttrConfigRequest(HttpServletRequest request,
-            @RequestBody AttrConfigRequest config) {
+            @RequestBody AttrConfigRequest config,
+            @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return proxy.validateAttrConfig(tenant.getId(), config);
+        return proxy.validateAttrConfig(tenant.getId(), config, mode);
     }
 
     private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,

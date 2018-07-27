@@ -14,31 +14,39 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 
 @Component("attrValidationService")
 public class AttrValidationServiceImpl implements AttrValidationService {
 
-    private List<String> validatorList = new ArrayList<>();
+    private List<String> activationValidatorList = new ArrayList<>();
+    private List<String> usageValidatorList = new ArrayList<>();
 
     @PostConstruct
     private void initializeValidator() {
-        validatorList.add(CDLImpactValidator.VALIDATOR_NAME);
-        validatorList.add(GenericValidator.VALIDATOR_NAME);
-        validatorList.add(LifecycleValidator.VALIDATOR_NAME);
-        validatorList.add(ActivationLimitValidator.VALIDATOR_NAME);
-        validatorList.add(UsageValidator.VALIDATOR_NAME);
-        validatorList.add(UsageLimitValidator.VALIDATOR_NAME);
+        activationValidatorList.add(GenericValidator.VALIDATOR_NAME);
+        activationValidatorList.add(LifecycleValidator.VALIDATOR_NAME);
+        activationValidatorList.add(ActivationLimitValidator.VALIDATOR_NAME);
+        activationValidatorList.add(UsageValidator.VALIDATOR_NAME);
+
+        usageValidatorList.add(CDLImpactValidator.VALIDATOR_NAME);
+        usageValidatorList.add(GenericValidator.VALIDATOR_NAME);
+        usageValidatorList.add(UsageLimitValidator.VALIDATOR_NAME);
     }
 
     @Override
     public ValidationDetails validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
-            boolean isAdmin) {
+            AttrConfigUpdateMode mode) {
+        List<String> validatorList = activationValidatorList;
+        if (AttrConfigUpdateMode.Usage.equals(mode)) {
+            validatorList = usageValidatorList;
+        }
         for (String validatorName : validatorList) {
             AttrValidator validator = AttrValidator.getValidator(validatorName);
             try (PerformanceTimer timer = new PerformanceTimer()) {
                 if (validator != null) {
-                    validator.validate(existingAttrConfigs, userProvidedAttrConfigs, isAdmin);
+                    validator.validate(existingAttrConfigs, userProvidedAttrConfigs);
                 }
                 String msg = String.format("Validator %s for tenant %s", validatorName,
                         MultiTenantContext.getShortTenantId());

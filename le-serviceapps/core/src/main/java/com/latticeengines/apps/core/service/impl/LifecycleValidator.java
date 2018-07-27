@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.service.AttrValidator;
@@ -19,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 @Component("lifecycleValidator")
 public class LifecycleValidator extends AttrValidator {
 
+    private static Logger log = LoggerFactory.getLogger(LifecycleValidator.class);
     public static final String VALIDATOR_NAME = "LIFECYCLE_VALIDATOR";
 
     protected LifecycleValidator() {
@@ -26,14 +29,14 @@ public class LifecycleValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
-            boolean isAdmin) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
+        log.info("start to validate lifecycle");
         for (AttrConfig attrConfig : userProvidedAttrConfigs) {
-            checkState(attrConfig, isAdmin);
+            checkState(attrConfig);
         }
     }
 
-    private void checkState(AttrConfig attrConfig, boolean isAdmin) {
+    private void checkState(AttrConfig attrConfig) {
         Map<String, AttrConfigProp<?>> attrConfigPropMap = attrConfig.getAttrProps();
         if (MapUtils.isEmpty(attrConfigPropMap)) {
             return;

@@ -58,6 +58,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings.Type;
@@ -187,7 +188,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public void updateActivationConfig(String categoryName, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getShortTenantId();
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(categoryName, request);
-        cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
+        cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest, AttrConfigUpdateMode.Activation);
         createUpdateActivationActions(categoryName, request);
     }
 
@@ -274,7 +275,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         String tenantId = MultiTenantContext.getShortTenantId();
         String usage = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
-        AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
+        AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest,
+                AttrConfigUpdateMode.Usage);
         return processUpdateUsageResponse(saveResponse, request);
     }
 

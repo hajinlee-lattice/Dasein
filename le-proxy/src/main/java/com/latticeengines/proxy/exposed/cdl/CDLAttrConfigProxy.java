@@ -9,6 +9,7 @@ import org.springframework.lang.Nullable;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 
 public interface CDLAttrConfigProxy {
 
@@ -16,9 +17,9 @@ public interface CDLAttrConfigProxy {
 
     AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName);
 
-    AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request);
+    AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode);
 
-    AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request);
+    AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode);
 
     Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(String customerSpace,
             @Nullable List<String> categoryNames, @NonNull List<String> propertyNames, boolean activeOnly);

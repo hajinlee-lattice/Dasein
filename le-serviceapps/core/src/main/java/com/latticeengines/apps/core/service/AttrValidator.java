@@ -21,8 +21,7 @@ public abstract class AttrValidator {
         return validators.get(name);
     }
 
-    public abstract void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
-            boolean isAdmin);
+    public abstract void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs);
 
     public void addErrorMsg(ValidationErrors.Type errorType, String message, AttrConfig attrConfig) {
         ValidationErrors error = attrConfig.getValidationErrors();

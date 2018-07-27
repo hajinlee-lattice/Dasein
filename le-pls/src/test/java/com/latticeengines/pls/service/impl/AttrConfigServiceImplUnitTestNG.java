@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -294,7 +295,8 @@ public class AttrConfigServiceImplUnitTestNG {
         // happy path
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
         request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect[0]));
-        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
                 .thenReturn(AttrConfigServiceImplTestUtils.generateHappyAttrConfigRequest());
         UIAction uiAction = attrConfigService.updateUsageConfig(Category.INTENT.getName(), "Company Profile", request);
         Assert.assertNotNull(uiAction);
@@ -303,7 +305,8 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(uiAction.getStatus(), Status.Success);
 
         // attribute level
-        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
                 .thenReturn(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest());
         try {
             attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
@@ -320,7 +323,8 @@ public class AttrConfigServiceImplUnitTestNG {
 
         // subcategory level
         request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect));
-        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
                 .thenReturn(AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest());
         try {
             attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
@@ -335,7 +339,8 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertNotNull(uiAction.getMessage());
         }
         // category level
-        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class)))
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
                 .thenReturn(AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest());
         try {
             attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);

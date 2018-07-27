@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,10 +74,11 @@ public class AttrConfigResource {
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation("save cdl attribute config request")
-    public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace, @RequestBody AttrConfigRequest request,
-            @RequestParam(value = "isAdmin", required = false, defaultValue = "0") boolean isAdmin) {
+    public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace,
+            @RequestBody AttrConfigRequest request,
+            @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
         request.fixJsonDeserialization();
-        return attrConfigService.saveRequest(request, isAdmin);
+        return attrConfigService.saveRequest(request, mode);
     }
 
     @PostMapping(value = "/validate")
@@ -84,9 +86,9 @@ public class AttrConfigResource {
     @ApiOperation("put cdl attribute config request")
     public AttrConfigRequest validateAttrConfig(@PathVariable String customerSpace,
             @RequestBody AttrConfigRequest request,
-            @RequestParam(value = "isAdmin", required = false, defaultValue = "0") boolean isAdmin) {
+            @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
         request.fixJsonDeserialization();
-        return attrConfigService.validateRequest(request, isAdmin);
+        return attrConfigService.validateRequest(request, mode);
     }
 
     private Category resolveCategory(String categoryName) {

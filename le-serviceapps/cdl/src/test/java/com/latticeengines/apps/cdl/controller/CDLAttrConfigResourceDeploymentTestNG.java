@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -117,7 +118,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         enrichProp.setCustomValue(Boolean.TRUE);
         config1.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Enrichment.name(), enrichProp));
         request.setAttrConfigs(Arrays.asList(config1));
-        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request);
+        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
         // wait the replication lag
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
@@ -131,7 +132,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         segmentProp.setCustomValue(Boolean.TRUE);
         config2.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Segment.name(), segmentProp));
         request.setAttrConfigs(Arrays.asList(config2));
-        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request);
+        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
         // wait the replication lag
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
@@ -146,7 +147,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         segmentProp.setCustomValue(null);
         config2.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Segment.name(), segmentProp));
         request.setAttrConfigs(Arrays.asList(config2));
-        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request);
+        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
         // wait the replication lag
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
@@ -178,7 +179,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         SegmentProp.setCustomValue(Boolean.TRUE);
         config4.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Segment.name(), SegmentProp));
         request.setAttrConfigs(Arrays.asList(config3, config4));
-        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request);
+        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
         assertEquals(request.getAttrConfigs().size(), 2);
@@ -192,7 +193,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         SegmentProp.setCustomValue(null);
         config4.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Segment.name(), SegmentProp));
         request.setAttrConfigs(Arrays.asList(config4));
-        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request);
+        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, false);
         assertEquals(request.getAttrConfigs().size(), 0);

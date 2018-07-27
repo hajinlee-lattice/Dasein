@@ -14,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
@@ -75,17 +76,19 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         return result;
     }
 
-    public AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request) {
-        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/", //
-                shortenCustomerSpace(customerSpace));
+    public AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request,
+            AttrConfigUpdateMode mode) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/?mode={mode}", //
+                shortenCustomerSpace(customerSpace), mode);
         AttrConfigRequest result = post("save attr config", url, request, AttrConfigRequest.class);
         result.fixJsonDeserialization();
         return result;
     }
 
-    public AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request) {
-        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/validate", //
-                shortenCustomerSpace(customerSpace));
+    public AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request,
+            AttrConfigUpdateMode mode) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/validate/?mode={mode}", //
+                shortenCustomerSpace(customerSpace), mode);
         AttrConfigRequest result = post("validate attr config request", url, request, AttrConfigRequest.class);
         result.fixJsonDeserialization();
         return result;
