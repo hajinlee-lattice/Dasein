@@ -191,7 +191,8 @@ angular
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
-                "banner": "bannerMessage"
+                "banner": "bannerMessage",
+                "notice": "noticeMessage"
             }
         })
         .state('home.models', {

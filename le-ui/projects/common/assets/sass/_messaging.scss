@@ -90,7 +90,7 @@
         width: 4em;
 
         &:hover .close {
-            color: #222;
+            color: #457EBA;
         }
 
         .close, .link-button.close-button {
@@ -99,7 +99,7 @@
             font-size: 11pt;
             display: flex;
             font-family: cursive;
-            color: #888;
+            color: #222;
             
             &, & *, & *:before {
                 -webkir-transition: none;

@@ -11,8 +11,10 @@ var mainApp = angular.module('mainApp', [
 
     'mainApp.appCommon.Widgets',
 
-    'common.banner',
     'common.modules',
+    'common.modal',
+    'common.banner',
+    'common.notice',
     'common.attributes',
     'common.datacloud',
 

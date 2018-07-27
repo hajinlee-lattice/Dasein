@@ -34,7 +34,7 @@ angular
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('ServiceErrorInterceptor');
 })
-.service('ServiceErrorUtility', function(Banner, Modal) {
+.service('ServiceErrorUtility', function(Banner, Modal, Notice) {
     this.check = function (response) {
         return (response && response.data && (response.data.error || response.data.error_description || response.data.errorMsg || response.data.errorMsg));
     };
@@ -43,22 +43,21 @@ angular
         if (this.check(response)) {
             var config = response.config || { headers: {} },
                 params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),
-                method = params[0],
-                state = params[1] || null, // state or elementQuery
-                stateParams = params[2] || null;
+                method = params[0];
             
             switch (method) {
                 case 'none': break;
-                case 'popup': this.showModal(response, false, state, stateParams); break;
-                case 'modal': this.showModal(response, true, state, stateParams); break;
-                case 'banner': this.showBanner(response, state); break;
-                case 'suppress': this.showSuppressed(response); break;
-                default: this.showModal(response);
+                case 'popup': this.show(Modal, response); break;
+                case 'modal': this.show(Modal, response); break;
+                case 'banner': this.show(Banner, response); break;
+                case 'notice': this.show(Notice, response); break;
+                case 'suppress': console.error(response); break;
+                default: this.show(Modal, response);
             }
         }
     };
 
-    this.showBanner = function (response, elementQuery) {
+    this.show = function(Service, response) {
         if (!this.check(response)) {
             return;
         }
@@ -70,29 +69,14 @@ angular
             desc = data.errorMsg || data.error_description,
             url = response.config.url;
 
-        Banner.error({
+        Service.error({
             title: http_code + ' ' + http_err + ': ' + url,
             message: desc + ' (' + ledp_code + ')',
         });
     };
 
-    this.showModal = function (response, isModal, state, stateParams) {
-        if (!this.check(response)) {
-            return;
-        }
-
-        var data = response.data,
-            http_err = response.statusText,
-            http_code = response.status,
-            ledp_code = data.errorCode || data.error,
-            desc = data.errorMsg || data.error_description,
-            url = response.config.url;
-
-        Modal.error({
-            type: 'md',
-            title: http_err + ': ' + url,
-            message: desc + ' (' + ledp_code + ')',
-        });
+    this.hideBanner = function() {
+        Banner.reset();
     };
 })
 .controller('ServiceErrorController', function ($scope, ResourceUtility) {
