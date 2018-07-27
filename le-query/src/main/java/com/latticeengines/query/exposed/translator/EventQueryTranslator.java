@@ -370,6 +370,13 @@ public class EventQueryTranslator extends TranslatorCommon {
         BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, period,
                                                                          evaluationPeriodId, laggingPeriodCount, sqlUser);
 
+        if (txRestriction.isSkipOffset()) {
+            int offset = Integer.valueOf(timeFilter.getValues().get(0).toString());
+
+            periodIdPredicate = periodIdPredicate.and(periodId.gt(translateMinPeriodId(queryFactory, repository, period,
+                                                                             offset, sqlUser)));
+        }
+
         SQLQuery subQueryExpression = factory.query().select(accountId, periodId, amountAggr, quantityAggr) //
             .from(apsQuery, apsPath) //
             .where(periodIdPredicate);
@@ -505,8 +512,7 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         BooleanExpression resultFilter = amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate);
 
-        if (txRestriction.isNegate() &&
-            (ComparisonType.WITHIN == timeFilter.getRelation() || ComparisonType.PRIOR == timeFilter.getRelation())) {
+        if (txRestriction.isSkipOffset()) {
             int offset = Integer.valueOf(timeFilter.getValues().get(0).toString());
 
             resultFilter = resultFilter.and(periodId.gt(translateMinPeriodId(queryFactory, repository, period, //
@@ -615,7 +621,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                                           null);
     }
 
-    private TransactionRestriction translateToEngagedWithin(TransactionRestriction priorOnly) {
+    private TransactionRestriction translateToEngagedWithin(TransactionRestriction priorOnly, boolean skipOffset) {
 
         TimeFilter timeFilter = new TimeFilter(
             priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
@@ -625,10 +631,11 @@ public class EventQueryTranslator extends TranslatorCommon {
                                           timeFilter, //
                                           false, //
                                           null, //
-                                          null);
+                                          null,
+                                          skipOffset);
     }
 
-    private TransactionRestriction translateToNotEngagedEver(TransactionRestriction priorOnly) {
+    private TransactionRestriction translateToNotEngagedEver(TransactionRestriction priorOnly, boolean skipOffset) {
 
         TimeFilter timeFilter = new TimeFilter(
             priorOnly.getTimeFilter().getLhs(), ComparisonType.EVER, //
@@ -638,7 +645,8 @@ public class EventQueryTranslator extends TranslatorCommon {
                                           timeFilter, //
                                           true, //
                                           null, //
-                                          null);
+                                          null,
+                                          skipOffset);
     }
 
     private boolean calculateEventRevenue(boolean isEvent, EventFrontEndQuery frontEndQuery) {
@@ -700,6 +708,28 @@ public class EventQueryTranslator extends TranslatorCommon {
 
             if (isHasEngagedRestriction(txRestriction)) {
                 rootRestriction = translateHasEngagedToLogicalGroup(txRestriction);
+            }
+        }
+
+        // special treatment for NOT WITHIN to skip offset
+        if (rootRestriction instanceof LogicalRestriction) {
+            BreadthFirstSearch bfs = new BreadthFirstSearch();
+            bfs.run(rootRestriction, (object, ctx) -> {
+                if (object instanceof TransactionRestriction) {
+                    TransactionRestriction txRestriction = (TransactionRestriction) object;
+                    if (txRestriction.isNegate() &&
+                        ComparisonType.WITHIN == txRestriction.getTimeFilter().getRelation()) {
+                        Restriction newRestriction = translateNotWithinToSkipOffset(txRestriction);
+                        LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                        parent.getRestrictions().remove(txRestriction);
+                        parent.getRestrictions().add(newRestriction);
+                    }
+                }
+            });
+        } else if (rootRestriction instanceof TransactionRestriction) {
+            TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
+            if (txRestriction.isNegate() && ComparisonType.WITHIN == txRestriction.getTimeFilter().getRelation()) {
+                rootRestriction = translateNotWithinToSkipOffset(txRestriction);
             }
         }
 
@@ -908,10 +938,20 @@ public class EventQueryTranslator extends TranslatorCommon {
             Restriction notEngagedWithin = translateToNotEngagedWithin(txRestriction);
             newRestriction = Restriction.builder().and(prior, notEngagedWithin).build();
         } else {
-            Restriction notEngagedEver = translateToNotEngagedEver(txRestriction);
-            Restriction engagedWithin = translateToEngagedWithin(txRestriction);
+            Restriction notEngagedEver = translateToNotEngagedEver(txRestriction, true);
+            Restriction engagedWithin = translateToEngagedWithin(txRestriction, true);
             newRestriction = Restriction.builder().or(notEngagedEver, engagedWithin).build();
         }
+        return newRestriction;
+    }
+
+    private Restriction translateNotWithinToSkipOffset(TransactionRestriction txRestriction) {
+        Restriction newRestriction = new TransactionRestriction(txRestriction.getProductId(),
+                                                                txRestriction.getTimeFilter(),
+                                                                txRestriction.isNegate(),
+                                                                txRestriction.getSpentFilter(),
+                                                                txRestriction.getUnitFilter(),
+                                                                true);
         return newRestriction;
     }
 

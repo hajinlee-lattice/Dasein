@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,16 +29,26 @@ public class TransactionRestriction extends Restriction {
     @JsonProperty("unitFilter")
     private AggregationFilter unitFilter;
 
+    @JsonIgnore
+    private boolean skipOffset = false;
+
     public TransactionRestriction() {
     }
 
     public TransactionRestriction(String productId, TimeFilter timeFilter, boolean negate, //
                                   AggregationFilter spentFilter, AggregationFilter unitFilter) {
+        this(productId, timeFilter, negate, spentFilter, unitFilter, false);
+    }
+
+    public TransactionRestriction(String productId, TimeFilter timeFilter, boolean negate, //
+                                  AggregationFilter spentFilter, AggregationFilter unitFilter,
+                                  boolean skipOffset) {
         this.productId = productId;
         this.timeFilter = timeFilter;
         this.negate = negate;
         this.spentFilter = spentFilter;
         this.unitFilter = unitFilter;
+        this.skipOffset = skipOffset;
     }
 
     public String getProductId() {
@@ -94,5 +105,13 @@ public class TransactionRestriction extends Restriction {
                                                AggregationSelector.UNIT);
         }
         this.unitFilter = unitFilter;
+    }
+
+    public boolean isSkipOffset() {
+        return skipOffset;
+    }
+
+    public void setSkipOffset(boolean skipOffset) {
+        this.skipOffset = skipOffset;
     }
 }

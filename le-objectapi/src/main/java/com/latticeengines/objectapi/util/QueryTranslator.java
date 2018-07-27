@@ -241,7 +241,7 @@ abstract class QueryTranslator {
 
     private static AggregationFilter setAggToSum(AggregationFilter filter) {
         return new AggregationFilter(filter.getSelector(), AggregationType.SUM, //
-                filter.getComparisonType(), filter.getValues());
+                                     filter.getComparisonType(), filter.getValues(), filter.isIncludeNotPurchased());
     }
 
     static Sort translateFrontEndSort(FrontEndSort frontEndSort) {

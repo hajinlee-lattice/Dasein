@@ -107,10 +107,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         txRestriction.setProductId(prodIdList);
         txRestriction.setTimeFilter(TimeFilter.ever());
         AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.SUM,
-                ComparisonType.LESS_THAN,
-                Collections.singletonList(1000000.0)
+            AggregationSelector.SPENT,
+            AggregationType.SUM,
+            ComparisonType.LESS_THAN,
+            Collections.singletonList(1000000.0),
+            true
         );
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
@@ -172,10 +173,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                                                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
         AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.EACH,
-                ComparisonType.LESS_THAN,
-                Arrays.asList(100)
+            AggregationSelector.SPENT,
+            AggregationType.EACH,
+            ComparisonType.LESS_THAN,
+            Arrays.asList(100),
+            true
         );
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
@@ -287,10 +289,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                                                Arrays.asList(7, 30));
         txRestriction.setTimeFilter(timeFilter);
         AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.AVG,
-                ComparisonType.LESS_OR_EQUAL,
-                Arrays.asList(10)
+            AggregationSelector.SPENT,
+            AggregationType.AVG,
+            ComparisonType.LESS_OR_EQUAL,
+            Arrays.asList(10),
+            true
         );
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
@@ -321,10 +324,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                                                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
         AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AVG,
-                ComparisonType.LESS_OR_EQUAL,
-                Arrays.asList(10.0)
+            AggregationSelector.UNIT,
+            AggregationType.AVG,
+            ComparisonType.LESS_OR_EQUAL,
+            Arrays.asList(10.0),
+            true
         );
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
@@ -338,10 +342,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                                                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
         AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.SUM,
-                ComparisonType.LESS_THAN,
-                Arrays.asList(100.0)
+            AggregationSelector.UNIT,
+            AggregationType.SUM,
+            ComparisonType.LESS_THAN,
+            Arrays.asList(100.0),
+            true
         );
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
@@ -406,10 +411,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                                                Arrays.asList(7, 30));
         txRestriction.setTimeFilter(timeFilter);
         AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AVG,
-                ComparisonType.LESS_THAN,
-                Arrays.asList(1.0)
+            AggregationSelector.UNIT,
+            AggregationType.AVG,
+            ComparisonType.LESS_THAN,
+            Arrays.asList(1.0),
+            true
         );
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;

@@ -24,6 +24,10 @@ public class AggregationFilter {
     @JsonProperty("Vals")
     private List<Object> values;
 
+    // include not purchased for less comparison, used for playmaker migration
+    @JsonProperty("includeNotPurchased")
+    private boolean includeNotPurchased;
+
     AggregationFilter() {
     }
 
@@ -31,16 +35,26 @@ public class AggregationFilter {
                              List<Object> values) {
         this.comparisonType = comparisonType;
         this.values = values;
+        this.includeNotPurchased = false;
     }
 
     public AggregationFilter(AggregationSelector selector,
                              AggregationType aggregationType,
                              ComparisonType comparisonType,
                              List<Object> values) {
+        this(selector, aggregationType, comparisonType, values, false);
+    }
+
+    public AggregationFilter(AggregationSelector selector,
+                             AggregationType aggregationType,
+                             ComparisonType comparisonType,
+                             List<Object> values,
+                             boolean includeNotPurchased) {
         this.selector = selector;
         this.aggregationType = aggregationType;
         this.comparisonType = comparisonType;
         this.values = values;
+        this.includeNotPurchased = includeNotPurchased;
     }
 
     public AggregationSelector getSelector() {
@@ -57,5 +71,9 @@ public class AggregationFilter {
 
     public List<Object> getValues() {
         return values;
+    }
+
+    public boolean isIncludeNotPurchased() {
+        return includeNotPurchased;
     }
 }

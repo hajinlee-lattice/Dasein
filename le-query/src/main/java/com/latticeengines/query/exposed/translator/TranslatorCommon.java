@@ -125,6 +125,11 @@ public class TranslatorCommon {
         return (ComparisonType.LESS_THAN != cmp && ComparisonType.LESS_OR_EQUAL != cmp);
     }
 
+    protected boolean excludeNotPurchasedInLessThanOperation(AggregationFilter aggregationFilter) {
+        return !(aggregationFilter == null || isNotLessThanOperation(aggregationFilter.getComparisonType()) ||
+                 aggregationFilter.isIncludeNotPurchased());
+    }
+
     @SuppressWarnings("unchecked")
     private WindowFunction translateEver(WindowFunction windowAgg) {
         return windowAgg.rows().between().unboundedPreceding().currentRow();

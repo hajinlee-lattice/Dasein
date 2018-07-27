@@ -92,7 +92,8 @@ public class RestrictionUtils {
                     agg = unitFilterInTxn.getAggregationType();
                 }
                 AggregationFilter unitFilter = new AggregationFilter(AggregationSelector.UNIT, agg, //
-                        unitFilterInTxn.getComparisonType(), unitFilterInTxn.getValues());
+                                                                     unitFilterInTxn.getComparisonType(), unitFilterInTxn.getValues(),
+                                                                     unitFilterInTxn.isIncludeNotPurchased());
                 transactionRestriction.setUnitFilter(unitFilter);
             }
 
@@ -103,7 +104,8 @@ public class RestrictionUtils {
                     agg = spentFilterInTxn.getAggregationType();
                 }
                 AggregationFilter spentFilter = new AggregationFilter(AggregationSelector.SPENT, agg, //
-                        spentFilterInTxn.getComparisonType(), spentFilterInTxn.getValues());
+                                                                      spentFilterInTxn.getComparisonType(), spentFilterInTxn.getValues(),
+                                                                      spentFilterInTxn.isIncludeNotPurchased());
                 transactionRestriction.setSpentFilter(spentFilter);
             }
             return transactionRestriction;
