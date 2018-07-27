@@ -257,7 +257,7 @@ angular.module('lp.configureattributes')
         var deferred = $q.defer();
         $http({
             method: 'GET',
-            url: '/pls/datacollection/metrics/precheck',
+            url: '/pls/datacollection/precheck',
             headers: { 'Content-Type': 'application/json' }
         }).success(function(result, status) {
             deferred.resolve(result);

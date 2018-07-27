@@ -70,7 +70,8 @@ span.logo {
 
 #mainView {
   overflow:auto;
-  padding-bottom: 28px;
+  //padding-bottom: 28px;
+  padding-bottom: 60px; // to accommodate ZenDesk widget
   overflow: visible;
 }
 
