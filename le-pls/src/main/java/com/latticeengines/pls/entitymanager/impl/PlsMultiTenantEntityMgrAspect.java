@@ -1,5 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.Arrays;
+
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 
@@ -23,6 +25,10 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Qualifier(value = "entityManagerFactory")
     private EntityManager entityManager;
 
+    @Autowired
+    @Qualifier(value = "entityManagerFactoryReader")
+    private EntityManager entityManagerReader;
+    
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
@@ -114,6 +120,17 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Before("execution(* com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr.find*(..))")
     public void findMarketoCredentialByName(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+    
+    @Before("execution(* com.latticeengines.pls.entitymanager.ScoringRequestConfigEntityManager.update*(..))")
+    public void updateScoringRequestConfig(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.ScoringRequestConfigEntityManager.find*(..))")
+    public void findScoringRequestConfig(JoinPoint joinPoint) {
+        System.out.println("triggered find method aspect" + joinPoint.toShortString());
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr.delete*(..))")

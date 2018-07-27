@@ -2,10 +2,12 @@ package com.latticeengines.common.exposed.util;
 
 import static org.testng.Assert.assertTrue;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class UuidUtilsUnitTestNG {
@@ -51,6 +53,26 @@ public class UuidUtilsUnitTestNG {
 
         Assert.assertEquals(unpacked.getKey(), tenantId);
         Assert.assertEquals(unpacked.getValue(), credentialId);
+    }
+    
+    @DataProvider(name = "packUnpackDP")
+    public static Object[][] packUnpackDataProvider() {
+        // Array with
+        //      TenantID && CredentialId && ModelId
+        return new Object[][] {
+            {"Customer.Customer.Production", "123456"},
+            {"Customer.Customer.Production", "123456", "ms__0f4217c2-f234-443a-af42-6d7b7a7ff9f3-PLSModel"},
+            {"Customer.Customer.Production", "ms__0f4217c2-f234-443a-af42-6d7b7a7ff9f3-PLSModel"},
+            {"Customer_Name_Version.Customer_Name_Version.Production", "ms__0f4217c2-f234-443a-af42-6d7b7a7ff9f3-PLSModel"}
+        };
+    }
+    
+    @Test(groups = "unit", dataProvider = "packUnpackDP")
+    public void testPackUnpackMultiple(String... args) throws Exception {
+        String uuid = UuidUtils.packUuid(args);
+        System.out.println("DP uuid:" + uuid.length() + " - " + uuid);
+        List<String> unpacked = UuidUtils.unpackListUuid(uuid);
+        Assert.assertEquals(unpacked.size(), args.length);
     }
 
     @Test(groups = "unit")

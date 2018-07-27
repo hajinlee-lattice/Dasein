@@ -65,7 +65,8 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/score/health/**", //
                         "/score/v2/api-docs", //
                         "/score/configuration/**", //
-                        "/score/enrich/record/**") //
+                        "/score/enrich/record/**",
+                        "/score/external/record/**") //
                 .permitAll() //
                 .antMatchers("/score/**") //
                 .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))");

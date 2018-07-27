@@ -2,6 +2,9 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +17,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.domain.exposed.remote.marketo.LeadField;
 import com.latticeengines.pls.service.MarketoCredentialService;
+import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
 
 import io.swagger.annotations.Api;
@@ -31,10 +39,13 @@ public class MarketoCredentialResource {
 
     private static final Logger log = LoggerFactory.getLogger(ModelSummaryResource.class);
 
-    @Autowired
+    @Inject
     private MarketoCredentialService marketoCredentialService;
-
-    @Autowired
+    
+    @Inject
+    private ScoringRequestConfigService scoringRequestConfigService;
+    
+    @Inject
     private MarketoSoapService marketoSoapService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -117,4 +128,57 @@ public class MarketoCredentialResource {
         marketoCredentialService.updateCredentialMatchFields(credentialId, marketoMatchFields);
     }
 
+    /*
+     * ScoringRequestConfig resources
+     * */
+    
+    @RequestMapping(value = "/{credentialId}/scoring-requests", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get list of ScoringRequest Configurations")
+    @ResponseBody
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
+    public List<ScoringRequestConfigSummary> getScoringRequestConfigs(@PathVariable Long credentialId) {
+        return scoringRequestConfigService.findAllByMarketoCredential(credentialId);
+    }
+
+    @RequestMapping(value = "/{credentialId}/scoring-requests/{configId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get ScoringRequestConfiguration")
+    @ResponseBody
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
+    public ScoringRequestConfig getScoringRequestConfigByModelId(@PathVariable(name = "credentialId") Long credentialId,
+            @PathVariable(name = "configId") String configId) {
+        return scoringRequestConfigService.findByConfigId(credentialId, configId);
+    }
+
+    private void validateRequest(Long credentialId, ScoringRequestConfig scoringRequestConfig, String configId) {
+        if (StringUtils.isNotBlank(configId) && !configId.equals(scoringRequestConfig.getConfigId())) {
+            throw new LedpException(LedpCode.LEDP_18193,
+                    new String[] { "ScoringRequest mapped to invalid configuration" });
+        }
+    }
+    
+    @RequestMapping(value = "/{credentialId}/scoring-requests", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiOperation(value = "Creates new ScoringRequestConfiguration")
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
+    public void createScoringRequestConfig(@PathVariable(name = "credentialId") Long credentialId,
+            @RequestBody ScoringRequestConfig scoringRequestConfig) {
+        validateRequest(credentialId, scoringRequestConfig, null);
+        setMarketoCredentialContext(credentialId, scoringRequestConfig);
+        scoringRequestConfigService.createScoringRequestConfig(scoringRequestConfig);
+    }
+
+    @RequestMapping(value = "/{credentialId}/scoring-requests/{configId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ApiOperation(value = "Update ScoringRequestConfiguration")
+    @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
+    public void updateScoringRequestConfig(@PathVariable(name = "credentialId") Long credentialId,
+            @PathVariable(name = "configId") String configId, @RequestBody ScoringRequestConfig scoringRequestConfig) {
+        validateRequest(credentialId, scoringRequestConfig, configId);
+        setMarketoCredentialContext(credentialId, scoringRequestConfig);
+        scoringRequestConfigService.updateScoringRequestConfig(scoringRequestConfig);
+    }
+
+    private void setMarketoCredentialContext(Long credentialId, ScoringRequestConfig scoringRequestConfig) {
+        MarketoCredential marketoCredential = new MarketoCredential();
+        marketoCredential.setPid(credentialId);
+        scoringRequestConfig.setMarketoCredential(marketoCredential);
+    }
 }

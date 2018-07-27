@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,11 +16,14 @@ import com.latticeengines.domain.exposed.pls.Enrichment;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
 import com.latticeengines.domain.exposed.pls.MarketoMatchFieldName;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr;
+import com.latticeengines.pls.entitymanager.ScoringRequestConfigEntityManager;
 import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
+import com.microsoft.sqlserver.jdbc.StringUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("marketoCredentialService")
@@ -31,6 +35,9 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
     @Autowired
     private MarketoMatchFieldEntityMgr marketoMatchFieldEntityMgr;
 
+    @Autowired
+    private ScoringRequestConfigEntityManager scoringRequestConfigEntityMgr;
+    
     @Autowired
     private MarketoRestValidationService marketoRestValidationService;
 
@@ -126,5 +133,5 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
             throw new LedpException(LedpCode.LEDP_18117, new String[] { "bad SOAP credentials" });
         }
     }
-
+    
 }

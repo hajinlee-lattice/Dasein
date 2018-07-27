@@ -313,6 +313,10 @@ public enum LedpCode {
             "The following field name length exceeded the limit of {0} characters. Shorten the field name to upload the file. \"{1}\""), //
     LEDP_18189("There are Rating Models associated with the current segment {0} and thus it cannot be deleted."), //
     LEDP_18190("Update Usage Attribute Config failed due to dependency check failure"), //
+    LEDP_18191("Marketo Scoring setup is missing required {0}"), //
+    LEDP_18192("This Model is already configured for the given Marketo Profile {0}. Please refresh the page."), //
+    LEDP_18193("Marketo Scoring Request Configuration is in invalid State. {0}."), //
+    LEDP_18194("Could not retrive Scoring Request Configuration. Something thing went wrong. Please try again later."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

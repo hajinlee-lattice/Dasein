@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
 
 public interface MarketoCredentialService {
 
@@ -19,5 +20,4 @@ public interface MarketoCredentialService {
 
     void updateCredentialMatchFields(String credentialId,
             List<MarketoMatchField> marketoMatchFields);
-
 }

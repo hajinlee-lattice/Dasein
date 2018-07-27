@@ -318,5 +318,5 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         assertEquals(marketoCredential1.getSoapUserId(), marketoCredential.getSoapUserId());
         assertEquals(marketoCredential1.getEnrichment().getPid(), marketoCredential.getEnrichment().getPid());
     }
-
+    
 }
