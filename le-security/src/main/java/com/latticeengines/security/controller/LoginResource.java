@@ -122,6 +122,10 @@ public class LoginResource {
             doc.setTicket(ticket);
 
             Session session = sessionService.attach(ticket);
+            if (session == null) {
+                // either ticket expired or not exist
+                throw new LedpException(LedpCode.LEDP_18002, new String[] { ticket.getData() });
+            }
             doc.setSuccess(true);
             doc.setAuthenticationRoute(session.getAuthenticationRoute());
 
@@ -138,7 +142,7 @@ public class LoginResource {
 
             doc.setResult(result);
         } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001 || e.getCode() == LedpCode.LEDP_18123) {
+            if (e.getCode() == LedpCode.LEDP_18001 || e.getCode() == LedpCode.LEDP_18002 || e.getCode() == LedpCode.LEDP_18123) {
                 throw new LoginException(e);
             }
             throw e;
