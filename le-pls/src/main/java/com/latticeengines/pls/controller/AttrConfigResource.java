@@ -56,9 +56,11 @@ public class AttrConfigResource {
 
     @PutMapping(value = "/activation/config/category/{categoryName}")
     @ApiOperation("update Activation Config")
-    public void updateActivationConfig(@PathVariable String categoryName,
+    public ModelAndView updateActivationConfig(@PathVariable String categoryName,
             @RequestBody AttrConfigSelectionRequest request) {
-        attrConfigService.updateActivationConfig(categoryName, request);
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        UIAction uiAction = attrConfigService.updateActivationConfig(categoryName, request);
+        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
     @PutMapping(value = "/usage/config/category/{categoryName}")

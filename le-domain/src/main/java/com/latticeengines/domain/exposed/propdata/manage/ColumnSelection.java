@@ -162,7 +162,11 @@ public class ColumnSelection {
             return getName() + "_" + version + ".json";
         }
 
-        public static final EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, ID, Enrichment, Segment, TalkingPoint, CompanyProfile);
+        public static final EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, ID,
+                Enrichment, Segment, TalkingPoint, CompanyProfile);
+
+        public static final EnumSet<Predefined> usageProperties = EnumSet.of(Segment, Enrichment, TalkingPoint,
+                CompanyProfile);
 
         public static Predefined getLegacyDefaultSelection() {
             return DerivedColumns;

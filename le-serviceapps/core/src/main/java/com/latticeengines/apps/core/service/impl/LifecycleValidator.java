@@ -57,11 +57,8 @@ public class LifecycleValidator extends AttrValidator {
                 }
             }
             // check customer value or system value is equal to Inactive
-            ColumnSelection.Predefined[] usageProperties = { ColumnSelection.Predefined.Segment,
-                    ColumnSelection.Predefined.Enrichment, ColumnSelection.Predefined.TalkingPoint,
-                    ColumnSelection.Predefined.CompanyProfile };
             if (AttrState.Inactive.equals(finalState)) {
-                for (ColumnSelection.Predefined group : usageProperties) {
+                for (ColumnSelection.Predefined group : ColumnSelection.Predefined.usageProperties) {
                     Boolean finalUsageValue = attrConfig.getPropertyFinalValue(group.name(), Boolean.class);
                     if (Boolean.TRUE.equals((finalUsageValue))) {
                         addWarningMsg(ImpactWarnings.Type.USAGE_ENABLED, group.name(), attrConfig);

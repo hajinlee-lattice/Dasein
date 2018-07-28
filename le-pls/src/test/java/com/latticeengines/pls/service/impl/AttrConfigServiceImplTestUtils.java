@@ -836,7 +836,7 @@ public class AttrConfigServiceImplTestUtils {
         return attrConfigRequest;
     }
 
-    public static AttrConfigRequest generateAttrLevelAttrConfigRequest() {
+    public static AttrConfigRequest generateAttrLevelAttrConfigRequest(boolean updateUsage) {
         AttrConfigRequest attrConfigRequest = generateHappyAttrConfigRequest();
         String subcategory = "sub1";
         String attrName = deselect[0];
@@ -860,17 +860,24 @@ public class AttrConfigServiceImplTestUtils {
         validation.setSubcategory(subcategory);
         ImpactWarnings impactWarnings = new ImpactWarnings();
         Map<ImpactWarnings.Type, List<String>> warnings = new HashMap<>();
-        warnings.put(ImpactWarnings.Type.IMPACTED_SEGMENTS, Arrays.asList("seg1", "seg2", "seg3"));
-        warnings.put(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, Arrays.asList("re1", "re2", "re3"));
-        warnings.put(ImpactWarnings.Type.IMPACTED_RATING_MODELS, Arrays.asList("rm1", "rm2", "rm3"));
+        if (updateUsage) {
+            warnings.put(ImpactWarnings.Type.IMPACTED_SEGMENTS, Arrays.asList("seg1", "seg2", "seg3"));
+            warnings.put(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, Arrays.asList("re1", "re2", "re3"));
+            warnings.put(ImpactWarnings.Type.IMPACTED_RATING_MODELS, Arrays.asList("rm1", "rm2", "rm3"));
+        } else {
+            warnings.put(ImpactWarnings.Type.USAGE_ENABLED,
+                    Arrays.asList(ColumnSelection.Predefined.Segment.getName(),
+                            ColumnSelection.Predefined.CompanyProfile.getName(),
+                            ColumnSelection.Predefined.Enrichment.getName()));
+        }
         impactWarnings.setWarnings(warnings);
         validation.setImpactWarnings(impactWarnings);
         validations.add(validation);
         return attrConfigRequest;
     }
 
-    public static AttrConfigRequest generateSubcategoryLevelAttrConfigRequest() {
-        AttrConfigRequest attrConfigRequest = generateAttrLevelAttrConfigRequest();
+    public static AttrConfigRequest generateSubcategoryLevelAttrConfigRequest(boolean updateUsage) {
+        AttrConfigRequest attrConfigRequest = generateAttrLevelAttrConfigRequest(updateUsage);
 
         String subcategory = "sub1";
         String attrName = deselect[1];
@@ -893,8 +900,8 @@ public class AttrConfigServiceImplTestUtils {
         return attrConfigRequest;
     }
 
-    public static AttrConfigRequest generateCategoryLevelAttrConfigRequest() {
-        AttrConfigRequest attrConfigRequest = generateSubcategoryLevelAttrConfigRequest();
+    public static AttrConfigRequest generateCategoryLevelAttrConfigRequest(boolean updateUsage) {
+        AttrConfigRequest attrConfigRequest = generateSubcategoryLevelAttrConfigRequest(updateUsage);
 
         String subcategory = "sub2";
         String attrName = deselect[2];

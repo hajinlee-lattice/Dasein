@@ -21,7 +21,7 @@ public interface AttrConfigService {
 
     AttrConfigSelectionDetail getAttrConfigSelectionDetails(String categoryName, String usageName);
 
-    void updateActivationConfig(String categoryName, AttrConfigSelectionRequest request);
+    UIAction updateActivationConfig(String categoryName, AttrConfigSelectionRequest request);
 
     UIAction updateUsageConfig(String categoryName, String usageName, AttrConfigSelectionRequest request);
 

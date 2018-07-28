@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
@@ -61,6 +63,9 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private ActionService actionService;
 
     @InjectMocks
     @Spy
@@ -297,17 +302,17 @@ public class AttrConfigServiceImplUnitTestNG {
         request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect[0]));
         when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
                 any(AttrConfigUpdateMode.class)))
-                .thenReturn(AttrConfigServiceImplTestUtils.generateHappyAttrConfigRequest());
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateHappyAttrConfigRequest());
         UIAction uiAction = attrConfigService.updateUsageConfig(Category.INTENT.getName(), "Company Profile", request);
         Assert.assertNotNull(uiAction);
-        Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_SUCCESS_TITLE);
+        Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_SUCCESS_TITLE);
         Assert.assertEquals(uiAction.getView(), View.Notice);
         Assert.assertEquals(uiAction.getStatus(), Status.Success);
 
         // attribute level
         when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
                 any(AttrConfigUpdateMode.class)))
-                .thenReturn(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest());
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest(true));
         try {
             attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
             Assert.fail("Should have thrown exception due to dependency check failure");
@@ -315,7 +320,7 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_FAIL_ATTRIBUTE_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_ATTRIBUTE_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
@@ -325,7 +330,7 @@ public class AttrConfigServiceImplUnitTestNG {
         request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect));
         when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
                 any(AttrConfigUpdateMode.class)))
-                .thenReturn(AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest());
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest(true));
         try {
             attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
             Assert.fail("Should have thrown exception due to dependency check failure");
@@ -333,7 +338,7 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_FAIL_SUBCATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_SUBCATEGORY_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
@@ -341,7 +346,7 @@ public class AttrConfigServiceImplUnitTestNG {
         // category level
         when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
                 any(AttrConfigUpdateMode.class)))
-                .thenReturn(AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest());
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest(true));
         try {
             attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
             Assert.fail("Should have thrown exception due to dependency check failure");
@@ -349,7 +354,75 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_FAIL_CATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_CATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getView(), View.Modal);
+            Assert.assertEquals(uiAction.getStatus(), Status.Error);
+            Assert.assertNotNull(uiAction.getMessage());
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateActivationConfig() {
+        when(actionService.create(any(Action.class))).thenReturn(new Action());
+        doReturn(AccessLevel.SUPER_ADMIN).when(userService).getAccessLevel(anyString(), nullable(String.class));
+        // happy path
+        AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
+        request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect[0]));
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateHappyAttrConfigRequest());
+        UIAction uiAction = attrConfigService.updateActivationConfig(Category.INTENT.getName(), request);
+        Assert.assertNotNull(uiAction);
+        Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_SUCCESS_TITLE);
+        Assert.assertEquals(uiAction.getView(), View.Notice);
+        Assert.assertEquals(uiAction.getStatus(), Status.Success);
+
+        // attribute level
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest(false));
+        try {
+            attrConfigService.updateActivationConfig(Category.ACCOUNT_ATTRIBUTES.getName(), request);
+            Assert.fail("Should have thrown exception due to dependency check failure");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UIActionException);
+            UIActionException uiActionException = (UIActionException) e;
+            uiAction = uiActionException.getUIAction();
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_ATTRIBUTE_TITLE);
+            Assert.assertEquals(uiAction.getView(), View.Modal);
+            Assert.assertEquals(uiAction.getStatus(), Status.Error);
+            Assert.assertNotNull(uiAction.getMessage());
+        }
+
+        // subcategory level
+        request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect));
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest(true));
+        try {
+            attrConfigService.updateActivationConfig(Category.ACCOUNT_ATTRIBUTES.getName(), request);
+            Assert.fail("Should have thrown exception due to dependency check failure");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UIActionException);
+            UIActionException uiActionException = (UIActionException) e;
+            uiAction = uiActionException.getUIAction();
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_SUBCATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getView(), View.Modal);
+            Assert.assertEquals(uiAction.getStatus(), Status.Error);
+            Assert.assertNotNull(uiAction.getMessage());
+        }
+        // category level
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest(true));
+        try {
+            attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
+            Assert.fail("Should have thrown exception due to dependency check failure");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UIActionException);
+            UIActionException uiActionException = (UIActionException) e;
+            uiAction = uiActionException.getUIAction();
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_CATEGORY_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
@@ -359,31 +432,54 @@ public class AttrConfigServiceImplUnitTestNG {
     @Test(groups = "unit")
     public void testGenerateAttrLevelMsg() {
         String html = attrConfigService
-                .generateAttrLevelMsg(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest());
+                .generateAttrLevelMsg(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest(true), true);
         log.info("html for Attr Level is " + html);
-        Assert.assertTrue(html.contains(
-                "<p>This attribute is in use and cannot be disabled until the dependency has been removed.</p>"));
+        Assert.assertTrue(
+                html.contains(String.format("<p>%s</p>", AttrConfigServiceImpl.UPDATE_USAGE_FAIL_ATTRIBUTE_MSG)));
         Assert.assertTrue(html.contains("<b>Model(s):</b><ul><li>re1</li><li>re2</li><li>re3</li></ul>"));
         Assert.assertTrue(html.contains("<b>RatingModel(s):</b><ul><li>rm1</li><li>rm2</li><li>rm3</li></ul>"));
         Assert.assertTrue(html.contains("<b>Segment(s):</b><ul><li>seg1</li><li>seg2</li><li>seg3</li></ul>"));
+
+        html = attrConfigService
+                .generateAttrLevelMsg(AttrConfigServiceImplTestUtils.generateAttrLevelAttrConfigRequest(false), false);
+        log.info("html for Attr Level is " + html);
+        Assert.assertTrue(
+                html.contains(String.format("<p>%s</p>", AttrConfigServiceImpl.UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG)));
+        Assert.assertTrue(html.contains("<li>Segment</li>"));
+        Assert.assertTrue(html.contains("<li>CompanyProfile</li>"));
+        Assert.assertTrue(html.contains("<li>Enrichment</li>"));
     }
 
     @Test(groups = "unit")
     public void testGenerateSubcategoryLevelMsg() {
         String html = attrConfigService.generateSubcategoryLevelMsg(
-                AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest());
+                AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest(true), true);
         log.info("html for Subcategory Level is " + html);
-        Assert.assertEquals(html,
-                "<p>This sub-category is in use and cannot be disabled until the attributes have been removed.</p><b>sub1:</b><ul><li>attr4</li><li>attr5</li></ul>");
+        Assert.assertEquals(html, String.format("<p>%s</p><b>sub1:</b><ul><li>attr4</li><li>attr5</li></ul>",
+                AttrConfigServiceImpl.UPDATE_USAGE_FAIL_SUBCATEGORY_MSG));
+
+        html = attrConfigService.generateSubcategoryLevelMsg(
+                AttrConfigServiceImplTestUtils.generateSubcategoryLevelAttrConfigRequest(false), false);
+        log.info("html for Subcategory Level is " + html);
+        Assert.assertEquals(html, String.format("<p>%s</p><b>sub1:</b><ul><li>attr4</li><li>attr5</li></ul>",
+                AttrConfigServiceImpl.UPDATE_ACTIVATION_FAIL_SUBCATEGORY_MSG));
     }
 
     @Test(groups = "unit")
     public void testGenerateCategoryLevelMsg() {
-        String html = attrConfigService
-                .generateCategoryLevelMsg(AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest());
+        String html = attrConfigService.generateCategoryLevelMsg(
+                AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest(true), true);
         log.info("html for Category Level is " + html);
-        Assert.assertTrue(html.contains(
-                "<p>This category is in use and cannot be disabled until the attributes have been removed.</p>"));
+        Assert.assertTrue(
+                html.contains(String.format("<p>%s</p>", AttrConfigServiceImpl.UPDATE_USAGE_FAIL_CATEGORY_MSG)));
+        Assert.assertTrue(html.contains("<b>sub2:</b><ul><li>attr6</li></ul>"));
+        Assert.assertTrue(html.contains("<b>sub1:</b><ul><li>attr4</li><li>attr5</li></ul>"));
+
+        html = attrConfigService.generateCategoryLevelMsg(
+                AttrConfigServiceImplTestUtils.generateCategoryLevelAttrConfigRequest(false), false);
+        log.info("html for Category Level is " + html);
+        Assert.assertTrue(
+                html.contains(String.format("<p>%s</p>", AttrConfigServiceImpl.UPDATE_ACTIVATION_FAIL_CATEGORY_MSG)));
         Assert.assertTrue(html.contains("<b>sub2:</b><ul><li>attr6</li></ul>"));
         Assert.assertTrue(html.contains("<b>sub1:</b><ul><li>attr4</li><li>attr5</li></ul>"));
     }

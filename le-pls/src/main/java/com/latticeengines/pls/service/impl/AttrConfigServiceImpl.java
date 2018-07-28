@@ -76,6 +76,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImpl.class);
 
+    // The order matters as it maps with the mock up
     public static final String[] usageProperties = { ColumnSelection.Predefined.Segment.getName(),
             ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.TalkingPoint.getName(),
             ColumnSelection.Predefined.CompanyProfile.getName() };
@@ -85,13 +86,16 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private static final String defaultDisplayName = "Default Name";
     private static final String defaultDescription = "Default Description";
 
-    public static final String UPDATE_USAGE_SUCCESS_TITLE = "Your change has been saved";
-    public static final String UPDATE_USAGE_FAIL_ATTRIBUTE_TITLE = "Attribute In Use";
+    public static final String UPDATE_SUCCESS_TITLE = "Your changes have been saved";
+    public static final String UPDATE_FAIL_ATTRIBUTE_TITLE = "Attribute In Use";
     public static final String UPDATE_USAGE_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be disabled until the dependency has been removed.";
-    public static final String UPDATE_USAGE_FAIL_CATEGORY_TITLE = "Category In Use";
+    public static final String UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be deactivated until it is disabled from the following usecases.";
+    public static final String UPDATE_FAIL_CATEGORY_TITLE = "Category In Use";
     public static final String UPDATE_USAGE_FAIL_CATEGORY_MSG = "This category is in use and cannot be disabled until the attributes have been removed.";
-    public static final String UPDATE_USAGE_FAIL_SUBCATEGORY_TITLE = "Sub-category In Use";
+    public static final String UPDATE_ACTIVATION_FAIL_CATEGORY_MSG = "This category is in use and cannot be deactivated until the attributes have been removed from the usecase(s).";
+    public static final String UPDATE_FAIL_SUBCATEGORY_TITLE = "Sub-category In Use";
     public static final String UPDATE_USAGE_FAIL_SUBCATEGORY_MSG = "This sub-category is in use and cannot be disabled until the attributes have been removed.";
+    public static final String UPDATE_ACTIVATION_FAIL_SUBCATEGORY_MSG = "This sub-category is in use and cannot be deactivated until the attributes have been removed from the usecase(s).";
 
     static {
         usageToDisplayName.put(ColumnSelection.Predefined.Segment.getName(), "Segmentation");
@@ -185,11 +189,63 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public void updateActivationConfig(String categoryName, AttrConfigSelectionRequest request) {
+    public UIAction updateActivationConfig(String categoryName, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getShortTenantId();
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(categoryName, request);
-        cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest, AttrConfigUpdateMode.Activation);
+        AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest,
+                AttrConfigUpdateMode.Activation);
         createUpdateActivationActions(categoryName, request);
+        return processUpdateResponse(saveResponse, request, false);
+    }
+
+    private UIAction processUpdateResponse(AttrConfigRequest saveResponse, AttrConfigSelectionRequest request,
+            boolean updateUsage) {
+        UIAction uiAction = new UIAction();
+        if (saveResponse != null) {
+            if (saveResponse.hasError()) {
+                // TODO ygao parse the error message to make it more
+                // user-friendly
+                throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
+                        + JsonUtils.serialize(saveResponse.getDetails()));
+            } else if (saveResponse.hasWarning()) {
+                // parse the mode of the request
+                int mode = parseModeForRequest(saveResponse, request);
+                // form the uiAction and throw exception
+                switch (mode) {
+                case 0:
+                    // attribute level
+                    uiAction.setTitle(UPDATE_FAIL_ATTRIBUTE_TITLE);
+                    uiAction.setView(View.Modal);
+                    uiAction.setStatus(Status.Error);
+                    uiAction.setMessage(generateAttrLevelMsg(saveResponse, updateUsage));
+                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                case 1:
+                    // subcategory level
+                    uiAction.setTitle(UPDATE_FAIL_SUBCATEGORY_TITLE);
+                    uiAction.setView(View.Modal);
+                    uiAction.setStatus(Status.Error);
+                    uiAction.setMessage(generateSubcategoryLevelMsg(saveResponse, updateUsage));
+                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                case 2:
+                    // category level
+                    uiAction.setTitle(UPDATE_FAIL_CATEGORY_TITLE);
+                    uiAction.setView(View.Modal);
+                    uiAction.setStatus(Status.Error);
+                    uiAction.setMessage(generateCategoryLevelMsg(saveResponse, updateUsage));
+                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                default:
+                    return uiAction;
+                }
+            } else {
+                uiAction.setTitle(UPDATE_SUCCESS_TITLE);
+                uiAction.setView(View.Notice);
+                uiAction.setStatus(Status.Success);
+            }
+        } else {
+            String tenantId = MultiTenantContext.getShortTenantId();
+            log.warn(String.format("Resposne for request %s of tenant %s is null.", request.toString(), tenantId));
+        }
+        return uiAction;
     }
 
     private void createUpdateActivationActions(String categoryName, AttrConfigSelectionRequest request) {
@@ -277,68 +333,27 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
         AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest,
                 AttrConfigUpdateMode.Usage);
-        return processUpdateUsageResponse(saveResponse, request);
-    }
-
-    private UIAction processUpdateUsageResponse(AttrConfigRequest saveResponse, AttrConfigSelectionRequest request) {
-        UIAction uiAction = new UIAction();
-        if (saveResponse != null) {
-            if (saveResponse.hasError()) {
-                // TODO ygao parse the error message to make it more
-                // user-friendly
-                throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
-                        + JsonUtils.serialize(saveResponse.getDetails()));
-            } else if (saveResponse.hasWarning()) {
-                // parse the mode of the request
-                int mode = parseModeForRequest(saveResponse, request);
-                // form the uiAction and throw exception
-                switch (mode) {
-                case 0:
-                    // attribute level
-                    uiAction.setTitle(UPDATE_USAGE_FAIL_ATTRIBUTE_TITLE);
-                    uiAction.setView(View.Modal);
-                    uiAction.setStatus(Status.Error);
-                    uiAction.setMessage(generateAttrLevelMsg(saveResponse));
-                    throw new UIActionException(uiAction, LedpCode.LEDP_18190);
-                case 1:
-                    // subcategory level
-                    uiAction.setTitle(UPDATE_USAGE_FAIL_SUBCATEGORY_TITLE);
-                    uiAction.setView(View.Modal);
-                    uiAction.setStatus(Status.Error);
-                    uiAction.setMessage(generateSubcategoryLevelMsg(saveResponse));
-                    throw new UIActionException(uiAction, LedpCode.LEDP_18190);
-                case 2:
-                    // category level
-                    uiAction.setTitle(UPDATE_USAGE_FAIL_CATEGORY_TITLE);
-                    uiAction.setView(View.Modal);
-                    uiAction.setStatus(Status.Error);
-                    uiAction.setMessage(generateCategoryLevelMsg(saveResponse));
-                    throw new UIActionException(uiAction, LedpCode.LEDP_18190);
-                default:
-                    return uiAction;
-                }
-            } else {
-                uiAction.setTitle(UPDATE_USAGE_SUCCESS_TITLE);
-                uiAction.setView(View.Notice);
-                uiAction.setStatus(Status.Success);
-            }
-        } else {
-            String tenantId = MultiTenantContext.getShortTenantId();
-            log.warn(String.format("Resposne for request %s of tenant %s is null.", request.toString(), tenantId));
-        }
-        return uiAction;
+        return processUpdateResponse(saveResponse, request, true);
     }
 
     @VisibleForTesting
-    String generateAttrLevelMsg(AttrConfigRequest saveResponse) {
+    String generateAttrLevelMsg(AttrConfigRequest saveResponse, boolean updateUsage) {
         AttrValidation attrValidation = saveResponse.getDetails().getValidations().get(0);
         Map<Type, List<String>> warnings = attrValidation.getImpactWarnings().getWarnings();
         StringBuilder html = new StringBuilder();
-        html.append(p(UPDATE_USAGE_FAIL_ATTRIBUTE_MSG).render());
-        for (Type type : warnings.keySet()) {
-            html.append(b(mapTypeToDisplayName(type)).render());
+        if (updateUsage) {
+            html.append(p(UPDATE_USAGE_FAIL_ATTRIBUTE_MSG).render());
+            for (Type type : warnings.keySet()) {
+                html.append(b(mapTypeToDisplayName(type)).render());
+                html.append(ul().with( //
+                        each(warnings.get(type), entity -> //
+                        li(entity))) //
+                        .render());
+            }
+        } else {
+            html.append(p(UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG).render());
             html.append(ul().with( //
-                    each(warnings.get(type), entity -> //
+                    each(warnings.get(Type.USAGE_ENABLED), entity -> //
                     li(entity))) //
                     .render());
         }
@@ -346,10 +361,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @VisibleForTesting
-    String generateSubcategoryLevelMsg(AttrConfigRequest saveResponse) {
+    String generateSubcategoryLevelMsg(AttrConfigRequest saveResponse, boolean updateUsage) {
         Map<String, List<String>> subcategoryToAttrs = aggregateAttrValidations(saveResponse);
         StringBuilder html = new StringBuilder();
-        html.append(p(UPDATE_USAGE_FAIL_SUBCATEGORY_MSG).render());
+        if (updateUsage) {
+            html.append(p(UPDATE_USAGE_FAIL_SUBCATEGORY_MSG).render());
+        } else {
+            html.append(p(UPDATE_ACTIVATION_FAIL_SUBCATEGORY_MSG).render());
+        }
         subcategoryToAttrs.forEach((k, v) -> {
             html.append((b(k + ":").render()));
             html.append(ul().with( //
@@ -360,10 +379,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @VisibleForTesting
-    String generateCategoryLevelMsg(AttrConfigRequest saveResponse) {
+    String generateCategoryLevelMsg(AttrConfigRequest saveResponse, boolean updateUsage) {
         Map<String, List<String>> subcategoryToAttrs = aggregateAttrValidations(saveResponse);
         StringBuilder html = new StringBuilder();
-        html.append(p(UPDATE_USAGE_FAIL_CATEGORY_MSG).render());
+        if (updateUsage) {
+            html.append(p(UPDATE_USAGE_FAIL_CATEGORY_MSG).render());
+        } else {
+            html.append(p(UPDATE_ACTIVATION_FAIL_CATEGORY_MSG).render());
+        }
         subcategoryToAttrs.forEach((k, v) -> {
             html.append((b(k + ":").render()));
             html.append(ul().with( //

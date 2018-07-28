@@ -317,6 +317,7 @@ public enum LedpCode {
     LEDP_18192("This Model is already configured for the given Marketo Profile {0}. Please refresh the page."), //
     LEDP_18193("Marketo Scoring Request Configuration is in invalid State. {0}."), //
     LEDP_18194("Could not retrive Scoring Request Configuration. Something thing went wrong. Please try again later."), //
+    LEDP_18195("Update Activation Attribute Config failed due to usage enbaled"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
