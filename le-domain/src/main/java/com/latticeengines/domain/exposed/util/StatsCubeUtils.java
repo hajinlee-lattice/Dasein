@@ -499,6 +499,41 @@ public class StatsCubeUtils {
         catTopNTree.setSubcategories(subcatMap);
     }
 
+    public static void sortBkts(StatsCube cube, BusinessEntity entity) {
+        if (cube != null && MapUtils.isNotEmpty(cube.getStatistics())) {
+            cube.getStatistics().forEach((attrName, attrStats) -> {
+                Buckets buckets = attrStats.getBuckets();
+                if (buckets != null && CollectionUtils.isNotEmpty(buckets.getBucketList())) {
+                    Comparator<Bucket> comparator = getBktComparator(entity, buckets.getType(), attrName);
+                    if (comparator != null) {
+                        buckets.getBucketList().sort(comparator);
+                    }
+                }
+            });
+        }
+    }
+
+    private static Comparator<Bucket> getBktComparator(BusinessEntity entity, BucketType bucketType, String attrName) {
+        switch (entity) {
+        case Rating:
+        case PurchaseHistory:
+            return null;
+        default:
+            return defaultBktComparator(bucketType, attrName);
+        }
+    }
+
+    private static Comparator<Bucket> defaultBktComparator(BucketType bucketType, String attrName) {
+        // reverse id ordering for intent
+        if (attrName.startsWith("BmbrSurge_") && attrName.endsWith("_Intent")) {
+            return Comparator.comparing(Bucket::getId).reversed();
+        } else if (BucketType.Enum.equals(bucketType)) { // only resort enum buckets
+            return defaultTopBktComparator();
+        } else {
+            return null;
+        }
+    }
+
     public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap, Map<String, List<ColumnMetadata>> cmMap,
             boolean includeTopBkt, ColumnSelection.Predefined selectedGroup) {
         TopNTree topNTree = new TopNTree();
@@ -568,12 +603,7 @@ public class StatsCubeUtils {
         AttributeLookup attributeLookup = new AttributeLookup(entity, attrName);
         TopAttribute topAttribute = new TopAttribute(attributeLookup, attributeStats.getNonNullCount());
         if (includeTopBkt && attributeStats.getBuckets() != null) {
-            boolean isRating = false;
-            if (BusinessEntity.Rating.equals(entity) || Category.RATING.equals(category)) {
-                isRating = (attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX)
-                        && RatingEngine.toEngineId(attrName).equals(attrName));
-            }
-            Comparator<Bucket> comparator = getTopBktComparatorForCategory(category, isRating);
+            Comparator<Bucket> comparator = getTopBktComparatorForCategory(category);
             Bucket topBkt = getTopBkt(attributeStats, comparator);
             if (topBkt != null) {
                 topAttribute.setTopBkt(topBkt);
@@ -593,18 +623,18 @@ public class StatsCubeUtils {
         }
     }
 
-    private static Comparator<Bucket> getTopBktComparatorForCategory(Category category, boolean isRating) {
+    private static Comparator<Bucket> getTopBktComparatorForCategory(Category category) {
         switch (category) {
-            case INTENT:
-                return intentTopBktComparator();
-            case WEBSITE_PROFILE:
-            case TECHNOLOGY_PROFILE:
-                return techTopBktComparator();
-            case RATING:
-                return ratingTopBktComparator(isRating);
-            case PRODUCT_SPEND:
-            default:
-                return defaultTopBktComparator();
+        case INTENT:
+            return intentTopBktComparator();
+        case WEBSITE_PROFILE:
+        case TECHNOLOGY_PROFILE:
+            return techTopBktComparator();
+        case RATING:
+            return ratingTopBktComparator();
+        case PRODUCT_SPEND:
+        default:
+            return defaultTopBktComparator();
         }
     }
 
@@ -616,18 +646,18 @@ public class StatsCubeUtils {
         return Comparator.comparing(Bucket::getId);
     }
 
-    private static Comparator<Bucket> ratingTopBktComparator(boolean isRating) {
-        if (isRating) {
-            return Comparator.comparing(Bucket::getId);
-        } else {
-            return Comparator.comparing(Bucket::getCount).reversed();
-        }
+    private static Comparator<Bucket> ratingTopBktComparator() {
+        return Comparator.comparing(Bucket::getId);
     }
 
     private static Comparator<Bucket> defaultTopBktComparator() {
         return (o1, o2) -> {
-            if (isBooleanBkt(o1) || isBooleanBkt(o2)) {
+            if (isBooleanBkt(o1) && isBooleanBkt(o2)) {
                 return Comparator.comparing(Bucket::getId).compare(o1, o2);
+            } else if (isBooleanBkt(o1)) {
+                return 1;
+            } else if (isBooleanBkt(o2)) {
+                return -1;
             } else {
                 return Comparator.comparing(Bucket::getCount).reversed().compare(o1, o2);
             }
@@ -709,8 +739,10 @@ public class StatsCubeUtils {
         return (o1, o2) -> {
             String attr1 = o1.getAttribute();
             String attr2 = o2.getAttribute();
-            Long count1 = (o1.getTopBkt() == null || o1.getTopBkt().getCount() == null) ? 0L : o1.getTopBkt().getCount();
-            Long count2 = (o2.getTopBkt() == null || o2.getTopBkt().getCount() == null) ? 0L : o2.getTopBkt().getCount();
+            Long count1 = (o1.getTopBkt() == null || o1.getTopBkt().getCount() == null) ? 0L
+                    : o1.getTopBkt().getCount();
+            Long count2 = (o2.getTopBkt() == null || o2.getTopBkt().getCount() == null) ? 0L
+                    : o2.getTopBkt().getCount();
             int countCmp = Long.compare(count2, count1);
             if (countCmp == 0) {
                 return StringUtils.compare(attr1, attr2);

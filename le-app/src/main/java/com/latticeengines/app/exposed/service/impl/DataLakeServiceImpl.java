@@ -22,7 +22,6 @@ import java.util.stream.IntStream;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import com.latticeengines.common.exposed.util.KryoUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +41,7 @@ import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -438,7 +438,14 @@ public class DataLakeServiceImpl implements DataLakeService {
     public Map<String, StatsCube> getStatsCubesFromCache(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
-            return container.getStatsCubes();
+            Map<String, StatsCube> cubeMap = container.getStatsCubes();
+            if (MapUtils.isNotEmpty(cubeMap)) {
+                cubeMap.forEach((entityName, cube) -> {
+                    BusinessEntity entity = BusinessEntity.valueOf(entityName);
+                    StatsCubeUtils.sortBkts(cube, entity);
+                });
+            }
+            return cubeMap;
         }
         return null;
     }
