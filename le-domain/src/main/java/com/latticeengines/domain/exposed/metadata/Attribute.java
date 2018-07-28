@@ -1165,8 +1165,10 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         metadata.setBitOffset(getBitOffset());
         metadata.setNumBits(getNumOfBits());
         metadata.setPhysicalName(getPhysicalName());
-        metadata.setApprovedUsageList(
-                getApprovedUsage().stream().map(ApprovedUsage::fromName).collect(Collectors.toList()));
+        if (CollectionUtils.isNotEmpty(getApprovedUsage())) {
+            metadata.setApprovedUsageList(
+                    getApprovedUsage().stream().map(ApprovedUsage::fromName).collect(Collectors.toList()));
+        }
         metadata.setIsCoveredByMandatoryRule(getIsCoveredByMandatoryRule());
         metadata.setIsCoveredByOptionalRule(getIsCoveredByOptionalRule());
         return metadata;
