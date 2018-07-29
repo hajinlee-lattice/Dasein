@@ -55,12 +55,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.mds.MetadataStoreName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -82,8 +79,6 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataStoreProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 
@@ -142,12 +137,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
-    @Inject
-    private MetadataStoreProxy metadataStoreProxy;
-
-    @Inject
-    private MetadataProxy metadataProxy;
-
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;
 
@@ -183,7 +172,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status,
-            boolean publishedRatingsOnly) {
+                                                                 boolean publishedRatingsOnly) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format(
                 "Get all the rating engine summaries for tenant %s with status set to %s and type set to %s",
@@ -223,7 +212,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public List<String> getAllRatingEngineIdsInSegment(String segmentName, //
-            boolean considerPublishedOnly) {
+                                                       boolean considerPublishedOnly) {
         List<String> ids = ratingEngineEntityMgr.findAllIdsInSegment(segmentName);
         if (considerPublishedOnly) {
             ids.retainAll(getPublishedRatingEngineIds());
@@ -286,9 +275,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @SuppressWarnings("unchecked")
     public RatingModel createOrUpdateModelIteration(RatingEngine ratingEngine, RatingModel ratingModel) {
         if (!(ratingModel instanceof AIModel)) {
-            throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
+            throw new LedpException(LedpCode.LEDP_31107, new String[]{ratingModel.getClass().getName()});
         } else if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
-            throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingEngine.getClass().getName() });
+            throw new LedpException(LedpCode.LEDP_31107, new String[]{ratingEngine.getClass().getName()});
         }
 
         String ratingEngineId = ratingEngine.getId();
@@ -405,7 +394,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         if (ratingEngine.getStatus() != null && ratingEngine.getStatus() != RatingEngineStatus.INACTIVE) {
-            throw new LedpException(LedpCode.LEDP_18181, new String[] { ratingEngine.getDisplayName() });
+            throw new LedpException(LedpCode.LEDP_18181, new String[]{ratingEngine.getDisplayName()});
         }
     }
 
@@ -444,60 +433,30 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public Map<String, List<ColumnMetadata>> getIterationMetadata(String ratingEngineId, String ratingModelId) {
+        log.info(String.format("Attempting to collate Metadata for Iteration %s of Model %s", ratingModelId, ratingEngineId));
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
         validateAIRatingEngine(ratingEngine);
         AIModel aiModel = (AIModel) getRatingModel(ratingEngineId, ratingModelId);
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        if (!aiModel.getModelingJobStatus().isTerminated()) {
-            throw new LedpException(LedpCode.LEDP_40034, new String[] { ratingModelId, ratingEngineId, customerSpace });
-        }
-        if (aiModel.getModelingJobStatus() != JobStatus.COMPLETED || StringUtils.isEmpty(aiModel.getModelSummaryId())) {
-            throw new LedpException(LedpCode.LEDP_40035, new String[] { ratingModelId, ratingEngineId, customerSpace });
-        }
-        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryById(customerSpace, aiModel.getModelSummaryId());
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_40036,
-                    new String[] { "ModelSummary", ratingModelId, ratingEngineId, customerSpace });
-        }
-        String tableName = modelSummary.getEventTableName();
-        if (tableName == null) {
-            throw new LedpException(LedpCode.LEDP_40036,
-                    new String[] { "Event table name", ratingModelId, ratingEngineId, customerSpace });
-        }
+        AIModelService aiModelService = (AIModelService) getRatingModelService(ratingEngine.getType());
 
-        Table table = metadataProxy.getTable(customerSpace, tableName);
-        if (table == null) {
-            throw new LedpException(LedpCode.LEDP_40036,
-                    new String[] { "Event table metadata", ratingModelId, ratingEngineId, customerSpace });
-        }
-
-        HashMap<String, List<ColumnMetadata>> metadataMap = new HashMap<>();
-
-        metadataStoreProxy.getMetadata(MetadataStoreName.Table, CustomerSpace.shortenCustomerSpace(customerSpace),
-                table.getName()).collectList().block().forEach(cm -> {
-                    if (!metadataMap.containsKey(cm.getCategory().getName())) {
-                        metadataMap.put(cm.getCategory().getName(), new ArrayList<>());
-                    }
-                    metadataMap.get(cm.getCategory().getName()).add(cm);
-                });
-
-        return metadataMap;
+        return aiModelService.getIterationMetadata(customerSpace, ratingEngine, aiModel);
     }
 
     @Override
     public void setScoringIteration(String ratingEngineId, String ratingModelId, List<BucketMetadata> bucketMetadatas,
-            String userEmail) {
+                                    String userEmail) {
 
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, true);
         RatingModel ratingModel = getRatingModel(ratingEngineId, ratingModelId);
 
         if (ratingEngine.getType() != RatingEngineType.RULE_BASED) {
             if (bucketMetadatas == null || CollectionUtils.isEmpty(bucketMetadatas)) {
-                throw new LedpException(LedpCode.LEDP_40030, new String[] { ratingModelId, ratingEngineId });
+                throw new LedpException(LedpCode.LEDP_40030, new String[]{ratingModelId, ratingEngineId});
             }
             AIModel aiModel = (AIModel) ratingModel;
             if (StringUtils.isEmpty(aiModel.getModelSummaryId())) {
-                throw new LedpException(LedpCode.LEDP_40031, new String[] { ratingModelId, ratingEngineId });
+                throw new LedpException(LedpCode.LEDP_40031, new String[]{ratingModelId, ratingEngineId});
             }
 
             log.info(String.format("Creating BucketMetadata for RatingEngine %s, AIModel %s and ModelSummary %s",
@@ -516,21 +475,16 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
-            String ratingEngineId) {
+                                                                                     String ratingEngineId) {
+        // TODO: Once Anoop's Dependency framework is ready this method should
+        // use it
         log.info(String.format("Attempting to find rating engine dependencies for Rating Engine %s", ratingEngineId));
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
         if (ratingEngine == null) {
-            throw new LedpException(LedpCode.LEDP_40016, new String[] { ratingEngineId, customerSpace });
+            throw new LedpException(LedpCode.LEDP_40016, new String[]{ratingEngineId, customerSpace});
         }
 
         HashMap<RatingEngineDependencyType, List<String>> dependencyMap = new HashMap<>();
-
-        // Eventually should be something like this
-        // for (RatingEngineDependencyType type :
-        // RatingEngineDependencyType.values()) {
-        // dependencyMap.put(type, ratingEngine.getDependencies(type));
-        // }
-
         dependencyMap.put(RatingEngineDependencyType.Play, playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid())
                 .stream().map(Play::getDisplayName).collect(Collectors.toList()));
 
@@ -539,9 +493,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-            ModelingQueryType modelingQueryType, DataCollection.Version version) {
+                                               ModelingQueryType modelingQueryType, DataCollection.Version version) {
         if (ratingModel == null) {
-            throw new LedpException(LedpCode.LEDP_40014, new String[] { ratingEngine.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40014, new String[]{ratingEngine.getId(), customerSpace});
         }
 
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL && ratingModel instanceof AIModel) {
@@ -553,30 +507,30 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     modelingQueryType, version);
         } else {
             throw new LedpException(LedpCode.LEDP_40009,
-                    new String[] { ratingEngine.getId(), ratingModel.getId(), customerSpace });
+                    new String[]{ratingEngine.getId(), ratingModel.getId(), customerSpace});
         }
     }
 
     @Override
     public Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-            ModelingQueryType modelingQueryType, DataCollection.Version version) {
+                                      ModelingQueryType modelingQueryType, DataCollection.Version version) {
         EventFrontEndQuery efeq = getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType,
                 version);
         switch (modelingQueryType) {
-        case TARGET:
-            return eventProxy.getScoringCount(customerSpace, efeq);
-        case TRAINING:
-            return eventProxy.getTrainingCount(customerSpace, efeq);
-        case EVENT:
-            return eventProxy.getEventCount(customerSpace, efeq);
-        default:
-            throw new LedpException(LedpCode.LEDP_40010, new String[] { modelingQueryType.getModelingQueryTypeName() });
+            case TARGET:
+                return eventProxy.getScoringCount(customerSpace, efeq);
+            case TRAINING:
+                return eventProxy.getTrainingCount(customerSpace, efeq);
+            case EVENT:
+                return eventProxy.getEventCount(customerSpace, efeq);
+            default:
+                throw new LedpException(LedpCode.LEDP_40010, new String[]{modelingQueryType.getModelingQueryTypeName()});
         }
     }
 
     @Override
     public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
-            String userEmail) {
+                                    String userEmail) {
         validateAIRatingEngine(ratingEngine);
         ApplicationId jobId = aiModel.getModelingYarnJobId();
         if (jobId != null) {
@@ -584,80 +538,80 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         switch (ratingEngine.getType()) {
-        case RULE_BASED:
-            throw new LedpException(LedpCode.LEDP_31107,
-                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
-        case CROSS_SELL:
-            if (CollectionUtils
-                    .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts())) {
-                throw new LedpException(LedpCode.LEDP_40012,
-                        new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() });
-            }
-            Long noOfEvents = getModelingQueryCount(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT,
-                    null);
-            if (noOfEvents < minimumEvents) {
-                throw new LedpException(LedpCode.LEDP_40033,
-                        new String[] { aiModel.getId(), ratingEngine.getId(), noOfEvents.toString(),
-                                minimumEvents.toString(), CustomerSpace.parse(customerSpace).toString() });
-            }
-            modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
-            DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpace);
-            RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
-            parameters.setName(aiModel.getId());
-            parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
-            parameters.setDescription(ratingEngine.getDisplayName());
-            parameters.setModuleName("Module");
-            parameters.setUserId(userEmail);
-            parameters.setRatingEngineId(ratingEngine.getId());
-            parameters.setAiModelId(aiModel.getId());
-            parameters.setTargetFilterQuery(
-                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET, activeVersion));
-            parameters.setTargetFilterTableName(aiModel.getId() + "_target");
-            parameters.setTrainFilterQuery(
-                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING, activeVersion));
-            parameters.setTrainFilterTableName(aiModel.getId() + "_train");
-            parameters.setEventFilterQuery(
-                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT, activeVersion));
-            parameters.setEventFilterTableName(aiModel.getId() + "_event");
-            if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
-                parameters.setExpectedValue(true);
-            }
+            case RULE_BASED:
+                throw new LedpException(LedpCode.LEDP_31107,
+                        new String[]{RatingEngineType.RULE_BASED.getRatingEngineTypeName()});
+            case CROSS_SELL:
+                if (CollectionUtils
+                        .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts())) {
+                    throw new LedpException(LedpCode.LEDP_40012,
+                            new String[]{aiModel.getId(), CustomerSpace.parse(customerSpace).toString()});
+                }
+                Long noOfEvents = getModelingQueryCount(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT,
+                        null);
+                if (noOfEvents < minimumEvents) {
+                    throw new LedpException(LedpCode.LEDP_40033,
+                            new String[]{aiModel.getId(), ratingEngine.getId(), noOfEvents.toString(),
+                                    minimumEvents.toString(), CustomerSpace.parse(customerSpace).toString()});
+                }
+                modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
+                DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpace);
+                RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
+                parameters.setName(aiModel.getId());
+                parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
+                parameters.setDescription(ratingEngine.getDisplayName());
+                parameters.setModuleName("Module");
+                parameters.setUserId(userEmail);
+                parameters.setRatingEngineId(ratingEngine.getId());
+                parameters.setAiModelId(aiModel.getId());
+                parameters.setTargetFilterQuery(
+                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET, activeVersion));
+                parameters.setTargetFilterTableName(aiModel.getId() + "_target");
+                parameters.setTrainFilterQuery(
+                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING, activeVersion));
+                parameters.setTrainFilterTableName(aiModel.getId() + "_train");
+                parameters.setEventFilterQuery(
+                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT, activeVersion));
+                parameters.setEventFilterTableName(aiModel.getId() + "_event");
+                if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
+                    parameters.setExpectedValue(true);
+                }
 
-            log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
-            jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
-            break;
-        case CUSTOM_EVENT:
-            CustomEventModelingConfig config = (CustomEventModelingConfig) aiModel.getAdvancedModelingConfig();
-            ModelingParameters modelingParameters = new ModelingParameters();
-            modelingParameters.setName(aiModel.getId());
-            modelingParameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
-            modelingParameters.setDescription(ratingEngine.getDisplayName());
-            modelingParameters.setModuleName("Module");
-            modelingParameters.setUserId(userEmail);
-            modelingParameters.setRatingEngineId(ratingEngine.getId());
-            modelingParameters.setAiModelId(aiModel.getId());
-            modelingParameters.setCustomEventModelingType(config.getCustomEventModelingType());
-            modelingParameters.setFilename(config.getSourceFileName());
-            modelingParameters.setActivateModelSummaryByDefault(true);
-            modelingParameters.setDeduplicationType(config.getDeduplicationType());
-            modelingParameters.setExcludePublicDomains(config.isExcludePublicDomains());
-            modelingParameters.setTransformationGroup(config.getConvertedTransformationGroup());
-            modelingParameters.setExcludePropDataColumns(
-                    !config.getDataStores().contains(CustomEventModelingConfig.DataStore.DataCloud));
-            modelingParameters
-                    .setExcludeCDLAttributes(!config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
-            modelingParameters.setExcludeCustomFileAttributes(
-                    !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
-            modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
+                log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
+                jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
+                break;
+            case CUSTOM_EVENT:
+                CustomEventModelingConfig config = (CustomEventModelingConfig) aiModel.getAdvancedModelingConfig();
+                ModelingParameters modelingParameters = new ModelingParameters();
+                modelingParameters.setName(aiModel.getId());
+                modelingParameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
+                modelingParameters.setDescription(ratingEngine.getDisplayName());
+                modelingParameters.setModuleName("Module");
+                modelingParameters.setUserId(userEmail);
+                modelingParameters.setRatingEngineId(ratingEngine.getId());
+                modelingParameters.setAiModelId(aiModel.getId());
+                modelingParameters.setCustomEventModelingType(config.getCustomEventModelingType());
+                modelingParameters.setFilename(config.getSourceFileName());
+                modelingParameters.setActivateModelSummaryByDefault(true);
+                modelingParameters.setDeduplicationType(config.getDeduplicationType());
+                modelingParameters.setExcludePublicDomains(config.isExcludePublicDomains());
+                modelingParameters.setTransformationGroup(config.getConvertedTransformationGroup());
+                modelingParameters.setExcludePropDataColumns(
+                        !config.getDataStores().contains(CustomEventModelingConfig.DataStore.DataCloud));
+                modelingParameters
+                        .setExcludeCDLAttributes(!config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
+                modelingParameters.setExcludeCustomFileAttributes(
+                        !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
+                modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
 
-            log.info(String.format("Custom event modelling job submitted with parameters %s",
-                    modelingParameters.toString()));
-            jobId = customEventModelingWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace).toString(),
-                    modelingParameters);
-            break;
-        default:
-            throw new LedpException(LedpCode.LEDP_31107,
-                    new String[] { ratingEngine.getType().getRatingEngineTypeName() });
+                log.info(String.format("Custom event modelling job submitted with parameters %s",
+                        modelingParameters.toString()));
+                jobId = customEventModelingWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace).toString(),
+                        modelingParameters);
+                break;
+            default:
+                throw new LedpException(LedpCode.LEDP_31107,
+                        new String[]{ratingEngine.getType().getRatingEngineTypeName()});
         }
 
         aiModel.setModelingJobId(jobId.toString());
@@ -739,7 +693,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
         RatingEngineType type = ratingEngine.getType();
         if (type == null) {
-            throw new LedpException(LedpCode.LEDP_18154, new String[] { ratingEngineId });
+            throw new LedpException(LedpCode.LEDP_18154, new String[]{ratingEngineId});
         }
     }
 
@@ -843,7 +797,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     List<RatingModel> ratingModels = ratingModelService
                             .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
                     if (ratingModels != null) {
-                        rm: for (RatingModel ratingModel : ratingModels) {
+                        rm:
+                        for (RatingModel ratingModel : ratingModels) {
                             ratingModelService.findRatingModelAttributeLookups(ratingModel);
                             Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
                             if (attributeLookups != null) {
@@ -878,7 +833,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     }
                 }
 
-                throw new LedpException(LedpCode.LEDP_40024, new String[] { message.toString() });
+                throw new LedpException(LedpCode.LEDP_40024, new String[]{message.toString()});
             }
         }
     }
@@ -947,7 +902,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private void validateAIRatingEngine(RatingEngine ratingEngine) {
         if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
             throw new LedpException(LedpCode.LEDP_31107,
-                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
+                    new String[]{RatingEngineType.RULE_BASED.getRatingEngineTypeName()});
         }
     }
 

@@ -1,6 +1,10 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.List;
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -13,4 +17,7 @@ public interface AIModelService extends RatingModelService<AIModel> {
             ModelingQueryType modelingQueryType, DataCollection.Version version);
 
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
+
+    Map<String, List<ColumnMetadata>> getIterationMetadata(String customerSpace, RatingEngine ratingEngine,
+            AIModel aiModel);
 }
