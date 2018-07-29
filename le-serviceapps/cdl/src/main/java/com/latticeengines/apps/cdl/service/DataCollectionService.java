@@ -2,6 +2,9 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 
+import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
+
+import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -54,5 +57,7 @@ public interface DataCollectionService {
     void saveOrUpdateStatus(String customerSpace, DataCollectionStatus detail, DataCollection.Version version);
 
     DataCollection createDefaultCollection();
+
+    CDLDataSpace getCDLDataSpace(String cutstomerSpace);
 
 }

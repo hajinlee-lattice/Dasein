@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -307,6 +308,8 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         if (version != null) {
             url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo?version={version}",
                     shortenCustomerSpace(customerSpace), version);
+
+
             method = "get default attribute repo at version " + version;
         }
         return getKryo(method, url, AttributeRepository.class);
@@ -336,6 +339,11 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             }
         }
         return dynamoDataUnit;
+    }
+
+    public CDLDataSpace getCDLDataSpace(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/dataspace",shortenCustomerSpace(customerSpace));
+        return get("getCDLDataSpace", url, CDLDataSpace.class);
     }
 
 }

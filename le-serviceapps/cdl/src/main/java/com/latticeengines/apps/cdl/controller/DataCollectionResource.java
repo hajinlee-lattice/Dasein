@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -282,4 +284,11 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
+    @GetMapping(value = "/dataspace")
+    @ResponseBody
+    @ApiOperation(value = "Dump out the paths of tenant's CDL data space")
+    public CDLDataSpace getCDLDataSpace(@PathVariable String customerSpace){
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.getCDLDataSpace(customerSpace);
+    }
 }
