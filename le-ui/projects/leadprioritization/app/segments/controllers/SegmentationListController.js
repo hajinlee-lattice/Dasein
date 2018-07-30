@@ -248,47 +248,46 @@ angular.module('lp.segments.segments', [
                             var vals = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType);
                             
                             if (vals.length > 1) {
-                                attrs.push(enrichment.DisplayName + ': ' + vals.length + ' Values Selected');
+                                attrs.push({label: enrichment.DisplayName + ': ', value: vals.length + ' Values Selected'});
                             } else {
-                                attrs.push(enrichment.DisplayName + ': ' + vals);
+                                attrs.push({label: enrichment.DisplayName + ': ', value: vals[0]});
                             }
                             
                             break;
 
                         case 'Numerical':
                             if (QueryTreeService.two_inputs.indexOf(restriction.bucketRestriction.bkt.Cmp) < 0) {
-                                attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp] + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0));
+                                attrs.push({label: enrichment.DisplayName + ': ', value: QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp] + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0)});
                             } else {
-                                attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0) + '-' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 1));
+                                attrs.push({label: enrichment.DisplayName + ': ', value: QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0) + '-' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 1)});
                             }
                             
                             break;
 
                         case 'Boolean': 
-                            attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType));
+                            attrs.push({label: enrichment.DisplayName + ': ', value: QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType)});
                             
                             break;
 
                         case 'TimeSeries':
                             var value = QueryTreeService.getOperationValue(restriction.bucketRestriction, 'Boolean') ? 'True' : 'False';
-                            attrs.push(enrichment.DisplayName + ' (' + enrichment.Subcategory +  '): ' + value); 
+                            attrs.push({label: enrichment.DisplayName + ' (' + enrichment.Subcategory +  '): ', value: value});
                             
                             break;
                         case 'PercentChange':
                                 var value = PercentStore.getDirectionRedable(restriction.bucketRestriction) + ' ' + PercentStore.getCmpRedable(restriction.bucketRestriction).toLowerCase()
                                     + ' ' + PercentStore.getValuesFormatted(restriction.bucketRestriction);
-                            attrs.push(enrichment.DisplayName + ': ' + value);
+                            attrs.push({label: enrichment.DisplayName + ': ', value: value});
 
                             break;
                     }
                 } else {
                     // for pure string attributes
-                    
-                    var value = enrichment.DisplayName + ': ' + QueryTreeService.getOperationLabel('String', restriction.bucketRestriction);
+                    var value = QueryTreeService.getOperationLabel('String', restriction.bucketRestriction);
                     if (QueryTreeService.hasInputs('String', restriction.bucketRestriction)) {
                         value += " '" + QueryTreeService.getOperationValue(restriction.bucketRestriction, 'String') + "'";
                     }
-                    attrs.push(value);
+                    attrs.push({label: enrichment.DisplayName + ': ', value: value});
                 }
             } else {
                 vm.invalidSegments.add(segment.name);

@@ -380,9 +380,6 @@ attr-categories,
         .category {
             @include flex-item(1 0 auto);
             padding: 0px 6px 0 0;
-            &:last-child {
-                padding-right: 0;
-            }
             &.active {
                 pointer-events: none;
                 cursor: default;
@@ -454,6 +451,13 @@ attr-categories,
                     font-weight: bold;
                     font-size: 16px;
                     margin-bottom: 10px;
+                }
+            }
+        }
+        &.has-category {
+            .category {
+                &:last-child {
+                    padding-right: 0;
                 }
             }
         }

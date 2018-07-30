@@ -108,18 +108,8 @@ angular.module('lp.ratingsengine.ratingslist', [
                 name: {fieldname: 'displayName', visible: true, maxLength: 50},
                 description: {fieldname: 'description', visible: false, maxLength: 1000}
           }
-        },
-        datacollectionPrecheck: null,
-        datacollectionPrechecking: false
+        }
     });
-
-    getDatacollectionPrecheck = function() {
-        vm.datacollectionPrechecking = true; // spinner
-        ConfigureAttributesStore.getPrecheck().then(function(result) {
-            vm.datacollectionPrecheck = result;
-            vm.datacollectionPrechecking = false;
-        });
-    }
 
     vm.count = function(type) {
         return $filter('filter')(vm.current.ratings, { status: type }, true).length;
@@ -135,8 +125,6 @@ angular.module('lp.ratingsengine.ratingslist', [
     }
 
     vm.init = function($q, $filter) {
-        getDatacollectionPrecheck();
-
         RatingsEngineStore.clear();
 
         vm.totalLength = vm.count();
