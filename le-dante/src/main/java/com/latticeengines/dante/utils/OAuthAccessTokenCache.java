@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
-@Component("oAuthUtils")
+@Component("oAuthAccessTokenCache")
 public class OAuthAccessTokenCache {
     private static final Logger log = LoggerFactory.getLogger(OAuthAccessTokenCache.class);
 
