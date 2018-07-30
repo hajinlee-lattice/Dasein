@@ -135,9 +135,12 @@ attr-categories,
                         &:last-child:after {
                             display: none;
                         }
+                        &:hover {
+                            color: #457eba;
+                        }
                         &.selected {
                             opacity: 1;
-                            font-weight: bold;
+                            color: #ef6a30;
                         }
                         .ico {
                             position: relative;

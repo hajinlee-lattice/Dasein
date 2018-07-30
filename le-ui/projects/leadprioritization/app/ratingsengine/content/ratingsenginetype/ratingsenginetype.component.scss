@@ -112,6 +112,7 @@
                     }
                 }
             }
+            .fa-spinner,
             .fa-exclamation-circle {
                 position: absolute;
                 bottom: 6px;
@@ -119,5 +120,19 @@
                 color: #a9a9a9;
             }
         }
+        &.disabled li {
+                border-color: #d0d0d0;
+                background: #fefefe;
+                color: #bbb;
+                pointer-events: none;
+                path, polygon, rect {
+                    fill: #bbb;
+                }
+                &:hover {
+                    path, polygon, rect {
+                        fill: #bbb;
+                    }
+                }
+            }
     }
 }
