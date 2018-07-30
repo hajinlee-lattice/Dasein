@@ -142,7 +142,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         DataCollectionStatus detail = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
                 null);
         detail.setEvaluationDate(evaluationDate);
-        detail.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
         detail.setApsRollingPeriod(configuration.getApsRollingPeriod());
         log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(detail));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
@@ -213,6 +212,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             log.info("Data cloud changed?=" + changed + " current LDC build number=" + currentBuildNumber
                     + ", the LDC builder number in data collection status="
                     + (status == null ? "" : status.getDataCloudBuildNumber()));
+            if (status != null) {
+                status.setDataCloudBuildNumber(currentBuildNumber);
+                putObjectInContext(CDL_COLLECTION_STATUS, status);
+            }
         }
 
         if (changed) {
