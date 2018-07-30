@@ -239,6 +239,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         for (Attribute attr : table.getAttributes()) {
             Object avroFieldValue = null;
             String csvColumnName = attr.getDisplayName();
+            // renamed field end with underline plus number, need to transform
+            // it to previous name in csv file
+            if (!headers.contains(csvColumnName) && Pattern.matches(".+_\\d+", csvColumnName)) {
+                csvColumnName = csvColumnName.substring(0, csvColumnName.lastIndexOf('_'));
+            }
             if (headers.contains(csvColumnName) || attr.getDefaultValueStr() != null) {
                 Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
                 String csvFieldValue = null;
@@ -250,7 +255,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
                 List<InputValidator> validators = attr.getValidators();
                 try {
-                    validateAttribute(validators, csvRecord, attr);
+                    validateAttribute(validators, csvRecord, attr, csvColumnName);
                     if (!attr.isNullable() || !StringUtils.isEmpty(csvFieldValue)) {
                         if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
                             csvFieldValue = attr.getDefaultValueStr();
@@ -295,9 +300,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     }
 
-    private void validateAttribute(List<InputValidator> validators, CSVRecord csvRecord, Attribute attr) {
+    private void validateAttribute(List<InputValidator> validators, CSVRecord csvRecord, Attribute attr,
+            String csvColumnName) {
         String attrKey = attr.getName();
-        if (!attr.isNullable() && StringUtils.isEmpty(csvRecord.get(attr.getDisplayName()))) {
+        if (!attr.isNullable() && StringUtils.isEmpty(csvRecord.get(csvColumnName))) {
             if (attr.getDefaultValueStr() == null) {
                 missingRequiredColValue = true;
                 throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
