@@ -60,7 +60,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataStoreProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Component("aiModelService")
 public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implements AIModelService {
@@ -262,7 +261,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                         new String[] { featureImportanceFilePath, modelSummary.getId(), customerSpace });
             }
             TreeMap<Double, String> sortedImportance = Flux.fromArray(featureImportanceRaw.split("\n"))
-                    .onErrorResume(e -> Mono.empty()) //
                     .collect(TreeMap<Double, String>::new, (sortedMap, line) -> {
                         try {
                             sortedMap.put(Double.parseDouble(line.split(",")[1]), line.split(",")[0]);

@@ -168,9 +168,9 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     @SuppressWarnings("unchecked")
     public Map<String, List<ColumnMetadata>> getIterationMetadata(String customerSpace, String ratingEngineId,
             String ratingModelId) {
-        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}",
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
-        return JsonUtils.convertMapWithListValue(get("get rating model", url, Map.class), String.class,
+        return JsonUtils.convertMapWithListValue(get("get metadata for a rating model", url, Map.class), String.class,
                 ColumnMetadata.class);
     }
 
