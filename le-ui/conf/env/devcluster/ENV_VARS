@@ -15,3 +15,5 @@ export ADMIN_HTTPS_PORT=false
 export COMPRESSED=false
 export LOGGING=./server/log
 export LOG_LEVEL=verbose
+export LEUI_BUNDLER=wp
+export LEADMIN_BUNDLER=grunt

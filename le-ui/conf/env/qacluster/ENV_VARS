@@ -20,3 +20,5 @@ export WHITELIST=${AWS_PUBLIC_LB},${AWS_PRIVATE_LB}
 export LOGGING=/var/log/ledp
 export LOG_LEVEL=verbose
 export STACK_ENV=${LE_STACK}
+export LEUI_BUNDLER=wp
+export LEADMIN_BUNDLER=grunt

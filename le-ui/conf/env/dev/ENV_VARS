@@ -17,3 +17,5 @@ export HTTPS_PASS=Lattice1
 export WHITELIST=localhost
 export LOG_LEVEL=verbose
 export STACK_ENV=${LE_STACK}
+export LEUI_BUNDLER=wp
+export LEADMIN_BUNDLER=grunt

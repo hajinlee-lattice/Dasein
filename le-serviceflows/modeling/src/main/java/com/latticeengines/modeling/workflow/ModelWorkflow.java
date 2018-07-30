@@ -66,7 +66,7 @@ public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> 
     private RemediateDataRules remediateDataRules;
 
     @Inject
-    InvokeDataScienceAnalysis invokeDataScienceAnalysis;
+    private InvokeDataScienceAnalysis invokeDataScienceAnalysis;
 
     @Override
     public Workflow defineWorkflow(ModelWorkflowConfiguration config) {
