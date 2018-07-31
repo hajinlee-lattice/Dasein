@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -233,9 +234,8 @@ public class ValidateFileHeaderUtils {
         }
         for (String reservedBegining : reservedBeginings) {
             for (String header : headerFields) {
-                if (header.startsWith(reservedBegining)) {
-                    // throw new LedpException(LedpCode.LEDP_18183, new String[] { header, reservedBegining });
-                    throw new RuntimeException("LEDP_18183");
+                if (Pattern.matches(reservedBegining.toLowerCase() + "\\d*", header.toLowerCase())) {
+                    throw new LedpException(LedpCode.LEDP_18183, new String[] { header });
                 }
             }
         }
