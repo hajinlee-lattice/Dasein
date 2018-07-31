@@ -71,7 +71,7 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
         MarketoCredential marketoCredential = marketoCredentialEntityMgr
                 .findMarketoCredentialById(scoringRequestConfig.getMarketoCredential().getPid().toString());
         if (marketoCredential == null) {
-            throw new LedpException(LedpCode.LEDP_18195, new String[] {scoringRequestConfig.getMarketoCredential().getPid().toString()});
+            throw new LedpException(LedpCode.LEDP_18197, new String[] {scoringRequestConfig.getMarketoCredential().getPid().toString()});
         }
         scoringRequestConfig.setMarketoCredential(marketoCredential);
         if (scoringRequestReadRepository.findByMarketoCredentialPidAndModelUuid(marketoCredential.getPid(), scoringRequestConfig.getModelUuid()) != null) {
