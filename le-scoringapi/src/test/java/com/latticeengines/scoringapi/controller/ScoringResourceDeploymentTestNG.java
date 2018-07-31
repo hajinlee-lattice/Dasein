@@ -315,7 +315,6 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                     singleRecordScoreTransformedRecord.size(), batchScoreTransformedRecord.size(),
                     JsonUtils.serialize(singleRecordScoreTransformedRecord),
                     JsonUtils.serialize(batchScoreTransformedRecord)));
-            System.exit(1);
         }
         Assert.assertEquals(singleRecordScoreTransformedRecord.size(), batchScoreTransformedRecord.size());
         Assert.assertTrue(singleRecordScoreTransformedRecord.size() > 0);
