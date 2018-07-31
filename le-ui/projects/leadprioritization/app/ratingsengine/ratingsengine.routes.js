@@ -695,7 +695,7 @@ angular
                     },
                     WizardControlsOptions: function (RatingsEngineStore) {
                         return {
-                            backState: 'home.ratingsengine',
+                            backState: 'home.ratingsengine.ratingsenginetype',
                             nextState: 'home.ratingsengine.dashboard'
                         };
                     }
@@ -1044,7 +1044,7 @@ angular
                     },
                     WizardControlsOptions: function (RatingsEngineStore) {
                         return {
-                            backState: 'home.ratingsengine',
+                            backState: 'home.ratingsengine.ratingsenginetype',
                             secondaryLink: true,
                             nextState: 'home.ratingsengine.dashboard'
                         };
@@ -1298,7 +1298,7 @@ angular
                     },
                     WizardControlsOptions: function (RatingsEngineStore) {
                         return {
-                            backState: 'home.ratingsengine',
+                            backState: 'home.ratingsengine.ratingsenginetype',
                             secondaryLink: true,
                             nextState: 'home.ratingsengine.dashboard'
                         };
