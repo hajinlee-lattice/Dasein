@@ -346,4 +346,20 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("getCDLDataSpace", url, CDLDataSpace.class);
     }
 
+    public List<DynamoDataUnit> getDynamoDataUnits(String customerSpace, DataCollection.Version version,
+            List<TableRoleInCollection> tableRoles) {
+        List<DynamoDataUnit> dynamoDataUnits = new ArrayList<>();
+        for (TableRoleInCollection tableRole : tableRoles) {
+            String tableName = getTableName(customerSpace, tableRole, version);
+            if (StringUtils.isNotBlank(tableName)) {
+                DataUnit dataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName,
+                        DataUnit.StorageType.Dynamo);
+                if (dataUnit != null) {
+                    dynamoDataUnits.add((DynamoDataUnit) dataUnit);
+                }
+            }
+        }
+        return dynamoDataUnits;
+    }
+
 }
