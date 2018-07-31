@@ -32,10 +32,10 @@ public class RestrictionOptimizerUnitTestNG {
     private static final Restriction C4 = bucket(Contact, 4);
     private static final Restriction C5 = bucket(Contact, 5); // ignored
 
-    private static final Restriction M1 = RestrictionUtils.convertBucketRestriction(metricBkt1());
-    private static final Restriction M2 = RestrictionUtils.convertBucketRestriction(metricBkt2());
-    private static final Restriction M3 = RestrictionUtils.convertBucketRestriction(metricBkt3());
-    private static final Restriction M4 = RestrictionUtils.convertBucketRestriction(metricBkt4());
+    private static final Restriction M1 = RestrictionUtils.convertBucketRestriction(metricBkt1(), true);
+    private static final Restriction M2 = RestrictionUtils.convertBucketRestriction(metricBkt2(), true);
+    private static final Restriction M3 = RestrictionUtils.convertBucketRestriction(metricBkt3(), true);
+    private static final Restriction M4 = RestrictionUtils.convertBucketRestriction(metricBkt4(), true);
 
     @Test(groups = "unit", dataProvider = "optimizeTestData")
     public void testOptimize(Restriction restriction, Restriction expected) {

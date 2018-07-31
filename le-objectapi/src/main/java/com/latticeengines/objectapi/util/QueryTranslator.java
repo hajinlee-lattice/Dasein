@@ -88,17 +88,18 @@ abstract class QueryTranslator {
         }
     }
 
-    Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
+    Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction, boolean translatePriorOnly) {
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
             return null;
         }
-        Restriction restriction = translateBucketRestriction(frontEndRestriction.getRestriction());
+        Restriction restriction = translateBucketRestriction(frontEndRestriction.getRestriction(), translatePriorOnly);
         return RestrictionOptimizer.optimize(restriction);
     }
 
     Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction,
-            TimeFilterTranslator timeTranslator, String sqlUser) {
-        Restriction restriction = translateFrontEndRestriction(frontEndRestriction);
+                                             TimeFilterTranslator timeTranslator, String sqlUser,
+                                             boolean translatePriorOnly) {
+        Restriction restriction = translateFrontEndRestriction(frontEndRestriction, translatePriorOnly);
         if (restriction == null) {
             return null;
         }
@@ -137,7 +138,7 @@ abstract class QueryTranslator {
             break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction);
+        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, true);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 
@@ -146,7 +147,7 @@ abstract class QueryTranslator {
                 : Restriction.builder().and(outerRestriction, innerRestriction).build();
     }
 
-    private Restriction translateBucketRestriction(Restriction restriction) {
+    private Restriction translateBucketRestriction(Restriction restriction, boolean translatePriorOnly) {
         Restriction translated = null;
         if (restriction instanceof LogicalRestriction) {
             BreadthFirstSearch search = new BreadthFirstSearch();
@@ -159,7 +160,7 @@ abstract class QueryTranslator {
                         parent.getRestrictions().remove(bucket);
                         log.warn("Ignored buckets should be filtered out by optimizer: " + JsonUtils.serialize(bucket));
                     } else {
-                        Restriction converted = RestrictionUtils.convertBucketRestriction(bucket);
+                        Restriction converted = RestrictionUtils.convertBucketRestriction(bucket, translatePriorOnly);
                         parent.getRestrictions().remove(bucket);
                         parent.getRestrictions().add(converted);
                     }
@@ -174,7 +175,7 @@ abstract class QueryTranslator {
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucket = (BucketRestriction) restriction;
             if (!Boolean.TRUE.equals(bucket.getIgnored())) {
-                translated = RestrictionUtils.convertBucketRestriction(bucket);
+                translated = RestrictionUtils.convertBucketRestriction(bucket, translatePriorOnly);
             } else {
                 log.warn("Ignored buckets should be filtered out by optimizer: " + JsonUtils.serialize(bucket));
             }

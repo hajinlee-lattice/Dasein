@@ -50,7 +50,7 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertEquals(ComparisonType.IS_NULL, deserialized.getBkt().getComparisonType());
         Assert.assertNull(deserialized.getBkt().getValues());
 
-        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized, true);
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof ConcreteRestriction);
         ConcreteRestriction concreteRestriction = (ConcreteRestriction) convertedRestriction;
@@ -67,7 +67,7 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertEquals(ComparisonType.IS_NOT_NULL, deserialized.getBkt().getComparisonType());
         Assert.assertNull(deserialized.getBkt().getValues());
 
-        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized, true);
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof ConcreteRestriction);
         ConcreteRestriction concreteRestriction = (ConcreteRestriction) convertedRestriction;
@@ -87,7 +87,7 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertEquals(1, deserialized.getBkt().getValues().size());
         Assert.assertEquals(2, deserialized.getBkt().getValues().get(0));
 
-        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized, true);
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof ConcreteRestriction);
         ConcreteRestriction concreteRestriction = (ConcreteRestriction) convertedRestriction;
@@ -99,7 +99,7 @@ public class BucketRestrictionUnitTestNG {
         Bucket isNotEqual = Bucket.valueBkt(ComparisonType.NOT_EQUAL, Arrays.asList(1));
         BucketRestriction bucketRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "A"),
                 isNotEqual);
-        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(bucketRestriction);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(bucketRestriction, true);
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof ConcreteRestriction);
         ConcreteRestriction concreteRestriction = (ConcreteRestriction) convertedRestriction;
@@ -122,7 +122,7 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertEquals(3, deserialized.getBkt().getValues().get(1));
         Assert.assertEquals(5, deserialized.getBkt().getValues().get(2));
 
-        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized, true);
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof ConcreteRestriction);
         ConcreteRestriction concreteRestriction = (ConcreteRestriction) convertedRestriction;
@@ -146,7 +146,7 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertNotNull(deserializedTxn);
         Assert.assertEquals(deserializedTxn.getTimeFilter().getRelation(), ComparisonType.EVER);
 
-        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized, true);
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof TransactionRestriction);
         TransactionRestriction transactionRestriction = (TransactionRestriction) convertedRestriction;
@@ -184,7 +184,7 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertNotNull(deserializedTxn.getSpentFilter());
         Assert.assertNotNull(deserializedTxn.getUnitFilter());
 
-        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized, true);
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof TransactionRestriction);
 
@@ -207,7 +207,7 @@ public class BucketRestrictionUnitTestNG {
         String serialized = JsonUtils.serialize(bucketRestriction);
         BucketRestriction deserialized = JsonUtils.deserialize(serialized, BucketRestriction.class);
         Assert.assertNotNull(deserialized);
-        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized, true);
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof LogicalRestriction);
         LogicalRestriction logicalRestriction = (LogicalRestriction) convertedRestriction;

@@ -35,7 +35,7 @@ public class EntityQueryTranslator extends QueryTranslator {
         QueryBuilder queryBuilder = Query.builder();
 
         restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery),
-                timeTranslator, sqlUser);
+                                                   timeTranslator, sqlUser, true);
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
         restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, timeTranslator, sqlUser);
 
@@ -76,7 +76,8 @@ public class EntityQueryTranslator extends QueryTranslator {
             break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser);
+        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser,
+                                                                    true);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 

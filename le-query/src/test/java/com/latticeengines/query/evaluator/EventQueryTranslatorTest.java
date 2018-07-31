@@ -875,8 +875,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
-        Assert.assertEquals(count, 14137);
-        //Assert.assertEquals(count, 115);
+        //Assert.assertEquals(count, 14137);
+        Assert.assertEquals(count, 115);
 
     }
 

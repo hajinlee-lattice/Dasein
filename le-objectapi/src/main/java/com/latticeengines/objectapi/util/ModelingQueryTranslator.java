@@ -50,7 +50,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
         EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
         QueryBuilder queryBuilder = Query.builder();
-        Restriction restriction = translateFrontEndRestriction(frontEndRestriction);
+        Restriction restriction = translateFrontEndRestriction(frontEndRestriction, false);
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
 
         if (frontEndQuery.getSegmentQuery() != null) {
@@ -107,7 +107,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
         FrontEndRestriction segmentAccountRestriction = getEntityFrontEndRestriction(BusinessEntity.Account,
                 segmentQuery);
         Restriction segmentRestriction = translateFrontEndRestriction(segmentAccountRestriction, timeTranslator,
-                sqlUser);
+                                                                      sqlUser, true);
         segmentRestriction = translateInnerRestriction(segmentQuery, BusinessEntity.Account, segmentRestriction);
         return segmentRestriction;
     }
@@ -129,5 +129,4 @@ public class ModelingQueryTranslator extends QueryTranslator {
             }
         }
     }
-
 }

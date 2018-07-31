@@ -1,0 +1,73 @@
+{
+  "account_restriction": {
+    "restriction": {
+      "logicalRestriction": {
+        "operator": "AND",
+        "restrictions": [
+          {
+            "logicalRestriction": {
+              "operator": "AND",
+              "restrictions": [
+                {
+                  "bucketRestriction": {
+                    "bkt": {
+                      "Lbl": "No",
+                      "Cnt": 228717,
+                      "Id": 1,
+                      "Txn": {
+                        "PrdId": "A80D4770376C1226C47617C071324C0B",
+                        "Time": {
+                          "Cmp": "PRIOR_ONLY",
+                          "Vals": [
+                            8
+                          ],
+                          "Period": "Month"
+                        },
+                        "Negate": true
+                      }
+                    },
+                    "ignored": false,
+                    "attr": "PurchaseHistory.AM_A80D4770376C1226C47617C071324C0B__EVER__HP"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "transactionRestriction": {
+              "productId": "4E3242E9584D07C784FE74C017A64066",
+              "timeFilter": {
+                "Cmp": "EVER",
+                "Vals": [
+                  -1
+                ],
+                "Period": "Month"
+              },
+              "negate": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  "contact_restriction": {
+    "restriction": {
+      "logicalRestriction": {
+        "operator": "AND",
+        "restrictions": []
+      }
+    }
+  },
+  "restrict_without_sfdcid": false,
+  "restrict_with_sfdcid": false,
+  "lookups": [],
+  "distinct": false,
+  "period_name": "Month",
+  "period_count": -1,
+  "target_product_ids": [
+    "4E3242E9584D07C784FE74C017A64066"
+  ],
+  "calculate_product_revenue": false,
+  "evaluation_period_id": 215,
+  "lagging_period_count": 1
+}

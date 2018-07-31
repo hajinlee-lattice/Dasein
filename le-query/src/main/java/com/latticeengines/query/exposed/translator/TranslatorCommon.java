@@ -121,11 +121,11 @@ public class TranslatorCommon {
         return aggrPredicate;
     }
 
-    private boolean isNotLessThanOperation(ComparisonType cmp) {
+    private static boolean isNotLessThanOperation(ComparisonType cmp) {
         return (ComparisonType.LESS_THAN != cmp && ComparisonType.LESS_OR_EQUAL != cmp);
     }
 
-    protected boolean excludeNotPurchasedInLessThanOperation(AggregationFilter aggregationFilter) {
+    private static boolean excludeNotPurchasedInLessThanOperation(AggregationFilter aggregationFilter) {
         return !(aggregationFilter == null || isNotLessThanOperation(aggregationFilter.getComparisonType()) ||
                  aggregationFilter.isIncludeNotPurchased());
     }
@@ -265,6 +265,21 @@ public class TranslatorCommon {
             return Restriction.builder().or(restrictionList).build();
 
         }
+    }
+
+    static public boolean excludeNotPurchased(TransactionRestriction txRestriction) {
+        return excludeNotPurchasedInLessThanOperation(txRestriction.getSpentFilter()) ||
+               excludeNotPurchasedInLessThanOperation(txRestriction.getUnitFilter());
+    }
+
+    static public Restriction translateExcludeNotPurchased(TransactionRestriction txRestriction) {
+
+        TransactionRestriction hasPurchased = new TransactionRestriction(txRestriction.getProductId(),
+                                                                         txRestriction.getTimeFilter(),
+                                                                         false,
+                                                                         null,
+                                                                         null);
+        return Restriction.builder().and(txRestriction, hasPurchased).build();
     }
 
     @SuppressWarnings("unchecked")

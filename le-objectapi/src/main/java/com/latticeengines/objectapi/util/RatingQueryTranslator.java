@@ -51,7 +51,7 @@ public class RatingQueryTranslator extends QueryTranslator {
 
         Map<String, Lookup> ruleBasedModels = ruleBasedModels(mainEntity, frontEndQuery.getRatingModels(), //
                 queryBuilder, timeTranslator, sqlUser);
-        restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), timeTranslator, sqlUser);
+        restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), timeTranslator, sqlUser, true);
         translateRatingRuleRestriction(ruleBasedModels, restriction);
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
         restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, queryBuilder, ruleBasedModels,
@@ -103,7 +103,7 @@ public class RatingQueryTranslator extends QueryTranslator {
             break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser);
+        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction, timeTranslator, sqlUser, true);
         translateRatingRuleRestriction(ruleBasedModels, innerRestriction);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
@@ -202,12 +202,12 @@ public class RatingQueryTranslator extends QueryTranslator {
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
             // do not support nested ratings for now
-            Restriction accountRestriction = translateFrontEndRestriction(frontEndRestriction, timeTranslator, sqlUser);
+            Restriction accountRestriction = translateFrontEndRestriction(frontEndRestriction, timeTranslator, sqlUser, true);
 
             frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.CONTACT_RESTRICTION));
             // do not support nested ratings for now
-            Restriction contactRestriction = translateFrontEndRestriction(frontEndRestriction, timeTranslator, sqlUser);
+            Restriction contactRestriction = translateFrontEndRestriction(frontEndRestriction, timeTranslator, sqlUser, true);
 
             BusinessEntity innerEntity;
             Restriction outerRestriction, innerRestriction;

@@ -127,6 +127,13 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertEquals(eventCount, 5374);
     }
 
+    @Test(groups = "functional")
+    public void testDP6881() {
+        EventFrontEndQuery frontEndQuery = loadFrontEndQueryFromResource("/dp6881.json");
+        long count = eventQueryService.getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertEquals(count, 8501);
+    }
+
     private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();

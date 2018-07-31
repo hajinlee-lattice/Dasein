@@ -33,7 +33,7 @@ public class RestrictionUtils {
     public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
             "HasPurchased");
 
-    public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction) {
+    public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction, boolean translatePriorOnly) {
         Restriction restriction;
         Bucket bkt = bucketRestriction.getBkt();
         if (bkt == null) {
@@ -45,7 +45,7 @@ public class RestrictionUtils {
         }
 
         if (bkt.getTransaction() != null) {
-            restriction = convertTxnBucket(bkt.getTransaction());
+            restriction = convertTxnBucket(bkt.getTransaction(), translatePriorOnly);
         } else {
             ComparisonType comparisonType = bkt.getComparisonType();
             List<Object> values = bkt.getValues();
@@ -76,8 +76,9 @@ public class RestrictionUtils {
         }
     }
 
-    private static Restriction convertTxnBucket(Bucket.Transaction transaction) {
-        if (transaction.getTimeFilter() != null && ComparisonType.PRIOR_ONLY.equals(transaction.getTimeFilter().getRelation())) {
+    private static Restriction convertTxnBucket(Bucket.Transaction transaction, boolean translatePriorOnly) {
+        if (transaction.getTimeFilter() != null &&
+            translatePriorOnly && ComparisonType.PRIOR_ONLY.equals(transaction.getTimeFilter().getRelation())) {
             return convertPriorOnlyTxnBucket(transaction);
         } else {
             TransactionRestriction transactionRestriction = new TransactionRestriction();
@@ -132,9 +133,9 @@ public class RestrictionUtils {
             withinTxn = new Bucket.Transaction(transaction.getProductId(), within, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
             currentTxn = new Bucket.Transaction(transaction.getProductId(), current, transaction.getSpentFilter(), transaction.getUnitFilter(), true);
         }
-        Restriction everRst = convertTxnBucket(everTxn);
-        Restriction withinRst = convertTxnBucket(withinTxn);
-        Restriction currentRst = convertTxnBucket(currentTxn);
+        Restriction everRst = convertTxnBucket(everTxn, false);
+        Restriction withinRst = convertTxnBucket(withinTxn, false);
+        Restriction currentRst = convertTxnBucket(currentTxn, false);
         RestrictionBuilder builder = Restriction.builder();
         if (negate) {
             builder.or(everRst, withinRst, currentRst);
