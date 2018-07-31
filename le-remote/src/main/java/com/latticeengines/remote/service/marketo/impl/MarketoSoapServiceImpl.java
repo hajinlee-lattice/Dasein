@@ -41,9 +41,9 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
     private static final Marker fatal = MarkerFactory.getMarker("FATAL");
 
     @SuppressWarnings("unused")
-    private static final ImmutableSet<String> EXCLUDED_DATATYPES = ImmutableSet.of("datetime", "float", "formula", "percent",
-            "textarea", "currency", "date", "reference");
-    private static final ImmutableSet<String> INCLUDED_DATATYPES = ImmutableSet.of("string", "email");
+    private static final ImmutableSet<String> EXCLUDED_DATATYPES = ImmutableSet.of("reference");
+    private static final ImmutableSet<String> INCLUDED_DATATYPES = ImmutableSet.of("boolean", "currency", "date", "datetime",
+            "email", "float", "integer", "phone", "string", "text", "url");
 
     @Override
     public boolean validateMarketoSoapCredentials(String soapEndPoint, String userId, String encryptionKey) {
@@ -59,9 +59,8 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
     public List<LeadField> getLeadFields(String soapEndPoint, String userId, String encryptionKey) {
         List<LeadField> fields = new ArrayList<>();
         SuccessDescribeMObject lead = describeLeadObject(soapEndPoint, userId, encryptionKey);
-
         for (MObjFieldMetadata fieldMetadata : lead.getResult().getMetadata().getFieldList().getFields()) {
-            if (!fieldMetadata.isIsReadonly() && INCLUDED_DATATYPES.contains(fieldMetadata.getDataType().toLowerCase())) {
+            if (INCLUDED_DATATYPES.contains(fieldMetadata.getDataType().toLowerCase())) {
                 LeadField field = new LeadField();
                 field.setDataType(fieldMetadata.getDataType().toLowerCase());
                 field.setDisplayName(fieldMetadata.getDisplayName());

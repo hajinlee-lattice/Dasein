@@ -571,7 +571,7 @@ public abstract class BaseRestApiProxy {
             if (attempt != null) {
                 msg += String.format(".  (Attempt=%d)", attempt);
             }
-            log.info(msg);
+            log.debug(msg);
         }
     }
 }

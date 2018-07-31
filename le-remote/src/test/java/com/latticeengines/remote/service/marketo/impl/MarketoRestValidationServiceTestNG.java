@@ -42,7 +42,7 @@ public class MarketoRestValidationServiceTestNG extends RemoteFunctionalTestNGBa
         } catch (LedpException e) {
             ledpException = e;
         }
-        assertEquals(ledpException.getCode(), LedpCode.LEDP_21029);
+        assertEquals(ledpException.getCode(), LedpCode.LEDP_21028);
 
         try {
             marketoRestValidationService.validateMarketoRestCredentials(identityEndPoint, restEndPoint, "bogusClientId",
@@ -74,7 +74,7 @@ public class MarketoRestValidationServiceTestNG extends RemoteFunctionalTestNGBa
         } catch (LedpException e) {
             ledpException = e;
         }
-        assertEquals(ledpException.getCode(), LedpCode.LEDP_21032);
+        assertEquals(ledpException.getCode(), LedpCode.LEDP_21031);
 
     }
 
