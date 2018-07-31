@@ -34,6 +34,7 @@ var mainApp = angular.module('mainApp', [
     'lp.delete',
     'lp.create.import',
     'lp.sfdc',
+    'lp.ssoconfig',
     'lp.sfdc.credentials',
     'lp.marketo',
     'lp.marketo.enrichment',

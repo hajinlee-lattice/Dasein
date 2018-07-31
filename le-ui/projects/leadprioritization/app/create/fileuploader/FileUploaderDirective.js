@@ -17,6 +17,8 @@ angular
             fileLoad:'&',
             fileDone:'&',
             fileCancel:'&',
+            fileValidation:'&',
+            readOnly:'@?',
             tooltipConfig: '@'
         },
         templateUrl: 'app/create/fileuploader/FileUploaderTemplate.html',
@@ -89,7 +91,7 @@ angular
                     return;
                 }
 
-                ServiceErrorUtility.hideBanner();
+                // ServiceErrorUtility.hideBanner();
 
                 vm.startTime = new Date();
                 vm.upload_percent = 0;
@@ -270,6 +272,19 @@ angular
                 return deferred.promise;
             }
 
+            vm.readFileAsText = function(file) {
+                var deferred = $q.defer(),
+                    FR = new FileReader();
+
+                FR.onload = function(e) {
+                    deferred.resolve(FR.result);
+                };
+
+                FR.readAsText(file);
+
+                return deferred.promise;
+            }
+
             vm.compressFileInWorker = function(file) {
                 vm.message = 'Compressing: ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                 vm.compressing = true;
@@ -371,40 +386,45 @@ angular
 
                 var fileType = vm.accountLeadCheck ? vm.accountLeadCheck : 'SalesforceLead',
                     modelName = vm.modelDisplayName = vm.modelDisplayName || vm.selectedFileName, options;
-                if($state.includes('home.import.entry')) {
-                    var fileName = "file_" + (new Date).getTime() + ".csv";
-                    ImportWizardStore.setCsvFileName(fileName);
-                    options = {
+
+                if (!vm.readOnly) {
+                    if($state.includes('home.import.entry')) {
+                        var fileName = "file_" + (new Date).getTime() + ".csv";
+                        ImportWizardStore.setCsvFileName(fileName);
+                        options = {
+                                file: file,
+                                url: vm.params.url || '/pls/models/uploadfile',
+                                params: {
+                                    entity: 'account',
+                                    fileName: fileName,
+                                    modelId: vm.params.modelId || false,
+                                    metadataFile: vm.params.metadataFile || null,
+                                    compressed: vm.isCompressed(),
+                                    displayName: vm.selectedFileDisplayName
+                                },
+                                progress: vm.uploadProgress
+                            };
+                    } else {
+                        options = {
                             file: file,
-                            url: vm.params.url || '/pls/models/uploadfile',
+                            url: vm.params.url || '/pls/models/uploadfile/unnamed',
                             params: {
-                                entity: 'account',
-                                fileName: fileName,
+                                schema: vm.params.schema || fileType,
                                 modelId: vm.params.modelId || false,
                                 metadataFile: vm.params.metadataFile || null,
                                 compressed: vm.isCompressed(),
-                                displayName: vm.selectedFileDisplayName
+                                displayName: vm.selectedFileDisplayName,
+                                operationType: vm.params.operationType || null
                             },
                             progress: vm.uploadProgress
                         };
-                } else {
-                    options = {
-                        file: file,
-                        url: vm.params.url || '/pls/models/uploadfile/unnamed',
-                        params: {
-                            schema: vm.params.schema || fileType,
-                            modelId: vm.params.modelId || false,
-                            metadataFile: vm.params.metadataFile || null,
-                            compressed: vm.isCompressed(),
-                            displayName: vm.selectedFileDisplayName,
-                            operationType: vm.params.operationType || null
-                        },
-                        progress: vm.uploadProgress
-                    };
-                }
-                vm.cancelDeferred = cancelDeferred = $q.defer();
+                    }
+                    vm.cancelDeferred = cancelDeferred = $q.defer();
 
-                ImportService.Upload(options).then(vm.uploadResponse);
+                    ImportService.Upload(options).then(vm.uploadResponse);
+                } else {
+                    vm.readFileAsText(file).then(vm.uploadResponse);
+                }
             }
 
             vm.isCompressed = function(file) {
@@ -428,24 +448,46 @@ angular
 
                 vm.uploading = false;
 
-                if (result.Success && result.Result) {
-                    var fileName = vm.choosenFileName = result.Result.name,
-                        metaData = vm.metadata = result.Result;
+                if (vm.readOnly && typeof vm.fileValidation == 'function') {
+                    vm.fileValidation({ result: result }).then(function(response) {
+                        if (response) {
+                            vm.choosenFileName = vm.selectedFileDisplayName,
+                            vm.metadata = {};
 
-                    vm.upload_percent = 0;
-                    vm.uploaded = true;
-                    vm.message = 'Done in ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
+                            vm.completeTransfer();
+                        } else {
+
+                            vm.abortTransfer(result);
+                        }
+                    });
                 } else {
-                    vm.cancel(true, result);
-                    vm.message = 'Transfer aborted';
+                    if ((result.Success && result.Result)) {
+                        var fileName = vm.choosenFileName = result.Result ? result.Result.name : vm.selectedFileDisplayName,
+                            metaData = vm.metadata = result.Result || {};
 
-                    setTimeout(function() {
-                        vm.message = '';
-                    }, 1500);
+                        vm.completeTransfer();
+                    } else {
+                        vm.abortTransfer(result);
 
-                    var errorCode = result.errorCode || 'LEDP_ERR';
-                    var errorMsg  = result.errorMsg || result.ResultErrors || 'Unknown error while uploading file.';
+                        var errorCode = result.errorCode || 'LEDP_ERR';
+                        var errorMsg  = result.errorMsg || result.ResultErrors || 'Unknown error while uploading file.';
+                    }
                 }
+            }
+
+            vm.completeTransfer = function() {
+                vm.upload_percent = 0;
+                vm.uploaded = true;
+                vm.message = 'Done in ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
+            }
+
+            vm.abortTransfer = function(result) {
+                vm.cancel(true, result);
+                vm.message = 'Transfer aborted';
+
+                setTimeout(function() {
+                    vm.message = '';
+                }, 1500);
             }
 
             vm.uploadProgress = function(e) {

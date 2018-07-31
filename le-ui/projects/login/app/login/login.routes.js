@@ -72,6 +72,7 @@ angular.module('login', [
         .state('login.saml', {
             url: 'saml/:tenantId',
             params: {
+                disableUserInfo: false,
                 disableLogoArea: true
             },
             views: {
@@ -81,7 +82,8 @@ angular.module('login', [
         .state('login.saml_logout', { 
             url: 'saml/:tenantId/logout',
             params: {
-                disableLogoArea: true
+                disableUserInfo: true,
+                disableLogoArea: false
             },
             views: {
                 "FrameContent": "loginSamlLogout"
@@ -90,7 +92,8 @@ angular.module('login', [
         .state('login.saml_error', {
             url: 'saml/:tenantId/error',
             params: {
-                disableLogoArea: true
+                disableUserInfo: true,
+                disableLogoArea: false
             },
             views: {
                 "FrameContent": "loginSamlError"

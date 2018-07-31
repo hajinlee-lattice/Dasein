@@ -1,3 +1,10 @@
-<div class="login-saml">
-    SAML logout
-</div>
+<section>
+	<div class="logout-message">
+		<p> You have been succesfuly logged out. </p>
+	    <p class="footer login-footer">&copy; {{$ctrl.ResourceUtility.getString('LOGIN_COPYRIGHT', [$ctrl.dateString])}}
+	        <a href="http://lattice-engines.com/about-us/privacy-policy">
+	            {{$ctrl.ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}
+	        </a>
+	    </p>
+	</div> 
+</section>
