@@ -9,6 +9,8 @@ public interface GenericTableEntityMgr {
 
     Map<String, Object> getByKeyPair(String tenantId, String tableName, Pair<String, String> keyPair);
 
+    Map<String, Object> getByKeyPair(Map<String, List<String>> tenantIdsAndTableNames, Pair<String, String> keyPair);
+
     List<Map<String, Object>> getByKeyPairs(String tenantId, String tableName, List<Pair<String, String>> keyPairs);
 
 }

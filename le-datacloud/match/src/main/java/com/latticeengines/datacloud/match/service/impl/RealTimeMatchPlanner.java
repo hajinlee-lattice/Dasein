@@ -62,6 +62,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
             columnSelection.setColumns(columns);
             context.setColumnSelection(columnSelection);
             context.setCustomAccountDataUnit(parseCustomAccount(input));
+            context.setCustomDataUnits(parseCustomDynamo(input));
             output = initializeMatchOutput(input, columnSelection, metadatas);
         } else {
             context.setCDLMatch(false);

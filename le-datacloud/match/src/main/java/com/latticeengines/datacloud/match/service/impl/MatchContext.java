@@ -32,6 +32,7 @@ public class MatchContext implements Fact, Dimension {
     private boolean seekingIdOnly;
     private boolean isCDLMatch;
     private DynamoDataUnit customAccountDataUnit;
+    private List<DynamoDataUnit> customDataUnits;
     private MatchEngine matchEngine;
 
     @JsonIgnore
@@ -150,6 +151,14 @@ public class MatchContext implements Fact, Dimension {
 
     public void setCustomAccountDataUnit(DynamoDataUnit customAccountDataUnit) {
         this.customAccountDataUnit = customAccountDataUnit;
+    }
+
+    public List<DynamoDataUnit> getCustomDataUnits() {
+        return customDataUnits;
+    }
+
+    public void setCustomDataUnits(List<DynamoDataUnit> customDataUnits) {
+        this.customDataUnits = customDataUnits;
     }
 
     @JsonIgnore

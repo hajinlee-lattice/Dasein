@@ -1,6 +1,7 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,6 +35,32 @@ public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
             GenericTableEntity entity = internalEntityMgr.findByKey(id);
             if (entity != null) {
                 result = entity.getAttributes();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getByKeyPair(Map<String, List<String>> tenantIdsAndTableNames,
+            Pair<String, String> keyPair) {
+        Map<String, Object> result = null;
+        List<String> ids = new ArrayList<>();
+        for (Map.Entry<String, List<String>> ent : tenantIdsAndTableNames.entrySet()) {
+            List<String> parts = ent.getValue().stream().map(tableName -> contactKeys(ent.getKey(), tableName, keyPair))
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(parts)) {
+                ids.addAll(parts);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(ids)) {
+            List<GenericTableEntity> entities = internalEntityMgr.batchFindByKey(ids);
+            for (GenericTableEntity entity : entities) {
+                if (entity != null) {
+                    if (result == null) {
+                        result = new HashMap<>();
+                    }
+                    result.putAll(entity.getAttributes());
+                }
             }
         }
         return result;

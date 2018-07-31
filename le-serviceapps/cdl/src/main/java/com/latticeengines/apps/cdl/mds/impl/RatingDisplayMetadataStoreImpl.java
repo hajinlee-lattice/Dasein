@@ -93,7 +93,7 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             } else {
                 reAttr.disableGroup(ColumnSelection.Predefined.Enrichment);
             }
-            reAttr.disableGroup(ColumnSelection.Predefined.TalkingPoint);
+            // reAttr.disableGroup(ColumnSelection.Predefined.TalkingPoint);
             reAttr.disableGroup(ColumnSelection.Predefined.CompanyProfile);
             return reAttr;
         });

@@ -126,6 +126,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return cdlColumnSelectionService.parseCustomAccountDynamo(input);
     }
 
+    List<DynamoDataUnit> parseCustomDynamo(MatchInput input) {
+        return cdlColumnSelectionService.parseCustomDynamo(input);
+    }
+
     @MatchStep(threshold = 100L)
     public ColumnSelection combineSelections(ColumnSelectionService columnSelectionService,
             UnionSelection unionSelection, String dataCloudVersion) {

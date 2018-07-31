@@ -147,10 +147,15 @@ public class SystemMetadataStoreImpl extends
                                 // unless otherwise specified in upstream
                                 if (BusinessEntity.Account.equals(entity)) {
                                     cm.enableGroup(Model);
-                                    cm.enableGroup(TalkingPoint);
                                     if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
                                         cm.setSubcategory("Account IDs");
                                     }
+                                }
+                                // all custom account/rating/purchase history
+                                // attributes are enabled for talking point
+                                if (BusinessEntity.Account.equals(entity) || BusinessEntity.Rating.equals(entity)
+                                        || BusinessEntity.PurchaseHistory.equals(entity)) {
+                                    cm.enableGroup(TalkingPoint);
                                 }
                                 cm.disableGroup(CompanyProfile);
 
