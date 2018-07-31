@@ -12,9 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -43,8 +46,12 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             ProductType productType) {
         List<PeriodTransaction> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
-        String periodTransactionTableName = dataCollectionProxy.getTableName(tenant.getId(),
-                BusinessEntity.PeriodTransaction.getServingStore());
+        String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
+                BusinessEntity.PeriodTransaction);
+
+        if (StringUtils.isEmpty(periodTransactionTableName)) {
+
+        }
 
         log.info(String.format(
                 "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s",
@@ -87,8 +94,8 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             ProductType productType) {
         List<PeriodTransaction> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
-        String periodTransactionTableName = dataCollectionProxy.getTableName(tenant.getId(),
-                BusinessEntity.PeriodTransaction.getServingStore());
+        String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
+                BusinessEntity.PeriodTransaction);
         String accountTableName = dataCollectionProxy.getTableName(tenant.getId(),
                 BusinessEntity.Account.getServingStore());
 
@@ -136,8 +143,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     public List<ProductHierarchy> getProductHierarchy(DataCollection.Version version) {
         List<ProductHierarchy> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
-        String tableName = dataCollectionProxy.getTableName(tenant.getId(),
-                BusinessEntity.ProductHierarchy.getServingStore());
+        String tableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.ProductHierarchy);
         log.info(String.format("Get product Hierarchy table %s for %s", tableName, tenant.getId()));
         String query = String.format(
                 "SELECT %s, %s, %s, coalesce(" + InterfaceName.ProductLineId + ", " + InterfaceName.ProductFamilyId
@@ -162,8 +168,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     @Override
     public DataPage getAllSpendAnalyticsSegments() {
         Tenant tenant = MultiTenantContext.getTenant();
-        String accountTableName = dataCollectionProxy.getTableName(tenant.getId(),
-                BusinessEntity.Account.getServingStore());
+        String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
         log.info(String.format("Get Account Table %s for %s", accountTableName, tenant.getId()));
         String query = MessageFormat.format(
                 "SELECT distinct {0}, count({1}) as {2}, True as IsSegment, {0} as AccountId FROM {3} WHERE {0} IS NOT NULL GROUP BY {0}",
@@ -172,6 +177,15 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         log.info("query for getAllSpendAnalyticsSegments " + query);
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
         return new DataPage(retList);
+    }
+
+    private String getAndValidateServingStoreTableName(String customerSpace, BusinessEntity businessEntity) {
+        String toReturn = dataCollectionProxy.getTableName(customerSpace, businessEntity.getServingStore());
+        if (StringUtils.isEmpty(toReturn)) {
+            throw new LedpException(LedpCode.LEDP_37017,
+                    new String[] { "ServingStore" + businessEntity.name(), customerSpace });
+        }
+        return toReturn;
     }
 
     @VisibleForTesting

@@ -223,7 +223,7 @@ public enum LedpCode {
     LEDP_18102("Failed to download results CSV file for job {0}."), //
     LEDP_18103("Scoring job is not completed yet for job {0}."), //
     LEDP_18104("No job could be found with id {0}."), //
-    LEDP_18105("Model {0} does not have attribuets in the event tableName."), //
+    LEDP_18105("Model {0} does not have attributes in the event tableName."), //
     LEDP_18106("Model {0} does not have schemaInterpretation in the modelsummary."), //
     LEDP_18107("CSV header validations failed:\n {0}"), //
     LEDP_18108("Could not find transformation group name from model {0}."), //
@@ -672,6 +672,7 @@ public enum LedpCode {
     LEDP_37015(
             "Could not find the attribute repository for tenant {0} at version {1}. Make sure data profiling is done for the tenant."), //
     LEDP_37016("Cannot support cross-period event query, found {0} and {1} in the query."), //
+    LEDP_37017("Unable to find the {0} table for BusinessEntity {1} for Customer space {2}"), //
 
     // le-dante
     LEDP_38001("Could not find Talking point with name {0}"), //
