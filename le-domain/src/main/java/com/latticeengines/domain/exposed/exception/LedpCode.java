@@ -318,6 +318,7 @@ public enum LedpCode {
     LEDP_18193("Marketo Scoring Request Configuration is in invalid State. {0}."), //
     LEDP_18194("Could not retrive Scoring Request Configuration. Something thing went wrong. Please try again later."), //
     LEDP_18195("Update Activation Attribute Config failed due to usage enbaled"), //
+    LEDP_18196("Cannot map two column to {0}, please re-map column."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

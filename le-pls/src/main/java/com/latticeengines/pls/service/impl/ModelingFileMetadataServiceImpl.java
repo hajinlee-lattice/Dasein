@@ -281,8 +281,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 mappedUserFieldName.add(fieldMapping.getUserField());
                 if (reservedName.contains(fieldMapping.getMappedField())) {
                     if (mappedFieldName.contains(fieldMapping.getMappedField())) {
-                        throw new RuntimeException(String.format("Cannot map two column to %s, please re-map column",
-                                fieldMapping.getMappedField()));
+                        throw new LedpException(LedpCode.LEDP_18196, new String[] { fieldMapping.getMappedField() });
                     } else {
                         fieldMapping.setMappedToLatticeField(true);
                         mappedFieldName.add(fieldMapping.getMappedField());
