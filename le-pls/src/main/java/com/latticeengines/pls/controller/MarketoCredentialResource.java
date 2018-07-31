@@ -144,9 +144,13 @@ public class MarketoCredentialResource {
     @ApiOperation(value = "Get ScoringRequestConfiguration")
     @ResponseBody
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
-    public ScoringRequestConfig getScoringRequestConfigByModelId(@PathVariable(name = "credentialId") Long credentialId,
+    public ScoringRequestConfig getScoringRequestConfigByConfigId(@PathVariable(name = "credentialId") Long credentialId,
             @PathVariable(name = "configId") String configId) {
-        return scoringRequestConfigService.findByConfigId(credentialId, configId);
+        ScoringRequestConfig requestConfig = scoringRequestConfigService.findByConfigId(credentialId, configId);
+        if (requestConfig == null) {
+            throw new LedpException(LedpCode.LEDP_18194, new String[] {configId});
+        }
+        return requestConfig;
     }
 
     private void validateRequest(Long credentialId, ScoringRequestConfig scoringRequestConfig, String configId) {
@@ -172,6 +176,7 @@ public class MarketoCredentialResource {
     public void updateScoringRequestConfig(@PathVariable(name = "credentialId") Long credentialId,
             @PathVariable(name = "configId") String configId, @RequestBody ScoringRequestConfig scoringRequestConfig) {
         validateRequest(credentialId, scoringRequestConfig, configId);
+        scoringRequestConfig.setConfigId(configId);
         setMarketoCredentialContext(credentialId, scoringRequestConfig);
         scoringRequestConfigService.updateScoringRequestConfig(scoringRequestConfig);
     }

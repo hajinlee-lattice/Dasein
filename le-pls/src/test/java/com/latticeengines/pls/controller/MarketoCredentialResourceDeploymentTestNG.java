@@ -17,6 +17,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoScoringMatchField;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
@@ -152,6 +154,45 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         assertNotNull(scoringReqConfFromRest.getMarketoScoringMatchFields());
         assertEquals(scoringReqConfFromRest.getMarketoScoringMatchFields().size(), scoringMappings.size());
         assertEquals(scoringReqConfFromRest.getWebhookResource(), scoringWebhookResource);
+    }
+    
+    @Test(groups = "deployment", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
+    public void testCreateScoringRequestConfigDuplicate_assertCreationFails() {
+        MarketoCredential marketoCredential = getMarketoCredential(marketoCredentialId);
+        assertNotNull(marketoCredential);
+        List<ScoringRequestConfigSummary> reqConfigSummaryLst = getScoringRequestConfigs(marketoCredential.getPid());
+        assertNotNull(reqConfigSummaryLst);
+        assertTrue(reqConfigSummaryLst.size() == 1);
+        
+        ScoringRequestConfig scoringReqConf = new ScoringRequestConfig();
+        scoringReqConf.setMarketoCredential(marketoCredential);
+        scoringReqConf.setModelUuid(MODEL_UUID);
+        
+        MARKETO_SCORE_MATCH_FIELD_1.setModelFieldName(FieldInterpretation.Website.toString());
+        MARKETO_SCORE_MATCH_FIELD_1.setMarketoFieldName("lead.website");
+        
+        MARKETO_SCORE_MATCH_FIELD_2.setModelFieldName(FieldInterpretation.Email.toString());
+        MARKETO_SCORE_MATCH_FIELD_2.setMarketoFieldName("lead.email");
+        
+        MARKETO_SCORE_MATCH_FIELD_3.setModelFieldName(FieldInterpretation.CompanyName.toString());
+        MARKETO_SCORE_MATCH_FIELD_3.setMarketoFieldName("lead.company");
+        List<MarketoScoringMatchField> scoringMappings = Arrays.asList(MARKETO_SCORE_MATCH_FIELD_1, MARKETO_SCORE_MATCH_FIELD_2, MARKETO_SCORE_MATCH_FIELD_3);
+        scoringReqConf.setMarketoScoringMatchFields(scoringMappings);
+        
+        
+        Exception exception = null;
+        try {
+            createScoringRequestConfig(marketoCredential.getPid(), scoringReqConf);
+        } catch (Exception e) {
+            exception = e;
+        }
+        
+        assertNotNull(exception);
+        assertTrue(exception.getMessage().contains(LedpException.buildMessage(LedpCode.LEDP_18192, new String[] {marketoCredential.getName()})));
+        
+        reqConfigSummaryLst = getScoringRequestConfigs(marketoCredential.getPid());
+        assertNotNull(reqConfigSummaryLst);
+        assertTrue(reqConfigSummaryLst.size() == 1);
     }
     
     @Test(groups = "deployment", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")

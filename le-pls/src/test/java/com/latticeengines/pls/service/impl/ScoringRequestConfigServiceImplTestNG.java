@@ -15,6 +15,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoScoringMatchField;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
@@ -150,6 +152,47 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertNotNull(scoringReqConfFromDB.getMarketoScoringMatchFields());
         assertEquals(scoringReqConfFromDB.getPid(), scoringReqConf.getPid());
         assertEquals(scoringReqConfFromDB.getMarketoScoringMatchFields().size(), scoringMappings.size());
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
+    public void testCreateScoringRequestConfigDuplicate_assertCreationFails() {
+        MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials().get(0);
+        assertNotNull(marketoCredential);
+        List<ScoringRequestConfigSummary> reqConfigSummaryLst = scoringRequestConfigService
+                .findAllByMarketoCredential(marketoCredential.getPid());
+        assertNotNull(reqConfigSummaryLst);
+        assertTrue(reqConfigSummaryLst.size() == 1);
+        
+        ScoringRequestConfig scoringReqConf = new ScoringRequestConfig();
+        scoringReqConf.setMarketoCredential(marketoCredential);
+        scoringReqConf.setModelUuid(MODEL_UUID);
+        
+        MARKETO_SCORE_MATCH_FIELD_1.setModelFieldName(FieldInterpretation.Website.toString());
+        MARKETO_SCORE_MATCH_FIELD_1.setMarketoFieldName("lead.website");
+        
+        MARKETO_SCORE_MATCH_FIELD_2.setModelFieldName(FieldInterpretation.Email.toString());
+        MARKETO_SCORE_MATCH_FIELD_2.setMarketoFieldName("lead.email");
+        
+        MARKETO_SCORE_MATCH_FIELD_3.setModelFieldName(FieldInterpretation.CompanyName.toString());
+        MARKETO_SCORE_MATCH_FIELD_3.setMarketoFieldName("lead.company");
+        List<MarketoScoringMatchField> scoringMappings = Arrays.asList(MARKETO_SCORE_MATCH_FIELD_1, MARKETO_SCORE_MATCH_FIELD_2, MARKETO_SCORE_MATCH_FIELD_3);
+        scoringReqConf.setMarketoScoringMatchFields(scoringMappings);
+        
+        LedpException exception = null;
+        try {
+            scoringRequestConfigService.createScoringRequestConfig(scoringReqConf);    
+        } catch (LedpException e) {
+            exception = e;
+        }
+        
+        assertNotNull(exception);
+        assertEquals(exception.getCode(), LedpCode.LEDP_18192);
+        assertEquals(exception.getMessage(), LedpException.buildMessage(LedpCode.LEDP_18192, new String[] {marketoCredential.getName()}));
+        
+        reqConfigSummaryLst = scoringRequestConfigService
+                .findAllByMarketoCredential(marketoCredential.getPid());
+        assertNotNull(reqConfigSummaryLst);
+        assertTrue(reqConfigSummaryLst.size() == 1);
     }
     
     @Test(groups = "functional", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
