@@ -199,7 +199,8 @@ public class LoginResource {
         if (updateSucceeded) {
             return SimpleBooleanResponse.successResponse();
         } else {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList("Could not change password."));
+            String message = "We could not verify your current password, please make sure you provide correct one.";
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(message));
         }
 
     }
