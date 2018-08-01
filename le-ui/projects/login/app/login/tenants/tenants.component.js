@@ -71,11 +71,23 @@ angular.module('login.tenants', [
             LoginService.GetSessionDocument(tenant, LoginStore.login.username).then(function(data) {
                 if (data != null && data.Success === true) {
                     LoginStore.redirectToLP(tenant);
+                    vm.aptrinsic(LoginStore.login, tenant);
                 } else {
                     vm.deactivated = false;
                     vm.selected = null;
                     showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
                 }
+            });
+        };
+
+        vm.aptrinsic = function(login, tenant) {
+            window.aptrinsic("identify", { 
+                "id": login.username, // Required for logged in app users 
+                "email": login.username
+            },{ 
+            //Account Fields 
+                "id": tenant.Identifier, //Required 
+                "name": tenant.DisplayName
             });
         };
 
