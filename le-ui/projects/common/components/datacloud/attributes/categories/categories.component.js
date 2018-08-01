@@ -39,7 +39,7 @@ angular.module('common.attributes.categories', [])
         }
 
         vm.click = function(category) {
-            if (typeof (vm.callback) != undefined) {
+            if (!vm.params.section) {
                 vm.callback({category});
             } else {
                 ShowSpinner('Loading ' + category + ' Data', 'div.attr-results-container');
