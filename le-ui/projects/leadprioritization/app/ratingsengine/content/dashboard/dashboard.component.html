@@ -8,7 +8,7 @@
     class="rating-engine dashboard {{ vm.modelingStrategy }}"
     ng-class="{noRatings: (vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0)}">
     <div class="container row">
-        <div class="ten columns offset-one">
+        <div class="twelve columns">
 
 
             <div class="header">
@@ -52,6 +52,13 @@
             <div class="content">
                 <div ng-if="!vm.isRulesBased">
                     <h3>Creation Settings</h3>
+
+                    <!-- <dl>
+                        <dt ng-repeat-start="setting in vm.settings">{{setting.label}}</dt>
+                        <dd ng-repeat-end>{{setting.value}}</dd>
+                    </dl> -->
+
+
                     <dl>
                         <dt>Model Type:</dt>
                         <dd>{{ vm.ratingEngineType }}</dd>
@@ -110,7 +117,7 @@
                     </dl>
                 </div>
                 <div>
-                    <h3>Ratings</h3>
+                    <h3>Ratings ( Iteration {{ vm.ratingEngine.activeModel.AI.iteration }} )</h3>
                     <h4 ng-if="vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0 || vm.dashboard.summary.isPublished == false">No Ratings Available</h4>
                     <bar-chart ng-if="vm.dashboard.summary.isPublished"    
                         config="vm.ratingEngine.chartConfig" 
@@ -118,20 +125,35 @@
                     </bar-chart>
                 </div>
                 <div>
-                    <h3>Creation History (1)</h3>
-                    <table>
+                    <h3>Creation History ({{ vm.dashboard.iterations.length }})</h3>
+                    <table class="creation-history">
                         <thead>
                             <tr>
+                                <th>&nbsp;</th>
                                 <th>Created</th>
                                 <th>User</th>
-                                <th></th>
+                                <th>Scoring</th>
+                                <th>&nbsp;</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>{{ vm.ratingEngine.created | date }}</td>
-                                <td>{{ vm.ratingEngine.createdBy }}</td>
-                                <td class="orange-text">{{vm.ratingEngine.status}}</td>
+                            <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5">
+                                <td>{{ iteration.iteration }}</td>
+                                <td>{{ iteration.created | date }}</td>
+                                <td>{{ iteration.createdBy }}</td>
+                                <td class="green-text">
+                                    <span ng-if="vm.isIterationActive(iteration.id)">ACTIVE</span>
+                                </td>
+                                <td>
+                                    <span ng-if="iteration.modelingJobStatus === 'Completed'" class="ico ico-check"></span>
+                                    <span ng-if="iteration.modelingJobStatus === 'Failed'" class="ico ico-warning"></span>
+                                    <span ng-if="iteration.modelingJobStatus === 'Pending'" class="fa fa-clock-o"></span>
+                                </td>
+                                <td>
+                                    <button class="button link-button" ng-click="vm.viewIteration(iteration)">View</button>
+                                    <button class="button link-button" ng-click="vm.remodel(iteration)">Remodel</button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

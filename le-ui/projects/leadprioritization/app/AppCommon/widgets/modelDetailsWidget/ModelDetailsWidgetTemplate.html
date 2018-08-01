@@ -17,8 +17,8 @@
                 <p>Created by {{ createdBy }} on {{ created | date }}</p>
             </div>
 
-            <!-- CDL Models -->
-            <div class="data" ng-if="IsRatingEngine || IsRuleBased">
+            <!-- Active Version of CDL Model -->
+            <div class="data" ng-if="(IsRatingEngine && !isActiveModel) || IsRuleBased">
                 <div class="stats stats-group">
                     <h3>Segment</h3>
                     <h4 class="text-ellipsis">{{ segmentName }}</h4>
@@ -27,19 +27,46 @@
                     <h3>Accounts</h3>
                     <h4>{{ totalAccounts | number }}</h4>
                 </div>
+                <div class="stats stats-group" ng-if="!IsRuleBased">
+                    <h3>Iterations Created</h3>
+                    <h4>{{ totalIterations }}</h4>
+                </div>
                 <div class="stats stats-group">
                     <h3>Scoring</h3>
-                    <h4>{{ activeStatus }}</h4>
+                    <h4>{{ activeStatus }} ( Iteration {{ activeIteration }} )</h4>
                     <p>Last data refresh {{ lastRefreshedDate | date }}</p>
                 </div>
-                <div class="stats stats-group" ng-if="!IsRuleBased">
-                    <h3>Active Version</h3>
-                    <h4>Iteration {{ activeIteration }}</h4>
+            </div>
+
+            <!-- Viewing an Iteration -->
+            <!-- <div class="data" ng-if="(IsRatingEngine && !isActiveModel) && !IsRuleBased">
+                <div class="stats stats-group">
+                    <h3>Segment</h3>
+                    <h4 class="text-ellipsis">{{ segmentName }}</h4>
                 </div>
-            </div><!-- End .data -->
+                <div class="stats stats-group">
+                    <h3>Accounts</h3>
+                    <h4>{{ totalAccounts | number }}</h4>
+                </div>
+                <div class="stats stats-group" ng-if="!IsRuleBased">
+                    <h3>Total Conversions</h3>
+                    <h4>314 (3.11%)</h4>
+                </div>
+                <div class="stats stats-group">
+                    <div class="stats stats-group">
+                        <h3>Attribute Source</h3>
+                        <dl>
+                            <dt>192 Lattice</dt>
+                        </dl>
+                        <dl>
+                            <dt>4 Your Company</dt>
+                        </dl>
+                    </div>
+                </div>
+            </div> -->
 
 
-            <!-- LPI Models -->
+            <!-- LPI Model Details -->
             <div class="data" ng-if="!IsRatingEngine && !IsRuleBased">
                 <div class="stats stats-group">
                     <h3>Overview</h3>

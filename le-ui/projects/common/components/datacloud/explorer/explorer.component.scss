@@ -373,6 +373,9 @@ attr-categories,
                     margin: 0 -2px 0 0px;
                     &> span {
                         padding: 5px 7px 3px;
+                        border-color: #ddd;
+                        border-style: solid;
+                        border-width: 0 1px 1px;
                     }
                 }
             }
@@ -1562,7 +1565,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #33bdb7;
+            border-color: #33bdb7 !important;
         }
         .background-color {
             background-color: #33bdb7;
@@ -1613,7 +1616,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #65b7e6;
+            border-color: #65b7e6 !important;
         }
         .background-color {
             background-color: #65b7e6;
@@ -1664,7 +1667,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #f15a5a;
+            border-color: #f15a5a !important;
         }
         .background-color {
             background-color: #f15a5a;
@@ -1715,10 +1718,10 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #8e71b2;
+            border-color: #8e71b2 !important;
         }
         .background-color {
-            background-color: #8e71b2;
+            background-color: #8e71b2 !important;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
@@ -1766,7 +1769,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #70bf4a;
+            border-color: #70bf4a !important;
         }
         .background-color {
             background-color: #70bf4a;
@@ -1817,7 +1820,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #fdbc49;
+            border-color: #fdbc49 !important;
         }
         .background-color {
             background-color: #fdbc49;
@@ -1868,7 +1871,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #26649b;
+            border-color: #26649b !important;
         }
         .background-color {
             background-color: #26649b;
@@ -1919,7 +1922,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #ff9e64;
+            border-color: #ff9e64 !important;
         }
         .background-color {
             background-color: #ff9e64;
@@ -1949,7 +1952,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #cd80bc;
+            border-color: #cd80bc !important;
         }
         .background-color {
             background-color: #cd80bc;
@@ -2000,7 +2003,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #aac43b;
+            border-color: #aac43b !important;
         }
         .background-color {
             background-color: #aac43b;
@@ -2033,7 +2036,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #457EBA;
+            border-color: #457EBA !important;
         }
         .background-color {
             background-color: #457EBA;
@@ -2085,7 +2088,7 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #2E6099;
+            border-color: #2E6099 !important;
         }
         .background-color {
             background-color: #2E6099;

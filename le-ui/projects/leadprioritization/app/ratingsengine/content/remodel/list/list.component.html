@@ -1,0 +1,79 @@
+<div class="attr-results-container">
+
+    <div class="attr-list-noresults" ng-if="filteredList.length === 0">
+        No Results.
+    </div>
+
+    <table class="attr-list-results noselect-children">
+        <thead>
+            <tr>
+                <th ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'display_name'">
+                    <span class="ico ico-warning"></span>
+                    <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'display_name')" class="fa fa-sort"></i>
+                    <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                </th>
+                <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'UsedByModel'">
+                    Used by Model
+                    <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'UsedByModel')" class="fa fa-sort"></i>
+                    <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'UsedByModel')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                </th>
+                <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'FeatureImportance'">
+                    Feature Importance
+                    <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'FeatureImportance')" class="fa fa-sort"></i>
+                    <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'FeatureImportance')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                </th>
+                <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'DisplayName'">
+                    Attribute
+                    <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'DisplayName')" class="fa fa-sort"></i>
+                    <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'DisplayName')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                </th>
+                <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'display_name'">
+                    Enabled
+                    <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'ApprovedUsage')" class="fa fa-sort"></i>
+                    <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'ApprovedUsage')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="attribute in (filteredList = ($ctrl.getCategoryAttributes()
+                        | filter: $ctrl.searchFilter
+                        | orderBy: $ctrl.sortBy
+                        | startFrom: ($ctrl.currentPage - 1) * $ctrl.pageSize
+                        | limitTo: $ctrl.pageSize))"
+                ng-class="{'disabled': attribute.ApprovedUsage === 'None'}">
+                <td>
+                    <span class="ico ico-warning" ng-if="attribute.IsCoveredByOptionalRule || attribute.IsCoveredByMandatoryRule"></span>
+                </td>
+                <td>
+                    <span class="ico ico-check" ng-if="attribute.UsedByModel"></span>
+                </td>
+                <td>{{ attribute.FeatureImportance }}</td>
+                <td>{{ attribute.DisplayName }}</td>
+                <td>
+                    <div class="attr-result-checkbox" ng-click="$ctrl.toggleSelected(attribute)">
+                        <i class="fa fa-toggle-off" ng-if="attribute.ApprovedUsage == ['None']"></i>
+                        <i class="fa fa-toggle-on" ng-if="attribute.ApprovedUsage != ['None']"></i>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul class="attr-pagination-bottom">
+    <!-- <ul class="attr-pagination-bottom" ng-init="pagesize = 12" ng-show="max > 1"> -->
+        <li class="attr-pagination pull-right">
+            <!-- <pd-pagination-controls 
+                current="$ctrl.currentPage" 
+                max="max = ($ctrl.header.filter.filtered | filter: $ctrl.query).length / pagesize"
+                class="pull-right">
+            </pd-pagination-controls> -->
+
+            <pd-pagination-controls
+                current="$ctrl.currentPage"
+                max="$ctrl.getCategoryAttributes().length / $ctrl.pageSize"
+                ng-if="$ctrl.getCategoryAttributes().length > 10">
+            </pd-pagination-controls>
+        </li>
+    </ul>
+
+</div>

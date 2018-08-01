@@ -1,4 +1,4 @@
-<div class="ratingengine-creation playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
+<div class="ratingengine-creation playbook-content container" ng-class="{'dashboard-content': $ctrl.stateParams.section && $ctrl.stateParams.section.indexOf('dashboard.') !== -1}">
     <div class="inner-container">
         <div class="header">
             <h2>The model is being created.</h2>
@@ -10,70 +10,70 @@
             <div class="summary-data">
                 <dl>
                     <dt>Model Type:</dt>
-                    <dd>{{ vm.ratingEngineType }}</dd>
+                    <dd>{{ $ctrl.ratingEngineType }}</dd>
 
-                    <dt ng-if="vm.showSetting('segment')">Segment:</dt>
-                    <dd ng-if="vm.showSetting('segment')" class="text-ellipsis">{{ vm.ratingEngine.segment.display_name }}</dd>
+                    <dt ng-if="$ctrl.showSetting('segment')">Segment:</dt>
+                    <dd ng-if="$ctrl.showSetting('segment')" class="text-ellipsis">{{ $ctrl.ratingEngine.segment.display_name }}</dd>
 
                     <!-- Cross-sell Modeling Settings -->
                     
-                    <dt ng-if="vm.showSetting('products')">Products:</dt>
-                    <dd ng-if="vm.showSetting('products')">{{ vm.targetProducts.length == 1 ? vm.targetProductName : vm.targetProducts.length + ' selected'}} </dd>
+                    <dt ng-if="$ctrl.showSetting('products')">Products:</dt>
+                    <dd ng-if="$ctrl.showSetting('products')">{{ $ctrl.targetProducts.length == 1 ? $ctrl.targetProductName : $ctrl.targetProducts.length + ' selected'}} </dd>
 
-                    <dt ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
-                    <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
+                    <dt ng-if="$ctrl.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
+                    <dd ng-if="$ctrl.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ $ctrl.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
 
-                    <dt ng-if="vm.showSetting('prioritizeBy')">Prioritize by:</dt>
-                    <dd ng-if="vm.showSetting('prioritizeBy')">{{ vm.prioritizeBy }}</dd>
+                    <dt ng-if="$ctrl.showSetting('prioritizeBy')">Prioritize by:</dt>
+                    <dd ng-if="$ctrl.showSetting('prioritizeBy')">{{ $ctrl.prioritizeBy }}</dd>
 
                     <!-- Custom-event Modeling Settings -->
 
-                    <dt ng-if="vm.showSetting('availableAttributes')">Available Attributes: </dt>
-                    <dd ng-if="vm.showSetting('availableAttributes')"> {{vm.availableAttributes}}</dd>
+                    <dt ng-if="$ctrl.showSetting('availableAttributes')">Available Attributes: </dt>
+                    <dd ng-if="$ctrl.showSetting('availableAttributes')"> {{$ctrl.availableAttributes}}</dd>
 
-                    <dt ng-if="vm.showSetting('scoreExternalFile')">Score External File:</dt>
-                    <dd ng-if="vm.showSetting('scoreExternalFile')"> {{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
+                    <dt ng-if="$ctrl.showSetting('scoreExternalFile')">Score External File:</dt>
+                    <dd ng-if="$ctrl.showSetting('scoreExternalFile')"> {{$ctrl.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
 
                 </dl>
-                <dl ng-if="vm.hasSettingsInfo">
-                    <dt ng-if="vm.showSetting('modelSettingsTitle')">Training:</dt>
+                <dl ng-if="$ctrl.hasSettingsInfo">
+                    <dt ng-if="$ctrl.showSetting('modelSettingsTitle')">Training:</dt>
                     <dd>
-                        <ul ng-if="vm.type == 'cross_sell'">
+                        <ul ng-if="$ctrl.type == 'cross_sell'">
                             <li 
-                                ng-if="vm.configFilters['SPEND_IN_PERIOD']">
-                                Spend in the quarter was {{ vm.spendCriteria }} ${{ vm.configFilters['SPEND_IN_PERIOD'].value | number }}
+                                ng-if="$ctrl.configFilters['SPEND_IN_PERIOD']">
+                                Spend in the quarter was {{ $ctrl.spendCriteria }} ${{ $ctrl.configFilters['SPEND_IN_PERIOD'].value | number }}
                             </li>
                             <li
-                                ng-if="vm.configFilters['QUANTITY_IN_PERIOD']">
-                                Quantity bought was {{ vm.quantityCriteria }} {{ vm.configFilters['QUANTITY_IN_PERIOD'].value | number }} units
+                                ng-if="$ctrl.configFilters['QUANTITY_IN_PERIOD']">
+                                Quantity bought was {{ $ctrl.quantityCriteria }} {{ $ctrl.configFilters['QUANTITY_IN_PERIOD'].value | number }} units
                             </li>
                             <li
-                                ng-if="vm.configFilters['TRAINING_SET_PERIOD']">
-                                {{ vm.configFilters['TRAINING_SET_PERIOD'].value }} months of historical records
+                                ng-if="$ctrl.configFilters['TRAINING_SET_PERIOD']">
+                                {{ $ctrl.configFilters['TRAINING_SET_PERIOD'].value }} months of historical records
                             </li>
                             <li
-                                ng-if="vm.trainingSegment !== null">
-                                Model with similar segment: {{ vm.trainingSegment.display_name }}
+                                ng-if="$ctrl.trainingSegment !== null">
+                                Model with similar segment: {{ $ctrl.trainingSegment.display_name }}
                             </li>
                             <li
-                                ng-if="vm.trainingProducts.length > 0">
+                                ng-if="$ctrl.trainingProducts.length > 0">
                                 Model with similar product(s): 
-                                <span ng-if="vm.trainingProducts.length === 1">{{ vm.trainingProductName }}</span>
-                                <span ng-if="vm.trainingProducts.length > 1">{{ vm.trainingProducts.length }} selected</span>
+                                <span ng-if="$ctrl.trainingProducts.length === 1">{{ $ctrl.trainingProductName }}</span>
+                                <span ng-if="$ctrl.trainingProducts.length > 1">{{ $ctrl.trainingProducts.length }} selected</span>
                             </li>
                         </ul>
-                        <ul ng-if="vm.type == 'custom_event' ">
-                            <li class="text-ellipsis" title="{{vm.getTrainingFileName()}}"> 
-                                Training File: {{ vm.getTrainingFileName() }}
+                        <ul ng-if="$ctrl.type == 'custom_event' ">
+                            <li class="text-ellipsis" title="{{$ctrl.getTrainingFileName()}}"> 
+                                Training File: {{ $ctrl.getTrainingFileName() }}
                             </li>
                             <li>
-                                One record per account: {{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}
+                                One record per account: {{ $ctrl.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}
                             </li>
                             <li>
-                                Include personal email domains: {{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}
+                                Include personal email domains: {{ $ctrl.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}
                             </li>
                             <li>
-                                Use curated attributes: {{ !vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.transformationGroup ? 'Yes' : 'No'}}
+                                Use curated attributes: {{ !$ctrl.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.transformationGroup ? 'Yes' : 'No'}}
                             </li>
                         </ul>
                     </dd>
@@ -82,64 +82,63 @@
 
             <h3>Job Status</h3>
             <dl class="step-progression">
-                <dt ng-class="{ 'started': (!vm.jobStarted || vm.startTimestamp)}">{{vm.getStatusLabel(vm.type, 0)}}</dt>
+                <dt ng-class="{ 'started': (!$ctrl.jobStarted || $ctrl.startTimestamp)}">Job Started</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
-                        ng-if="!vm.jobStarted"></i>
-                    <span ng-if="vm.startTimestamp">
+                        ng-if="!$ctrl.jobStarted"></i>
+                    <span ng-if="$ctrl.startTimestamp">
                         <i 
                         class="fa fa-check"></i>
-                        {{vm.startTimestamp | date:"MM/dd/yyyy 'at' h:mma"}}
+                        {{$ctrl.startTimestamp | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
-                <dt ng-class="{ 'started': (vm.loadingData || vm.completedSteps.load_data) }">{{vm.getStatusLabel(vm.type, 1)}}</dt>
+                <dt ng-class="{ 'started': ($ctrl.loadingData || $ctrl.completedSteps.load_data) }">Processing File</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
-                        ng-if="vm.loadingData"></i>
-                    <span ng-if="vm.completedSteps.load_data">
+                        ng-if="$ctrl.loadingData"></i>
+                    <span ng-if="$ctrl.completedSteps.load_data">
                         <i 
                         class="fa fa-check"></i>
-                        {{vm.completedSteps.load_data | date:"MM/dd/yyyy 'at' h:mma"}}
+                        {{$ctrl.completedSteps.load_data | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
-                <dt ng-class="{ 'started': (vm.matchingToDataCloud || vm.completedSteps.create_global_target_market || vm.completedSteps.create_global_model) }">{{vm.getStatusLabel(vm.type, 2)}}</dt>
-
+                <dt ng-class="{ 'started': ($ctrl.matchingToDataCloud || $ctrl.completedSteps.create_global_target_market || $ctrl.completedSteps.create_global_model) }">Matching to Data Cloud</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
-                        ng-if="vm.matchingToDataCloud"></i>
-                    <span ng-if="vm.type == 'cross_sell' && vm.completedSteps.create_global_target_market">
+                        ng-if="$ctrl.matchingToDataCloud"></i>
+                    <span ng-if="$ctrl.type == 'cross_sell' && $ctrl.completedSteps.create_global_target_market">
                         <i 
                         class="fa fa-check"></i>
-                        {{vm.completedSteps.create_global_target_market | date:"MM/dd/yyyy 'at' h:mma"}}
+                        {{$ctrl.completedSteps.create_global_target_market | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
-                    <span ng-if="vm.type == 'custom_event' && vm.completedSteps.create_global_model">
+                    <span ng-if="$ctrl.type == 'custom_event' && $ctrl.completedSteps.create_global_model">
                         <i 
                         class="fa fa-check"></i>
-                        {{vm.completedSteps.create_global_model | date:"MM/dd/yyyy 'at' h:mma"}}
+                        {{$ctrl.completedSteps.create_global_model | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
-                <dt ng-class="{ 'started': (vm.scoringTrainingSet || vm.completedSteps.score_training_set) }">{{vm.getStatusLabel(vm.type, 3)}}</dt>
+                <dt ng-class="{ 'started': ($ctrl.scoringTrainingSet || $ctrl.completedSteps.score_training_set) }">Scoring Training Set</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
-                        ng-if="vm.scoringTrainingSet"></i>
-                    <span ng-if="vm.completedSteps.score_training_set">
+                        ng-if="$ctrl.scoringTrainingSet"></i>
+                    <span ng-if="$ctrl.completedSteps.score_training_set">
                         <i 
                         class="fa fa-check"></i>
-                        {{vm.completedSteps.score_training_set | date:"MM/dd/yyyy 'at' h:mma"}}
+                        {{$ctrl.completedSteps.score_training_set | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
             </dl>
 
 
-            <div class="meter bar" ng-if="vm.status !== 'Completed' && vm.status !== 'Failed'">
-                <span class="indeterminate" ng-style="{ 'width': vm.progress }"></span>
+            <div class="meter bar" ng-if="$ctrl.status !== 'Completed' && $ctrl.status !== 'Failed'">
+                <span class="indeterminate" ng-style="{ 'width': $ctrl.progress }"></span>
             </div>
             <div>
-                <p><i class="fa fa-check" ng-if="vm.status === 'Completed'"></i> {{ vm.status }}</p>
+                <p><i class="fa fa-check" ng-if="$ctrl.status === 'Completed'"></i> {{ $ctrl.status }}</p>
             </div>
             
         </div>

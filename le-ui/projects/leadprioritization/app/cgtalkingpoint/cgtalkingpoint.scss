@@ -249,6 +249,10 @@
             padding: 3px 6px;
             border-bottom: #eee solid 1px;
             font-size: 11px;
+            &:hover {
+                background-color: #498ad4;
+                color: #fff;
+            }
         }
     }
     .control {

@@ -14,7 +14,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'lp.navigation.review'
 ])
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility,
-    NavUtility, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml, RatingEngine) {
+    NavUtility, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml, RatingEngine, Dashboard) {
     $scope.ResourceUtility = ResourceUtility;
 
     if(Model !== null){
@@ -48,8 +48,10 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         angular.extend(ModelStore, {
             metadata: null,
             data: model,
-            parentData: model
+            parentData: model,
+            dashboard: Dashboard
         });
+
     } else {
         $scope.RatingEngine = RatingEngine;
     }

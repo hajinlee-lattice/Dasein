@@ -2,18 +2,20 @@ angular.module('common.attributes.categories', [])
 .component('attrCategories', {
     templateUrl: '/components/datacloud/attributes/categories/categories.component.html',
     bindings: {
-        categories: '<'
+        categories: '<',
+        store: '<',
+        callback: '&'
     },
-    controller: function ($state, $stateParams, StateHistory, AttrConfigStore) {
+    controller: function ($state, $stateParams, StateHistory) {
         var vm = this;
 
-        vm.store = AttrConfigStore;
         vm.current = 1;
         vm.pagesize = 6;
         vm.catlength = 1;
 
         vm.$onInit = function() {
             vm.params = $stateParams;
+
             vm.category = vm.store.get('category');
             vm.catmap = vm.pruneEmptyCategories(angular.copy(vm.categories));
             vm.categories = Object.keys(vm.catmap);
@@ -37,13 +39,18 @@ angular.module('common.attributes.categories', [])
         }
 
         vm.click = function(category) {
-            ShowSpinner('Loading ' + category + ' Data', 'div.attr-results-container')
+            if (typeof (vm.callback) != undefined) {
+                vm.callback({category});
+            } else {
+                ShowSpinner('Loading ' + category + ' Data', 'div.attr-results-container');
+
+                $state.go('.', { 
+                    section: vm.params.section, 
+                    category: category, 
+                    subcategory: vm.params.subcategory 
+                });
+            }
             
-            $state.go('.', { 
-                section: vm.params.section, 
-                category: category, 
-                subcategory: vm.params.subcategory 
-            });
         };
 
         vm.categoryIcon = function(category) {
@@ -79,11 +86,15 @@ angular.module('common.attributes.categories', [])
         };
 
         vm.isActive = function(category) {
-            var x = vm.category == category;
-            var y = vm.getTo().category == category;
-            var z = vm.getFrom().category != category || vm.getTo().category == category;
+            if (!vm.params.section) {
+                return (vm.store.get('category') == category) ? true : false;
+            } else {
+                var x = vm.category == category;
+                var y = vm.getTo().category == category;
+                var z = vm.getFrom().category != category || vm.getTo().category == category;
 
-            return (x || y) && z;
+                return (x || y) && z;    
+            }
         };
     }
 });

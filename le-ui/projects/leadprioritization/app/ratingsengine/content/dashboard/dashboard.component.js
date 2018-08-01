@@ -3,7 +3,7 @@ angular.module('lp.ratingsengine.dashboard', [
 ])
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, 
-    RatingsEngineStore, RatingsEngineService,  Modal,
+    RatingsEngineStore, RatingsEngineService, AtlasRemodelStore, Modal,
     Dashboard, RatingEngine, Model, IsRatingEngine, IsPmml, Products, AuthorizationUtility, FeatureFlagService
 ) {
     var vm = this,
@@ -208,8 +208,44 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.initDataModel = function(){
 
-        // console.log(vm.ratingEngine);
-        // console.log(vm.dashboard);
+        // vm.dashboard.iterations = [
+        //     {
+        //         "id": "ai_lzgpprzdtsg_qwinfsuama",
+        //         "iteration": 1,
+        //         "created": 1532381484000,
+        //         "createdBy": "jhadden@lattice-engines.com",
+        //         "modelingJobStatus": "Failed",
+        //         "modelSummaryId": "ms__2b5aacdb-14b5-48f2-9dc0-6af5a1f8e20c-ai_vqeec",
+        //         "scoring": false
+        //     },
+        //     {
+        //         "id": "ai_lzgpprzdtsg_qwinfsuama",
+        //         "iteration": 2,
+        //         "created": 1532381484000,
+        //         "createdBy": "jhadden@lattice-engines.com",
+        //         "modelingJobStatus": "Completed",
+        //         "modelSummaryId": "ms__2b5aacdb-14b5-48f2-9dc0-6af5a1f8e20c-ai_vqeec",
+        //         "scoring": false
+        //     },
+        //     {
+        //         "id": "ai_lzgpprzdtsg_qwinfsuama",
+        //         "iteration": 3,
+        //         "created": 1532381484000,
+        //         "createdBy": "jhadden@lattice-engines.com",
+        //         "modelingJobStatus": "Completed",
+        //         "modelSummaryId": "ms__2b5aacdb-14b5-48f2-9dc0-6af5a1f8e20c-ai_vqeec",
+        //         "scoring": true
+        //     },
+        //     {
+        //         "id": "ai_lzgpprzdtsg_qwinfsuama",
+        //         "iteration": 4,
+        //         "created": 1532381484000,
+        //         "createdBy": "jhadden@lattice-engines.com",
+        //         "modelingJobStatus": "Pending",
+        //         "modelSummaryId": "ms__2b5aacdb-14b5-48f2-9dc0-6af5a1f8e20c-ai_vqeec",
+        //         "scoring": false
+        //     }
+        // ]
 
         vm.relatedItems = vm.dashboard.plays;
         vm.hasBuckets = vm.ratingEngine.counts != null;
@@ -230,8 +266,9 @@ angular.module('lp.ratingsengine.dashboard', [
         } else {
             var model = vm.ratingEngine.activeModel;
             var type = vm.ratingEngine.type.toLowerCase();
+
             if (type === 'cross_sell') {
-                if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig[type].filters.trainingProducts === null) {
+                if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment == null && model.AI.advancedModelingConfig[type].filters.targetProducts == null) {
                     vm.hasSettingsInfo = false;
                 } else {
                     vm.hasSettingsInfo = true;
@@ -288,8 +325,19 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.init = function() {
+
+        // console.log(vm.ratingEngine);
+        // console.log(vm.modelSummary);
+        // console.log(vm.dashboard);
+
+        // console.log($stateParams);
+
         vm.initModalWindow();
         vm.initDataModel();
+    }
+
+    vm.isIterationActive = function(iterationId){
+        return (vm.ratingEngine.activeModel.AI.id == iterationId) ? true : false;
     }
 
     vm.returnProductNameFromId = function(productId) {
@@ -347,6 +395,29 @@ angular.module('lp.ratingsengine.dashboard', [
             return false;
         }
     };
+
+    vm.remodel = function(iteration){
+        var engineId = vm.ratingEngine.id,
+            modelId = iteration.id;
+
+        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+            AtlasRemodelStore.setRemodelIteration(result);
+            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
+            $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
+        });
+    }
+
+    vm.viewIteration = function(iteration){
+
+        var modelId = iteration.modelSummaryId,
+            rating_id = $stateParams.rating_id;
+
+        $state.go('home.ratingsengine.dashboard', { 
+            rating_id: rating_id, 
+            modelId: modelId,
+            modelingJobStatus: null
+        },{reload:true});
+    }
 
     vm.init();
 });

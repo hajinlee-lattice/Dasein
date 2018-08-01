@@ -61,6 +61,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
         var widgetConfig = ModelStore.widgetConfig;
         var metadata = ModelStore.metadata;
+        var dashboard = ModelStore.dashboard;
         var modelDetails = data.ModelDetails;
 
         $scope.displayName = modelDetails[widgetConfig.NameProperty];
@@ -75,6 +76,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $scope.$on('statusChange', function(event, args) {
                 $scope.activeStatus = args.activeStatus;
             });
+
+            $scope.totalIterations = dashboard.iterations.length;
 
             // console.log(engineId);
             // console.log(ratingEngine);

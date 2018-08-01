@@ -37,6 +37,7 @@ angular.module('lp.ratingsengine')
         }
 
         this.currentRating = {};
+        this.remodelIteration = null;
         this.rule = null;
         this.rating = null;
         this.rating_id;
@@ -671,6 +672,13 @@ angular.module('lp.ratingsengine')
         this.rating_id = $stateParams.rating_id;
     }
 
+    this.getRatingEngine = function() {
+        return this.rating;
+    }
+    this.setRatingEngine = function(rating) {
+        this.rating = rating;   
+    }
+
     this.getProductsSelectedIds = function() {
         var ids = Object.keys(this.productsSelected);
         return ids;
@@ -788,7 +796,6 @@ angular.module('lp.ratingsengine')
     this.getTrainingProducts = function() {
         return this.trainingProducts;
     }
-
 
     this.nextSaveCustomEventRatingEngine = function(nextState){
 

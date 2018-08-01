@@ -1,5 +1,23 @@
 /*
-Icons
+Table of Contents
+1. Font Aweosome Overrides
+2. Custom Icons (SVG with PNG Modernizr fallbacks)
+*/
+
+
+/*
+1. Font Awesome Overrides
+======================================================== */
+.fa {
+	&.fa-sort {
+	    font-size: 10px;
+	}
+}
+
+
+
+/*
+2. Custom (SVG with PNG Modernizr fallbacks)
 ======================================================== */
 .ico {
 	display: inline-block;
@@ -70,13 +88,21 @@ Icons
 		-webkit-mask-image: url("/assets/images/ico-model.svg");
 		mask: url("/assets/images/ico-model.svg");
 	}
+	&.ico-check {
+		background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='20px' height='15px' viewBox='0 0 20 15' version='1.1'><g xmlns='http://www.w3.org/2000/svg' fill='%2300B04A' fill-rule='nonzero'><path d='M17.8839585,0.353500929 C17.643229,0.117781929 17.3505543,0 17.0065649,0 C16.6624157,0 16.3697409,0.117781929 16.1290114,0.353500929 L7.66453082,8.64907179 L3.87098841,4.9242165 C3.63010125,4.68849771 3.33758197,4.57071579 2.9935926,4.57071579 C2.64944557,4.57071579 2.35692848,4.68849771 2.11604132,4.9242165 L0.3612519,6.64135393 C0.120364744,6.87707271 0,7.16331407 0,7.50007757 C0,7.83668593 0.120364744,8.12308221 0.3612519,8.35864607 L5.03219011,12.9293619 L6.7871372,14.6464991 C7.02786669,14.8822181 7.32038378,15 7.66453082,15 C8.00852018,15 8.30103728,14.8820631 8.54192443,14.6464991 L10.2968737,12.9293619 L19.6387479,3.7879305 C19.8794774,3.5522115 19.9999998,3.26597036 19.9999998,2.92920686 C20.0001575,2.59259829 19.8794774,2.30635714 19.6387479,2.07063814 L17.8839585,0.353500929 Z' id='Shape'/></g></svg>"); 
+		background-size: 14px;
+		background-repeat: no-repeat;
+		background-position: center center;
+		width: 14px;
+    	height: 14px;
+	}
 	&.ico-dashboard {
 		background-color: transparent !important;
-		background: url("data:image/svg+xml;utf8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 40 39'><g stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'><g fill='%23ffffff'><path d='M1.96989318,28.7153 L30.8647793,28.7153 L30.8647793,2.44745 L1.96989318,2.44745 L1.96989318,28.7153 Z M32.0142736,0 L0.820398903,0 C0.329095378,0 0,0.3255 0,0.8153 L0,30.1847 C0,30.67295 0.329095378,31 0.820398903,31 L32.1796011,31 C32.6709046,31 33,30.67295 33,30.1847 L33,0.8153 C32.8362322,0.3255 32.5071368,0 32.0142736,0 Z'></path><polygon points='6 25 12 25 12 19 6 19'></polygon><polygon points='13.5 25 19.5 25 19.5 19 13.5 19'></polygon><polygon points='21 25 27 25 27 19 21 19'></polygon><polygon points='6 8 8 8 8 6 6 6'></polygon><polygon points='10 8 27 8 27 6 10 6'></polygon><polygon points='6 12 27 12 27 10 6 10'></polygon><polygon points='6 16 22 16 22 14 6 14'></polygon></g></g></svg>") no-repeat 2px 3px; 
+		background: url("data:image/svg+xml;utf8,<svg x='0px' y='0px' viewBox='0 0 40 39' version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><g stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'><g fill='%23ffffff'><path d='M1.96989318,28.7153 L30.8647793,28.7153 L30.8647793,2.44745 L1.96989318,2.44745 L1.96989318,28.7153 Z M32.0142736,0 L0.820398903,0 C0.329095378,0 0,0.3255 0,0.8153 L0,30.1847 C0,30.67295 0.329095378,31 0.820398903,31 L32.1796011,31 C32.6709046,31 33,30.67295 33,30.1847 L33,0.8153 C32.8362322,0.3255 32.5071368,0 32.0142736,0 Z'></path><polygon points='6 25 12 25 12 19 6 19'></polygon><polygon points='13.5 25 19.5 25 19.5 19 13.5 19'></polygon><polygon points='21 25 27 25 27 19 21 19'></polygon><polygon points='6 8 8 8 8 6 6 6'></polygon><polygon points='10 8 27 8 27 6 10 6'></polygon><polygon points='6 12 27 12 27 10 6 10'></polygon><polygon points='6 16 22 16 22 14 6 14'></polygon></g></g></svg>") no-repeat 2px 3px; 
 	}
 	&.ico-ratings {
 		background-color: transparent !important;
-		background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 23 25'><g data-name='Layer 2'><g id='Content'><path fill='%23fff' d='M13,11.05A4.95,4.95,0,1,0,18,16,5,5,0,0,0,13,11.05Zm2.13,8.22L13,17.73l-2.13,1.54.82-2.5L9.56,15.23h2.63l.81-2.5.81,2.5h2.63l-2.12,1.54Z'/><polygon fill='%23fff' points='9 0 9 4 13 4 9 0'/><path fill='%23fff' d='M13,9V5H8V0H0V16H6a7,7,0,0,1,7-7Z'/></g></g></svg>") no-repeat 4px 3px; 
+		background: url("data:image/svg+xml;utf8,<svg viewBox='0 0 23 25' xmlns='http://www.w3.org/2000/svg'><g data-name='Layer 2'><g id='Content'><path fill='%23fff' d='M13,11.05A4.95,4.95,0,1,0,18,16,5,5,0,0,0,13,11.05Zm2.13,8.22L13,17.73l-2.13,1.54.82-2.5L9.56,15.23h2.63l.81-2.5.81,2.5h2.63l-2.12,1.54Z'/><polygon fill='%23fff' points='9 0 9 4 13 4 9 0'/><path fill='%23fff' d='M13,9V5H8V0H0V16H6a7,7,0,0,1,7-7Z'/></g></g></svg>") no-repeat 4px 3px; 
 		&.ico-black {
 			background-color: transparent;
 			background-image: url("/assets/images/ico-ratings-header.png");

@@ -1,9 +1,10 @@
 <div class="ratingengine-training playbook-content container">
     <div class="inner-container">
-        <ng-form name="trainingForm" form-on-change="vm.formOnChange()" ng-model-options="{ debounce: 800 }" novalidate>
+        <ng-form name="trainingForm" form-on-change="$ctrl.formOnChange()" ng-model-options="{ debounce: 800 }" novalidate>
         
             <div class="header">
-                <h2>How do you want to train the model?</h2>
+                <h2>{{ $ctrl.pageTitle }}</h2>
+                <p ng-if="$stateParams.section != 'wizard.ratingsengine_segment'">Changing these settings will probably result in a different set of attributes.</p>
             </div>
 
             <div class="content-body">
@@ -19,26 +20,26 @@
                             <select 
                                 class="form-control"
                                 ng-disabled="!checkboxModel.spend"
-                                ng-model="vm.spendCriteria">
+                                ng-model="$ctrl.spendCriteria">
                                 <option value="GREATER_OR_EQUAL">At least</option>
                                 <option value="LESS_OR_EQUAL">At most</option>
                             </select>
                             <div class="input-group prepend" >
                                     <numerical-range-directive
-                                        config ="{{vm.getSpendConfigString()}}"
-                                        mainconfig="{{vm.getNumericalConfig()}}"
+                                        mainconfig="{{ $ctrl.getNumericalConfig() }}"
+                                        config="{{ $ctrl.getSpendConfigString() }}"
                                         showfrom="true"
                                         fromlabel="$"
                                         fromdisabled="!checkboxModel.spend" 
                                         initialvalidation="false"
                                         showto="false"
-                                        vm="vm" 
+                                        vm="$ctrl"
                                         form="trainingForm"
                                         type="" 
                                         bucketrestriction=""
                                         invalidcallback="true"
                                         showmessage="true"
-                                        changed="vm.callbackSpend(type, position, value)">
+                                        changed="$ctrl.callbackSpend(type, position, value)">
                                     </numerical-range-directive>
                             </div>
                         </div>
@@ -53,26 +54,26 @@
                             <select 
                                 class="form-control"
                                 ng-disabled="!checkboxModel.quantity"
-                                ng-model="vm.quantityCriteria">
+                                ng-model="$ctrl.quantityCriteria">
                                 <option value="GREATER_OR_EQUAL">At least</option>
                                 <option value="LESS_OR_EQUAL">At most</option>
                             </select>
                             <div class="input-group append">
                                 <numerical-range-directive 
-                                    mainconfig="{{vm.getNumericalConfig()}}"
-                                    config ="{{vm.getQuantityConfigString()}}"
+                                    mainconfig="{{ $ctrl.getNumericalConfig() }}"
+                                    config="{{ $ctrl.getQuantityConfigString() }}"
                                     fromdisabled="!checkboxModel.quantity" 
                                     initialvalidation="false"
                                     showfrom="true"
                                     showtolabel="true"
                                     tolabel="Units"
                                     showto="false"
-                                    vm="vm" 
+                                    vm="$ctrl" 
                                     form="trainingForm"
                                     type="" 
                                     bucketrestriction=""
                                     invalidcallback="true"
-                                    changed="vm.callbackQuantity(type, position, value)">
+                                    changed="$ctrl.callbackQuantity(type, position, value)">
                                 </numerical-range-directive>
                             </div>
                         </div>
@@ -86,20 +87,20 @@
                             <p>When modeling, only use historical records from the last</p>
                             <div class="input-group append">
                                 <numerical-range-directive 
-                                    mainconfig="{{vm.getNumericalConfig()}}"
-                                    config ="{{vm.getPeriodConfigString()}}"
+                                    mainconfig="{{ $ctrl.getNumericalConfig() }}"
+                                    config ="{{ $ctrl.getPeriodConfigString() }}"
                                     initialvalidation="false"
                                     fromdisabled="!checkboxModel.periods" 
                                     showfrom="true"
                                     showtolabel="true"
                                     tolabel="months"
                                     showto="false"
-                                    vm="vm" 
+                                    vm="$ctrl"
                                     form="trainingForm"
                                     type="" 
                                     bucketrestriction=""
                                     invalidcallback="true"
-                                    changed="vm.callbackPeriod(type, position, value)">
+                                    changed="$ctrl.callbackPeriod(type, position, value)">
                                 </numerical-range-directive>
                             </div>
                         </div>
@@ -109,8 +110,8 @@
                             <p>Let me model on a similar segment, not exactly the one I want to sell into</p>
                             <chips
                                 placeholder="Search for a similar segment"
-                                datasource="vm.segments" 
-                                callback-function="vm.segmentCallback(args)"
+                                datasource="$ctrl.segments" 
+                                callback-function="$ctrl.segmentCallback(args)"
                                 single-selection="true"
                                 id="name"
                                 displayname="display_name"
@@ -124,8 +125,8 @@
                             <p>Let me model on similar products, not exactly the ones I want to sell too</p>
                             <chips
                                 placeholder="Search for similar products" 
-                                datasource="vm.products"
-                                callback-function="vm.productsCallback(args)"
+                                datasource="$ctrl.products"
+                                callback-function="$ctrl.productsCallback(args)"
                                 single-selection="false"
                                 id="ProductId"
                                 displayname="ProductName"
@@ -137,33 +138,33 @@
                 </ul><!-- End .checkbox-list -->
                 <ul class="data">
                     <li>
-                        <h3>Modeling</h3>
+                        <h3>Effect on Modeling</h3>
                         <div class="stats-group">
                             <dl class="stats">
                                 <dt>Records Selected</dt>
                                 <dd>
-                                    <span ng-if="!vm.recordsCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
-                                    <span ng-if="vm.recordsCountReturned">{{ vm.recordsCount | number }}</span>
+                                    <span ng-if="!$ctrl.recordsCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="$ctrl.recordsCountReturned">{{ $ctrl.recordsCount | number }}</span>
                                 </dd>  
                             </dl>
                             <dl class="stats">
-                                <dt ng-if="vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE'">First Purchases</dt>
-                                <dt ng-if="vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE'">Repeat Purchases</dt>
+                                <dt ng-if="$ctrl.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE'">First Purchases</dt>
+                                <dt ng-if="$ctrl.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE'">Repeat Purchases</dt>
                                 <dd>
-                                    <span ng-if="!vm.purchasesCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
-                                    <span ng-if="vm.purchasesCountReturned">{{ vm.purchasesCount | number }}</span>
+                                    <span ng-if="!$ctrl.purchasesCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="$ctrl.purchasesCountReturned">{{ $ctrl.purchasesCount | number }}</span>
                                 </dd>
                             </dl>
                         </div>
                     </li>
                     <li>
-                        <h3>Scoring</h3>
+                        <h3>Effect on Scoring</h3>
                         <div class="stats-group">
                             <dl class="stats">
                                 <dt>Accounts to be scored</dt>
                                 <dd>
-                                    <span ng-if="!vm.scoringCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
-                                    <span ng-if="vm.scoringCountReturned">{{ vm.scoringCount | number }}</span>
+                                    <span ng-if="!$ctrl.scoringCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                    <span ng-if="$ctrl.scoringCountReturned">{{ $ctrl.scoringCount | number }}</span>
                                 </dd>
                             </dl>
                         </div>

@@ -9,6 +9,7 @@ angular
         'lp.ratingsengine.ratingsenginetype',
         'lp.ratingsengine.dashboard',
         'lp.ratingsengine.activatescoring',
+        'lp.ratingsengine.remodel',
         'lp.notes',
         'lp.ratingsengine.wizard.segment',
         'lp.ratingsengine.wizard.attributes',
@@ -97,7 +98,7 @@ angular
                 }
             })
             .state('home.ratingsengine.dashboard', {
-                url: '/dashboard/:modelId/:rating_id',
+                url: '/:rating_id/dashboard/:modelId',
                 params: {
                     pageIcon: 'ico-model',
                     pageTitle: 'Model',
@@ -1159,7 +1160,7 @@ angular
             .state('home.ratingsengine.productpurchase.segment.products.prioritization.training', {
                 url: '/training',
                 resolve: {
-                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                    ratingEngine: ['$q', '$stateParams', 'RatingsEngineStore', function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 
                         RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
@@ -1167,11 +1168,11 @@ angular
                         });
 
                         return deferred.promise;
-                    },
-                    Segments: function (SegmentService) {
+                    }],
+                    segments: ['SegmentService', function (SegmentService) {
                         return SegmentService.GetSegments();
-                    },
-                    Products: function ($q, $stateParams, RatingsEngineStore) {
+                    }],
+                    products: ['$q', '$stateParams', 'RatingsEngineStore', function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 
                         var params = {
@@ -1181,15 +1182,12 @@ angular
                         RatingsEngineStore.getProducts(params).then(function (result) {
                             deferred.resolve(result);
                         });
+
                         return deferred.promise;
-                    }
+                    }]
                 },
                 views: {
-                    'wizard_content@home.ratingsengine.productpurchase': {
-                        controller: 'RatingsEngineAITraining',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/training/training.component.html'
-                    }
+                    'wizard_content@home.ratingsengine.productpurchase': 'ratingsEngineAITraining'
                 }
             })
             .state('home.ratingsengine.productpurchase.segment.products.prioritization.training.creation', {
@@ -1199,7 +1197,7 @@ angular
                     pageTitle: 'Models',
                 },
                 resolve: {
-                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                    ratingEngine: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 
                         RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
@@ -1208,7 +1206,7 @@ angular
 
                         return deferred.promise;
                     },
-                    Products: function ($q, $stateParams, RatingsEngineStore) {
+                    products: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 
                         var params = {
@@ -1233,11 +1231,7 @@ angular
                         templateUrl: '/components/wizard/progress/progress.component.html'
 
                     },
-                    'wizard_content@home.ratingsengine.productpurchase': {
-                        controller: 'RatingsEngineCreation',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/creation/creation.component.html'
-                    }
+                    'wizard_content@home.ratingsengine.productpurchase': 'ratingsEngineCreation'
                 }
             })
             .state('home.ratingsengine.customevent', {
@@ -1442,7 +1436,7 @@ angular
                     pageTitle: 'Models',
                 },
                 resolve: {
-                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                    ratingEngine: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 
                         RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
@@ -1451,7 +1445,7 @@ angular
 
                         return deferred.promise;
                     },
-                    Products: function () {
+                    products: function () {
                         return [];
                     },
                     DisableWizardNavOnLastStep: function () {
@@ -1465,11 +1459,7 @@ angular
                         templateUrl: '/components/wizard/progress/progress.component.html'
 
                     },
-                    'wizard_content@home.ratingsengine.customevent': {
-                        controller: 'RatingsEngineCreation',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/creation/creation.component.html'
-                    }
+                    'wizard_content@home.ratingsengine.customevent': 'ratingsEngineCreation'
                 }
             });
     });

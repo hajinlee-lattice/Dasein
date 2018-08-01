@@ -559,7 +559,7 @@ angular.module('common.datacloud')
             max = opts.max || null,
             onlySelectedAttributes = opts.onlySelectedAttributes || null,
             url = this.url('/attributes','/insights');
-        
+
         $http({
             method: 'get',
             url: url,
