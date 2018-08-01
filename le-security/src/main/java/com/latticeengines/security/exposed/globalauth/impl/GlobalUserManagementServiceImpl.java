@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
 import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -840,13 +842,21 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
      * @return entire zendesk user after the operation
      */
     private ZendeskUser upsertZendeskUser(GlobalAuthUser user) {
-        String name = user.getFirstName();
         ZendeskUser req = new ZendeskUser();
         req.setEmail(user.getEmail());
-        req.setName(name);
+        req.setName(getZendeskName(user));
         // verified and unsuspended
         req.setVerified(true);
         req.setSuspended(false);
         return zendeskService.createOrUpdateUser(req);
+    }
+
+    /*
+     * get formated username for zendesk user
+     */
+    private String getZendeskName(@NotNull GlobalAuthUser user) {
+        String firstName = Optional.ofNullable(user.getFirstName()).orElse("");
+        String lastName = Optional.ofNullable(user.getLastName()).orElse("");
+        return String.format("%s %s", firstName, lastName);
     }
 }
