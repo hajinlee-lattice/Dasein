@@ -43,29 +43,33 @@ public class SchemaRepository {
     private SchemaRepository() {
     }
 
-    public Table getSchema(BusinessEntity entity) {
+    public Table getSchema(BusinessEntity entity, boolean cdlSchema) {
         Table table = null;
         switch (entity) {
-        case Account:
-            table = getAccountSchema();
-            break;
-        case Contact:
-            table = getContactSchema();
-            break;
-        case Product:
-            table = getProductSchema();
-            break;
-        case Transaction:
-            table = getTransactionSchema();
-            break;
-        case PeriodTransaction:
-            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation, false);
-            break;
-        default:
-            throw new RuntimeException(String.format("Unsupported schema %s", entity));
+            case Account:
+                table = getAccountSchema(cdlSchema);
+                break;
+            case Contact:
+                table = getContactSchema();
+                break;
+            case Product:
+                table = getProductSchema();
+                break;
+            case Transaction:
+                table = getTransactionSchema();
+                break;
+            case PeriodTransaction:
+                table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation, false);
+                break;
+            default:
+                throw new RuntimeException(String.format("Unsupported schema %s", entity));
         }
         table.addAttributes(matchingAttributes(entity));
         return table;
+    }
+
+    public Table getSchema(BusinessEntity entity) {
+        return getSchema(entity, false);
     }
 
     public Table getSchema(SchemaInterpretation schema) {
@@ -455,6 +459,10 @@ public class SchemaRepository {
     }
 
     private Table getAccountSchema() {
+        return getAccountSchema(false);
+    }
+
+    private Table getAccountSchema(boolean cdlSchema) {
         Table table = createTable(SchemaInterpretation.Account);
         table.setPrimaryKey(createPrimaryKey(InterfaceName.AccountId.name()));
 
@@ -520,15 +528,6 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
-        table.addAttribute(attr("Event") //
-                .allowedDisplayNames(Sets.newHashSet("EVENT", "WON", "P1_EVENT")) //
-                .type(Schema.Type.BOOLEAN) //
-                .notNull() //
-                .interfaceName(InterfaceName.Event) //
-                .logicalType(LogicalDataType.Event) //
-                .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .build());
         table.addAttribute(attr(InterfaceName.Longitude.name()) //
                 .allowedDisplayNames(Sets.newHashSet("LONGITUDE")) //
                 .type(Schema.Type.STRING) //
@@ -543,7 +542,18 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
-
+        Attribute eventAttr = attr("Event") //
+                .allowedDisplayNames(Sets.newHashSet("EVENT", "WON", "P1_EVENT")) //
+                .type(Schema.Type.BOOLEAN) //
+                .interfaceName(InterfaceName.Event) //
+                .logicalType(LogicalDataType.Event) //
+                .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build();
+        if (!cdlSchema) {
+            eventAttr.setNullable(false);
+        }
+        table.addAttribute(eventAttr);
         return table;
     }
 

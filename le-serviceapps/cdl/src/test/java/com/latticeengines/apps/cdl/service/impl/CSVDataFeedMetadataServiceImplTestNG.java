@@ -22,8 +22,8 @@ public class CSVDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void testCompareMetadata() {
-        Table sourceTable = SchemaRepository.instance().getSchema(BusinessEntity.Account);
-        Table targetTable = SchemaRepository.instance().getSchema(BusinessEntity.Account);
+        Table sourceTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true);
+        Table targetTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true);
         Assert.assertTrue(csvDataFeedMetadataService.compareMetadata(sourceTable, targetTable, false));
         sourceTable.removeAttribute(InterfaceName.Website.name());
         Assert.assertFalse(csvDataFeedMetadataService.compareMetadata(sourceTable, targetTable, false));

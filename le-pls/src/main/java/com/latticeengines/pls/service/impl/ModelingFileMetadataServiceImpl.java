@@ -162,7 +162,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask == null) {
-            table = getTableFromParameters(sourceFile.getSchemaInterpretation());
+            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true);
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
         } else {
             table = dataFeedTask.getImportTemplate();
@@ -266,7 +266,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (BusinessEntity.Account.equals(entity)) {
             setCDLExternalSystems(fieldMappingDocument);
         }
-        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity) : templateTable;
+        Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity, true) : templateTable;
         Set<String> reservedName = standardTable.getAttributes().stream()
                 .map(Attribute::getName)
                 .collect(Collectors.toSet());

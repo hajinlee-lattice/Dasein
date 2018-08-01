@@ -115,7 +115,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         Pair<Table, List<AttrConfig>> metadataPair = dataFeedMetadataService.getMetadata(importConfig, entity);
         Table newMeta = metadataPair.getLeft();
         List<AttrConfig> attrConfigs = metadataPair.getRight();
-        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
+        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true);
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
@@ -362,7 +362,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return false;
         }
         Map<String, Attribute> standardAttrs = new HashMap<>();
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity));
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true);
         standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
         Map<String, Attribute> templateAttrs = new HashMap<>();
         finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
