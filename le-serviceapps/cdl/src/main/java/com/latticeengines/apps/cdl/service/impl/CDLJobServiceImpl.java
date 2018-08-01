@@ -199,10 +199,19 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.info(String.format("tenant: %s", tenant.getId()));
             CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
             Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
-            if (invokeTime!= null && currentTimeMillis > invokeTime.getTime()) {
-                log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
-                list.add(new HashMap.SimpleEntry<>(invokeTime,
-                new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
+            if (invokeTime!= null) {
+                if (dataFeed.getNextInvokeTime() == null || !dataFeed.getNextInvokeTime().equals(invokeTime)) {
+                    try {
+                        dataFeedProxy.updateDataFeedNextinvoketime(tenant.getId(), invokeTime);
+                    } catch (Exception e) {
+                        log.error(e.getMessage());
+                    }
+                }
+                if (currentTimeMillis > invokeTime.getTime()) {
+                    log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
+                    list.add(new HashMap.SimpleEntry<>(invokeTime,
+                            new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
+                }
             }
         }
 

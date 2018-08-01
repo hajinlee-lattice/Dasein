@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -27,6 +28,8 @@ public interface DataFeedService {
     void updateDataFeedMaintenanceMode(String customerSpace, boolean maintenanceMode);
 
     void updateDataFeed(String customerSpace, String datafeedName, String status);
+
+    void updateDataFeedNextInvokeTime(String customerSpace, Date time);
 
     DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
 

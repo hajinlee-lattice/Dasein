@@ -270,6 +270,17 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
     }
 
+    @Override
+    public void updateDataFeedNextInvokeTime(String customerSpace, Date time) {
+        DataFeed datafeed = findDataFeedByName(customerSpace, "");
+        if (datafeed == null) {
+            throw new NullPointerException("Datafeed is null. Cannot update next invoke time.");
+        } else {
+            datafeed.setNextInvokeTime(time);
+            datafeedEntityMgr.update(datafeed);
+        }
+    }
+
     private DataFeedExecution failExecution(DataFeed datafeed, String initialDataFeedStatus) {
         DataFeedExecution execution = datafeed.getActiveExecution();
         execution.setStatus(DataFeedExecution.Status.Failed);

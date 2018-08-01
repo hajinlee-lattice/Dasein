@@ -142,6 +142,11 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonProperty("maintenance_mode")
     private boolean maintenanceMode = false;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "NEXT_INVOKE_TIME", nullable = true)
+    @JsonProperty("next_invoke_time")
+    private Date nextInvokeTime;
+
     @Transient
     @JsonIgnore
     private Map<String, Map<String, Map<String, DataFeedTask>>> taskMap = new HashMap<>();
@@ -337,6 +342,14 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setRebuildTransaction(Boolean rebuildTransaction) {
         this.rebuildTransaction = rebuildTransaction;
+    }
+
+    public Date getNextInvokeTime() {
+        return nextInvokeTime;
+    }
+
+    public void setNextInvokeTime(Date nextInvokeTime) {
+        this.nextInvokeTime = nextInvokeTime;
     }
 
     public enum Status {

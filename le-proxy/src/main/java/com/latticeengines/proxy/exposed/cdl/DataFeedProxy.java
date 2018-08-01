@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -110,6 +111,13 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace), status);
         put("updateDataFeedStatus", url);
     }
+
+    public void updateDataFeedNextinvoketime(String customerSpace, Date time) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/nextinvoketime/{time}",
+                shortenCustomerSpace(customerSpace), time);
+        put("updateDataFeedNextinvoketime", url);
+    }
+
 
     public Boolean dataFeedTaskExist(String customerSpace, String dataFeedType, String entity) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{dataFeedType}/{entity}/exist",
