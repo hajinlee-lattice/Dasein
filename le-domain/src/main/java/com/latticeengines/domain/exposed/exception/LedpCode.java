@@ -304,7 +304,7 @@ public enum LedpCode {
             "There is no active Rating Model associated with the current Rating Engine {0} and thus it cannot be activated."), //
     LEDP_18181("The current Rating Engine {0} is not inactive thus it cannot be deleted."), //
     LEDP_18182("Submit {0} job failed: {1}"), //
-    LEDP_18183("Column name {0} has potential conflict with system defined name, Please don't begin with {1}"), //
+    LEDP_18183("Column name {0} has potential conflict with system defined name"), //
     LEDP_18184("Job cannot be null or incomplete"), //
     LEDP_18185("User {0} does not have the right to deactivate attribute"), //
     LEDP_18186("No scoring iteration set for Rating Engine: {0}"), //
