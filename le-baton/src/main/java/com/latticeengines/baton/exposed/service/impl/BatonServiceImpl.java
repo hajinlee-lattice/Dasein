@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
@@ -617,7 +615,6 @@ public class BatonServiceImpl implements BatonService {
         return products.stream().anyMatch(product -> hasProduct(customerSpace, product));
     }
 
-    @PostConstruct
     private static TreeCache getTreeCache() {
         if (cache == null) {
             synchronized (BatonServiceImpl.class) {
