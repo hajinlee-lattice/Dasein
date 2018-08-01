@@ -22,7 +22,7 @@ angular.module('lp.ratingsengine.remodel', [
                 WizardProgressItems: function ($stateParams, AtlasRemodelStore) {
                     return [
                         { label: 'Training Changes', state: 'training', nextFn: '', progressDisabled: false },
-                        { label: 'Available Attributes', state: 'training.attributes', nextFn: AtlasRemodelStore.saveIteration, progressDisabled: false },
+                        { label: 'Attributes Enablement', state: 'training.attributes', nextFn: AtlasRemodelStore.saveIteration, progressDisabled: false },
                         { label: 'Creation', state: 'training.attributes.creation', nextFn: '', progressDisabled: true }
                     ];
                 },

@@ -151,8 +151,13 @@
                                     <span ng-if="iteration.modelingJobStatus === 'Pending'" class="fa fa-clock-o"></span>
                                 </td>
                                 <td>
-                                    <button class="button link-button" ng-click="vm.viewIteration(iteration)">View</button>
-                                    <button class="button link-button" ng-click="vm.remodel(iteration)">Remodel</button>
+                                    <button 
+                                        class="button link-button" 
+                                        ng-click="vm.viewIteration(iteration)"
+                                        ng-disabled="iteration.modelingJobStatus === 'Pending'">View</button>
+                                    <button 
+                                        class="button link-button" 
+                                        ng-click="vm.remodel(iteration)">Remodel</button>
                                 </td>
                             </tr>
                         </tbody>

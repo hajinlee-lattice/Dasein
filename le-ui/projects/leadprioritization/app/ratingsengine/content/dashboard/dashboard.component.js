@@ -328,7 +328,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
         // console.log(vm.ratingEngine);
         // console.log(vm.modelSummary);
-        // console.log(vm.dashboard);
+        console.log(vm.dashboard);
 
         // console.log($stateParams);
 
@@ -408,6 +408,8 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.viewIteration = function(iteration){
+
+        console.log(iteration);
 
         var modelId = iteration.modelSummaryId,
             rating_id = $stateParams.rating_id;

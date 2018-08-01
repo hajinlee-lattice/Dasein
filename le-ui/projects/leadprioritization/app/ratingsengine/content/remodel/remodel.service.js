@@ -49,6 +49,7 @@ angular.module('lp.ratingsengine.remodel')
         var deferred = $q.defer();
 
         AtlasRemodelService.getAttributes(engineId, modelId).then(function(result) {
+
             deferred.resolve(result);
         });
 
@@ -66,7 +67,9 @@ angular.module('lp.ratingsengine.remodel')
 
         // Sanitize attributes to remove OriginalApprovedUsage (used when toggling Enable/Disable in Attributes screen)
         angular.forEach(attributes, function(category){
-            var modifiedAttributes = category.filter(attribute => attribute.OriginalApprovedUsage);
+            var modifiedAttributes = category.filter(function(attribute) {
+                return attribute.OriginalApprovedUsage;
+            });
             if(modifiedAttributes.length > 0){
                 angular.forEach(modifiedAttributes, function(attribute){
                     delete attribute.OriginalApprovedUsage; 
@@ -75,7 +78,7 @@ angular.module('lp.ratingsengine.remodel')
         });
 
         // Set sanitized attributes and created by properties prior to saving iteration
-        iteration.AI.ratingmodel_attributes = attributes;
+        // iteration.AI.ratingmodel_attributes = attributes;
         iteration.AI.createdBy = createdBy;
 
         // Save iteration
