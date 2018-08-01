@@ -64,8 +64,6 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
 
         vm.setCategoryData = function(category){
             AtlasRemodelStore.set('category', category);
-            // AtlasRemodelStore.getCategoryAttributes(vm.attributes[category]);
-            // AtlasRemodelStore.setRemodelAttributes(vm.attributes[category]);
         }
     }
 });

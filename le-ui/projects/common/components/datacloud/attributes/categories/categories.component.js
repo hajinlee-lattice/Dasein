@@ -6,7 +6,7 @@ angular.module('common.attributes.categories', [])
         store: '<',
         callback: '&'
     },
-    controller: function ($state, $stateParams, StateHistory) {
+    controller: function ($state, $scope, $stateParams, StateHistory) {
         var vm = this;
 
         vm.current = 1;
@@ -40,7 +40,7 @@ angular.module('common.attributes.categories', [])
 
         vm.click = function(category) {
             if (!vm.params.section) {
-                vm.callback({category});
+                vm.callback({category: category});
             } else {
                 ShowSpinner('Loading ' + category + ' Data', 'div.attr-results-container');
 
