@@ -337,7 +337,11 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.isIterationActive = function(iterationId){
-        return (vm.ratingEngine.activeModel.AI.id == iterationId) ? true : false;
+        if(vm.ratingEngine.activeModel.AI && vm.ratingEngine.activeModel.AI.id == iterationId){
+            return true;
+        }else {
+            return false;
+        }
     }
 
     vm.returnProductNameFromId = function(productId) {
