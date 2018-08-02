@@ -27,12 +27,16 @@ import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExterna
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.graph.traversal.impl.ReverseTopologicalTraverse;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -279,8 +283,19 @@ public class ComponentOrchestrator {
                                 || !(batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId,
                                         dependency.getName())).state.equals(BootstrapState.State.OK)) {
                             failed.add(component.getName());
-                            log.error(String.format("Component %s's dependency: %s is not met", component.getName(),
-                                    dependency.getName()));
+                            String message = String.format("Component %s's dependency: %s is not met",
+                                    component.getName(), dependency.getName());
+                            log.error(message);
+                            try {
+                                BootstrapStateUtil.setState(
+                                        PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                                                CustomerSpace.parse(tenantId), component.getName()),
+                                        BootstrapState.constructErrorState(0, 0, message));
+                            } catch (Exception e) {
+                                log.error(String.format(
+                                        "Unexpected failure at attempting to set bootstrap state for tenant %s component %s",
+                                        tenantId, component.getName()));
+                            }
                             return;
                         }
                     }
