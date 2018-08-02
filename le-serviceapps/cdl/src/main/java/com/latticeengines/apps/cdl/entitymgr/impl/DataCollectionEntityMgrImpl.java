@@ -113,6 +113,17 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
     }
 
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public List<Object[]> findTableNamesOfAllRole(String collectionName){
+        List<Object[]> tableNames = dataCollectionDao.findTableNamesOfAllRole(collectionName);
+        if (tableNames == null){
+            return Collections.emptyList();
+        }else{
+            return tableNames;
+        }
+    }
+
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,

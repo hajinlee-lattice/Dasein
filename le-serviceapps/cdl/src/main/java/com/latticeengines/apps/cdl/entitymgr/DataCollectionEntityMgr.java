@@ -32,4 +32,6 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
     void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer);
 
     List<DataCollectionTable> findTablesFromCollection(String collectionName, String tableName);
+
+    List<Object[]> findTableNamesOfAllRole(String collectionName);
 }

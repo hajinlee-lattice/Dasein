@@ -11,4 +11,6 @@ public interface DataCollectionDao extends BaseDao<DataCollection> {
     List<String> getTableNamesOfRole(String collectionName, TableRoleInCollection tableRole,
                                      DataCollection.Version version);
 
+    List<Object[]> findTableNamesOfAllRole(String collectionName);
+
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,12 +19,10 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.dynamodbv2.document.spec.UpdateTableSpec;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
@@ -38,7 +36,6 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace.TableSpace;
-import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy.Entity;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -51,8 +48,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
-
-import javafx.scene.control.Tab;
 
 @Component("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
@@ -299,6 +294,31 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return dataCollectionEntityMgr.findTableNamesOfRole(collectionName, tableRole, version);
     }
 
+    @Override
+    public Map<TableRoleInCollection, Map<Version, List<String>>> getTableRoleNameMap(String customerSpace, String collectionName){
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+        List<Object[]> tableNamesOfAllRole =  dataCollectionEntityMgr.findTableNamesOfAllRole(collectionName);
+        Map<TableRoleInCollection, Map<Version, List<String>>> tableRoleNames = new HashMap<>();
+        for(Iterator iterator = tableNamesOfAllRole.iterator(); iterator.hasNext();){
+            Object[] objects = (Object[]) iterator.next();
+            String name = objects[0].toString();
+            TableRoleInCollection role = (TableRoleInCollection)objects[1];
+            Version version = (Version)objects[2];
+            if (!tableRoleNames.containsKey(role)){
+                tableRoleNames.put(role,new HashMap<>());
+            }
+            Map<Version,List<String>> versionTableNamesMap = tableRoleNames.get(role);
+            if (!versionTableNamesMap.containsKey(version)){
+                versionTableNamesMap.put(version,new ArrayList<>());
+            }
+            versionTableNamesMap.get(version).add(name);
+        }
+        return tableRoleNames;
+    }
+
     public AttributeRepository getAttrRepo(String customerSpace, String collectionName,
             DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
@@ -440,10 +460,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         CDLDataSpace.setActiveVersion(getActiveVersion(customerSpace));
         Map<BusinessEntity, Map<BusinessEntity.DataStore, List<TableSpace>>>   entities = new HashMap<>();
         Set<TableRoleInCollection> tableRolesWithEntity = new HashSet<>();
-        Map<Version,AttributeRepository> versionAttrMap = new HashMap<>();
+        Map<TableRoleInCollection, Map<Version, List<String>>> tableRoleNames = getTableRoleNameMap(customerSpace,null);
         Map<Version, Map<String,Table>> versionTableMap = new HashMap<>();
         for(Version version:Version.values()) {
-            versionAttrMap.put(version, getAttrRepo(customerSpace, null, version));
             Map<String, Table> tableNameMap = new HashMap<>();
             List<Table> tableList = getTables(customerSpace, null, null, version);
             for(Table table:tableList) {
@@ -451,7 +470,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             }
             versionTableMap.put(version,tableNameMap);
         }
-
         for(BusinessEntity entity : BusinessEntity.values()) {
             Map<BusinessEntity.DataStore, List<TableSpace>> dataStoreMap = new HashMap<>();
             for(BusinessEntity.DataStore dataStore:BusinessEntity.DataStore.values()) {
@@ -459,11 +477,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 for (DataCollection.Version version:DataCollection.Version.values()) {
                     TableRoleInCollection tableRole = getTableRoleFromStore(entity,dataStore);
                     tableRolesWithEntity.add(tableRole);
-                    List<String> tableNames = new ArrayList<>();
                     List<Table> tables = new ArrayList<>();
-                    if (versionAttrMap.get(version) == null)
+                    if (MapUtils.isEmpty(tableRoleNames.get(tableRole))){
                         continue;
-                    updateTableNames(tableNames, versionAttrMap, tableRole, version);
+                    }
+                    List<String> tableNames = tableRoleNames.get(tableRole).get(version);
+                    if (CollectionUtils.isEmpty(tableNames)){
+                        continue;
+                    }
                     UpdateTables(tableNames, tables, versionTableMap, version);
                     if (CollectionUtils.isEmpty(tableNames) && CollectionUtils.isEmpty(tables)) {
                         continue;
@@ -475,17 +496,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                     tableSpace.setTableRole(tableRole);
                     tableSpaceList.add(tableSpace);
                 }
-                if (CollectionUtils.isNotEmpty(tableSpaceList))
+                if (CollectionUtils.isNotEmpty(tableSpaceList)){
                     dataStoreMap.put(dataStore, tableSpaceList);
+                }
             }
             if (MapUtils.isNotEmpty(dataStoreMap)) {
                 entities.put(entity,dataStoreMap);
             }
         }
-       CDLDataSpace.setEntities(entities);
-       Map<String, List<TableSpace>> others = getOtherTableRoles(tableRolesWithEntity,versionAttrMap,versionTableMap);
-       CDLDataSpace.setOthers(others);
-       return CDLDataSpace;
+        CDLDataSpace.setEntities(entities);
+        Map<String, List<TableSpace>> others = getOtherTableRoles(tableRolesWithEntity,tableRoleNames,versionTableMap);
+        CDLDataSpace.setOthers(others);
+        return CDLDataSpace;
     }
 
     private TableRoleInCollection getTableRoleFromStore(BusinessEntity entity,BusinessEntity.DataStore dataStore) {
@@ -519,35 +541,38 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             tableSpace.setTables(tableNames);
         }
         switch (dataStore) {
-        case Batch:
-            for (Table table:tables) {
-                if (CollectionUtils.isNotEmpty(table.getExtracts())) {
-                    hdfsPaths.add(table.getExtracts().get(0).getPath());
+            case Batch:
+                for (Table table:tables) {
+                    if (CollectionUtils.isNotEmpty(table.getExtracts())) {
+                        hdfsPaths.add(table.getExtracts().get(0).getPath());
+                    }
                 }
-            }
-            tableSpace.setHdfsPath(hdfsPaths);
-            break;
-        case Serving:
-            tableSpace.setTables(tableNames);
-            break;
-        default:
-            throw new UnsupportedOperationException("Unknown data store " + dataStore);
+                tableSpace.setHdfsPath(hdfsPaths);
+                break;
+            case Serving:
+                tableSpace.setTables(tableNames);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown data store " + dataStore);
         }
         tableSpace.setVersion(version);
         return tableSpace;
     }
 
-    private Map<String, List<TableSpace>> getOtherTableRoles(Set<TableRoleInCollection> tableRolesWithEntity,Map<Version,AttributeRepository> versionAttrMap,Map<Version, Map<String,Table>> versionTableMap){
+    private Map<String, List<TableSpace>> getOtherTableRoles(Set<TableRoleInCollection> tableRolesWithEntity,Map<TableRoleInCollection, Map<Version, List<String>>> tableRoleNames,Map<Version, Map<String,Table>> versionTableMap){
         Map<String, List<TableSpace>> others = new HashMap<>();
         for (TableRoleInCollection tableRole:TableRoleInCollection.values()) {
             if (!tableRolesWithEntity.contains(tableRole)) {
                 List<TableSpace> tableSpaceList = new ArrayList<>();
                 for(DataCollection.Version version:DataCollection.Version.values()) {
-                    List<String> tableNames = new ArrayList<>();
                     List<Table> tables = new ArrayList<>();
-                    if (versionAttrMap.get(version) == null)
+                    if (MapUtils.isEmpty(tableRoleNames.get(tableRole))){
                         continue;
-                    updateTableNames(tableNames, versionAttrMap, tableRole, version);
+                    }
+                    List<String> tableNames = tableRoleNames.get(tableRole).get(version);
+                    if (CollectionUtils.isEmpty(tableNames)){
+                        continue;
+                    }
                     UpdateTables(tableNames, tables, versionTableMap, version);
                     if (CollectionUtils.isEmpty(tableNames) && CollectionUtils.isEmpty(tables)) {
                         continue;
@@ -565,13 +590,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             }
         }
         return others;
-    }
-
-    public void updateTableNames(List<String> tableNames,Map<Version,AttributeRepository> versionAttrMap,TableRoleInCollection tableRole,DataCollection.Version version) {
-        String tableName = versionAttrMap.get(version).getTableName(tableRole);
-        if (StringUtils.isNotEmpty(tableName)) {
-            tableNames.add(tableName);
-        }
     }
 
     public void UpdateTables(List<String> tableNames,List<Table> tables,Map<Version, Map<String,Table>> versionTableMap,DataCollection.Version version) {

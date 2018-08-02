@@ -45,4 +45,19 @@ public class DataCollectionDaoImpl extends BaseDaoImpl<DataCollection> implement
         }
         return query.list();
     }
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findTableNamesOfAllRole(String collectionName){
+        Session session = getSessionFactory().getCurrentSession();
+        String queryPattern = "select tbl.name,cTbl.role,cTbl.version from %s as dc";
+        queryPattern += " join dc.collectionTables as cTbl";
+        queryPattern += " join cTbl.table as tbl";
+        queryPattern += " where dc.name = :collectionName";
+        String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("collectionName", collectionName);
+        return query.list();
+    }
 }

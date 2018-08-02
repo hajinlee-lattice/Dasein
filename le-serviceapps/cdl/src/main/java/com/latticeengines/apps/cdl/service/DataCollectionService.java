@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
 
@@ -59,5 +60,7 @@ public interface DataCollectionService {
     DataCollection createDefaultCollection();
 
     CDLDataSpace getCDLDataSpace(String cutstomerSpace);
+
+    Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> getTableRoleNameMap(String customerSpace, String collectionName);
 
 }
