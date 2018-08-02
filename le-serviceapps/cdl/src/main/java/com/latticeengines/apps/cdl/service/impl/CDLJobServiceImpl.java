@@ -28,7 +28,6 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -202,8 +201,10 @@ public class CDLJobServiceImpl implements CDLJobService {
             if (invokeTime!= null) {
                 if (dataFeed.getNextInvokeTime() == null || !dataFeed.getNextInvokeTime().equals(invokeTime)) {
                     try {
-                        dataFeedProxy.updateDataFeedNextinvoketime(tenant.getId(), invokeTime);
+                        log.info(String.format("update next invoke time for s%.", tenant.getId()));
+                        dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                     } catch (Exception e) {
+                        log.error(String.format("update next invoke time for s% failed.", tenant.getId()));
                         log.error(e.getMessage());
                     }
                 }

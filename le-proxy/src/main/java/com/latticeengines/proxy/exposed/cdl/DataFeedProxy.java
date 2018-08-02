@@ -112,10 +112,10 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         put("updateDataFeedStatus", url);
     }
 
-    public void updateDataFeedNextinvoketime(String customerSpace, Date time) {
+    public void updateDataFeedNextInvokeTime(String customerSpace, Date time) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/nextinvoketime/{time}",
                 shortenCustomerSpace(customerSpace), time);
-        put("updateDataFeedNextinvoketime", url);
+        put("updateDataFeedNextInvokeTime", url);
     }
 
 
