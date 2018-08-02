@@ -129,7 +129,6 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.ScoringRequestConfigEntityManager.find*(..))")
     public void findScoringRequestConfig(JoinPoint joinPoint) {
-        System.out.println("triggered find method aspect" + joinPoint.toShortString());
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
     }
 

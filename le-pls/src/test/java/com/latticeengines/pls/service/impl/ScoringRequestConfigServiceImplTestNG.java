@@ -87,6 +87,19 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         CREDENTIAL_NAME += System.currentTimeMillis();
     }
 
+    
+    /**
+     * As most of the find operations performed on reader connection, we need to add some delay before making find call.
+     * In real world scenario, this is consumed at UI layer, we can are fine with few milli-seconds of delay 
+     */
+    private void addDelay() {
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            //Ignore
+        }
+    }
+    
     @Test(groups = "functional")
     public void createMarketoCredential_assertCredentialCreated() throws Exception {
         MarketoCredential marketoCredential = new MarketoCredential();
@@ -146,14 +159,14 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         scoringRequestConfigService.createScoringRequestConfig(scoringReqConf);
         assertNotNull(scoringReqConf.getPid());
         assertNotNull(scoringReqConf.getConfigId());
-        
+        addDelay();
         ScoringRequestConfig scoringReqConfFromDB = scoringRequestConfigService.findByConfigId(marketoCredential.getPid(), scoringReqConf.getConfigId());
         assertNotNull(scoringReqConfFromDB);
         assertNotNull(scoringReqConfFromDB.getMarketoScoringMatchFields());
         assertEquals(scoringReqConfFromDB.getPid(), scoringReqConf.getPid());
         assertEquals(scoringReqConfFromDB.getMarketoScoringMatchFields().size(), scoringMappings.size());
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
     public void testCreateScoringRequestConfigDuplicate_assertCreationFails() {
         MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials().get(0);
@@ -238,6 +251,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         scoreReqConf1.setMarketoScoringMatchFields(updatedMatchFields);
         
         scoringRequestConfigService.updateScoringRequestConfig(scoreReqConf1);
+        addDelay();
         ScoringRequestConfig scoreReqConf2 = scoringRequestConfigService.findByConfigId(marketoCredentialId, scoreReqConf1.getConfigId());
         assertNotNull(scoreReqConf2);
         
@@ -256,6 +270,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         scoreReqConf1.setMarketoScoringMatchFields(updatedMatchFields);
         
         scoringRequestConfigService.updateScoringRequestConfig(scoreReqConf1);
+        addDelay();
         ScoringRequestConfig scoreReqConf2 = scoringRequestConfigService.findByConfigId(marketoCredentialId, scoreReqConf1.getConfigId());
         assertNotNull(scoreReqConf2);
         
@@ -280,7 +295,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         updatedMatchFields.forEach(matchField -> matchField.setMarketoFieldName(matchField.getMarketoFieldName() + "-Updated"));
         
         scoringRequestConfigService.updateScoringRequestConfig(scoreReqConf1);
-        
+        addDelay();
         ScoringRequestConfig scoreReqConf2 = scoringRequestConfigService.findByConfigId(marketoCredentialId, scoreReqConf1.getConfigId());
         assertNotNull(scoreReqConf2);
         
@@ -291,6 +306,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
     @Test(groups = "functional", dependsOnMethods = "testUpdateScoringRequestConfig_assertFieldsAddAndUpdate")
     public void testDeleteMarketoCredential_assertDeleteScoringRequests() {
         marketoCredentialService.deleteMarketoCredentialById(marketoCredentialId.toString());
+        addDelay();
         MarketoCredential marketoCredential = marketoCredentialService.findMarketoCredentialById(marketoCredentialId.toString());
         assertNull(marketoCredential);
         List<ScoringRequestConfigSummary> requestConfigLst = scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);

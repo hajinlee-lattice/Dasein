@@ -70,6 +70,18 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         MultiTenantContext.setTenant(mainTestTenant);
     }
 
+    /**
+     * As most of the find operations performed on reader connection, we need to add some delay before making find call.
+     * In real world scenario, this is consumed at UI layer, we can are fine with few milli-seconds of delay 
+     */
+    private void addDelay() {
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            //Ignore
+        }
+    }
+    
     @Test(groups = { "deployment" })
     public void findMarketoCredentialAsDifferentUsers_assertCorrectBehavior() {
         switchToThirdPartyUser();
@@ -140,14 +152,18 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         List<MarketoScoringMatchField> scoringMappings = Arrays.asList(MARKETO_SCORE_MATCH_FIELD_1, MARKETO_SCORE_MATCH_FIELD_2, MARKETO_SCORE_MATCH_FIELD_3);
         scoringReqConf.setMarketoScoringMatchFields(scoringMappings);
         
-        createScoringRequestConfig(marketoCredential.getPid(), scoringReqConf);
+        ScoringRequestConfig createdReq = createScoringRequestConfig(marketoCredential.getPid(), scoringReqConf);
+        assertNotNull(createdReq);
+        assertNotNull(createdReq.getConfigId());
         
+        addDelay();
         reqConfigSummaryLst = getScoringRequestConfigs(marketoCredential.getPid());
         assertNotNull(reqConfigSummaryLst);
         assertTrue(reqConfigSummaryLst.size() == 1);
         
         assertNotNull(reqConfigSummaryLst.get(0).getModelUuid());
         assertNotNull(reqConfigSummaryLst.get(0).getConfigId());
+        assertEquals(reqConfigSummaryLst.get(0).getConfigId(), createdReq.getConfigId());
         
         ScoringRequestConfig scoringReqConfFromRest = getScoringRequestConfig(marketoCredential.getPid(), reqConfigSummaryLst.get(0).getConfigId());
         assertNotNull(scoringReqConfFromRest);
@@ -229,6 +245,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         scoreReqConf1.setMarketoScoringMatchFields(updatedMatchFields);
         
         updateScoringRequestConfig(marketoCredentialId, scoreReqConf1);
+        addDelay();
         ScoringRequestConfig scoreReqConf2 = getScoringRequestConfig(marketoCredentialId, scoreReqConf1.getConfigId());
         assertNotNull(scoreReqConf2);
         
@@ -246,6 +263,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         scoreReqConf1.setMarketoScoringMatchFields(updatedMatchFields);
         
         updateScoringRequestConfig(marketoCredentialId, scoreReqConf1);
+        addDelay();
         ScoringRequestConfig scoreReqConf2 = getScoringRequestConfig(marketoCredentialId, scoreReqConf1.getConfigId());
         assertNotNull(scoreReqConf2);
         
@@ -269,7 +287,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         updatedMatchFields.forEach(matchField -> matchField.setMarketoFieldName(matchField.getMarketoFieldName() + "-Updated"));
         
         updateScoringRequestConfig(marketoCredentialId, scoreReqConf1);
-        
+        addDelay();
         ScoringRequestConfig scoreReqConf2 = getScoringRequestConfig(marketoCredentialId, scoreReqConf1.getConfigId());
         assertNotNull(scoreReqConf2);
         
@@ -278,8 +296,9 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
     }
     
     
-    private void createScoringRequestConfig(Long credentialId, ScoringRequestConfig scoringReqConf) {
-        restTemplate.postForObject(getRestAPIHostPort() + PLS_MARKETO_CREDENTIAL_URL + "/" + credentialId + PLS_MARKETO_SCORING_REQUESTS, scoringReqConf, ScoringRequestConfig.class);
+    private ScoringRequestConfig createScoringRequestConfig(Long credentialId, ScoringRequestConfig scoringReqConf) {
+        ScoringRequestConfig createdReq = restTemplate.postForObject(getRestAPIHostPort() + PLS_MARKETO_CREDENTIAL_URL + "/" + credentialId + PLS_MARKETO_SCORING_REQUESTS, scoringReqConf, ScoringRequestConfig.class);
+        return createdReq;
     }
 
     private void updateScoringRequestConfig(Long credentialId, ScoringRequestConfig scoreReqConf) {

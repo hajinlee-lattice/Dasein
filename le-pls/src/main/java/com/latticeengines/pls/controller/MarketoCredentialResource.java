@@ -163,11 +163,12 @@ public class MarketoCredentialResource {
     @RequestMapping(value = "/{credentialId}/scoring-requests", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Creates new ScoringRequestConfiguration")
     @PreAuthorize("hasRole('Edit_PLS_MarketoCredentials')")
-    public void createScoringRequestConfig(@PathVariable(name = "credentialId") Long credentialId,
+    public ScoringRequestConfig createScoringRequestConfig(@PathVariable(name = "credentialId") Long credentialId,
             @RequestBody ScoringRequestConfig scoringRequestConfig) {
         validateRequest(credentialId, scoringRequestConfig, null);
         setMarketoCredentialContext(credentialId, scoringRequestConfig);
         scoringRequestConfigService.createScoringRequestConfig(scoringRequestConfig);
+        return scoringRequestConfig;
     }
 
     @RequestMapping(value = "/{credentialId}/scoring-requests/{configId}", method = RequestMethod.PUT, headers = "Accept=application/json")
