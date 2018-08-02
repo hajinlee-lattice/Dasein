@@ -689,6 +689,28 @@ public class EventQueryTranslator extends TranslatorCommon {
             builder.with(translateShiftedRevenue(queryFactory, repository, laggingPeriodCount, sqlUser));
         }
 
+        // special handling for less operation to exclude "not purchased"
+        if (rootRestriction instanceof LogicalRestriction) {
+            BreadthFirstSearch bfs = new BreadthFirstSearch();
+            bfs.run(rootRestriction, (object, ctx) -> {
+                if (object instanceof TransactionRestriction) {
+                    TransactionRestriction txRestriction = (TransactionRestriction) object;
+                    if (excludeNotPurchased(txRestriction)) {
+                        Restriction newRestriction = translateExcludeNotPurchased(txRestriction);
+                        LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                        parent.getRestrictions().remove(txRestriction);
+                        parent.getRestrictions().add(newRestriction);
+                    }
+                }
+            });
+        } else if (rootRestriction instanceof TransactionRestriction) {
+            TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
+
+            if (excludeNotPurchased(txRestriction)) {
+                rootRestriction = translateExcludeNotPurchased(txRestriction);
+            }
+        }
+
         // translate mutli-product "has engaged" to logical grouping
         if (rootRestriction instanceof LogicalRestriction) {
             BreadthFirstSearch bfs = new BreadthFirstSearch();

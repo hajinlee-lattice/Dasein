@@ -866,7 +866,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testTotalAmountLessThan1MWithPurchase() {
         TransactionRestriction txRestriction = getTotalAmountLessThan1MWithPurchase();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
