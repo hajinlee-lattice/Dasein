@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +32,15 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
         T configuration;
         if (shouldUseEmr()) {
             String masterIp = emrService.getMasterIp();
+            if (StringUtils.isBlank(masterIp)) {
+                throw new RuntimeException("Cannot find the master IP for main EMR cluster.");
+            }
             configuration = getEmrConfiguration(masterIp);
         } else {
             configuration = getBaseConfiguration();
         }
         String fs = configuration.get("fs.defaultFS");
-        log.info(String.format("Created a %s: %s %s %s", getObjectType().getSimpleName(), configuration.toString(), fs,
-                System.identityHashCode(configuration)));
+        log.info(String.format("Created a %s (%s): %s", getObjectType().getSimpleName(), System.identityHashCode(configuration)), fs);
         return configuration;
     }
 
@@ -47,7 +50,7 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     }
 
     protected Properties getYarnProperties(String masterIp) {
-        return HadoopConfigurationUtils.loadPropsFromResource("emr.properties", masterIp);
+         return HadoopConfigurationUtils.loadPropsFromResource("emr.properties", masterIp);
     }
 
     private boolean shouldUseEmr() {
