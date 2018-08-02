@@ -77,7 +77,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 $scope.activeStatus = args.activeStatus;
             });
 
-            $scope.totalIterations = dashboard.iterations.length;
+            // $scope.totalIterations = dashboard.iterations.length;
 
             // console.log(engineId);
             // console.log(ratingEngine);
