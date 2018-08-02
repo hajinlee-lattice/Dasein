@@ -104,7 +104,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         RatingModel testAIModel = type == CustomEventModelingType.CDL ? cdlCEAIModel : lpiCEAIModel;
         verifyBucketMetadataNotGenerated(testRatingEngine);
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
-                testRatingEngine.getId(), testAIModel.getId(), "bnguyen@lattice-engines.com");
+                testRatingEngine.getId(), testAIModel.getId(), null, "bnguyen@lattice-engines.com");
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);

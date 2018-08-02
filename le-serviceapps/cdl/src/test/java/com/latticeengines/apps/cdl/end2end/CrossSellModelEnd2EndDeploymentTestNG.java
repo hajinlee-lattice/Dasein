@@ -129,7 +129,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         log.info("Start Cross Sell modeling ...");
         verifyBucketMetadataNotGenerated();
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
-                testRatingEngine.getId(), testAIModel.getId(), "bnguyen@lattice-engines.com");
+                testRatingEngine.getId(), testAIModel.getId(), null, "bnguyen@lattice-engines.com");
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
