@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -33,8 +34,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "LETest1529773529695"; // LETest1528844192916-14
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "JLM1532628202775"; // LETest1528844192916-14
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
@@ -56,33 +57,19 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     // Target Products are shared with Refresh Rating test
     private static final ImmutableList<String> repeatTargetProducts = ImmutableList.of(
-            "6aWAxPIdKjD9bDVN90kMphZgevl8jua",
-            "6mhfUZb1DOQWShBJZvmVPjnDE65Tmrd",
-            "xsfqOtt95Ft5oWdrrEY5XbVca8W52U",
-            "vjQ1pa9f3VAZWOs5B99KooDva2LsF2KB"
-    );
-    private static final ImmutableList<String> firstTargetProducts = ImmutableList.of(
-            "6aWAxPIdKjD9bDVN90kMphZgevl8jua"
-    );
+            "6aWAxPIdKjD9bDVN90kMphZgevl8jua", "6mhfUZb1DOQWShBJZvmVPjnDE65Tmrd", "xsfqOtt95Ft5oWdrrEY5XbVca8W52U",
+            "vjQ1pa9f3VAZWOs5B99KooDva2LsF2KB");
+    private static final ImmutableList<String> firstTargetProducts = ImmutableList
+            .of("6aWAxPIdKjD9bDVN90kMphZgevl8jua");
 
     // Training Products are only used by this test
     private static final ImmutableList<String> repeatTrainingProducts = ImmutableList.of(
-        "9IfG2T5joqw0CIJva0izeZXSCwON1S",
-        "Og8oP4j5zJ1Lieh3G38qTINC6m2Jor",
-        "C4jlopoPp3mNkOqz4axpbpmWGIoU2Ua",
-        "x2tWKKnRNWfJkGnM1qJBjqU6YJa9Zj1S",
-        "ecz3YIqtjwiTGPE8Md0SdUg7ZczGvVA",
-        "snB31hdBFDT9bcNvGMltIgsagzR15io",
-        "650050C066EF46905EC469E9CC2921E0",
-        "vTQ5oBReNHvkiYcWZA86TkrFqkoK15",
-        "fuDcy4WsrfF278qOmcVNGz7FKUnCxHwm",
-        "AWLhcmhd9d9GJGdW9cFdXFou4FmS4Evo"
-    );
-    private static final ImmutableList<String> firstTrainingProducts = ImmutableList.of(
-            "9IfG2T5joqw0CIJva0izeZXSCwON1S"
-    );
-
-
+            "9IfG2T5joqw0CIJva0izeZXSCwON1S", "Og8oP4j5zJ1Lieh3G38qTINC6m2Jor", "C4jlopoPp3mNkOqz4axpbpmWGIoU2Ua",
+            "x2tWKKnRNWfJkGnM1qJBjqU6YJa9Zj1S", "ecz3YIqtjwiTGPE8Md0SdUg7ZczGvVA", "snB31hdBFDT9bcNvGMltIgsagzR15io",
+            "650050C066EF46905EC469E9CC2921E0", "vTQ5oBReNHvkiYcWZA86TkrFqkoK15", "fuDcy4WsrfF278qOmcVNGz7FKUnCxHwm",
+            "AWLhcmhd9d9GJGdW9cFdXFou4FmS4Evo");
+    private static final ImmutableList<String> firstTrainingProducts = ImmutableList
+            .of("9IfG2T5joqw0CIJva0izeZXSCwON1S");
 
     private long targetCount;
 
@@ -148,8 +135,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         testAIModel = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
                 testAIModel.getId());
-        // Assert.assertEquals(testAIModel.getModelingJobStatus(),
-        // completedStatus);
+        Assert.assertEquals(testAIModel.getModelingJobStatus(), completedStatus);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         verifyBucketMetadataGenerated();
         Assert.assertEquals(
@@ -187,16 +173,23 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         ratingEngine.setAdvancedRatingConfig(ratingConfig);
         testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
         log.info("Created rating engine " + testRatingEngine.getId());
-        testAIModel = (AIModel) testRatingEngine.getActiveModel();
+        testAIModel = (AIModel) testRatingEngine.getLatestIteration();
 
-        List<String> targetProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy) ?
-                repeatTargetProducts : firstTargetProducts;
-        List<String> trainingProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy) ?
-                repeatTrainingProducts : firstTrainingProducts;
+        Assert.assertThrows(LedpException.class, () -> ratingEngineProxy.validateForModeling(mainTestTenant.getId(),
+                testRatingEngine.getId(), testAIModel.getId()));
+
+        List<String> targetProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy)
+                ? repeatTargetProducts : firstTargetProducts;
+        List<String> trainingProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy)
+                ? repeatTrainingProducts : firstTrainingProducts;
         configureCrossSellModel(testAIModel, predictionType, strategy, targetProducts, trainingProducts);
 
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
                 testAIModel.getId(), testAIModel);
+
+        Assert.assertTrue(ratingEngineProxy.validateForModeling(mainTestTenant.getId(), testRatingEngine.getId(),
+                testAIModel.getId()));
+
         log.info("Updated rating model " + testAIModel.getId());
         log.info("/ratingengines/" + testRatingEngine.getId() + "/ratingmodels/" + testAIModel.getId());
     }

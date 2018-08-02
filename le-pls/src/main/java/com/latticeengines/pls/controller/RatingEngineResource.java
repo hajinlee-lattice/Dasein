@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -237,7 +236,7 @@ public class RatingEngineResource {
         return ratingModelAndAction.getRatingModel();
     }
 
-    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
     public Map<String, List<ColumnMetadata>> getIterationMetadata(@PathVariable String ratingEngineId,
@@ -345,14 +344,29 @@ public class RatingEngineResource {
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model")
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
-    public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
+    public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
+            @RequestBody Map<String, List<ColumnMetadata>> attributes) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
-            return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId,
-                    MultiTenantContext.getEmailAddress());
+            return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId, attributes, MultiTenantContext.getEmailAddress());
         } catch (Exception ex) {
             log.error("Modeling job failed!", ex);
             throw new RuntimeException("Modeling job failed, contact Lattice support for details!");
+        }
+    }
+
+    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
+    @ResponseBody
+    @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
+    public boolean validateForModeling(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId) {
+        try {
+            Tenant tenant = MultiTenantContext.getTenant();
+            return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId, ratingModelId);
+        } catch (Exception ex) {
+            log.error("Validation failed, cannot model this iteration yet", ex);
+            throw new RuntimeException("Validation failed, cannot model this iteration yet");
         }
     }
 }
