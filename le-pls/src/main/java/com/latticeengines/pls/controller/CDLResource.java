@@ -74,9 +74,14 @@ public class CDLResource {
                                                    @RequestParam(value = "entity") String entity, //
                                                    @RequestParam(value = "feedType") String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName, dataFileName, source,
-                entity, feedType);
-        return ResponseDocument.successResponse(applicationId.toString());
+        try {
+            ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName, dataFileName, source,
+                    entity, feedType);
+            return ResponseDocument.successResponse(applicationId.toString());
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to submit import job: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {"ImportFile", e.getMessage()});
+        }
     }
 
     @RequestMapping(value = "/cleanupbyupload", method = RequestMethod.POST)
