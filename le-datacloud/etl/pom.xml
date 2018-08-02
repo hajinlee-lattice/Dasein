@@ -53,6 +53,11 @@
             <version>${quartz.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>${jcraft.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-datacloud-core</artifactId>
             <version>${project.version}</version>
