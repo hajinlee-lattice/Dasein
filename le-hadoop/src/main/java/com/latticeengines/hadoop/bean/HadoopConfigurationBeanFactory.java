@@ -40,7 +40,8 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
             configuration = getBaseConfiguration();
         }
         String fs = configuration.get("fs.defaultFS");
-        log.info(String.format("Created a %s (%s): %s", getObjectType().getSimpleName(), System.identityHashCode(configuration)), fs);
+        log.info(String.format("Created a %s (%s): %s",
+                               getObjectType().getSimpleName(), System.identityHashCode(configuration), fs));
         return configuration;
     }
 
