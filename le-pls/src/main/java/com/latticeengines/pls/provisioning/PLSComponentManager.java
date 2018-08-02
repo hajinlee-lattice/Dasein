@@ -115,8 +115,10 @@ public class PLSComponentManager {
         tenant.setName(tenantName);
 
         List<LatticeProduct> products = tenantConfigService.getProducts(PLSTenantId);
-        if (products.contains(LatticeProduct.LPA3) || products.contains(LatticeProduct.PD)) {
+        if (products.contains(LatticeProduct.LPA3) && products.contains(LatticeProduct.CG)) {
             tenant.setUiVersion("4.0");
+        } else {
+            tenant.setUiVersion("3.0");
         }
 
         try {
