@@ -571,7 +571,7 @@ public class SqlServerHelper implements DbHelper {
         nameLocation.setName(name);
         nameLocation.setCity(city);
         nameLocation.setState(state);
-        nameLocation.setCity(country);
+        nameLocation.setCountry(country);
         record.setMatchedNameLocation(nameLocation);
     }
 
