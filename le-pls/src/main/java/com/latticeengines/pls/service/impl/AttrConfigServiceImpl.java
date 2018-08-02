@@ -218,21 +218,21 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     uiAction.setView(View.Modal);
                     uiAction.setStatus(Status.Error);
                     uiAction.setMessage(generateAttrLevelMsg(saveResponse, updateUsage));
-                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                    //throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
                 case 1:
                     // subcategory level
                     uiAction.setTitle(UPDATE_FAIL_SUBCATEGORY_TITLE);
                     uiAction.setView(View.Modal);
                     uiAction.setStatus(Status.Error);
                     uiAction.setMessage(generateSubcategoryLevelMsg(saveResponse, updateUsage));
-                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                    //throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
                 case 2:
                     // category level
                     uiAction.setTitle(UPDATE_FAIL_CATEGORY_TITLE);
                     uiAction.setView(View.Modal);
                     uiAction.setStatus(Status.Error);
                     uiAction.setMessage(generateCategoryLevelMsg(saveResponse, updateUsage));
-                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                    //throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
                 default:
                     return uiAction;
                 }
