@@ -485,7 +485,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 sourceExists = true;
             }
         } catch (Exception e) {
-            log.info("Failed to check " + source + " in HDFS");
+            log.warn("Failed to check " + source + " at " + sourceDir, e);
         }
         return sourceExists;
     }

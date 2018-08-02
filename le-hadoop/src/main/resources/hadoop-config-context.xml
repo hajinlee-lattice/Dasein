@@ -41,6 +41,8 @@
         mapreduce.jobhistory.address=${hadoop.mapreduce.jobhistory.address}
     </yarn:configuration>
 
-    <bean id="yarnConfiguration" class="com.latticeengines.hadoop.bean.HadoopConfigurationBeanFactory" />
+    <bean id="emrConfiguration" class="com.latticeengines.hadoop.bean.YarnConfigurationBeanFactory" />
+
+    <yarn:configuration id="yarnConfiguration" configuration-ref="emrConfiguration"/>
 
 </beans>

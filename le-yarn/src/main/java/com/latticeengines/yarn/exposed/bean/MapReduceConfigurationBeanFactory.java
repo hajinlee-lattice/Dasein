@@ -6,16 +6,20 @@ import javax.annotation.Resource;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.yarn.configuration.ConfigurationUtils;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.hadoop.bean.HadoopConfigurationBeanFactory;
 import com.latticeengines.hadoop.bean.HadoopConfigurationUtils;
 
-public class MapReduceConfigurationBeanFactory extends HadoopConfigurationBeanFactory implements FactoryBean<Configuration> {
+public class MapReduceConfigurationBeanFactory extends HadoopConfigurationBeanFactory<Configuration> implements FactoryBean<Configuration> {
 
     @Resource(name = "baseHadoopConfiguration")
     private Configuration baseHadoopConfiguration;
+
+    @Override
+    public Class<?> getObjectType() {
+        return Configuration.class;
+    }
 
     @Override
     protected Configuration getBaseConfiguration() {
@@ -25,7 +29,9 @@ public class MapReduceConfigurationBeanFactory extends HadoopConfigurationBeanFa
     @Override
     protected Configuration getEmrConfiguration(String masterIp) {
         Properties properties = getMRProperties(masterIp);
-        return ConfigurationUtils.createFrom(new Configuration(), properties);
+        Configuration hdpConfiguration = new Configuration();
+        properties.forEach((k, v) -> hdpConfiguration.set((String) k, (String) v));
+        return hdpConfiguration;
     }
 
     private Properties getMRProperties(String masterIp) {

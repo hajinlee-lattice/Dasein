@@ -2,39 +2,43 @@ package com.latticeengines.hadoop.bean;
 
 import java.util.Properties;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.yarn.configuration.ConfigurationUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.aws.emr.EMRService;
 
-public class HadoopConfigurationBeanFactory implements FactoryBean<Configuration> {
+public abstract class HadoopConfigurationBeanFactory<T extends Configuration> implements FactoryBean<T> {
 
-    private static final String USE_EMR_YARN = "USE_EMR_YARN";
+    private static final Logger log = LoggerFactory.getLogger(HadoopConfigurationBeanFactory.class);
 
-    @Resource(name = "baseConfiguration")
-    private Configuration baseConfiguration;
+    protected abstract T getBaseConfiguration();
+
+    protected abstract T getEmrConfiguration(String masterIp);
 
     @Inject
     private EMRService emrService;
 
-    @Override
-    public Configuration getObject() {
-        if (shouldUseEmr()) {
-            String masterIp = emrService.getMasterIp();
-            return getEmrConfiguration(masterIp);
-        } else {
-            return getBaseConfiguration();
-        }
-    }
+    @Value("${hadoop.use.emr}")
+    private String useEmr;
 
     @Override
-    public Class<?> getObjectType() {
-        return Configuration.class;
+    public T getObject() {
+        T configuration;
+        if (shouldUseEmr()) {
+            String masterIp = emrService.getMasterIp();
+            configuration = getEmrConfiguration(masterIp);
+        } else {
+            configuration = getBaseConfiguration();
+        }
+        String fs = configuration.get("fs.defaultFS");
+        log.info(String.format("Created a %s: %s %s %s", getObjectType().getSimpleName(), configuration.toString(), fs,
+                System.identityHashCode(configuration)));
+        return configuration;
     }
 
     @Override
@@ -42,22 +46,11 @@ public class HadoopConfigurationBeanFactory implements FactoryBean<Configuration
         return true;
     }
 
-    protected Configuration getBaseConfiguration() {
-        return baseConfiguration;
-    }
-
-    protected Configuration getEmrConfiguration(String masterIp) {
-        Properties properties = getYarnProperties(masterIp);
-        return ConfigurationUtils.createFrom(new Configuration(), properties);
-    }
-
     protected Properties getYarnProperties(String masterIp) {
         return HadoopConfigurationUtils.loadPropsFromResource("emr.properties", masterIp);
     }
 
     private boolean shouldUseEmr() {
-        // TODO: (ysong-M22) to be changed to use properties file
-        return StringUtils.isNotBlank(System.getenv(USE_EMR_YARN))
-                && Boolean.valueOf(System.getenv(USE_EMR_YARN));
+        return "true".equalsIgnoreCase(useEmr);
     }
 }

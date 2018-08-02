@@ -19,7 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-hadoop-context.xml" })
-public class HadoopConfigurationTestNG extends AbstractTestNGSpringContextTests {
+public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
 
     @Inject
     private Configuration yarnConfiguration;
@@ -33,6 +33,7 @@ public class HadoopConfigurationTestNG extends AbstractTestNGSpringContextTests 
                 String.format("hdfs://%s", emrService.getMasterIp()));
         InputStream is = getResourceStream();
         String hdfsPath = "/tmp/yarn-config-test/test.txt";
+        HdfsUtils.isDirectory(yarnConfiguration, "/Pods/Default/Services/PropData/Sources/HGDataClean");
         if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
             HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
         }

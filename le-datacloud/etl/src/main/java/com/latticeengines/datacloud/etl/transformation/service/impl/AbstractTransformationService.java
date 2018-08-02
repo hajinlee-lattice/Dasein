@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
-    protected YarnConfiguration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     @Autowired
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
