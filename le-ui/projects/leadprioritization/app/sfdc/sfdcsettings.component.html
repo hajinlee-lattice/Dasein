@@ -25,7 +25,7 @@
 
     <div class="row">
         <div class="twelve columns">
-            <h2>SFDC Org Authentication</h2>
+            <h2>System Org Authentication</h2>
             <p>Generate a token below to connect the BIS application with the Lattice platform.</p>
             <button 
                 class="button orange-button" 
@@ -38,21 +38,21 @@
 
     <div class="row" ng-if="$ctrl.cdlIsEnabled">
         <div class="twelve columns">
-            <h2>SFDC Org ID to Account ID Mapping</h2>
-            <p>This is accounted to ensure the right ID is used when launching plays in your SFDC instances. <br/>Note: Each time a new SFDC Org is authenticated, an ID will be listed here.</p>
+            <h2>System Org ID to Account ID Mapping</h2>
+            <p>Map your authenticated application IDs to your imported Account IDs.</p>
 
             <form name="salesforceOrgsForm" novalidate>
                 <table>
                     <thead>
                         <tr>
-                            <th>SFDC Org ID</th>
-                            <th>SFDC Org Name</th>
+                            <th>System Org ID</th>
+                            <th>System Org Name</th>
                             <th>Account ID</th>
                         </tr>
                     </thead>
                     <tbody ng-if="$ctrl.orgs.length === 0 || $ctrl.orgs === undefined">
                         <tr>
-                            <td colspan="3">Each time you authenticate an SFDC Org in the Salesforce app, it will be listed here.</td>
+                            <td colspan="3">Each time you authenticate a System Org, it will be listed here.</td>
                         </tr>
                     </tbody>
                     <tbody ng-if="$ctrl.orgs.length > 0">
@@ -67,21 +67,22 @@
                                     ng-init="value = ($ctrl.accountids[org.accountId]) ? $ctrl.accountids[org.accountId] : null" 
                                     ng-model="org.accountId" 
                                     ng-required="org.accountId == null || org.accountId == ''"
-                                    ng-disabled="org.isRegistered === false">
+                                    ng-disabled="org.isRegistered === false"
+                                    ng-change="$ctrl.saveOrg(org); salesforceOrgsForm.$setPristine()">
                                         <option value="">Select</option>
-                                        <option ng-repeat="accountid in $ctrl.accountids" value="{{accountid.fieldName}}">CRM: {{accountid.displayName}}</option>
+                                        <option ng-repeat="accountid in $ctrl.accountids" value="{{accountid.fieldName}}">{{$ctrl.accountIDMap[accountid.fieldName]}}: {{accountid.displayName}}</option>
                                     </select>
                                     <!-- ng-options="accountid.fieldName as accountid.displayName for accountid in $ctrl.accountids" -->
                             </td>
                         </tr>
                     </tbody>
                 </table>
-
+<!-- 
                 <button
                     type="button"
                     class="button blue-button"
                     ng-click="$ctrl.saveOrgs(); salesforceOrgsForm.$setPristine()"
-                    ng-disabled="salesforceOrgsForm.$pristine">Save</button>
+                    ng-disabled="salesforceOrgsForm.$pristine">Save</button> -->
 
             </form>
         </div>

@@ -1271,7 +1271,7 @@ angular
             url: '/salesforce-settings',
             params: {
                 pageIcon: 'ico-salesforce',
-                pageTitle: 'Salesforce Settings'
+                pageTitle: 'Application Settings'
             },
             resolve: {
                 featureflags: function($q, FeatureFlagService) {
@@ -1283,21 +1283,37 @@ angular
 
                     return deferred.promise;
                 },
-                accountids: function($q, SfdcStore) {
+                externaltypes: function($q, SfdcStore) {
                     var deferred = $q.defer();
 
-                    SfdcStore.getAccountIds().then(function (result) {
-                        deferred.resolve(result.CRM);
+                    SfdcStore.getExternalTypes().then(function (result) {
+                        deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                orgs: function($q, SfdcService, SfdcStore, accountids) {
+                accountids: function($q, SfdcStore, externaltypes) {
+                    var deferred = $q.defer();
+                    params = {
+                        externalSystemType: externaltypes
+                    };
+                    SfdcStore.getAccountIds(params).then(function (result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                orgs: function($q, SfdcService, SfdcStore, accountids, externaltypes) {
                     var deferred = $q.defer(),
                         orgs = [];
 
                     SfdcStore.getOrgs().then(function (result) {
-                        deferred.resolve(result.CRM);
+                        externaltypes.forEach(function(type) {
+                            if (result[type] != undefined) {
+                                orgs = orgs.concat(result[type]);
+                            }
+                        });
+                        deferred.resolve(orgs);
                     });
                     
                     return deferred.promise;

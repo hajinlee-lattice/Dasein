@@ -4,11 +4,12 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
     bindings: {
         featureflags: '<',
         orgs: '<',
-        accountids: '<'
+        accountids: '<',
+        externaltypes: '<'
     },
     controller: function(
         $q, $scope, $state, $timeout, 
-        ResourceUtility, BrowserStorageUtility, SfdcService, Modal, SfdcStore
+        ResourceUtility, BrowserStorageUtility, SfdcService, Modal, SfdcStore, Banner, Notice
     ) {
         var vm = this;
 
@@ -43,8 +44,17 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         }
 
         vm.$onInit = function() {
-            console.log("Orgs", vm.orgs);
-            console.log("Account IDs", vm.accountids);
+            vm.accountIDMap = {};
+            var ids = [];
+            vm.externaltypes.forEach(function(type) {
+                if (vm.accountids[type] != undefined) {
+                    vm.accountids[type].forEach(function(account) {
+                        vm.accountIDMap[account.fieldName] = type;
+                        ids.push(account);
+                    })
+                }
+            });
+            vm.accountids = ids;
 
             vm.cdlIsEnabled = vm.featureflags.EnableCdl;
             vm.generateAuthTokenButtonLabel = vm.cdlIsEnabled ? 'Email One-time Authentication Token' : 'Generate Salesforce Access Token';
@@ -84,12 +94,13 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
                 tenantId = clientSession.Tenant.Identifier;
 
             SfdcService.generateAuthToken(emailAddress, tenantId).then(function (result) {
-                vm.showSuccess = true;
-                vm.successMessage = 'Your one-time authentication token has been sent to your email.';
-                console.log(result);
+                Banner.success({title: 'Email sent to ' + emailAddress, message: 'After you authenticate a new system org, a new ID will be listed below.'});
+
                 $timeout(function(){
-                    vm.showSuccess = false;
-                }, 3000);
+                    Banner.get().shift();
+                }, 5000);
+
+                
             });
         };
 
@@ -98,18 +109,23 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
             angular.forEach(orgs, function(value, key) {
                 SfdcService.saveOrgs(value.configId, value).then(function(result){
                     console.log(result);
-                    vm.showSuccess = true;
-                    vm.successMessage = 'Your changes have been saved.';
-                    $timeout(function(){
-                        vm.showSuccess = false;
-                    }, 3000);
+                    Notice.success({message: 'Your changes have been saved.'});
                 });
             });
 
-            // console.log(vm.orgs);
-
             SfdcStore.setOrgs(vm.orgs);
             vm.originalData = angular.copy(vm.orgs);
+        };
+
+        vm.saveOrg = function(org) {
+            if (org.accountId != '') { // FIXME - ng-change is called twice when setting accountId to blank option 
+                SfdcService.saveOrgs(org.configId, org).then(function(result){
+                    console.log(result);
+                    Notice.success({message: 'Your changes have been saved.'});
+                });
+                SfdcStore.setOrgs(vm.orgs);
+                vm.originalData = angular.copy(vm.orgs);
+            }
         };
 
         vm.closeStatusMessage = function() {

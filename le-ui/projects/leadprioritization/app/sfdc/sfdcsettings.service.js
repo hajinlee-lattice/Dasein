@@ -15,10 +15,20 @@ angular.module('lp.sfdc', [])
         this.init();
     }
 
-    this.getAccountIds = function() {
+    this.getExternalTypes = function() {
         var deferred = $q.defer();
 
-        SfdcService.getAccountIds().then(function(data) {
+        SfdcService.getExternalTypes().then(function(data) {
+            deferred.resolve(data);
+        });
+
+        return deferred.promise;
+    }
+
+    this.getAccountIds = function(params) {
+        var deferred = $q.defer();
+
+        SfdcService.getAccountIds(params).then(function(data) {
             SfdcStore.setAccountIds(data);
             deferred.resolve(data);
         });
@@ -33,6 +43,7 @@ angular.module('lp.sfdc', [])
         var deferred = $q.defer();
 
         SfdcService.getOrgs().then(function(data) {
+            console.log(data);
             SfdcStore.setOrgs(data);
             deferred.resolve(data);
         });
@@ -76,12 +87,38 @@ angular.module('lp.sfdc', [])
         return deferred.promise;
     }
 
-    this.getAccountIds = function() {
+    this.getExternalTypes = function() {
         var deferred = $q.defer();
 
         $http({
             method: 'GET',
-            url: '/pls/lookup-id-mapping/available-lookup-ids?externalSystemType=CRM'
+            url: '/pls/lookup-id-mapping/all-external-system-types'
+        }).then(
+            function onSuccess(response) {
+                console.log(response);
+                var result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                console.log('response', response);
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
+    this.getAccountIds = function(params) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/lookup-id-mapping/available-lookup-ids',
+            params: params
         }).then(
             function onSuccess(response) {
                 var result = response.data;
