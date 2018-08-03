@@ -8,7 +8,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         externaltypes: '<'
     },
     controller: function(
-        $q, $scope, $state, $timeout, 
+        $q, $scope, $state, $timeout,
         ResourceUtility, BrowserStorageUtility, SfdcService, Modal, SfdcStore, Banner, Notice
     ) {
         var vm = this;
@@ -44,6 +44,12 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         }
 
         vm.$onInit = function() {
+            if (!vm.featureflags.EnableCdl) {
+                $state.go('.', {pageTitle: 'Salesforce Settings'}, {notify: false});
+            } else {
+                $state.go('.', {pageTitle: 'Applications Settings'}, {notify: false});
+            }
+
             vm.accountIDMap = {};
             var ids = [];
             vm.externaltypes.forEach(function(type) {
@@ -94,11 +100,27 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
                 tenantId = clientSession.Tenant.Identifier;
 
             SfdcService.generateAuthToken(emailAddress, tenantId).then(function (result) {
-                Banner.success({title: 'Email sent to ' + emailAddress, message: 'After you authenticate a new system org, a new ID will be listed below.'});
+                console.log(result);
+                if (result.Success == true) {
+                    if (vm.cdlIsEnabled) {
+                        Banner.success({title: 'Email sent to ' + emailAddress, message: 'After you authenticate a new system org, a new ID will be listed below.'});
+                    } else {
+                        Banner.success({message: 'We have sent you an email with an access token and instructions for authenticating with Salesforce.'});
+                    }
 
-                $timeout(function(){
-                    Banner.get().shift();
-                }, 5000);
+                    $timeout(function(){
+                        Banner.get().shift();
+                    }, 5000);
+                } else {
+                    if (vm.cdlIsEnabled) {
+                        Banner.error({message: result.Errors[0]});
+                    } else {
+                        Banner.success({message: 'Failed to Generate Salesforce Access Token.'});
+                    }
+                    
+                }
+
+
 
                 
             });

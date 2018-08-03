@@ -187,7 +187,7 @@ angular
                     if: store.showSalesforceSettings,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
                     sref: "home.sfdcsettings",
-                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC"),
+                    label: !store.showCdlEnabledPage ? ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC") : "Application Settings",
                     icon: "ico-salesforce ico-light-gray"
                 },{
                     if: store.showApiConsole && !store.showCdlEnabledPage,

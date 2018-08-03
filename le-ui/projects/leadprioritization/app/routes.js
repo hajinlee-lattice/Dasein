@@ -1274,7 +1274,7 @@ angular
             url: '/salesforce-settings',
             params: {
                 pageIcon: 'ico-salesforce',
-                pageTitle: 'Application Settings'
+                pageTitle: ''
             },
             resolve: {
                 featureflags: function($q, FeatureFlagService) {
