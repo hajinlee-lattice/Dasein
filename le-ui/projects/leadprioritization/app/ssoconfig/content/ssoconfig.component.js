@@ -118,12 +118,18 @@ angular.module('lp.ssoconfig.configure', [])
             if (vm.configId && vm.isValidMetadata) {
                 SSOConfigStore.deleteSAMLConfig(vm.configId).then(function(result) {
                     SSOConfigStore.createSAMLConfig(vm.metadata).then(function(result) {
-                        Banner.success({title: 'Success!', message: 'Your SAML is configured.'});
+                        console.log(result);
+                        if (typeof result.errorCode == 'undefined') {
+                            Banner.success({title: 'Success!', message: 'Your SAML is configured.'});
+                        }
                     });
                 });
             } else {
                 SSOConfigStore.createSAMLConfig(vm.metadata).then(function(result) {
-                    Banner.success({title: 'Success!', message: 'Your SAML is configured.'});
+                    console.log(result);
+                    if (typeof result.errorCode == 'undefined') {
+                        Banner.success({title: 'Success!', message: 'Your SAML is configured.'});
+                    }
                 });
             }
         }

@@ -122,7 +122,8 @@ angular.module('lp.ssoconfig')
         var deferred = $q.defer();
         $http({
             method: 'POST',
-            url: '/pls/saml-config'
+            url: '/pls/saml-config',
+            data: metadataObject
         }).success(function(result, status) {
             deferred.resolve(result);
         }).error(function(error, status) {
