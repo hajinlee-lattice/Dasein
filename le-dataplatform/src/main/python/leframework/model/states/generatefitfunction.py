@@ -18,16 +18,14 @@ class FitFunctionGenerator(State):
 
     @overrides(State)
     def execute(self):
-        mediator = self.getMediator()
-        segmentations = mediator.segmentations
-        segments = segmentations[0]['Segments']
         structure = OrderedDict()
 
         try:
+            segments = self.get_segment_data_records()
             rateChartDf = self.get_rate_dataframe(segments)
-            maxRate = self.get_max_rate(rateChartDf)
-            avgRate = self.get_avg_rate(rateChartDf)
-            decileRateDf = self.get_decile_rate(rateChartDf)
+            maxRate = self.get_max_rate(rateChartDf, 'Score', 'probRate')
+            avgRate = self.get_avg_rate(rateChartDf, 'Converted', 'Count')
+            decileRateDf = self.get_decile_rate(rateChartDf, 'Score', 'Converted', 'Count')
             gamma, alpha, beta = self.rate_chart_fit((decileRateDf['rate']), decileRateDf['decile'], avgRate)
         except Exception as exp:
             self._logger.exception("Caught Exception while generating fit function: " + str(exp))
@@ -44,29 +42,35 @@ class FitFunctionGenerator(State):
     def get_default_fit_function_params(self):
         return 0.0, 0.0, 0.0, 0.0
 
-    def get_rate_dataframe(self, rateChart):
-        rateChartDf = pd.DataFrame.from_records(rateChart)
+    def get_segment_data_records(self):
+        mediator = self.getMediator()
+        segmentations = mediator.segmentations
+        return segmentations[0]['Segments']
+
+    def get_rate_dataframe(self, records):
+        rateChartDf = pd.DataFrame.from_records(records)
+        rateChartDf['probRate'] = rateChartDf['Converted'] * 1.0 / rateChartDf['Count']
         return rateChartDf
 
-    def get_max_rate(self, rateChartDf):
+    def get_max_rate(self, rateChartDf, sortByColumnName, rateColName):
         if pd_before_17():
-            rateChartDf = rateChartDf.sort('Score', ascending=False)
+            rateChartDf = rateChartDf.sort(sortByColumnName, ascending=False)
         else:
-            rateChartDf = rateChartDf.sort_values(by='Score', ascending=False)
+            rateChartDf = rateChartDf.sort_values(by=sortByColumnName, ascending=False)
         maxRateRow = rateChartDf.iloc[0]
-        return maxRateRow['Converted'] * 1.0 / maxRateRow['Count']
+        return maxRateRow[rateColName]
 
-    def get_decile_rate(self, p1):
-        p1['decile'] = p1['Score'].apply(lambda x: int((x - 1) / 10 + 1))
-        p1_decile = p1.groupby(by='decile')['Count', 'Converted'].sum()
-        p1_decile['rate'] = p1_decile['Converted'] / p1_decile['Count']
+    def get_decile_rate(self, p1, scoreColumnName, eventColName, countColName):
+        p1['decile'] = p1[scoreColumnName].apply(lambda x: int((x - 1) / 10 + 1))
+        p1_decile = p1.groupby(by='decile')[eventColName, countColName].sum()
+        p1_decile['rate'] = p1_decile[eventColName] / p1_decile[countColName]
 
         p1_decile.sort_index(inplace=True, ascending=False)
         p1_decile.reset_index(inplace=True)
         return p1_decile
 
-    def get_avg_rate(self, rateChartDf):
-        return rateChartDf['Converted'].sum() * 1.0 / rateChartDf['Count'].sum()
+    def get_avg_rate(self, rateChartDf, eventColName, countColName):
+        return rateChartDf[eventColName].sum() * 1.0 / rateChartDf[countColName].sum()
 
     def linear_fit(self, xx, yy):
         outlierThld = 2.0
