@@ -234,6 +234,11 @@
             <artifactId>j2html</artifactId>
             <version>${j2html.version}</version>
         </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

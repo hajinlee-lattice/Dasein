@@ -35,6 +35,11 @@
             <artifactId>le-remote</artifactId>
             <version>${le.remote.version}</version>
         </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
