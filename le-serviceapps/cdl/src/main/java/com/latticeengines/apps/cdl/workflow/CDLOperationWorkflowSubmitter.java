@@ -55,7 +55,16 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         DataFeed.Status dataFeedStatus = dataFeed.getStatus();
         log.info(String.format("Current data feed: %s, status: %s", dataFeed.getName(), dataFeedStatus.getName()));
         if (!dataFeedProxy.lockExecution(customerSpace.toString(), DataFeedExecutionJobType.CDLOperation)) {
-            throw new RuntimeException("We cannot start CDL maintenance right now!");
+            String errorMessage;
+            if (DataFeed.Status.ProcessAnalyzing.equals(dataFeedStatus)) {
+                errorMessage = "You cannot perform delete action while PA is running";
+            } else if (DataFeed.Status.Deleting.equals(dataFeedStatus)) {
+                errorMessage = "You cannot perform delete action while another delete action is running";
+            } else {
+                errorMessage = String.format("We cannot start cleanup workflow for %s by dataFeedStatus %s",
+                        customerSpace.toString(), dataFeedStatus.getName());
+            }
+            throw new RuntimeException(errorMessage);
         }
 
         DataFeed.Status initialStatus = getInitialDataFeedStatus(dataFeedStatus);
