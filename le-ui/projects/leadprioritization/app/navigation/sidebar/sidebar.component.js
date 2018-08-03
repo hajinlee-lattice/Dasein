@@ -211,16 +211,14 @@ angular
         return deferred.promise;
     };
 
-    this.set = function(source, back) {
-        back = back || false;
+    this.set = function(source) {
         //console.log(source, back);
         if (!source) {
             this.getRoot().then(function(source) {
-                this.back = back;
                 store.setDefaults(source);
             });
         } else {
-            this.back = back;
+            this.back = StateHistory.lastFrom().name || "home";
             this.setDefaults(source);
         }
     };
