@@ -2,33 +2,14 @@ package com.latticeengines.domain.exposed.exception;
 
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 
-public class UIActionException extends LedpException {
+public class UIActionException extends RuntimeException {
 
     private static final long serialVersionUID = 5890780873823715440L;
-
+    private LedpCode code;
     private UIAction uiAction;
 
-    public UIActionException(LedpCode code) {
-        super(code);
-    }
-
     public UIActionException(UIAction uiAction, LedpCode code) {
-        super(code);
-        this.uiAction = uiAction;
-    }
-
-    public UIActionException(UIAction uiAction, LedpCode code, Throwable t) {
-        super(code, t);
-        this.uiAction = uiAction;
-    }
-
-    public UIActionException(UIAction uiAction, LedpCode code, String msg) {
-        super(code, msg, null);
-        this.uiAction = uiAction;
-    }
-
-    public UIActionException(UIAction uiAction, LedpCode code, String msg, Throwable t) {
-        super(code, msg, t);
+        this.setCode(code);
         this.uiAction = uiAction;
     }
 
@@ -38,6 +19,14 @@ public class UIActionException extends LedpException {
 
     public void setUIAction(UIAction uiAction) {
         this.uiAction = uiAction;
+    }
+
+    public LedpCode getCode() {
+        return code;
+    }
+
+    public void setCode(LedpCode code) {
+        this.code = code;
     }
 
 }
