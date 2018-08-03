@@ -345,7 +345,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
     public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestBody Map<String, List<ColumnMetadata>> attributes) {
+            @RequestBody(required = false) Map<String, List<ColumnMetadata>> attributes) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId, attributes, MultiTenantContext.getEmailAddress());
