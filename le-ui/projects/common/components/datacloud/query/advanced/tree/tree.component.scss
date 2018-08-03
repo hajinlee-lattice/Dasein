@@ -190,7 +190,7 @@ div.advanced-query-builder {
             background: white;
 //             border: 1px solid #ccc;
             border-left: 5px solid #999;
-            border-right: 1px solid #ddd !important;
+            border-right: 1px solid #ddd;
             display: flex;
             cursor: default;
             z-index: 1;
@@ -456,7 +456,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #457eba;
+                    border-left-color: #457eba;
                 }
             }
 
@@ -466,7 +466,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #cd80bc;
+                    border-left-color: #cd80bc;
                 }
             }
 
@@ -476,7 +476,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #33bdb7;
+                    border-left-color: #33bdb7;
                 }
             }
 
@@ -486,7 +486,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #f15a5a;
+                    border-left-color: #f15a5a;
                 }
             }
 
@@ -496,7 +496,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #70bf4a;
+                    border-left-color: #70bf4a;
                 }
             }
 
@@ -506,7 +506,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #26649b;
+                    border-left-color: #26649b;
                 }
             }
 
@@ -516,7 +516,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #65b7e6;
+                    border-left-color: #65b7e6;
                 }
             }
 
@@ -526,7 +526,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #aac43b;
+                    border-left-color: #aac43b;
                 }
             }
 
@@ -536,7 +536,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #8e71b2;
+                    border-left-color: #8e71b2;
                 }
             }
 
@@ -546,7 +546,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #fdbc49;
+                    border-left-color: #fdbc49;
                 }
             }
 
@@ -556,7 +556,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #cd80bc;
+                    border-left-color: #cd80bc;
                 }
             }
 
@@ -566,7 +566,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #457eba;
+                    border-left-color: #457eba;
                 }
             }
 
@@ -576,7 +576,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-color: #26649b;
+                    border-left-color: #26649b;
                 }
             }
 
@@ -647,6 +647,7 @@ div.advanced-query-builder {
 
         .query-section-item-end {
             border-color: #bbb;
+            border-right: none;
             margin-bottom: 1em;
             padding-bottom: 0;
         }

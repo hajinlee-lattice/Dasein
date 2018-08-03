@@ -1,5 +1,8 @@
 angular
-.module('mainApp.core.modules.ServiceErrorModule', [
+.module('common.exceptions', [
+    'common.banner',
+    'common.modal',
+    'common.notice',
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .service('ServiceErrorInterceptor', function ($q, $injector) {
@@ -70,8 +73,8 @@ angular
             url = response.config.url;
 
         Service.error({
-            title: http_code + ' ' + http_err + ': ' + url,
-            message: desc + ' (' + ledp_code + ')',
+            title: http_code + ' "' + http_err + '" ' + url,
+            message: desc,
         });
     };
 

@@ -1,7 +1,7 @@
 angular.module('pd.navigation.header', [
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.modules.ServiceErrorModule',
+    'common.exceptions',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.core.services.FeatureFlagService',
     'mainApp.login.services.LoginService',

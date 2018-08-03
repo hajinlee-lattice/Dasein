@@ -1,5 +1,6 @@
-<div class="le-notice container" ng-if="$ctrl.notice.visible">
-    <div class="messaging {{$ctrl.notice.type}}-messaging">
+<div class="le-notice container">
+    <div    class="messaging {{$ctrl.notice.type}}-messaging"
+            ng-class="{ 'visible': $ctrl.notice.visible }">
         <div class="messaging-icon">
             <ico    class="fa" 
                     ng-if="$ctrl.notice.type" 
@@ -16,13 +17,5 @@
             <div class="messaging-title" ng-if="$ctrl.notice.title">{{$ctrl.notice.title}}</div>
             <div class="messaging-message" ng-if="$ctrl.notice.message">{{$ctrl.notice.message}}</div>
         </div>
-        
-        <!--div class="messaging-controls" ng-click="$ctrl.notice.show = !$ctrl.notice.show">
-            <button id="close-button" 
-                    type="button" 
-                    class="close">
-                X
-            </button>
-        </div-->
     </div>
 </div>

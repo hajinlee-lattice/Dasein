@@ -3,6 +3,17 @@ div.le-notice {
         position: fixed;
         top: 50%;
         left: 50%;
-        transform: translate(-50%,-50%);
-    }
-}
+        transform: translate(-50%,-50%) rotateY(90deg);
+        z-index: 2;
+        pointer-events: none;
+        transition: all 333ms ease; 
+        transform-origin: center center;
+        opacity: 0;
+        border-radius: 4px;
+        
+        &.visible {
+            opacity: 1;
+            transform: translate(-50%,-50%) rotateY(0deg);
+        }
+    } 
+} 

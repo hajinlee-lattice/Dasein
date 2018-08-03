@@ -32,14 +32,15 @@
     </head>
 
     <body>
+        <div ui-view="notice"></div>
         <div ui-view="info"></div>
         <div ui-view="main"></div>
     </body>
     
     <script src="/assets/vendor.min.js"></script>
-    <!-- build:template:dist -->
+    <!-- build:template:dist
     <script src="/assets/lattice.min.js"></script>
-    <!-- /build -->
+     /build -->
     <!-- build:remove:dist -->
     <script src="/app/directives/ngEnterDirective.js"></script>
     <script src="/app/utilities/BrowserStorageUtility.js"></script>
@@ -49,11 +50,16 @@
     <script src="/app/utilities/TimestampIntervalUtility.js"></script>
     <script src="/app/utilities/UnderscoreUtility.js"></script>
     <script src="/app/utilities/URLUtility.js"></script>
-    <script src="/app/utilities/SessionTimeoutUtility.js"></script>
     <script src="/app/services/FeatureFlagService.js"></script>
     <script src="/app/services/LoginService.js"></script>
     <script src="/app/services/ResourceStringsService.js"></script>
     <script src="/app/services/SessionService.js"></script>
+    <script src="/components/banner/banner.component.js"></script>
+    <script src="/components/modal/modal.component.js"></script>
+    <script src="/components/notice/notice.component.js"></script>
+    <script src="/components/exceptions/exceptions.component.js"></script>
+    <script src="/components/timeout/session-timeout.component.js"></script>
+
     <!-- endbuild -->
     <!-- build:js app.js -->
     <script src="app/app.component.js"></script>

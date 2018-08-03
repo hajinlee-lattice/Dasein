@@ -12,7 +12,7 @@ angular.module('login.update', [
     },
     controller: function (
         $state, ResourceUtility, BrowserStorageUtility, PasswordUtility, 
-        StringUtility, LoginService, TimestampIntervalUtility
+        StringUtility, LoginService, TimestampIntervalUtility, Banner
     ) {
         var vm = this;
 
@@ -36,19 +36,25 @@ angular.module('login.update', [
             vm.oldPasswordInputError = "";
             vm.newPasswordInputError = "";
             vm.confirmPasswordInputError = "";
-            vm.showPasswordError = false;
             vm.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
-
             vm.saveInProgess = false;
+            
+            Banner.reset();
 
             $("#validateAlertError, #changePasswordSuccessAlert").hide();
 
             if (vm.isPasswordOlderThanNinetyDays) {
-                vm.showPasswordError = true;
                 vm.validateErrorMessage = ResourceUtility.getString("NINTY_DAY_OLD_PASSWORD");
+
+                Banner.error({
+                    message: vm.validateErrorMessage
+                });
             } else if (vm.isLoggedInWithTempPassword) {
-                vm.showPasswordError = true;
                 vm.validateErrorMessage = ResourceUtility.getString("MUST_CHANGE_TEMP_PASSWORD");
+
+                Banner.error({
+                    message: vm.validateErrorMessage
+                });
             }
         };
 
@@ -108,7 +114,7 @@ angular.module('login.update', [
                 $event.preventDefault();
             }
             
-            vm.showPasswordError = false;
+            Banner.reset();
         };
         
         vm.updatePasswordClick = function () {
@@ -116,7 +122,7 @@ angular.module('login.update', [
                 return;
             }
 
-            vm.showPasswordError = false;
+            Banner.reset();
 
             var isValid = validatePassword();
 
@@ -137,11 +143,16 @@ angular.module('login.update', [
                         } else {
                             vm.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_ERROR");
                         }
-                        vm.showPasswordError = true;
+
+                        Banner.error({
+                            message: vm.validateErrorMessage
+                        });
                     }
                 });
             } else {
-                vm.showPasswordError = true;
+                Banner.error({
+                    message: vm.validateErrorMessage
+                });
             }
         };
     }

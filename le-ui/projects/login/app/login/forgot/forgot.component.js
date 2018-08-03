@@ -5,12 +5,11 @@ angular.module('login.forgot', [
 ])
 .component('loginForgotPassword', {
     templateUrl: 'app/login/forgot/forgot.component.html',
-    controller: function($state, ResourceUtility, LoginService) {
+    controller: function($state, ResourceUtility, LoginService, Banner) {
         var vm = this;
 
         vm.$onInit = function() {
             vm.ResourceUtility = ResourceUtility;
-            vm.forgotPasswordErrorMessage = "";
         };
 
         vm.cancelForgotPasswordClick = function ($event) {
@@ -22,13 +21,18 @@ angular.module('login.forgot', [
         };
 
         vm.forgotPasswordOkClick = function (forgotPasswordUsername) {
+            Banner.reset();
+
             forgotPasswordUsername = forgotPasswordUsername || vm.forgotPasswordUsername;
 
             vm.resetPasswordSuccess = false;
-            vm.showForgotPasswordError = false;
             vm.forgotPasswordUsernameInvalid = !validateEmail(forgotPasswordUsername);
 
             if (vm.forgotPasswordUsernameInvalid) {
+                Banner.error({
+                    message: ResourceUtility.getString('RESET_PASSWORD_USERNAME_INVALID')
+                });
+            
                 return;
             }
 
@@ -36,18 +40,23 @@ angular.module('login.forgot', [
                 if (result == null) {
                     return;
                 }
+                
                 if (result.Success === true) {
                     vm.resetPasswordSuccess = true;
                 } else {
-                    vm.showForgotPasswordError = true;
+                    var message = "";
 
                     if (result.Error.errorCode == 'LEDP_18018') {
                         vm.forgotPasswordUsernameInvalid = true;
-                        vm.forgotPasswordErrorMessage = ResourceUtility.getString('RESET_PASSWORD_USERNAME_INVALID');
+                        message = ResourceUtility.getString('RESET_PASSWORD_USERNAME_INVALID');
                     } else {
                         vm.forgotPasswordUsernameInvalid = false;
-                        vm.forgotPasswordErrorMessage = ResourceUtility.getString('RESET_PASSWORD_FAIL');
+                        message = ResourceUtility.getString('RESET_PASSWORD_FAIL');
                     }
+            
+                    Banner.error({
+                        message: message
+                    });
                 }
             });
         };

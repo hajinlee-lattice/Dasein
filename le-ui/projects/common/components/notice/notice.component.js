@@ -25,7 +25,7 @@ angular.module('common.notice', [])
 
         $timeout(function() {
             Notice.notice.visible = false;
-        }, opts.delay || 3000);
+        }, opts.delay || 3500);
     };
 
     this.reset = function() {

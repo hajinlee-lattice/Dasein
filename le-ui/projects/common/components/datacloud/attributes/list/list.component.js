@@ -31,7 +31,6 @@ angular.module('common.attributes.list', [])
 
             vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
             // console.log('attrResultsList', vm);
-            // console.log('attrResultsList', vm.attributes);
         };
         
         vm.autoDrillDown = function() {

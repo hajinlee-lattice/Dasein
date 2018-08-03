@@ -4,6 +4,7 @@ var mainApp = angular.module('insightsApp', [
     'ui.router',
     'ui.bootstrap',
 
+    'common.exceptions',
     'common.datacloud',
     'common.utilities.SessionTimeout',
     'pd.navigation.pagination',
@@ -11,7 +12,6 @@ var mainApp = angular.module('insightsApp', [
     'angulartics.mixpanel',
 
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.modules.ServiceErrorModule',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.core.services.FeatureFlagService',
     'mainApp.login.services.LoginService'

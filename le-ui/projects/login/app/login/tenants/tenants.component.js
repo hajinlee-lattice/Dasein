@@ -11,7 +11,7 @@ angular.module('login.tenants', [
     },
     controller: function (
         $state, $timeout, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
-        LoginService, LoginStore, SessionTimeoutUtility
+        LoginService, LoginStore, SessionTimeoutUtility, Banner
     ) {
         var vm = this;
 
@@ -65,6 +65,8 @@ angular.module('login.tenants', [
         };
 
         vm.select = function (tenant) {
+            Banner.reset();
+            
             vm.deactivated = true;
             vm.selected = tenant;
             
@@ -119,24 +121,25 @@ angular.module('login.tenants', [
             // convert html collection to array
             var all = [].slice.call($('.tenant-list-item'));
             var selected = [].slice.call($('.tenant-list-item.active,.tenant-list-item:hover'));
+            var n, index;
 
             switch ($event.keyCode) {
                 case 38: // up
-                    if (selected.length == 0) {
+                    if (selected.length === 0) {
                         $(all[0]).addClass('active');
                     } else {
-                        var index = all.indexOf(selected[0]);
-                        var n = index == 0 ? all.length - 1 : index - 1;
+                        index = all.indexOf(selected[0]);
+                        n = index === 0 ? all.length - 1 : index - 1;
                     }
 
                     break;
 
                 case 40: // down
-                    if (selected.length == 0) {
+                    if (selected.length === 0) {
                         $(all[0]).addClass('active');
                     } else {
-                        var index = all.indexOf(selected[0]);
-                        var n = index + 1 >= all.length ? 0 : index + 1;
+                        index = all.indexOf(selected[0]);
+                        n = index + 1 >= all.length ? 0 : index + 1;
                     }
 
                     break;
@@ -144,7 +147,7 @@ angular.module('login.tenants', [
                 case 13: // enter
                     if (selected && selected.length > 0) {
                         var tenant = vm.tenantMap[selected[0].id];
-                        console.log('enter', tenant, selected);
+
                         if (tenant) {
                             vm.select(tenant);
                         }
@@ -168,15 +171,15 @@ angular.module('login.tenants', [
                     filteredItems.addClass('active');
                 } else {}
             },1);
-        }
+        };
 
         vm.hover = function() {
             // convert html collection to array
             $('.tenant-list-item.active').removeClass('active');
-        }
+        };
 
         function showError(message) {
-            if (message == null) {
+            if (message === null) {
                 return;
             }
 
@@ -184,8 +187,9 @@ angular.module('login.tenants', [
                 message = ResourceUtility.getString("LOGIN_GLOBAL_AUTH_ERROR");
             }
 
-            vm.tenantErrorMessage = message;
-            vm.showTenantError = true;
+            Banner.error({
+                message: message
+            });
         };
     }
 });

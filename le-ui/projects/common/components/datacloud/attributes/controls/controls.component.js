@@ -33,7 +33,8 @@ angular.module('common.attributes.controls', [])
             if (vm.section == 'activate' && payload.Select.length > 0) {
                 Modal.warning({
                     title: "Activation",
-                    message: "Once you activate these premium attributes, you won't be able to deactivate.  Contact your lattice representative to upgrade."
+                    message: "Once you activate these premium attributes, you won't be able to deactivate.  Contact your lattice representative to upgrade.",
+                    confirmtext: "Yes, activate"
                 }, vm.store.modalCallback);
             } else {
                 vm.store.saveConfig();

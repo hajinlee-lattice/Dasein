@@ -13,7 +13,6 @@ angular
     angular.extend(vm, {});
 
     vm.init = function() {
-
         if (typeof(sessionStorage) !== 'undefined') {
             if (sessionStorage.getItem('open-nav') === 'true' || !sessionStorage.getItem('open-nav')) {
                 $("body").addClass('open-nav');
@@ -21,7 +20,7 @@ angular
                 $("body").removeClass('open-nav');
             }
         }
-    }
+    };
 
     vm.handleSidebarToggle = function($event) {
         var target = angular.element($event.target),
@@ -37,12 +36,12 @@ angular
 
             $rootScope.$broadcast('sidebar:toggle');
         }
-    }
+    };
 
     vm.init();
 })
 .service('SidebarStore', function(
-    $state, $stateParams, StateHistory, ResourceUtility, 
+    $state, $stateParams, StateHistory, ResourceUtility, $q,
     FeatureFlagService, DataCloudStore, QueryStore, QueryService
 ) {
     var store = this;
@@ -62,15 +61,13 @@ angular
         'home.segment.contacts'
     ];
 
-    this.items = {
-        root: [],
-        model: []
-    }
+    this.root = [];
+    this.items = [];
 
-    this.init = function() {
+    this.getRoot = function() {
+        var deferred = $q.defer();
 
         FeatureFlagService.GetAllFlags().then(function(result) {
-
             var flags = FeatureFlagService.Flags();
             
             store.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
@@ -91,135 +88,149 @@ angular
             store.isDataAvailable = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL) && QueryStore.collectionStatus != null ? 
                                     QueryStore.collectionStatus.AccountCount > 0 || QueryStore.collectionStatus.ContactCount > 0 : store.isDataAvailable;
 
-            store.sources = {
-                root: [{
-                        if: store.showAnalysisPage,
-                        active: store.checkMyDataActiveState,
-                        sref: store.getMyDataState() + "({ segment: 'Create' })",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_MYDATA"),
-                        icon: "ico-analysis ico-light-gray"
-                    },{
-                        if: store.showSegmentationPage,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        active: store.checkSegmentationActiveState,
-                        sref: "home.segments",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SEGMENTATION"),
-                        icon: "ico-segments ico-light-gray"
-                    },{
-                        if: store.showRatingsEngine,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        active: function() {
-                            return store.state.includes('home.ratingsengine') && !store.isTransitingFrom(['home.ratingsengine', 'home.ratingsengine.list', 'home.ratingsengine.list.ratings']);
-                        },
-                        transitioning: function() {
-                            return store.isTransitingTo(['home.ratingsengine', 'home.ratingsengine.list', 'home.ratingsengine.list.ratings']);
-                        },
-                        sref: "home.ratingsengine",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_RATING_ENGINE")
-                    },{
-                        if: store.showPlayBook,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        active: function() {
-                            return store.state.includes('home.playbook') && !store.isTransitingFrom(['home.playbook']);
-                        },
-                        transitioning: function() {
-                            return store.isTransitingTo(['home.playbook']);
-                        },
-                        sref: "home.playbook",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK"),
-                        icon: "ico-playbook"
-                    },{
-                        if: !store.showCdlEnabledPage,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        active: function() {
-                            return store.state.includes('home.models') || store.state.includes('home.models.history') && !store.isTransitingFrom(['home.models','home.models.history']);
-                        },
-                        transitioning: function() {
-                            return store.isTransitingTo(['home.models','home.models.history']);
-                        },
-                        sref: "home.models",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_MODEL_LIST")
-                    },{
-                        if: store.showCampaignsPage,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        active: function() {
-                            return store.state.includes('home.campaigns') && !store.isTransitingFrom(['home.campaigns']);
-                        },
-                        transitioning: function() {
-                            return store.isTransitingTo(['home.campaigns']);
-                        },
-                        sref: "home.campaigns",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_CAMPAIGNS"),
-                        icon: "ico-campaign ico-light-gray"
-                    },{
-                        if: !store.showCdlEnabledPage,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        active: function() {
-                            return store.state.includes('home.datacloud.explorer') || store.state.includes('home.datacloud.lookup') && !store.isTransitingFrom(['home.datacloud.explorer','home.datacloud.explorer']);
-                        },
-                        transitioning: function() {
-                            return store.isTransitingTo(['home.datacloud.lookup','home.datacloud.explorer']);
-                        },
-                        sref: "home.datacloud.explorer({section:'edit',category:'',subcategory:''})",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_DATA_CLOUD"),
-                        icon: "ico-enrichment ico-light-gray"
-                    },{
-                        if: store.showMarketoSettings && !store.showCdlEnabledPage,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        active: function() {
-                            return store.state.includes('home.marketosettings') && !store.isTransitingFrom(['home.marketosettings']);
-                        },
-                        transitioning: function() {
-                            return store.isTransitingTo(['home.marketosettings']);
-                        },
-                        sref: "home.marketosettings.apikey",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_MARKETO"),
-                        icon: "ico-marketo ico-light-gray"
-                    },{
-                        if: store.showEloquaSettings && !store.showCdlEnabledPage,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        active: function() {
-                            return store.state.includes('home.eloquasettings') && !store.isTransitingFrom(['home.eloquasettings']);
-                        },
-                        transitioning: function() {
-                            return store.isTransitingTo(['home.eloquasettings']);
-                        },
-                        sref: "home.eloquasettings.apikey",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_ELOQUA"),
-                        icon: "ico-eloqua ico-light-gray"
-                    },{
-                        if: store.showSalesforceSettings,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        sref: "home.sfdcsettings",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC"),
-                        icon: "ico-salesforce ico-light-gray"
-                    },{
-                        if: store.showApiConsole && !store.showCdlEnabledPage,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        sref: "home.apiconsole",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_API_CONSOLE"),
-                        icon: "ico-api-console ico-light-gray"
-                    },{
-                        if: store.showContactUs,
-                        disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                        href: "https://docs.google.com/forms/d/e/1FAIpQLSdxVGLgkna6zA_m2z6TF4eVH5OtF_qHPtyq80Oiy53vu9Of3A/viewform",
-                        target: "_contact_us",
-                        label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_CONTACT_US"),
-                        icon: "ico-contact-us ico-light-gray"
-                    }
-                ]
-            }
+            store.root = [{
+                    if: store.showAnalysisPage,
+                    active: store.checkMyDataActiveState,
+                    sref: store.getMyDataState() + "({ segment: 'Create' })",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_MYDATA"),
+                    icon: "ico-analysis ico-light-gray"
+                },{
+                    if: store.showSegmentationPage,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: store.checkSegmentationActiveState,
+                    sref: "home.segments",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SEGMENTATION"),
+                    icon: "ico-segments ico-light-gray"
+                },{
+                    if: store.showRatingsEngine,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function() {
+                        return store.state.includes('home.ratingsengine') && !store.isTransitingFrom(['home.ratingsengine', 'home.ratingsengine.list', 'home.ratingsengine.list.ratings']);
+                    },
+                    transitioning: function() {
+                        return store.isTransitingTo(['home.ratingsengine', 'home.ratingsengine.list', 'home.ratingsengine.list.ratings']);
+                    },
+                    sref: "home.ratingsengine",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_RATING_ENGINE")
+                },{
+                    if: store.showPlayBook,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function() {
+                        return store.state.includes('home.playbook') && !store.isTransitingFrom(['home.playbook']);
+                    },
+                    transitioning: function() {
+                        return store.isTransitingTo(['home.playbook']);
+                    },
+                    sref: "home.playbook",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK"),
+                    icon: "ico-playbook"
+                },{
+                    if: !store.showCdlEnabledPage,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function() {
+                        return store.state.includes('home.models') || store.state.includes('home.models.history') && !store.isTransitingFrom(['home.models','home.models.history']);
+                    },
+                    transitioning: function() {
+                        return store.isTransitingTo(['home.models','home.models.history']);
+                    },
+                    sref: "home.models",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_MODEL_LIST")
+                },{
+                    if: store.showCampaignsPage,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function() {
+                        return store.state.includes('home.campaigns') && !store.isTransitingFrom(['home.campaigns']);
+                    },
+                    transitioning: function() {
+                        return store.isTransitingTo(['home.campaigns']);
+                    },
+                    sref: "home.campaigns",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_CAMPAIGNS"),
+                    icon: "ico-campaign ico-light-gray"
+                },{
+                    if: !store.showCdlEnabledPage,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function() {
+                        return store.state.includes('home.datacloud.explorer') || store.state.includes('home.datacloud.lookup') && !store.isTransitingFrom(['home.datacloud.explorer','home.datacloud.explorer']);
+                    },
+                    transitioning: function() {
+                        return store.isTransitingTo(['home.datacloud.lookup','home.datacloud.explorer']);
+                    },
+                    sref: "home.datacloud.explorer({section:'edit',category:'',subcategory:''})",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_DATA_CLOUD"),
+                    icon: "ico-enrichment ico-light-gray"
+                },{
+                    if: store.showMarketoSettings && !store.showCdlEnabledPage,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function() {
+                        return store.state.includes('home.marketosettings') && !store.isTransitingFrom(['home.marketosettings']);
+                    },
+                    transitioning: function() {
+                        return store.isTransitingTo(['home.marketosettings']);
+                    },
+                    sref: "home.marketosettings.apikey",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_MARKETO"),
+                    icon: "ico-marketo ico-light-gray"
+                },{
+                    if: store.showEloquaSettings && !store.showCdlEnabledPage,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function() {
+                        return store.state.includes('home.eloquasettings') && !store.isTransitingFrom(['home.eloquasettings']);
+                    },
+                    transitioning: function() {
+                        return store.isTransitingTo(['home.eloquasettings']);
+                    },
+                    sref: "home.eloquasettings.apikey",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_ELOQUA"),
+                    icon: "ico-eloqua ico-light-gray"
+                },{
+                    if: store.showSalesforceSettings,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    sref: "home.sfdcsettings",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_SFDC"),
+                    icon: "ico-salesforce ico-light-gray"
+                },{
+                    if: store.showApiConsole && !store.showCdlEnabledPage,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    sref: "home.apiconsole",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_API_CONSOLE"),
+                    icon: "ico-api-console ico-light-gray"
+                },{
+                    if: store.showContactUs,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    href: "https://docs.google.com/forms/d/e/1FAIpQLSdxVGLgkna6zA_m2z6TF4eVH5OtF_qHPtyq80Oiy53vu9Of3A/viewform",
+                    target: "_contact_us",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_CONTACT_US"),
+                    icon: "ico-contact-us ico-light-gray"
+                }
+            ];
 
-            Object.keys(store.sources).forEach(function(type) {
-                store.setDefaults(type);
-                store.items[type] = store.items[type].concat(store.sources[type]);
-            });
+            deferred.resolve(store.root);
         });
-    }
 
-    this.setDefaults = function(type) {
-        var items = this.sources[type],
-            template = {
+        return deferred.promise;
+    };
+
+    this.set = function(source, back) {
+        back = back || false;
+        //console.log(source, back);
+        if (!source) {
+            this.getRoot().then(function(source) {
+                this.back = back;
+                store.setDefaults(source);
+            });
+        } else {
+            this.back = back;
+            this.setDefaults(source);
+        }
+    };
+
+    this.get = function() {
+        return this.items;
+    };
+
+    this.setDefaults = function(source) {
+        var template = {
                 if: true,
                 disabled: false,
                 active: function() {},
@@ -231,7 +242,7 @@ angular
             },
             properties = Object.keys(template);
 
-        items.forEach(function(item) {
+        source.forEach(function(item) {
             properties.forEach(function(property) {
                 if (!item.hasOwnProperty(property)) {
                     item[property] = template[property];
@@ -239,48 +250,54 @@ angular
             });
         });
 
-        return items;
+        //console.log('set', source);
+        this.setItems(source);
+    };
+
+    store.setItems = function(items) {
+        store.items.length = 0;
+        items.forEach(function(item) {
+            store.items.push(item);
+        });
     };
 
     store.getMyDataState = function() {
         return store.isDataAvailable ? "home.segment.explorer.attributes" : "home.nodata";
-    }
+    };
 
     store.checkMyDataActiveState = function() {
         return store.isStateName(store.MyDataStates) && (!store.stateParams.segment || store.stateParams.segment == 'Create')
-    }
+    };
 
     store.checkSegmentationActiveState = function() {
         return store.isStateName(store.MyDataStates) && (store.stateParams.segment && store.stateParams.segment != 'Create') || store.state.current.name == 'home.segments';
-    }
+    };
 
     store.checkToState = function(toState) {
         return StateHistory.lastTo().name == toState;
-    }
+    };
 
     store.isStateName = function(state_names) {
         return (state_names || []).indexOf($state.current.name) !== -1; 
-    }
+    };
 
     store.isTransitingFrom = function(state_names) {
         return false;
         return (state_names || []).indexOf(StateHistory.lastFrom().name) !== -1 && (state_names || []).indexOf(StateHistory.lastTo().name) !== -1; 
-    }
+    };
 
     store.isTransitingTo = function(state_names) {
         return false;
         return (state_names || []).indexOf(StateHistory.lastTo().name) !== -1 && (state_names || []).indexOf($state.current.name) === -1; 
-    }
+    };
 
     store.isTransitingToMyData = function(state_names) {
         return false;
         return (state_names || []).indexOf($state.current.name) === -1 && store.isTransitingTo(state_names) && (!StateHistory.lastToParams().segment || StateHistory.lastToParams().segment == 'Create');
-    }
+    };
 
     store.isTransitingToSegmentation = function(state_names) {
         return false;
         return store.isTransitingTo(state_names) && (StateHistory.lastToParams().segment && StateHistory.lastToParams().segment != 'Create') || ('home.segments' !== $state.current.name && StateHistory.lastTo().name === 'home.segments');
-    }
-
-    this.init();
+    };
 });

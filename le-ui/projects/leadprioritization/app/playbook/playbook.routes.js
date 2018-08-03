@@ -173,10 +173,35 @@ angular
                 pageTitle: 'Play Overview',
                 play_name: ''
             },
-            onEnter: ['Play', 'BackStore', function(Play, BackStore) {
+            onEnter: ['Play', 'BackStore', function($stateParams, Play, BackStore, ResourceStringsUtility) {
                 BackStore.setBackLabel(Play.displayName);
                 BackStore.setBackState('home.playbook');
                 BackStore.setHidden(false);
+
+                // var strings = ResourceStringsUtility.getString;
+                // var play_name = $stateParams.play_name || '';
+                // var segment = Play.segment;
+                // var targetsDisabled = Play.ratingEngine ? false : true;
+
+                // console.log('enter playbook.dashboard');
+                // SidebarStore.set([{
+                //         label: strings('NAVIGATION_SIDEBAR_LP_PLAYBOOK_PLAY_OVERVIEW'),
+                //         sref: "home.attributes.activate",
+                //         icon: "ico-analysis ico-light-gray"
+                //     },{
+                //         label: strings('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS'),
+                //         sref: "home.attributes.enable",
+                //         icon: "ico-analysis ico-light-gray"
+                //     },{
+                //         label: strings('NAVIGATION_SIDEBAR_LP_PLAYBOOK_INSIGHTS'),
+                //         sref: "home.attributes.enable",
+                //         icon: "ico-analysis ico-light-gray"
+                //     },{
+                //         label: strings('NAVIGATION_SIDEBAR_LP_PLAYBOOK_LAUNCH_HISTORY'),
+                //         sref: "home.attributes.enable",
+                //         icon: "ico-analysis ico-light-gray"
+                //     }
+                // ]);
             }],
             resolve: {
                 Play: function($q, $stateParams, PlaybookWizardStore) {

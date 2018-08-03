@@ -6,7 +6,7 @@ angular.module('login')
         clientsession: '<'
     },
     controller: function(
-        $state, $timeout, ResourceUtility, LoginService, 
+        $state, $timeout, ResourceUtility, LoginService, Banner,
         SessionTimeoutUtility, BrowserStorageUtility, LoginStore
     ) {
         var vm = this;
@@ -62,7 +62,10 @@ angular.module('login')
                     vm.aptrinsic(vm.login, tenant);
                 } else {
                     vm.loginInProgress[tenant.DisplayName] = false;
-                    showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
+                    
+                    Banner.error({
+                        message: ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR")
+                    });
                 }
             });
         };

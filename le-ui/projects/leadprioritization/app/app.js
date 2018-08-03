@@ -15,6 +15,7 @@ var mainApp = angular.module('mainApp', [
     'common.modal',
     'common.banner',
     'common.notice',
+    'common.exceptions',
     'common.attributes',
     'common.datacloud',
 

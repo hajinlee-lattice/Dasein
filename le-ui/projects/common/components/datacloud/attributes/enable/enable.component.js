@@ -69,7 +69,7 @@ angular.module('common.attributes.enable', [])
         overview: '<',
         config: '<'
     },
-    controller: function($stateParams, AttrConfigStore) {
+    controller: function($q, AttrConfigStore, Modal) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -78,5 +78,7 @@ angular.module('common.attributes.enable', [])
         vm.$onInit = function() {
             vm.categories = vm.overview.AttrNums;
         };
+        
+        vm.uiCanExit = vm.store.uiCanExit;
     }
 });

@@ -89,6 +89,7 @@
 
                 <div ng-if="$ctrl.state.loading">Loading</div>
 
+                <div ui-view="banner"></div>
                 <div ui-view="FrameContent" ng-if="!$ctrl.state.loading"></div>
                 
             </div><!-- End .columns.five -->

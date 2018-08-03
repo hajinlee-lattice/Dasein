@@ -35,7 +35,15 @@ angular.module('common.modal', [])
                 confirmcolor: "white-button",
                 headerconfig: { "background-color":"#D0242F", "color":"white" },
                 showcancel: false
-            }
+            },
+            info: {
+                name: "generic_info",
+                title: "Info",
+                icon: "fa fa-info-circle",
+                confirmcolor: "blue-button",
+                headerconfig: { "background-color":"#629acc", "color":"white" },
+                showcancel: false
+            },
         };
     };
 
@@ -98,6 +106,10 @@ angular.module('common.modal', [])
 
     this.error = function(opts, cb) {
         this.prefab_generator('error', opts, cb);
+    };
+
+    this.info = function(opts, cb) {
+        this.prefab_generator('info', opts, cb);
     };
 
     this.prefab_generator = function(type, opts, cb) {

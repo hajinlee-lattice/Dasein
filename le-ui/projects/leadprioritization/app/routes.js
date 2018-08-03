@@ -126,6 +126,9 @@ angular
     $stateProvider
         .state('home', {
             url: '/tenant/:tenantName',
+            onEnter: function(SidebarStore) {
+                SidebarStore.set(null);
+            },
             params: {
                 tenantName: { dynamic: true, value: '' }
             },
@@ -1635,6 +1638,12 @@ angular
             }
         });
 });
+
+function HideSpinner(selector) {
+    angular.element('.inactive-disabled').removeClass('inactive-disabled');
+    angular.element(selector || "section.loading-spinner").remove();
+}
+
 function ShowSpinner(LoadingString, selector) {
     // state change spinner
     selector = selector || '#mainContentView';

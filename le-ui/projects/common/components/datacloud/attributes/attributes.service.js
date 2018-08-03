@@ -1,7 +1,8 @@
 
 angular.module('common.attributes')
 .service('AttrConfigStore', function(
-    $q, $state, $stateParams, $timeout, AttrConfigService, DataCloudStore, Modal, BrowserStorageUtility
+    $q, $state, $stateParams, $timeout, AttrConfigService, 
+    DataCloudStore, BrowserStorageUtility, Modal
 ) {
     var store = this;
 
@@ -251,6 +252,31 @@ angular.module('common.attributes')
         
         AttrConfigService.putConfig(type, category, usage, data).then(function(data) {
             deferred.resolve(data);
+        });
+
+        return deferred.promise;
+    };
+
+    this.uiCanExit = function() {
+        var isChanged = store.isChanged();
+
+        if (!isChanged) {
+            return true;
+        }
+        
+        var deferred = $q.defer();
+
+        Modal.warning({
+            title: "Save before leaving?",
+            message: "The changes you've' made won't apply to the system until you save them.  Are you sure you want to leave the page without saving?",
+            confirmtext: 'Yes, discard changes'
+        }, function(opts) {
+            switch (opts.action) {
+                case "ok": deferred.resolve(true); break;
+                case "cancel": deferred.reject("user cancelled action"); HideSpinner(); break;
+            }
+
+            return true;
         });
 
         return deferred.promise;

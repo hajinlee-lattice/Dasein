@@ -1,6 +1,6 @@
 angular.module('lp.create.import.report', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.modules.ServiceErrorModule'
+    'common.exceptions'
 ])
 .controller('CSVReportController', function(
     $scope, JobsService, JobResult, ResourceUtility, 

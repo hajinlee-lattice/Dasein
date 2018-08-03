@@ -2,14 +2,19 @@ angular.module('login', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService'
 ])
+.run(function($transitions) {
+    $transitions.onStart({}, function(trans) {
+        trans.injector().get('Banner').reset();
+    });
+})
 .config(function($stateProvider) {
     $stateProvider
         .state('login', {
             url: '/',
-            onEnter: function(ResourceStringsService) {
-                ResourceStringsService.GetExternalResourceStringsForLocale();
-            },
             resolve: {
+                strings: function(ResourceStringsService) {
+                    return ResourceStringsService.GetExternalResourceStringsForLocale();
+                },
                 logindocument: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getLoginDocument() || {};
                 },
@@ -18,6 +23,7 @@ angular.module('login', [
                 }
             },
             views: {
+                "notice": "noticeMessage",
                 "main": "loginFrame"
             }
         })
@@ -29,6 +35,7 @@ angular.module('login', [
                 }
             },
             views: {
+                "banner": "bannerMessage",
                 "FrameContent": "loginForm"
             }
         })
@@ -43,12 +50,14 @@ angular.module('login', [
                 }
             },
             views: {
+                "banner": "bannerMessage",
                 "FrameContent": "loginTenants"
             }
         })
         .state('login.forgot', {
             url: 'forgot',
             views: {
+                "banner": "bannerMessage",
                 "FrameContent": "loginForgotPassword"
             }
         })
@@ -60,12 +69,14 @@ angular.module('login', [
                 }
             }, 
             views: {
+                "banner": "bannerMessage",
                 "FrameContent": "loginUpdatePassword"
             }
         })
         .state('login.success', {
             url: 'success',
             views: {
+                "banner": "bannerMessage",
                 "FrameContent": "loginUpdatePasswordSuccess"
             }
         })
@@ -76,6 +87,7 @@ angular.module('login', [
                 disableLogoArea: true
             },
             views: {
+                "banner": "bannerMessage",
                 "FrameContent": "loginSaml"
             }
         })
@@ -86,6 +98,7 @@ angular.module('login', [
                 disableLogoArea: false
             },
             views: {
+                "banner": "bannerMessage",
                 "FrameContent": "loginSamlLogout"
             }
         })
@@ -96,6 +109,7 @@ angular.module('login', [
                 disableLogoArea: false
             },
             views: {
+                "banner": "bannerMessage",
                 "FrameContent": "loginSamlError"
             }
         });

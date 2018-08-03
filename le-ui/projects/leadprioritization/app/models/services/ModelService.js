@@ -5,7 +5,7 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.services.SessionService',
     'mainApp.appCommon.services.ModelSummaryValidationService',
-    'mainApp.core.modules.ServiceErrorModule'
+    'common.exceptions'
 ])
 .service('ModelStore', function($q, ModelService, $timeout, ServiceErrorUtility) {
     var ModelStore = this;

@@ -13,6 +13,18 @@ angular.module('common.attributes', [
     $stateProvider
         .state('home.attributes', {
             url: '/attributes',
+            // onEnter: function($state, SidebarStore, StateHistory) {
+            //     console.log('enter home.attributes', $state.get(), StateHistory.lastFrom());
+            //     SidebarStore.set([{
+            //         sref: "home.attributes.activate",
+            //         label: "Choose Premium",
+            //         icon: "ico-analysis ico-light-gray"
+            //     },{
+            //         sref: "home.attributes.enable",
+            //         label: "Enable and Disable",
+            //         icon: "ico-analysis ico-light-gray"
+            //     }], StateHistory.lastFrom().name || "home");
+            // },
             params: {
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Attribute Admin'
@@ -39,5 +51,6 @@ angular.module('common.attributes', [
 })
 .component('adminAttributes', {
     templateUrl: '',
-    controller: function() {}
+    controller: function() {
+    }
 });

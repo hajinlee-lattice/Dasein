@@ -12,7 +12,7 @@ angular.module('login.form', [
     },
     controller: function (
         $state, ResourceUtility, LoginService, BrowserStorageUtility, 
-        SessionTimeoutUtility, TimestampIntervalUtility
+        SessionTimeoutUtility, TimestampIntervalUtility, Banner
     ) {
         var vm = this;
 
@@ -29,16 +29,9 @@ angular.module('login.form', [
             vm.username = "";
             vm.password = "";
             vm.visible = false;
-            vm.loginMessage = null;
-            vm.loginErrorMessage = null;
-            vm.showLoginError = false;
-            vm.showSuccessMessage = false;
-            vm.successMessage = "";
             vm.loginInProgress = false;
             vm.showForgotPassword = false;
-            vm.forgotPasswordUsername = "";
             vm.dateString = '2010 - ' + (new Date()).getFullYear();
-            vm.forgotPasswordErrorMessage = "";
             vm.history = [];
             vm.visible = true;
 
@@ -46,9 +39,6 @@ angular.module('login.form', [
         }
 
         vm.loginClick = function () {
-            vm.showLoginError = false;
-            vm.loginMessage = ResourceUtility.getString("LOGIN_LOGGING_IN_MESSAGE");
-            
             if (vm.loginInProgress) {
                 return;
             }
@@ -64,16 +54,13 @@ angular.module('login.form', [
 
             LoginService.Login(vm.username, vm.password).then(function(result) {
                 vm.loginInProgress = false;
-                vm.loginMessage = null;
-                if (result != null && result.Success === true) {
-                    // do we need this?
-                    //$rootScope.$broadcast("LoggedIn");
+                
+                if (result !== null && result.Success === true) {
                     SessionTimeoutUtility.refreshSessionLastActiveTimeStamp();
                     $state.go('login.tenants');
                 } else {
-                    // Need to fail gracefully if we get no service response at all
+                    Banner.reset();
                     vm.showLoginHeaderMessage(result);
-                    vm.showLoginError = true;
                 }
             });
         };
@@ -87,8 +74,9 @@ angular.module('login.form', [
                 message = ResourceUtility.getString("LOGIN_GLOBAL_AUTH_ERROR");
             }
 
-            vm.loginErrorMessage = message;
-            vm.showLoginError = true;
+            Banner.error({
+                message: message
+            });
         };
 
         vm.forgotPasswordClick = function ($event) {

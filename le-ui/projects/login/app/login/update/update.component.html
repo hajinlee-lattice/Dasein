@@ -1,14 +1,15 @@
-<form class="container row">
+<form class="row">
     <div class="columns twelve" ng-if="$ctrl.mayChangePassword">
-
         <div class="messaging error-messaging" ng-if="$ctrl.showPasswordError">
             <button id="close-button" type="button" class="close" ng-click="$ctrl.showPasswordError = false;">x</button>
             <ico class="fa fa-warning"></ico>
             <span>{{$ctrl.validateErrorMessage}}</span>
         </div>
+
         <div class="row">
             <h4>{{$ctrl.ResourceUtility.getString('UPDATE_PASSWORD_TITLE')}}</h4>
         </div>
+
         <div name="form" class="form-update-password" novalidate>
             <div class="form">
                 <div class="form-group">
@@ -35,8 +36,8 @@
                 </div>
             </div>
         </div>
-
     </div>
+
     <div class="columns twelve" ng-if="!$ctrl.mayChangePassword">
         Access Denied
     </div>

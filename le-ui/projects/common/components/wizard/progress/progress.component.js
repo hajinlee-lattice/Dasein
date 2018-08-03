@@ -1,5 +1,5 @@
 angular.module('common.wizard.progress', [
-    'mainApp.core.modules.ServiceErrorModule'
+    'common.exceptions'
 ])
 .controller('ImportWizardProgress', function(
     $state, $stateParams, $scope, $timeout, ResourceUtility, WizardProgressContext, 

@@ -1,12 +1,3 @@
-<div class="messaging success-messaging" data-ng-show="$ctrl.showSuccessMessage">
-    <p>{{$ctrl.successMessage}}</p>
-</div>
-
-<div class="messaging error-messaging" ng-if="$ctrl.showLoginError">
-    <button id="close-button" type="button" class="close" ng-click="$ctrl.showLoginError = false;">x</button>
-    <ico class="fa fa-warning"></ico>
-    <span>{{$ctrl.loginErrorMessage}}</span>
-</div>
 <form class="form form-signin" name="login-form" ng-if="$ctrl.visible">
     <!-- <h1>{{$ctrl.ResourceUtility.getString('COMPANY_REGMARK')}}&reg;</h1> -->
     <div class="form-group">
