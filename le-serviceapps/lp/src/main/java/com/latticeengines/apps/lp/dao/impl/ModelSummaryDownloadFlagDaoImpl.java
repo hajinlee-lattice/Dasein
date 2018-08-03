@@ -28,9 +28,26 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
         String msFlagTable = entityClz.getAnnotation(Table.class).name();
-        String sqlStr = String.format("SELECT msFlag.Tenant_ID FROM %s as msFlag GROUP BY msFlag.Tenant_ID",
+        String sqlStr = String.format("SELECT msFlag.Tenant_ID FROM %s as msFlag WHERE msFlag.Tenant_ID IS NOT NULL GROUP BY msFlag.Tenant_ID",
                 msFlagTable);
         SQLQuery sqlQuery = session.createSQLQuery(sqlStr).addScalar("Tenant_ID", new StringType());
+        List<String> list = sqlQuery.list();
+        if (list.size() == 0) {
+            return null;
+        } else {
+            return list;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getExcludeFlags() {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
+        String msFlagTable = entityClz.getAnnotation(Table.class).name();
+        String sqlStr = String.format("SELECT msFlag.Excldue_Tenant_ID FROM %s as msFlag WHERE msFlag.Excldue_Tenant_ID IS NOT NULL GROUP BY msFlag.Excldue_Tenant_ID",
+                msFlagTable);
+        SQLQuery sqlQuery = session.createSQLQuery(sqlStr).addScalar("Excldue_Tenant_ID", new StringType());
         List<String> list = sqlQuery.list();
         if (list.size() == 0) {
             return null;
@@ -48,6 +65,17 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("timeLimit", timeLimit);
+        query.executeUpdate();
+    }
+
+    @Override
+    public void deleteExcludeFlag(String tenantId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
+        String queryStr = String.format("delete from %s where Excldue_Tenant_ID = :excludeTenantId",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("excludeTenantId", tenantId);
         query.executeUpdate();
     }
 }

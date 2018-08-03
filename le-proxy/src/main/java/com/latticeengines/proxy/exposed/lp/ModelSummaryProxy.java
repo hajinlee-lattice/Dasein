@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.lp;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 
 public interface ModelSummaryProxy {
@@ -25,4 +27,7 @@ public interface ModelSummaryProxy {
     // List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long
     // timeFrame);
 
+    boolean downloadModelSummary(String customerSpace);
+
+    Map<String, ModelSummary> getEventToModelSummary(String customerSpace, Map<String, String> modelApplicationIdToEventColumn);
 }

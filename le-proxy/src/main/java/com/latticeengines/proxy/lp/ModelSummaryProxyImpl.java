@@ -1,10 +1,15 @@
 package com.latticeengines.proxy.lp;
 
+import java.util.Map;
+
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
@@ -27,5 +32,33 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
         String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/{modelSummaryId}",
                 shortenCustomerSpace(customerSpace), modelSummaryId);
         return get("set model summary download flag", url, ModelSummary.class);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean downloadModelSummary(String customerSpace){
+        String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/downloadmodelsummary",
+                shortenCustomerSpace(customerSpace));
+
+        ResponseDocument<Boolean> responseDoc = post("download model summary", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return Boolean.FALSE;
+        }
+
+        return responseDoc.getResult();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Map<String, ModelSummary> getEventToModelSummary(String customerSpace, Map<String, String> modelApplicationIdToEventColumn) {
+        String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/geteventtomodelsummary",
+                shortenCustomerSpace(customerSpace));
+
+        Map resObj = post("get event to model summary", url, modelApplicationIdToEventColumn, Map.class);
+        Map<String, ModelSummary> res = null;
+        if (MapUtils.isNotEmpty(resObj)) {
+            res = JsonUtils.convertMap(resObj, String.class, ModelSummary.class);
+        }
+        return res;
     }
 }

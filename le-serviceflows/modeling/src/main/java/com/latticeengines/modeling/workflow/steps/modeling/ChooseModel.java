@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ChooseModelStepConfiguration;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
@@ -37,7 +38,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
     private InternalResourceRestApiProxy proxy = null;
 
     @Autowired
-    private WaitForDownloadedModelSummaries waitForDownloadedModelSummaries;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public void execute() {
@@ -52,8 +53,14 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         if (proxy == null) {
             proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         }
-        Collection<ModelSummary> modelSummaries = waitForDownloadedModelSummaries
-                .wait(configuration, modelApplicationIdToEventColumn).values();
+
+        if (!modelSummaryProxy.downloadModelSummary(configuration.getCustomerSpace().toString())) {
+            throw new LedpException(LedpCode.LEDP_28029);
+        }
+
+        Collection<ModelSummary> modelSummaries = modelSummaryProxy.getEventToModelSummary(
+                configuration.getCustomerSpace().getTenantId(), modelApplicationIdToEventColumn).values();
+
         Entry<String, String> bestModelIdAndEventColumn = chooseBestModelIdAndEventColumn(modelSummaries,
                 modelApplicationIdToEventColumn);
         String modelId = bestModelIdAndEventColumn.getKey();

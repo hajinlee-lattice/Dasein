@@ -1,6 +1,8 @@
 package com.latticeengines.apps.lp.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -35,4 +37,10 @@ public interface ModelSummaryService {
     List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
 
     public void updateLastUpdateTime(String modelId);
+
+    Boolean downloadModelSummary(String tenantId);
+
+    Set<String> getModelSummaryIds();
+
+    Map<String, ModelSummary> getEventToModelSummary(Map<String, String> modelApplicationIdToEventColumn);
 }

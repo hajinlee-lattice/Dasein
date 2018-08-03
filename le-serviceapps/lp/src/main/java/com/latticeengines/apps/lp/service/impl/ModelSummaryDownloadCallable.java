@@ -1,7 +1,6 @@
 package com.latticeengines.apps.lp.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,7 +18,7 @@ import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.qbean.TimeStampContainer;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
-import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -39,6 +38,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     private TimeStampContainer timeStampContainer;
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
     private boolean incremental;
+    private ModelSummaryService modelSummaryService;
 
     public ModelSummaryDownloadCallable(Builder builder) {
         this.tenantEntityMgr = builder.getTenantEntityMgr();
@@ -52,6 +52,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         this.timeStampContainer = builder.getTimeStampContainer();
         this.modelSummaryDownloadFlagEntityMgr = builder.getModelSummaryDownloadFlagEntityMgr();
         this.incremental = builder.getIncremental();
+        this.modelSummaryService = builder.getModelSummaryService();
     }
 
     private Future<Boolean> downloadModel(Tenant tenant, Set<String> modelSummaryIds) {
@@ -91,34 +92,27 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         }
     }
 
-    private Set<String> getModelSummaryIds() {
-        Set<String> modelSummaryIds = Collections.synchronizedSet(new HashSet<String>());
-        List<String> summaries = modelSummaryEntityMgr.getAllModelSummaryIds();
-        for (String summary : summaries) {
-            try {
-                modelSummaryIds.add(UuidUtils.extractUuid(summary));
-            } catch (Exception e) {
-                // Skip any model summaries that have unexpected ID syntax
-                log.warn(e.getMessage());
-            }
-        }
-        return modelSummaryIds;
-    }
-
     private Boolean partialDownload() {
         long startTime = System.currentTimeMillis();
         List<String> waitingFlags = modelSummaryDownloadFlagEntityMgr.getWaitingFlags();
+        List<String> excludeFlags = modelSummaryDownloadFlagEntityMgr.getExcludeFlags();
+        HashSet<String> excludeTenantIds = null;
+        if (excludeFlags != null && excludeFlags.size() > 0) {
+            excludeTenantIds = new HashSet<>(excludeFlags);
+        }
         long getWaitingFlagTime = System.currentTimeMillis() - startTime;
         log.debug(String.format("Get waiting flags duration: %d milliseconds.", getWaitingFlagTime));
         if (waitingFlags != null && waitingFlags.size() > 0) {
             HashSet<String> tenantIds = new HashSet<>(waitingFlags);
-            Set<String> modelSummaryIds = getModelSummaryIds();
+            Set<String> modelSummaryIds = modelSummaryService.getModelSummaryIds();
             List<Future<Boolean>> futures = new ArrayList<>();
             log.info(String.format("Begin download following tenants: %s", tenantIds.toString()));
             for (String tenantId : tenantIds) {
-                Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
-                if (tenant != null) {
-                    futures.add(downloadModel(tenant, modelSummaryIds));
+                if (excludeTenantIds == null || !excludeTenantIds.contains(tenantId)) {
+                    Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+                    if (tenant != null) {
+                        futures.add(downloadModel(tenant, modelSummaryIds));
+                    }
                 }
             }
             for (Future<Boolean> future : futures) {
@@ -144,11 +138,18 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         }
         List<Tenant> tenants = tenantEntityMgr.findAll();
 
-        Set<String> modelSummaryIds = getModelSummaryIds();
+        List<String> excludeFlags = modelSummaryDownloadFlagEntityMgr.getExcludeFlags();
+        HashSet<String> excludeTenantIds = null;
+        if (excludeFlags != null && excludeFlags.size() > 0) {
+            excludeTenantIds = new HashSet<>(excludeFlags);
+        }
+
+        Set<String> modelSummaryIds = modelSummaryService.getModelSummaryIds();
         log.info(String.format("Full download for total %d tenants", tenants.size()));
         List<Future<Boolean>> futures = new ArrayList<>();
         for (Tenant tenant : tenants) {
-            if (tenantIds != null && tenantIds.contains(tenant.getId())) {
+            if ((tenantIds != null && tenantIds.contains(tenant.getId())) ||
+                (excludeTenantIds != null && excludeTenantIds.contains(tenant.getId()))) {
                 continue;
             }
             futures.add(downloadModel(tenant, modelSummaryIds));
@@ -180,6 +181,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         private TimeStampContainer timeStampContainer;
         private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
         private boolean incremental;
+        private ModelSummaryService modelSummaryService;
 
         public Builder() {
 
@@ -241,6 +243,11 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             return this;
         }
 
+        public Builder modelSummaryService(ModelSummaryService modelSummaryService) {
+            this.modelSummaryService = modelSummaryService;
+            return this;
+        }
+
         public TenantEntityMgr getTenantEntityMgr() {
             return tenantEntityMgr;
         }
@@ -285,6 +292,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             return incremental;
         }
 
+        public ModelSummaryService getModelSummaryService() { return modelSummaryService;}
     }
 
 }

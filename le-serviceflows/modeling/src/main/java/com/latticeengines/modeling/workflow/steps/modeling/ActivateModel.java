@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
@@ -23,7 +24,7 @@ import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
     @Autowired
-    private WaitForDownloadedModelSummaries waitForDownloadedModelSummaries;
+    private ModelSummaryProxy modelSummaryProxy;
 
     private InternalResourceRestApiProxy proxy = null;
 
@@ -39,8 +40,14 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
             if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
                 throw new LedpException(LedpCode.LEDP_28012);
             }
-            Map<String, ModelSummary> eventToModelSummary = waitForDownloadedModelSummaries.wait(configuration,
-                    modelApplicationIdToEventColumn);
+
+            if (!modelSummaryProxy.downloadModelSummary(configuration.getCustomerSpace().toString())) {
+                throw new LedpException(LedpCode.LEDP_28029);
+            }
+
+            Map<String, ModelSummary> eventToModelSummary = modelSummaryProxy.getEventToModelSummary(
+                    configuration.getCustomerSpace().getTenantId(), modelApplicationIdToEventColumn);
+
             modelIds = retrieveModelIds(eventToModelSummary).values();
         } else {
             modelIds = getObjectFromContext(ACTIVATE_MODEL_IDS, List.class);

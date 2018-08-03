@@ -9,5 +9,9 @@ public interface ModelSummaryDownloadFlagDao extends BaseDao<ModelSummaryDownloa
 
     List<String> getWaitingFlags();
 
+    List<String> getExcludeFlags();
+
     void deleteOldFlags(long timeTicks);
+
+    void deleteExcludeFlag(String tenantId);
 }

@@ -9,7 +9,13 @@ public interface ModelSummaryDownloadFlagEntityMgr extends BaseEntityMgr<ModelSu
 
     List<String> getWaitingFlags();
 
+    List<String> getExcludeFlags();
+
     void addDownloadFlag(String tenantId);
 
+    void addExcludeFlag(String tenantId);
+
     void removeDownloadedFlag(long timeTicks);
+
+    void removeExcludeFlag(String tenantId);
 }

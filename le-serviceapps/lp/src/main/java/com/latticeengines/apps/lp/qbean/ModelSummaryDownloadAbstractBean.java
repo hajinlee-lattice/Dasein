@@ -13,6 +13,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.service.impl.FeatureImportanceParser;
 import com.latticeengines.apps.lp.service.impl.ModelSummaryDownloadCallable;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -48,6 +49,9 @@ public abstract class ModelSummaryDownloadAbstractBean implements QuartzJobBean 
     @Inject
     private BucketedScoreService bucketedScoreService;
 
+    @Inject
+    private ModelSummaryService modelSummaryService;
+
     @Value("${pls.downloader.max.pool.size}")
     private int maxPoolSize;
 
@@ -76,7 +80,8 @@ public abstract class ModelSummaryDownloadAbstractBean implements QuartzJobBean 
                 .modelSummaryDownloadExecutor(taskExecutor) //
                 .timeStampContainer(timeStampContainer) //
                 .modelSummaryDownloadFlagEntityMgr(modelSummaryDownloadFlagEntityMgr) //
-                .incremental(incremental);
+                .incremental(incremental) //
+                .modelSummaryService(modelSummaryService);
         return new ModelSummaryDownloadCallable(builder);
     }
 

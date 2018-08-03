@@ -44,9 +44,12 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         String modelTypeStr = modelSummary.getModelType();
         ModelService modelService = ModelServiceBase.getModelService(modelTypeStr);
 
+        String result;
         try (PerformanceTimer timer = new PerformanceTimer("Copy model function")) {
-            return modelService.copyModel(modelSummary, sourceTenantId, targetTenantId);
+            result = modelService.copyModel(modelSummary, sourceTenantId, targetTenantId);
         }
+        modelSummaryService.downloadModelSummary(targetTenantId);
+        return result;
     }
 
     @Override

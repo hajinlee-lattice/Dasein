@@ -2,12 +2,24 @@ package com.latticeengines.apps.lp.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,9 +29,13 @@ import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.BucketedScoreService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.service.SourceFileService;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -53,6 +69,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public static final String NO_PREDICTORS_WITH_MORE_THAN_200_DISTINCTVALUES = "NoPredictorsWithMoreThan200DistinctValues";
     public static final String LATTICE_GT200_DISCRETE_VALUE = "LATTICE_GT200_DiscreteValue";
 
+    @Value("${pls.modelingservice.basedir}")
+    private String modelingServiceHdfsBaseDir;
+
     @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
@@ -67,6 +86,22 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Inject
     private SourceFileService sourceFileService;
+
+    @Inject
+    private BucketedScoreService bucketedScoreService;
+
+    @Inject
+    private Configuration yarnConfiguration;
+
+    @Inject
+    private FeatureImportanceParser featureImportanceParser;
+
+    @Autowired
+    @Qualifier("commonTaskExecutor")
+    private ThreadPoolTaskExecutor modelSummaryDownloadExecutor;
+
+    @Inject
+    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @Override
     public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
@@ -366,6 +401,103 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
         modelSummaryEntityMgr.updateLastUpdateTime(modelSummary);
+    }
+
+    @Override
+    public Boolean downloadModelSummary(String tenantId) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        if (tenant == null) {
+            throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
+        }
+
+        long startTime = System.currentTimeMillis();
+        log.info(String.format("Begin download for tenant: %s", tenantId));
+        Set<String> modelSummaryIds = getModelSummaryIds();
+        ModelDownloaderCallable.Builder builder = new ModelDownloaderCallable.Builder();
+        builder.modelServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+                .tenant(tenant) //
+                .modelSummaryEntityMgr(modelSummaryEntityMgr) //
+                .bucketedScoreService(bucketedScoreService) //
+                .yarnConfiguration(yarnConfiguration) //
+                .modelSummaryParser(modelSummaryParser) //
+                .featureImportanceParser(featureImportanceParser)
+                .modelSummaryIds(modelSummaryIds);
+        ModelDownloaderCallable callable = new ModelDownloaderCallable(builder);
+
+        log.info("Add exclude flag: " + tenantId);
+        modelSummaryDownloadFlagEntityMgr.addExcludeFlag(tenantId);
+
+        log.info("Model summary download executor submit");
+        Boolean result;
+        try {
+            result = callable.call();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        log.info("Remove exclude flag: " + tenantId);
+        modelSummaryDownloadFlagEntityMgr.removeExcludeFlag(tenantId);
+
+        long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
+        log.info(String.format("Download for tenant %s duration: %d seconds", tenantId, totalSeconds));
+
+        return result;
+    }
+
+    @Override
+    public Set<String> getModelSummaryIds() {
+        Set<String> modelSummaryIds = Collections.synchronizedSet(new HashSet<String>());
+        List<String> summaries = modelSummaryEntityMgr.getAllModelSummaryIds();
+        for (String summary : summaries) {
+            try {
+                modelSummaryIds.add(UuidUtils.extractUuid(summary));
+            } catch (Exception e) {
+                // Skip any model summaries that have unexpected ID syntax
+                log.warn(e.getMessage());
+            }
+        }
+        return modelSummaryIds;
+    }
+
+    @Override
+    public Map<String, ModelSummary> getEventToModelSummary(Map<String, String> modelApplicationIdToEventColumn) {
+        Map<String, ModelSummary> eventToModelSummary = new HashMap<>();
+        Set<String> foundModels = new HashSet<>();
+
+        int maxTries = 2;
+        int i = 0;
+
+        log.info("Expecting to retrieve models with these application ids:"
+                + Joiner.on(", ").join(modelApplicationIdToEventColumn.keySet()));
+
+        do {
+            for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
+                if (!foundModels.contains(modelApplicationId)) {
+                    ModelSummary model = modelSummaryEntityMgr.findByApplicationId(modelApplicationId);
+
+                    if (model != null) {
+                        eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
+                        foundModels.add(modelApplicationId);
+                    } else {
+                        log.info("Still waiting for model:" + modelApplicationId);
+                    }
+                }
+            }
+
+            i++;
+
+            if (i == maxTries) {
+                break;
+            }
+        } while (eventToModelSummary.size() < modelApplicationIdToEventColumn.size());
+
+        if (eventToModelSummary.size() < modelApplicationIdToEventColumn.size()) {
+            Joiner joiner = Joiner.on(",").skipNulls();
+            throw new LedpException(LedpCode.LEDP_28013,
+                    new String[] { joiner.join(modelApplicationIdToEventColumn.keySet()), joiner.join(foundModels) });
+        }
+
+        return eventToModelSummary;
     }
 
     private void getModelSummaryHasRating(ModelSummary summary) {

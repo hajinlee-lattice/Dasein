@@ -38,6 +38,12 @@ public class ModelSummaryDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<Mod
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<String> getExcludeFlags() {
+        return modelSummaryDownloadFlagDao.getExcludeFlags();
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void addDownloadFlag(String tenantId) {
         ModelSummaryDownloadFlag flag = new ModelSummaryDownloadFlag();
@@ -49,9 +55,21 @@ public class ModelSummaryDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<Mod
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void addExcludeFlag(String tenantId) {
+        ModelSummaryDownloadFlag flag = new ModelSummaryDownloadFlag();
+        flag.setExcldueTenantID(tenantId);
+        flag.setMarkTime(new Date(System.currentTimeMillis()));
+        log.info(String.format("Set model summary exclude flag for tenant %s by entityMgr.", tenantId));
+        modelSummaryDownloadFlagDao.create(flag);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void removeDownloadedFlag(long timeTicks) {
         modelSummaryDownloadFlagDao.deleteOldFlags(timeTicks);
     }
 
-
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void removeExcludeFlag(String tenantId) { modelSummaryDownloadFlagDao.deleteExcludeFlag(tenantId); }
 }

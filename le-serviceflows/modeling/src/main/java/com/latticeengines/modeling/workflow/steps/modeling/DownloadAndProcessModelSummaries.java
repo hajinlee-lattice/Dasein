@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
@@ -26,13 +28,13 @@ import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStepConfiguration> {
 
-    @Inject
-    private WaitForDownloadedModelSummaries waitForDownloadedModelSummaries;
-
     private InternalResourceRestApiProxy proxy = null;
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -45,8 +47,14 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_28012);
         }
-        Map<String, ModelSummary> eventToModelSummary = waitForDownloadedModelSummaries.wait(configuration,
-                modelApplicationIdToEventColumn);
+
+        if (!modelSummaryProxy.downloadModelSummary(configuration.getCustomerSpace().toString())) {
+            throw new LedpException(LedpCode.LEDP_28029);
+        }
+
+        Map<String, ModelSummary> eventToModelSummary = modelSummaryProxy.getEventToModelSummary(
+                configuration.getCustomerSpace().getTenantId(), modelApplicationIdToEventColumn);
+
         Map<String, String> eventToModelId = retrieveModelIds(eventToModelSummary);
 
         AttributeMap attrMap = new AttributeMap();

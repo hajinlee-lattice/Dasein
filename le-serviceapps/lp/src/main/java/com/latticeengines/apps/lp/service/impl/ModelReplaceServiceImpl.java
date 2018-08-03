@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.ModelReplaceService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.util.ModelingHdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -35,6 +36,9 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
     @Inject
     private Configuration yarnConfiguration;
+
+    @Inject
+    private ModelSummaryService modelSummaryService;
 
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
@@ -69,6 +73,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
             ModelSummary targetModelSummary = modelSummaryEntityMgr.getByModelId(targetModelId);
 
             processHdfsData(sourceTenantId, targetTenantId, sourceModelSummary, targetModelSummary);
+            modelSummaryService.downloadModelSummary(targetTenantId);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
