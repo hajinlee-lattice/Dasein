@@ -75,7 +75,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
 
     @Override
     public void enqueue(String domain) {
-        if (domainCollectEnabled) {
+        if (domainCollectEnabled && domainSet.size() < MAX_DUMP_SIZE) {
             domainSet.add(domain);
         }
     }
@@ -122,7 +122,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                     putDomainsInAccountTransferTable(transferId, domainBuffer);
                     dumpCnt += domainBuffer.size();
                 }
-                executeDomainCollectionTransfer(transferId);
+                // executeDomainCollectionTransfer(transferId);
                 log.info("Finished dumping " + dumpCnt + " domains to collector's url stream.");
             }
         }
