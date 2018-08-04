@@ -30,7 +30,7 @@ angular.module('lp.cg.talkingpoint.attributepane', [
 
                 var scrollY = evt.currentTarget.scrollY,
                     paneBottom = $element.offset().top + $element.outerHeight(),
-                    container = $element.parents('.section-body')[0],
+                    container = $element[0].parentElement,
                     $container = angular.element(container),
                     containerBottom = $container.offset().top + $container.outerHeight();
 

@@ -22,7 +22,9 @@ module.exports = function(grunt) {
             js: {
                 files: [
                     '<%= dir.app %>/**/*.js',
-                    '<%= dir.components %>/**/*.js'
+                    '<%= dir.components %>/**/*.js',
+                    '!<%= dir.app %>/**/*.index.js',
+                    '!<%= dir.components %>/**/*.index.js'
                 ],
                 tasks: [
                     'concat:production',
@@ -83,7 +85,9 @@ module.exports = function(grunt) {
             production: {
                 src: [
                     '<%= dir.app %>/**/*.js',
-                    '<%= dir.components %>/**/*.js'
+                    '<%= dir.components %>/**/*.js',
+                    '!<%= dir.app %>/**/*.index.js',
+                    '!<%= dir.components %>/**/*.index.js'
                 ],
                 dest: '<%= dir.assets %>/lattice.min.js'
             }

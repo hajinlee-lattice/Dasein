@@ -31,7 +31,7 @@ angular.module('lp.ratingsengine.wizard.summary', [])
         vm.initCoverageMap();
 
         RatingsEngineStore.getCoverageMap(RatingsEngineModels, CurrentRatingEngine.segment.name).then(function(result) {
-            CoverageMap = vm.initCoverageMap(result);
+            var CoverageMap = vm.initCoverageMap(result);
             console.log('[AQB] CoverageMap:', CoverageMap);
         }); 
 
@@ -61,13 +61,14 @@ angular.module('lp.ratingsengine.wizard.summary', [])
     		vm.rating.status = 'INACTIVE';
     	}
 
-    	$stateParams.opts = {
-    		rating_id: $stateParams.rating_id,
-    		displayName: vm.rating.displayName,
-    		note: vm.rating.note,
-    		status: vm.rating.status
-    	}
-
+        //TODO: Check why we have this set of the opts
+    	// $stateParams.opts = {
+    	// 	rating_id: $stateParams.rating_id,
+    	// 	displayName: vm.rating.displayName,
+    	// 	note: vm.rating.note,
+    	// 	status: vm.rating.status
+        // }
+        console.log('$stateParams ====> ', $stateParams);
     }
 
     vm.initCoverageMap = function(map) {

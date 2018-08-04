@@ -21,6 +21,7 @@ angular.module('mainApp.login.services.LoginService', [
             data: params
          }).then(
             function onSuccess(response) {
+                console.log('BACK Again');
                 var result = response.data;
                 if (result != null && result !== "" && result.Success == true) {
                     BrowserStorageUtility.setTokenDocument(result.Uniqueness + "." + result.Randomness);
@@ -79,33 +80,34 @@ angular.module('mainApp.login.services.LoginService', [
             method: 'POST',
             url: '/pls/attach',
             data: angular.toJson(tenant)
-        })
-        .success(function(data, status, headers, config) {
-            var result = false;
+        }).then(
+            function onSuccess(d, status, headers, config){
+                var data = d.data;
+                var result = false;
 
-            if (data != null && data.Success === true) {
-                BrowserStorageUtility.setSessionDocument(data.Result);
-                data.Result.User.Tenant = tenant;
-                result = data;
-
-                BrowserStorageUtility.setClientSession(data.Result.User, function(){
-                    BrowserStorageUtility.setHistory(username, tenant);
-                    
+                if (data != null && data.Success === true) {
+                    BrowserStorageUtility.setSessionDocument(data.Result);
+                    data.Result.User.Tenant = tenant;
+                    result = data;
+    
+                    BrowserStorageUtility.setClientSession(data.Result.User, function(){
+                        BrowserStorageUtility.setHistory(username, tenant);
+                        
+                        deferred.resolve(result);
+                    });
+                }
+    
+                if (result.Result.User.AccessLevel === null) {
+                    status = 401;
+                    SessionService.HandleResponseErrors(data, status);
                     deferred.resolve(result);
-                });
+                }
+            },
+            function onError(data, status, headers, config) {
+                SessionService.HandleResponseErrors(data.data, status);
+                deferred.resolve(data.data);
             }
-
-            if (result.Result.User.AccessLevel === null) {
-                status = 401;
-                SessionService.HandleResponseErrors(data, status);
-                deferred.resolve(result);
-            }
-        })
-        .error(function(data, status, headers, config) {
-            SessionService.HandleResponseErrors(data, status);
-            deferred.resolve(data);
-        });
-
+        );
         return deferred.promise;
     };
 
@@ -121,22 +123,22 @@ angular.module('mainApp.login.services.LoginService', [
             url: "/pls/forgotpassword/",
             data: {Username: username, Product: "Lead Prioritization", HostPort: this.getHostPort()},
             headers: {"Content-Type": "application/json"}
-        })
-        .success(function(data, status, headers, config) {
-            var result = { Success: false };
+        }).then(
+            function onSuccess(data, status, headers, config){
+                var result = { Success: false };
 
-            if (data === true || data === 'true') {
-                result.Success = true;
-            } else {
-                SessionService.HandleResponseErrors(data, status);
+                if (data === true || data === 'true') {
+                    result.Success = true;
+                } else {
+                    SessionService.HandleResponseErrors(data, status);
+                }
+                deferred.resolve(result);
+            },
+            function onError(data, status, headers, config){
+                var result = { Success: false, Error: data };
+                deferred.resolve(result);
             }
-            deferred.resolve(result);
-        })
-        .error(function(data, status, headers, config) {
-            var result = { Success: false, Error: data };
-            deferred.resolve(result);
-        });
-
+        );
         return deferred.promise;
     };
 
@@ -150,32 +152,33 @@ angular.module('mainApp.login.services.LoginService', [
             headers: {
                "Content-Type": "application/json"
             }
-        })
-        .success(function(data, status, headers, config) {
-            if (data != null && data.Success === true) {
-                BrowserStorageUtility.clear(false);
-                ResourceUtility.clearResourceStrings();
-
-                var loginDocument = BrowserStorageUtility.getLoginDocument(),
-                    authenticationRoute = (loginDocument && loginDocument.AuthenticationRoute ? loginDocument.AuthenticationRoute : null),
-                    tenantId = (BrowserStorageUtility.getClientSession() && BrowserStorageUtility.getClientSession().Tenant  && BrowserStorageUtility.getClientSession().Tenant.Identifier ? BrowserStorageUtility.getClientSession().Tenant.Identifier : null);
-
-                setTimeout(function() {
-                    if(authenticationRoute === 'SSO') {
-                        window.open("/login/saml/' + tenantId + '/logout", "_self");
-                    } else {
-                        window.open("/login/", "_self");
-                    }
-                }, 300);
-            } else {
-                SessionService.HandleResponseErrors(data, status);
+        }).then(
+            function onSuccess(data, status, headers, config){
+                if (data != null && data.data.Success === true) {
+                    BrowserStorageUtility.clear(false);
+                    ResourceUtility.clearResourceStrings();
+    
+                    var loginDocument = BrowserStorageUtility.getLoginDocument(),
+                        authenticationRoute = (loginDocument && loginDocument.AuthenticationRoute ? loginDocument.AuthenticationRoute : null),
+                        tenantId = (BrowserStorageUtility.getClientSession() && BrowserStorageUtility.getClientSession().Tenant  && BrowserStorageUtility.getClientSession().Tenant.Identifier ? BrowserStorageUtility.getClientSession().Tenant.Identifier : null);
+    
+                    setTimeout(function() {
+                        if(authenticationRoute === 'SSO') {
+                            window.open("/login/saml/' + tenantId + '/logout", "_self");
+                        } else {
+                            window.open("/login/", "_self");
+                        }
+                    }, 300);
+                } else {
+                    SessionService.HandleResponseErrors(data.data, status);
+                }
+                deferred.resolve(data);
+            },
+            function onError(data, status, headers, config){
+                deferred.resolve(data.data);
             }
-            deferred.resolve(data);
-        })
-        .error(function(data, status, headers, config) {
-            deferred.resolve(data);
-        });
-
+        );
+       
         return deferred.promise;
     };
 
@@ -200,27 +203,28 @@ angular.module('mainApp.login.services.LoginService', [
             headers: {
                 "Content-Type": "application/json"
             }
-        })
-        .success(function(data, status, headers, config) {
-            var result = {
-                Success:    true,
-                Status:     status
-            };
-
-            if (!data.Success) {
-                result.Success = false;
-            }
-
-            deferred.resolve(result);
-        })
-        .error(function(data, status, headers, config) {
-            var result = {
+        }).then(
+            function onSuccess(data, status, headers, config){
+                var result = {
+                    Success:    true,
+                    Status:     status
+                };
+    
+                if (!data.Success) {
+                    result.Success = false;
+                }
+    
+                deferred.resolve(result);
+            },
+            function onError(data, status, headers, config){
+                var result = {
                     Success:    false,
                     Status:     status
                 };
-            deferred.resolve(result);
-        });
-
+                deferred.resolve(result);
+            }
+        );
+       
         return deferred.promise;
     };
 

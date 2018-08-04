@@ -102,7 +102,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             var description = $('.attribute-hover-header p')[0];
 
             if(description){
-                height = description.offsetHeight;
+                var height = description.offsetHeight;
             }
 
             if (height > 28) { // determine > 2 lines, line-height 14.

@@ -34,7 +34,7 @@ angular.module('common.datacloud.tabs.mydata', [])
 
         ['accountRestriction','contactRestriction'].forEach(function(source) {
             if (QueryStore[source].restriction) {
-                buckets = QueryStore.getAllBuckets(QueryStore[source].restriction.logicalRestriction.restrictions)
+                var buckets = QueryStore.getAllBuckets(QueryStore[source].restriction.logicalRestriction.restrictions)
                 all = [].concat(all, buckets);
             }
         });

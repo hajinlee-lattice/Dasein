@@ -189,18 +189,18 @@ angular
         .success(function(data, status, headers, config) {
 
             console.log("GetFieldDocument:", data);
-
+            
             if (data == null || !data.Success) {
                 if (data && data.Errors.length > 0) {
                     var errors = data.Errors.join('\n');
                 }
-                result = {
+                var result = {
                     Success: false,
                     ResultErrors: errors || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
                     Result: null
                 };
             } else {
-                result = {
+                var result = {
                     Success: true,
                     ResultErrors: data.Errors,
                     Result: data.Result
@@ -251,8 +251,8 @@ angular
     };
 
     this.StartModeling = function(MetaData) {
-        var deferred = $q.defer(),
-            data = {
+        var deferred = $q.defer();
+        var data = {
                 notesContent: MetaData.notesContent,
                 filename: MetaData.name,
                 name: MetaData.modelName,
@@ -277,13 +277,13 @@ angular
         .success(function(data, status, headers, config) {
             console.log("StartModeling:", data);
             if (data == null) {
-                result = {
+                var result = {
                     Success: false,
                     ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
                     Result: null
                 };
             } else {
-                result = {
+                var result = {
                     Success: true,
                     ResultErrors: data.Errors,
                     Result: data.Result
@@ -323,13 +323,13 @@ angular
 
             console.log("StartPMMLModeling:", data);
             if (data == null) {
-                result = {
+                var result = {
                     Success: false,
                     ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
                     Result: null
                 };
             } else {
-                result = {
+                var result = {
                     Success: true,
                     ResultErrors: data.Errors,
                     Result: data.Result
@@ -366,13 +366,13 @@ angular
         .success(function(data, status, headers, config) {
             console.log("StartTestingSet:", data);
             if (data == null) {
-                result = {
+                var result = {
                     Success: false,
                     ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
                     Result: null
                 };
             } else {
-                result = {
+                var result = {
                     Success: true,
                     ResultErrors: data.Errors,
                     Result: data.Result

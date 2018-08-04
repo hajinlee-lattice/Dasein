@@ -150,7 +150,7 @@ angular.module('common.datacloud.query')
             var deferred = $q.defer();
 
             this.GetDataByQuery('accounts', query).then(function(response) {
-                this.accounts = response;
+                QueryStore.accounts = response;
                 deferred.resolve(response);
             });
             return deferred.promise;
@@ -169,7 +169,7 @@ angular.module('common.datacloud.query')
             var deferred = $q.defer();
 
             this.GetDataByQuery('contacts', query).then(function(response) {
-                this.contacts = response;
+                QueryStore.contacts = response;
                 deferred.resolve(response);
             });
             return deferred.promise;
@@ -200,11 +200,11 @@ angular.module('common.datacloud.query')
 
         this.setContactRestriction = function(contactRestriction) {
             if (contactRestriction) {
-                this.contactRestriction = contactRestriction;
+                QueryStore.contactRestriction = contactRestriction;
             }
         };
         this.getContactRestriction = function() {
-            return this.contactRestriction;
+            return QueryStore.contactRestriction;
         };
 
         // this.setPurchaseHistoryRestriction = function(purchaseRestriction){
@@ -601,7 +601,7 @@ angular.module('common.datacloud.query')
 
                 var deferred = $q.defer();
 
-                queryWithRestriction = {
+                var queryWithRestriction = {
                     'free_form_text_search': query.free_form_text_search,
                     'account_restriction': query.account_restriction,
                     'contact_restriction': query.contact_restriction,

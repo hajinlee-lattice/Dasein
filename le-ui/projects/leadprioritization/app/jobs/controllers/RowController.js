@@ -265,6 +265,7 @@ angular
                 if (reports != null) {
                     reports.forEach(function(item) {
                         if (item.purpose == "IMPORT_DATA_SUMMARY") {
+                            var data;
                             $scope.data = data = JSON.parse(item.json.Payload);
                             JobReport = item;
 

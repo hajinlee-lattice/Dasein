@@ -137,7 +137,7 @@ angular.module('lp.import.calendar', [])
             return '';
         }
         var regex = /\*\*(\S(.*?\S)?)\*\*/gm;
-            ret = string.replace(regex, '<strong>$1</strong>')
+        var ret = string.replace(regex, '<strong>$1</strong>');
         return $sce.trustAsHtml(ret);
     }
 

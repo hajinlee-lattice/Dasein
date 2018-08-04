@@ -1,0 +1,1 @@
+import './prioritization.component';

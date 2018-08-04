@@ -57,7 +57,7 @@ angular
                     var number = stat[field];
 
                     if (number && $scope.highest) {
-                        percentage = ((number / $scope.highest) * 100);
+                        var percentage = ((number / $scope.highest) * 100);
 
                         if (typeof limit != 'undefined') {
                             percentage = percentage.toFixed(limit);

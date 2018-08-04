@@ -1,5 +1,5 @@
-angular.module('lp.sfdc.credentials', ['ngAnimate'])
-.component('salesforceSettings', {
+angular.module('lp.sfdc.credentials', ['ngAnimate', 'lp.sfdc', 'common.modal', 'mainApp.core.utilities.BrowserStorageUtility'])
+.component('sales', {
     templateUrl: 'app/sfdc/sfdcsettings.component.html',
     bindings: {
         featureflags: '<',

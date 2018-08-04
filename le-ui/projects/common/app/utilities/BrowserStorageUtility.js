@@ -149,7 +149,7 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     // by adding it to local storage and then calling a success handler.
     this._setProperty = function (data, successHandler, propStorageObjName, propStorageKeyName) {
         if (this[propStorageKeyName]) {
-            if (data != null) {
+            if (data != null && typeof data != 'string') {
                 data.Timestamp = new Date().getTime() + this.CacheTimeout;
             } else {
                 $.jStorage.deleteKey(this[propStorageKeyName]);

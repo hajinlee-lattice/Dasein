@@ -514,7 +514,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         var isContinuous = false;
         if (!AnalyticAttributeUtility.IsPredictorBoolean(predictor)) {
-            for (i = 0; i < predictor.Elements.length; i++) {
+            for (var i = 0; i < predictor.Elements.length; i++) {
                 bucket = predictor.Elements[i];
                 if (bucket.LowerInclusive != null || bucket.UpperExclusive != null) {
                     isContinuous = true;
@@ -743,7 +743,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var bucketName = null;
 
         if (!AnalyticAttributeUtility.IsPredictorBoolean(predictor)) {
-            for (i = 0; i < predictor.Elements.length; i++) {
+            for (var i = 0; i < predictor.Elements.length; i++) {
                 bucket = predictor.Elements[i];
                 if (this.IsPredictorElementCategorical(bucket)) {
                     doOtherBucket = true;
@@ -757,7 +757,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         if (doOtherBucket) {
             // Group elements less than 1% frequency into "Other" bucket
-            for (i = 0; i < predictor.Elements.length; i++) {
+            for (var i = 0; i < predictor.Elements.length; i++) {
 
                 bucket = predictor.Elements[i];
                 bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
@@ -778,7 +778,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             topPredictorElements = predictor.Elements;
         }
 
-        for (i = 0; i < topPredictorElements.length; i++) {
+        for (var i = 0; i < topPredictorElements.length; i++) {
 
             bucket = topPredictorElements[i];
             bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
@@ -866,7 +866,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (otherBucketElements.length > 0) {
             var otherBucketTotalPercentage = 0;
             var averagedLift = 0;
-            for (i = 0; i < otherBucketElements.length; i++) {
+            for (var i = 0; i < otherBucketElements.length; i++) {
                 var otherBucketElement = otherBucketElements[i];
                 var otherBucketPercentage = otherBucketElement.Count != null? otherBucketElement.Count / modelSummary.ModelDetails.TotalLeads :
                     otherBucketElement.percentTotal/100;
@@ -909,7 +909,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         // Find the bucket with the largest percentage
         var index = 0;
         var maxPercentage = 0;
-        for (i = 0; i < percentList.length; i++) {
+        for (var i = 0; i < percentList.length; i++) {
             var currentPercentage = 0;
             if (typeof percentList[i] === 'string' && percentList[i] == "<0.1") {
                 currentPercentage = 0.1;
@@ -923,7 +923,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
         }
         // Make the max percentage equal to 100 minus the sum of all the other percentages
-        for (i = 0; i < percentList.length; i++) {
+        for (var i = 0; i < percentList.length; i++) {
             if (i == index) {
                 continue;
             } else {

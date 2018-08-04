@@ -196,7 +196,7 @@ angular.module('lp.playbook.dashboard', [
 
         if(save) {
             vm.editable = false; // block rapid edits
-            savePlay = {
+            var savePlay = {
                 name: vm.play.name,
                 createdBy: vm.play.createdBy,
                 displayName: newPlay.displayName,
@@ -238,7 +238,7 @@ angular.module('lp.playbook.dashboard', [
             // vm.ratingsGraph = makeSimpleGraph(play.ratings && play.ratings, 'count');
 
             // PLS-8472 Using play.ratingEngine.bucketMetadata instead of play.ratings to generate play ratings graph once ratings object is more stable
-            buckets = reformatBucketMetadata(play.ratingEngine.bucketMetadata);
+            var buckets = reformatBucketMetadata(play.ratingEngine.bucketMetadata);
             vm.ratingsGraph = makeSimpleGraph(buckets, 'count');
    
             if(play.ratingEngine.type === 'CROSS_SELL' && play.ratingEngine.advancedRatingConfig) {
@@ -285,8 +285,8 @@ angular.module('lp.playbook.dashboard', [
         });
     }
 
-    reformatBucketMetadata = function(bucketMetadata) {
-        buckets = [];
+    function reformatBucketMetadata(bucketMetadata) {
+        var buckets = [];
         bucketMetadata.forEach(function(bkt) {
             buckets.push({
                 bucket: bkt.bucket_name,

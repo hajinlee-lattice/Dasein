@@ -71,7 +71,7 @@ angular.module('lp.segments.segments', [
             if(tileState) {
                 tileState.editSegment = !tileState.editSegment;
                 tileState.saveEnabled = true;
-                $stateParams.edit = null;
+                // $stateParams.edit = null; TODO: Why are we updating this?
             }
         }
     }

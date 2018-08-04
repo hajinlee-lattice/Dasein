@@ -69,6 +69,7 @@ module.exports = function (grunt) {
                         '!<%= pls.app %>/lib/js/*.js',
                         '!<%= pls.app %>/lib/css/*.css',
                         '!<%= pls.app %>/app/*.min.js',
+                        '!<%= pls.app %>/**/*.index.js',
                         '!<%= pls.app %>/assets/styles/*.min.css'
                     ]
                 }],
@@ -123,7 +124,8 @@ module.exports = function (grunt) {
                 files: ['<%= pls.app %>/app/**/*.js',
                     '<%= pls.app %>/app/app.js',
                     '<%= pls.app %>/test/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/vendor/**/*.js'],
+                    '!<%= pls.app %>/app/AppCommon/vendor/**/*.js',
+                    '!<%= pls.app %>/**/*.index.js'],
                 tasks: ['jshint:dist', 'karma:watch:run']
             },
             css:     {
@@ -223,7 +225,8 @@ module.exports = function (grunt) {
                         '<%= pls.app %>/app/AppCommon/vendor/ui-bootstrap-jpls-0.13.0.js',
                         '<%= pls.app %>/app/AppCommon/!(vendor|test)/**/*.js',
                         '<%= pls.app %>/app/!(AppCommon)/**/*.js',
-                        '<%= pls.app %>/app/app.js'
+                        '<%= pls.app %>/app/app.js',
+                        '!<%= pls.app %>/**/*.index.js'
                     ]
                 }
             },

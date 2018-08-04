@@ -43,7 +43,7 @@ body {
   }
 }
 .login-body {
-  background: url(../images/bg_login.jpg) no-repeat top left fixed;
+  background: url('../images/bg_login.jpg') no-repeat top left fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -509,19 +509,19 @@ table.existing-user-info tr td {
 }
 
 .priority-arrow-up {
-  background: url(../images/arrow-up.png) no-repeat center center;
+  background: url('../images/arrow-up.png') no-repeat center center;
 }
 
 .priority-arrow-up:hover {
-  background: url(../images/arrow-up-over.png) no-repeat center center;
+  background: url('../images/arrow-up-over.png') no-repeat center center;
 }
 
 .priority-arrow-down {
-  background: url(../images/arrow-down.png) no-repeat center center;
+  background: url('../images/arrow-down.png') no-repeat center center;
 }
 
 .priority-arrow-down:hover {
-  background: url(../images/arrow-down-over.png) no-repeat center center;
+  background: url('../images/arrow-down-over.png') no-repeat center center;
 }
 
 /*

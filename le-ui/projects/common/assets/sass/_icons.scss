@@ -174,13 +174,13 @@ Table of Contents
 	}
 	&.ico-user {
 		background-color: $pearl-white;
-		-webkit-mask-image: url("/assets/images/ico-user.svg");
-		mask: url("/assets/images/ico-user.svg");
+		-webkit-mask-image: url("../images/ico-user.svg");
+		mask: url("../images/ico-user.svg");
 	}
 	&.ico-user-card {
 		background-color: $pearl-white;
-		-webkit-mask-image: url("/assets/images/ico-user-card.svg");
-		mask: url("/assets/images/ico-user-card.svg");
+		-webkit-mask-image: url("../images/ico-user-card.svg");
+		mask: url("../images/ico-user-card.svg");
 	}
 	&.ico-industry {
 		background-color: $pearl-white;
@@ -195,7 +195,7 @@ Table of Contents
 	&.ico-tmb-user {
 		background-color: $pearl-white;
 		-webkit-mask: url("/assets/images/ico-employee-range.svg");
-		mask: url("/assets/images/ico-user.svg");
+		mask: url("../images/ico-user.svg");
 	}
 	&.ico-tmb-chart {
 		background-color: $pearl-white;

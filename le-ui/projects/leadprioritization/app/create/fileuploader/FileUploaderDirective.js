@@ -379,7 +379,7 @@ angular
             vm.uploadFile = function(file) {
                 vm.uploading = true;
                 vm.upload_percent = 0;
-
+                var cancelDeferred;
                 if (!vm.params) {
                     vm.params = {};
                 }

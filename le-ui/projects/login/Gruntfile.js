@@ -34,7 +34,8 @@ module.exports = function (grunt) {
                     src: [
                         '.tmp',
                         '<%= pls.app %>/production_*.js',
-                        '<%= pls.assets %>/styles/production_*.css'
+                        '<%= pls.assets %>/styles/production_*.css',
+                        '!<%= pls.app %>/**/*.index.js'
                     ]
                 }],
                 options: {
@@ -69,7 +70,8 @@ module.exports = function (grunt) {
                         '!<%= pls.app %>/lib/js/*.js',
                         '!<%= pls.app %>/lib/css/*.css',
                         '!<%= pls.app %>/app/*.min.js',
-                        '!<%= pls.app %>/assets/styles/*.min.css'
+                        '!<%= pls.app %>/assets/styles/*.min.css',
+                        '!<%= pls.app %>/**/*.index.js'
                     ]
                 }],
                 options: {
@@ -104,7 +106,8 @@ module.exports = function (grunt) {
                 src:     [
                     '<%= pls.app %>/app/**/*.js',
                     '!<%= pls.app %>/app/AppCommon/vendor/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/test/**/*.js'
+                    '!<%= pls.app %>/app/AppCommon/test/**/*.js',
+                    '!<%= pls.app %>/**/*.index.js'
                 ],
                 options: {
                     eqnull: true,
@@ -121,7 +124,8 @@ module.exports = function (grunt) {
                 files: ['<%= pls.app %>/app/**/*.js',
                     '<%= pls.app %>/app/app.js',
                     '<%= pls.app %>/test/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/vendor/**/*.js'],
+                    '!<%= pls.app %>/app/AppCommon/vendor/**/*.js',
+                    '!<%= pls.app %>/**/*.index.js'],
                 tasks: ['jshint:dist', 'karma:watch:run']
             },
             css:     {
@@ -204,7 +208,7 @@ module.exports = function (grunt) {
         ngAnnotate: {
             dist: {
                 files: {
-                    '<%= pls.dist %>/app.js': ['<%= pls.dist %>/app.js']
+                    '<%= pls.dist %>/app.js': ['<%= pls.dist %>/app.js', '!<%= pls.app %>/**/*.index.js']
                 }
             }
         },
@@ -221,7 +225,8 @@ module.exports = function (grunt) {
                         '<%= pls.app %>/app/AppCommon/vendor/ui-bootstrap-jpls-0.13.0.js',
                         '<%= pls.app %>/app/AppCommon/!(vendor|test)/**/*.js',
                         '<%= pls.app %>/app/!(AppCommon)/**/*.js',
-                        '<%= pls.app %>/app/app.js'
+                        '<%= pls.app %>/app/app.js',
+                        '!<%= pls.app %>/**/*.index.js'
                     ]
                 }
             },
@@ -231,7 +236,8 @@ module.exports = function (grunt) {
                 },
                 files: {
                     '<%= pls.dist %>/app.js': [
-                        '<%= pls.dist %>/app.js'//,'<%= pls.dist %>/templates.js'
+                        '<%= pls.dist %>/app.js',//,'<%= pls.dist %>/templates.js'
+                        '!<%= pls.app %>/**/*.index.js'
                     ]
                 }
             }

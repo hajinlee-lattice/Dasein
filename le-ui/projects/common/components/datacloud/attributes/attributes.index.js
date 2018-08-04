@@ -1,0 +1,11 @@
+import './activate/activate.component';
+import './categories/categories.component';
+import './controls/controls.component';
+import './edit/edit.component';
+import './enable/enable.component';
+import './filters/filters.component';
+import './header/header.component';
+import './list/list.component';
+import './subheader/subheader.component';
+import './attributes.component';
+import './attributes.service';

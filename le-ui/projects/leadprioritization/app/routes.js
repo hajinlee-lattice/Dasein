@@ -1297,7 +1297,7 @@ angular
                 },
                 accountids: function($q, SfdcStore, externaltypes) {
                     var deferred = $q.defer();
-                    params = {
+                    var params = {
                         externalSystemType: externaltypes
                     };
                     SfdcStore.getAccountIds(params).then(function (result) {
@@ -1326,7 +1326,7 @@ angular
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
-                "main@": 'salesforceSettings'
+                "main@": 'sales'
             }
         })
         .state('home.apiconsole', {
@@ -1639,12 +1639,12 @@ angular
         });
 });
 
-function HideSpinner(selector) {
+window.HideSpinner = function(selector) {
     angular.element('.inactive-disabled').removeClass('inactive-disabled');
     angular.element(selector || "section.loading-spinner").remove();
 }
 
-function ShowSpinner(LoadingString, selector) {
+window.ShowSpinner = function(LoadingString, selector) {
     // state change spinner
     selector = selector || '#mainContentView';
     LoadingString = LoadingString || '';

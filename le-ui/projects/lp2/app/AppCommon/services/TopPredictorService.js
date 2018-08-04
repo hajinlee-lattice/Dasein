@@ -605,7 +605,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         // Find the bucket with the largest percentage
         var index = 0;
         var maxPercentage = 0;
-        for (i = 0; i < percentList.length; i++) {
+        for (var i = 0; i < percentList.length; i++) {
             var currentPercentage = 0;
             if (typeof percentList[i] === 'string' && percentList[i] == "<0.1") {
                 currentPercentage = 0.1;

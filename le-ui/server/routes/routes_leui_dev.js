@@ -28,10 +28,14 @@ module.exports = [{
     path: '/projects/login',
     html5mode: true,
     pages: {
-        '/login': 'index.html',
-        '/login/index': 'index.html'
+        '/login':'/dist/indexwp.html',
+        '/login/form':'/dist/indexwp.html',
+        '/login/old': 'index.html',
+        '/login/old/index': 'index.html'
     },
     folders: {
+        '/login': '/dist',
+        '/dist': '/dist',
         '/login/app': '/app',
         '/login/assets': '/assets',
         '/login/lib': '/lib',
@@ -52,10 +56,12 @@ module.exports = [{
     path: '/projects/leadprioritization',
     html5mode: true,
     pages: {
-        '/lp/': 'index.html',
-        '/lp/index': 'index.html'
+        '/lp/': '/dist/indexwp.html',
+        '/lp/index': '/dist/indexwp.html'
     },
     folders: {
+        '/lp' : '/dist',
+        '/dist': '/dist',
         '/lp/app': '/app',
         '/lp/assets': '/assets',
         '/lp/lib': '/lib'
@@ -73,12 +79,18 @@ module.exports = [{
         'lattice-engines.com'
     ],
     pages: {
-        '/insights/': 'index.html',
-        '/insights/index': 'index.html'
+        '/insights/': '/dist/indexwp.html',
+        '/insights': '/dist/indexwp.html',
+        '/insights/index': '/dist/indexwp.html'
     },
     folders: {
+        '/dist': '/dist',
+        '/insights': '/dist',
         '/insights/app': '/app',
-        '/insights/assets': '/assets'
+        '/insights/assets': '/assets',
+        '/insights/app': '/app',
+        '/insights/assets': '/assets',
+        '/insights/lib': '/lib'
     }
 },{    
     path: '/projects/lp2',

@@ -18,13 +18,18 @@ module.exports = [{
     path: '/projects/login',
     html5mode: true,
     pages: {
-        '/login/': 'assets/index.html',
-        '/login/index': 'assets/index.html'
+        '/login':'/dist/indexwp.html',
+        '/login/form':'/dist/indexwp.html',
+        '/login/old': 'index.html',
+        '/login/old/index': 'index.html'
     },
     folders: {
+        '/login': '/dist',
+        '/dist': '/dist',
+        '/login/app': '/app',
         '/login/assets': '/assets',
-        '/login/help': '/help',
-        '/login': '/assets'
+        '/login/lib': '/lib',
+        '/login/help': '/help'
     }
 },{
     path: '/projects/prospectdiscovery',
@@ -41,14 +46,19 @@ module.exports = [{
     path: '/projects/leadprioritization',
     html5mode: true,
     pages: {
-        '/lp/': 'assets/index.html',
-        '/lp/index': 'assets/index.html'
+        '/lp/': '/dist/indexwp.html',
+        '/lp/index': '/dist/indexwp.html',
+        '/lp/old': 'assets/index.html',
+        '/lp/old/index': 'assets/index.html'
     },
     folders: {
+        '/lp' : '/dist',
+        '/dist': '/dist',
+        '/lp/app': '/app',
+        '/lp/assets': '/assets',
+        '/lp/lib': '/lib',
         '/lp/assets': '/assets',
         '/lp/lib/js': '/lib/js',
-        '/lp': '/assets',
-        '/lp/assets/images': '/assets/images'
     }
 },{
     path: '/projects/insights',
@@ -63,11 +73,14 @@ module.exports = [{
         'lattice-engines.com'
     ],
     pages: {
-        '/insights/': 'assets/index.html',
-        '/insights/index': 'assets/index.html'
+        '/insights/': '/dist/indexwp.html',
+        '/insights': '/dist/indexwp.html',
+        '/insights/index': '/dist/indexwp.html'
     },
     folders: {
-        '/insights': '/assets'
+        '/': '/dist',
+        '/dist': '/dist',
+        '/insights': '/dist',
     }
 },{
     path: '/projects/dante',

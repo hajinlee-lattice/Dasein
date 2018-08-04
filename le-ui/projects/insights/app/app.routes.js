@@ -1,5 +1,5 @@
 angular.module('insightsApp')
-.run(function($transitions) {
+.run(function($transitions, ServiceErrorUtility) {
     $transitions.onStart({}, function(trans) {
         var to = trans.$to(),
             from = trans.$from(),
@@ -8,8 +8,8 @@ angular.module('insightsApp')
         if (to.name !== from.name && params.LoadingSpinner !== false) {
             ShowSpinner('Loading Insight Data');
         }
-
-        trans.injector().get('ServiceErrorUtility').hideBanner();
+        console.log(ServiceErrorUtility);
+        // trans.injector().get('ServiceErrorUtility').hideBanner();
     });
 })
 .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
@@ -71,7 +71,7 @@ angular.module('insightsApp')
         });
 });
 
-function ShowSpinner(LoadingString, selector) {
+window.ShowSpinner = function(LoadingString, selector) {
     // state change spinner
     selector = selector || '#mainContentView';
     LoadingString = LoadingString || '';

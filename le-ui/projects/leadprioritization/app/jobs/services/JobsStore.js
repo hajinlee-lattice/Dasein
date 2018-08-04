@@ -134,26 +134,27 @@ angular
                 } else {
                     JobsStore.data.jobs.length = 0;
 
-                    var nullIdsMap = {};
+                    var nullIdsMap = [];
                     JobsStore.inProgressModelJobs = {};
                     JobsStore.jobTypes.forEach(function(type) {
                         nullIdsMap[type] = false;
                     })
+                    if(res){
+                        for (var i=0; i<res.length; i++) {
+                            var job = res[i];
 
-                    for (var i=0; i<res.length; i++) {
-                        var job = res[i];
-
-                        if (job.startTimestamp != null) {
-                            JobsStore.addJobMap(job.id, job);
-                            JobsStore.addJob(job, modelId);
-                            if(isImportJob(job) && job.id == null){
-                                nullIdsMap['import'] = true;
-                            } else if (isExportJob(job) && job.id == null) {
-                                nullIdsMap['export'] = true;
+                            if (job.startTimestamp != null) {
+                                JobsStore.addJobMap(job.id, job);
+                                JobsStore.addJob(job, modelId);
+                                if(isImportJob(job) && job.id == null){
+                                    nullIdsMap['import'] = true;
+                                } else if (isExportJob(job) && job.id == null) {
+                                    nullIdsMap['export'] = true;
+                                }
                             }
                         }
+                        JobsStore.synchJobs(nullIdsMap, res);
                     }
-                    JobsStore.synchJobs(nullIdsMap, res);
                 }
                 deferred.resolve(JobsStore.data.jobs);
             });

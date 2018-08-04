@@ -41,7 +41,7 @@ angular
                 },
                 ModelConfig: function($q, $rootScope, Model, JobsStore, IsPmml){
                     var config = {};
-                    ModelId = (Model.ModelId ? Model.ModelId : ((Model.ModelDetails ? Model.ModelDetails.ModelID : undefined)));
+                    var ModelId = (Model.ModelId ? Model.ModelId : ((Model.ModelDetails ? Model.ModelDetails.ModelID : undefined)));
                     IsPmml = IsPmml || false; 
                     config.ModelId = ModelId;
                     config.IsPmml = IsPmml;

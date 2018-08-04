@@ -55,7 +55,8 @@ module.exports = function (grunt) {
                 HTTPS_PORT: 3000,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
-                HTTPS_PASS: false
+                HTTPS_PASS: false,
+                LEUI_BUNDLER: 'grunt'
             },
             dev_admin: { // qa stack a
                 NODE_APPS: 'leadmin',
@@ -70,7 +71,8 @@ module.exports = function (grunt) {
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
-                HTTPS_PASS: false
+                HTTPS_PASS: false,
+                LEADMIN_BUNDLER: 'grunt'
             },
             devb: { // qa stack b
                 NODE_APPS: 'leui',
@@ -88,7 +90,8 @@ module.exports = function (grunt) {
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
-                HTTPS_PASS: false
+                HTTPS_PASS: false,
+                LEUI_BUNDLER: 'grunt'
             },
             devb_admin: { // qa stack b
                 NODE_APPS: 'leadmin',
@@ -103,7 +106,8 @@ module.exports = function (grunt) {
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
-                HTTPS_PASS: false
+                HTTPS_PASS: false,
+                LEADMIN_BUNDLER: 'grunt'
             },
             devb_bodc: { // qa stack b in bodc, to be deprecated
                 NODE_APPS: 'leui',
@@ -152,7 +156,8 @@ module.exports = function (grunt) {
                 HTTPS_PORT: 3000,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
-                HTTPS_PASS: false
+                HTTPS_PASS: false,
+                LEUI_BUNDLER: 'grunt'
             },
             local2: {
                 NODE_APPS: 'leui',
@@ -184,7 +189,8 @@ module.exports = function (grunt) {
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
-                HTTPS_PASS: false
+                HTTPS_PASS: false,
+                LEADMIN_BUNDLER: 'grunt'
             },
             qa: { // qa stack a
                 NODE_APPS: 'leui,leadmin',
@@ -205,7 +211,10 @@ module.exports = function (grunt) {
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
-                WHITELIST: 'internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com, internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com'
+                WHITELIST: 'internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com, internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                LEUI_BUNDLER: 'grunt',
+                LEADMIN_BUNDLER: 'grunt'
+
             },
             qadev: { // qa stack a
                 NODE_APPS: 'leui,leadmin',
@@ -226,7 +235,9 @@ module.exports = function (grunt) {
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
-                WHITELIST: 'internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com, internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com'
+                WHITELIST: 'internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com, internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                LEUI_BUNDLER: 'grunt',
+                LEADMIN_BUNDLER: 'grunt'
             },
             production: {
                 NODE_APPS: 'leui',

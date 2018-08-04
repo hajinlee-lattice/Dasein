@@ -61,7 +61,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
                 vm.block_user = false;
                 RatingsEngineStore.setValidation('segment', true);
 
-                makeItemFirst = function (name){
+                var makeItemFirst = function (name){
                     for (var i = 0; i < vm.segments.length; i++){
                         if (vm.segments[i].name == name){
                             vm.segments[i].Selected = true;

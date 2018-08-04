@@ -97,18 +97,18 @@ angular.module('common.datacloud.explorer', [
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
-    getDatacollectionPrecheck = function() {
-        vm.datacollectionPrechecking = true; // spinner
-        ConfigureAttributesStore.getPrecheck().then(function(result) {
-            vm.datacollectionPrecheck = result;
-            vm.datacollectionPrechecking = false;
-        });
-    }
+    // getDatacollectionPrecheck = function() {
+    //     vm.datacollectionPrechecking = true; // spinner
+    //     ConfigureAttributesStore.getPrecheck().then(function(result) {
+    //         vm.datacollectionPrecheck = result;
+    //         vm.datacollectionPrechecking = false;
+    //     });
+    // }
 
     vm.init = function() {
-        if(['segment.analysis'].indexOf(vm.section) != -1) { // only run on 'my data' page
-            getDatacollectionPrecheck();
-        }
+        // if(['segment.analysis'].indexOf(vm.section) != -1) { // only run on 'my data' page
+        //     getDatacollectionPrecheck();
+        // }
 
         if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add' || $state.current.name === 'home.ratingsengine.rulesprospects.segment.attributes.add') {
             vm.mode = 'dashboardrules';

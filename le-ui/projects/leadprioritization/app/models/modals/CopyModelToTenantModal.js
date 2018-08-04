@@ -46,7 +46,7 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
         error: false
     }
     
-    _tenants = $.jStorage.get('GriotLoginDocument').Tenants || {};
+    var _tenants = $.jStorage.get('GriotLoginDocument').Tenants || {};
     vm.tenants = _tenants.filter(function(o) { 
         return o.DisplayName !== vm.asTenantName; 
     });

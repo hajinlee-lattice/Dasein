@@ -52,7 +52,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
                     }
                     
                     var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
-                        content = tinymce.activeEditor.getContent();
+                    var content = tinymce.activeEditor.getContent();
 
                     if(content === '') {
                         return false;

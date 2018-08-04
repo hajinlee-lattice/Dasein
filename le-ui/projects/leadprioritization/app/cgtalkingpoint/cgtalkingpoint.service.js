@@ -83,7 +83,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
         // just check from a whitelist to see if the properties are equal
         for(var i in check) {
-            property = check[i];
+            var property = check[i];
             if(foundCurrentTalkingPoint[property] !== talkingPoint[property]) {
                 dirty = true;
                 break;
@@ -254,7 +254,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return QueryStore.GetDataByQuery('accounts', query, PlaybookWizardStore.currentPlay.segment);
     };
 
-    makeAttributesArray = function(attributes) {
+    this.makeAttributesArray = function(attributes) {
         array = [];
         for(var i in attributes) {
             var key = i,

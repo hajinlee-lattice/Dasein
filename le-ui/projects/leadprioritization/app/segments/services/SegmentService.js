@@ -14,7 +14,7 @@ angular
     }
 
     this.flattenSegmentRestrictions = function(segment) {
-        restrictions = [];
+        var restrictions = [];
         if (segment.account_restriction != null && 
             segment.account_restriction.restriction !== null  && 
             segment.account_restriction.restriction.logicalRestriction && 

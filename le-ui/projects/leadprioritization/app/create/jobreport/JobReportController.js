@@ -26,7 +26,8 @@ angular.module('lp.create.import.report', [
     $scope.TenantId = clientSession.Tenant.Identifier;
     $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
     $scope.report = JobReport;
-    $scope.data = data = JSON.parse(JobReport.json.Payload);
+    $scope.data = JSON.parse(JobReport.json.Payload);
+    var data = $scope.data;
     $scope.data.total_records = data.imported_records + data.ignored_records;
     $scope.errorlog = '/files/fileuploads/' + JobReport.name + '/import/errors' + 
         '?Authorization=' + $scope.AuthToken + 

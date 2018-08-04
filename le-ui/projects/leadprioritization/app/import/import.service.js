@@ -305,7 +305,7 @@ angular.module('lp.import')
                     items.forEach(function(item, key) {
                         var mappedItem = {},
                             _mappedItem = {},
-                            newitem = {},
+                            newItem = {},
                             _newItem = {};
 
                         if(item.originalUserField) {
@@ -707,13 +707,13 @@ angular.module('lp.import')
 	                if (data && data.Errors.length > 0) {
 	                    var errors = data.Errors.join('\n');
 	                }
-	                result = {
+	                var result = {
 	                    Success: false,
 	                    ResultErrors: errors || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
 	                    Result: null
 	                };
 	            } else {
-	                result = {
+	                var result = {
 	                    Success: true,
 	                    ResultErrors: data.Errors,
 	                    Result: data.Result

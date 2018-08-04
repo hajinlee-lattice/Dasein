@@ -407,7 +407,7 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer(),
             ClientSession = BrowserStorageUtility.getClientSession(); 
 
-        opts = {
+        var opts = {
             createdBy: rating.createdBy !== undefined ? rating.createdBy : ClientSession.EmailAddress,
             type: rating.type !== undefined ? rating.type : 'RULE_BASED',
             segment: rating.segment || RatingsEngineStore.getSegment(),
@@ -816,9 +816,9 @@ angular.module('lp.ratingsengine')
                 predictionType = RatingsEngineStore.getPredictionType(),
                 dataStores = RatingsEngineStore.getDataStores(),
                 customEventModelingType = RatingsEngineStore.getCustomEventModelingType();
-                modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions();
-                fileName = RatingsEngineStore.getCSVFileName();
-                obj = {};
+                var modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions();
+                var fileName = RatingsEngineStore.getCSVFileName();
+                var obj = {};
 
             obj = {
                 AI: {

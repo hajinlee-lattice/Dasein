@@ -7,7 +7,7 @@ angular.module('lp.ratingsengine.ratingsenginetype', [])
         datacollectionPrechecking: false
     });
 
-    getDatacollectionPrecheck = function() {
+    function getDatacollectionPrecheck() {
         vm.datacollectionPrechecking = true; // spinner
         ConfigureAttributesStore.getPrecheck().then(function(result) {
             vm.datacollectionPrecheck = result;

@@ -16,7 +16,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility,
     NavUtility, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml, RatingEngine) {
     $scope.ResourceUtility = ResourceUtility;
-
     if(Model !== null){
 
         var modelId = $stateParams.modelId;
@@ -38,7 +37,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
         model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
 
-        thresholdData = ThresholdExplorerService.PrepareData(model);
+        var thresholdData = ThresholdExplorerService.PrepareData(model);
         model.ThresholdChartData = thresholdData.ChartData;
         model.ThresholdDecileData = thresholdData.DecileData;
         model.ThresholdLiftData = thresholdData.LiftData;

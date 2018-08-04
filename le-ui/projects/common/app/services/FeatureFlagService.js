@@ -1,4 +1,4 @@
-mod = angular.module('mainApp.core.services.FeatureFlagService', [
+angular.module('mainApp.core.services.FeatureFlagService', [
     'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.BrowserStorageUtility'
 ]).service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {

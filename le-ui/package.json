@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
+    "dotenv": "^6.0.0",
     "eslint": "^3.17.1",
     "grunt": "^0.4.5",
     "grunt-concurrent": "2.3.1",
@@ -61,10 +62,10 @@
     "newdevb": "grunt newdevb",
     "qa": "grunt qa",
     "qadev": "grunt qadev",
-    "prod": "grunt prod",
+    "prod": "grunt prod && npm run wpbuild",
     "proddev": "grunt proddev",
     "devallnowatch": "grunt devallnowatch",
-    "build": "concurrently \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run insightsbuild\" \"npm run dantebuild\" \"npm run adminbuild\" \"npm run lp2build\"",
+    "build": "concurrently \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run insightsbuild\" \"npm run dantebuild\" \"npm run adminbuild\" \"npm run lp2build\" && npm run wpbuild",
     "sass": "concurrently \"npm run commonsass\" \"npm run loginsass\" \"npm run lpsass\" \"npm run insightssass\" \"npm run dantesass\"",
     "sentry": "concurrently \"npm run commonsentry\" \"npm run loginsentry\" \"npm run lpsentry\" \"npm run insightssentry\" \"npm run dantesentry\"",
     "precommit": "npm run lint_admin",
@@ -108,6 +109,19 @@
     "dantesentry": "cd projects/dante/ && grunt sentry",
     "loginsentry": "cd projects/login/ && grunt sentry",
     "adminsentry": "cd projects/tenantconsole/ && grunt sentry",
-    "lint_admin": "cd projects/tenantconsole/ && grunt lint || true"
+    "lint_admin": "cd projects/tenantconsole/ && grunt lint || true",
+    "wp-loginbuild": "cd projects/login/ && npm run build",
+    "wp-logindev": "cd projects/login/ && npm run watch",
+    "wp-lpdev": "cd projects/leadprioritization/ && npm run watch",
+    "wp-lpprod": "cd projects/leadprioritization/ && npm run build",
+    "wp-insightsbuild": "cd projects/insights/ && npm run build",
+    "wp-insightsdev": "cd projects/insights/ && npm run watch",
+    "wpdeva": "concurrently \"npm run wp-logindev\" \"npm run wp-lpdev\" \"npm run wp-insightsdev\" \"node bin/devsetup env=a\"",
+    "wpdevb": "concurrently \"npm run wp-logindev\" \"npm run wp-lpdev\" \"node bin/devsetup env=b\"",
+    "wpdevlocal": "concurrently \"npm run wp-logindev\" \"npm run wp-lpdev\" \"node bin/devsetup env=local\"",
+    "nodea": "node bin/devsetup env=a",
+    "nodeb": "node bin/devsetup env=b",
+    "wpqa": "concurrently \"npm run wp-logindev\" \"npm run wp-lpdev\" \"node bin/devsetup env=qa\"",
+    "wpbuild": "concurrently \"npm run wp-loginbuild\" \"npm run wp-lpprod\" \"npm run wp-insightsbuild\""
   }
 }

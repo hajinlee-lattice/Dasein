@@ -197,7 +197,8 @@ module.exports = function(grunt) {
                         '<%= app.dir %>/app/datacloud/service/MetadataSrv.js',
                         '<%= app.dir %>/app/datacloud/metadata/controller/MetadataCtrl.js',
                         '<%= app.dir %>/app/datacloud/metadata2/controller/Metadata2Ctrl.js',
-                        '<%= app.dir %>/app/app.js'
+                        '<%= app.dir %>/app/app.js',
+                        '!<%= app.dir %>/**/*.index.js',
                     ]
                 }
             }
@@ -286,6 +287,7 @@ module.exports = function(grunt) {
                 'Gruntfile.js',
                 '<%= app.dir %>/app/app.js',
                 '<%= app.dir %>/app/**/*.js',
+                '!<%= app.dir %>/app/**/*.index.js',
                 '!<%= app.dir %>/app/**/*Spec.js'
             ]
         },
@@ -294,7 +296,8 @@ module.exports = function(grunt) {
             js: {
                 files: [
                     '<%= app.dir %>/Gruntfile.js',
-                    '<%= app.dir %>/app/**/*.js'
+                    '<%= app.dir %>/app/**/*.js',
+                    '!<%= app.dir %>/app/**/*.index.js',
                 ],
                 tasks: ['jshint']
             },
