@@ -20,7 +20,6 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
@@ -58,15 +57,9 @@ public class AttrConfigResource {
     @PutMapping(value = "/activation/config/category/{categoryName}")
     @ApiOperation("update Activation Config")
     public ModelAndView updateActivationConfig(@PathVariable String categoryName,
-            @RequestBody AttrConfigSelectionRequest request) {              
+            @RequestBody AttrConfigSelectionRequest request) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        
-        UIAction uiAction;
-        try {
-            uiAction = attrConfigService.updateActivationConfig(categoryName, request);
-        } catch (UIActionException e) {
-            uiAction = e.getUIAction();
-        }
+        UIAction uiAction = attrConfigService.updateActivationConfig(categoryName, request);
         return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
@@ -76,13 +69,7 @@ public class AttrConfigResource {
             @RequestParam(value = "usage", required = true) String usageName,
             @RequestBody AttrConfigSelectionRequest request, HttpServletResponse response) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        
-        UIAction uiAction;
-        try {
-            uiAction = attrConfigService.updateUsageConfig(categoryName, usageName, request);
-        } catch (UIActionException e) {
-            uiAction = e.getUIAction();
-        }
+        UIAction uiAction = attrConfigService.updateUsageConfig(categoryName, usageName, request);
         return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
