@@ -13,6 +13,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 
 public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandler {
 
@@ -29,10 +31,18 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(LedpException e) {
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : ExceptionUtils
-                .getStackTrace(e);
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause())
+                : ExceptionUtils.getStackTrace(e);
         logError(e.getCode() + "\n" + stackTrace);
         return getModelAndView(e);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ModelAndView handleException(UIActionException e) {
+        logError(e);
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), e.getUIAction()));
     }
 
     @ExceptionHandler
@@ -48,8 +58,8 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ModelAndView handleException(AccessDeniedException e) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : ExceptionUtils
-                .getStackTrace(e);
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause())
+                : ExceptionUtils.getStackTrace(e);
         logError(stackTrace);
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_18003.name(), //
                 "errorMsg", LedpException.buildMessage(LedpCode.LEDP_18003, new String[] {})));
@@ -59,8 +69,8 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ModelAndView handleException(LoginException e) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : ExceptionUtils
-                .getStackTrace(e);
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause())
+                : ExceptionUtils.getStackTrace(e);
         logError(stackTrace);
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //
                 "errorMsg", e.getMessage()));
