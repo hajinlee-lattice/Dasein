@@ -368,6 +368,12 @@
         </dependency>
 
         <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
+        </dependency>        
+
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
             <version>${project.version}</version>
