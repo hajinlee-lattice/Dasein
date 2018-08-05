@@ -122,5 +122,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
+        </dependency>        
+
     </dependencies>
 </project>
