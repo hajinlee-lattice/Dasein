@@ -20,17 +20,15 @@
                 </nav>
 
                 <section id="main" role="main" class="main-content">
-                    <div class="content-wrap">
-                        <div id="mainView">
-                            <div ui-view="header" id="mainHeaderView"></div>
-                            <div ui-view="summary" id="mainSummaryView"></div>
-                            <div ui-view="subsummary" id="subSummaryView"></div>
-                            <div id="mainInfoView"></div>
-                            <div ui-view="main" id="mainContentView"></div>
-                        </div>
+                    <div id="mainView">
+                        <div ui-view="header" id="mainHeaderView"></div>
+                        <div ui-view="summary" id="mainSummaryView"></div>
+                        <div ui-view="subsummary" id="subSummaryView"></div>
+                        <div ui-view="banner" id="mainInfoView"></div>
+                        <div ui-view="notice" id="mainNoticeView"></div>
+                        <div ui-view="main" id="mainContentView"></div>
                     </div>
                 </section>
-
             </div>
         </div>
        

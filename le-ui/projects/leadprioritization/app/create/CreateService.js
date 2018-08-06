@@ -106,12 +106,25 @@ angular
         }
 
         xhr.addEventListener('load', function(event) {
-            xhr.data = JSON.parse(this.responseText);
-            ServiceErrorUtility.process(xhr);
-            deferred.resolve(xhr.data);
+            var status = this.status;
+            if(status != 200){
+                var obj = JSON.parse(this.responseText);
+                var txt = obj.errorMsg;
+                var result = {
+                    Success: false,
+                    ResultErrors: txt,
+                    Result: null
+                };
+                deferred.resolve(result);
+            }else{
+                xhr.data = JSON.parse(this.responseText);
+                ServiceErrorUtility.process(xhr);
+                deferred.resolve(xhr.data);
+            }
         });
 
         xhr.addEventListener('error', function(event) {
+           
             xhr.data = JSON.parse(this.responseText);
             ServiceErrorUtility.process(xhr);
 
