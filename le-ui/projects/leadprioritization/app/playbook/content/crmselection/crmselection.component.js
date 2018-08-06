@@ -2,17 +2,19 @@ angular.module('lp.playbook.wizard.crmselection', [])
 .component('crmSelection', {
     templateUrl: 'app/playbook/content/crmselection/crmselection.component.html',
     bindings: {
+        featureflags: '<',
         orgs: '<'
     },
     controller: function(
         $scope, $state, $timeout, $stateParams,
         ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService, SfdcService, QueryStore
     ) {
-        var vm = this;       
+        var vm = this;
+        vm.showMAPSystems = vm.featureflags.EnableCdl;
 
         vm.$onInit = function() {
 
-            // console.log(vm.orgs);
+            console.log(vm.orgs);
 
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
@@ -56,8 +58,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
             }
 
 
-            
-
             var accountId = accountId;
             if (accountId && isRegistered){
 
@@ -97,6 +97,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
                 PlaybookWizardStore.setValidation('crmselection', form.$valid);                
             }
         }
+
 
     }
 });

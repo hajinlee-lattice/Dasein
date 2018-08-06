@@ -87,6 +87,7 @@ angular.module('mainApp.core.services.FeatureFlagService', [
         ENABLE_PRODUCT_HIERARCHY_IMPORT: 'EnableProductHierarchyImport',
         ENABLE_PRODUCT_PURCHASE_IMPORT: 'EnableProductPurchaseImport',
         PLAYBOOK_MODULE: 'PlaybookModule',
+        LAUNCH_PLAY_TO_MAP_SYSTEM: 'LaunchPlayToMapSystem',
 
         //TODO: deprecated flags
         CAMPAIGNS_PAGE: 'EnableCampaignUI',

@@ -24,6 +24,7 @@ public enum LatticeFeatureFlag {
     ENABLE_PRODUCT_BUNDLE_IMPORT("EnableProductBundleImport", "Enable Product Bundle Import"), //
     ENABLE_PRODUCT_HIERARCHY_IMPORT("EnableProductHierarchyImport", "Enable Product Hierarchy Import"), //
     PLAYBOOK_MODULE("PlaybookModule", "Playbook Module"), //
+    LAUNCH_PLAY_TO_MAP_SYSTEM("LaunchPlayToMapSystem", "Launch Play to MAP System"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

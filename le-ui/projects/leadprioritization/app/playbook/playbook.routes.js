@@ -665,12 +665,26 @@ angular
                 pageTitle: 'Playbook'
             },
             resolve: {
-                orgs: function($q, SfdcStore) {
+                featureflags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                orgs: function($q, SfdcStore, featureflags) {
                     var deferred = $q.defer();
 
                     SfdcStore.getOrgs().then(function (result) {
-                        
-                        deferred.resolve(result.CRM);
+                        var orgs = result.CRM;
+
+                        if (featureflags.LaunchPlayToMapSystem && result.MAP) {
+                            orgs = orgs.concat(result.MAP);
+                        }
+
+                        deferred.resolve(orgs);
                         
                         // var orgs = result.CRM;
 
