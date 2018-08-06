@@ -96,6 +96,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         List<RawCollectionRequest> rawReqs = rawCollectionRequestService.getNonTransferred();
         BitSet filter = collectionRequestService.addNonTransferred(rawReqs);
         rawCollectionRequestService.updateTransferredStatus(rawReqs, filter, deleteFilteredReqs);
+        log.info("TRANSFER_RAW_COLLECTION_REQ=" + rawReqs.size() + "," + filter.size());
+        log.info("CREATE_COLLECTION_REQ=" + (rawReqs.size() - filter.size()));
 
         return rawReqs.size() - filter.cardinality();
     }
@@ -267,10 +269,12 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             //update request status
             collectionRequestService.beginCollecting(readyReqs, worker);
 
+            log.info("BEG_COLLECTING_REQ=" + vendor + "," + readyReqs.size());
             readyReqs.clear();
 
             ++spawnedTasks;
         }
+        log.info("SPAWN_COLLECTION_WORKER=" + spawnedTasks);
 
         return spawnedTasks;
     }
@@ -390,6 +394,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             recordsCollected += getDomainFromCsvEx(vendor, tmpFiles.get(i), domains);
         }
         worker.setRecordsCollected(recordsCollected);
+        log.info("END_COLLECTING_REQ=" + vendor + "," + domains.size() + "," + recordsCollected);
 
         //consumeFinished reqs
         collectionRequestService.consumeFinished(workerId, domains);
@@ -429,6 +434,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         if (activeTasks == null || activeTasks.size() == 0)
             return 0;
 
+        int failedTasks = 0;
         for (int i = 0; i < activeWorkers.size(); ++i) {
             CollectionWorker worker = activeWorkers.get(i);
             Task task = activeTasks.get(worker.getTaskArn());
@@ -465,9 +471,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 collectionWorkerService.getEntityMgr().update(worker);
 
                 ++stoppedTasks;
+                if (!succ)
+                    ++failedTasks;
                 log.info("task " + worker.getWorkerId() + (succ ? " consumed" : " failed"));
             }
         }
+
+        log.info("COLLECTION_WORKER_STOPPED=" + stoppedTasks + "," + failedTasks);
 
         return stoppedTasks;
     }
@@ -491,7 +501,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         try {
             int activeTasks = getActiveTaskCount();
-            if (prevMillis == 0 || prevActiveTasks != activeTasks || currentMillis - prevMillis >= 600 * 1000) {
+            if (prevMillis == 0 || prevActiveTasks != activeTasks || currentMillis - prevMillis >= 3600 * 1000) {
                 prevMillis = currentMillis;
                 log.info("There're " + activeTasks + " tasks");
             }
