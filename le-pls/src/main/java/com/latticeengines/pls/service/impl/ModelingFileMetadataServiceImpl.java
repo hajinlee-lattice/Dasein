@@ -121,6 +121,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 if (standardMappingMap.containsKey(fieldMapping.getUserField())
                         && standardMappingMap.get(fieldMapping.getUserField()).getMappedField() != null) {
                     fieldMapping.setMappedField(standardMappingMap.get(fieldMapping.getUserField()).getMappedField());
+                    fieldMapping.setFieldType(standardMappingMap.get(fieldMapping.getUserField()).getFieldType());
                     fieldMapping.setMappedToLatticeField(false);
                 }
             }

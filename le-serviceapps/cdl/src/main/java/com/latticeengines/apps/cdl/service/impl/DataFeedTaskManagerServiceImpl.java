@@ -442,7 +442,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return false;
         }
         if (attr1.getInterfaceName() == null || attr2.getInterfaceName() == null) {
-            log.error("Interface name is null for attribute : " + attr1.getName());
+            log.warn("Interface name is null for attribute : " + attr1.getName());
         } else if (!attr1.getInterfaceName().equals(attr2.getInterfaceName())) {
             log.error("Interface name is not the same for attribute: " + attr1.getName());
             return false;
