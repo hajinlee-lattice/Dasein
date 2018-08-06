@@ -427,7 +427,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
         boolean exception = false;
         try {
-            ratingEngineService.createOrUpdateModelIteration(rbRatingEngine, ruleBasedModel);
+            ratingEngineService.createModelIteration(rbRatingEngine, ruleBasedModel);
         } catch (Exception e) {
             exception = true;
             assertTrue(e instanceof LedpException);
@@ -436,7 +436,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         assertTrue(exception);
 
         AIModel aiModel = createAIModel(aiRatingEngine.getActiveModel());
-        ratingEngineService.createOrUpdateModelIteration(aiRatingEngine, aiModel);
+        ratingEngineService.createModelIteration(aiRatingEngine, aiModel);
 
         List<RatingModel> ratingModels = getRatingModelsByRatingEngineId(aiRatingEngineId);
         Assert.assertNotNull(ratingModels);
