@@ -173,7 +173,7 @@ angular
                 pageTitle: 'Play Overview',
                 play_name: ''
             },
-            onEnter: ['Play', 'BackStore', function($stateParams, Play, BackStore, ResourceStringsUtility) {
+            onEnter: ['Play', 'BackStore', function(Play, BackStore) {
                 BackStore.setBackLabel(Play.displayName);
                 BackStore.setBackState('home.playbook');
                 BackStore.setHidden(false);
