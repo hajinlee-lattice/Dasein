@@ -36,7 +36,7 @@ public class MapReduceConfigurationBeanFactory extends HadoopConfigurationBeanFa
 
     private Properties getMRProperties(String masterIp) {
         Properties properties = getYarnProperties(masterIp);
-        Properties mrProps = HadoopConfigurationUtils.loadPropsFromResource("emr_mr.properties", masterIp);
+        Properties mrProps = HadoopConfigurationUtils.loadPropsFromResource("emr_mr.properties", masterIp, awsKey, awsSecret);
         upsertProperty(mrProps, "mapreduce.map.memory.mb", "dataplatform.container.mapreduce.memory");
         upsertProperty(mrProps, "mapreduce.reduce.memory.mb", "dataplatform.container.mapreduce.memory");
         upsertProperty(mrProps, "mapreduce.map.cpu.vcores", "dataplatform.container.map.virtualcores");

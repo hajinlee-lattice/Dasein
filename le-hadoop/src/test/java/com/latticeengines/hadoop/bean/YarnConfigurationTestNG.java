@@ -2,10 +2,13 @@ package com.latticeengines.hadoop.bean;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -13,7 +16,11 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.aws.emr.EMRService;
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
 
@@ -27,7 +34,19 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     @Inject
     private EMRService emrService;
 
-    @Test(groups = "functional", enabled = false)
+    @Inject
+    private S3Service s3Service;
+
+    @Inject
+    private AmazonS3 s3Client;
+
+    @Value("${aws.test.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${common.le.stack}")
+    private String leStack;
+
+    @Test(groups = "manual", enabled = false)
     public void testEmrYarnConfiguration() throws IOException {
         Assert.assertEquals(yarnConfiguration.get("fs.defaultFS"), //
                 String.format("hdfs://%s", emrService.getMasterIp()));
@@ -43,6 +62,41 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
 
     private InputStream getResourceStream() {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream("test.txt");
+    }
+
+    @Test(groups = "functional")
+    public void testS3DistCp() throws Exception {
+        List<Pair<String, Class<?>>> columns = ImmutableList.of( //
+                Pair.of("Id", Integer.class), //
+                Pair.of("Value", String.class)
+        );
+        Object[][] data = new Object[][]{
+                { 1, "1" }, //
+                { 2, "2" }, //
+                { 3, "3" },
+        };
+        String srcDir = "/tmp/HdfsUtilsTest/input";
+        AvroUtils.uploadAvro(yarnConfiguration, data, columns, "test", srcDir);
+        Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
+
+        String tgtDir = leStack + "/HdfsUtilsTest/output";
+        String s3Uri = "s3n://" + s3Bucket + "/" + tgtDir;
+        if (s3Service.isNonEmptyDirectory(s3Bucket, tgtDir)) {
+            s3Service.cleanupPrefix(s3Bucket, tgtDir);
+        }
+        Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
+
+        HdfsUtils.distcp(yarnConfiguration, srcDir, s3Uri, "default");
+        Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, s3Uri));
+
+        InputStream is = s3Service.readObjectAsStream(s3Bucket, tgtDir + "/test.avro");
+        AvroUtils.readFromInputStream(is).forEach(System.out::println);
+
+        HdfsUtils.rmdir(yarnConfiguration, srcDir);
+        Assert.assertFalse(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
+        HdfsUtils.distcp(yarnConfiguration, s3Uri, srcDir, "default");
+        Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
+        AvroUtils.iterator(yarnConfiguration, srcDir + "/*.avro").forEachRemaining(System.out::println);
     }
 
 }

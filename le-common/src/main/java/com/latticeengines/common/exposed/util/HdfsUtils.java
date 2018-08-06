@@ -76,20 +76,28 @@ public class HdfsUtils {
         }
     }
 
+    public static FileSystem getFileSystem(Configuration configuration) throws IOException {
+        return FileSystem.newInstance(configuration);
+    }
+
+    private static FileSystem getFileSystem(Configuration configuration, String path) throws IOException {
+        return FileSystem.newInstance(URI.create(path), configuration);
+    }
+
     public static void mkdir(Configuration configuration, String dir) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, dir)) {
             fs.mkdirs(new Path(dir));
         }
     }
 
     public static boolean isDirectory(Configuration configuration, String path) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, path)) {
             return fs.isDirectory(new Path(path));
         }
     }
 
     public static void rmdir(Configuration configuration, String dir) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, dir)) {
             fs.delete(new Path(dir), true);
         }
     }
@@ -152,10 +160,6 @@ public class HdfsUtils {
             throw new RuntimeException("DistCp exited with code " + exit);
         }
         log.info("Finished distcp from " + srcPath + " to " + tgtPath + ".");
-    }
-
-    public static FileSystem getFileSystem(Configuration configuration) throws IOException {
-        return FileSystem.newInstance(configuration);
     }
 
     public static void copyLocalResourceToHdfs(Configuration configuration, String resourcePath, String hdfsPath)
@@ -243,7 +247,7 @@ public class HdfsUtils {
     }
 
     public static boolean fileExists(Configuration configuration, String hdfsPath) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = FileSystem.newInstance(URI.create(hdfsPath), configuration)) {
             return fs.exists(new Path(hdfsPath));
         }
     }
@@ -525,7 +529,7 @@ public class HdfsUtils {
     }
 
     public static List<String> getFilesByGlob(Configuration configuration, String globPath) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+        try (FileSystem fs = getFileSystem(configuration, globPath)) {
             FileStatus[] statuses = fs.globStatus(new Path(globPath));
             List<String> filePaths = new ArrayList<>();
             if (statuses == null) {

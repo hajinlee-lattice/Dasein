@@ -27,6 +27,12 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     @Value("${hadoop.use.emr}")
     private String useEmr;
 
+    @Value("${aws.default.access.key}")
+    protected String awsKey;
+
+    @Value("${aws.default.secret.key.encrypted}")
+    protected String awsSecret;
+
     @Override
     public T getObject() {
         T configuration;
@@ -51,7 +57,7 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     }
 
     protected Properties getYarnProperties(String masterIp) {
-         return HadoopConfigurationUtils.loadPropsFromResource("emr.properties", masterIp);
+         return HadoopConfigurationUtils.loadPropsFromResource("emr.properties", masterIp, awsKey, awsSecret);
     }
 
     private boolean shouldUseEmr() {

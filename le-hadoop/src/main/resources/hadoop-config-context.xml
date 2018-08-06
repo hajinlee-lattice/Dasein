@@ -39,6 +39,12 @@
         mapreduce.jobtracker.jobhistory.completed.location=/mr-history/done
         mapreduce.jobhistory.webapp.address=${hadoop.mapreduce.jobhistory.webapp.address}
         mapreduce.jobhistory.address=${hadoop.mapreduce.jobhistory.address}
+        fs.s3.awsAccessKeyId=${aws.default.access.key}
+        fs.s3n.awsAccessKeyId=${aws.default.access.key}
+        fs.s3.awsSecretAccessKey=${aws.default.secret.key.encrypted}
+        fs.s3n.awsSecretAccessKey=${aws.default.secret.key.encrypted}
+        fs.s3.impl=org.apache.hadoop.fs.s3.S3FileSystem
+        fs.s3n.impl=org.apache.hadoop.fs.s3native.NativeS3FileSystem
     </yarn:configuration>
 
     <bean id="emrConfiguration" class="com.latticeengines.hadoop.bean.YarnConfigurationBeanFactory" />

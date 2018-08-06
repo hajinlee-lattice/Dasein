@@ -21,4 +21,10 @@ public interface S3Service {
     Upload uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync);
 
     void downloadS3File(S3ObjectSummary itemDesc, File file) throws Exception;
+
+    InputStream readObjectAsStream(String bucket, String objectKey);
+
+    boolean objectExist(String bucket, String object);
+
+    boolean isNonEmptyDirectory(String bucket, String prefix);
 }
