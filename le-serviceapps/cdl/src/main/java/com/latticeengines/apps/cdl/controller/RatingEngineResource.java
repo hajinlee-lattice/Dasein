@@ -284,7 +284,7 @@ public class RatingEngineResource {
     public RatingModel createModelIteration(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
             @RequestBody RatingModel ratingModel) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
-        return ratingEngineService.createOrUpdateModelIteration(ratingEngine, ratingModel);
+        return ratingEngineService.createModelIteration(ratingEngine, ratingModel);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", headers = "Accept=application/json")

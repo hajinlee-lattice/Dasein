@@ -42,7 +42,7 @@ public interface RatingEngineService {
 
     RatingEngine createOrUpdate(RatingEngine ratingEngine, Boolean unlinkSegment);
 
-    RatingModel createOrUpdateModelIteration(RatingEngine ratingEngine, RatingModel ratingModel);
+    RatingModel createModelIteration(RatingEngine ratingEngine, RatingModel ratingModel);
 
     RatingEngine replicateRatingEngine(String id);
 

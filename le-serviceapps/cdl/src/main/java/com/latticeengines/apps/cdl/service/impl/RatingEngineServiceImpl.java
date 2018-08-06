@@ -275,7 +275,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     @SuppressWarnings("unchecked")
-    public RatingModel createOrUpdateModelIteration(RatingEngine ratingEngine, RatingModel ratingModel) {
+    public RatingModel createModelIteration(RatingEngine ratingEngine, RatingModel ratingModel) {
         if (!(ratingModel instanceof AIModel)) {
             throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
         } else if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
@@ -285,14 +285,23 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         String ratingEngineId = ratingEngine.getId();
         log.info("Creating new iteration for rating engine %s", ratingEngineId);
 
-        ratingModel.setRatingEngine(ratingEngine);
+        AIModel aiModel = (AIModel) ratingModel;
+        AIModel toCreate = new AIModel();
+        
+        toCreate.setAdvancedModelingConfig(aiModel.getAdvancedModelingConfig());
+        toCreate.setCreatedBy(aiModel.getCreatedBy());
+        toCreate.setPredictionType(aiModel.getPredictionType());
+        toCreate.setRatingEngine(ratingEngine);
+        toCreate.setRatingModelAttributes(aiModel.getRatingModelAttributes());
+        toCreate.setTrainingSegment(aiModel.getTrainingSegment());
+
         RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
-        ratingModel = ratingModelService.createOrUpdate((AIModel) ratingModel, ratingEngine.getId());
+        toCreate = ratingModelService.createOrUpdate(toCreate, ratingEngine.getId());
 
-        ratingEngine.setLatestIteration(ratingModel);
+        ratingEngine.setLatestIteration(toCreate);
         createOrUpdate(ratingEngine);
-        return ratingModel;
+        return toCreate;
     }
 
     @Override
@@ -462,12 +471,15 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
             log.info(String.format("Creating BucketMetadata for RatingEngine %s, AIModel %s and ModelSummary %s",
                     ratingEngineId, ratingModelId, aiModel.getModelSummaryId()));
-            CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
-            request.setBucketMetadataList(bucketMetadatas);
-            request.setModelGuid(aiModel.getModelSummaryId());
-            request.setRatingEngineId(ratingEngineId);
-            request.setLastModifiedBy(userEmail);
-            bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getShortTenantId(), request);
+
+            if (!bucketMetadatas.equals(ratingEngine.getBucketMetadata())) {
+                CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+                request.setBucketMetadataList(bucketMetadatas);
+                request.setModelGuid(aiModel.getModelSummaryId());
+                request.setRatingEngineId(ratingEngineId);
+                request.setLastModifiedBy(userEmail);
+                bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getShortTenantId(), request);
+            }
         }
 
         ratingEngine.setScoringIteration(ratingModel);

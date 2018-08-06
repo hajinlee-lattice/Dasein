@@ -188,4 +188,23 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         this.numLeads = numleads;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj == null) {
+            return false;
+        } else if (obj instanceof BucketMetadata) {
+            BucketMetadata bucketMetadata = (BucketMetadata) obj;
+            return this.getModelSummary().getId().equals(bucketMetadata.getModelSummary().getId())
+                    && this.getRatingEngine().getId()
+                            .equals(bucketMetadata.getRatingEngine().getId())
+                    && this.getBucketName().equals(bucketMetadata.getBucketName())
+                    && this.getRightBoundScore() == bucketMetadata.getRightBoundScore()
+                    && this.getLift() == bucketMetadata.getLift()
+                    && this.getNumLeads() == bucketMetadata.getNumLeads();
+        }
+        return false;
+    }
+
 }
