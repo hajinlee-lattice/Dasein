@@ -417,7 +417,8 @@ public class RatingEngineResource {
             throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
         }
 
-        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, (AIModel) ratingModel, userEmail);
+        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, (AIModel) ratingModel, attributes,
+                userEmail);
     }
 
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus")

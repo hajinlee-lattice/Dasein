@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
@@ -206,7 +204,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public ModelSummary getModelSummaryEnrichedByDetails(String modelId) {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (summary != null) {
-            summary.setPredictors(new ArrayList<Predictor>());
+            summary.setPredictors(new ArrayList<>());
             summary.setDetails(null);
         }
         return summary;
@@ -221,7 +219,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public ModelSummary getModelSummary(String modelId) {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (summary != null) {
-            summary.setPredictors(new ArrayList<Predictor>());
+            summary.setPredictors(new ArrayList<>());
             getModelSummaryTrainingFileState(summary);
             getModelSummaryHasRating(summary);
             if (!summary.getModelType().equals(ModelType.PMML.getModelType())) {
@@ -420,7 +418,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 .bucketedScoreService(bucketedScoreService) //
                 .yarnConfiguration(yarnConfiguration) //
                 .modelSummaryParser(modelSummaryParser) //
-                .featureImportanceParser(featureImportanceParser)
+                .featureImportanceParser(featureImportanceParser) //
                 .modelSummaryIds(modelSummaryIds);
         ModelDownloaderCallable callable = new ModelDownloaderCallable(builder);
 
@@ -438,15 +436,15 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         log.info("Remove exclude flag: " + tenantId);
         modelSummaryDownloadFlagEntityMgr.removeExcludeFlag(tenantId);
 
-        long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
-        log.info(String.format("Download for tenant %s duration: %d seconds", tenantId, totalSeconds));
+        long totalSeconds = (System.currentTimeMillis() - startTime);
+        log.info(String.format("Download for tenant %s duration: %dms", tenantId, totalSeconds));
 
         return result;
     }
 
     @Override
     public Set<String> getModelSummaryIds() {
-        Set<String> modelSummaryIds = Collections.synchronizedSet(new HashSet<String>());
+        Set<String> modelSummaryIds = Collections.synchronizedSet(new HashSet<>());
         List<String> summaries = modelSummaryEntityMgr.getAllModelSummaryIds();
         for (String summary : summaries) {
             try {

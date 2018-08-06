@@ -1,8 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Arrays;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -18,16 +15,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.CdlModelMetadataService;
+import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
-import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
-import com.latticeengines.apps.cdl.workflow.RatingEngineMatchAndModelWorkflowSubmitter;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.proxy.exposed.lp.ModelMetadataProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -47,16 +38,13 @@ public class ModelResource {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    @Autowired
-    private RatingEngineMatchAndModelWorkflowSubmitter ratingEngineModelWorkflowSubmitter;
-
     private InternalResourceRestApiProxy internalResourceProxy;
 
     @Autowired
     private CdlModelMetadataService cdlModelMetadataService;
 
     @Inject
-    private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
+    private CrossSellImportMatchAndModelWorkflowSubmitter crossSellImportMatchAndModelWorkflowSubmitter;
 
     @Inject
     private CustomEventModelingWorkflowSubmitter customEventModelingWorkflowSubmitter;
@@ -104,35 +92,6 @@ public class ModelResource {
         modelSummaryProxy.setDownloadFlag(customerSpace);
         log.info(String.format("Rating Engine model endpoint called with parameters %s",
                 ratingEngineModelingParameters.toString()));
-        return ratingEngineImportMatchAndModelWorkflowSubmitter.submit(ratingEngineModelingParameters).toString();
-    }
-
-    @RequestMapping(value = "/rating/{modelName}/clone", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Kick off a modeling job given the RatingEngineModelingParameters")
-    public String cloneAndRemodel(@PathVariable String customerSpace, @PathVariable String modelName,
-            @RequestBody CloneModelingParameters parameters) {
-
-        if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
-            log.error(message);
-            throw new RuntimeException(message);
-        }
-        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
-                parameters.getDeduplicationType()));
-        ModelSummary modelSummary = internalResourceProxy
-                .getModelSummaryFromModelId(parameters.getSourceModelSummaryId(), CustomerSpace.parse(customerSpace));
-
-        List<Table> trainingTargetTables = cdlModelMetadataService.cloneTrainingTargetTable(modelSummary);
-        List<String> trainingTargetTableNames = Arrays.asList(trainingTargetTables.get(0).getName(),
-                trainingTargetTables.get(1).getName());
-
-        Table eventTable = metadataProxy.getTable(customerSpace, modelSummary.getEventTableName());
-        List<Attribute> userRefinedAttributes = modelMetadataProxy.getAttributesFromFields(customerSpace,
-                eventTable.getAttributes(), parameters.getAttributes());
-        modelSummaryProxy.setDownloadFlag(customerSpace);
-        return ratingEngineModelWorkflowSubmitter
-                .submit(trainingTargetTableNames, parameters, userRefinedAttributes, modelSummary).toString();
-
+        return crossSellImportMatchAndModelWorkflowSubmitter.submit(ratingEngineModelingParameters).toString();
     }
 }

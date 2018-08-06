@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -23,6 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetT
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.MergeUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportBucketToolStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportScoreTrainingFileStepConfiguration;
@@ -30,7 +33,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigura
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
-public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     @Override
     public Collection<String> getSwpkgNames() {
@@ -41,7 +44,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
     }
 
     public static class Builder {
-        private RatingEngineImportMatchAndModelWorkflowConfiguration configuration = new RatingEngineImportMatchAndModelWorkflowConfiguration();
+        private CrossSellImportMatchAndModelWorkflowConfiguration configuration = new CrossSellImportMatchAndModelWorkflowConfiguration();
 
         private MatchDataCloudWorkflowConfiguration.Builder matchDataCloudWorkflowBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
         private CdlModelWorkflowConfiguration.Builder cdlModelWorkflowBuilder = new CdlModelWorkflowConfiguration.Builder();
@@ -51,6 +54,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         private CreateCdlEventTableFilterConfiguration cdlEventTableTupleFilter = new CreateCdlEventTableFilterConfiguration();
         private ExportScoreTrainingFileStepConfiguration exportScoreTrainingFile = new ExportScoreTrainingFileStepConfiguration();
         private ExportBucketToolStepConfiguration exportBucketTool = new ExportBucketToolStepConfiguration();
+        private MergeUserRefinedAttributesConfiguration mergeUserRefinedAttributes = new MergeUserRefinedAttributesConfiguration();
 
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
@@ -67,6 +71,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             exportBucketTool.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
+            mergeUserRefinedAttributes.setMicroServiceHostPort(microServiceHostPort);
             generateAIRating.microServiceHostPort(microServiceHostPort);
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
@@ -83,6 +88,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             exportBucketTool.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
+            mergeUserRefinedAttributes.setCustomerSpace(customerSpace);
             generateAIRating.customer(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
@@ -100,6 +106,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             generateAIRating.internalResourceHostPort(internalResourceHostPort);
+            mergeUserRefinedAttributes.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -366,7 +373,12 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
-        public RatingEngineImportMatchAndModelWorkflowConfiguration build() {
+        public Builder setUserRefinedAttributes(Map<String,ColumnMetadata> userRefinedAttributes) {
+            mergeUserRefinedAttributes.setUserRefinedAttributes(userRefinedAttributes);
+            return this;
+        }
+
+        public CrossSellImportMatchAndModelWorkflowConfiguration build() {
             exportBucketTool.setUsingDisplayName(Boolean.FALSE);
             generateAIRating.saveBucketMetadata();
             generateAIRating.fetchOnly(Boolean.TRUE);
@@ -385,7 +397,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(exportScoreTrainingFile);
             configuration.add(cdlTargetTableTupleFilter);
             configuration.add(generateAIRating.build());
-
+            configuration.add(mergeUserRefinedAttributes);
             return configuration;
         }
 

@@ -6,6 +6,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
@@ -80,6 +81,9 @@ public class ModelingParameters {
 
     @JsonProperty
     private String ratingEngineId;
+
+    @JsonProperty
+    private Map<String, ColumnMetadata> userRefinedAttributes;
 
     public String getFilename() {
         return filename;
@@ -255,6 +259,14 @@ public class ModelingParameters {
 
     public void setExcludeCustomFileAttributes(boolean excludeCustomFileAttributes) {
         this.excludeCustomFileAttributes = excludeCustomFileAttributes;
+    }
+
+    public Map<String, ColumnMetadata> getUserRefinedAttributes() {
+        return userRefinedAttributes;
+    }
+
+    public void setUserRefinedAttributes(Map<String, ColumnMetadata> userRefinedAttributes) {
+        this.userRefinedAttributes = userRefinedAttributes;
     }
 
     @Override

@@ -20,6 +20,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -37,8 +38,8 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
-import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -82,6 +83,7 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
 @Component("ratingEngineService")
@@ -111,7 +113,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private EventProxy eventProxy;
 
     @Inject
-    private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
+    private CrossSellImportMatchAndModelWorkflowSubmitter crossSellImportMatchAndModelWorkflowSubmitter;
 
     @Inject
     private CustomEventModelingWorkflowSubmitter customEventModelingWorkflowSubmitter;
@@ -283,9 +285,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         String ratingEngineId = ratingEngine.getId();
         log.info("Creating new iteration for rating engine %s", ratingEngineId);
 
-        ratingModel.setId(AIModel.generateIdStr());
         ratingModel.setRatingEngine(ratingEngine);
-
         RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
         ratingModel = ratingModelService.createOrUpdate((AIModel) ratingModel, ratingEngine.getId());
@@ -559,11 +559,19 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
-            String userEmail) {
+            Map<String, List<ColumnMetadata>> userRefinedColumnMetadata, String userEmail) {
         validateForModeling(customerSpace, ratingEngine, aiModel);
         ApplicationId jobId = aiModel.getModelingYarnJobId();
         if (jobId != null) {
             return jobId.toString();
+        }
+        Map<String, ColumnMetadata> userRefinedAttributes = null;
+
+        if (!MapUtils.isEmpty(userRefinedColumnMetadata)) {
+            userRefinedAttributes = Flux.fromIterable(userRefinedColumnMetadata.values()) //
+                    .flatMap(Flux::fromIterable) //
+                    .collect(HashMap<String, ColumnMetadata>::new, (map, cm) -> map.put(cm.getAttrName(), cm)) //
+                    .block();
         }
 
         switch (ratingEngine.getType()) {
@@ -590,12 +598,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             parameters.setEventFilterQuery(
                     getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT, activeVersion));
             parameters.setEventFilterTableName(aiModel.getId() + "_event");
+            parameters.setUserRefinedAttributes(userRefinedAttributes);
             if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
                 parameters.setExpectedValue(true);
             }
 
             log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
-            jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
+            jobId = crossSellImportMatchAndModelWorkflowSubmitter.submit(parameters);
             break;
         case CUSTOM_EVENT:
             CustomEventModelingConfig config = (CustomEventModelingConfig) aiModel.getAdvancedModelingConfig();
@@ -619,6 +628,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     .setExcludeCDLAttributes(!config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
             modelingParameters.setExcludeCustomFileAttributes(
                     !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
+            modelingParameters.setUserRefinedAttributes(userRefinedAttributes);
             modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
 
             log.info(String.format("Custom event modelling job submitted with parameters %s",

@@ -1,5 +1,7 @@
 package com.latticeengines.apps.lp.controller;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -15,14 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import java.util.Map;
 
 @Api(value = "model summaries", description = "REST resource for model summaries")
 @RestController
@@ -59,14 +58,14 @@ public class ModelSummaryResource {
     @PostMapping("/downloadmodelsummary")
     @ResponseBody
     @ApiOperation(value = "Download model summary")
-    public ResponseDocument<Boolean> downloadModelSummary(@PathVariable String customerSpace) {
+    public Boolean downloadModelSummary(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         log.info(String.format("Download model summary for tenant %s", customerSpace));
         try {
-            return ResponseDocument.successResponse(modelSummaryService.downloadModelSummary(customerSpace));
+            return modelSummaryService.downloadModelSummary(customerSpace);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return ResponseDocument.failedResponse(e);
+            return false;
         }
     }
 

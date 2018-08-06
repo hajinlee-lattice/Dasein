@@ -11,6 +11,7 @@ import static org.testng.Assert.assertTrue;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAndModelWorkflowConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -25,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
@@ -57,12 +57,12 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         setConfigurationForScoring.setBeanName("setConfigurationForScoring");
         StepRunner runner = new StepRunner(jobLauncher, jobRepository);
 
-        RatingEngineImportMatchAndModelWorkflowConfiguration.Builder builder = new RatingEngineImportMatchAndModelWorkflowConfiguration.Builder();
+        CrossSellImportMatchAndModelWorkflowConfiguration.Builder builder = new CrossSellImportMatchAndModelWorkflowConfiguration.Builder();
         builder.customer(CustomerSpace.parse("Workflow_Tenant"));
         builder.modelingServiceHdfsBaseDir("abc");
         builder.microServiceHostPort("123");
         builder.inputProperties(ImmutableMap.of(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, "abc.csv"));
-        RatingEngineImportMatchAndModelWorkflowConfiguration config = builder.build();
+        CrossSellImportMatchAndModelWorkflowConfiguration config = builder.build();
 
         JobParameters params = workflowService.createJobParams(config);
         log.info(params.toString());

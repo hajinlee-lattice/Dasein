@@ -1,15 +1,14 @@
 package com.latticeengines.proxy.lp;
 
-import java.util.Map;
-
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
+import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
@@ -36,21 +35,17 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
 
     @Override
     @SuppressWarnings("unchecked")
-    public boolean downloadModelSummary(String customerSpace){
+    public boolean downloadModelSummary(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/downloadmodelsummary",
                 shortenCustomerSpace(customerSpace));
 
-        ResponseDocument<Boolean> responseDoc = post("download model summary", url, null, ResponseDocument.class);
-        if (responseDoc == null) {
-            return Boolean.FALSE;
-        }
-
-        return responseDoc.getResult();
+        return post("download model summary", url, null, Boolean.class);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Map<String, ModelSummary> getEventToModelSummary(String customerSpace, Map<String, String> modelApplicationIdToEventColumn) {
+    public Map<String, ModelSummary> getEventToModelSummary(String customerSpace,
+            Map<String, String> modelApplicationIdToEventColumn) {
         String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/geteventtomodelsummary",
                 shortenCustomerSpace(customerSpace));
 

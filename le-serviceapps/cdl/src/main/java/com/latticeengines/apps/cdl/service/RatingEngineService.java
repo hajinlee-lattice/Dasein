@@ -71,7 +71,8 @@ public interface RatingEngineService {
     Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
             ModelingQueryType modelingQueryType, DataCollection.Version version);
 
-    String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel, String userEmail);
+    String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel,
+            Map<String, List<ColumnMetadata>> userEditedAttributes, String userEmail);
 
     List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId);
 

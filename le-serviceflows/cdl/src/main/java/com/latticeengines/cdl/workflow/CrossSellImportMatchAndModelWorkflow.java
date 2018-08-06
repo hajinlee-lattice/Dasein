@@ -2,77 +2,83 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineMatchAndModelWorkflowConfiguration;
+import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableFilterStep;
+import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
-import com.latticeengines.scoring.dataflow.ComputeLift;
-import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
+import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
+import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
-import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("ratingEngineModelAndEmailWorkflow")
+@Component("ratingEngineImportMatchAndModelWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class RatingEngineMatchAndModelAndEmailWorkflow
-        extends AbstractWorkflow<RatingEngineMatchAndModelWorkflowConfiguration> {
+public class CrossSellImportMatchAndModelWorkflow
+        extends AbstractWorkflow<CrossSellImportMatchAndModelWorkflowConfiguration> {
 
     @Inject
-    private DedupEventTable dedupEventTableDataFlow;
+    private CreateCdlEventTableFilterStep createCdlEventTableFilterStep;
+
+    @Inject
+    private CreateCdlEventTableStep createCdlEventTableStep;
 
     @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Inject
+    private DedupEventTable dedupEventTableDataFlow;
+
+    @Inject
     private AddStandardAttributes addStandardAttributesDataFlow;
 
     @Inject
-    private ResolveMetadataFromUserRefinedAttributes resolveMetadataFromUserRefinedAttributes;
+    private MergeUserRefinedAttributes mergeUserRefinedAttributes;
 
     @Inject
     private CdlModelWorkflow modelWorkflow;
 
-    @Autowired
+    @Inject
     private SetConfigurationForScoring setConfigurationForScoring;
 
     @Inject
-    private RatingEngineScoreWorkflow scoreWorkflow;
+    private GenerateAIRatingWorkflow generateRating;
 
     @Inject
-    private ComputeLift computeLift;
+    private ExportBucketTool exportBucketTool;
 
     @Inject
-    private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
-
-    @Inject
-    private ExportData exportData;
+    private ExportScoreTrainingFile exportScoreTrainingFile;
 
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
-    public Workflow defineWorkflow(RatingEngineMatchAndModelWorkflowConfiguration config) {
+    public Workflow defineWorkflow(CrossSellImportMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
+                .next(createCdlEventTableFilterStep) //
+                .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
-                .next(resolveMetadataFromUserRefinedAttributes) //
+                .next(mergeUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
-                .next(scoreWorkflow) //
-                .next(pivotScoreAndEventDataFlow) //
-                .next(exportData) //
+                .next(generateRating) //
+                .next(exportScoreTrainingFile) //
+                .next(exportBucketTool) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

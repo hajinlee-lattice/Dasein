@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.pls.service.ScoringJobService;
 
 import io.swagger.annotations.Api;
@@ -42,7 +40,7 @@ public class ScoreResource {
             @RequestParam(value = "debug", required = false) Boolean debug) {
         log.info(String.format("Scoring testing file for model %s (performEnrichment=%s,useRtsApi=%s)", modelId,
                 performEnrichment, useRtsApi));
-        return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
+        return JsonUtils.serialize(ImmutableMap.of("applicationId", //
                 scoringJobService.scoreTestingData(modelId, fileName, performEnrichment, debug)));
 
     }
@@ -57,23 +55,7 @@ public class ScoreResource {
             @RequestParam(value = "debug", required = false) Boolean debug) {
         log.info(String.format("Scoring training file for model %s (performEnrichment=%s,useRtsApi=%s)", modelId,
                 performEnrichment, useRtsApi));
-        return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
+        return JsonUtils.serialize(ImmutableMap.of("applicationId", //
                 scoringJobService.scoreTrainingData(modelId, performEnrichment, debug)));
-    }
-
-    @RequestMapping(value = "/rating/{modelId}", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Score the provided query. Returns the job id.")
-    public String scoreRating(//
-            @PathVariable String modelId, //
-            @RequestBody RatingEngineScoringParameters parameters) {
-        try {
-            return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
-                    scoringJobService.scoreRatinggData(modelId, parameters)));
-        } catch (Exception ex) {
-            log.error("Scoring job failed!", ex);
-            throw new RuntimeException("Scoring job failed, contact Lattice support for details!");
-        }
-
     }
 }

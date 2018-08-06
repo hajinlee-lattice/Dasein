@@ -15,11 +15,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -27,10 +28,7 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringJobService;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
-import com.latticeengines.pls.workflow.RatingEngineScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("scoringJobService")
 public class ScoringJobServiceImpl implements ScoringJobService {
@@ -50,9 +48,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Autowired
     private RTSBulkScoreWorkflowSubmitter rtsBulkScoreWorkflowSubmitter;
-
-    @Autowired
-    private RatingEngineScoreWorkflowSubmitter ratingEngineScoreWorkflowSubmitter;
 
     @Autowired
     private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTSBulkScoreWorkflowSubmitter;
@@ -100,7 +95,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     private InputStream getResultFile(String workflowJobId, String resultFileType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Job job = workflowProxy.getWorkflowExecution(workflowJobId, customerSpace != null ? customerSpace.toString() : null);
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId,
+                customerSpace != null ? customerSpace.toString() : null);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
@@ -128,7 +124,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public String getResultScoreFileName(String workflowJobId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Job job = workflowProxy.getWorkflowExecution(workflowJobId, customerSpace != null ? customerSpace.toString() : null);
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId,
+                customerSpace != null ? customerSpace.toString() : null);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
@@ -148,7 +145,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public String getResultPivotScoreFileName(String workflowJobId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Job job = workflowProxy.getWorkflowExecution(workflowJobId, customerSpace != null ? customerSpace.toString() : null);
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId,
+                customerSpace != null ? customerSpace.toString() : null);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
@@ -186,16 +184,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment, enableDebug);
     }
 
-    @Override
-    public String scoreRatinggData(String modelId, RatingEngineScoringParameters parameters) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-        return ratingEngineScoreWorkflowSubmitter.submit(modelSummary, parameters)
-                .toString();
-    }
-
     private Tenant getTenant() {
         Tenant tenant = MultiTenantContext.getTenant();
         return tenantEntityMgr.findByTenantId(tenant.getId());
@@ -220,7 +208,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public InputStream getScoringErrorStream(String workflowJobId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Job job = workflowProxy.getWorkflowExecution(workflowJobId, customerSpace != null ? customerSpace.toString() : null);
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId,
+                customerSpace != null ? customerSpace.toString() : null);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }

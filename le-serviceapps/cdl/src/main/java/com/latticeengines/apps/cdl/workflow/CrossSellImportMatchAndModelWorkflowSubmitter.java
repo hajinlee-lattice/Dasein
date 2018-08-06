@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -42,8 +42,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
-public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSubmitter {
-    private static final Logger log = LoggerFactory.getLogger(RatingEngineImportMatchAndModelWorkflowSubmitter.class);
+public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmitter {
+    private static final Logger log = LoggerFactory.getLogger(CrossSellImportMatchAndModelWorkflowSubmitter.class);
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
@@ -63,7 +63,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
     @Value("${cdl.modeling.workflow.mem.mb}")
     protected int workflowMemMb;
 
-    public RatingEngineImportMatchAndModelWorkflowConfiguration generateConfiguration(
+    public CrossSellImportMatchAndModelWorkflowConfiguration generateConfiguration(
             RatingEngineModelingParameters parameters) {
 
         Map<String, String> inputProperties = new HashMap<>();
@@ -92,7 +92,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
         String tableName = getTableName(parameters);
         String targetTableName = tableName + "_TargetTable";
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
-        RatingEngineImportMatchAndModelWorkflowConfiguration.Builder builder = new RatingEngineImportMatchAndModelWorkflowConfiguration.Builder()
+        CrossSellImportMatchAndModelWorkflowConfiguration.Builder builder = new CrossSellImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .filterTableNames(parameters.getTrainFilterTableName(), parameters.getEventFilterTableName(),
@@ -144,6 +144,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .dataCollectionVersion(version) //
                 .aiModelId(parameters.getAiModelId()) //
                 .ratingEngineId(parameters.getRatingEngineId()) //
+                .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
                 .workflowContainerMem(workflowMemMb) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
@@ -180,7 +181,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
         if (parameters.getTransformationGroup() == null) {
             parameters.setTransformationGroup(transformationGroup);
         }
-        RatingEngineImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters);
+        CrossSellImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters);
         return workflowJobService.submit(configuration);
     }
 }
