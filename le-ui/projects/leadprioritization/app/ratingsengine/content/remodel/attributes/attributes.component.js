@@ -47,7 +47,6 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
 
             // Create categories object to render categories tabs
             vm.categories = {};
-            // Get categories and length of items
             angular.forEach(vm.attributes, function(value, key){
                 vm.categories[key] = value.length;
             });

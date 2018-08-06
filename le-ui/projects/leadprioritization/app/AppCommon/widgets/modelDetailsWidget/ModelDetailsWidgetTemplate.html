@@ -13,12 +13,12 @@
                     <span ng-if="type === 'RULE_BASED'">Rule Based</span>
                     <span ng-if="type === 'CUSTOM_EVENT'">Custom Event</span>
                 </h2>
-                <h1>{{ displayName }}</h1>
+                <h1>{{ displayName }} <span ng-if="!isActiveModel">| Iteration {{ iteration.iteration }}</span></h1>
                 <p>Created by {{ createdBy }} on {{ created | date }}</p>
             </div>
 
             <!-- Active Version of CDL Model -->
-            <div class="data" ng-if="(IsRatingEngine && !isActiveModel) || IsRuleBased">
+            <div class="data" ng-if="(IsRatingEngine && isActiveModel) || IsRuleBased">
                 <div class="stats stats-group">
                     <h3>Segment</h3>
                     <h4 class="text-ellipsis">{{ segmentName }}</h4>
@@ -33,13 +33,13 @@
                 </div>
                 <div class="stats stats-group">
                     <h3>Scoring</h3>
-                    <h4>{{ activeStatus }} ( Iteration {{ activeIteration }} )</h4>
+                    <h4>{{ activeStatus }} <span ng-if="!IsRuleBased">( Iteration {{ activeIteration }} )</span></h4>
                     <p>Last data refresh {{ lastRefreshedDate | date }}</p>
                 </div>
             </div>
 
             <!-- Viewing an Iteration -->
-            <!-- <div class="data" ng-if="(IsRatingEngine && !isActiveModel) && !IsRuleBased">
+            <div class="data" ng-if="(IsRatingEngine && !isActiveModel) && !IsRuleBased">
                 <div class="stats stats-group">
                     <h3>Segment</h3>
                     <h4 class="text-ellipsis">{{ segmentName }}</h4>
@@ -56,14 +56,14 @@
                     <div class="stats stats-group">
                         <h3>Attribute Source</h3>
                         <dl>
-                            <dt>192 Lattice</dt>
+                            <dt>{{ externalAttributeCount | number }} Lattice</dt>
                         </dl>
                         <dl>
-                            <dt>4 Your Company</dt>
+                            <dt>{{ internalAttributeCount | number }} Your Company</dt>
                         </dl>
                     </div>
                 </div>
-            </div> -->
+            </div>
 
 
             <!-- LPI Model Details -->

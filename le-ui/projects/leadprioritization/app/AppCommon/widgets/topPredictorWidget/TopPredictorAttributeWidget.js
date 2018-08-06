@@ -12,7 +12,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     var data = $scope.data;
     var modelData = ModelStore.data;
 
-    console.log(modelData);
+    // console.log(modelData);
 
     $scope.attributeName = data.name;
     $scope.attributeFullDescription = data.description;

@@ -6,7 +6,7 @@ angular
     'lp.ratingsengine'
 ])
 .controller('SidebarModelController', function(
-    $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, 
+    $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, RatingsEngineStore,
     StateHistory, Model, IsPmml, IsRatingEngine, RatingEngine, HasRatingsAvailable
 ) {
     var vm = this;
@@ -27,6 +27,18 @@ angular
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
         vm.Uploaded = Model.ModelDetails.Uploaded;
         vm.HasRatingsAvailable = HasRatingsAvailable;
+
+        console.log(vm.model);
+        console.log(vm.ratingEngine);
+
+        var engineId = vm.ratingEngine.id,
+            ratingModelId = vm.model.ModelDetails.Name;
+
+        RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
+            vm.isActiveModel = vm.ratingEngine.activeModel.AI.iteration == iteration.AI.iteration ? true : false;
+        });
+
+
 
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {
             vm.HasRatingsAvailable = true;

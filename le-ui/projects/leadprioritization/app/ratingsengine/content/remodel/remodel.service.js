@@ -1,5 +1,5 @@
 angular.module('lp.ratingsengine.remodel')
-.service('AtlasRemodelStore', function($q, $state, $stateParams, $timeout, BrowserStorageUtility, AtlasRemodelService) {
+.service('AtlasRemodelStore', function($q, $state, $stateParams, $timeout, BrowserStorageUtility, AtlasRemodelService, RatingsEngineStore, JobsStore) {
     var store = this;
 
     this.init = function(){
@@ -19,6 +19,12 @@ angular.module('lp.ratingsengine.remodel')
 
         this.remodelAttributes = {};
     };
+
+    this.init();
+
+    this.clear = function() {
+        this.init();
+    }
 
     this.set = function(property, value) {
         this[property] = value;
@@ -56,42 +62,61 @@ angular.module('lp.ratingsengine.remodel')
         return deferred.promise;
     };
 
-    this.saveIteration = function() {
+    this.saveIteration = function(nextState) {
 
-        var deferred = $q.defer(),
-            engineId = $stateParams.engineId,
+        var engineId = $stateParams.engineId,
             iteration = store.getRemodelIteration(),
-            attributes = store.getRemodelAttributes(),
             clientSession = BrowserStorageUtility.getClientSession(),
             createdBy = clientSession.EmailAddress;
 
-        // Sanitize attributes to remove OriginalApprovedUsage (used when toggling Enable/Disable in Attributes screen)
-        angular.forEach(attributes, function(category){
-            var modifiedAttributes = category.filter(function(attribute) {
-                return attribute.OriginalApprovedUsage;
-            });
-            if(modifiedAttributes.length > 0){
-                angular.forEach(modifiedAttributes, function(attribute){
-                    delete attribute.OriginalApprovedUsage; 
-                });
-            }
-        });
+        console.log(iteration.AI);
 
-        // Set sanitized attributes and created by properties prior to saving iteration
-        // iteration.AI.ratingmodel_attributes = attributes;
+        // Sanitize iteration to remove data and add createBy
         iteration.AI.createdBy = createdBy;
+        delete iteration.AI.pid;
+        delete iteration.AI.id;
+        delete iteration.AI.modelingJobId;
+        delete iteration.AI.modelingJobStatus;
+        delete iteration.AI.modelSummaryId;
 
         // Save iteration
         AtlasRemodelService.saveIteration(engineId, iteration).then(function(result){
-            console.log(result);
-            deferred.resolve(result);
-        });
+            
+            var modelId = result.AI.id,
+                attributes = store.getRemodelAttributes();
 
-        return deferred.promise;
+            // Sanitize attributes to remove OriginalApprovedUsage (used when toggling Enable/Disable in Attributes screen)
+            angular.forEach(attributes, function(category){
+                var modifiedAttributes = category.filter(function(attribute) {
+                    return attribute.OriginalApprovedUsage;
+                });
+                if(modifiedAttributes.length > 0){
+                    angular.forEach(modifiedAttributes, function(attribute){
+                        delete attribute.OriginalApprovedUsage; 
+                    });
+                }
+            });
+
+            var attributesString = JSON.stringify(attributes);
+
+            AtlasRemodelService.launchModeling(engineId, modelId, attributesString).then(function(applicationid){
+                console.log(applicationid);
+
+                RatingsEngineStore.setApplicationId(applicationid);
+                JobsStore.inProgressModelJobs[engineId] = null;
+
+                // console.log('Model Launched', id, nextState);
+                if(nextState) {
+                    $state.go(nextState, { ai_model_job_id: applicationid });
+                }
+            });
+
+
+        });
 
     };
 
-    this.init();
+
 }) 
 .service('AtlasRemodelService', function($q, $http) {
 
@@ -124,6 +149,33 @@ angular.module('lp.ratingsengine.remodel')
             method: 'POST',
             url: '/pls/ratingengines/' + engineId + '/ratingmodels',
             data: iteration
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
+    this.launchModeling = function(engineId, modelId, attributes){
+        var deferred = $q.defer();
+
+        $http({
+            method: 'POST',
+            url: '/pls/ratingengines/' + engineId + '/ratingmodels/' + modelId + '/model',
+            headers: {
+                'Accept': 'text/plain'
+            },
+            data: attributes
         }).then(
             function onSuccess(response) {
                 var result = response.data;

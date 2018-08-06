@@ -15,6 +15,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.ResourceUtility = ResourceUtility;
     var data = ModelStore.data;
 
+    // console.log(data);
+
     if (data === undefined) {
         var ratingEngine = $scope.RatingEngine;
 
@@ -61,8 +63,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
         var widgetConfig = ModelStore.widgetConfig;
         var metadata = ModelStore.metadata;
-        var dashboard = ModelStore.dashboard;
+        var dashboard = ModelStore.getDashboardData();
         var modelDetails = data.ModelDetails;
+
+        // console.log(dashboard);
 
         $scope.displayName = modelDetails[widgetConfig.NameProperty];
         $scope.IsPmml = data.IsPmml;
@@ -73,15 +77,18 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 ratingEngine = RatingsEngineStore.getCurrentRating(),
                 type = ratingEngine.type.toLowerCase();
 
-            $scope.$on('statusChange', function(event, args) {
-                $scope.activeStatus = args.activeStatus;
-            });
-
-            // $scope.totalIterations = dashboard.iterations.length;
 
             // console.log(engineId);
             // console.log(ratingEngine);
 
+
+            $scope.$on('statusChange', function(event, args) {
+                $scope.activeStatus = args.activeStatus;
+            });
+
+            $scope.totalIterations = dashboard.iterations.length;
+            $scope.externalAttributeCount = data.ExternalAttributes.total;
+            $scope.internalAttributeCount = data.InternalAttributes.total;
             $scope.displayName = ratingEngine.displayName;
             $scope.createdBy = ratingEngine.createdBy;
             $scope.created = ratingEngine.created;
@@ -101,6 +108,19 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
                 $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
             }
+
+            if($scope.typeContext == 'AI'){
+
+                var engineId = $stateParams.rating_id,
+                    ratingModelId = data.ModelDetails.Name;
+
+                RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
+                    $scope.iteration = iteration.AI;
+                    $scope.isActiveModel = ratingEngine.activeModel.AI.iteration == iteration.AI.iteration ? true : false;
+                });
+    
+            }
+            
             $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
             $scope.modelIsReady = ((ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined));
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;

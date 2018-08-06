@@ -67,6 +67,13 @@
                 }
             }
         }
+        &.full-width {
+            width: 100%;
+            margin-bottom: 18px;
+            .form-group {
+                margin-bottom: 0;
+            }
+        }
     }
     .data {
         width: 40%;

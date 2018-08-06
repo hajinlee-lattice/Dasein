@@ -55,6 +55,7 @@ angular.module('common.wizard.controls', [])
         if (vm.next && !isPrev) {
             vm.go(vm.next, isPrev);
         } else if (isPrev && vm.prev) {
+            console.log(vm.prev);
             vm.go(vm.prev, isPrev);
         } else if (!isPrev && !vm.next) {
             if (WizardControlsOptions.nextState) {

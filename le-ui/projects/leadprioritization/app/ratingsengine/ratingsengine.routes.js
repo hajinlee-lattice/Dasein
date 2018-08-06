@@ -130,10 +130,11 @@ angular
                         }
                         return deferred.promise;
                     },
-                    Dashboard: function ($q, $stateParams, RatingsEngineStore) {
+                    Dashboard: function ($q, $stateParams, RatingsEngineStore, ModelStore) {
                         var deferred = $q.defer();
                         var rating_id = $stateParams.rating_id || RatingsEngineStore.getRatingId();
                         RatingsEngineStore.getRatingDashboard(rating_id).then(function (data) {
+                            ModelStore.setDashboardData(data);
                             deferred.resolve(data);
                         });
 

@@ -352,7 +352,6 @@ angular
                 pageIcon: 'ico-attributes',
                 pageTitle: 'Attributes'
             },
-           
             views: {
                 "main@": {
                     controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore, RatingEngine, StateHistory) {

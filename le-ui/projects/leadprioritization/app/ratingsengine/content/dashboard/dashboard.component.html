@@ -117,14 +117,14 @@
                     </dl>
                 </div>
                 <div>
-                    <h3>Ratings ( Iteration {{ vm.ratingEngine.activeModel.AI.iteration }} )</h3>
+                    <h3>Ratings <span ng-if="!vm.isRulesBased">( Iteration {{ vm.ratingEngine.activeModel.AI.iteration }} )</span></h3>
                     <h4 ng-if="vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0 || vm.dashboard.summary.isPublished == false">No Ratings Available</h4>
                     <bar-chart ng-if="vm.dashboard.summary.isPublished"    
                         config="vm.ratingEngine.chartConfig" 
                         bktlist="vm.dashboard.summary.bucketMetadata">
                     </bar-chart>
                 </div>
-                <div>
+                <div ng-if="!vm.isRulesBased">
                     <h3>Creation History ({{ vm.dashboard.iterations.length }})</h3>
                     <table class="creation-history">
                         <thead>
@@ -138,7 +138,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5">
+                            <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration'">
+                            <!-- <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5"> -->
                                 <td>{{ iteration.iteration }}</td>
                                 <td>{{ iteration.created | date }}</td>
                                 <td>{{ iteration.createdBy }}</td>
@@ -148,13 +149,15 @@
                                 <td>
                                     <span ng-if="iteration.modelingJobStatus === 'Completed'" class="ico ico-check"></span>
                                     <span ng-if="iteration.modelingJobStatus === 'Failed'" class="ico ico-warning"></span>
-                                    <span ng-if="iteration.modelingJobStatus === 'Pending'" class="fa fa-clock-o"></span>
+                                    <span ng-if="iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'" class="fa fa-clock-o"></span>
                                 </td>
                                 <td>
                                     <button 
                                         class="button link-button" 
                                         ng-click="vm.viewIteration(iteration)"
-                                        ng-disabled="iteration.modelingJobStatus === 'Pending'">View</button>
+                                        ng-if="
+                                            (!vm.isIterationActive(iteration.id) || iteration.modelingJobStatus != 'Pending') && 
+                                            iteration.modelSummaryId">View</button>
                                     <button 
                                         class="button link-button" 
                                         ng-click="vm.remodel(iteration)">Remodel</button>

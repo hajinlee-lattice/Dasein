@@ -407,6 +407,8 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer(),
             ClientSession = BrowserStorageUtility.getClientSession(); 
 
+        console.log(rating);
+
         var opts = {
             createdBy: rating.createdBy !== undefined ? rating.createdBy : ClientSession.EmailAddress,
             type: rating.type !== undefined ? rating.type : 'RULE_BASED',
@@ -1239,6 +1241,29 @@ angular.module('lp.ratingsengine')
         $http({
             method: 'GET',
             url: '/pls/ratingengines/' + id
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
+    this.getRatingModels = function(id) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/ratingengines/' + id + '/ratingmodels'
         }).then(
             function onSuccess(response) {
                 var result = response.data;

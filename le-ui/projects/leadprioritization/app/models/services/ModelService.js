@@ -13,6 +13,7 @@ angular.module('mainApp.models.services.ModelService', [
     this.models = [];
     this.modelsMap = {};
     this.stale = true;
+    this.dashboard = {};
 
     this.widgetConfig = {
         "ScoreProperty": "RocScore",
@@ -94,6 +95,15 @@ angular.module('mainApp.models.services.ModelService', [
     this.removeModel = function(modelId) {
         delete this.modelsMap[modelId];
     };
+
+    this.setDashboardData = function(dashboardData) {
+        this.dashboard = dashboardData;
+    };
+
+    this.getDashboardData = function() {
+        return this.dashboard;
+    };
+
 })
 .service('ModelService', function ($http, $q, _, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService, ModelServiceUtility) {
 

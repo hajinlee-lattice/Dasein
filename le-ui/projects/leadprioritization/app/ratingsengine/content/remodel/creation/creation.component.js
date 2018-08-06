@@ -9,7 +9,7 @@ angular.module('lp.ratingsengine.remodel.creation', [])
 
                     console.log($stateParams);
 
-                    RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                    RatingsEngineStore.getRating($stateParams.engineId).then(function (result) {
                         deferred.resolve(result)
                     });
 

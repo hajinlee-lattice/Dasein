@@ -42,52 +42,88 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
+            vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.activeModel.AI;
+            vm.engineType = vm.ratingEngine.type.toLowerCase();
+
             if($stateParams.section != "wizard.ratingsengine_segment"){
 
-                var filters = vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.filters;
+                if(vm.engineType == 'cross_sell'){
 
-                $scope.checkboxModel = {
-                    spend: filters.SPEND_IN_PERIOD ? true : false,
-                    quantity: filters.QUANTITY_IN_PERIOD ? true : false,
-                    periods: filters.TRAINING_SET_PERIOD ? true : false
-                };
+                    // Setup form for Cross Sell Models
+                    var filters = vm.iteration ? vm.iteration.AI.advancedModelingConfig.cross_sell.filters : vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.filters;
 
-                vm.spendCriteria = filters.SPEND_IN_PERIOD ? filters.SPEND_IN_PERIOD.criteria : '';
-                vm.spendValue = filters.SPEND_IN_PERIOD ? filters.SPEND_IN_PERIOD.value : '';
+                    $scope.checkboxModel = {
+                        spend: filters.SPEND_IN_PERIOD ? true : false,
+                        quantity: filters.QUANTITY_IN_PERIOD ? true : false,
+                        periods: filters.TRAINING_SET_PERIOD ? true : false
+                    };
 
-                vm.quantityCriteria = filters.QUANTITY_IN_PERIOD ? filters.QUANTITY_IN_PERIOD.criteria : '';
-                vm.quantityValue = filters.QUANTITY_IN_PERIOD ? filters.QUANTITY_IN_PERIOD.value : '';
+                    vm.spendCriteria = filters.SPEND_IN_PERIOD ? filters.SPEND_IN_PERIOD.criteria : '';
+                    vm.spendValue = filters.SPEND_IN_PERIOD ? filters.SPEND_IN_PERIOD.value : '';
 
-                vm.periodsCriteria = filters.TRAINING_SET_PERIOD ? filters.TRAINING_SET_PERIOD.criteria : '';
-                vm.periodsValue = filters.TRAINING_SET_PERIOD ? filters.TRAINING_SET_PERIOD.value : '';
+                    vm.quantityCriteria = filters.QUANTITY_IN_PERIOD ? filters.QUANTITY_IN_PERIOD.criteria : '';
+                    vm.quantityValue = filters.QUANTITY_IN_PERIOD ? filters.QUANTITY_IN_PERIOD.value : '';
+
+                    vm.periodsCriteria = filters.TRAINING_SET_PERIOD ? filters.TRAINING_SET_PERIOD.criteria : '';
+                    vm.periodsValue = filters.TRAINING_SET_PERIOD ? filters.TRAINING_SET_PERIOD.value : '';
+                
+                } else {
+
+                    // Setup form for Custom Event Models
+                    var filters = vm.iteration ? vm.iteration.AI.advancedModelingConfig.custom_event : vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event;
+
+                    $scope.checkboxModel = {
+                        datacloud: (filters.dataStores.indexOf('DataCloud') > -1) ? true : false,
+                        cdl: (filters.dataStores.indexOf('CDL') > -1) ? true : false,
+                        deduplicationType: filters.deduplicationType ? true : false,
+                        excludePublicDomains: (filters.excludePublicDomains == true) ? true : false,
+                        transformationGroup: (filters.transformationGroup == 'NONE') ? true : false
+                    }
+                }
 
             }
 
-            vm.activeModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.activeModel.AI; 
-
             vm.engineId = vm.ratingEngine.id;            
-            vm.modelId = vm.activeModel.id;
-            vm.modelingStrategy = vm.activeModel.advancedModelingConfig.cross_sell.modelingStrategy;
+            vm.modelId = vm.ratingModel.id;
+            vm.modelingStrategy = vm.ratingModel.advancedModelingConfig[vm.engineType].modelingStrategy;
 
-            vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
-            vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
-            vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
+            if(vm.engineType == 'cross_sell'){
+                vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
+                vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
+                vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
+            }
 
             $scope.$on("$destroy", function() {
-                delete vm.configFilters.SPEND_IN_PERIOD;
-                delete vm.configFilters.QUANTITY_IN_PERIOD;
-                delete vm.configFilters.TRAINING_SET_PERIOD;
-                
-                RatingsEngineStore.setTrainingProducts(null);
-                vm.activeModel.advancedModelingConfig.cross_sell.trainingProducts = null;
 
-                RatingsEngineStore.setTrainingSegment(null);
-                vm.activeModel.trainingSegment = null;
+                if(vm.engineType == 'cross_sell'){
+                    delete vm.configFilters.SPEND_IN_PERIOD;
+                    delete vm.configFilters.QUANTITY_IN_PERIOD;
+                    delete vm.configFilters.TRAINING_SET_PERIOD;
+                    
+                    RatingsEngineStore.setTrainingProducts(null);
+                    vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts = null;
+
+                    RatingsEngineStore.setTrainingSegment(null);
+                    vm.ratingModel.trainingSegment = null;
+                }
+
             });
+
             $timeout(function () {
-                vm.validateForm();
+                if(vm.engineType == 'cross_sell'){
+                    vm.validateCrossSellForm();
+                } else {
+                    vm.validateCustomEventForm();
+                }
             });
         }
+
+
+
+        // Functions for Cross Sell Models
+        // ============================================================================================
+        // ============================================================================================
+        // ============================================================================================
 
         vm.getRecordsCount = function(engineId, modelId, ratingEngine) {
             vm.recordsCountReturned = false;
@@ -114,7 +150,7 @@ angular.module('lp.ratingsengine.wizard.training', [
         vm.segmentCallback = function(selectedSegment) {
             vm.trainingSegment = selectedSegment[0];
             RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
-            vm.activeModel.trainingSegment = vm.trainingSegment;
+            vm.ratingModel.trainingSegment = vm.trainingSegment;
 
             vm.autcompleteChange();
         }
@@ -125,7 +161,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.trainingProducts.push(product.ProductId);
             });
             RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
-            vm.activeModel.advancedModelingConfig.cross_sell.trainingProducts = vm.trainingProducts;
+            vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts = vm.trainingProducts;
 
             vm.autcompleteChange();        
         }
@@ -133,70 +169,6 @@ angular.module('lp.ratingsengine.wizard.training', [
         vm.autcompleteChange = function(){
             vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
             vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
-        };
-
-        vm.validateForm = function(){
-
-            var valid = true;
-            if($scope.trainingForm){
-                valid = $scope.trainingForm.$valid;
-            }
-
-            if(valid === true){
-                RatingsEngineStore.validation.training = true;
-                RatingsEngineStore.validation.refine = true;
-                vm.recordsCountReturned = false;
-                vm.purchasesCountReturned = false;
-
-                if($scope.checkboxModel) {
-                    if($scope.checkboxModel.spend) {
-                        vm.configFilters.SPEND_IN_PERIOD = {
-                            "configName": "SPEND_IN_PERIOD",
-                            "criteria": vm.spendCriteria,
-                            "value": vm.spendValue
-                        };
-                    } else {
-                        delete vm.configFilters.SPEND_IN_PERIOD;
-                    }
-
-                    if($scope.checkboxModel.quantity) {
-                        vm.configFilters.QUANTITY_IN_PERIOD = {
-                            "configName": "QUANTITY_IN_PERIOD",
-                            "criteria": vm.quantityCriteria,
-                            "value": vm.quantityValue
-                        };
-                    } else {
-                        delete vm.configFilters.QUANTITY_IN_PERIOD;
-                    }
-
-                    if($scope.checkboxModel.periods) {
-
-                        vm.configFilters.TRAINING_SET_PERIOD = {
-                            "configName": "TRAINING_SET_PERIOD",
-                            "criteria": vm.periodsCriteria,
-                            "value": vm.periodsValue
-                        };
-                    } else {
-                        delete vm.configFilters.TRAINING_SET_PERIOD;
-                    }
-
-                    if($scope.checkboxModel.spend || $scope.checkboxModel.quantity || $scope.checkboxModel.periods) {
-                        RatingsEngineStore.setConfigFilters(vm.configFilters);
-                    }
-
-                    vm.activeModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
-
-                    vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
-                    vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
-                }
-            }else{
-                RatingsEngineStore.validation.training = false;
-                RatingsEngineStore.validation.refine = false;
-            }
-        }
-        
-        vm.formOnChange = function(){
-            $timeout(vm.validateForm());
         };
        
         vm.getSpendConfig = function(){
@@ -240,7 +212,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.spendValue = value;
             }
             vm.formOnChange();
-            
         }
 
         vm.callbackQuantity = function(type, position, value){
@@ -248,7 +219,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.quantityValue = value;
             }
             vm.formOnChange();
-            
         }
 
         vm.callbackPeriod = function(type, position, value){
@@ -256,8 +226,157 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.periodsValue = value;
             }
             vm.formOnChange();
-            
         }
+
+        vm.validateCrossSellForm = function(){
+
+            var valid = true;
+            if($scope.trainingForm){
+                valid = $scope.trainingForm.$valid;
+            }
+
+            if(valid == true){
+                RatingsEngineStore.validation.training = true;
+                RatingsEngineStore.validation.refine = true;
+                vm.recordsCountReturned = false;
+                vm.purchasesCountReturned = false;
+
+                if($scope.checkboxModel) {
+                    if($scope.checkboxModel.spend) {
+                        vm.configFilters.SPEND_IN_PERIOD = {
+                            "configName": "SPEND_IN_PERIOD",
+                            "criteria": vm.spendCriteria,
+                            "value": vm.spendValue
+                        };
+                    } else {
+                        delete vm.configFilters.SPEND_IN_PERIOD;
+                    }
+
+                    if($scope.checkboxModel.quantity) {
+                        vm.configFilters.QUANTITY_IN_PERIOD = {
+                            "configName": "QUANTITY_IN_PERIOD",
+                            "criteria": vm.quantityCriteria,
+                            "value": vm.quantityValue
+                        };
+                    } else {
+                        delete vm.configFilters.QUANTITY_IN_PERIOD;
+                    }
+
+                    if($scope.checkboxModel.periods) {
+
+                        vm.configFilters.TRAINING_SET_PERIOD = {
+                            "configName": "TRAINING_SET_PERIOD",
+                            "criteria": vm.periodsCriteria,
+                            "value": vm.periodsValue
+                        };
+                    } else {
+                        delete vm.configFilters.TRAINING_SET_PERIOD;
+                    }
+
+                    if($scope.checkboxModel.spend || $scope.checkboxModel.quantity || $scope.checkboxModel.periods) {
+                        RatingsEngineStore.setConfigFilters(vm.configFilters);
+                    }
+
+                    vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
+
+                    vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
+                    vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
+                }
+            } else {
+                RatingsEngineStore.validation.training = false;
+                RatingsEngineStore.validation.refine = false;
+            }
+        }
+
+
+        // Functions for Custom Event Models
+        // ============================================================================================
+        // ============================================================================================
+        // ============================================================================================
+
+        vm.validateCustomEventForm = function(){
+
+
+            console.log("yo");
+
+            var valid = true;
+            if($scope.trainingForm){
+                valid = $scope.trainingForm.$valid;
+            }
+
+            if(valid == true){
+                RatingsEngineStore.validation.training = true;
+                RatingsEngineStore.validation.refine = true;
+
+                vm.configFilters.dataStores = [];
+
+                if($scope.checkboxModel) {
+
+                    console.log($scope.checkboxModel);
+
+                    if($scope.checkboxModel.datacloud) {
+                        vm.configFilters.dataStores.push('DataCloud');
+                    } else {
+                        var dataStores = vm.configFilters.dataStores,
+                            index = dataStores.indexOf('DataCloud');
+                        
+                        dataStores.splice(index, 1);
+                    }
+
+                    if($scope.checkboxModel.cdl) {
+                        vm.configFilters.dataStores.push('CDL');
+                    } else {
+                        var dataStores = vm.configFilters.dataStores,
+                            index = dataStores.indexOf('CDL');
+                        
+                        dataStores.splice(index, 1);
+                    }
+
+                    if($scope.checkboxModel.deduplicationType) {
+                        vm.configFilters.deduplicationType = 'ONELEADPERDOMAIN';
+                    } else {
+                        delete vm.configFilters.deduplicationType;
+                    }
+
+                    if($scope.checkboxModel.excludePublicDomains) {
+                        vm.configFilters.excludePublicDomains = $scope.checkboxModel.excludePublicDomains;
+                    } else {
+                        delete vm.configFilters.excludePublicDomains;
+                    }
+
+                    if($scope.checkboxModel.transformationGroup) {
+                        vm.configFilters.transformationGroup = 'NONE';
+                    } else {
+                        delete vm.configFilters.transformationGroup;
+                    }
+
+
+                    if($scope.checkboxModel.datacloud || $scope.checkboxModel.cdl || $scope.checkboxModel.deduplicationType || $scope.checkboxModel.excludePublicDomains || $scope.checkboxModel.transformationGroup) {
+                        RatingsEngineStore.setConfigFilters(vm.configFilters);
+                    }
+
+                    console.log(vm.configFilters);
+
+                    vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
+                }
+
+            } else {
+                RatingsEngineStore.validation.training = false;
+                RatingsEngineStore.validation.refine = false;
+            }
+
+        }
+
+        
+        vm.formOnChange = function(){
+            $timeout(function () {
+                if(vm.engineType == 'cross_sell'){
+                    vm.validateCrossSellForm();
+                } else {
+                    vm.validateCustomEventForm();
+                }
+            }, 500);
+        };
         
     }
 });

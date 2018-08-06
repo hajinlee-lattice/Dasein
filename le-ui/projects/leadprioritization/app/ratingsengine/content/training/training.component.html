@@ -9,7 +9,54 @@
 
             <div class="content-body">
 
-                <ul class="checkbox-list">
+                <div ng-if="$ctrl.engineType == 'custom_event'">
+
+                    <p>What attributes will be available for scoring?</p>
+                    <ul class="checkbox-list full-width">
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="checkboxModel.datacloud" />
+                            <div>Your matched 3rd-Party Attributes provided through Lattice</div>
+                        </li>
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="checkboxModel.cdl" />
+                            <div>Your Imported 1st-Party Attributes (My Data Attributes)</div>
+                        </li>
+                    </ul>
+
+                    <p>Training Options</p>
+                    <ul class="checkbox-list full-width">
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="checkboxModel.deduplicationType" />
+                            <div>One record per account</div>
+                        </li>
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="checkboxModel.excludePublicDomains" />
+                            <div>Include personal email domains</div>
+                        </li>
+                        <li class="form-group">
+                            <input 
+                                type="checkbox"
+                                class="form-control"
+                                ng-model="checkboxModel.transformationGroup" />
+                            <div>Use curated attributes</div>
+                        </li>
+                    </ul>
+
+                </div>
+
+                <ul ng-if="$ctrl.engineType == 'cross_sell'" class="checkbox-list">
                     <li class="form-group">
                         <input 
                             type="checkbox"
@@ -136,7 +183,10 @@
                         </div>
                     </li>
                 </ul><!-- End .checkbox-list -->
-                <ul class="data">
+
+
+
+                <ul class="data" ng-if="$ctrl.engineType == 'cross_sell'">
                     <li>
                         <h3>Size of Training Data Set</h3>
                         <div class="stats-group">

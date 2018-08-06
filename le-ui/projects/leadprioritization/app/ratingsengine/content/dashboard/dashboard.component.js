@@ -207,46 +207,6 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.initDataModel = function(){
-
-        // vm.dashboard.iterations = [
-        //     {
-        //         "id": "ai_lzgpprzdtsg_qwinfsuama",
-        //         "iteration": 1,
-        //         "created": 1532381484000,
-        //         "createdBy": "jhadden@lattice-engines.com",
-        //         "modelingJobStatus": "Failed",
-        //         "modelSummaryId": "ms__2b5aacdb-14b5-48f2-9dc0-6af5a1f8e20c-ai_vqeec",
-        //         "scoring": false
-        //     },
-        //     {
-        //         "id": "ai_lzgpprzdtsg_qwinfsuama",
-        //         "iteration": 2,
-        //         "created": 1532381484000,
-        //         "createdBy": "jhadden@lattice-engines.com",
-        //         "modelingJobStatus": "Completed",
-        //         "modelSummaryId": "ms__2b5aacdb-14b5-48f2-9dc0-6af5a1f8e20c-ai_vqeec",
-        //         "scoring": false
-        //     },
-        //     {
-        //         "id": "ai_lzgpprzdtsg_qwinfsuama",
-        //         "iteration": 3,
-        //         "created": 1532381484000,
-        //         "createdBy": "jhadden@lattice-engines.com",
-        //         "modelingJobStatus": "Completed",
-        //         "modelSummaryId": "ms__2b5aacdb-14b5-48f2-9dc0-6af5a1f8e20c-ai_vqeec",
-        //         "scoring": true
-        //     },
-        //     {
-        //         "id": "ai_lzgpprzdtsg_qwinfsuama",
-        //         "iteration": 4,
-        //         "created": 1532381484000,
-        //         "createdBy": "jhadden@lattice-engines.com",
-        //         "modelingJobStatus": "Pending",
-        //         "modelSummaryId": "ms__2b5aacdb-14b5-48f2-9dc0-6af5a1f8e20c-ai_vqeec",
-        //         "scoring": false
-        //     }
-        // ]
-
         vm.relatedItems = vm.dashboard.plays;
         vm.hasBuckets = vm.ratingEngine.counts != null;
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
@@ -326,11 +286,9 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.init = function() {
 
-        // console.log(vm.ratingEngine);
+        console.log(vm.ratingEngine);
         // console.log(vm.modelSummary);
         console.log(vm.dashboard);
-
-        // console.log($stateParams);
 
         vm.initModalWindow();
         vm.initDataModel();
@@ -413,16 +371,17 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.viewIteration = function(iteration){
 
-        console.log(iteration);
+        // console.log(vm.ratingEngine);
 
-        var modelId = iteration.modelSummaryId,
-            rating_id = $stateParams.rating_id;
+        // if(vm.isIterationActive(iteration.id) == false){
+            var modelId = iteration.modelSummaryId,
+                rating_id = $stateParams.rating_id;
 
-        $state.go('home.ratingsengine.dashboard', { 
-            rating_id: rating_id, 
-            modelId: modelId,
-            modelingJobStatus: null
-        },{reload:true});
+            $state.go('home.model.attributes', { 
+                rating_id: rating_id, 
+                modelId: modelId
+            },{ reload:true });   
+        // }
     }
 
     vm.init();
