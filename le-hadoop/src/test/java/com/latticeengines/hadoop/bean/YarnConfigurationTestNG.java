@@ -3,6 +3,7 @@ package com.latticeengines.hadoop.bean;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 
 import javax.inject.Inject;
 
@@ -13,10 +14,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.yarn.configuration.ConfigurationUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.aws.s3.S3Service;
@@ -37,11 +38,14 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     @Inject
     private S3Service s3Service;
 
-    @Inject
-    private AmazonS3 s3Client;
-
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
+
+    @Value("${aws.default.access.key}")
+    protected String awsKey;
+
+    @Value("${aws.default.secret.key.encrypted}")
+    protected String awsSecret;
 
     @Value("${common.le.stack}")
     private String leStack;
@@ -86,7 +90,12 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         }
         Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
 
-        HdfsUtils.distcp(yarnConfiguration, srcDir, s3Uri, "default");
+        // demo overwrite aws key and secret
+        Properties properties = new Properties();
+        properties.setProperty("fs.s3n.awsAccessKeyId", awsKey);
+        properties.setProperty("fs.s3n.awsSecretAccessKey", awsSecret);
+        Configuration configuration = ConfigurationUtils.createFrom(yarnConfiguration, properties);
+        HdfsUtils.distcp(configuration, srcDir, s3Uri, "default");
         Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, s3Uri));
 
         InputStream is = s3Service.readObjectAsStream(s3Bucket, tgtDir + "/test.avro");
