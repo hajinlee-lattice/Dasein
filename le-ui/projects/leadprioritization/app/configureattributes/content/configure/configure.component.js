@@ -127,7 +127,8 @@ angular.module('lp.configureattributes.configure', [])
             vm.disabledObj[key] = {};
 
             for(var i in options) {
-                var option = options[i].null;
+                var first_key = Object.keys(options[i])[0],
+                    option = options[i][first_key];
                 if(!vm.disabledObj[key][option.Period]) {
                     vm.disabledObj[key][option.Period] = [];
                 }
@@ -357,7 +358,6 @@ angular.module('lp.configureattributes.configure', [])
                 keys = path.split('.'),
                 key = keys[0],
                 obj = {};
-
             if(value) {
                 setObj(path, value, obj);
                 angular.merge(vm.options, obj);
@@ -507,21 +507,24 @@ angular.module('lp.configureattributes.configure', [])
 
             vm.steps = ConfigureAttributesStore.getSteps(ConfigureAttributesStore.purchaseHistory, vm.steps);
 
-            if(vm.options.TotalSpendOvertime) {
-                totalSpendOvertimeOptionsAr = [];
-                for(var i in vm.options.TotalSpendOvertime) {
-                    var option = angular.copy(vm.options.TotalSpendOvertime[i]);
-                    totalSpendOvertimeOptionsAr.push(option);
-                }
-            }
+            // I changed behavior with setting options and this now breaks Spend Over Time
+            // when you go switch to that page after setting options
+            // 
+            // if(vm.options.TotalSpendOvertime) {
+            //     totalSpendOvertimeOptionsAr = [];
+            //     for(var i in vm.options.TotalSpendOvertime) {
+            //         var option = angular.copy(vm.options.TotalSpendOvertime[i]);
+            //         totalSpendOvertimeOptionsAr.push(option);
+            //     }
+            // }
             
-            if(vm.options.AvgSpendOvertime) {
-                avgSpendOvertimeOptionsAr = [];
-                for(var i in vm.options.AvgSpendOvertime) {
-                    var option =  angular.copy(vm.options.AvgSpendOvertime[i]);
-                    avgSpendOvertimeOptionsAr.push(option);
-                }
-            }
+            // if(vm.options.AvgSpendOvertime) {
+            //     avgSpendOvertimeOptionsAr = [];
+            //     for(var i in vm.options.AvgSpendOvertime) {
+            //         var option =  angular.copy(vm.options.AvgSpendOvertime[i]);
+            //         avgSpendOvertimeOptionsAr.push(option);
+            //     }
+            // }
 
             vm.spendOvertime = {
                 TotalSpendOvertime: totalSpendOvertimeOptionsAr || vm.steps.spend_over_time.data.TotalSpendOvertime || [defaultOption],

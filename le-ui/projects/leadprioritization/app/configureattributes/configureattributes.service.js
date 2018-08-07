@@ -33,7 +33,6 @@ angular.module('lp.configureattributes')
 
     this.savePurchaseHistory = function() {
         var deferred = $q.defer();
-
         ConfigureAttributesService.savePurchaseHistory(this.purchaseHistory).then(function(result) {
             deferred.resolve(result);
         });
@@ -47,10 +46,10 @@ angular.module('lp.configureattributes')
         for(var i in options) {
             var key = i,
                 option = options[key];
-
             for(var j in option) {
-                if(Object.keys(option[j]).length > 1 && option[j].null) { //fixes weird behavior where options can become duplicated or go missing
-                    delete option[j].null;
+                var first_key = 'null'; //Object.keys(option[j])[0]; // leave this be
+                if(Object.keys(option[j]).length > 1 && option[j][first_key]) { //fixes weird behavior where options can become duplicated or go missing
+                    delete option[j][first_key];
                 }
             }
             ConfigureAttributesStore.options[key] = options[key];
@@ -69,7 +68,7 @@ angular.module('lp.configureattributes')
                 var option = _option[i][cmp],
                     period = {
                         Cmp: (cmp !== 'null' ? cmp : 'WITHIN'),
-                        Vals: [option.Val],
+                        Vals: [parseInt(option.Val)],
                         Period: option.Period
                     },
                     timestamp = + new Date(),
@@ -83,7 +82,7 @@ angular.module('lp.configureattributes')
                         IsEOL: false
                     };
 
-                if(period.Vals && Number.isInteger(period.Vals[0])) {
+                if(period.Vals && Number.isInteger(parseInt(period.Vals[0]))) {
                     ConfigureAttributesStore.purchaseHistory.push(obj);
                 }
             }

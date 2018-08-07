@@ -12,7 +12,7 @@ angular.module('lp.notes', [
     angular.extend(vm, {
         isRating: $stateParams.rating_id,
         id: '',
-        userName: ClientSession.DisplayName,
+        userName: ClientSession.EmailAddress,
         ResourceUtility: ResourceUtility,
         notes: Notes.data,
         referModelName: '',
@@ -42,7 +42,7 @@ angular.module('lp.notes', [
     vm.addNote = function(note){
 
     	var newNote = {
-            Origin: 'Note',
+            Origin: 'NOTE',
             CreatedByUser: vm.userName,
             NotesContents: note
 		};

@@ -257,7 +257,7 @@ angular.module('common.datacloud.query')
             if (tree === null) {
                 delete this.addBucketTreeRoot;
             } else {
-                this.addBucketTreeRoot = tree;
+                this.addBucketTreeRoot = tree; // this causes PLS-6617
                 this.addBucketTreeType = type ? type : '';
             }
         }

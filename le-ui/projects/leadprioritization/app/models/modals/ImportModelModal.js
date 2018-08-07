@@ -45,11 +45,13 @@ angular.module('mainApp.models.modals.ImportModelModal', [
         });
     };
 
-    $scope.uploadFile = function(){
-        $scope.showImportError = false;
-        $scope.importErrorMsg = "";
-        $scope.importing = true;
-        reader.readAsText($scope.jsonFile);
+    $scope.uploadFile = function() {
+        if($scope.jsonFile) {
+            $scope.showImportError = false;
+            $scope.importErrorMsg = "";
+            $scope.importing = true;
+            reader.readAsText($scope.jsonFile);
+        }
     };
 
 
