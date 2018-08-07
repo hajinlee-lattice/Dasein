@@ -52,8 +52,8 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         importContext = new ImportContext(yarnConfiguration);
         importContext.setProperty(MarketoImportProperty.HOST, "976-KKC-431.mktorest.com");
-        importContext.setProperty(MarketoImportProperty.CLIENTID, "c98abab9-c62d-4723-8fd4-90ad5b0056f3");
-        importContext.setProperty(MarketoImportProperty.CLIENTSECRET, "PlPMqv2ek7oUyZ7VinSCT254utMR0JL5");
+        importContext.setProperty(MarketoImportProperty.CLIENTID, "868c37ad-905c-4562-be86-c6b1f39293f4");
+        importContext.setProperty(MarketoImportProperty.CLIENTSECRET, "vBt3ZnFAU4eCyrtzOzRZfvkRQPfdDrUi");
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         importContext.setProperty(ImportProperty.TARGETPATH, "/tmp");
         importContext.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
