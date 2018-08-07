@@ -289,7 +289,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         AIModel toCreate = new AIModel();
         
         toCreate.setAdvancedModelingConfig(aiModel.getAdvancedModelingConfig());
-        toCreate.setCreatedBy(aiModel.getCreatedBy());
         toCreate.setPredictionType(aiModel.getPredictionType());
         toCreate.setRatingEngine(ratingEngine);
         toCreate.setRatingModelAttributes(aiModel.getRatingModelAttributes());
