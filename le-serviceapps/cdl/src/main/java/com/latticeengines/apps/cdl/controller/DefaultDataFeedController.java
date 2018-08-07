@@ -116,6 +116,16 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedNextInvokeTime(customerSpace, time);
     }
 
+    @GetMapping(value = "/jobtype/{jobType}/latestexecution")
+    @ResponseBody
+    @ApiOperation(value = "get the latest data feed execution")
+    public DataFeedExecution getLatestExecution(@PathVariable String customerSpace, //
+            @PathVariable DataFeedExecutionJobType jobType) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        DataFeed dataFeed = datafeedService.getDefaultDataFeed(customerSpace);
+        return datafeedService.getLatestExecution(customerSpace, dataFeed.getName(), jobType);
+    }
+
     @PostMapping(value = "/status/{initialDataFeedStatus}/finishexecution")
     @ResponseBody
     @ApiOperation(value = "finish data feed execution")

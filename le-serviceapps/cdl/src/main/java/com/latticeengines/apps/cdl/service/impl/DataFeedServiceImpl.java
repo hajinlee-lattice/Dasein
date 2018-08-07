@@ -281,6 +281,15 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
     }
 
+    @Override
+    public DataFeedExecution getLatestExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
+        DataFeed dataFeed = findDataFeedByName(customerSpace, datafeedName);
+        if (dataFeed == null) {
+            throw new NullPointerException("Datafeed is null. Cannot get the latest execution.");
+        }
+        return datafeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed, jobType);
+    }
+
     private DataFeedExecution failExecution(DataFeed datafeed, String initialDataFeedStatus) {
         DataFeedExecution execution = datafeed.getActiveExecution();
         execution.setStatus(DataFeedExecution.Status.Failed);

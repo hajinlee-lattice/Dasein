@@ -1,17 +1,22 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import org.apache.commons.collections.CollectionUtils;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
@@ -46,9 +52,14 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Long RUNNING_ACTION_2_TRACKING_ID = 102L;
     private static final Long COMPLETE_ACTION_1_TRACKING_ID = 103L;
     private static final Long COMPLETE_ACTION_2_TRACKING_ID = 104L;
+    private static final Long DEFAULT_WORKFLOW_ID = 200L;
+    private static final Long DEFAULT_WORKFLOW_PID = 201L;
 
     @Mock
     private ActionService actionService;
+
+    @Mock
+    private DataFeedProxy dataFeedProxy;
 
     @Mock
     private WorkflowProxy workflowProxy;
@@ -126,6 +137,76 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(pair.getRight().size(), 2);
         Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_ID);
         Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_ID);
+    }
+
+    @Test(groups = "functional", dataProvider = "provideInheritableActionTestObjects")
+    public void testGetInheritableActionsFromLastFailedPA(DataFeedExecution dataFeedExecution, Job workflowExection,
+        List<Action> actions, List<Long> inheritableActionIds) {
+        when(dataFeedProxy.getLatestExecution(anyString(), any())).thenReturn(dataFeedExecution);
+        when(workflowProxy.getWorkflowExecution(anyString())).thenReturn(workflowExection);
+        when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
+
+        List<Long> actionIds = processAnalyzeWorkflowSubmitter.getActionIdsFromLastFailedPA(customerSpace);
+
+        Assert.assertNotNull(actionIds);
+        Assert.assertEquals(actionIds, inheritableActionIds);
+    }
+
+    @DataProvider(name = "provideInheritableActionTestObjects")
+    private Object[][] provideInheritableActionTestObjects() {
+        return new Object[][] {
+                // completed PA's actions will not be inherited
+                {
+                        newDataFeedExecution(), newWorkflowExecution(JobStatus.COMPLETED),
+                        Collections.emptyList(), Collections.emptyList()
+                },
+                {
+                        newDataFeedExecution(), newWorkflowExecution(JobStatus.COMPLETED),
+                        newTypedActions(ActionType.INTENT_CHANGE, ActionType.ACTIVITY_METRICS_CHANGE), Collections.emptyList()
+                },
+                // failed PA
+                {
+                        newDataFeedExecution(), newWorkflowExecution(JobStatus.FAILED),
+                        Collections.emptyList(), Collections.emptyList()
+                },
+                {
+                        newDataFeedExecution(), newWorkflowExecution(JobStatus.FAILED),
+                        newTypedActions(
+                                ActionType.ACTIVITY_METRICS_CHANGE,
+                                ActionType.ATTRIBUTE_MANAGEMENT_ACTIVATION,
+                                ActionType.INTENT_CHANGE, // system action, not inherited
+                                ActionType.ATTRIBUTE_MANAGEMENT_DEACTIVATION,
+                                ActionType.METADATA_CHANGE,
+                                ActionType.METADATA_SEGMENT_CHANGE,
+                                ActionType.DATA_CLOUD_CHANGE, // system action, not inherited
+                                ActionType.RATING_ENGINE_CHANGE,
+                                ActionType.CDL_DATAFEED_IMPORT_WORKFLOW), // import action, not inherited
+                        Arrays.asList(0L, 1L, 3L, 4L, 5L, 7L)
+                },
+        };
+    }
+
+    private List<Action> newTypedActions(ActionType... types) {
+        return LongStream.range(0, types.length).mapToObj(idx -> {
+            Action action = new Action();
+            action.setPid(idx);
+            action.setType(types[(int) idx]);
+            return action;
+        }).collect(Collectors.toList());
+    }
+
+    private DataFeedExecution newDataFeedExecution() {
+        DataFeedExecution execution = new DataFeedExecution();
+        execution.setWorkflowId(DEFAULT_WORKFLOW_ID);
+        return execution;
+    }
+
+    private Job newWorkflowExecution(JobStatus status) {
+        Job job = new Job();
+        job.setPid(DEFAULT_WORKFLOW_PID);
+        job.setId(DEFAULT_WORKFLOW_ID);
+        job.setJobStatus(status);
+        return job;
     }
 
     private List<Job> generateJobs() {

@@ -31,6 +31,8 @@ public interface DataFeedService {
 
     void updateDataFeedNextInvokeTime(String customerSpace, Date time);
 
+    DataFeedExecution getLatestExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
+
     DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
 
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);

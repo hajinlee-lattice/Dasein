@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -116,6 +117,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("customer: %s, data feed: %s, status: %s", customerSpace, datafeed.getName(),
                 datafeedStatus.getName()));
 
+        List<Long> lastFailedActionIds = getActionIdsFromLastFailedPA(customerSpace);
+
         if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
             String errorMessage;
             if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
@@ -139,6 +142,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         try {
             Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
+            // add to front
+            actionAndJobIds.getLeft().addAll(0, lastFailedActionIds);
+            if (CollectionUtils.isNotEmpty(lastFailedActionIds)) {
+                log.info("Inherit actions from last failed processAnalyze workflow, actionIds={}", lastFailedActionIds);
+            }
             updateActions(actionAndJobIds.getLeft(), pidWrapper.getPid());
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
@@ -216,6 +224,42 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Data cloud related Actions are: %s", datacloudActionIds));
 
         return new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
+    }
+
+    /*
+     * Retrieve all the inheritable action IDs if the last PA failed.
+     * Return an empty list otherwise.
+     */
+    @VisibleForTesting
+    List<Long> getActionIdsFromLastFailedPA(String customerSpace) {
+        DataFeedExecution lastDataFeedExecution = dataFeedProxy.getLatestExecution(
+                customerSpace, DataFeedExecutionJobType.PA);
+        if (lastDataFeedExecution == null || lastDataFeedExecution.getWorkflowId() == null) {
+            return Collections.emptyList();
+        }
+
+        // data feed execution does not always have workflowPid, need the workflow execution
+        Long workflowId = lastDataFeedExecution.getWorkflowId();
+        Job job = workflowProxy.getWorkflowExecution(String.valueOf(workflowId));
+        if (job == null || job.getPid() == null || job.getJobStatus() != JobStatus.FAILED) {
+            return Collections.emptyList();
+        }
+        Long workflowPid = job.getPid();
+
+        return actionService
+                .findByOwnerId(workflowPid)
+                .stream()
+                .filter(action -> {
+                    if (action == null || action.getPid() == null || action.getType() == null) {
+                        return false;
+                    }
+
+                    // not inherit import and system actions
+                    return !ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()) &&
+                            !ActionType.getDataCloudRelatedTypes().contains(action.getType());
+                })
+                .map(Action::getPid)
+                .collect(Collectors.toList());
     }
 
     private void updateActions(List<Long> actionIds, Long workflowPid) {

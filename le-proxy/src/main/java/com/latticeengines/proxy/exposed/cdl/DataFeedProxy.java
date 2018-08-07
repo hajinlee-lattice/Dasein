@@ -74,6 +74,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return responseDoc.getResult();
     }
 
+    public DataFeedExecution getLatestExecution(String customerSpace, DataFeedExecutionJobType jobType) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/latestexecution",
+                shortenCustomerSpace(customerSpace), jobType);
+        return get("getLatestExecution", url, DataFeedExecution.class);
+    }
+
     public DataFeedExecution finishExecution(String customerSpace, String initialDataFeedStatus) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datafeed/status/{initialDataFeedStatus}/finishexecution",
