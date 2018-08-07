@@ -58,11 +58,12 @@ public class ModelSummaryResource {
     @PostMapping("/downloadmodelsummary")
     @ResponseBody
     @ApiOperation(value = "Download model summary")
-    public Boolean downloadModelSummary(@PathVariable String customerSpace) {
+    public Boolean downloadModelSummary(@PathVariable String customerSpace,
+            @RequestBody(required = false) Map<String, String> modelApplicationIdToEventColumn) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         log.info(String.format("Download model summary for tenant %s", customerSpace));
         try {
-            return modelSummaryService.downloadModelSummary(customerSpace);
+            return modelSummaryService.downloadModelSummary(customerSpace, modelApplicationIdToEventColumn);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return false;

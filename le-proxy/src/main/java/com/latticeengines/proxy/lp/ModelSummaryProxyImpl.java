@@ -44,6 +44,15 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
 
     @Override
     @SuppressWarnings("unchecked")
+    public boolean downloadModelSummary(String customerSpace, Map<String, String> modelApplicationIdToEventColumn) {
+        String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/downloadmodelsummary",
+                shortenCustomerSpace(customerSpace));
+
+        return post("download model summary", url, modelApplicationIdToEventColumn, Boolean.class);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public Map<String, ModelSummary> getEventToModelSummary(String customerSpace,
             Map<String, String> modelApplicationIdToEventColumn) {
         String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/geteventtomodelsummary",

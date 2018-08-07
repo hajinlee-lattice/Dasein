@@ -38,8 +38,8 @@ public class ModelSummaryDownloadFlag implements HasPid {
     private Date markTime;
 
     @JsonProperty("exclude_tenant_id")
-    @Column(name = "Excldue_Tenant_ID")
-    private String excldueTenantID;
+    @Column(name = "EXCLUDE_TENANT_ID")
+    private String excludeTenantID;
 
     @Override
     public Long getPid() {
@@ -67,7 +67,11 @@ public class ModelSummaryDownloadFlag implements HasPid {
         this.markTime = markTime;
     }
 
-    public void setExcldueTenantID(String tenantId) { this.excldueTenantID = tenantId; }
+    public void setExcludeTenantID(String tenantId) {
+        this.excludeTenantID = tenantId;
+    }
 
-    public String getExcldueTenantID() { return excldueTenantID; }
+    public String getExcludeTenantID() {
+        return excludeTenantID;
+    }
 }

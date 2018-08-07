@@ -36,9 +36,11 @@ public interface ModelSummaryService {
 
     List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
 
-    public void updateLastUpdateTime(String modelId);
+    void updateLastUpdateTime(String modelId);
 
-    Boolean downloadModelSummary(String tenantId);
+    boolean downloadModelSummary(String tenantId);
+
+    boolean downloadModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn);
 
     Set<String> getModelSummaryIds();
 

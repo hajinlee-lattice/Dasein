@@ -57,7 +57,7 @@ public class ModelSummaryDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<Mod
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void addExcludeFlag(String tenantId) {
         ModelSummaryDownloadFlag flag = new ModelSummaryDownloadFlag();
-        flag.setExcldueTenantID(tenantId);
+        flag.setExcludeTenantID(tenantId);
         flag.setMarkTime(new Date(System.currentTimeMillis()));
         log.info(String.format("Set model summary exclude flag for tenant %s by entityMgr.", tenantId));
         modelSummaryDownloadFlagDao.create(flag);

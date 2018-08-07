@@ -402,7 +402,22 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public Boolean downloadModelSummary(String tenantId) {
+    public boolean downloadModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn) {
+        boolean result = downloadModelSummary(tenantId);
+        if (!result) {
+            try {
+                getEventToModelSummary(modelApplicationIdToEventColumn);
+                return true;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean downloadModelSummary(String tenantId) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
@@ -430,6 +445,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         try {
             result = callable.call();
         } catch (Exception e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
 

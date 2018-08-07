@@ -29,5 +29,8 @@ public interface ModelSummaryProxy {
 
     boolean downloadModelSummary(String customerSpace);
 
-    Map<String, ModelSummary> getEventToModelSummary(String customerSpace, Map<String, String> modelApplicationIdToEventColumn);
+    boolean downloadModelSummary(String customerSpace, Map<String, String> modelApplicationIdToEventColumn);
+
+    Map<String, ModelSummary> getEventToModelSummary(String customerSpace,
+            Map<String, String> modelApplicationIdToEventColumn);
 }
