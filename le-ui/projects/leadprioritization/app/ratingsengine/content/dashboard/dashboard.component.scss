@@ -83,6 +83,9 @@
         background-repeat: no-repeat;
         background-position: center center;
     }
+    .fa-clock-o {
+        color: orange;
+    }
     &.CUSTOM_EVENT {
         .content {
             dt {
@@ -105,6 +108,16 @@
         td:last-of-type {
             button:last-of-type {
                 margin-left: 8px;
+            }
+        }
+        .tooltip_ {
+            width: auto;
+            text-transform: none;
+            .cover {
+                padding: 8px
+            }
+            p {
+                font-size: 11px;
             }
         }
     }
