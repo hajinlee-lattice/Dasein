@@ -16,7 +16,8 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 
 @Component("modelSummaryDownloadFlagDao")
-public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDownloadFlag> implements ModelSummaryDownloadFlagDao {
+public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDownloadFlag>
+        implements ModelSummaryDownloadFlagDao {
     @Override
     protected Class<ModelSummaryDownloadFlag> getEntityClass() {
         return ModelSummaryDownloadFlag.class;
@@ -28,7 +29,8 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
         String msFlagTable = entityClz.getAnnotation(Table.class).name();
-        String sqlStr = String.format("SELECT msFlag.Tenant_ID FROM %s as msFlag WHERE msFlag.Tenant_ID IS NOT NULL GROUP BY msFlag.Tenant_ID",
+        String sqlStr = String.format(
+                "SELECT msFlag.Tenant_ID FROM %s as msFlag WHERE msFlag.Tenant_ID IS NOT NULL GROUP BY msFlag.Tenant_ID",
                 msFlagTable);
         SQLQuery sqlQuery = session.createSQLQuery(sqlStr).addScalar("Tenant_ID", new StringType());
         List<String> list = sqlQuery.list();
@@ -45,9 +47,10 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
         String msFlagTable = entityClz.getAnnotation(Table.class).name();
-        String sqlStr = String.format("SELECT msFlag.Excldue_Tenant_ID FROM %s as msFlag WHERE msFlag.Excldue_Tenant_ID IS NOT NULL GROUP BY msFlag.Excldue_Tenant_ID",
+        String sqlStr = String.format(
+                "SELECT msFlag.EXCLUDE_TENANT_ID FROM %s as msFlag WHERE msFlag.EXCLUDE_TENANT_ID IS NOT NULL GROUP BY msFlag.EXCLUDE_TENANT_ID",
                 msFlagTable);
-        SQLQuery sqlQuery = session.createSQLQuery(sqlStr).addScalar("Excldue_Tenant_ID", new StringType());
+        SQLQuery sqlQuery = session.createSQLQuery(sqlStr).addScalar("EXCLUDE_TENANT_ID", new StringType());
         List<String> list = sqlQuery.list();
         if (list.size() == 0) {
             return null;
@@ -61,8 +64,7 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
         Timestamp timeLimit = new Timestamp(timeTicks);
-        String queryStr = String.format("delete from %s where MARK_TIME < :timeLimit",
-                entityClz.getSimpleName());
+        String queryStr = String.format("delete from %s where MARK_TIME < :timeLimit", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("timeLimit", timeLimit);
         query.executeUpdate();
@@ -72,7 +74,7 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
     public void deleteExcludeFlag(String tenantId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
-        String queryStr = String.format("delete from %s where Excldue_Tenant_ID = :excludeTenantId",
+        String queryStr = String.format("delete from %s where EXCLUDE_TENANT_ID = :excludeTenantId",
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("excludeTenantId", tenantId);
