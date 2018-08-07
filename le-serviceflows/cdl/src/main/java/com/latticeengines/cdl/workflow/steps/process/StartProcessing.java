@@ -136,6 +136,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
+        putLongValueInContext(PA_TIMESTAMP, System.currentTimeMillis());
 
         // get current active collection status
         DataCollectionStatus detail = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
@@ -144,6 +145,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         detail.setApsRollingPeriod(configuration.getApsRollingPeriod());
         log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(detail));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
+        generateDateValueForCollectionDetail(detail);
 
         createReportJson();
         setupInactiveVersion();
@@ -406,6 +408,22 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
         log.info("Removing stats in " + inactiveVersion);
         dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
+    }
+
+    private void generateDateValueForCollectionDetail(DataCollectionStatus detail) {
+        Long PATime = getLongValueFromContext(PA_TIMESTAMP);
+        Map<Category, Long> dateMap = new HashMap<>();
+        detail.setDateMap(dateMap);
+        dateMap.put(Category.FIRMOGRAPHICS, PATime);
+        dateMap.put(Category.GROWTH_TRENDS, PATime);
+        dateMap.put(Category.INTENT, PATime);
+        dateMap.put(Category.ONLINE_PRESENCE, PATime);
+        dateMap.put(Category.TECHNOLOGY_PROFILE, PATime);
+        dateMap.put(Category.WEBSITE_KEYWORDS, PATime);
+        dateMap.put(Category.WEBSITE_PROFILE, PATime);
+        dateMap.put(Category.ACCOUNT_ATTRIBUTES, PATime);
+        dateMap.put(Category.CONTACT_ATTRIBUTES, PATime);
+
     }
 
     public static class RebuildEntitiesProvider {

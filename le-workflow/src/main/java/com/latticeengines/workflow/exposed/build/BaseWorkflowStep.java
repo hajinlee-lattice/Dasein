@@ -115,6 +115,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
     protected static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";
+    protected static final String PA_TIMESTAMP = "PA_TIMESTAMP";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -202,6 +203,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         this.detail.setApsRollingPeriod(apsRollupPeriod);
     }
 
+    @JsonProperty("DateMap")
+    public Map getDateMap() {
+        return this.detail.getDateMap();
+    }
+
+    @JsonProperty("DateMap")
+    public void setDateMap(Map<Category, Long> dateMap) {
+        this.detail.setDateMap(dateMap);
+    }
+
     private static class DataCollectionStatusDetail implements Serializable {
         private static final long serialVersionUID = -6030795342397598056L;
         @JsonProperty("MinTxnDate")
@@ -220,6 +231,8 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         private Long transactionCount = 0L;
         @JsonProperty("ApsRollingPeriod")
         private String apsRollingPeriod;
+        @JsonProperty("DateMap")
+        Map<Category, Long> dateMap;
 
         public Integer getMinTxnDate() {
             return minTxnDate;
@@ -284,6 +297,15 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         public void setApsRollingPeriod(String apsRollingPeriod) {
             this.apsRollingPeriod = apsRollingPeriod;
         }
+
+        public Map<Category, Long> getDateMap() {
+            return dateMap;
+        }
+
+        public void setDateMap(Map<Category, Long> dateMap) {
+            this.dateMap = dateMap;
+        }
+
     }
 
 }
