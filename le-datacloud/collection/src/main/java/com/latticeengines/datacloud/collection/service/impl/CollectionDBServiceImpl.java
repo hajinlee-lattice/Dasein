@@ -96,8 +96,10 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         List<RawCollectionRequest> rawReqs = rawCollectionRequestService.getNonTransferred();
         BitSet filter = collectionRequestService.addNonTransferred(rawReqs);
         rawCollectionRequestService.updateTransferredStatus(rawReqs, filter, deleteFilteredReqs);
-        log.info("TRANSFER_RAW_COLLECTION_REQ=" + rawReqs.size() + "," + filter.size());
-        log.info("CREATE_COLLECTION_REQ=" + (rawReqs.size() - filter.size()));
+        if (rawReqs.size() > 0) {
+            log.info("TRANSFER_RAW_COLLECTION_REQ=" + rawReqs.size() + "," + filter.cardinality());
+            log.info("CREATE_COLLECTION_REQ=" + (rawReqs.size() - filter.cardinality()));
+        }
 
         return rawReqs.size() - filter.cardinality();
     }
@@ -274,7 +276,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             ++spawnedTasks;
         }
-        log.info("SPAWN_COLLECTION_WORKER=" + spawnedTasks);
+        if (spawnedTasks > 0)
+            log.info("SPAWN_COLLECTION_WORKER=" + spawnedTasks);
 
         return spawnedTasks;
     }
@@ -477,7 +480,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             }
         }
 
-        log.info("COLLECTION_WORKER_STOPPED=" + stoppedTasks + "," + failedTasks);
+        if (stoppedTasks > 0)
+            log.info("COLLECTION_WORKER_STOPPED=" + stoppedTasks + "," + failedTasks);
 
         return stoppedTasks;
     }
