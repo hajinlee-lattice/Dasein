@@ -19,7 +19,8 @@ angular.module('common.modal', [])
                 name: "generic_warning",
                 title: "Application Warning",
                 confirmcolor: "yellow-button",
-                headerconfig: { "background-color":"#ffbd48", "color":"white" }
+                headerconfig: { "background-color":"#ffbd48", "color":"white" },
+                showcancel: true
             },
             success: {
                 name: "generic_success",

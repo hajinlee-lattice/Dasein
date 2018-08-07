@@ -4,6 +4,9 @@ var mainApp = angular.module('insightsApp', [
     'ui.router',
     'ui.bootstrap',
 
+    'common.modal',
+    'common.banner',
+    'common.notice',
     'common.exceptions',
     'common.datacloud',
     'common.utilities.SessionTimeout',

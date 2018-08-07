@@ -37,17 +37,27 @@ angular
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('ServiceErrorInterceptor');
 })
-.service('ServiceErrorUtility', function(Banner, Modal, Notice) {
+.service('ServiceErrorUtility', function($timeout, Banner, Modal, Notice) {
     this.check = function (response) {
-        return (response && response.data && (response.data.error || response.data.error_description || response.data.errorMsg || response.data.errorMsg));
+        if (!response || !response.data) {
+            return false;
+        }
+
+        var uiErrorCheck = !!(response.error || response.error_description || response.errorMsg);
+        var uiActionCheck = !!(response.data && response.data.UIAction);
+
+        return uiErrorCheck || uiActionCheck;
     };
 
     this.process = function (response) {
         if (this.check(response)) {
             var config = response.config || { headers: {} },
                 params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),
-                method = params[0];
+                payload = response.data,
+                uiAction = payload ? payload.UIAction : {},
+                method = (uiAction.view || params[0]).toLowerCase();
             
+            //console.log('-!- exceptions process:', method, uiAction, payload);
             switch (method) {
                 case 'none': break;
                 case 'popup': this.show(Modal, response); break;
@@ -65,23 +75,25 @@ angular
             return;
         }
 
-        var data = response.data,
+        var payload = response.data,
+            uiAction = payload.UIAction || {},
+            type = (uiAction.status || 'error').toLowerCase(),
             http_err = response.statusText,
             http_code = response.status,
-            ledp_code = data.errorCode || data.error,
-            desc = data.errorMsg || data.error_description,
-            url = response.config.url;
+            url = response.config.url,
+            title = uiAction.title || (http_code + ' "' + http_err + '" ' + url),
+            message = uiAction.message || payload.errorMsg || payload.error_description;
 
-        Service.error({
-            title: http_code + ' "' + http_err + '" ' + url,
-            message: desc,
-        });
+        console.log('-!- exceptions show:', type, title, message, Service);
+        $timeout(function() {
+            Service[type]({ title: title, message: message });
+        }, 1);
     };
 
     this.hideBanner = function() {
         Banner.reset();
     };
 })
-.controller('ServiceErrorController', function ($scope, ResourceUtility) {
+.controller('ServiceErrorController', function($scope, ResourceUtility) {
     $scope.ResourceUtility = ResourceUtility;
 });

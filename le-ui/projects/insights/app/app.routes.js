@@ -34,13 +34,15 @@ angular.module('insightsApp')
                 }
             },
             views: {
+                "banner": "bannerMessage",
+                "notice": "noticeMessage",
                 "main": {
                     controller: function($state, AuthStore, LookupStore, FeatureFlagService, ApiHost) {
                         parent.postMessage("init", '*');
 
-                        console.log('### insightsApp: initialized, waiting for postMessage()')
+                        console.log('### insightsApp: initialized, waiting for postMessage()');
                         window.addEventListener("message", function (event){
-                            console.log('### insightsApp: received postMessage() event',event)
+                            console.log('### insightsApp: received postMessage() event',event);
                             var data = ((typeof event.data).toLowerCase() == 'string')
                                 ? JSON.parse(event.data)
                                 : event.data;

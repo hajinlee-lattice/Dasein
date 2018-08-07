@@ -65,14 +65,10 @@ angular.module('common.attributes')
         return this.accesslevel;
     };
 
-    this.getModal = function() {
-        return Modal.get('attribute_admin_save');
-    };
-
     this.modalCallback = function(args) {
         var modal = Modal.get(args.name);
         var ret = true;
-
+console.log('modalCallback', args, modal);
         switch (args.action) {
             case "closedForced": 
                 break;
@@ -85,7 +81,9 @@ angular.module('common.attributes')
                 modal.disableDischargeButton(true);
             
                 store.saveConfig().then(function(result) {
-                    Modal.modalRemoveFromDOM(modal, args);
+                    if (modal && modal.name == 'AttrAdmin_Warning') {
+                        Modal.modalRemoveFromDOM(modal, args);
+                    }
                 });
 
                 ret = false;
@@ -268,12 +266,12 @@ angular.module('common.attributes')
 
         Modal.warning({
             title: "Save before leaving?",
-            message: "The changes you've' made won't apply to the system until you save them.  Are you sure you want to leave the page without saving?",
+            message: "The changes you have made won't apply to the system until you save them.  Are you sure you want to leave the page without saving?",
             confirmtext: 'Yes, discard changes'
         }, function(opts) {
             switch (opts.action) {
-                case "ok": deferred.resolve(true); break;
                 case "cancel": deferred.reject("user cancelled action"); HideSpinner(); break;
+                default: deferred.resolve(true); 
             }
 
             return true;
