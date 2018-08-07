@@ -1,10 +1,13 @@
 .enrichment-wizard-container {
     padding: 0;
     @media (max-width: 1300px) {
-        padding: 0 2.12766%;
+        padding: 0 2.52766%;
     }
     &.dashboardrules {
+        max-width: 1200px;
+        padding: 0 2.52766%;
         padding-top: 1.5em;
+        margin: 0 auto;
         .success-message {
             width: auto;
         }
@@ -15,9 +18,12 @@
 }
 .open-nav .enrichment-wizard-container {
     @media (max-width: 1491px) {
-        padding: 0 2.12766%;
+        padding: 0 2.52766%;
     }
     &.dashboard-rules {
+        max-width: 1200px;
+        padding: 0 2.52766%;
+        margin: 0 auto;
         padding-top: 40px;
         &.navigation {
             &:after {
@@ -30,6 +36,9 @@
 }
 .open-nav .enrichment-wizard-container.dashboardrules {
     @media (max-width: 1491px) {
+        max-width: 1200px;
+        padding: 0 2.52766%;
+        margin: 0 auto;
         padding-top: 40px;
         &.navigation {
             &:after {
