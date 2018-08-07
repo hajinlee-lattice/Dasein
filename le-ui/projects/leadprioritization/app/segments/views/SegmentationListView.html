@@ -125,6 +125,14 @@
                         callback="vm.saveNameDescription(obj, newData)">
                     </edit-form>
                 </li>
+                <li class="create-tile" ng-if="vm.segments.length < 1">
+                    <a
+                        class="button new-tile-button"
+                        ng-click="vm.addSegment()">
+                        <span>&#43;</span>
+                        Add Segment
+                    </a>
+                </li>
             </ul>
         </div>
     </div><!-- End .row -->
