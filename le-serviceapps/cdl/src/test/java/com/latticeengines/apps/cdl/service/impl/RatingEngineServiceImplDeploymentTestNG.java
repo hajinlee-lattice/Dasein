@@ -436,7 +436,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         assertTrue(exception);
 
         AIModel aiModel = createAIModel(aiRatingEngine.getActiveModel());
-        ratingEngineService.createModelIteration(aiRatingEngine, aiModel);
+        aiModel = (AIModel) ratingEngineService.createModelIteration(aiRatingEngine, aiModel);
 
         List<RatingModel> ratingModels = getRatingModelsByRatingEngineId(aiRatingEngineId);
         Assert.assertNotNull(ratingModels);
