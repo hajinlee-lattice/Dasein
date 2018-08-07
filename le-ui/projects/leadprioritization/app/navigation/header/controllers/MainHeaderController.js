@@ -152,6 +152,10 @@ angular.module('pd.navigation.header', [
         }
     });
 
+    $scope.mayViewSSOConfig = function() {
+        return BrowserStorageUtility.getClientSession().AvailableRights.PLS_SSO_Config.MayView;
+    }
+
     function createUpdatePasswordSuccessView() {
         $('#mainHeaderView').hide();
         //LoginService.Logout();

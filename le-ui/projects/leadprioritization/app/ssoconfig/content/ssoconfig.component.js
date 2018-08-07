@@ -2,27 +2,28 @@ angular.module('lp.ssoconfig.configure', [])
 .component('ssoConfig', {
     templateUrl: 'app/ssoconfig/content/ssoconfig.component.html',
     controller: function( 
-        $q, $state, $stateParams, $scope, $location, $timeout, SSOConfigStore, ImportStore, Banner) 
+        $q, $state, $stateParams, $scope, $location, $timeout, BrowserStorageUtility, SSOConfigStore, ImportStore, Banner) 
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve,
             SSOConfiguration = resolve.SSOConfiguration,
             ServiceProviderURLs = resolve.ServiceProviderURLs;
 
-        console.log(SSOConfiguration);
         angular.extend(vm, {
-            isConfigured: SSOConfiguration && typeof SSOConfiguration.errorCode == 'undefined',
+            configuration: SSOConfiguration,
+            canEdit: BrowserStorageUtility.getClientSession().AvailableRights.PLS_SSO_Config.MayEdit,
+            isConfigured: SSOConfiguration && typeof SSOConfiguration.config_id != 'undefined',
             configId: SSOConfiguration ? SSOConfiguration.config_id : '',
             samlVersion: 'n/a',
             status: 'n/a',
             metadataUploadDate: 'n/a',
             metadataXMLLabel: 'n/a',
             metadata: {},
-            startURL: ServiceProviderURLs['assertionConsumerServiceURL'] ? ServiceProviderURLs['assertionConsumerServiceURL'] :'http://app.lattice-engines.com/sso',
-            acsURL: ServiceProviderURLs['assertionConsumerServiceURL'] ? ServiceProviderURLs['assertionConsumerServiceURL'] :'http://app.lattice-engines.com/sso',
-            entityID: ServiceProviderURLs['serviceProviderEntityId'] ? ServiceProviderURLs['serviceProviderEntityId'] :'http://app.lattice-engines.com/sso',
+            startURL: ServiceProviderURLs['assertionConsumerServiceURL'],
+            acsURL: ServiceProviderURLs['assertionConsumerServiceURL'],
+            entityID: ServiceProviderURLs['serviceProviderEntityId'],
             logoutURL: 'http://app.lattice-engines.com/logoutApp',
-            iconURL: $location.protocol() + "://" + location.host + '/images/logo-lattice-color.png',
+            iconURL: '',
             uploading: false,
             canSubmit: false,
             isValidMetadata: false,
@@ -35,14 +36,17 @@ angular.module('lp.ssoconfig.configure', [])
         });
 
         vm.init = function() {
-            vm.setConfigTable();
+            var parser = document.createElement('a');
+            parser.href = vm.startURL;
+            vm.iconURL = parser.protocol + '//' + parser.hostname + '/images/lattice-logo.png';
+            vm.setConfigTable(vm.configuration);
         }
 
-        vm.setConfigTable = function() {
-            if (vm.configId) {
+        vm.setConfigTable = function(configuration) {
+            if (vm.isConfigured) {
                 vm.samlVersion = 'V 2.0';
                 vm.status = 'Success';
-                vm.metadataUploadDate = SSOConfiguration.created;
+                vm.metadataUploadDate = configuration.created;
                 vm.metadataXMLLabel = 'Download File'
             }
         }
@@ -60,7 +64,7 @@ angular.module('lp.ssoconfig.configure', [])
             var data, filename, link;
             filename = 'metadata.xml';
 
-            var xml = SSOConfiguration.metadata;
+            var xml = vm.configuration.metadata;
             if (!xml.match(/^data:text\/xml/i)) {
                 xml = 'data:text/xml;charset=utf-8,' + xml;
             }
@@ -107,7 +111,7 @@ angular.module('lp.ssoconfig.configure', [])
                 vm.isValidMetadata = vm.canSubmit = validation.valid;
                 vm.metadata = validation.valid ? config : {}; 
                 if (!validation.valid) {
-                    Banner.error({title: 'Validation Error', message: validation.exceptionMessage});
+                    Banner.error({message: "Failed! Your metadata has unexpected errors"});
                 }
                 deferred.resolve(validation.valid);
             });
@@ -118,20 +122,36 @@ angular.module('lp.ssoconfig.configure', [])
             if (vm.configId && vm.isValidMetadata) {
                 SSOConfigStore.deleteSAMLConfig(vm.configId).then(function(result) {
                     SSOConfigStore.createSAMLConfig(vm.metadata).then(function(result) {
-                        console.log(result);
                         if (typeof result.errorCode == 'undefined') {
                             Banner.success({title: 'Success!', message: 'Your SAML is configured.'});
                         }
+                        vm.updateConfigTable();
                     });
                 });
             } else {
                 SSOConfigStore.createSAMLConfig(vm.metadata).then(function(result) {
-                    console.log(result);
                     if (typeof result.errorCode == 'undefined') {
-                        Banner.success({title: 'Success!', message: 'Your SAML is configured.'});
+                        Banner.success({title: 'Success!', message: 'Your SAML is configured.'});    
                     }
+                    vm.updateConfigTable();
                 });
             }
+        }
+
+        vm.updateConfigTable = function() {
+            SSOConfigStore.getSAMLConfig().then(function(result) {
+                vm.isConfigured = result && typeof result.config_id != 'undefined';
+                vm.configId = vm.isConfigured ? result.config_id : '';
+                vm.configuration = result ? result : {};
+                if (vm.configId) {
+                    vm.setConfigTable(result);
+                } else {
+                    vm.samlVersion = 'V 2.0';
+                    vm.status = 'Failed';
+                    vm.metadataUploadDate = result && result.created ? result.created : 'n/a';
+                    vm.metadataXMLLabel = result && result.metadata ? 'Download File' : 'n/a';
+                }
+            });
         }
 
         vm.init();

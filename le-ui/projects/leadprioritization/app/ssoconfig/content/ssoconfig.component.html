@@ -36,32 +36,32 @@
 		<table class="service-provider-table">
 		  	<tbody>
 			  <tr>
-			    <td class="saml-url"> Start URL: <span id="startURL"> {{$ctrl.startURL}} </span> </td>
+			    <td class="saml-url"> Start URL: <span id="startURL">{{$ctrl.startURL}}</span> </td>
 			    <td> 
 			    	<button class="button orange-button" ng-click="$ctrl.copyLink('startURL')"> Copy Link </button>
 
 			     </td>
 			  </tr>
 			  <tr>
-			    <td class="saml-url"> ACS URL: <span id="acsURL"> {{$ctrl.acsURL}} </span> </td>
+			    <td class="saml-url"> ACS URL: <span id="acsURL">{{$ctrl.acsURL}}</span> </td>
 			    <td> 
 			    	<button class="button orange-button" ng-click="$ctrl.copyLink('acsURL')"> Copy Link </button>
 			     </td>
 			  </tr>
-			  <tr>
-			    <td class="saml-url"> Logout URL: <span id="logoutURL"> {{$ctrl.logoutURL}} </span> </td>
+<!-- 			  <tr>
+			    <td class="saml-url"> Logout URL: <span id="logoutURL">{{$ctrl.logoutURL}}</span> </td>
 			    <td> 
 			    	<button class="button orange-button" ng-click="$ctrl.copyLink('logoutURL')"> Copy Link </button>
 			     </td>
-			  </tr>
+			  </tr> -->
 			  <tr>
-			    <td class="saml-url"> Icon URL: <span id="iconURL"> {{$ctrl.iconURL}} </span></td>
+			    <td class="saml-url"> Icon URL: <span id="iconURL">{{$ctrl.iconURL}}</span></td>
 			    <td> 
 			    	<button class="button orange-button" ng-click="$ctrl.copyLink('iconURL')"> Copy Link </button>
 			     </td>
 			  </tr>
 			  <tr>
-			    <td class="saml-url"> Entity ID: <span id="entityID"> {{$ctrl.entityID}} </span> </td>
+			    <td class="saml-url"> Entity ID: <span id="entityID">{{$ctrl.entityID}}</span> </td>
 			    <td> 
 			    	<button class="button orange-button" ng-click="$ctrl.copyLink('entityID')"> Copy Link </button>
 			     </td>
@@ -69,32 +69,34 @@
 			</tbody>
 		</table>
 	</div>
-	<div>
-		<h5> Step 2: Upload Metadata </h5>
-		<div class="upload-container row">
-			<div class="upload-title" ng-class="{'touched': $ctrl.isTouched}">
-				Upload SAML Metadata
-			</div>
-			<div 
-				file-uploader-container
-				params="$ctrl.params"
-				input-name="csvFileName"
-				file-accept=".xml"
-				file-select="$ctrl.fileSelect(fileName)"
-				file-load="$ctrl.fileLoad(headers)"
-				file-done="$ctrl.fileDone(result)"
-				file-cancel="$ctrl.fileCancel()"
-				file-validation="$ctrl.fileValidation(result)"
-				class="form-group file-upload" 
-				default-message="'Example: metadata.xml'"
-				read-only="true"
-				ng-class="{ 'has-error' : false }"
-				>
+	<div ng-if="$ctrl.canEdit">
+		<div>
+			<h5> Step 2: Upload Metadata </h5>
+			<div class="upload-container row">
+				<div class="upload-title" ng-class="{'touched': $ctrl.isTouched}">
+					Upload SAML Metadata
+				</div>
+				<div 
+					file-uploader-container
+					params="$ctrl.params"
+					input-name="csvFileName"
+					file-accept=".xml"
+					file-select="$ctrl.fileSelect(fileName)"
+					file-load="$ctrl.fileLoad(headers)"
+					file-done="$ctrl.fileDone(result)"
+					file-cancel="$ctrl.fileCancel()"
+					file-validation="$ctrl.fileValidation(result)"
+					class="form-group file-upload" 
+					default-message="'Example: metadata.xml'"
+					read-only="true"
+					ng-class="{ 'has-error' : false }"
+					>
+				</div>
 			</div>
 		</div>
-	</div>
-	<div>
-		<button class="button blue-button" ng-disabled="!$ctrl.canSubmit" ng-click="$ctrl.submitMetadata()"> Configure Metadata </button>
+		<div>
+			<button class="button blue-button" ng-disabled="!$ctrl.canSubmit" ng-click="$ctrl.submitMetadata()"> Configure Metadata </button>
+		</div>
 	</div>
 
 </section>

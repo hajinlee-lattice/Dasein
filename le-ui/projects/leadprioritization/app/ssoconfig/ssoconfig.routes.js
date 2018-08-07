@@ -6,9 +6,11 @@ angular
     $stateProvider
         .state('home.ssoconfig', {
             url: '/ssoconfig',
-            // onEnter: ['AuthorizationUtility', function(AuthorizationUtility) {
-            //     AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.adminsOnly, {}, 'home');
-            // }],
+            onEnter: ['BrowserStorageUtility', function(BrowserStorageUtility) {
+                if (!BrowserStorageUtility.getClientSession().AvailableRights.PLS_SSO_Config.MayView) {
+                    $state.go("home");
+                }
+            }],
             params: {
                 pageIcon: 'ico-cog',
                 pageTitle: 'SSO Configuration'

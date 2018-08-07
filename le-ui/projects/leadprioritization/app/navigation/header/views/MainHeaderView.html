@@ -57,7 +57,7 @@
                                 {{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}
                             </a>
                         </li>
-                        <li>
+                        <li ng-if="mayViewSSOConfig">
                             <a ui-sref="home.ssoconfig">
                                 SSO Settings
                             </a>
