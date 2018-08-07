@@ -171,12 +171,30 @@ public class CDLJobServiceImpl implements CDLJobService {
         List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds();
         log.info(String.format("data feeds count: %d", allDataFeeds.size()));
 
+        long currentTimeMillis = System.currentTimeMillis();
+        Date currentTime = new Date(currentTimeMillis);
+        log.info(String.format("current time: %s", currentTime.toString()));
+
+
         int runningProcessAnalyzeJobs = 0;
         for (SimpleDataFeed dataFeed : allDataFeeds) {
+            Tenant tenant = dataFeed.getTenant();
             if (dataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
-                Tenant tenant = dataFeed.getTenant();
                 log.info(String.format("ProcessAnalyzing tenant : %s", tenant.getId()));
                 runningProcessAnalyzeJobs++;
+            } else if (dataFeed.getStatus() == DataFeed.Status.Active &&
+                    (dataFeed.getNextInvokeTime() == null || dataFeed.getNextInvokeTime().before(currentTime))) {
+                log.info(String.format("Need update next invoke time for %s.", tenant.getId()));
+                MultiTenantContext.setTenant(tenant);
+                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
+                Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
+                if (invokeTime != null) {
+                    try {
+                        dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
+                    } catch (Exception e) {
+                        log.error(String.format("Update next invoke time for %s failed. Error: %s", tenant.getId(), e.getMessage()));
+                    }
+                }
             }
         }
 
@@ -185,30 +203,13 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
 
         List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
-        long currentTimeMillis = System.currentTimeMillis();
-        log.info(String.format("current time: %s", (new Date(currentTimeMillis)).toString()));
-
         for (SimpleDataFeed dataFeed : allDataFeeds) {
-            if (dataFeed.getStatus() != DataFeed.Status.Active) {
-                continue;
-            }
-
-            Tenant tenant = dataFeed.getTenant();
-            MultiTenantContext.setTenant(tenant);
-            log.info(String.format("tenant: %s", tenant.getId()));
-            CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-            Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
-            if (invokeTime!= null) {
-                if (dataFeed.getNextInvokeTime() == null || !dataFeed.getNextInvokeTime().equals(invokeTime)) {
-                    try {
-                        log.info(String.format("update next invoke time for s%.", tenant.getId()));
-                        dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
-                    } catch (Exception e) {
-                        log.error(String.format("update next invoke time for s% failed.", tenant.getId()));
-                        log.error(e.getMessage());
-                    }
-                }
-                if (currentTimeMillis > invokeTime.getTime()) {
+            if (dataFeed.getStatus() == DataFeed.Status.Active) {
+                Tenant tenant = dataFeed.getTenant();
+                MultiTenantContext.setTenant(tenant);
+                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
+                Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
+                if (invokeTime != null && currentTimeMillis > invokeTime.getTime()) {
                     log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
                     list.add(new HashMap.SimpleEntry<>(invokeTime,
                             new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
