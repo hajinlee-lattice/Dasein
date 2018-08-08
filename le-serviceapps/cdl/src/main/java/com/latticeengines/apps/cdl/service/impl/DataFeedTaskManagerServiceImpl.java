@@ -387,6 +387,17 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             if (CollectionUtils.isEmpty(attrConfigs)
                     || templateTable == null
                     || CollectionUtils.isEmpty(templateTable.getAttributes())) {
+                if (CollectionUtils.isEmpty(attrConfigs)) {
+                    log.info(String.format("Attr config setting is empty for tenant %s", customerSpace.toString()));
+                }
+                if (templateTable == null) {
+                    log.info(String.format("Template table is empty for tenant %s, entity %s",
+                            customerSpace.toString(), entity));
+                }
+                if (CollectionUtils.isEmpty(templateTable.getAttributes())) {
+                    log.info(String.format("Template table does not contain any attributes, tenant %s, entity %s",
+                            customerSpace.toString(), entity));
+                }
                 return;
             }
             List<AttrConfig> originalAttrConfigs = attrConfigEntityMgr.findAllForEntity(customerSpace.getTenantId(),
@@ -410,11 +421,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             while (attrConfigIterator.hasNext()) {
                 AttrConfig attrConfig = attrConfigIterator.next();
                 if (originalAttrConfigMap.containsKey(attrConfig.getAttrName())) {
+                    log.info(String.format("Remove attr config %s", attrConfig.getAttrName()));
                     attrConfigIterator.remove();
                 }
             }
-
-            attrConfigEntityMgr.save(customerSpace.getTenantId(), BusinessEntity.getByName(entity), attrConfigs);
+            log.info(String.format("Save AttrConfigs with size %d", attrConfigs.size()));
+            List<AttrConfig> savedAttrConfigs = attrConfigEntityMgr.save(customerSpace.getTenantId(),
+                    BusinessEntity.getByName(entity), attrConfigs);
+            log.info(String.format("Saved AttrConfigs size %d", savedAttrConfigs.size()));
         } catch (Exception e) {
             log.error("We cannot auto set the AttrConfig for import, please set AttrConfig manually!");
         }
