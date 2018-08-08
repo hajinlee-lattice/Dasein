@@ -155,6 +155,22 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         }
         return LPASelected;
     };
+
+    $scope.changeTenantType = function() {
+        if ($scope.selectedProductNames.indexOf("Customer Growth") >= 0) {
+            $scope.selectedFeatureFlags.forEach(function(flag) {
+                if (flag.DisplayName == 'AllowAutoSchedule') {
+                    flag.Value = setAutoSchedulingFlagValue();
+                }
+            })
+        }
+    }
+
+    function setAutoSchedulingFlagValue() {
+        return $scope.tenantInfo.properties.tenantType == "CUSTOMER" && 
+                                    $scope.selectedProductNames.length == 2 && $scope.selectedProductNames.indexOf("Lead Prioritization 3.0") >= 0 &&
+                                    $scope.selectedProductNames.indexOf("Customer Growth") >= 0;
+    }
     
     function getSelecetedFeatureFlags(selectedProducts) {
         var featureFlags = [];
@@ -164,6 +180,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 if (!flagNames.includes(flag.DisplayName)) {
                     featureFlags.push(flag);
                     flagNames.push(flag.DisplayName);
+                }
+                if (flag.DisplayName === "AllowAutoSchedule") {
+                    flag.Value = setAutoSchedulingFlagValue();
                 }
             });
         });
@@ -267,8 +286,6 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 } catch (err) {
                     $scope.selectedFeatureFlagMap = "";
                 }
-                console.log($scope.selectedFeatureFlagMap);
-                console.log($scope.featureFlagDefinitions);
                 constructSelectedFeatureFlagsInViewPage();
 
                 ServiceService.GetRegisteredServices().then( function(result2) {
