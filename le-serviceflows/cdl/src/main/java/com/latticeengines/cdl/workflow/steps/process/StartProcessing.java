@@ -144,8 +144,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         detail.setEvaluationDate(evaluationDate);
         detail.setApsRollingPeriod(configuration.getApsRollingPeriod());
         log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(detail));
-        putObjectInContext(CDL_COLLECTION_STATUS, detail);
         generateDateValueForCollectionDetail(detail);
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
 
         createReportJson();
         setupInactiveVersion();
