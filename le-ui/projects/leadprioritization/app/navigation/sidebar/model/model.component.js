@@ -17,7 +17,8 @@ angular
         stateParams: $stateParams,
         StateHistory: StateHistory,
         model: Model,
-        ratingEngine: RatingEngine
+        ratingEngine: RatingEngine,
+        isActiveModel: false
     });
 
     vm.init = function() {
@@ -27,17 +28,14 @@ angular
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
         vm.Uploaded = Model.ModelDetails.Uploaded;
         vm.HasRatingsAvailable = HasRatingsAvailable;
-
-        console.log(vm.model);
-        console.log(vm.ratingEngine);
+        
 
         var engineId = vm.ratingEngine.id,
             ratingModelId = vm.model.ModelDetails.Name;
 
         RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
-            vm.isActiveModel = vm.ratingEngine.activeModel.AI.iteration == iteration.AI.iteration ? true : false;
+            vm.isActiveModel = (vm.ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
         });
-
 
 
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {

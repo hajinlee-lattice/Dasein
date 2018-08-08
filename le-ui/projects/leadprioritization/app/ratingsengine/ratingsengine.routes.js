@@ -191,7 +191,7 @@ angular
                         template: '<div id="ModelDetailsArea"></div>'
                     },
                     "navigation@home": {
-                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine, JobStatus) {
+                        controller: function ($scope, $stateParams, $state, $rootScope, RatingsEngineStore, Dashboard, RatingEngine, Model, JobStatus) {
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
@@ -211,9 +211,9 @@ angular
 
                                 $scope.modelingStrategy = RatingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
                             }
+
                             $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
                             $scope.modelIsReady = ((RatingEngine.activeModel[$scope.typeContext].modelSummaryId !== null) || (RatingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined));
-
 
                             $scope.stateName = function () {
                                 return $state.current.name;

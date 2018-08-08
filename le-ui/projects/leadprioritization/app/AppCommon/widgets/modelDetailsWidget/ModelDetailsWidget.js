@@ -51,6 +51,16 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
         }
 
+        if($scope.typeContext == 'AI'){
+            var engineId = $stateParams.rating_id,
+                ratingModelId = data.ModelDetails.Name;
+
+            RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
+                $scope.iteration = iteration.AI;
+                $scope.isActiveModel = (ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
+            });
+        }
+
         $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
         $scope.modelIsReady = ((ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined));
         $scope.activeStatus = ratingEngine.status;
@@ -110,15 +120,13 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             }
 
             if($scope.typeContext == 'AI'){
-
                 var engineId = $stateParams.rating_id,
                     ratingModelId = data.ModelDetails.Name;
 
                 RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
                     $scope.iteration = iteration.AI;
-                    $scope.isActiveModel = ratingEngine.activeModel.AI.iteration == iteration.AI.iteration ? true : false;
+                    $scope.isActiveModel = (ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
                 });
-    
             }
             
             $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;

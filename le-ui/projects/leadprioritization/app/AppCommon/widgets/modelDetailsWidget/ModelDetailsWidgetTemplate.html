@@ -32,7 +32,19 @@
                     <h4>{{ totalIterations }}</h4>
                 </div>
                 <div class="stats stats-group">
-                    <h3>Scoring</h3>
+                    <h3>
+                        Scoring
+                        <span class="more-info show-tooltip top delay">
+                            i
+                            <div class="tooltip_ small">
+                                <div class="cover">
+                                    <p>
+                                        Shows if scoring has been activated and which iteration was selected for it. You can continue to create new iterations while scoring with this iteration until you are ready to switch to a newer one.
+                                    </p>
+                                </div>
+                            </div>
+                        </span>
+                    </h3>
                     <h4>{{ activeStatus }} <span ng-if="!IsRuleBased">( Iteration {{ activeIteration }} )</span></h4>
                     <p>Last data refresh {{ lastRefreshedDate | date }}</p>
                 </div>

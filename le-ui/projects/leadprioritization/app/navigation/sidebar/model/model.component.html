@@ -1,13 +1,15 @@
 <ul class="menu">
-    <li role="presentation" ui-sref-active="active">
-        <a ng-if="!vm.IsRatingEngine" ui-sref="home.models" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_MODELS')}}">
+    <li ng-if="!vm.IsRatingEngine" role="presentation" ui-sref-active="active">
+        <a ui-sref="home.models" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_MODELS')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_MODELS')}}">
                 <span class="ico ico-back no-svg"></span>
             </span>
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_MODELS')}}</span>
             <span class="badge blue-badge pull-right" ng-show="vm.totalmodels">{{vm.totalmodels}}</span>
         </a>
-        <a ng-if="vm.IsRatingEngine" ng-click="vm.goToRatingEngineRoute()">
+    </li>
+    <li ng-if="vm.IsRatingEngine" role="presentation" ui-sref-active="active">
+        <a ng-click="vm.goToRatingEngineRoute()">
             <span 
                 class="ico-container" 
                 data-stooltip="Back to Models">
@@ -24,7 +26,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}</span>
         </a>
     </li>
-    <li ng-if="!vm.IsPmml" role="presentation" ui-sref-active="active">
+    <li ng-if="!vm.IsPmml && !vm.isActiveModel" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.attributes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
                 <span class="ico ico-attributes ico-light-gray"></span>
@@ -32,7 +34,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}</span>
         </a>
     </li>
-    <li ng-if="!vm.IsPmml" role="presentation" ui-sref-active="active">
+    <li ng-if="!vm.IsPmml && !vm.isActiveModel" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.performance" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
                 <span class="ico ico-performance ico-light-gray"></span>
@@ -40,7 +42,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}</span>
         </a>
     </li>
-    <li ng-if="!vm.IsPmml && vm.HasRatingsAvailable && !vm.IsRatingEngine &&  vm.isActiveModel" role="rating" ui-sref-active="active">
+    <li ng-if="!vm.IsPmml && vm.HasRatingsAvailable && !vm.IsRatingEngine" role="rating" ui-sref-active="active">
         <a ui-sref="home.model.ratings" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
                 <span class="ico ico-ratings ico-light-gray"></span>
@@ -56,15 +58,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}</span>
         </a>
     </li>
-    <li ng-if="!vm.IsPmml && !vm.HasRatingsAvailable && vm.isActiveModel" role="rating" ui-sref-active="active">
-        <a ui-sref="home.model.ratings-demo" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
-            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
-                <span class="ico ico-ratings ico-light-gray"></span>
-            </span>
-            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}</span>
-        </a>
-    </li>
-    <li ng-if="vm.showSampleLeads && !vm.IsPmml && vm.isActiveModel" role="presentation" ui-sref-active="active">
+    <li ng-if="vm.showSampleLeads && !vm.IsPmml" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.leads" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}" data-ng-if='vm.sourceType=="SalesforceLead"'>
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}">
                 <span class="ico ico-leads ico-light-gray"></span>
@@ -78,7 +72,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ACCOUNTS')}}</span>
         </a>
     </li>
-    <li ng-if="vm.showModelSummary && !vm.Uploaded" role="presentation" ui-sref-active="active">
+    <li ng-if="vm.showModelSummary && !vm.Uploaded && !vm.isActiveModel" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.summary" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
                 <span class="ico ico-datatable ico-light-gray"></span>
@@ -86,7 +80,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}</span>
         </a>
     </li>
-    <li ng-if="vm.showAlerts && !vm.IsPmml && !vm.IsRatingEngine && vm.isActiveModel" role="presentation" ui-sref-active="active">
+    <li ng-if="vm.showAlerts && !vm.IsPmml && !vm.IsRatingEngine" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.alerts" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}">
                 <span class="ico ico-alerts ico-light-gray"></span>
@@ -94,7 +88,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}</span>
         </a>
     </li>
-    <li role="presentation" ui-sref-active="active" ng-if="!vm.IsRatingEngine && vm.isActiveModel">
+    <li role="presentation" ui-sref-active="active" ng-if="!vm.IsRatingEngine">
         <a ui-sref="home.model.jobs" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}">
                 <span class="ico ico-scoring ico-light-gray"></span>
@@ -110,7 +104,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REVIEW')}}</span>
         </a>
     </li>
-    <li ng-if="vm.showRefineAndClone && !vm.IsPmml && !vm.Uploaded && !vm.IsRatingEngine && vm.isActiveModel" role="presentation" ui-sref-active="active">
+    <li ng-if="vm.showRefineAndClone && !vm.IsPmml && !vm.Uploaded && !vm.IsRatingEngine" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.refine" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}">
                 <span class="ico ico-refine ico-light-gray"></span>
@@ -118,7 +112,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</span>
         </a>
     </li>
-    <li ng-if="vm.canRemodel && !vm.IsRatingEngine && vm.isActiveModel" role="presentation" ui-sref-active="active">
+    <li ng-if="vm.canRemodel && !vm.IsRatingEngine" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.remodel" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REMODEL')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REMODEL')}}">
                 <span class="ico ico-remodel-large ico-light-gray"></span>
@@ -126,7 +120,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REMODEL')}}</span>
         </a>
     </li>
-    <li role="presentation" ui-sref-active="active" ng-if="!vm.IsRatingEngine && vm.isActiveModel">
+    <li role="presentation" ui-sref-active="active" ng-if="!vm.IsRatingEngine">
         <a ui-sref="home.model.notes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
                 <span class="ico ico-notes"></span>

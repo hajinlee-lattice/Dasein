@@ -286,7 +286,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.init = function() {
 
-        console.log(vm.ratingEngine);
+        // console.log(vm.ratingEngine);
         // console.log(vm.modelSummary);
         console.log(vm.dashboard);
 

@@ -117,7 +117,22 @@
                     </dl>
                 </div>
                 <div>
-                    <h3>Ratings <span ng-if="!vm.isRulesBased">( Iteration {{ vm.ratingEngine.activeModel.AI.iteration }} )</span></h3>
+                    <h3>
+                        Ratings 
+                        <span ng-if="!vm.isRulesBased">
+                            ( Iteration {{ vm.ratingEngine.activeModel.AI.iteration }} )
+                            <span class="more-info show-tooltip top delay">
+                                i
+                                <div class="tooltip_ small">
+                                    <div class="cover">
+                                        <p>
+                                            This chart shows the ratings for the iteration selected for scoring (marked as active). It may take a while to update after changing it because the analytics needs to be re-created.
+                                        </p>
+                                    </div>
+                                </div>
+                            </span>
+                        </span>
+                    </h3>
                     <h4 ng-if="vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0 || vm.dashboard.summary.isPublished == false">No Ratings Available</h4>
                     <bar-chart ng-if="vm.dashboard.summary.isPublished"    
                         config="vm.ratingEngine.chartConfig" 
@@ -129,14 +144,15 @@
                     <table class="creation-history">
                         <thead>
                             <tr>
-                                <th class="show-tooltip delay top">
-                                    <div class="tooltip_ small">
-                                        <div class="cover">
-                                            <p>Iteration</p>
+                                <th>
+                                    <span class="show-tooltip delay top">
+                                        Iter.
+                                        <div class="tooltip_ small">
+                                            <div class="cover">
+                                                <p>Iteration</p>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    Iter.
+                                    </span>
                                 </th>
                                 <th>Created</th>
                                 <th>User</th>
@@ -155,9 +171,33 @@
                                     <span ng-if="vm.isIterationActive(iteration.id)">ACTIVE</span>
                                 </td>
                                 <td>
-                                    <span ng-if="iteration.modelingJobStatus === 'Completed'" class="ico ico-check"></span>
-                                    <span ng-if="iteration.modelingJobStatus === 'Failed'" class="ico ico-warning"></span>
-                                    <span ng-if="iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'" class="fa fa-clock-o"></span>
+                                    <span 
+                                        ng-if="iteration.modelingJobStatus === 'Completed'" 
+                                        class="ico ico-check show-tooltip delay top">
+                                        <div class="tooltip_ small">
+                                            <div class="cover">
+                                                <p>Completed</p>
+                                            </div>
+                                        </div>
+                                    </span>
+                                    <span 
+                                        ng-if="iteration.modelingJobStatus === 'Failed'" 
+                                        class="ico ico-warning show-tooltip delay top">
+                                        <div class="tooltip_ small">
+                                            <div class="cover">
+                                                <p>Failed</p>
+                                            </div>
+                                        </div>
+                                    </span>
+                                    <span 
+                                        ng-if="iteration.modelingJobStatus === 'Pending' || iteration.modelingJobStatus === 'Running'" 
+                                        class="fa fa-clock-o show-tooltip delay top">
+                                        <div class="tooltip_ small">
+                                            <div class="cover">
+                                                <p>{{ iteration.modelingJobStatus }}</p>
+                                            </div>
+                                        </div>
+                                    </span>
                                 </td>
                                 <td>
                                     <button 

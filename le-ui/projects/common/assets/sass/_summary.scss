@@ -49,6 +49,9 @@ Page Summary / Sub-Nav Headers
     }
     .stats {
       background: #4BAEB5;
+      .more-info {
+        color: #4BAEB5;
+      }
     }
   }
   &.CROSS_SELL_REPEAT_PURCHASE {
@@ -60,6 +63,9 @@ Page Summary / Sub-Nav Headers
     }
     .stats {
       background: #218F73;
+      .more-info {
+        color: #218F73;
+      }
     }
   }
   &.CUSTOM_EVENT {
@@ -71,6 +77,9 @@ Page Summary / Sub-Nav Headers
     }
     .stats {
       background: #5EA83D;
+      .more-info {
+        color: #5EA83D;
+      }
     }
   }
   &.RULE_BASED {
@@ -109,6 +118,12 @@ Page Summary / Sub-Nav Headers
       color: rgba(255,255,255,0.8);
       text-align: left;
       font-size: 12px;
+      .more-info {
+        padding: 0px 6px;
+        background: rgba(255, 255, 255, 0.8);
+        text-transform: none;
+        color: #fff;
+      }
     }
     h4 {
       width: 100%;
