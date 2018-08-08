@@ -98,6 +98,11 @@
           ul {
             list-style: disc;
             margin-left: 1.2em;
+            margin-bottom: 1em;
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
           }
 
           b, bold {

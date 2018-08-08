@@ -68,7 +68,7 @@ angular.module('common.attributes')
     this.modalCallback = function(args) {
         var modal = Modal.get(args.name);
         var ret = true;
-console.log('modalCallback', args, modal);
+        
         switch (args.action) {
             case "closedForced": 
                 break;

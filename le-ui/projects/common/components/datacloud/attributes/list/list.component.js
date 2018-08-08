@@ -5,7 +5,7 @@ angular.module('common.attributes.list', [])
     bindings: {
         filters: '<'
     },
-    controller: function ($state, $stateParams, AttrConfigStore, BrowserStorageUtility) {
+    controller: function ($state, AttrConfigStore, BrowserStorageUtility) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -23,7 +23,6 @@ angular.module('common.attributes.list', [])
             vm.category = vm.store.get('category');
             vm.data = vm.store.get('data');
             vm.buckets = vm.data.buckets;
-            vm.params = $stateParams;
 
             vm.autoDrillDown();
             vm.parseData();
@@ -34,7 +33,7 @@ angular.module('common.attributes.list', [])
         };
         
         vm.autoDrillDown = function() {
-            if (vm.data.config && vm.data.config.Subcategories.length == 1) {
+            if (vm.data.config && vm.data.config.Subcategories && vm.data.config.Subcategories.length == 1) {
                 vm.go(vm.data.config.Subcategories[0].DisplayName);
             }
         };

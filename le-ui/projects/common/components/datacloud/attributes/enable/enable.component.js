@@ -30,7 +30,7 @@ angular.module('common.attributes.enable', [])
 
                     return deferred.promise;
                 }],
-                config: ['$q', '$stateParams', 'AttrConfigService', 'AttrConfigStore', 'overview', function($q, $stateParams, AttrConfigService, AttrConfigStore, overview) {
+                config: ['$q', '$state', '$stateParams', 'AttrConfigService', 'AttrConfigStore', 'overview', function($q, $state, $stateParams, AttrConfigService, AttrConfigStore, overview) {
                     var deferred = $q.defer();
                     var section = $stateParams.section;
                     var category = $stateParams.category;
@@ -41,8 +41,9 @@ angular.module('common.attributes.enable', [])
                                 return category = key;
                             }
                         });
-
-                        $stateParams.category = category;
+                        
+                        //$state.go('.', { category: category });
+                        //$stateParams.category = category;
                     }
 
                     AttrConfigStore.set('category', category);
@@ -69,7 +70,7 @@ angular.module('common.attributes.enable', [])
         overview: '<',
         config: '<'
     },
-    controller: function($q, AttrConfigStore, Modal) {
+    controller: function($q, $state, AttrConfigStore, Modal) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -77,6 +78,9 @@ angular.module('common.attributes.enable', [])
 
         vm.$onInit = function() {
             vm.categories = vm.overview.AttrNums;
+
+            // var category = vm.store.get('category');
+            // $state.go('.', { category: category }, { reload: false, notify: false });
         };
         
         vm.uiCanExit = vm.store.uiCanExit;
