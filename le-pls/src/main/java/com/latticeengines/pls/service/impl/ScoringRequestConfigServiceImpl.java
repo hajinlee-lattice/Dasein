@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.MarketoScoringMatchField;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.pls.entitymanager.ScoringRequestConfigEntityManager;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
@@ -54,7 +55,7 @@ public class ScoringRequestConfigServiceImpl implements ScoringRequestConfigServ
             throw new LedpException(LedpCode.LEDP_18191, new String[] {"field mappings. Field mappings cannot be blank."});
         }
         scoringRequestConfig.setMarketoScoringMatchFields(validMappings);
-        
+        scoringRequestConfig.setWebhookResource(webhookResource);
         if(StringUtils.isBlank(scoringRequestConfig.getModelUuid())) {
             throw new LedpException(LedpCode.LEDP_18191, new String[] {"Model association"});
         }
@@ -101,6 +102,14 @@ public class ScoringRequestConfigServiceImpl implements ScoringRequestConfigServ
     public void updateScoringRequestConfig(ScoringRequestConfig scoringRequestConfig) {
         validateAndProcessScoringRequestConfig(scoringRequestConfig, true);
         scoringRequestConfigEntityMgr.update(scoringRequestConfig);
+    }
+
+    @Override
+    public ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid) {
+        if (StringUtils.isBlank(configUuid)) {
+            throw new LedpException(LedpCode.LEDP_18194, new String[] {configUuid});
+        }
+        return scoringRequestConfigEntityMgr.retrieveScoringRequestConfigContext(configUuid);
     }
 
 }

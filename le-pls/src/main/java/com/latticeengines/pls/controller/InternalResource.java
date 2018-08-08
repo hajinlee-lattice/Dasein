@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -72,6 +73,7 @@ import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -90,6 +92,7 @@ import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -180,9 +183,12 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private DataLakeService dataLakeService;
-
+    
     @Inject
     private WorkflowJobService workflowJobService;
+    
+    @Inject
+    private ScoringRequestConfigService scoringRequestConfigService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1273,5 +1279,19 @@ public class InternalResource extends InternalResourceBase {
                 (pids == null ? "{}" : JsonUtils.serialize(pids))));
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
+    }
+    
+    @RequestMapping(value = "/external-scoring-config-context/{configUuid}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get attributes within a predefined group for a tenant")
+    public ScoringRequestConfigContext getScoringRequestConfigContext(HttpServletRequest request, @PathVariable(name="configUuid") String configUuid) {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Retrieve ScoringRequestConfiguration metadata for ConfigId: %s", configUuid));
+        }
+        ScoringRequestConfigContext srcContext = scoringRequestConfigService.retrieveScoringRequestConfigContext(configUuid);
+        if (srcContext == null) {
+            throw new LedpException(LedpCode.LEDP_18194, new String[] {configUuid});
+        }
+        return srcContext;
     }
 }

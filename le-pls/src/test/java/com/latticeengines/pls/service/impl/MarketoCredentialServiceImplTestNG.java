@@ -6,6 +6,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,21 +30,14 @@ import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper;
 
 public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private static final String TENANT1 = "TENANT1";
-    private static final String NAME = "TEST MARKETO CREDENTIAL";
     private static final String NAME_1 = "TEST MARKETO CREDENTIAL 1";
-    private static final String SOAP_ENDPOINT = "https://948-IYP-205.mktoapi.com/soap/mktows/2_9";
     private static final String SOAP_ENDPOINT_1 = "UPDATED_SOAP_ENDPOINT";
-    private static final String SOAP_USER_ID = "latticeengines1_511435204E14C09D06A6E8";
-    private static final String SOAP_ENCRYPTION_KEY = "140990042468919944EE1144CC0099EF0066CF0EE494";
-    private static final String REST_ENDPOINT = "https://948-IYP-205.mktorest.com/rest";
-    private static final String REST_IDENTITY_ENDPOINT = "https://948-IYP-205.mktorest.com/identity";
-    private static final String REST_CLIENT_ID = "dafede33-f785-48d1-85fa-b6ebdb884d06";
     private static final String REST_CLIENT_ID_1 = "Updated Rest Client";
-    private static final String REST_CLIENT_SECRET = "1R0LCTlmNd7G2PGh9ZJj8SIKSjEVZ8Ik";
     private static final String TEST_DOMAIN_FIELD = "Test Domain";
     private static final String TEST_COMPANY_FIELD = "Test Company";
     private static final String TEST_STATE_FIELD = "Test State";
@@ -100,15 +94,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void createMarketoCredential_assertCredentialCreated() throws Exception {
-        MarketoCredential marketoCredential = new MarketoCredential();
-        marketoCredential.setName(NAME);
-        marketoCredential.setSoapEndpoint(SOAP_ENDPOINT);
-        marketoCredential.setSoapUserId(SOAP_USER_ID);
-        marketoCredential.setSoapEncryptionKey(SOAP_ENCRYPTION_KEY);
-        marketoCredential.setRestEndpoint(REST_ENDPOINT);
-        marketoCredential.setRestIdentityEnpoint(REST_IDENTITY_ENDPOINT);
-        marketoCredential.setRestClientId(REST_CLIENT_ID);
-        marketoCredential.setRestClientSecret(REST_CLIENT_SECRET);
+        MarketoCredential marketoCredential = MarketoConnectorHelper.getTestMarketoCredentialConfig();
 
         marketoCredentialService.createMarketoCredential(marketoCredential);
         List<MarketoCredential> marketoCredentials = marketoCredentialService.findAllMarketoCredentials();
@@ -123,6 +109,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         assertEquals(marketoCredential1.getRestIdentityEnpoint(), REST_IDENTITY_ENDPOINT);
         assertEquals(marketoCredential1.getRestClientId(), REST_CLIENT_ID);
         assertEquals(marketoCredential1.getRestClientSecret(), REST_CLIENT_SECRET);
+        assertNotNull(marketoCredential1.getLatticeSecretKey());
         assertNotNull(marketoCredential1.getEnrichment());
         assertEquals(marketoCredential1.getEnrichment().getWebhookUrl(), enrichmentWebhookUrl);
         assertEquals(marketoCredential1.getEnrichment().getTenantCredentialGUID(),
@@ -312,6 +299,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         assertEquals(marketoCredential1.getName(), marketoCredential.getName());
         assertEquals(marketoCredential1.getRestClientId(), marketoCredential.getRestClientId());
         assertEquals(marketoCredential1.getRestClientSecret(), marketoCredential.getRestClientSecret());
+        assertEquals(marketoCredential1.getLatticeSecretKey(), marketoCredential.getLatticeSecretKey());
         assertEquals(marketoCredential1.getRestEndpoint(), marketoCredential.getRestEndpoint());
         assertEquals(marketoCredential1.getSoapEncryptionKey(), marketoCredential.getSoapEncryptionKey());
         assertEquals(marketoCredential1.getSoapEndpoint(), marketoCredential.getSoapEndpoint());

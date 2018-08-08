@@ -3,6 +3,7 @@ package com.latticeengines.pls.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 
 public interface ScoringRequestConfigService {
@@ -16,4 +17,6 @@ public interface ScoringRequestConfigService {
     ScoringRequestConfig findByConfigId(Long credentialPid, String configId);
     
     void updateScoringRequestConfig(ScoringRequestConfig scoringRequestConfig);
+
+    ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid);
 }

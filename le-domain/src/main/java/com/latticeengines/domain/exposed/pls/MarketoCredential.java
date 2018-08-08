@@ -26,6 +26,7 @@ public class MarketoCredential extends Credential {
     private String restIdentityEnpoint;
     private String restClientId;
     private String restClientSecret;
+    private String latticeSecretKey;
     private Enrichment enrichment;
 
     @JsonProperty("soap_endpoint")
@@ -98,6 +99,16 @@ public class MarketoCredential extends Credential {
         this.restClientSecret = restClientSecret;
     }
 
+    @JsonProperty("lattice_secret_key")
+    @Column(name = "SECRET_KEY", nullable = true)
+    public String getLatticeSecretKey() {
+        return latticeSecretKey;
+    }
+
+    public void setLatticeSecretKey(String latticeSecretKey) {
+        this.latticeSecretKey = latticeSecretKey;
+    }
+    
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_ENRICHMENT_ID", nullable = false)

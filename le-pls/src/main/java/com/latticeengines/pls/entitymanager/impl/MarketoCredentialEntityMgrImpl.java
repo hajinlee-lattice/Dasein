@@ -1,7 +1,9 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -45,6 +47,7 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
         }
         populateMarketoCredentialWithTenant(marketoCredential);
         marketoCredential.setEnrichment(enrichmentEntityMgr.createEnrichment());
+        marketoCredential.setLatticeSecretKey(UUID.randomUUID().toString());
         marketoCredentialDao.create(marketoCredential);
     }
 
@@ -64,7 +67,11 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
         marketoCredential1.setSoapEndpoint(marketoCredential.getSoapEndpoint());
         marketoCredential1.setSoapUserId(marketoCredential.getSoapUserId());
         marketoCredential1.setSoapEncryptionKey(marketoCredential.getSoapEncryptionKey());
-
+        if (StringUtils.isNotBlank(marketoCredential.getLatticeSecretKey())) {
+            marketoCredential1.setLatticeSecretKey(marketoCredential.getLatticeSecretKey().trim());
+        } else {
+            marketoCredential1.setLatticeSecretKey(UUID.randomUUID().toString());
+        }
         marketoCredentialDao.update(marketoCredential1);
 
     }

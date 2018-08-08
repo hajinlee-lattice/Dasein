@@ -14,6 +14,8 @@ DELIMITER ;
 
 CREATE PROCEDURE `MarketoIntegrationSchema`()
   BEGIN
+    ALTER TABLE `PLS_MultiTenant`.`MARKETO_CREDENTIAL` ADD `SECRET_KEY` varchar(255);
+
     create table `PLS_MultiTenant`.`SCORING_REQUEST_CONFIG` (`PID` bigint not null auto_increment, `REQ_CONFIG_ID` varchar(255) not null, `CREATED` datetime not null, `MODEL_UUID` varchar(255) not null, `UPDATED` datetime not null, `MARKETO_CREDENTIAL_ID` bigint not null, `FK_TENANT_ID` bigint not null, primary key (`PID`)) engine=InnoDB;
     alter table `PLS_MultiTenant`.`SCORING_REQUEST_CONFIG` add constraint SCORING_REQUEST_CONFIG.REQ_CONFIG_ID unique (`REQ_CONFIG_ID`);
     alter table `PLS_MultiTenant`.`SCORING_REQUEST_CONFIG` add constraint `FK_SCORINGREQUESTCONFIG_MARKETOCREDENTIALID_MARKETOCREDENTIAL` foreign key (`MARKETO_CREDENTIAL_ID`) references `PLS_MultiTenant`.`MARKETO_CREDENTIAL` (`PID`) on delete cascade;

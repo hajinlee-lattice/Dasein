@@ -18,7 +18,7 @@ public class ScoringRequestConfigSummary {
         this.modelUuid = modelUuid;
     }
     
-    @JsonProperty("requestConfigId")
+    @JsonProperty("configId")
     public String getConfigId() {
         return configId;
     }

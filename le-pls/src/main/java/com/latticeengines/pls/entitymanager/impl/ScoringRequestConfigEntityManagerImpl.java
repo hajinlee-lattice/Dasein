@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoScoringMatchField;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.ScoringRequestConfigDao;
@@ -149,6 +150,11 @@ public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrReposito
         
         marketoScoringMatchFieldEntityMgr.deleteFields(removedMappings);
         super.update(existingConfig);
+    }
+
+    @Override
+    public ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid) {
+        return scoringRequestReadRepository.retrieveScoringRequestConfigContext(configUuid);
     }
 
 }

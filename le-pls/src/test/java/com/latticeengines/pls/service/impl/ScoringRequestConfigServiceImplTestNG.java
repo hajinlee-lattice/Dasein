@@ -14,12 +14,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoScoringMatchField;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfig;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -126,6 +128,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertEquals(marketoCredential.getRestIdentityEnpoint(), REST_IDENTITY_ENDPOINT);
         assertEquals(marketoCredential.getRestClientId(), REST_CLIENT_ID);
         assertEquals(marketoCredential.getRestClientSecret(), REST_CLIENT_SECRET);
+        assertNotNull(marketoCredential.getLatticeSecretKey());
         assertNotNull(marketoCredential.getEnrichment());
         assertEquals(marketoCredential.getEnrichment().getWebhookUrl(), enrichmentWebhookUrl);
         assertEquals(marketoCredential.getEnrichment().getTenantCredentialGUID(),
@@ -209,7 +212,7 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
     }
     
     @Test(groups = "functional", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
-    public void testFindMethods_assertRetrievals() {
+    public void testFindMethods() {
         List<ScoringRequestConfigSummary> requestConfigLst = 
                 scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);
         assertNotNull(requestConfigLst);
@@ -231,7 +234,30 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
         assertTrue(scoreReqConf1.getMarketoScoringMatchFields().size() == scoreReqConf2.getMarketoScoringMatchFields().size());
     }
     
-    @Test(groups = "functional", dependsOnMethods = "testFindMethods_assertRetrievals")
+    @Test(groups = "functional", dependsOnMethods = "testCreateScoringRequestConfig_assertCreation")
+    public void testRetrieveMethods_assertScoringRequestConfigContext() {
+        List<ScoringRequestConfigSummary> requestConfigLst = 
+                scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);
+        assertNotNull(requestConfigLst);
+        assertTrue(requestConfigLst.size() == 1);
+        ScoringRequestConfigSummary configSummary = requestConfigLst.get(0);
+        assertNotNull(configSummary.getConfigId());
+        assertNotNull(configSummary.getModelUuid());
+        
+        ScoringRequestConfigContext srcContext = scoringRequestConfigService.retrieveScoringRequestConfigContext(configSummary.getConfigId());
+        assertNotNull(srcContext);
+        assertNotNull(srcContext.getConfigId());
+        assertNotNull(srcContext.getSecretKey());
+        assertEquals(srcContext.getConfigId(), configSummary.getConfigId());
+        assertEquals(srcContext.getModelUuid(), configSummary.getModelUuid());
+        assertEquals(srcContext.getTenantId(), TENANT1);
+        assertTrue(srcContext.getExternalProfileId().contains(marketoCredentialId.toString()));
+        
+        srcContext = scoringRequestConfigService.retrieveScoringRequestConfigContext("DummyId");
+        assertNull(srcContext);
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = "testFindMethods")
     public void testUpdateScoringRequestConfig_assertFieldAdditions() {
         List<ScoringRequestConfigSummary> requestConfigLst = 
                 scoringRequestConfigService.findAllByMarketoCredential(marketoCredentialId);

@@ -17,7 +17,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -25,7 +24,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
-
+import org.hibernate.annotations.NamedQuery;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
@@ -45,6 +44,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "SCORING_REQUEST_CONFIG", indexes = {@Index(name="SCORING_REQUEST_CONFIG.REQ_CONFIG_ID", columnList="REQ_CONFIG_ID", unique=true)})
 @NamedQuery(name = ScoringRequestConfig.NQ_FIND_CONFIGS_BY_CREDENTIAL_ID, query = ScoringRequestConfig.SELECT_CONFIG_SUMMARY_BY_CREDENTIAL)
+@NamedQuery(name = ScoringRequestConfig.NQ_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID, query = ScoringRequestConfig.SELECT_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 @NamedEntityGraph(name = "ScoringRequestConfig.details", attributeNodes = { @NamedAttributeNode("marketoScoringMatchFields") })
 public class ScoringRequestConfig extends ScoringRequestConfigSummary implements HasPid, HasTenant, HasAuditingFields {
@@ -53,7 +53,12 @@ public class ScoringRequestConfig extends ScoringRequestConfigSummary implements
             + "( src.configId, src.modelUuid ) " 
             + "FROM ScoringRequestConfig src WHERE src.marketoCredential.pid = :credentialPid";
     
+    static final String SELECT_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID = "SELECT new com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext "
+            + "(src, src.marketoCredential) " 
+            + "FROM ScoringRequestConfig src WHERE src.configId = :configId";
+    
     public static final String NQ_FIND_CONFIGS_BY_CREDENTIAL_ID = "ScoringRequestConfig.findConfigsByCredentialId";
+    public static final String NQ_SCORING_REQUEST_CONTEXT_BY_CONFIG_ID = "ScoringRequestConfig.findScoringRequestContextByConfigId";
     
     private Long pid;
     private Tenant tenant;

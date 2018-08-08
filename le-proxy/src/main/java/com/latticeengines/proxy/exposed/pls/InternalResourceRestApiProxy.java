@@ -14,12 +14,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -30,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -214,8 +217,9 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "", customerSpace.toString());
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
                     onlySelectedAttributes, offset, max, considerInternalAttributes);
-
-            log.debug("Get from " + url);
+            if (log.isDebugEnabled()) {
+                log.debug("Get from " + url);
+            }
             List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
             List<LeadEnrichmentAttribute> attributeList = JsonUtils.convertList(combinedAttributeObjList,
                     LeadEnrichmentAttribute.class);
@@ -232,8 +236,9 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/count", customerSpace.toString());
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
                     onlySelectedAttributes, null, null, considerInternalAttributes);
-
-            log.debug("Get from " + url);
+            if (log.isDebugEnabled()) {
+                log.debug("Get from " + url);
+            }
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
@@ -509,6 +514,21 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
+    public ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid) {
+        try {
+            String url = constructUrl(
+                    "pls/internal/external-scoring-config-context/" + configUuid);
+            if (log.isDebugEnabled()) {
+                log.debug("Find ScoringRequestConfigContext by configId (" + configUuid + ")" + url);
+            }
+            return restTemplate.getForObject(url, ScoringRequestConfigContext.class);
+        } catch (RemoteLedpException rle) {
+            throw rle;
+        } catch (Exception e) {
+            throw new RuntimeException("retrieveScoringRequestConfigContext: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+    
     @VisibleForTesting
     String generateFindJobsBasedOnActionIdsAndTypeUrl(String customerSpace, List<Long> actionPids,
             ActionType actionType) {

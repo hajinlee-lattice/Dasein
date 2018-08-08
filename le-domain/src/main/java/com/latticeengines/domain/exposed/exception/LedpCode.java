@@ -319,8 +319,12 @@ public enum LedpCode {
     LEDP_18194("Could not find Scoring Request Configuration for given ConfigID: {0}."), //
     LEDP_18195("Update Activation Attribute Config failed due to usage enbaled"), //
     LEDP_18196("Cannot map two column to {0}, please re-map column."), //
-    LEDP_18197("Could not find Marketo Crendetial Profile for given id: {0}."), //
+    LEDP_18197("Could not find Marketo Credential Profile for given id: {0}."), //
     LEDP_18198("Records in company profile request cannot be empty"), //
+    LEDP_18199("Could not process Scoring Request as SecretKey is not provided."), //
+    LEDP_18200("Could not process Scoring Request as SecretKey doesnot match."), //
+    LEDP_18201("Could not process Scoring Request as record body is empty"), //
+    LEDP_18202("Could not process Scoring Request as ConfigID is empty."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
