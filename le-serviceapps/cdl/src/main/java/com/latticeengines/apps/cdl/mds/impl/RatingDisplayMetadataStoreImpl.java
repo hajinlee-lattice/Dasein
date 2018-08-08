@@ -82,7 +82,8 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
                 reAttr.setAttrState(AttrState.Deprecated);
                 reAttr.setShouldDeprecate(true);
             }
-            if (isSegmentable(suffix) && !Boolean.TRUE.equals(summary.getDeleted())) {
+            reAttr.setCanSegment(true);
+            if (isSegmentable(suffix)) {
                 reAttr.enableGroup(ColumnSelection.Predefined.Segment);
             } else {
                 reAttr.disableGroup(ColumnSelection.Predefined.Segment);
@@ -93,7 +94,6 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             } else {
                 reAttr.disableGroup(ColumnSelection.Predefined.Enrichment);
             }
-            // reAttr.disableGroup(ColumnSelection.Predefined.TalkingPoint);
             reAttr.disableGroup(ColumnSelection.Predefined.CompanyProfile);
             return reAttr;
         });
