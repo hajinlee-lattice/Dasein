@@ -2,85 +2,89 @@
     <div class="le-grid editing-container">
         <div class="le-row">
             <div class="le-col-span-10">
-                <span ng-if="vm.showItem('String') && !vm.showItem('Percent') && !vm.showItem('Transaction')" class="query-section-item-operation">
-                    <select ng-model="vm.stringCmpModel" ng-options="k as v for (k, v) in vm.string_operations" ng-change="vm.changeStringCmpValue()">
-                    </select>
+                <div class="flex-container">
+                    <span ng-if="vm.showItem('String') && !vm.showItem('Percent') && !vm.showItem('Transaction')" class="query-section-item-operation">
+                        <select ng-model="vm.stringCmpModel" ng-options="k as v for (k, v) in vm.string_operations" ng-change="vm.changeStringCmpValue()">
+                        </select>
 
-                    <input type="text" name="input" ng-model="vm.stringValue" ng-change="vm.changeStringValue()" required ng-trim="false"
-                             ng-if="vm.showInput(vm.stringCmpModel)">
-                </span>
-
-                <span ng-if="vm.showItem('Boolean') && !vm.showItem('Percent')" class="query-section-item-operation">
-                    <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
-                        <strong>is</strong>
+                        <input type="text" name="input" ng-model="vm.stringValue" ng-change="vm.changeStringValue()" required ng-trim="false" ng-if="vm.showInput(vm.stringCmpModel)">
                     </span>
 
-                    <select ng-model="vm.booleanValue" ng-change="vm.changeBooleanValue()">
-                        <option value="Yes">True</option>
-                        <option value="No">False</option>
-                        <option value="" ng-if="vm.showEmptyOption()">Empty</option>
-                    </select>
-                </span>
+                    <span ng-if="vm.showItem('Boolean') && !vm.showItem('Percent')" class="query-section-item-operation">
+                        <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
+                            <strong>is</strong>
+                        </span>
 
-                <span ng-if="vm.showItem('Enum') && !vm.showItem('Percent')" class="query-section-item-operation">
-                    <!-- PLEASE LEAVE THIS SELECT ALONE -->
-                    <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()">
-                        <option ng-selected="vm.enumCmpModel == 'EQUAL' || vm.enumCmpModel == 'IN_COLLECTION'" ng-value="EQUAL" ng-if="vm.vals.length > 0">is</option>
-                        <option ng-selected="vm.enumCmpModel == 'NOT_EQUAL' || vm.enumCmpModel == 'NOT_IN_COLLECTION'" ng-value="NOT_EQUAL" ng-if="vm.vals.length > 0">is not</option>
-                        <option ng-selected="vm.enumCmpModel == 'IS_NULL'" ng-value="IS_NULL">is empty</option>
-                        <option ng-selected="vm.enumCmpModel == 'IS_NOT_NULL'" ng-value="IS_NOT_NULL">is present</option>
-                    </select>
-
-                    <a ng-click="vm.goToEnumPicker()" href="javascript:void(0)" class="default-link">Add{{(vm.vals.length > 0 ? ' or Remove ' : ' ')}}Values</a>
-
-                    <span class="query-section-item-value" ng-model="vm.tree.bucketRestriction.bkt.Vals" ng-change="vm.changeBktVal(0)">
-                        <strong ng-repeat="bucket in vm.vals">{{ vm.vals.length > 1 && $index != 0 ? ', ' : ''; }}{{ bucket }}</strong>
+                        <select ng-model="vm.booleanValue" ng-change="vm.changeBooleanValue()">
+                            <option value="Yes">True</option>
+                            <option value="No">False</option>
+                            <option value="" ng-if="vm.showEmptyOption()">Empty</option>
+                        </select>
                     </span>
-                </span>
 
-                <span ng-if="vm.showItem('Numerical') && !vm.showItem('Percent')" class="query-section-item-operation">
-                    <div class="num-edit-row">
-                        <div class="button-group" role="group" ng-click="vm.clickEditMode(vm.editMode == 'Custom' ? 'Preset' : 'Custom')" ng-if="!vm.showItem('Percent')">
-                            <button type="button" class="button icon-button {{vm.editMode == 'Custom' ? 'white' : 'light-gray'}}-button" value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
-                                <span ng-if="vm.editMode == 'Custom'">Custom</span>
-                                <i class="fa fa-bars fa-rotate-90" ng-if="vm.editMode == 'Preset'"></i>
-                            </button>
-                            <button type="button" class="button icon-button {{vm.editMode == 'Preset' ? 'white' : 'light-gray'}}-button" value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
-                                <i class="fa fa-bars fa-rotate-90" ng-if="vm.editMode == 'Custom'"></i>
-                                <span ng-if="vm.editMode == 'Preset'">Preset</span>
-                            </button>
+                    <span ng-if="vm.showItem('Enum') && !vm.showItem('Percent')" class="query-section-item-operation">
+                        <!-- PLEASE LEAVE THIS SELECT ALONE -->
+                        <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()">
+                            <option ng-selected="vm.enumCmpModel == 'EQUAL' || vm.enumCmpModel == 'IN_COLLECTION'" ng-value="EQUAL" ng-if="vm.vals.length > 0">is</option>
+                            <option ng-selected="vm.enumCmpModel == 'NOT_EQUAL' || vm.enumCmpModel == 'NOT_IN_COLLECTION'" ng-value="NOT_EQUAL" ng-if="vm.vals.length > 0">is not</option>
+                            <option ng-selected="vm.enumCmpModel == 'IS_NULL'" ng-value="IS_NULL">is empty</option>
+                            <option ng-selected="vm.enumCmpModel == 'IS_NOT_NULL'" ng-value="IS_NOT_NULL">is present</option>
+                        </select>
+
+                        <a ng-click="vm.goToEnumPicker()" href="javascript:void(0)" class="default-link">Add{{(vm.vals.length > 0 ? ' or Remove ' : ' ')}}Values</a>
+
+                        <span class="query-section-item-value" ng-model="vm.tree.bucketRestriction.bkt.Vals" ng-change="vm.changeBktVal(0)">
+                            <strong ng-repeat="bucket in vm.vals">{{ vm.vals.length > 1 && $index != 0 ? ', ' : ''; }}{{ bucket }}</strong>
+                        </span>
+                    </span>
+
+                    <span ng-if="vm.showItem('Numerical') && !vm.showItem('Percent')" class="query-section-item-operation">
+                        <div class="num-edit-row">
+                            <div class="button-group" role="group" ng-click="vm.clickEditMode(vm.editMode == 'Custom' ? 'Preset' : 'Custom')" ng-if="!vm.showItem('Percent')">
+                                <button type="button" class="button icon-button {{vm.editMode == 'Custom' ? 'white' : 'light-gray'}}-button" value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
+                                    <span ng-if="vm.editMode == 'Custom'">Custom</span>
+                                    <i class="fa fa-bars fa-rotate-90" ng-if="vm.editMode == 'Preset'"></i>
+                                </button>
+                                <button type="button" class="button icon-button {{vm.editMode == 'Preset' ? 'white' : 'light-gray'}}-button" value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
+                                    <i class="fa fa-bars fa-rotate-90" ng-if="vm.editMode == 'Custom'"></i>
+                                    <span ng-if="vm.editMode == 'Preset'">Preset</span>
+                                </button>
+                            </div>
+
+                            <span ng-if="vm.editMode == 'Custom'">
+                                <select ng-model="vm.numericalCmpModel" ng-change="vm.changeNumericalCmpValue()" ng-options="k as v for (k, v) in vm.numerical_operations">
+                                </select>
+                            </span>
+                            <numerical-range-directive ng-if="vm.editMode == 'Custom' && (vm.showFromNumerical || vm.showToNumerical)" config="{{vm.getNumericalConfigString()}}"
+                                showfrom="vm.showFromNumerical" showto="vm.showToNumerical" vm="vm" form="vm.getForm()" type="{{vm.type}}"
+                                bucketrestriction="vm.tree.bucketRestriction" changed="vm.callbackChangedNumericalValue(type, position, value)">
+                            </numerical-range-directive>
+
+                            <span ng-if="vm.editMode == 'Preset'">
+                                <select ng-model="vm.presetOperation" ng-change="vm.changePreset()">
+                                    <option ng-repeat="bucket in vm.getCubeBktList()" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
+                                </select>
+                            </span>
                         </div>
-
-                        <span ng-if="vm.editMode == 'Custom'">
-                            <select ng-model="vm.numericalCmpModel" ng-change="vm.changeNumericalCmpValue()" ng-options="k as v for (k, v) in vm.numerical_operations">
-                            </select>
-                        </span>
-                        <numerical-range-directive ng-if="vm.editMode == 'Custom' && (vm.showFromNumerical || vm.showToNumerical)" config="{{vm.getNumericalConfigString()}}" showfrom="vm.showFromNumerical"
-                            showto="vm.showToNumerical" vm="vm" form="vm.getForm()" type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
-                            changed="vm.callbackChangedNumericalValue(type, position, value)">
-                        </numerical-range-directive>
-
-                        <span ng-if="vm.editMode == 'Preset'">
-                            <select ng-model="vm.presetOperation" ng-change="vm.changePreset()">
-                                <option ng-repeat="bucket in vm.getCubeBktList()" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
-                            </select>
-                        </span>
-                    </div>
-                </span>
+                    </span>
 
 
-                <span ng-if="vm.showItem('Transaction')  && !vm.showItem('Percent')">
-                    <transaction-edit-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type" form="vm.getForm()" purchased="vm.booleanValue" booleanchanged='vm.booleanChanged'></transaction-edit-directive>
-                </span>
-                <span ng-if="vm.showItem('Percent')" class="query-section-item-operation" >
-                    <percent-edit-attribute bucketrestriction="vm.tree.bucketRestriction" type="vm.type" form="vm.getForm()"></percent-edit-attribute>
-                </span>
+                    <span ng-if="vm.showItem('Transaction')  && !vm.showItem('Percent')">
+                        <transaction-edit-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type" form="vm.getForm()" purchased="vm.booleanValue"
+                            booleanchanged='vm.booleanChanged'></transaction-edit-directive>
+                    </span>
+                    <span ng-if="vm.showItem('Percent')" class="query-section-item-operation">
+                        <percent-edit-attribute bucketrestriction="vm.tree.bucketRestriction" type="vm.type" form="vm.getForm()"></percent-edit-attribute>
+                    </span>
+                </div>
             </div>
 
             <div class="le-col-span-2">
-                <div ng-class="vm.showUnsetButton() ? 'edit-controllers' : 'edit-controller'">
-                    <button class="button blue-button set" ng-click="vm.setBucket($event)" ng-disabled="!vm.isValid()">SET</button>
-                    <button class="button gray-button unset" ng-if="vm.showUnsetButton()" ng-click="vm.setBucket($event, true)">UNSET</button>
+                <div class="flex-container-controller">
+                    <!-- <div ng-class="vm.showUnsetButton() ? 'edit-controllers' : 'edit-controller'"> -->
+                        <button class="button blue-button set" ng-click="vm.setBucket($event)" ng-disabled="!vm.isValid()">SET</button>
+                        <button class="button gray-button unset" ng-if="vm.showUnsetButton()" ng-click="vm.setBucket($event, true)">UNSET</button>
+                    <!-- </div> -->
                 </div>
             </div>
         </div>

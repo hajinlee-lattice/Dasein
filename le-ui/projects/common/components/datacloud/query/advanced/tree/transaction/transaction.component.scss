@@ -1,36 +1,49 @@
+.query-section-item-operation {
+  min-width: 100px;
+}
+
 div.transaction-container {
-    margin-left: 87px;
-    margin-top: -22px;
-    margin-bottom: 0px;
-    // border: 1px solid yellow;
-    
-    .transaction-row {
-        display: flex;
-        justify-content: flex-start;
-        // border: 1px solid orange;
-        .transaction-element-title {
-            min-width: 100px;
-            margin-top: .2em;
-            font-weight: bold;
-        }
-        .transaction-element {
-            padding: 3px 0 3px 5px;
-            select {
-                min-width: 120px;
-            }
-        }
+  flex: 1;
+  width: 100%;
+  margin-top: -6px;
+  .range-container{
+      margin-left: -12px;
+      padding: 0;
+  }
+  .time-frame{
+      margin-top: 0.15em;
+      margin-left: -4px;
+      margin-right: 0;
+      & > .time-frame-select{
+          margin-left: 4px;
+      }
+  }
+  .transaction-row {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    align-items: stretch;
+    .transaction-element-title {
+      min-width: 90px;
+      margin-top: 0.2em;
+      font-weight: bold;
     }
-    .group-container{
-        display: flex;
-        flex-direction: row;
-        // border: 1px solid aqua;
+    .transaction-element {
+      padding: 3px 0 3px 5px;
+      select {
+        min-width: 120px;
+      }
     }
-    .range-container {
-        display: flex;
-        flex-direction: row;
-        // border: 1px solid green;
-        @media only screen and (max-width: 1000px) {
-            flex-direction: column;
-        }
-    }
+  }
+  .date-picker-container {
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
+  }
+  .date-picker-container-with-label {
+    width: 165px;
+    min-width: 165px;
+    max-width: 165px;
+  }
+
 }

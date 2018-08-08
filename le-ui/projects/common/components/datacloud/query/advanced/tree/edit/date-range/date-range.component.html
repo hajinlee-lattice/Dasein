@@ -1,13 +1,15 @@
 <div class="range-container">
     <span class="transaction-element" ng-if="fromlabel && show(0)"> {{fromlabel}} </span>
-    <div class="transaction-element date-picker-container" ng-if="show(0)" ng-class="{'show-inline': showinline} ">
+    <div class="transaction-element date-picker-container" ng-if="show(0)" ng-class="{'show-inline': showinline, 'date-picker-container-with-label': (show(0) && show(1))} ">
         <span>
             <i id="{{getFromDateTriggerId()}}" class="fa fa-calendar date-trigger" ng-click="openPicker(0)"></i>
         </span>
         <input type="text" id="{{getFromDateId()}}" name="{{getName(0)}}" ng-change="validateDates()" ng-model="fromDate" readonly ng-click="openPicker(0)" placeholder="{{ startplaceholder ? startplaceholder : '' }} ">
+        <span class="transaction-element from-lable" ng-if="show(0) && show(1)"> {{tolabel ? tolabel : '-'}} </span>
     </div>
-    <span class="transaction-element" ng-if="show(0) && show(1)"> {{tolabel ? tolabel : '-'}} </span>
+    
     <div class="transaction-element date-picker-container" ng-if="show(1)" ng-class="{'show-inline': showinline} ">
+        
         <span>
             <i id="{{getToDateTriggerId()}}" class="fa fa-calendar date-trigger" ng-click="openPicker(1)"></i>
         </span>
