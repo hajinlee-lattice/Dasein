@@ -145,7 +145,7 @@ public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
         fms.add(new FieldMetadata(FLAG_DROP_LESS_POPULAR_DOMAIN, String.class));
         Aggregator agg = new AMSeedPriDomAggregator(new Fields(DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN), DUNS,
                 FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN, ALEXA_RANK_AMSEED, DOMAIN_SOURCE, LE_IS_PRIMARY_DOMAIN,
-                config.getSrcPriorityToMrkPriDom(), DU_DOMAINS, LE_PRIMARY_DUNS);
+                config.getSrcPriorityToMrkPriDom(), DU_DOMAINS, config.getGoldenDomSrcs());
         Node primaryDomain = node.groupByAndAggregate(new FieldList(DUNS), agg, fms).renamePipe("PrimaryDomain");
 
         node = node.leftJoin(DUNS, primaryDomain, DUNS);

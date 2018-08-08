@@ -31,7 +31,7 @@ public class AMSeedPriDomAggregator
     private String isPriDomField;
     private String[] srcPriorityToMrkPriDom;
     private String duDomsField;
-    private String duDunsField;
+    private String[] goldenDomSrcs;
 
     private int dunsLoc;
     private int priDomLoc;
@@ -48,7 +48,7 @@ public class AMSeedPriDomAggregator
 
     public AMSeedPriDomAggregator(Fields fieldDeclaration, String dunsField, String priDomField, String domField,
             String alexaRankField, String domSrcField, String isPriDomField, String[] srcPriorityToMrkPriDom,
-            String duDomsField, String duDunsField) {
+            String duDomsField, String[] goldenDomSrcs) {
         super(fieldDeclaration);
         this.dunsField = dunsField;
         this.domField = domField;
@@ -59,7 +59,7 @@ public class AMSeedPriDomAggregator
         this.priDomLoc = namePositionMap.get(priDomField);
         this.srcPriorityToMrkPriDom = srcPriorityToMrkPriDom;
         this.duDomsField = duDomsField;
-        this.duDunsField = duDunsField;
+        this.goldenDomSrcs = goldenDomSrcs;
     }
 
     @Override
@@ -90,15 +90,16 @@ public class AMSeedPriDomAggregator
         if (context.priDom == null && StringUtils.isNotBlank(arguments.getString(domField))) {
             return update(context, arguments);
         }
-        /* Temporarily revert the implementation for PD-1694
-        int res = checkRuleDiffWithDuDoms(context, arguments);
-        if (res > 0) {
-            return update(context, arguments);
-        } else if (res < 0) {
-            return context;
+        int res;
+        for (String srcPriority : goldenDomSrcs) {
+            res = checkRuleExpectedString(arguments.getString(domSrcField), context.domSrc, srcPriority);
+            if (res > 0) {
+                return update(context, arguments);
+            } else if (res < 0) {
+                return context;
+            }
         }
-        */
-        int res = checkRuleSmallerInteger((Integer) arguments.getObject(alexaRankField), context.alexaRank);
+        res = checkRuleSmallerInteger((Integer) arguments.getObject(alexaRankField), context.alexaRank);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
@@ -119,25 +120,6 @@ public class AMSeedPriDomAggregator
             return context;
         }
         return context;
-    }
-
-    private int checkRuleDiffWithDuDoms(Context context, TupleEntry arguments) {
-        String duDuns = arguments.getString(duDunsField);
-        String duns = arguments.getString(dunsField);
-        if (StringUtils.isBlank(duDuns) || StringUtils.isBlank(duns) || duDuns.equals(duns) || context.duDoms == null) {
-            return 0;
-        }
-        String checking = arguments.getString(domField);
-        String checked = context.domain;
-        if (StringUtils.isNotBlank(checking) && !context.duDoms.contains(checking)
-                && (StringUtils.isBlank(checked) || context.duDoms.contains(checked))) {
-            return 1;
-        } else if (StringUtils.isNotBlank(checked) && !context.duDoms.contains(checked)
-                && (StringUtils.isBlank(checking) || context.duDoms.contains(checking))) {
-            return -1;
-        } else {
-            return 0;
-        }
     }
 
     private int checkRuleSmallerInteger(Integer checking, Integer checked) {

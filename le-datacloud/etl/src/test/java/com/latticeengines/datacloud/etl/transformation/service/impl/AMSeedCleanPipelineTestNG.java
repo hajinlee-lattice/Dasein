@@ -171,6 +171,8 @@ public class AMSeedCleanPipelineTestNG
         AMSeedMarkerConfig conf = new AMSeedMarkerConfig();
         String[] srcPriorityToMrkPriDom = { "Orb", "HG", "DnB", "RTS" };
         conf.setSrcPriorityToMrkPriDom(srcPriorityToMrkPriDom);
+        String[] goldenDomSrcs = { "Orb" };
+        conf.setGoldenDomSrcs(goldenDomSrcs);
         ObjectNode on = om.valueToTree(conf);
         if (useTez) {
             TransformationFlowParameters.EngineConfiguration engineConfiguration = new TransformationFlowParameters.EngineConfiguration();
@@ -204,59 +206,69 @@ public class AMSeedCleanPipelineTestNG
         uploadBaseSourceData(alexa.getSourceName(), baseSourceVersion, columns, alexaData);
     }
 
+    // LatticeID, Domain, DUNS, Name, Country, DomainSource, LE_IS_PRIMARY_DOMAIN, LE_IS_PRIMARY_LOCATION, OUT_OF_BUSINESS_INDICATOR, 
+    // LE_EMPLOYEE_RANGE, LE_NUMBER_OF_LOCATIONS, SALES_VOLUME_US_DOLLARS, LE_PRIMARY_DUNS
     private Object[][] amsData = new Object[][] { //
             /* Test markLessPopularDomainsForDUNS */
-            { 1L, "a.com", "01", "Name1", "Country1", "Orb", "Y", "Y", "0", ">10,000", 100, 100000000L, "01" }, //
-            { 2L, "b.com", "01", "Name1", "Country1", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "01" }, //
-            { 3L, "c.com", "01", "Name1", "Country1", "Orb", "Y", "Y", "0", ">10,000", 100, 100000000L, "01" }, //
-            { 4L, "d.com", "02", "Name2", "Country2", "Orb", "Y", "Y", "0", ">10,000", 100, 100000000L, "02" }, //
-            { 5L, "e.com", "02", "Name2", "Country2", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "02" }, //
-            { 6L, "f.com", "03", "Name3", "Country3", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L, "03" }, //
-            { 7L, "g.com", "03", "Name3", "Country3", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "03" }, //
-            { 8L, "h.com", null, "NameNull", "CountryNull", "Orb", "N", "Y", "0", ">10,000", 100, 100000000L, null }, //
-            { 9L, "i.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, 100000000L, null }, //
-            { 10L, null, "04", "Name4", "Country4", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "04" }, //
-            { 11L, null, "05", "Name5", "Country5", null, "Y", "Y", "0", ">10,000", 100, 100000000L, "05" }, //
-            // 1 duns with multiple domains - test domain source priority
-            { 30L, "j.com", "06", "Name6", "Country6", "RTS", "Y", "Y", "0", ">10,000", 100, 100000000L, "06" }, //
-            { 31L, "k.com", "06", "Name6", "Country6", "HG", "Y", "Y", "0", ">10,000", 100, 100000000L, "06" }, //
-            { 32L, "l.com", "06", "Name6", "Country6", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "06" }, //
-            { 33L, "m.com", "06", "Name6", "Country6", null, "Y", "Y", "0", ">10,000", 100, 100000000L, "06" }, //
-            // If 1 duns has a domain same as some domain of corresponding duduns,
-            // this domain has lower priority to be marked as primary domain
-            /*
-            { 34L, "n.com", "07", "Name7", "Country7", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
-            { 35L, "o.com", "07", "Name7", "Country7", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
-            { 36L, "n.com", "08", "Name8", "Country8", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
-            { 37L, "p.com", "08", "Name8", "Country8", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
-            { 38L, "n.com", "09", "Name9", "Country9", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
-            { 39L, "o.com", "09", "Name9", "Country9", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
-            */
+            // Compare golden domain source
+            { 1L, "a.com", "DUNS01", "Name01", "Country01", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS01" }, //
+            { 2L, "b.com", "DUNS01", "Name01", "Country01", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS01" }, //
+            { 3L, "c.com", "DUNS01", "Name01", "Country01", "Orb", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS01" }, //
+            // Compare AlexaRank
+            { 4L, "a.com", "DUNS02", "Name02", "Country02", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS02" }, //
+            { 5L, "b.com", "DUNS02", "Name02", "Country02", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS02" }, //
+            { 6L, "c.com", "DUNS02", "Name02", "Country02", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS02" }, //
+            // Compare domain source priority
+            { 7L, "j.com", "DUNS03", "Name03", "Country03", "RTS", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS03" }, //
+            { 8L, "k.com", "DUNS03", "Name03", "Country03", "HG", "Y", "Y", "0", ">10,000", 100, 100000000L, "DUNS03" }, //
+            { 9L, "l.com", "DUNS03", "Name03", "Country03", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS03" }, //
+            { 10L, "m.com", "DUNS03", "Name03", "Country03", null, "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS03" }, //
+            // Compare original LE_IS_PRIMARY_DOMAIN flag
+            { 11L, "f.com", "DUNS04", "Name04", "Country04", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS04" }, //
+            { 12L, "g.com", "DUNS04", "Name04", "Country04", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L,
+                    "DUNS04" }, //
+            // Domain-only entries
+            { 13L, "h.com", null, "NameNull", "CountryNull", "Orb", "N", "Y", "0", ">10,000", 100, 100000000L, null }, //
+            { 14L, "i.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, 100000000L, null }, //
+            // DUNS-only entries
+            { 15L, null, "DUNS05", "Name05", "Country05", "Orb", "Y", "Y", "0", ">10,000", 100, 100000000L, "DUNS04" }, //
+            { 16L, null, "DUNS06", "Name06", "Country06", null, "Y", "Y", "0", ">10,000", 100, 100000000L, "DUNS05" }, //
+
             /* Test markOOBEntries */
             // LatticeID = 12 will be removed
-            { 12L, null, "46", "Name46", "Country46", "DnB", "N", "Y", "1", ">10,000", 100, 100000000L, "46" }, //
-            { 13L, null, "47", "Name47", "Country47", "DnB", "N", "Y", null, ">10,000", 100, 100000000L, "47" }, //
+            { 112L, null, "46", "Name46", "Country46", "DnB", "N", "Y", "1", ">10,000", 100, 100000000L, "46" }, //
+            { 113L, null, "47", "Name47", "Country47", "DnB", "N", "Y", null, ">10,000", 100, 100000000L, "47" }, //
             /* Test markOrphanRecordWithDomain */
-            { 14L, "aa.com", "11", "Name11", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "11" }, //
-            { 15L, "aa.com", "12", "Name12", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "12" }, //
-            { 16L, "bb.com", "13", "Name13", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "13" }, //
-            { 17L, "bb.com", "14", "Name14", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "14" }, //
+            { 114L, "aa.com", "11", "Name11", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "11" }, //
+            { 115L, "aa.com", "12", "Name12", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "12" }, //
+            { 116L, "bb.com", "13", "Name13", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "13" }, //
+            { 117L, "bb.com", "14", "Name14", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "14" }, //
             // Following LatticeID will be left
-            { 18L, "bb.com", "15", "Name15", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 0, 200000000L, "15" }, //
-            { 19L, "cc.com", "16", "Name16", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, "16" }, //
-            { 20L, "cc.com", "17", "Name17", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, 100000000L, "17" }, //
-            { 21L, "cc.com", "18", "Name18", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, 1000L, "18" }, //
-            { 22L, "dd.com", "19", "Name19", "CountryDD", "DnB", "Y", "Y", "0", ">10,000", 0, null, "19" }, //
+            { 118L, "bb.com", "15", "Name15", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 0, 200000000L, "15" }, //
+            { 119L, "cc.com", "16", "Name16", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, "16" }, //
+            { 120L, "cc.com", "17", "Name17", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, 100000000L, "17" }, //
+            { 121L, "cc.com", "18", "Name18", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, 1000L, "18" }, //
+            { 122L, "dd.com", "19", "Name19", "CountryDD", "DnB", "Y", "Y", "0", ">10,000", 0, null, "19" }, //
             // Following LatticeID will be left
-            { 23L, "ee.com", "20", "Name20", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, "20" }, //
-            { 24L, "ee.com", "21", "Name21", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, "21" }, //
+            { 123L, "ee.com", "20", "Name20", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, "20" }, //
+            { 124L, "ee.com", "21", "Name21", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, "21" }, //
             /* Test markOrphanRecordsForSmallBusiness */
             // Following LatticeID will be left
-            { 25L, null, "31", "Name31", null, "DnB", "N", "Y", "0", "1-10", 100, 100000000L, "31" }, //
-            { 26L, "aaa.com", "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, "31" }, //
-            { 27L, null, "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, "31" }, //
-            { 28L, null, "31", "Name31", "Country31", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "31" }, //
-            { 29L, "bbb.com", null, "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, null }, //
+            { 225L, null, "31", "Name31", null, "DnB", "N", "Y", "0", "1-10", 100, 100000000L, "31" }, //
+            { 226L, "aaa.com", "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, "31" }, //
+            { 227L, null, "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, "31" }, //
+            { 228L, null, "31", "Name31", "Country31", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "31" }, //
+            { 229L, "bbb.com", null, "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, null }, //
     };
 
     private void prepareAMSeedMerged() {
@@ -281,74 +293,77 @@ public class AMSeedCleanPipelineTestNG
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
 
+        // LatticeID, Domain, DUNS, Name, Country, DomainSource, LE_IS_PRIMARY_DOMAIN, LE_IS_PRIMARY_LOCATION, OUT_OF_BUSINESS_INDICATOR, 
+        // LE_EMPLOYEE_RANGE, LE_NUMBER_OF_LOCATIONS, SALES_VOLUME_US_DOLLARS, LE_PRIMARY_DUNS
         Object[][] expectedData = {
-                { 1L, "a.com", "01", "Name1", "Country1", "Orb", "N", "Y", "0", ">10,000", 100, 100, 100000000L, "01" },
-                { 2L, "b.com", "01", "Name1", "Country1", "DnB", "Y", "Y", "0", ">10,000", 100, 10, 100000000L, "01" },
-                { 3L, "c.com", "01", "Name1", "Country1", "Orb", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "01" },
-                { 4L, "d.com", "02", "Name2", "Country2", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "02" },
-                { 5L, "e.com", "02", "Name2", "Country2", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "02" },
-                { 6L, "f.com", "03", "Name3", "Country3", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "03" },
-                { 7L, "g.com", "03", "Name3", "Country3", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "03" },
-                { 8L, "h.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                // Compare golden domain source
+                { 1L, "a.com", "DUNS01", "Name01", "Country01", "DnB", "N", "Y", "0", ">10,000", 100, 100, 100000000L,
+                        "DUNS01" },
+                { 2L, "b.com", "DUNS01", "Name01", "Country01", "DnB", "N", "Y", "0", ">10,000", 100, 10, 100000000L,
+                        "DUNS01" },
+                { 3L, "c.com", "DUNS01", "Name01", "Country01", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS01" },
+                // Compare alexa rank
+                { 4L, "a.com", "DUNS02", "Name02", "Country02", "DnB", "N", "Y", "0", ">10,000", 100, 100, 100000000L,
+                        "DUNS02" },
+                { 5L, "b.com", "DUNS02", "Name02", "Country02", "DnB", "Y", "Y", "0", ">10,000", 100, 10, 100000000L,
+                        "DUNS02" },
+                { 6L, "c.com", "DUNS02", "Name02", "Country02", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS02" },
+                // Compare domain source priority
+                { 7L, "j.com", "DUNS03", "Name03", "Country03", "RTS", "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS03" },
+                { 8L, "k.com", "DUNS03", "Name03", "Country03", "HG", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS03" },
+                { 9L, "l.com", "DUNS03", "Name03", "Country03", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS03" },
+                { 10L, "m.com", "DUNS03", "Name03", "Country03", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS03" },
+                // Compare original LE_IS_PRIMARY_DOMAIN flag
+                { 11L, "f.com", "DUNS04", "Name04", "Country04", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS04" },
+                { 12L, "g.com", "DUNS04", "Name04", "Country04", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS04" },
+                // Domain-only entries
+                { 13L, "h.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         null },
-                { 9L, "i.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                { 14L, "i.com", null, "NameNull", "CountryNull", "Orb", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         null },
-                { 10L, null, "04", "Name4", "Country4", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L, "04" },
-                { 11L, null, "05", "Name5", "Country5", null, "N", "Y", "0", ">10,000", 100, null, 100000000L, "05" },
-                /*
-                { 34L, "n.com", "07", "Name7", "Country7", "DnB", "Y", "Y", "0", ">10,000", 100, 1000, 100000000L,
-                        "07" }, //
-                { 35L, "o.com", "07", "Name7", "Country7", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "07" }, //
-                { 36L, "n.com", "08", "Name8", "Country8", "DnB", "N", "Y", "0", ">10,000", 100, 1000, 100000000L,
-                        "07" }, //
-                { 37L, "p.com", "08", "Name8", "Country8", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "07" }, //
-                { 38L, "n.com", "09", "Name9", "Country9", "DnB", "Y", "Y", "0", ">10,000", 100, 1000, 100000000L,
-                        "07" }, //
-                { 39L, "o.com", "09", "Name9", "Country9", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "07" }, //
-                */
-                { 13L, null, "47", "Name47", "Country47", "DnB", "N", "Y", null, ">10,000", 100, null, 100000000L,
+                // DUNS-only entries
+                { 15L, null, "DUNS05", "Name05", "Country05", "Orb", "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS04" },
+                { 16L, null, "DUNS06", "Name06", "Country06", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "DUNS05" },
+
+                { 113L, null, "47", "Name47", "Country47", "DnB", "N", "Y", null, ">10,000", 100, null, 100000000L,
                         "47" },
-                { 14L, "aa.com", "11", "Name11", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                { 114L, "aa.com", "11", "Name11", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         "11" },
-                { 15L, "aa.com", "12", "Name12", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                { 115L, "aa.com", "12", "Name12", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         "12" },
-                { 16L, "bb.com", "13", "Name13", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                { 116L, "bb.com", "13", "Name13", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         "13" },
-                { 17L, "bb.com", "14", "Name14", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                { 117L, "bb.com", "14", "Name14", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         "14" },
-                { 18L, "bb.com", "15", "Name15", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 0, null, 200000000L,
+                { 118L, "bb.com", "15", "Name15", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 0, null, 200000000L,
                         "15" },
-                { 19L, "cc.com", "16", "Name16", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "16" },
-                { 20L, "cc.com", "17", "Name17", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, 100000000L,
+                { 119L, "cc.com", "16", "Name16", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "16" },
+                { 120L, "cc.com", "17", "Name17", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, 100000000L,
                         "17" },
-                { 21L, "cc.com", "18", "Name18", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, 1000L, "18" },
-                { 22L, "dd.com", "19", "Name19", "CountryDD", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "19" },
-                { 23L, "ee.com", "20", "Name20", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "20" },
-                { 24L, "ee.com", "21", "Name21", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "21" },
-                { 25L, null, "31", "Name31", null, "DnB", "N", "Y", "0", "1-10", 100, null, 100000000L, "31" },
-                { 26L, "aaa.com", "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, null, 100000000L,
+                { 121L, "cc.com", "18", "Name18", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, 1000L, "18" },
+                { 122L, "dd.com", "19", "Name19", "CountryDD", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "19" },
+                { 123L, "ee.com", "20", "Name20", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "20" },
+                { 124L, "ee.com", "21", "Name21", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "21" },
+
+                { 225L, null, "31", "Name31", null, "DnB", "N", "Y", "0", "1-10", 100, null, 100000000L, "31" },
+                { 226L, "aaa.com", "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, null, 100000000L,
                         "31" },
-                { 27L, null, "31", "Name31", "Country31", "DnB", "N", "Y", "0", "1-10", 100, null, 100000000L, "31" },
-                { 28L, null, "31", "Name31", "Country31", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                { 227L, null, "31", "Name31", "Country31", "DnB", "N", "Y", "0", "1-10", 100, null, 100000000L, "31" },
+                { 228L, null, "31", "Name31", "Country31", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
                         "31" },
-                { 29L, "bbb.com", null, "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, null, 100000000L,
+                { 229L, "bbb.com", null, "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, null, 100000000L,
                         null },
-                { 30L, "j.com", "06", "Name6", "Country6", "RTS", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "06" },
-                { 31L, "k.com", "06", "Name6", "Country6", "HG", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "06" },
-                { 32L, "l.com", "06", "Name6", "Country6", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "06" },
-                { 33L, "m.com", "06", "Name6", "Country6", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "06" },
+
         };
 
         String[] fieldNames = new String[] { //
@@ -384,7 +399,6 @@ public class AMSeedCleanPipelineTestNG
         while (records.hasNext()) {
             GenericRecord record = records.next();
             Long latticeId = (Long) record.get(LATTICEID);
-            log.info(String.valueOf(latticeId));
             distinctIds.add(latticeId);
             Map<String, Object> data = latticeIdToData.get(latticeId);
 
@@ -402,16 +416,15 @@ public class AMSeedCleanPipelineTestNG
                 }
             }
             if (hasFieldMismatchInRecord) {
-                log.warn(StringUtils.join(misMatched, ", "));
+                log.warn(String.format("Problematic record with LatticeId = %d. Mis-matched fields: %s",
+                        String.valueOf(latticeId), StringUtils.join(misMatched, ", ")));
             }
-            System.out.println(latticeId + ":" + record);
             numRows++;
         }
-        System.out.println("numRows : "+numRows);
-        System.out.println("distinctIds.size() : "+distinctIds.size());
-        System.out.println("hasFieldMismatchInRecord : "+hasFieldMismatchInRecord);
-        Assert.assertEquals(numRows, 32, "There should be 32 rows in the result.");
-        Assert.assertEquals(distinctIds.size(), 32, "There should be 32 distinct lattice ids.");
+        Assert.assertEquals(numRows, expectedData.length,
+                String.format("There should be %d rows in the result.", expectedData.length));
+        Assert.assertEquals(distinctIds.size(), expectedData.length,
+                String.format("There should be %d distinct lattice ids.", expectedData.length));
         Assert.assertFalse(hasFieldMismatchInRecord, "There are incorrect results, see logs above.");
 
     }

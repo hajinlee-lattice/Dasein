@@ -6,12 +6,23 @@ public class AMSeedMarkerConfig extends TransformerConfig {
     @JsonProperty("SrcPriorityToMrkPriDom")
     private String[] srcPriorityToMrkPriDom;
 
+    @JsonProperty("GoldenDomSrcs")
+    private String[] goldenDomSrcs;
+
     public String[] getSrcPriorityToMrkPriDom() {
         return srcPriorityToMrkPriDom;
     }
 
     public void setSrcPriorityToMrkPriDom(String[] srcPriorityToMrkPriDom) {
         this.srcPriorityToMrkPriDom = srcPriorityToMrkPriDom;
+    }
+
+    public String[] getGoldenDomSrcs() {
+        return goldenDomSrcs;
+    }
+
+    public void setGoldenDomSrcs(String[] goldenDomSrcs) {
+        this.goldenDomSrcs = goldenDomSrcs;
     }
 
 }
