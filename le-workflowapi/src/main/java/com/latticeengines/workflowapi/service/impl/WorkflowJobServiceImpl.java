@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -40,6 +42,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String timelineServiceUrl;
+
+    @Autowired
+    private JobCacheService jobCacheService;
 
     @Autowired
     private LEJobExecutionRetriever leJobExecutionRetriever;
@@ -133,6 +138,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
+    public Job getJobByWorkflowIdFromCache(String customerSpace, @NotNull Long workflowId, boolean includeDetails) {
+        Job job =  jobCacheService.getByWorkflowId(workflowId, includeDetails);
+        checkLastUpdateTime(Collections.singletonList(toWorkflowJob(job)));
+        return job;
+    }
+
+    @Override
+    @WithCustomerSpace
     public Job getJobByWorkflowPid(String customerSpace, Long workflowPid, Boolean includeDetails) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPid);
         if (workflowJob == null) {
@@ -191,6 +204,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(
                 reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @WithCustomerSpace
+    public List<Job> getJobsByWorkflowIdsFromCache(String customerSpace, @NotNull List<Long> workflowIds, boolean includeDetails) {
+        List<Job> jobs = jobCacheService.getByWorkflowIds(workflowIds, includeDetails);
+        checkLastUpdateTime(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
+        return jobs;
     }
 
     @Override
@@ -355,6 +376,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         return workflowJobs;
+    }
+
+    /*
+     * transform job to workflowjob for last update time check
+     */
+    private WorkflowJob toWorkflowJob(@NotNull Job job) {
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setPid(job.getPid());
+        workflowJob.setStatus(job.getJobStatus() == null ? null : job.getJobStatus().name());
+        return workflowJob;
     }
 
     @VisibleForTesting

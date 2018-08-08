@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.service.ReportService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobCache;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -14,6 +15,8 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,11 +24,13 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -35,8 +40,11 @@ import java.util.stream.Stream;
 @Service("jobCacheService")
 public class JobCacheServiceImpl implements JobCacheService {
 
+    private static final Logger log = LoggerFactory.getLogger(JobCacheServiceImpl.class);
+
     private static final int NUM_THREADS = 8;
     private static final int EXPIRE_TIME_IN_MILLIS = 30000;
+    private static final int LOG_NUM_IDS_LIMIT = 20;
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String timelineServiceUrl;
@@ -67,18 +75,17 @@ public class JobCacheServiceImpl implements JobCacheService {
     public List<Job> getByWorkflowIds(List<Long> workflowIds, boolean includeDetails) {
         check(workflowIds);
 
-        Map<Long, JobCache> cacheJobMap = cacheWriter
-                .getByWorkflowIds(workflowIds, includeDetails)
-                .stream()
-                // consider a cache miss if the cache object is not valid
-                .filter(this::isCacheValid)
-                .collect(Collectors.toMap(cache -> cache.getJob().getId(), cache -> cache));
+        Map<Long, JobCache> cacheJobMap = getCachedJobMap(workflowIds, includeDetails);
         // trigger async refresh for expired cache, still return stale data
         List<Long> expiredWorkflowIds = cacheJobMap.values()
                 .stream()
                 .filter(this::isCacheExpired)
                 .map(cache -> cache.getJob().getId())
                 .collect(Collectors.toList());
+        if (!expiredWorkflowIds.isEmpty()) {
+            log.info("Re-populating expired job caches, size={}, IDs={}, includeDetails={}",
+                    expiredWorkflowIds.size(), getWorkflowIdsStr(expiredWorkflowIds), includeDetails);
+        }
         putAsync(expiredWorkflowIds, false);
 
         // load jobs from datastore
@@ -86,13 +93,19 @@ public class JobCacheServiceImpl implements JobCacheService {
                 .stream()
                 .filter(id -> !cacheJobMap.containsKey(id))
                 .collect(Collectors.toList());
-        List<Job> missingJobs = workflowJobEntityMgr.findByWorkflowIds(missingJobIds)
-                .stream()
-                .map(workflowJob -> transform(workflowJob, includeDetails))
-                .collect(Collectors.toList());
+        List<Job> missingJobs = getMissingJobs(missingJobIds, includeDetails);
 
         // populate for cache misses
-        cacheWriter.put(missingJobs, includeDetails);
+        service.execute(() -> {
+            if (missingJobs.isEmpty()) {
+                return;
+            }
+            log.info("Populating missed job caches, size={}, IDs={}, includeDetails={}",
+                    missingJobs.size(),
+                    getWorkflowIdsStr(missingJobs.stream().map(Job::getId).collect(Collectors.toList())),
+                    includeDetails);
+            cacheWriter.put(missingJobs, includeDetails);
+        });
 
         // merge both lists
         Map<Long, Job> missingJobMap = missingJobs.stream().collect(Collectors.toMap(Job::getId, job -> job));
@@ -114,6 +127,7 @@ public class JobCacheServiceImpl implements JobCacheService {
         Job detailedJob = transform(workflowJob, true);
         Job job = transform(workflowJob, false);
 
+        log.info("Refreshing job cache with workflow ID={}", workflowJob.getWorkflowId());
         cacheWriter.put(detailedJob, true);
         cacheWriter.put(job, false);
     }
@@ -136,7 +150,16 @@ public class JobCacheServiceImpl implements JobCacheService {
      * false: only populate the cache entry if no one else is updating
      */
     private Future<?> putAsync(List<Long> workflowIds, boolean forceRefresh) {
+        if (workflowIds.isEmpty()) {
+            // ends immediately
+            return CompletableFuture.completedFuture(null);
+        }
         long timestamp = System.currentTimeMillis();
+        log.info("Refreshing job cache, timestamp={}, forceRefresh={}, # of workflow IDs = {}, IDs={}",
+                timestamp,
+                forceRefresh,
+                workflowIds.size(),
+                getWorkflowIdsStr(workflowIds));
         if (!forceRefresh) {
             // when not forcing refresh, set the cache entry's update time
             // runnable only update if no other people's updating
@@ -159,6 +182,46 @@ public class JobCacheServiceImpl implements JobCacheService {
 
         long timestamp = System.currentTimeMillis();
         return timestamp - cache.getUpdatedAt() > EXPIRE_TIME_IN_MILLIS;
+    }
+
+    private List<Job> getMissingJobs(List<Long> missingJobIds, boolean includeDetails) {
+        if (missingJobIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // entity manager cannot take empty list
+        return workflowJobEntityMgr.findByWorkflowIds(missingJobIds)
+                .stream()
+                .map(workflowJob -> transform(workflowJob, includeDetails))
+                .collect(Collectors.toList());
+    }
+
+    /*
+     * return empty map if failed to retrieve from cache
+     */
+    private Map<Long, JobCache> getCachedJobMap(List<Long> workflowIds, boolean includeDetails) {
+        Map<Long, JobCache> jobCacheMap = new HashMap<>();
+        try {
+            jobCacheMap = cacheWriter
+                    .getByWorkflowIds(workflowIds, includeDetails)
+                    .stream()
+                    // consider a cache miss if the cache object is not valid
+                    .filter(this::isCacheValid)
+                    .collect(Collectors.toMap(cache -> cache.getJob().getId(), cache -> cache));
+        } catch (Exception e) {
+            String msg = String.format("Failed to retrieve job caches, size=%d, IDs=%s, includeDetails=%b",
+                    workflowIds.size(), getWorkflowIdsStr(workflowIds), includeDetails);
+            log.error(msg, e);
+        }
+        return jobCacheMap;
+    }
+
+    private String getWorkflowIdsStr(List<Long> workflowIds) {
+        List<Long> truncatedIds = workflowIds.stream().limit(LOG_NUM_IDS_LIMIT).collect(Collectors.toList());
+        if (truncatedIds.size() == workflowIds.size()) {
+            return truncatedIds.toString();
+        } else {
+            return truncatedIds.toString() + "...";
+        }
     }
 
     /*
@@ -194,6 +257,8 @@ public class JobCacheServiceImpl implements JobCacheService {
         if (workflowJob == null) {
             return null;
         }
+        // set tenant for report retrieval
+        MultiTenantContext.setTenant(workflowJob.getTenant());
         return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl,
                 workflowJob, includeDeatils);
     }
@@ -213,35 +278,51 @@ public class JobCacheServiceImpl implements JobCacheService {
 
         @Override
         public void run() {
-            List<Long> ids = new ArrayList<>(workflowIds);
-            List<Long> detailIds = new ArrayList<>(workflowIds);
-            if (updateTime != null) {
-                // check if the update time has changed, if other process has refreshed the cache entry,
-                // not refreshing again
-                List<Long> updateTimes = cacheWriter.getUpdateTimeByWorkflowIds(workflowIds, false);
-                List<Long> detailUpdateTimes = cacheWriter.getUpdateTimeByWorkflowIds(workflowIds, true);
-                ids = removeUpdatedIds(workflowIds, updateTimes, updateTime);
-                detailIds = removeUpdatedIds(workflowIds, detailUpdateTimes, updateTime);
+            try {
+                List<Long> ids = new ArrayList<>(workflowIds);
+                List<Long> detailIds = new ArrayList<>(workflowIds);
+                if (updateTime != null) {
+                    // check if the update time has changed, if other process has refreshed the cache entry,
+                    // not refreshing again
+                    List<Long> updateTimes = cacheWriter.getUpdateTimeByWorkflowIds(workflowIds, false);
+                    List<Long> detailUpdateTimes = cacheWriter.getUpdateTimeByWorkflowIds(workflowIds, true);
+                    ids = removeUpdatedIds(workflowIds, updateTimes, updateTime);
+                    detailIds = removeUpdatedIds(workflowIds, detailUpdateTimes, updateTime);
+                }
+
+                // merge IDs and dedup
+                List<Long> jobIds = Stream.concat(ids.stream(), detailIds.stream()).distinct().collect(Collectors.toList());
+                List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(jobIds);
+                Set<Long> idSet = new HashSet<>(ids);
+                Set<Long> detailIdSet = new HashSet<>(detailIds);
+
+                logUpdatedIds(jobIds, workflowIds);
+
+                List<Job> jobs = workflowJobs
+                        .stream()
+                        .filter(job -> idSet.contains(job.getWorkflowId()))
+                        .map(workflowJob -> transform(workflowJob, false))
+                        .collect(Collectors.toList());
+                List<Job> detailJobs = workflowJobs
+                        .stream()
+                        .filter(job -> detailIdSet.contains(job.getWorkflowId()))
+                        .map(workflowJob -> transform(workflowJob, true))
+                        .collect(Collectors.toList());
+                log.info("Populating job caches, updateTime={}, size={}, IDs={}",
+                        updateTime, jobIds.size(), getWorkflowIdsStr(jobIds));
+                cacheWriter.put(jobs, false);
+                cacheWriter.put(detailJobs, true);
+            } catch (Exception e) {
+                log.error(String.format("Fail to refresh job caches, updateTime=%d, size=%d, IDs=%s",
+                        updateTime, workflowIds.size(), getWorkflowIdsStr(workflowIds)), e);
             }
+        }
 
-            // merge IDs and dedup
-            List<Long> jobIds = Stream.concat(ids.stream(), detailIds.stream()).distinct().collect(Collectors.toList());
-            List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(jobIds);
-            Set<Long> idSet = new HashSet<>(ids);
-            Set<Long> detailIdSet = new HashSet<>(detailIds);
-
-            List<Job> jobs = workflowJobs
-                    .stream()
-                    .filter(job -> idSet.contains(job.getWorkflowId()))
-                    .map(workflowJob -> transform(workflowJob, false))
-                    .collect(Collectors.toList());
-            List<Job> detailJobs = workflowJobs
-                    .stream()
-                    .filter(job -> detailIdSet.contains(job.getWorkflowId()))
-                    .map(workflowJob -> transform(workflowJob, true))
-                    .collect(Collectors.toList());
-            cacheWriter.put(jobs, false);
-            cacheWriter.put(detailJobs, true);
+        private void logUpdatedIds(List<Long> filteredIds, List<Long> originalIds) {
+            Set<Long> idSet = new HashSet<>(filteredIds);
+            List<Long> updatedIds = originalIds.stream().filter(id -> !idSet.contains(id)).collect(Collectors.toList());
+            log.info("Skipping already updated job caches, updateTime={}, size={}, IDs={}",
+                    updateTime, updatedIds.size(), getWorkflowIdsStr(updatedIds));
         }
 
         private List<Long> removeUpdatedIds(List<Long> ids, List<Long> times, @NotNull Long updateTime) {

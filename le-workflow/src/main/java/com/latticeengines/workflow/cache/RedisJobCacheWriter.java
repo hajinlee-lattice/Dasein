@@ -227,7 +227,11 @@ public class RedisJobCacheWriter implements JobCacheWriter {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(id);
         List<String> params = new ArrayList<>();
-        Collections.addAll(params, CACHE_KEY_PREFIX, type.name(), includeDetails ? DETAIL_KEY : "", id);
+        Collections.addAll(params, CACHE_KEY_PREFIX, type.name());
+        if (includeDetails) {
+            params.add(DETAIL_KEY);
+        }
+        params.add(id);
         Collections.addAll(params, suffixStrs);
         return StringUtils.collectionToDelimitedString(params, DELIMITER);
     }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.TransformerUtils;
 import org.slf4j.Logger;
@@ -87,6 +88,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private JobCacheService jobCacheService;
 
     @Autowired
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
@@ -346,6 +350,8 @@ public class WorkflowServiceImpl implements WorkflowService {
             try {
                 status = getStatus(workflowId);
                 keepUpdate(workflowPid, jobUpdate);
+                // pre-warm the cache
+                jobCacheService.putAsync(workflowId.getId());
                 if (status == null) {
                     break;
                 } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {

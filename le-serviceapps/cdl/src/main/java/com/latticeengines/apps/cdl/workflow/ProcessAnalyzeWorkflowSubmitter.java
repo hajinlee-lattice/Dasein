@@ -240,7 +240,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         // data feed execution does not always have workflowPid, need the workflow execution
         Long workflowId = lastDataFeedExecution.getWorkflowId();
-        Job job = workflowProxy.getWorkflowExecution(String.valueOf(workflowId));
+        Job job = workflowProxy.getWorkflowExecution(String.valueOf(workflowId), true);
         if (job == null || job.getPid() == null || job.getJobStatus() != JobStatus.FAILED) {
             return Collections.emptyList();
         }

@@ -22,6 +22,8 @@ public interface WorkflowJobService {
 
     Job getJobByWorkflowId(String customerSpace, Long workflowId, Boolean includeDetails);
 
+    Job getJobByWorkflowIdFromCache(String customerSpace, Long workflowId, boolean includeDetails);
+
     Job getJobByWorkflowPid(String customerSpace, Long workflowPid, Boolean includeDetails);
 
     Job getJobByApplicationId(String customerSpace, String applicationId, Boolean includeDetails);
@@ -30,6 +32,8 @@ public interface WorkflowJobService {
 
     List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
                                    Boolean includeDetails, Boolean hasParentId, Long parentJobId);
+
+    List<Job> getJobsByWorkflowIdsFromCache(String customerSpace, List<Long> workflowIds, boolean includeDetails);
 
     List<Job> getJobsByWorkflowPids(String customerSpace, List<Long> workflowPids, List<String> types,
                                    Boolean includeDetails, Boolean hasParentId, Long parentJobId);

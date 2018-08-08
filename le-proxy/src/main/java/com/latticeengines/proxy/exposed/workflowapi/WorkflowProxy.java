@@ -167,8 +167,16 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
     }
 
     public Job getWorkflowExecution(String workflowId, String... params) {
+        return getWorkflowExecution(workflowId, false, params);
+    }
+
+    public Job getWorkflowExecution(String workflowId, boolean bypassCache, String... params) {
         String baseUrl = "/job/{workflowId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        if (bypassCache) {
+            url += url.contains("?customerSpace=") ? "&" : "?";
+            url += buildQueryString("bypassCache", Collections.singletonList("true"));
+        }
         url = constructUrl(url, workflowId);
         return get("getJobFromWorkflowId", url, Job.class);
     }
@@ -367,4 +375,6 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         urlStr.append("parentJobId=").append(parentJobId);
         return constructUrl(urlStr.toString());
     }
+
+
 }

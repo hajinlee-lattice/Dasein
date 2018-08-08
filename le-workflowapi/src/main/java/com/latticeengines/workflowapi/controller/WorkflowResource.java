@@ -95,8 +95,13 @@ public class WorkflowResource {
     @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ApiOperation(value = "Get a workflow execution")
     public Job getWorkflowExecution(@PathVariable String workflowId,
-            @RequestParam(required = false) String customerSpace) {
-        return workflowJobService.getJobByWorkflowId(customerSpace, Long.valueOf(workflowId), true);
+            @RequestParam(required = false) String customerSpace,
+            @RequestParam(required = false, defaultValue = "false") Boolean bypassCache) {
+        if (bypassCache) {
+            return workflowJobService.getJobByWorkflowId(customerSpace, Long.valueOf(workflowId), true);
+        } else {
+            return workflowJobService.getJobByWorkflowIdFromCache(customerSpace, Long.valueOf(workflowId), true);
+        }
     }
 
     @RequestMapping(value = "/jobs", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -109,7 +114,11 @@ public class WorkflowResource {
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
         Optional<Boolean> optionalIncludeDetails = Optional.ofNullable(includeDetails);
 
-        if (optionalJobIds.isPresent()) {
+        if (optionalJobIds.isPresent() && !jobIds.isEmpty() && !optionalTypes.isPresent()) {
+            // from cache
+            List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
+            return workflowJobService.getJobsByWorkflowIdsFromCache(customerSpace, workflowIds, optionalIncludeDetails.orElse(true));
+        } else if (optionalJobIds.isPresent()) {
             List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
             return workflowJobService.getJobsByWorkflowIds(customerSpace, workflowIds, optionalTypes.orElse(null),
                     optionalIncludeDetails.orElse(true), false, -1L);
