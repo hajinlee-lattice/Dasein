@@ -8,7 +8,7 @@ module.exports = {
     angular: "./angular-vendor.js",
     vendor: "./vendor.index.js"
   },
-  devtool: "inline-source-map",
+  devtool: "eval-source-map",
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({

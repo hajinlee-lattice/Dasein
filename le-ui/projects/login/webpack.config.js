@@ -10,7 +10,7 @@ module.exports = {
     vendor: "../common/vendor.index.js",
     login: "./index.js"
   },
-  devtool: "inline-source-map",
+  devtool: "eval-source-map",
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({
