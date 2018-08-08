@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -46,6 +47,7 @@ public class CDLDependenciesResource {
 
     @RequestMapping(value = "/ratingengines", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @UseReaderConnection
     @ApiOperation(value = "Get impacted rating engines")
     public List<RatingEngine> getDependingRatingEngines(@PathVariable String customerSpace,
                                                         @RequestBody List<String> attributes) {
@@ -54,6 +56,7 @@ public class CDLDependenciesResource {
 
     @RequestMapping(value = "/ratingmodels", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @UseReaderConnection
     @ApiOperation(value = "Get impacted rating models")
     public List<RatingModel> getDependingRatingModels(@PathVariable String customerSpace,
                                                       @RequestBody List<String> attributes) {
@@ -62,6 +65,7 @@ public class CDLDependenciesResource {
 
     @RequestMapping(value = "/plays", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @UseReaderConnection
     @ApiOperation(value = "Get impacted plays")
     public List<Play> getDependingPlays(@PathVariable String customerSpace,
                                         @RequestBody List<String> attributes) {

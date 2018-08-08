@@ -4,9 +4,12 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 
+import com.latticeengines.common.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -30,6 +33,15 @@ public class ResourceAspect {
         String customerSpace = (String) joinPoint.getArgs()[0];
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         setMultiTenantContext(customerSpace);
+    }
+
+    @Around("execution(* com.latticeengines.apps.*.controller.*.*(..)) " +
+            "&& @annotation(com.latticeengines.common.exposed.annotation.UseReaderConnection)")
+    public Object setReaderConnection(ProceedingJoinPoint joinPoint) throws Throwable {
+        DBConnectionContext.setReaderConnection(Boolean.TRUE);
+        Object obj = joinPoint.proceed();
+        DBConnectionContext.setReaderConnection(Boolean.FALSE);
+        return obj;
     }
 
     private void setMultiTenantContext(String customerSpace) {

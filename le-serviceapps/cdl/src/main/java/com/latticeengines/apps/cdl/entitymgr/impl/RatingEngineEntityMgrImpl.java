@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,14 +28,15 @@ import com.latticeengines.apps.cdl.dao.RatingEngineDao;
 import com.latticeengines.apps.cdl.dao.RuleBasedModelDao;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
-import com.latticeengines.apps.cdl.repository.writer.RatingEngineRepository;
+import com.latticeengines.apps.cdl.repository.RatingEngineRepository;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
+import com.latticeengines.common.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -69,7 +71,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("ratingEngineEntityMgr")
-public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<RatingEngine, Long>
+public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<RatingEngine, Long>
         implements RatingEngineEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImpl.class);
@@ -77,8 +79,11 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     @Inject
     private RatingEngineDao ratingEngineDao;
 
-    @Inject
-    private RatingEngineRepository ratingEngineRepository;
+    @Resource(name = "ratingEngineWriterRepository")
+    private RatingEngineRepository ratingEngineWriterRepository;
+
+    @Resource(name = "ratingEngineReaderRepository")
+    private RatingEngineRepository ratingEngineReaderRepository;
 
     @Inject
     private RuleBasedModelDao ruleBasedModelDao;
@@ -98,14 +103,19 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     }
 
     @Override
-    public BaseJpaRepository<RatingEngine, Long> getRepository() {
-        return ratingEngineRepository;
+    public BaseJpaRepository<RatingEngine, Long> getRepositoryByContext() {
+        if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
+            log.info("Use reader repository for RatingEngineEntityMgr.");
+            return ratingEngineReaderRepository;
+        } else {
+            return ratingEngineWriterRepository;
+        }
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RatingEngine> findAll() {
-        return findAllByTypeAndStatus(null, null);
+        return super.findAll();
     }
 
     @Override
@@ -118,7 +128,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     @SoftDeleteConfiguration
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RatingEngine> findAllDeleted() {
-        return ratingEngineRepository.findByDeletedTrue();
+        return ratingEngineWriterRepository.findByDeletedTrue();
     }
 
     @Override

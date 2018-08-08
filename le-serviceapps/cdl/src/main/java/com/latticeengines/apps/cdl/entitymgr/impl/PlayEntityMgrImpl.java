@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,16 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.cdl.dao.PlayDao;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
-import com.latticeengines.apps.cdl.repository.writer.PlayRepository;
+import com.latticeengines.apps.cdl.repository.PlayRepository;
+import com.latticeengines.common.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 
 @Component("playEntityMgr")
-public class PlayEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Play, Long> implements PlayEntityMgr {
+public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play, Long> implements PlayEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(PlayEntityMgrImpl.class);
 
@@ -33,12 +35,20 @@ public class PlayEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Play, Long> i
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
-    @Inject
-    private PlayRepository playRepository;
+    @Resource(name = "playWriterRepository")
+    private PlayRepository playWriterRepository;
+
+    @Resource(name = "playReaderRepository")
+    private PlayRepository playReaderRepository;
 
     @Override
-    public BaseJpaRepository<Play, Long> getRepository() {
-        return playRepository;
+    public BaseJpaRepository<Play, Long> getRepositoryByContext() {
+        if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
+            log.info("Use reader repository for PlayEntityMgr.");
+            return playReaderRepository;
+        } else {
+            return playWriterRepository;
+        }
     }
 
     @Override
@@ -131,7 +141,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Play, Long> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine, List<PlayStatus> statusList) {
-        return playRepository.findByRatingEngineAndPlayStatusIn(ratingEngine, statusList);
+        return playWriterRepository.findByRatingEngineAndPlayStatusIn(ratingEngine, statusList);
     }
 
     @Override
