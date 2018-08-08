@@ -159,16 +159,16 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.changeTenantType = function() {
         if ($scope.selectedProductNames.indexOf("Customer Growth") >= 0) {
             $scope.selectedFeatureFlags.forEach(function(flag) {
-                if (flag.DisplayName == 'AllowAutoSchedule') {
+                if (flag.DisplayName === 'AllowAutoSchedule') {
                     flag.Value = setAutoSchedulingFlagValue();
                 }
-            })
+            });
         }
-    }
+    };
 
     function setAutoSchedulingFlagValue() {
-        return $scope.tenantInfo.properties.tenantType == "CUSTOMER" && 
-                                    $scope.selectedProductNames.length == 2 && $scope.selectedProductNames.indexOf("Lead Prioritization 3.0") >= 0 &&
+        return $scope.tenantInfo.properties.tenantType === "CUSTOMER" && 
+                                    $scope.selectedProductNames.length === 2 && $scope.selectedProductNames.indexOf("Lead Prioritization 3.0") >= 0 &&
                                     $scope.selectedProductNames.indexOf("Customer Growth") >= 0;
     }
     
