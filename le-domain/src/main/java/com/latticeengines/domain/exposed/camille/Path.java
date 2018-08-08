@@ -186,6 +186,14 @@ public class Path implements Serializable {
         return "/" + Joiner.on("/").join(parts);
     }
 
+    public String toS3Key() {
+        return Joiner.on("/").join(parts);
+    }
+
+    public String toS3NUri(String bucket) {
+        return "s3n://" + bucket + "/" + Joiner.on("/").join(parts);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other)

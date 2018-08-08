@@ -517,6 +517,30 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
     }
 
+
+    @Override
+    public synchronized void deleteSource(String source, String version) {
+        String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, path)) {
+                HdfsUtils.rmdir(yarnConfiguration, path);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete " + source + " snapshot at version " + version, e);
+        }
+
+        path = hdfsPathBuilder.constructSchemaFile(source, version).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, path)) {
+                HdfsUtils.rmdir(yarnConfiguration, path);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete " + source + " schema at version " + version, e);
+        }
+
+        log.info("Deleted " + source + " at version " + version);
+    }
+
     private void sleep(long sleepDuration) {
         try {
             Thread.sleep(sleepDuration);
