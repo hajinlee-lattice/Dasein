@@ -169,7 +169,7 @@ public class AMSeedCleanPipelineTestNG
 
     private String getMarkerConfig(boolean useTez) throws JsonProcessingException {
         AMSeedMarkerConfig conf = new AMSeedMarkerConfig();
-        String[] srcPriorityToMrkPriDom = { "Orb", "HG", "DnB", "RTS" };
+        String[] srcPriorityToMrkPriDom = { "HG", "DnB", "RTS" };
         conf.setSrcPriorityToMrkPriDom(srcPriorityToMrkPriDom);
         String[] goldenDomSrcs = { "Orb" };
         conf.setGoldenDomSrcs(goldenDomSrcs);
