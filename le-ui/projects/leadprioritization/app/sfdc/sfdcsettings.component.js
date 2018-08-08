@@ -47,7 +47,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate', 'lp.sfdc', 'common.modal', '
             if (!vm.featureflags.EnableCdl) {
                 $state.go('.', {pageTitle: 'Salesforce Settings'}, {notify: false});
             } else {
-                $state.go('.', {pageTitle: 'Applications Settings'}, {notify: false});
+                $state.go('.', {pageTitle: 'Application Settings'}, {notify: false});
             }
 
             vm.accountIDMap = {};
