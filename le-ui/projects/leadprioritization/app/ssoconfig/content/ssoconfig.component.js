@@ -150,6 +150,8 @@ angular.module('lp.ssoconfig.configure', [])
                     vm.status = 'Failed';
                     vm.metadataUploadDate = result && result.created ? result.created : 'n/a';
                     vm.metadataXMLLabel = result && result.metadata ? 'Download File' : 'n/a';
+                    vm.params.scope.cancel();
+                    vm.canSubmit = false;
                 }
             });
         }
