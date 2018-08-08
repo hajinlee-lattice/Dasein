@@ -856,7 +856,6 @@ public class AttrConfigServiceImplTestUtils {
         List<AttrValidation> validations = details.getValidations();
         AttrValidation validation = new AttrValidation();
         validation.setAttrName(attrName);
-        validation.setCategory(Category.ACCOUNT_ATTRIBUTES);
         validation.setSubcategory(subcategory);
         ImpactWarnings impactWarnings = new ImpactWarnings();
         Map<ImpactWarnings.Type, List<String>> warnings = new HashMap<>();
@@ -894,7 +893,6 @@ public class AttrConfigServiceImplTestUtils {
 
         AttrValidation validation = new AttrValidation();
         validation.setAttrName(attrName);
-        validation.setCategory(Category.ACCOUNT_ATTRIBUTES);
         validation.setSubcategory(subcategory);
         attrConfigRequest.getDetails().getValidations().add(validation);
         return attrConfigRequest;
@@ -918,7 +916,6 @@ public class AttrConfigServiceImplTestUtils {
 
         AttrValidation validation = new AttrValidation();
         validation.setAttrName(attrName);
-        validation.setCategory(Category.ACCOUNT_ATTRIBUTES);
         validation.setSubcategory(subcategory);
         attrConfigRequest.getDetails().getValidations().add(validation);
         return attrConfigRequest;
