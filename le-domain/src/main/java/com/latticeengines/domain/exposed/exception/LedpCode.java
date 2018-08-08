@@ -320,7 +320,8 @@ public enum LedpCode {
     LEDP_18195("Update Activation Attribute Config failed due to usage enbaled"), //
     LEDP_18196("Cannot map two column to {0}, please re-map column."), //
     LEDP_18197("Could not find Marketo Crendetial Profile for given id: {0}."), //
-    
+    LEDP_18198("Records in company profile request cannot be empty"), //
+
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
     LEDP_19001("Unauthorized."), //
