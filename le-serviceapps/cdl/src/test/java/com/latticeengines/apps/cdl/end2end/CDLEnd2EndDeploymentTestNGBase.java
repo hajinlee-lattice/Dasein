@@ -40,8 +40,8 @@ import org.testng.annotations.BeforeClass;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -270,13 +270,16 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
         log.info("Test environment setup finished.");
         createDataFeed();
-        updateDataCloudBuildNumber();
         setupBusinessCalendar();
         setupPurchaseHistoryMetrics();
         setDefaultAPSRollupPeriod();
 
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
+
+        // If don't want to remove testing tenant for debug purpose, remove
+        // comments on this line but don't check in
+        // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     protected void resetCollection() {
@@ -725,12 +728,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     protected void updateDataCloudBuildNumber() {
         String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
-        DataCollection.Version version = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
-        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace, version);
+        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace,
+                initialVersion);
         status.setDataCloudBuildNumber(currentDataCloudBuildNumber);
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status, version);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status, initialVersion);
         log.info(String.format("Update datacloud rebuild number as %s for tenant %s with version %s",
-                currentDataCloudBuildNumber, mainCustomerSpace, version));
+                currentDataCloudBuildNumber, mainCustomerSpace, initialVersion));
     }
 
     long countTableRole(TableRoleInCollection role) {
@@ -758,6 +761,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void resumeCheckpoint(String checkpoint) throws IOException {
         checkpointService.resumeCheckpoint(checkpoint);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+        updateDataCloudBuildNumber();
     }
 
     void saveCheckpoint(String checkpoint) throws IOException {
