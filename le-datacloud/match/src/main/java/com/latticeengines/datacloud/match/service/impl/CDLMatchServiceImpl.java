@@ -176,14 +176,14 @@ public class CDLMatchServiceImpl implements CDLMatchService {
                         ? dynamoDataUnit.getLinkedTable()
                         : dynamoDataUnit.getName();
                 map.get(dynamoDataUnit.getSignature()).get(tenantId).add(tableName);
-                for (Map.Entry<String, Map<String, List<String>>> ent : map.entrySet()) {
-                    GenericTableEntityMgr tableEntityMgr = getTableEntityMgr(ent.getKey());
-                    Map<String, Object> result = tableEntityMgr.getByKeyPair(ent.getValue(), keyPair);
-                    if (MapUtils.isNotEmpty(result)) {
-                        data.putAll(result);
-                    }
-                }
             });
+            for (Map.Entry<String, Map<String, List<String>>> ent : map.entrySet()) {
+                GenericTableEntityMgr tableEntityMgr = getTableEntityMgr(ent.getKey());
+                Map<String, Object> result = tableEntityMgr.getByKeyPair(ent.getValue(), keyPair);
+                if (MapUtils.isNotEmpty(result)) {
+                    data.putAll(result);
+                }
+            }
         }
         return data;
     }
