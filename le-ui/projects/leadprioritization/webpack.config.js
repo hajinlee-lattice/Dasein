@@ -11,7 +11,7 @@ module.exports = {
     visualization: "../common/vendor-visualization.index.js",
     atlas: "./index.js"
   },
-  devtool: "inline-source-map",
+  devtool: "source-map",
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({

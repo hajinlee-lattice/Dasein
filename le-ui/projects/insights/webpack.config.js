@@ -9,7 +9,7 @@ module.exports = {
     vendor: "../common/vendor.index.js",
     insights: "./index.js"
   },
-  devtool: "eval-source-map",
+  devtool: "source-map",
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({
