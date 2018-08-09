@@ -52,9 +52,10 @@ public class InfluxDbMetricWriter implements MetricWriter {
     private static final String DB_CACHE_KEY = "InfluxDB";
     private static final String METRIC_ADVERTISE_NAME = "METRIC_ADVERTISE_NAME";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
-    
-    @Value("${monitor.influxdb.enabled:false}")
-	private String enableInflux;
+
+    // dont' commmit perry
+    @Value("${monitor.influxdb.enabled:true}")
+    private String enableInflux;
 
     @Value("${monitor.influxdb.url:}")
     private String url;
@@ -125,8 +126,8 @@ public class InfluxDbMetricWriter implements MetricWriter {
     }
 
     @Override
-    public <F extends Fact, D extends Dimension> void write(MetricDB db,
-            List<? extends Measurement<F, D>> measurements, List<Map<String, Object>> fieldMaps) {
+    public <F extends Fact, D extends Dimension> void write(MetricDB db, List<? extends Measurement<F, D>> measurements,
+            List<Map<String, Object>> fieldMaps) {
         if (enabled) {
             boolean needToWrite = false;
             for (Measurement<F, D> measurement : measurements) {
@@ -195,7 +196,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
         List<Point> points = new ArrayList<>();
 
         for (int i = 0; i < measurements.size(); i++) {
-            Measurement<F, D> measurement  = measurements.get(i);
+            Measurement<F, D> measurement = measurements.get(i);
             Fact fact = measurement.getFact();
             Dimension dimension = measurement.getDimension();
             policy = measurement.getRetentionPolicy();
@@ -266,8 +267,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
         String queryString = String.format("CREATE DATABASE \"%s\"", db.getDbName());
         JsonNode jsonNode = queryInfluxDb(queryString, db.getDbName());
         if (jsonNode.get("results").get(0).has("error")) {
-            throw new RuntimeException(
-                    "Failed to create database: " + jsonNode.get("results").get(0).get("error"));
+            throw new RuntimeException("Failed to create database: " + jsonNode.get("results").get(0).get("error"));
         }
     }
 

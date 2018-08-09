@@ -7,15 +7,26 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
+import com.latticeengines.playmaker.exposed.context.PlaymakerMeasurement;
+import com.latticeengines.playmaker.exposed.context.PlaymakerMetrics;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
@@ -34,6 +45,9 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     @Inject
     private LpiPMAccountExtension lpiPMAccountExtension;
 
+    @Autowired
+    protected MetricService metricService;
+
     public LpiPMRecommendationDaoAdapterImpl() {
         super(null);
     }
@@ -45,8 +59,44 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
             List<String> playIds, Map<String, String> orgInfo) {
+        long timestamp = System.currentTimeMillis();
         SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
-        return lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum, playIds, orgInfo);
+        List<Map<String, Object>> result = lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum,
+                playIds, orgInfo);
+        long timeTaken = System.currentTimeMillis() - timestamp;
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        String destinationOrgId = null;
+        String destinationSysType = null;
+        if (MapUtils.isNotEmpty(orgInfo)) {
+            Pair<String, String> effectiveOrgInfo = null;
+            if (StringUtils.isNotBlank(orgInfo.get(CDLConstants.ORG_ID))
+                    && StringUtils.isNotBlank(orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE))) {
+                effectiveOrgInfo = new ImmutablePair<String, String>(orgInfo.get(CDLConstants.ORG_ID).trim(),
+                        orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE).trim());
+            }
+            destinationOrgId = effectiveOrgInfo.getLeft();
+            destinationSysType = effectiveOrgInfo.getRight();
+        }
+
+        PlaymakerMetrics metrics = generateMetrics(customerSpace, (int) timeTaken, maximum, destinationOrgId,
+                destinationSysType, syncDestEnum);
+        PlaymakerMeasurement measurement = new PlaymakerMeasurement(metrics);
+        metricService.write(MetricDB.PLAYMAKER, measurement);
+
+        return result;
+    }
+
+    private PlaymakerMetrics generateMetrics(CustomerSpace customerSpace, int timeTaken, int maximum,
+            String destinationOrgId, String destinationSysType, SynchronizationDestinationEnum syncDestEnum) {
+        PlaymakerMetrics metrics = new PlaymakerMetrics();
+        metrics.setTenantId(customerSpace.toString());
+        metrics.setGetRecommendationDurationMS(timeTaken);
+        metrics.setMaximum(maximum);
+        metrics.setDestinationOrgId(destinationOrgId);
+        metrics.setDestinationSysType(destinationSysType);
+        metrics.setSyncDestination(syncDestEnum.name());
+
+        return metrics;
     }
 
     @Override

@@ -23,10 +23,8 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { //"classpath:test-pls-context.xml", 
-		"classpath:test-testframework-cleanup-context.xml", 
-		"classpath:playmakercore-context.xml",
-        "classpath:test-playmaker-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-testframework-cleanup-context.xml",
+        "classpath:playmakercore-context.xml", "classpath:test-playmaker-context.xml" })
 public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(LpiPMPlayImplDeploymentTestNG.class);
