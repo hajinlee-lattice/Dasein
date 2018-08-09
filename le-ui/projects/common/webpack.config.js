@@ -14,13 +14,14 @@ module.exports = {
     new HtmlWebpackPlugin({
       filename: "index.html",
       template: __dirname + "/index.html"
-    }),
+    })
   ],
   optimization: {
     minimizer: [
       new UglifyJsPlugin({
         exclude: /\/node_modules/,
-        parallel: 4})
+        parallel: 4
+      })
     ],
     splitChunks: {
       // chunks: "all"
@@ -32,7 +33,24 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.s?css/, use: ["style-loader", "css-loader", "sass-loader"] },
+      {
+        test: /\.s?css/,
+        use: [
+          { loader: "style-loader" },
+          {
+            loader: "css-loader",
+            options: {
+              sourceMap: true
+            }
+          },
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: true
+            }
+          }
+        ]
+      },
       { test: /\.(png|svg|jpg|gif)$/, use: ["file-loader"] },
       { test: /\.(woff|woff2|eot|ttf|otf)$/, use: ["file-loader"] },
       { test: /\.html$/, use: ["raw-loader"] },
