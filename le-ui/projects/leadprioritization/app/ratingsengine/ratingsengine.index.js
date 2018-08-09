@@ -11,6 +11,6 @@ import './content/ratingslist/ratingslist.index';
 import './content/segment/segment.index';
 import './content/summary/summary.index';
 import './content/remodel/remodel.index';
-import './content/training/training.idex';
+import './content/training/training.index';
 import './ratingsengine.routes';
 import './ratingsengine.service';

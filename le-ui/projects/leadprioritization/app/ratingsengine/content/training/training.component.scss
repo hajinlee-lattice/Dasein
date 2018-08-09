@@ -66,6 +66,13 @@
                     margin-bottom: 0;
                 }
             }
+            &.purchased-before-period {
+                display: block;
+                p, select {
+                    display: inline-block;
+                    width: auto;
+                }
+            }
         }
         &.full-width {
             width: 100%;

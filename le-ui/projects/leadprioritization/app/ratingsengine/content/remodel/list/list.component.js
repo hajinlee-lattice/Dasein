@@ -59,14 +59,16 @@ angular.module('lp.ratingsengine.remodel.list', [])
         }
 
         vm.toggleSelected = function(attribute){
-            
-            if (attribute.ApprovedUsage === "None"){
-                attribute.ApprovedUsage = attribute.OriginalApprovedUsage;
-            } else {
-                attribute.OriginalApprovedUsage = attribute.ApprovedUsage;
-                attribute.ApprovedUsage = "None";    
-            }
+            var approvedUsage = attribute.ApprovedUsage;
 
+            if ( approvedUsage.indexOf( 'None' ) > -1 ) {
+                approvedUsage.splice(0,1);
+                approvedUsage.push(attribute.OriginalApprovedUsage);
+            } else {
+                attribute.OriginalApprovedUsage = approvedUsage[0];
+                approvedUsage.splice(0,1);
+                approvedUsage.push('None');
+            }
         }
 
     }

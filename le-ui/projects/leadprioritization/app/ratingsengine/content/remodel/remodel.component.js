@@ -25,7 +25,7 @@ angular.module('lp.ratingsengine.remodel', [
                         { 
                             label: 'Training Changes', 
                             state: 'training', 
-                            nextFn: '', 
+                            nextFn: '',
                             progressDisabled: false 
                         },
                         { 

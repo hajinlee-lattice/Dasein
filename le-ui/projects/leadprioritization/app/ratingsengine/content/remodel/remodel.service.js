@@ -55,7 +55,6 @@ angular.module('lp.ratingsengine.remodel')
         var deferred = $q.defer();
 
         AtlasRemodelService.getAttributes(engineId, modelId).then(function(result) {
-
             deferred.resolve(result);
         });
 
@@ -69,7 +68,11 @@ angular.module('lp.ratingsengine.remodel')
             clientSession = BrowserStorageUtility.getClientSession(),
             createdBy = clientSession.EmailAddress;
 
-        console.log(iteration.AI);
+        if(iteration.AI.advancedModelingConfig.cross_sell){
+            iteration.AI.advancedModelingConfig.cross_sell.filters = RatingsEngineStore.getConfigFilters();
+        } else {
+            iteration.AI.advancedModelingConfig.custom_event = RatingsEngineStore.getConfigFilters();
+        }
 
         // Sanitize iteration to remove data and add createBy
         iteration.AI.createdBy = createdBy;
@@ -78,6 +81,8 @@ angular.module('lp.ratingsengine.remodel')
         delete iteration.AI.modelingJobId;
         delete iteration.AI.modelingJobStatus;
         delete iteration.AI.modelSummaryId;
+
+        console.log(iteration);
 
         // Save iteration
         AtlasRemodelService.saveIteration(engineId, iteration).then(function(result){
@@ -97,9 +102,9 @@ angular.module('lp.ratingsengine.remodel')
                 }
             });
 
-            var attributesString = JSON.stringify(attributes);
+            // var attributesString = JSON.stringify(attributes);
 
-            AtlasRemodelService.launchModeling(engineId, modelId, attributesString).then(function(applicationid){
+            AtlasRemodelService.launchModeling(engineId, modelId, attributes).then(function(applicationid){
                 console.log(applicationid);
 
                 RatingsEngineStore.setApplicationId(applicationid);

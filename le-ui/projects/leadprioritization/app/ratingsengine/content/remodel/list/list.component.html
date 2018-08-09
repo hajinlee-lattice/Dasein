@@ -40,7 +40,7 @@
                         | orderBy: $ctrl.sortBy
                         | startFrom: ($ctrl.currentPage - 1) * $ctrl.pageSize
                         | limitTo: $ctrl.pageSize))"
-                ng-class="{'disabled': attribute.ApprovedUsage === 'None'}">
+                ng-class="{'disabled': attribute.ApprovedUsage[0] == 'None'}">
                 <td>
                     <span class="ico ico-warning" ng-if="attribute.IsCoveredByOptionalRule || attribute.IsCoveredByMandatoryRule"></span>
                 </td>
@@ -51,8 +51,8 @@
                 <td>{{ attribute.DisplayName }}</td>
                 <td>
                     <div class="attr-result-checkbox" ng-click="$ctrl.toggleSelected(attribute)">
-                        <i class="fa fa-toggle-off" ng-if="attribute.ApprovedUsage == ['None']"></i>
-                        <i class="fa fa-toggle-on" ng-if="attribute.ApprovedUsage != ['None']"></i>
+                        <i class="fa fa-toggle-off" ng-if="attribute.ApprovedUsage[0] == 'None'"></i>
+                        <i class="fa fa-toggle-on" ng-if="attribute.ApprovedUsage[0] != 'None'"></i>
                     </div>
                 </td>
             </tr>

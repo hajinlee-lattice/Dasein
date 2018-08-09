@@ -14,6 +14,9 @@ angular.module('lp.ratingsengine')
     this.ratingsSet = false;
 
     this.init = function() {
+
+        console.log("Initialize RatingsEngineStore");
+
         this.settings = {};
 
         this.validation = {
@@ -777,6 +780,7 @@ angular.module('lp.ratingsengine')
         var currentConfig = this.configFilters;
         if(currentConfig != null){
             this.configFilters = angular.extend(currentConfig, configFilters);
+            console.log(this.configFilters);
         } else {
             this.configFilters = configFilters;
         }

@@ -288,7 +288,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
         // console.log(vm.ratingEngine);
         // console.log(vm.modelSummary);
-        console.log(vm.dashboard);
+        // console.log(vm.dashboard);
 
         vm.initModalWindow();
         vm.initDataModel();

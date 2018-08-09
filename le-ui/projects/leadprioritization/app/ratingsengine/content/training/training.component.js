@@ -24,7 +24,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             quantityValue: 2,
             periodsCriteria: "WITHIN",
             periodsValue: 2,
-            configFilters: RatingsEngineStore.getConfigFilters(),
+            configFilters: angular.copy(RatingsEngineStore.getConfigFilters()),
             trainingSegment: null,
             trainingProducts: null,
             scoringCountReturned: false,
@@ -42,49 +42,58 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
+            // Data variables
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.activeModel.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
 
+            // State variables
+            vm.repeatPurchaseRemodel = (vm.repeatPurchase && ($stateParams.section != "wizard.ratingsengine_segment")) ? true : false;
+
             if($stateParams.section != "wizard.ratingsengine_segment"){
-
                 if(vm.engineType == 'cross_sell'){
-
                     // Setup form for Cross Sell Models
-                    var filters = vm.iteration ? vm.iteration.AI.advancedModelingConfig.cross_sell.filters : vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.filters;
+                    vm.filters = vm.iteration.AI.advancedModelingConfig.cross_sell.filters;
+                    RatingsEngineStore.setConfigFilters(vm.filters);
 
-                    $scope.checkboxModel = {
-                        spend: filters.SPEND_IN_PERIOD ? true : false,
-                        quantity: filters.QUANTITY_IN_PERIOD ? true : false,
-                        periods: filters.TRAINING_SET_PERIOD ? true : false
+                    vm.repeatPurchase = (vm.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') ? true : false;
+
+                    vm.checkboxModel = {
+                        spend: vm.filters.SPEND_IN_PERIOD ? true : false,
+                        quantity: vm.filters.QUANTITY_IN_PERIOD ? true : false,
+                        periods: vm.filters.TRAINING_SET_PERIOD ? true : false
                     };
 
-                    vm.spendCriteria = filters.SPEND_IN_PERIOD ? filters.SPEND_IN_PERIOD.criteria : '';
-                    vm.spendValue = filters.SPEND_IN_PERIOD ? filters.SPEND_IN_PERIOD.value : '';
+                    if(vm.repeatPurchase){
+                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value.toString();
+                    }
 
-                    vm.quantityCriteria = filters.QUANTITY_IN_PERIOD ? filters.QUANTITY_IN_PERIOD.criteria : '';
-                    vm.quantityValue = filters.QUANTITY_IN_PERIOD ? filters.QUANTITY_IN_PERIOD.value : '';
+                    vm.spendCriteria = vm.filters.SPEND_IN_PERIOD ? vm.filters.SPEND_IN_PERIOD.criteria : '';
+                    vm.spendValue = vm.filters.SPEND_IN_PERIOD ? vm.filters.SPEND_IN_PERIOD.value : '';
 
-                    vm.periodsCriteria = filters.TRAINING_SET_PERIOD ? filters.TRAINING_SET_PERIOD.criteria : '';
-                    vm.periodsValue = filters.TRAINING_SET_PERIOD ? filters.TRAINING_SET_PERIOD.value : '';
-                
+                    vm.quantityCriteria = vm.filters.QUANTITY_IN_PERIOD ? vm.filters.QUANTITY_IN_PERIOD.criteria : '';
+                    vm.quantityValue = vm.filters.QUANTITY_IN_PERIOD ? vm.filters.QUANTITY_IN_PERIOD.value : '';
+
+                    vm.periodsCriteria = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.criteria : '';
+                    vm.periodsValue = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.value : '';
+
                 } else {
-
                     // Setup form for Custom Event Models
-                    var filters = vm.iteration ? vm.iteration.AI.advancedModelingConfig.custom_event : vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event;
+                    vm.filters = vm.iteration.AI.advancedModelingConfig.custom_event;
+                    RatingsEngineStore.setConfigFilters(vm.filters);
 
-                    $scope.checkboxModel = {
-                        datacloud: (filters.dataStores.indexOf('DataCloud') > -1) ? true : false,
-                        cdl: (filters.dataStores.indexOf('CDL') > -1) ? true : false,
-                        deduplicationType: filters.deduplicationType ? true : false,
-                        excludePublicDomains: (filters.excludePublicDomains == true) ? true : false,
-                        transformationGroup: (filters.transformationGroup == 'NONE') ? true : false
+                    vm.checkboxModel = {
+                        datacloud: (vm.filters.dataStores.indexOf('DataCloud') > -1) ? true : false,
+                        cdl: (vm.filters.dataStores.indexOf('CDL') > -1) ? true : false,
+                        deduplicationType: vm.filters.deduplicationType ? true : false,
+                        excludePublicDomains: (vm.filters.excludePublicDomains == true) ? true : false,
+                        transformationGroup: (vm.filters.transformationGroup == 'NONE') ? true : false
                     }
                 }
-
             }
 
             vm.engineId = vm.ratingEngine.id;            
             vm.modelId = vm.ratingModel.id;
+
             vm.modelingStrategy = vm.ratingModel.advancedModelingConfig[vm.engineType].modelingStrategy;
 
             if(vm.engineType == 'cross_sell'){
@@ -94,8 +103,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
 
             $scope.$on("$destroy", function() {
-
                 if(vm.engineType == 'cross_sell'){
+                    delete vm.configFilters.PURCHASED_BEFORE_PERIOD;
                     delete vm.configFilters.SPEND_IN_PERIOD;
                     delete vm.configFilters.QUANTITY_IN_PERIOD;
                     delete vm.configFilters.TRAINING_SET_PERIOD;
@@ -106,6 +115,8 @@ angular.module('lp.ratingsengine.wizard.training', [
                     RatingsEngineStore.setTrainingSegment(null);
                     vm.ratingModel.trainingSegment = null;
                 }
+
+                console.log(RatingsEngineStore.getConfigFilters());
 
             });
 
@@ -228,6 +239,10 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.formOnChange();
         }
 
+        vm.getPurchasedBeforeValue = function(value) {
+            vm.purchasedBeforePeriod = value;
+        }
+
         vm.validateCrossSellForm = function(){
 
             var valid = true;
@@ -235,14 +250,30 @@ angular.module('lp.ratingsengine.wizard.training', [
                 valid = $scope.trainingForm.$valid;
             }
 
+            console.log(valid);
+
             if(valid == true){
                 RatingsEngineStore.validation.training = true;
                 RatingsEngineStore.validation.refine = true;
                 vm.recordsCountReturned = false;
                 vm.purchasesCountReturned = false;
 
-                if($scope.checkboxModel) {
-                    if($scope.checkboxModel.spend) {
+                if(vm.repeatPurchaseRemodel) {
+
+                    vm.purchasedBeforePeriodNum = Number(vm.purchasedBeforePeriod);
+                    vm.configFilters.PURCHASED_BEFORE_PERIOD = {
+                        "configName": "PURCHASED_BEFORE_PERIOD",
+                        "criteria": "PRIOR_ONLY",
+                        "value": vm.purchasedBeforePeriodNum
+                    };
+
+                    RatingsEngineStore.setConfigFilters(vm.configFilters);
+                    vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
+                }
+
+                vm.crossSellCheckboxModel = function() {
+
+                    if(vm.checkboxModel.spend) {
                         vm.configFilters.SPEND_IN_PERIOD = {
                             "configName": "SPEND_IN_PERIOD",
                             "criteria": vm.spendCriteria,
@@ -252,7 +283,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         delete vm.configFilters.SPEND_IN_PERIOD;
                     }
 
-                    if($scope.checkboxModel.quantity) {
+                    if(vm.checkboxModel.quantity) {
                         vm.configFilters.QUANTITY_IN_PERIOD = {
                             "configName": "QUANTITY_IN_PERIOD",
                             "criteria": vm.quantityCriteria,
@@ -262,8 +293,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         delete vm.configFilters.QUANTITY_IN_PERIOD;
                     }
 
-                    if($scope.checkboxModel.periods) {
-
+                    if(vm.checkboxModel.periods) {
                         vm.configFilters.TRAINING_SET_PERIOD = {
                             "configName": "TRAINING_SET_PERIOD",
                             "criteria": vm.periodsCriteria,
@@ -273,7 +303,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         delete vm.configFilters.TRAINING_SET_PERIOD;
                     }
 
-                    if($scope.checkboxModel.spend || $scope.checkboxModel.quantity || $scope.checkboxModel.periods) {
+                    if(vm.checkboxModel.spend || vm.checkboxModel.quantity || vm.checkboxModel.periods) {
                         RatingsEngineStore.setConfigFilters(vm.configFilters);
                     }
 
@@ -282,6 +312,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                     vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 }
+
             } else {
                 RatingsEngineStore.validation.training = false;
                 RatingsEngineStore.validation.refine = false;
@@ -296,9 +327,6 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.validateCustomEventForm = function(){
 
-
-            console.log("yo");
-
             var valid = true;
             if($scope.trainingForm){
                 valid = $scope.trainingForm.$valid;
@@ -308,13 +336,14 @@ angular.module('lp.ratingsengine.wizard.training', [
                 RatingsEngineStore.validation.training = true;
                 RatingsEngineStore.validation.refine = true;
 
+                vm.configFilters.sourceFileName = vm.filters.sourceFileName;
+                RatingsEngineStore.setConfigFilters(vm.configFilters);
+
                 vm.configFilters.dataStores = [];
 
-                if($scope.checkboxModel) {
+                vm.customEventCheckboxModel = function() {
 
-                    console.log($scope.checkboxModel);
-
-                    if($scope.checkboxModel.datacloud) {
+                    if(vm.checkboxModel.datacloud) {
                         vm.configFilters.dataStores.push('DataCloud');
                     } else {
                         var dataStores = vm.configFilters.dataStores,
@@ -323,7 +352,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         dataStores.splice(index, 1);
                     }
 
-                    if($scope.checkboxModel.cdl) {
+                    if(vm.checkboxModel.cdl) {
                         vm.configFilters.dataStores.push('CDL');
                     } else {
                         var dataStores = vm.configFilters.dataStores,
@@ -332,32 +361,30 @@ angular.module('lp.ratingsengine.wizard.training', [
                         dataStores.splice(index, 1);
                     }
 
-                    if($scope.checkboxModel.deduplicationType) {
+                    if(vm.checkboxModel.deduplicationType) {
                         vm.configFilters.deduplicationType = 'ONELEADPERDOMAIN';
                     } else {
                         delete vm.configFilters.deduplicationType;
                     }
 
-                    if($scope.checkboxModel.excludePublicDomains) {
-                        vm.configFilters.excludePublicDomains = $scope.checkboxModel.excludePublicDomains;
+                    if(vm.checkboxModel.excludePublicDomains) {
+                        vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains;
                     } else {
                         delete vm.configFilters.excludePublicDomains;
                     }
 
-                    if($scope.checkboxModel.transformationGroup) {
+                    if(vm.checkboxModel.transformationGroup) {
                         vm.configFilters.transformationGroup = 'NONE';
                     } else {
                         delete vm.configFilters.transformationGroup;
                     }
 
-
-                    if($scope.checkboxModel.datacloud || $scope.checkboxModel.cdl || $scope.checkboxModel.deduplicationType || $scope.checkboxModel.excludePublicDomains || $scope.checkboxModel.transformationGroup) {
+                    
+                    if(vm.checkboxModel.datacloud || vm.checkboxModel.cdl || vm.checkboxModel.deduplicationType || vm.checkboxModel.excludePublicDomains || vm.checkboxModel.transformationGroup) {
                         RatingsEngineStore.setConfigFilters(vm.configFilters);
+                        vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
                     }
 
-                    console.log(vm.configFilters);
-
-                    vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
                 }
 
             } else {
@@ -370,12 +397,12 @@ angular.module('lp.ratingsengine.wizard.training', [
         
         vm.formOnChange = function(){
             $timeout(function () {
-                if(vm.engineType == 'cross_sell'){
+                if(vm.engineType === 'cross_sell'){
                     vm.validateCrossSellForm();
                 } else {
                     vm.validateCustomEventForm();
                 }
-            }, 500);
+            }, 1500);
         };
         
     }

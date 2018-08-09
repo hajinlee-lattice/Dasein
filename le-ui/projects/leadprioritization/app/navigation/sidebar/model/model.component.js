@@ -30,12 +30,14 @@ angular
         vm.HasRatingsAvailable = HasRatingsAvailable;
         
 
-        var engineId = vm.ratingEngine.id,
-            ratingModelId = vm.model.ModelDetails.Name;
+        if(vm.IsRatingEngine) {
+            var engineId = vm.ratingEngine.id,
+                ratingModelId = vm.model.ModelDetails.Name;
 
-        RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
-            vm.isActiveModel = (vm.ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
-        });
+            RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
+                vm.isActiveModel = (vm.ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
+            });
+        }
 
 
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {
