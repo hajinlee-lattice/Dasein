@@ -76,6 +76,11 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     private boolean hasAccounts = false;
 
     @Override
+    void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
+        hasManyUpdate = false;
+    }
+
+    @Override
     protected void checkActiveServingStore(AbstractStep<? extends BaseStepConfiguration> step) {
         DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         String customerSpace = step.getStringValueFromContext(CUSTOMER_SPACE);
