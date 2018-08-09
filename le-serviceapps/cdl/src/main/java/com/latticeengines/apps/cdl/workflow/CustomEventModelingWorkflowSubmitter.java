@@ -229,6 +229,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .idColumnName(trainingTable.getPrimaryKey().getAttributes().get(0)) //
                 .cdlMultiModel(!isLPI) //
                 .dataCollectionVersion(version) //
+                .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
                 .build();
     }
 

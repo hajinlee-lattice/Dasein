@@ -579,7 +579,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
         Map<String, ColumnMetadata> userRefinedAttributes = null;
 
-        if (!MapUtils.isEmpty(userRefinedColumnMetadata)) {
+        if (MapUtils.isNotEmpty(userRefinedColumnMetadata)) {
             userRefinedAttributes = Flux.fromIterable(userRefinedColumnMetadata.values()) //
                     .flatMap(Flux::fromIterable) //
                     .collect(HashMap<String, ColumnMetadata>::new, (map, cm) -> map.put(cm.getAttrName(), cm)) //

@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttribute
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.MergeUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
@@ -63,6 +65,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private GenerateAIRatingWorkflowConfiguration.Builder generateAIRating = new GenerateAIRatingWorkflowConfiguration.Builder();
 
+        private MergeUserRefinedAttributesConfiguration mergeUserRefinedAttributes = new MergeUserRefinedAttributesConfiguration();
+
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             customEventMatchWorkflowConfigurationBuilder.customer(customerSpace);
@@ -77,6 +81,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             modelWorkflowBuilder.customer(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             generateAIRating.customer(customerSpace);
+            mergeUserRefinedAttributes.setCustomerSpace(customerSpace);
 
             return this;
         }
@@ -96,6 +101,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             exportScoreTrainingFile.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             generateAIRating.microServiceHostPort(microServiceHostPort);
+
+            mergeUserRefinedAttributes.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -141,6 +148,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             generateAIRating.internalResourceHostPort(internalResourceHostPort);
+            mergeUserRefinedAttributes.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -405,6 +413,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder setUserRefinedAttributes(Map<String, ColumnMetadata> userRefinedAttributes) {
+            mergeUserRefinedAttributes.setUserRefinedAttributes(userRefinedAttributes);
+            return this;
+        }
+
         public CustomEventModelingWorkflowConfiguration build() {
             customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(Predefined.RTS, "1.0");
             exportBucketTool.setUsingDisplayName(false);
@@ -425,6 +438,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(generateAIRating.build());
             configuration.add(exportBucketTool);
             configuration.add(exportScoreTrainingFile);
+
+            configuration.add(mergeUserRefinedAttributes);
 
             return configuration;
         }

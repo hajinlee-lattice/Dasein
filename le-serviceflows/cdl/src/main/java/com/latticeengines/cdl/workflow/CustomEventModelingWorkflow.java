@@ -13,6 +13,7 @@ import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
+import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
 import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
 import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
@@ -50,6 +51,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private LdcOnlyAttributesStep ldcOnlyAttributesDataFlow;
 
     @Inject
+    private MergeUserRefinedAttributes mergeUserRefinedAttributes;
+
+    @Inject
     private ModelWorkflow modelWorkflow;
 
     @Inject
@@ -77,6 +81,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
                 .next(ldcOnlyAttributesDataFlow) //
+                .next(mergeUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(generateRating) //
