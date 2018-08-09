@@ -58,7 +58,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
@@ -76,7 +75,6 @@ import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -1253,18 +1251,7 @@ public class InternalResource extends InternalResourceBase {
         }
         return false;
     }
-
-    @RequestMapping(value = "/datacollection/attributes/{predefined}/" + TENANT_ID_PATH, method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Get attributes within a predefined group for a tenant")
-    public List<ColumnMetadata> getAttributesInPredefinedGroup(
-            @PathVariable("predefined") ColumnSelection.Predefined predefined,
-            @PathVariable("tenantId") String customerSpace) {
-        log.debug(String.format("Retrieve Account attributes for attribute group: %s", predefined.getName()));
-        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
-        return dataLakeService.getAttributesInPredefinedGroup(predefined);
-    }
-
+    
     @RequestMapping(value = "/jobs/all/" + TENANT_ID_PATH, method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get actions for a tenant")

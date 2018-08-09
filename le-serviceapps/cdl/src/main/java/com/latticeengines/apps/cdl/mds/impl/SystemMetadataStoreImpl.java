@@ -159,6 +159,13 @@ public class SystemMetadataStoreImpl extends
                                 }
                                 cm.disableGroup(CompanyProfile);
 
+                                // TODO: YSong (M22) to be moved to a specific metadata store for curated attrs
+                                if (BusinessEntity.PurchaseHistory.equals(entity)) {
+                                    cm.setCanEnrich(true);
+                                    cm.enableGroup(TalkingPoint);
+                                    cm.disableGroup(Enrichment);
+                                }
+
                                 return cm;
                             }) //
                             .doOnNext(cm -> {

@@ -3,13 +3,17 @@ package com.latticeengines.dante.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,9 +28,14 @@ import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("talkingPointAttributesService")
 public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeService {
@@ -40,6 +49,9 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private EntityProxy entityProxy;
+
     @VisibleForTesting
     void setServingStoreProxy(ServingStoreProxy servingStoreProxy) {
         this.servingStoreProxy = servingStoreProxy;
@@ -50,21 +62,53 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     public List<TalkingPointAttribute> getAccountAttributes(String customerSpace) {
         log.info("Attempting to find Account attributes for customer space : " + customerSpace);
         try {
-            List<ColumnMetadata> allAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
-                    BusinessEntity.Account);
+            List<ColumnMetadata> allAttrs = new ArrayList<>();
 
-            if (allAttrs == null || allAttrs.isEmpty()) {
+            List<ColumnMetadata> accountAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.Account);
+            if (CollectionUtils.isNotEmpty(accountAttrs)) {
+                accountAttrs = accountAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
+                        .collect(Collectors.toList());
+                allAttrs.addAll(accountAttrs);
+            }
+            List<ColumnMetadata> ratingAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.Rating);
+            if (CollectionUtils.isNotEmpty(ratingAttrs)) {
+                ratingAttrs = ratingAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
+                        .collect(Collectors.toList());
+                allAttrs.addAll(ratingAttrs);
+            }
+            List<ColumnMetadata> phAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.PurchaseHistory);
+            if (CollectionUtils.isNotEmpty(phAttrs)) {
+                FrontEndQuery frontEndQuery = new FrontEndQuery();
+                frontEndQuery.setMainEntity(BusinessEntity.Product);
+                DataPage dataPage = entityProxy.getData(customerSpace, frontEndQuery);
+                Map<String, String> productNameMap = new HashMap<>();
+                if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
+                    dataPage.getData().forEach(map -> productNameMap.put( //
+                            map.get(InterfaceName.ProductId.name()).toString(), //
+                            map.get(InterfaceName.ProductName.name()).toString() //
+                    ));
+                }
+                phAttrs = phAttrs.stream()
+                        .filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
+                        .peek(cm -> {
+                            String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
+                            String productName = productNameMap.get(productId);
+                            cm.setDisplayName(productName + ": " + cm.getDisplayName());
+                        })
+                        .collect(Collectors.toList());
+                allAttrs.addAll(phAttrs);
+            }
+
+            if (CollectionUtils.isEmpty(allAttrs)) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });
             }
 
-            List<ColumnMetadata> rawAttrs = allAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
-                    .collect(Collectors.toList());
-
             // The Prefix is added since Dante UI looks for it to identify
             // Account attributes
-            return JsonUtils.convertList(rawAttrs, ColumnMetadata.class).stream()
+            return JsonUtils.convertList(allAttrs, ColumnMetadata.class).stream()
                     .map(attr -> new TalkingPointAttribute(attr.getDisplayName(),
-                            accountAttributePrefix + attr.getColumnId()))
+                            accountAttributePrefix + attr.getAttrName()))
                     .collect(Collectors.toList());
         } catch (LedpException e) {
             throw e;
@@ -78,7 +122,7 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     public List<TalkingPointAttribute> getRecommendationAttributes(String customerSpace) {
         try {
             log.info("Attempting to find Recommendation attributes for customer space : " + customerSpace);
-            ClassLoader classLoader = getClass().getClassLoader();
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             InputStream tableRegistryStream = classLoader.getResourceAsStream(recomendationAttributesFilePath);
             String attributesDoc = StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
             List<Object> raw = JsonUtils.deserialize(attributesDoc, List.class);

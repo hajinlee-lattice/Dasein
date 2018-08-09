@@ -210,16 +210,20 @@ public class DataLakeServiceImpl implements DataLakeService {
                 });
     }
 
-    @Override
-    public List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
+    @Deprecated
+    private List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
         // Only return attributes for account now
         String tenantId = MultiTenantContext.getShortTenantId();
-        List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, BusinessEntity.Account);
-        return cms.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
+        List<ColumnMetadata> accountAttrs = _dataLakeService.getCachedServingMetadataForEntity(tenantId, BusinessEntity.Account);
+        accountAttrs = accountAttrs.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
         // Hack to limit attributes for talking points temporarily PLS-7065
                 && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
                         || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
                 .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(accountAttrs)) {
+            accountAttrs = new ArrayList<>();
+        }
+        return accountAttrs;
     }
 
     @Override

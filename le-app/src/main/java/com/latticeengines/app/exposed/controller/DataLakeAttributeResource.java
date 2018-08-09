@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +18,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 import io.swagger.annotations.Api;
@@ -75,18 +73,6 @@ public class DataLakeAttributeResource {
             return dataLakeService.getAttributes(offset, max);
         } catch (Exception e) {
             log.error("Failed to get attributes", e);
-            throw new LedpException(LedpCode.LEDP_36002);
-        }
-    }
-
-    @RequestMapping(value = "/predefined/{groupName}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get list of attributes in a group")
-    public List<ColumnMetadata> getAttributesInPredefinedGroup(@PathVariable ColumnSelection.Predefined groupName) {
-        try {
-            return dataLakeService.getAttributesInPredefinedGroup(groupName);
-        } catch (Exception e) {
-            log.error("Failed to get attributes in predefined group " + groupName, e);
             throw new LedpException(LedpCode.LEDP_36002);
         }
     }

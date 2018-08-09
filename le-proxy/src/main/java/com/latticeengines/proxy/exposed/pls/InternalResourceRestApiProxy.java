@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -35,7 +34,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -485,18 +483,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             return restTemplate.getForObject(url, Report.class);
         } catch (Exception e) {
             throw new RuntimeException("getReport: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined,
-            String customerSpace) {
-        try {
-            String url = constructUrl(
-                    "pls/internal/datacollection/attributes/" + predefined.getName() + "/" + customerSpace);
-            return restTemplate.getForObject(url, List.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getAttributesInPredefinedGroup: Remote call failure: " + e.getMessage(), e);
         }
     }
 
