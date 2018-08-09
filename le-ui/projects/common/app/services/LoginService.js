@@ -126,16 +126,15 @@ angular.module('mainApp.login.services.LoginService', [
         }).then(
             function onSuccess(data, status, headers, config){
                 var result = { Success: false };
-
-                if (data === true || data === 'true') {
+                if (data.data === true || data.data === 'true') {
                     result.Success = true;
                 } else {
-                    SessionService.HandleResponseErrors(data, status);
+                    SessionService.HandleResponseErrors(data.data, status);
                 }
                 deferred.resolve(result);
             },
             function onError(data, status, headers, config){
-                var result = { Success: false, Error: data };
+                var result = { Success: false, Error: data.data };
                 deferred.resolve(result);
             }
         );
@@ -210,7 +209,7 @@ angular.module('mainApp.login.services.LoginService', [
                     Status:     status
                 };
     
-                if (!data.Success) {
+                if (!data.data.Success) {
                     result.Success = false;
                 }
     
