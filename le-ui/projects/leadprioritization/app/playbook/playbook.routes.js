@@ -678,7 +678,7 @@ angular
                     var deferred = $q.defer();
 
                     SfdcStore.getOrgs().then(function (result) {
-                        var orgs = result.CRM;
+                        var orgs = result.CRM || [];
 
                         if (featureflags.LaunchPlayToMapSystem && result.MAP) {
                             orgs = orgs.concat(result.MAP);
