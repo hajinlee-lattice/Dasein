@@ -234,6 +234,8 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.hasSettingsInfo = true;
                 }
 
+                console.log(model);
+
                 vm.targetProducts = model.AI.advancedModelingConfig[type].targetProducts;
                 vm.modelingStrategy = model.AI.advancedModelingConfig[type].modelingStrategy;
                 vm.configFilters = model.AI.advancedModelingConfig[type].filters;
@@ -281,6 +283,10 @@ angular.module('lp.ratingsengine.dashboard', [
             } else if (vm.predictionType === 'EXPECTED_VALUE') {
                 vm.prioritizeBy = 'Likely Amount of Spend';
             }
+
+
+
+            console.log(vm.configFilters);
         }
     }
 

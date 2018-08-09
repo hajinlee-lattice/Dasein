@@ -115,6 +115,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
             }
 
+            console.log(vm.hasSettingsInfo);
+
         };
 
         vm.checkJobStatus = function() {

@@ -31,7 +31,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             recordsCountReturned: false,
             purchasesCountReturned: false,
             iteration: AtlasRemodelStore.getRemodelIteration(),
-            pageTitle: ($stateParams.section === 'wizard.ratingsengine_segment') ? 'How do you want to train the model?' : 'Do you want to change the way the model is trained?'
+            pageTitle: ($stateParams.section === 'wizard.ratingsengine_segment') ? 'How do you want to train the model?' : 'Do you want to change the way the model is trained?',
+            checkboxModel: {}
         });
 
         vm.getNumericalConfig = function(){
@@ -67,14 +68,14 @@ angular.module('lp.ratingsengine.wizard.training', [
                         vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value.toString();
                     }
 
-                    vm.spendCriteria = vm.filters.SPEND_IN_PERIOD ? vm.filters.SPEND_IN_PERIOD.criteria : '';
-                    vm.spendValue = vm.filters.SPEND_IN_PERIOD ? vm.filters.SPEND_IN_PERIOD.value : '';
+                    vm.spendCriteria = vm.filters.SPEND_IN_PERIOD ? vm.filters.SPEND_IN_PERIOD.criteria : "GREATER_OR_EQUAL";
+                    vm.spendValue = vm.filters.SPEND_IN_PERIOD ? vm.filters.SPEND_IN_PERIOD.value : 1500;
 
-                    vm.quantityCriteria = vm.filters.QUANTITY_IN_PERIOD ? vm.filters.QUANTITY_IN_PERIOD.criteria : '';
-                    vm.quantityValue = vm.filters.QUANTITY_IN_PERIOD ? vm.filters.QUANTITY_IN_PERIOD.value : '';
+                    vm.quantityCriteria = vm.filters.QUANTITY_IN_PERIOD ? vm.filters.QUANTITY_IN_PERIOD.criteria : "GREATER_OR_EQUAL";
+                    vm.quantityValue = vm.filters.QUANTITY_IN_PERIOD ? vm.filters.QUANTITY_IN_PERIOD.value : 2;
 
-                    vm.periodsCriteria = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.criteria : '';
-                    vm.periodsValue = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.value : '';
+                    vm.periodsCriteria = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.criteria : "WITHIN";
+                    vm.periodsValue = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.value : 2;
 
                 } else {
                     // Setup form for Custom Event Models
@@ -250,8 +251,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                 valid = $scope.trainingForm.$valid;
             }
 
-            console.log(valid);
-
             if(valid == true){
                 RatingsEngineStore.validation.training = true;
                 RatingsEngineStore.validation.refine = true;
@@ -271,47 +270,51 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
                 }
 
-                vm.crossSellCheckboxModel = function() {
+                console.log(vm.checkboxModel.spend);
 
-                    if(vm.checkboxModel.spend) {
-                        vm.configFilters.SPEND_IN_PERIOD = {
-                            "configName": "SPEND_IN_PERIOD",
-                            "criteria": vm.spendCriteria,
-                            "value": vm.spendValue
-                        };
-                    } else {
-                        delete vm.configFilters.SPEND_IN_PERIOD;
-                    }
+                if(vm.checkboxModel.spend) {
+                    console.log("yo");
+                    vm.configFilters.SPEND_IN_PERIOD = {
+                        "configName": "SPEND_IN_PERIOD",
+                        "criteria": vm.spendCriteria,
+                        "value": vm.spendValue
+                    };
+                } else {
+                    delete vm.configFilters.SPEND_IN_PERIOD;
+                }
 
-                    if(vm.checkboxModel.quantity) {
-                        vm.configFilters.QUANTITY_IN_PERIOD = {
-                            "configName": "QUANTITY_IN_PERIOD",
-                            "criteria": vm.quantityCriteria,
-                            "value": vm.quantityValue
-                        };
-                    } else {
-                        delete vm.configFilters.QUANTITY_IN_PERIOD;
-                    }
+                if(vm.checkboxModel.quantity) {
+                    vm.configFilters.QUANTITY_IN_PERIOD = {
+                        "configName": "QUANTITY_IN_PERIOD",
+                        "criteria": vm.quantityCriteria,
+                        "value": vm.quantityValue
+                    };
+                } else {
+                    delete vm.configFilters.QUANTITY_IN_PERIOD;
+                }
 
-                    if(vm.checkboxModel.periods) {
-                        vm.configFilters.TRAINING_SET_PERIOD = {
-                            "configName": "TRAINING_SET_PERIOD",
-                            "criteria": vm.periodsCriteria,
-                            "value": vm.periodsValue
-                        };
-                    } else {
-                        delete vm.configFilters.TRAINING_SET_PERIOD;
-                    }
+                if(vm.checkboxModel.periods) {
+                    vm.configFilters.TRAINING_SET_PERIOD = {
+                        "configName": "TRAINING_SET_PERIOD",
+                        "criteria": vm.periodsCriteria,
+                        "value": vm.periodsValue
+                    };
+                } else {
+                    delete vm.configFilters.TRAINING_SET_PERIOD;
+                }
 
-                    if(vm.checkboxModel.spend || vm.checkboxModel.quantity || vm.checkboxModel.periods) {
-                        RatingsEngineStore.setConfigFilters(vm.configFilters);
-                    }
+                if(vm.checkboxModel.spend || vm.checkboxModel.quantity || vm.checkboxModel.periods) {
+                    RatingsEngineStore.setConfigFilters(vm.configFilters);
+                }
 
-                    vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
+                vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
 
+                console.log(vm.ratingEngine);
+
+                $timeout(function () {
                     vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                     vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
-                }
+                }, 500);
 
             } else {
                 RatingsEngineStore.validation.training = false;
@@ -341,50 +344,46 @@ angular.module('lp.ratingsengine.wizard.training', [
 
                 vm.configFilters.dataStores = [];
 
-                vm.customEventCheckboxModel = function() {
-
-                    if(vm.checkboxModel.datacloud) {
-                        vm.configFilters.dataStores.push('DataCloud');
-                    } else {
-                        var dataStores = vm.configFilters.dataStores,
-                            index = dataStores.indexOf('DataCloud');
-                        
-                        dataStores.splice(index, 1);
-                    }
-
-                    if(vm.checkboxModel.cdl) {
-                        vm.configFilters.dataStores.push('CDL');
-                    } else {
-                        var dataStores = vm.configFilters.dataStores,
-                            index = dataStores.indexOf('CDL');
-                        
-                        dataStores.splice(index, 1);
-                    }
-
-                    if(vm.checkboxModel.deduplicationType) {
-                        vm.configFilters.deduplicationType = 'ONELEADPERDOMAIN';
-                    } else {
-                        delete vm.configFilters.deduplicationType;
-                    }
-
-                    if(vm.checkboxModel.excludePublicDomains) {
-                        vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains;
-                    } else {
-                        delete vm.configFilters.excludePublicDomains;
-                    }
-
-                    if(vm.checkboxModel.transformationGroup) {
-                        vm.configFilters.transformationGroup = 'NONE';
-                    } else {
-                        delete vm.configFilters.transformationGroup;
-                    }
-
+                if(vm.checkboxModel.datacloud) {
+                    vm.configFilters.dataStores.push('DataCloud');
+                } else {
+                    var dataStores = vm.configFilters.dataStores,
+                        index = dataStores.indexOf('DataCloud');
                     
-                    if(vm.checkboxModel.datacloud || vm.checkboxModel.cdl || vm.checkboxModel.deduplicationType || vm.checkboxModel.excludePublicDomains || vm.checkboxModel.transformationGroup) {
-                        RatingsEngineStore.setConfigFilters(vm.configFilters);
-                        vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
-                    }
+                    dataStores.splice(index, 1);
+                }
 
+                if(vm.checkboxModel.cdl) {
+                    vm.configFilters.dataStores.push('CDL');
+                } else {
+                    var dataStores = vm.configFilters.dataStores,
+                        index = dataStores.indexOf('CDL');
+                    
+                    dataStores.splice(index, 1);
+                }
+
+                if(vm.checkboxModel.deduplicationType) {
+                    vm.configFilters.deduplicationType = 'ONELEADPERDOMAIN';
+                } else {
+                    delete vm.configFilters.deduplicationType;
+                }
+
+                if(vm.checkboxModel.excludePublicDomains) {
+                    vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains;
+                } else {
+                    delete vm.configFilters.excludePublicDomains;
+                }
+
+                if(vm.checkboxModel.transformationGroup) {
+                    vm.configFilters.transformationGroup = 'NONE';
+                } else {
+                    delete vm.configFilters.transformationGroup;
+                }
+
+                
+                if(vm.checkboxModel.datacloud || vm.checkboxModel.cdl || vm.checkboxModel.deduplicationType || vm.checkboxModel.excludePublicDomains || vm.checkboxModel.transformationGroup) {
+                    RatingsEngineStore.setConfigFilters(vm.configFilters);
+                    vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
                 }
 
             } else {
