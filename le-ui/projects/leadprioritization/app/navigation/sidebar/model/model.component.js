@@ -17,8 +17,7 @@ angular
         stateParams: $stateParams,
         StateHistory: StateHistory,
         model: Model,
-        ratingEngine: RatingEngine,
-        isActiveModel: false
+        ratingEngine: RatingEngine
     });
 
     vm.init = function() {
@@ -37,6 +36,10 @@ angular
             RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
                 vm.isActiveModel = (vm.ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
             });
+
+            vm.viewingIteration = $stateParams.viewingIteration ? true : false;
+
+            console.log(vm.viewingIteration);
         }
 
 

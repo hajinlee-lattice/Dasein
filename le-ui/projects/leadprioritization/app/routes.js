@@ -254,7 +254,8 @@ angular
             url: '/model/:modelId/:rating_id',
             params: {
                 modelId: '',
-                rating_id: ''
+                rating_id: '',
+                viewingIteration: false
             },
             onEnter: ['IsCdl', 'Model', 'RatingEngine', 'BackStore', function(IsCdl, Model, RatingEngine, BackStore) {
                 var displayName =  Model.ModelDetails.DisplayName;
