@@ -126,43 +126,30 @@ public class SystemMetadataStoreImpl extends
                                     return cm;
                                 }
 
-                                // all non-LDC attributes can be
-                                // enabled/disabled for Segmentation
+                                // Segmentation
                                 cm.setCanSegment(true);
-                                // all non-LDC attributes are enabled for
                                 cm.enableGroup(Segment);
 
-                                // all custom account and contact attributes
-                                // can be enabled/disabled for Export
-                                if (BusinessEntity.Account.equals(entity)
-                                        || BusinessEntity.Contact.equals(entity)) {
-                                    cm.setCanEnrich(true);
-                                }
+                                // Enrichment
+                                cm.setCanEnrich(true);
                                 // enable a list of default attributes for Export
                                 if (exportAttributes.contains(cm.getAttrName())) {
                                     cm.enableGroup(Enrichment);
+                                } else {
+                                    cm.disableGroup(Enrichment);
                                 }
-                                // all custom account attributes enabled for
-                                // following groups
-                                // unless otherwise specified in upstream
+                                cm.enableGroup(TalkingPoint);
+                                cm.disableGroup(CompanyProfile);
+
                                 if (BusinessEntity.Account.equals(entity)) {
                                     cm.enableGroup(Model);
                                     if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
                                         cm.setSubcategory("Account IDs");
                                     }
                                 }
-                                // all custom account/rating/purchase history
-                                // attributes are enabled for talking point
-                                if (BusinessEntity.Account.equals(entity) || BusinessEntity.Rating.equals(entity)
-                                        || BusinessEntity.PurchaseHistory.equals(entity)) {
-                                    cm.enableGroup(TalkingPoint);
-                                }
-                                cm.disableGroup(CompanyProfile);
 
                                 // TODO: YSong (M22) to be moved to a specific metadata store for curated attrs
                                 if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                                    cm.setCanEnrich(true);
-                                    cm.enableGroup(TalkingPoint);
                                     cm.disableGroup(Enrichment);
                                 }
 
