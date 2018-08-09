@@ -23,6 +23,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
@@ -42,15 +43,18 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 import com.latticeengines.yarn.exposed.service.JobService;
 
-//@Listeners({ GlobalAuthCleanupTestListener.class })
+@Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { // "classpath:test-pls-context.xml",
-        "classpath:playmakercore-context.xml", "classpath:test-playlaunch-properties-context.xml",
-        "classpath:yarn-context.xml", "classpath:proxy-context.xml", "classpath:test-workflowapi-context.xml",
-        "classpath:test-testframework-cleanup-context.xml" })
+@ContextConfiguration(locations = { //"classpath:test-pls-context.xml",
+		"classpath:playmakercore-context.xml",
+        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml", "classpath:proxy-context.xml",
+        "classpath:test-workflowapi-context.xml", 
+        "classpath:test-testframework-cleanup-context.xml" 
+        })
 public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStepDeploymentTestNG.class);
@@ -172,18 +176,16 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
+        testPlayCreationHelper.cleanupArtifacts();
 
-        // testPlayCreationHelper.cleanupArtifacts();
-        //
-        // List<Recommendation> recommendations =
-        // recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
-        // Assert.assertNotNull(recommendations);
-        // Assert.assertTrue(recommendations.size() > 0);
-        //
-        // recommendations.stream().forEach(rec -> {
-        // log.info("Cleaning up recommendation: " + rec.getId());
-        // recommendationService.delete(rec, false);
-        // });
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
+        Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() > 0);
+
+        recommendations.stream().forEach(rec -> {
+            log.info("Cleaning up recommendation: " + rec.getId());
+            recommendationService.delete(rec, false);
+        });
     }
 
     // @Test(groups = "deployment")

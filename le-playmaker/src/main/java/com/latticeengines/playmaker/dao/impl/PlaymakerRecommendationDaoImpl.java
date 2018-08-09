@@ -10,24 +10,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CDLConstants;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
-import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
-import com.latticeengines.playmaker.exposed.context.PlaymakerMeasurement;
-import com.latticeengines.playmaker.exposed.context.PlaymakerMetrics;
 
 public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
 
@@ -36,9 +24,6 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     private static final String SFDC_ACC_ID_KEY = "SfdcAccountID";
     private static final String SFDC_CONT_ID_KEY = "SfdcContactID";
     private static final String LAST_MODIFIED_TIME_KEY = "LastModificationDate";
-
-    @Autowired
-    protected MetricService metricService;
 
     public PlaymakerRecommendationDaoImpl(NamedParameterJdbcTemplate namedJdbcTemplate) {
         super(namedJdbcTemplate);
@@ -76,44 +61,10 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             source.addValue("playIds", playIds);
         }
 
-        long timestamp = System.currentTimeMillis();
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
-        long timeTaken = System.currentTimeMillis() - timestamp;
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
-        String destinationOrgId = null;
-        String destinationSysType = null;
-        if (MapUtils.isNotEmpty(orgInfo)) {
-            Pair<String, String> effectiveOrgInfo = null;
-            if (StringUtils.isNotBlank(orgInfo.get(CDLConstants.ORG_ID))
-                    && StringUtils.isNotBlank(orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE))) {
-                effectiveOrgInfo = new ImmutablePair<String, String>(orgInfo.get(CDLConstants.ORG_ID).trim(),
-                        orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE).trim());
-            }
-            destinationOrgId = effectiveOrgInfo.getLeft();
-            destinationSysType = effectiveOrgInfo.getRight();
-        }
-        PlaymakerMetrics metrics = generateMetrics(customerSpace, (int) timeTaken, maximum, destinationOrgId,
-                destinationSysType, syncDestEnum);
-        PlaymakerMeasurement measurement = new PlaymakerMeasurement(metrics);
-        metricService.write(MetricDB.PLAYMAKER, measurement);
-
         convertContacts(results);
 
         return results;
-    }
-
-    private PlaymakerMetrics generateMetrics(CustomerSpace customerSpace, int timeTaken, int maximum,
-            String destinationOrgId, String destinationSysType, SynchronizationDestinationEnum syncDestEnum) {
-        PlaymakerMetrics metrics = new PlaymakerMetrics();
-        metrics.setTenantId(customerSpace.toString());
-        metrics.setGetRecommendationDurationMS(timeTaken);
-        metrics.setMaximum(maximum);
-        metrics.setDestinationOrgId(destinationOrgId);
-        metrics.setDestinationSysType(destinationSysType);
-        metrics.setSyncDestination(syncDestEnum.name());
-
-        return metrics;
     }
 
     protected String getSfdcContactID() {
