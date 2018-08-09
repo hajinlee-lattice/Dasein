@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -143,7 +144,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     public void testGetInheritableActionsFromLastFailedPA(DataFeedExecution dataFeedExecution, Job workflowExection,
         List<Action> actions, List<Long> inheritableActionIds) {
         when(dataFeedProxy.getLatestExecution(anyString(), any())).thenReturn(dataFeedExecution);
-        when(workflowProxy.getWorkflowExecution(anyString())).thenReturn(workflowExection);
+        when(workflowProxy.getWorkflowExecution(anyString(), anyBoolean())).thenReturn(workflowExection);
         when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
 
         List<Long> actionIds = processAnalyzeWorkflowSubmitter.getActionIdsFromLastFailedPA(customerSpace);
