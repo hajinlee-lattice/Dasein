@@ -75,9 +75,6 @@ public class VdbMetadataUtils {
 
     @SuppressWarnings("unchecked")
     public static AttrConfig getAttrConfig(VdbSpecMetadata metadata, String entity) {
-        if (CollectionUtils.isEmpty(metadata.getTags()) && CollectionUtils.isEmpty(metadata.getApprovedUsage())) {
-            return null;
-        }
         AttrConfig attrConfig = new AttrConfig();
         attrConfig.setAttrName(metadata.getColumnName());
         attrConfig.setEntity(BusinessEntity.getByName(entity));
