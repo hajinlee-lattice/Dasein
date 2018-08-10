@@ -264,7 +264,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         } else if (jobImpacted) {
             return true;
         }
-        log.info("No reason to rebuild " + mainEntity());
+        log.info("Common check: no reason to rebuild " + mainEntity());
         return false;
     }
 
@@ -277,7 +277,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("No going to rebuild but has imports, going to update " + mainEntity());
             return true;
         }
-        log.info("No reason to update " + mainEntity());
+        log.info("Common check: no reason to update " + mainEntity());
         return false;
     }
 

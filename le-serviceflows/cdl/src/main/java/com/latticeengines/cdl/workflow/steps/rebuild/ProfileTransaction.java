@@ -309,10 +309,10 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name()));
-        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
-        config.setSumLongFields(Collections.singletonList(InterfaceName.Quantity.name()));
-        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
+        config.setSumFields(
+                Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name(), InterfaceName.Quantity.name()));
+        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
+                InterfaceName.TotalQuantity.name()));
         config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         config.setGroupByFields(Arrays.asList( //
@@ -365,11 +365,9 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
-                InterfaceName.TransactionCount.name()));
+                InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
-                InterfaceName.TransactionCount.name()));
-        config.setSumLongFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
-        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
+                InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //

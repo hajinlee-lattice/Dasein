@@ -212,6 +212,10 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
 
+        log.info(String.format(
+                "Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, hasProducts=%b, productChoreographer.update=%b, productChoreographer.rebuild=%b",
+                reset, hasRawStore, hasProducts, productChoreographer.update, productChoreographer.rebuild));
+
         if (reset) {
             return should;
         }
@@ -233,6 +237,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected boolean shouldUpdate() {
         boolean should = super.shouldUpdate();
+
+        log.info(String.format("Important flag to decide transaction update: hasProducts=%b", hasProducts));
+
         if (should && !hasProducts) {
             log.info("Skip update " + mainEntity() + " due to missing product table.");
             should = false;
@@ -241,9 +248,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     private boolean isProfilePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step) {
-        log.info(String.format(
-                "Check whether it is profile purchase history: StepName=%s, ProfilePurchaseHistoryBean=%s", step.name(),
-                ProfilePurchaseHistory.BEAN_NAME));
         return step.name().contains(ProfilePurchaseHistory.BEAN_NAME);
     }
 
@@ -253,6 +257,12 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
         boolean purchaseMetricsChanged = grapherContext.isPurchaseMetricsChanged();
+
+        log.info(String.format(
+                "Important flag to decide purchase history profile: purchaseMetricsChanged=%b, hasProducts=%b, hasAccounts=%b, hasRawStore=%b, update=%b, rebuild=%b, accountChoreographer.update=%b, accountChoreographer.rebuildNotForDataCloudChange=%b, productChoreographer.update=%b, productChoreographer.rebuild=%b",
+                purchaseMetricsChanged, hasProducts, hasAccounts, hasRawStore, update, rebuild,
+                accountChoreographer.update, accountChoreographer.rebuildNotForDataCloudChange,
+                productChoreographer.update, productChoreographer.rebuild));
 
         if (hasProducts && hasAccounts) {
             if (hasRawStore && (accountChoreographer.update || (accountChoreographer.rebuildNotForDataCloudChange))) {

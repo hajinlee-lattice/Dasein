@@ -283,10 +283,10 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         targetTable.setExpandBucketedAttrs(false);
         step.setTargetTable(targetTable);
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name()));
-        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
-        config.setSumLongFields(Collections.singletonList(InterfaceName.Quantity.name()));
-        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
+        config.setSumFields(
+                Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name(), InterfaceName.Quantity.name()));
+        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
+                InterfaceName.TotalQuantity.name()));
         config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         config.setGroupByFields(Arrays.asList( //
@@ -324,37 +324,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         return step;
     }
 
-    private TransformationStepConfig aggregatePeriods(PeriodStrategy strategy, int periodDataWithPeriodIdStep) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
-        step.setInputSteps(Collections.singletonList(periodDataWithPeriodIdStep));
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(periodTablePrefix + strategy.getName());
-        targetTable.setPrimaryKey(servingStorePrimaryKey);
-        targetTable.setExpandBucketedAttrs(false);
-        step.setTargetTable(targetTable);
-
-        PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        // config.setPeriodStrategy(strategy);
-        config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
-                InterfaceName.TransactionCount.name()));
-        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
-                InterfaceName.TransactionCount.name()));
-        config.setSumLongFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
-        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
-        config.setGroupByFields(Arrays.asList( //
-                InterfaceName.AccountId.name(), //
-                InterfaceName.ProductId.name(), //
-                InterfaceName.ProductType.name(), //
-                InterfaceName.TransactionType.name(), //
-                InterfaceName.PeriodId.name(), //
-                InterfaceName.PeriodName.name()));
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
-        return step;
-    }
-
     private TransformationStepConfig aggregatePeriods(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
@@ -362,11 +331,9 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
-                InterfaceName.TransactionCount.name()));
+                InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
-                InterfaceName.TransactionCount.name()));
-        config.setSumLongFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
-        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
+                InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
@@ -444,29 +411,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         return step;
     }
 
-    private TransformationStepConfig updatePeriodStore(int periodsStep, int periodAgrStep, Table periodTable) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
-        List<Integer> inputSteps = new ArrayList<>();
-        inputSteps.add(periodsStep);
-        inputSteps.add(periodAgrStep);
-        step.setInputSteps(inputSteps);
-
-        String tableSourceName = "PeriodTable";
-        String sourceTableName = periodTable.getName();
-        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
-
-        PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
-        config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
-        return step;
-    }
-
     private TransformationStepConfig updatePeriodStore(List<Table> periodTables, int periodsStep, int periodAgrStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
@@ -520,23 +464,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
             config.setFieldsToRetain(fieldsToRetain);
         }
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
-        return step;
-    }
-
-    private TransformationStepConfig mergePeriodStore(List<Integer> periodAgrSteps) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(DataCloudConstants.TRANSFORMER_MERGE);
-
-        step.setInputSteps(periodAgrSteps);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(periodTablePrefix);
-        targetTable.setPrimaryKey(servingStorePrimaryKey);
-        targetTable.setExpandBucketedAttrs(false);
-        step.setTargetTable(targetTable);
-
-        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step;
     }
 
