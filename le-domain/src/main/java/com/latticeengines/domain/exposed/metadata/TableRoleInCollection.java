@@ -31,7 +31,9 @@ public enum TableRoleInCollection {
 
     AnalyticPurchaseState, //
 
-    AccountFeatures,
+    AccountFeatures, //
+    AccountDiffSlim, //
+    AccountBatchSlim, //
 
     AccountMaster;
 

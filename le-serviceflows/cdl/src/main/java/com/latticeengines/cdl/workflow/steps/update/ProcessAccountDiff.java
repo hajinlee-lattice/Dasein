@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BulkMatchMergerTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
@@ -66,6 +68,7 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    protected String diffSlimTableName;
     private Table accountFeatureTable;
     private String accountFeatureTableName;
 
@@ -78,22 +81,31 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("ConsolidateAccountDiff");
 
-        int matchStep = 0;
-        int bucketStep = 1;
-        int retainStep = 2;
-        int filterAccountFeatureStep = 4;
+        int step = 0;
+        int matchStep = step++;
+        int mergeMatchStep = -1;
+        if (diffSlimTableName != null)
+            mergeMatchStep = step++;
+        int bucketStep = step++;
+        int retainStep = step++;
+        int sortStep = step++;
+        int filterAccountFeatureStep = step++;
 
         TransformationStepConfig matchDiff = match();
-        TransformationStepConfig bucket = bucket(matchStep, true);
+        TransformationStepConfig mergeMatch = diffSlimTableName != null ? mergeMatch(matchStep) : null;
+        int newMatchStep = diffSlimTableName != null ? mergeMatchStep : matchStep;
+        TransformationStepConfig bucket = bucket(newMatchStep, true);
         TransformationStepConfig retainFields = retainFields(bucketStep, false);
         TransformationStepConfig sort = sort(retainStep, 200);
-        TransformationStepConfig filterAccountFeature = filterAccountFeature(matchStep, customerSpace,
+        TransformationStepConfig filterAccountFeature = filterAccountFeature(newMatchStep, customerSpace,
                 filterAccountFeatureTablePrefix);
         TransformationStepConfig mergeAccountFeature = mergeAccountFeatures(filterAccountFeatureStep,
                 mergeAccountFeatureTablePrefix);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(matchDiff);
+        if (mergeMatch != null)
+            steps.add(mergeMatch);
         steps.add(bucket);
         steps.add(retainFields);
         steps.add(sort);
@@ -111,13 +123,18 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        accountFeatureTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.AccountFeatures, active);
+        accountFeatureTable = dataCollectionProxy.getTable(customerSpace.toString(),
+                TableRoleInCollection.AccountFeatures, active);
         if (accountFeatureTable == null || accountFeatureTable.getExtracts().isEmpty()) {
             log.info("There has been no Account Feature table!");
         } else {
             accountFeatureTableName = accountFeatureTable.getName();
         }
         log.info("Set accountFeatureTableName=" + accountFeatureTableName);
+
+        diffSlimTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
+                TableRoleInCollection.AccountDiffSlim, inactive);
+
     }
 
     @Override
@@ -131,7 +148,7 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MATCH);
 
-        useDiffTableAsSource(step);
+        useDiffTableAsSource(step, diffSlimTableName != null ? diffSlimTableName : diffTableName);
 
         // Match Input
         MatchTransformerConfig config = new MatchTransformerConfig();
@@ -171,8 +188,23 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         return step;
     }
 
+    private TransformationStepConfig mergeMatch(int matchStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> steps = Arrays.asList(matchStep);
+        step.setInputSteps(steps);
+        useDiffTableAsSource(step, diffTableName);
+        step.setTransformer("bulkMatchMergerTransformer");
+
+        BulkMatchMergerTransformerConfig conf = new BulkMatchMergerTransformerConfig();
+        conf.setJoinField(InterfaceName.AccountId.name());
+        conf.setReverse(true);
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
     private TransformationStepConfig filterAccountFeature(int matchStep, CustomerSpace customerSpace,
-                                                    String accountFeaturesTablePrefix) {
+            String accountFeaturesTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<Integer> inputSteps = Collections.singletonList(matchStep);
         step.setInputSteps(inputSteps);
@@ -207,7 +239,8 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         return step;
     }
 
-    private TransformationStepConfig mergeAccountFeatures(int filterAccountFeatureStep, String accountFeaturesTablePrefix) {
+    private TransformationStepConfig mergeAccountFeatures(int filterAccountFeatureStep,
+            String accountFeaturesTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step);
         step.setInputSteps(Collections.singletonList(filterAccountFeatureStep));
@@ -254,10 +287,13 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         }
         setAccountFeatureTableSchema(accountFeatureTable);
         DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
-        dataCollectionProxy.upsertTable(customerSpace, accountFeatureTableName, TableRoleInCollection.AccountFeatures, inactiveVersion);
-        accountFeatureTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AccountFeatures, inactiveVersion);
+        dataCollectionProxy.upsertTable(customerSpace, accountFeatureTableName, TableRoleInCollection.AccountFeatures,
+                inactiveVersion);
+        accountFeatureTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AccountFeatures,
+                inactiveVersion);
         if (accountFeatureTable == null) {
-            throw new IllegalStateException("Cannot find the upserted " + TableRoleInCollection.AccountFeatures + " table in data collection.");
+            throw new IllegalStateException(
+                    "Cannot find the upserted " + TableRoleInCollection.AccountFeatures + " table in data collection.");
         }
     }
 

@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BulkMatchMergerTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
@@ -58,7 +59,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
@@ -73,13 +73,17 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     private static final Logger log = LoggerFactory.getLogger(ProfileAccount.class);
 
     private static int matchStep;
+    private static int newMatchStep;
+    private static int mergeMatchStep;
     private static int profileStep;
     private static int bucketStep;
+    private static int calcStatsStep;
     private static int filterStep;
     private static int segmentProfileStep;
     private static int segmentBucketStep;
 
     protected String accountFeaturesTablePrefix = "AccountFeatures";
+    protected String masterSlimTableName;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -90,6 +94,14 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     @Override
     protected TableRoleInCollection profileTableRole() {
         return TableRoleInCollection.Profile;
+    }
+
+    @Override
+    protected void initializeConfiguration() {
+        super.initializeConfiguration();
+        masterSlimTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
+                TableRoleInCollection.AccountBatchSlim, inactive);
+
     }
 
     @Override
@@ -104,25 +116,34 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         String masterTableName = masterTable.getName();
         try {
 
-
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("ProfileAccountStep");
             request.setSubmitter(customerSpace.getTenantId());
             request.setKeepTemp(false);
             request.setEnableSlack(false);
-            matchStep = 0;
-            profileStep = 1;
-            bucketStep = 2;
-            filterStep = 4;
-            segmentProfileStep = 5;
-            segmentBucketStep = 6;
+            int step = 0;
+            matchStep = step++;
+            newMatchStep = matchStep;
+            if (masterSlimTableName != null) {
+                mergeMatchStep = step++;
+                newMatchStep = mergeMatchStep;
+            }
+            profileStep = step++;
+            bucketStep = step++;
+            calcStatsStep = step++;
+            filterStep = step++;
+            segmentProfileStep = step++;
+            segmentBucketStep = step++;
             // -----------
-            TransformationStepConfig match = match(customerSpace, masterTableName);
+            TransformationStepConfig match = match(customerSpace,
+                    masterSlimTableName != null ? masterSlimTableName : masterTableName);
+            TransformationStepConfig mergeMatch = masterSlimTableName != null ? mergeMatch(matchStep, masterTableName)
+                    : null;
             TransformationStepConfig profile = profile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig calc = calcStats(customerSpace, statsTablePrefix);
 
-            //filter step
+            // filter step
             TransformationStepConfig filter = filter();
             TransformationStepConfig segmentProfile = segmentProfile();
             TransformationStepConfig segmentBucket = segmentBucket();
@@ -131,18 +152,19 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
             TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
             TransformationStepConfig accountFeature = filterAccountFeature(customerSpace, accountFeaturesTablePrefix);
             // -----------
-            List<TransformationStepConfig> steps = Arrays.asList( //
-                    match, //
-                    profile, //
-                    bucket, //
-                    calc, //
-                    filter,
-                    segmentProfile,
-                    segmentBucket,
-                    sort, //
-                    sortProfile, //
-                    accountFeature //
-            );
+            List<TransformationStepConfig> steps = new ArrayList<>();
+            steps.add(match); //
+            if (mergeMatch != null)
+                steps.add(mergeMatch); //
+            steps.add(profile); //
+            steps.add(bucket); //
+            steps.add(calc); //
+            steps.add(filter); //
+            steps.add(segmentProfile); //
+            steps.add(segmentBucket); //
+            steps.add(sort); //
+            steps.add(sortProfile); //
+            steps.add(accountFeature); //
             // -----------
             request.setSteps(steps);
             return request;
@@ -155,18 +177,11 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MATCH);
 
-        String tableSourceName = "CustomerUniverse";
-        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
+        setBaseTables(customerSpace, sourceTableName, step);
 
         MatchTransformerConfig config = new MatchTransformerConfig();
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(customerSpace.toString()));
-
 
         String dataCloudVersion = "";
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
@@ -200,9 +215,34 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         return step;
     }
 
+    private void setBaseTables(CustomerSpace customerSpace, String sourceTableName, TransformationStepConfig step) {
+        String tableSourceName = "CustomerUniverse";
+        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
+    }
+
+    private TransformationStepConfig mergeMatch(int matchStep, String masterTableName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer("bulkMatchMergerTransformer");
+        List<Integer> steps = Arrays.asList(matchStep);
+        step.setInputSteps(steps);
+        setBaseTables(customerSpace, masterTableName, step);
+
+        BulkMatchMergerTransformerConfig conf = new BulkMatchMergerTransformerConfig();
+        conf.setJoinField(InterfaceName.AccountId.name());
+        conf.setReverse(true);
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
     private TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(matchStep));
+        step.setInputSteps(Collections.singletonList(newMatchStep));
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
@@ -213,7 +253,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
 
     private TransformationStepConfig bucket() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(matchStep, profileStep));
+        step.setInputSteps(Arrays.asList(newMatchStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
         step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;
@@ -253,9 +293,10 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         return step;
     }
 
-    private TransformationStepConfig filterAccountFeature(CustomerSpace customerSpace, String accountFeaturesTablePrefix) {
+    private TransformationStepConfig filterAccountFeature(CustomerSpace customerSpace,
+            String accountFeaturesTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(matchStep);
+        List<Integer> inputSteps = Collections.singletonList(newMatchStep);
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_COPIER);
 
@@ -265,7 +306,8 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         filterGroups.add(ColumnSelection.Predefined.Model);
 
         List<String> retainAttrNames = servingStoreProxy
-                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, tableFromActiveVersion ? active : inactive) //
+                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null,
+                        tableFromActiveVersion ? active : inactive) //
                 .filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor)) //
                 .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
@@ -290,7 +332,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
 
     private TransformationStepConfig filter() {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(matchStep);
+        List<Integer> inputSteps = Collections.singletonList(newMatchStep);
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_COPIER);
 
@@ -300,9 +342,11 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         filterGroups.add(ColumnSelection.Predefined.LookupId);
 
         List<String> retainAttrNames = servingStoreProxy
-                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, tableFromActiveVersion ? active : inactive) //
+                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null,
+                        tableFromActiveVersion ? active : inactive) //
                 .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
-                .filter(cm -> Boolean.TRUE.equals(cm.getCanSegment()) || filterGroups.stream().anyMatch(cm::isEnabledFor)) //
+                .filter(cm -> Boolean.TRUE.equals(cm.getCanSegment())
+                        || filterGroups.stream().anyMatch(cm::isEnabledFor)) //
                 .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
         if (retainAttrNames == null) {
@@ -443,10 +487,13 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         }
         setAccountFeatureTableSchema(accountFeatureTable);
         DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
-        dataCollectionProxy.upsertTable(customerSpace, accountFeatureTableName, TableRoleInCollection.AccountFeatures, inactiveVersion);
-        accountFeatureTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AccountFeatures, inactiveVersion);
+        dataCollectionProxy.upsertTable(customerSpace, accountFeatureTableName, TableRoleInCollection.AccountFeatures,
+                inactiveVersion);
+        accountFeatureTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AccountFeatures,
+                inactiveVersion);
         if (accountFeatureTable == null) {
-            throw new IllegalStateException("Cannot find the upserted " + TableRoleInCollection.AccountFeatures + " table in data collection.");
+            throw new IllegalStateException(
+                    "Cannot find the upserted " + TableRoleInCollection.AccountFeatures + " table in data collection.");
         }
     }
 
@@ -458,21 +505,21 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         amCols.forEach(cm -> amColMap.put(cm.getAttrName(), cm));
         List<Attribute> attrs = new ArrayList<>();
         table.getAttributes().forEach(attr0 -> {
-           Attribute attr = attr0;
-           if (amColMap.containsKey(attr0.getName())) {
-               ColumnMetadata cm = amColMap.get(attr0.getName());
-               if (Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())) {
-                   attr.setTags(Tag.INTERNAL);
-               }
-           }
-           attrs.add(attr);
+            Attribute attr = attr0;
+            if (amColMap.containsKey(attr0.getName())) {
+                ColumnMetadata cm = amColMap.get(attr0.getName());
+                if (Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())) {
+                    attr.setTags(Tag.INTERNAL);
+                }
+            }
+            attrs.add(attr);
         });
         table.setAttributes(attrs);
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
     }
 
     private void registerDynamoExport() {
-        exportToDynamo( masterTable.getName(), InterfaceName.AccountId.name(), null);
+        exportToDynamo(masterTable.getName(), InterfaceName.AccountId.name(), null);
     }
 
 }

@@ -1,8 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPIER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,7 +25,9 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BulkMatchMergerTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -35,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(MergeAccount.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -45,8 +51,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     static final String BEAN_NAME = "mergeAccount";
 
     private int mergeStep;
+    private int slimInputStep;
     private int matchStep;
+    private int slimDiffStep;
+    private int mergeMatchStep;
     private int upsertMasterStep;
+    private int slimMasterStep;
     private int diffStep;
 
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -56,20 +66,32 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             request.setName("MergeAccount");
 
             mergeStep = 0;
-            matchStep = 1;
-            upsertMasterStep = 2;
-            diffStep = 3;
+            slimInputStep = 1;
+            matchStep = 2;
+            slimDiffStep = 3;
+            mergeMatchStep = 4;
+            upsertMasterStep = 5;
+            slimMasterStep = 6;
+            diffStep = 7;
 
             TransformationStepConfig merge = mergeInputs(false, true, false);
+            TransformationStepConfig slimInputs = createSlimInputs();
             TransformationStepConfig match = match();
+            TransformationStepConfig slimDiff = createSlimTable(matchStep, diffTablePrefix);
+            TransformationStepConfig mergeMatch = mergeMatch(mergeStep, matchStep);
             TransformationStepConfig upsertMaster = mergeMaster();
+            TransformationStepConfig slimMaster = createSlimTable(upsertMasterStep, batchStoreTablePrefix);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig report = reportDiff(diffStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
+            steps.add(slimInputs);
             steps.add(match);
+            steps.add(slimDiff);
+            steps.add(mergeMatch);
             steps.add(upsertMaster);
+            steps.add(slimMaster);
             steps.add(diff);
             steps.add(report);
             request.setSteps(steps);
@@ -81,11 +103,70 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
     }
 
+    private TransformationStepConfig createSlimInputs() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = Collections.singletonList(mergeStep);
+        step.setInputSteps(inputSteps);
+        step.setTransformer(TRANSFORMER_COPIER);
+
+        CopierConfig conf = new CopierConfig();
+        Map<MatchKey, List<String>> matchKeys = getMatchKeys();
+        List<String> retainFields = getRetainFields(matchKeys);
+        conf.setRetainAttrs(retainFields);
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
+    private List<String> getRetainFields(Map<MatchKey, List<String>> matchKeys) {
+        List<String> fields = new ArrayList<>();
+        fields.add(batchStorePrimaryKey);
+        for (List<String> values : matchKeys.values()) {
+            if (CollectionUtils.isNotEmpty(values)) {
+                fields.addAll(values);
+            }
+        }
+        return fields;
+    }
+
+    private TransformationStepConfig createSlimTable(int inputStep, String tablePrefix) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> steps = Collections.singletonList(inputStep);
+        step.setInputSteps(steps);
+        step.setTransformer(TRANSFORMER_COPIER);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(tablePrefix + "_Slim");
+        targetTable.setPrimaryKey(batchStorePrimaryKey);
+        step.setTargetTable(targetTable);
+
+        CopierConfig conf = new CopierConfig();
+        List<String> slimFields = Arrays.asList(batchStorePrimaryKey, InterfaceName.LatticeAccountId.name());
+        conf.setRetainAttrs(slimFields);
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
     private TransformationStepConfig match() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(mergeStep));
+        step.setInputSteps(Collections.singletonList(slimInputStep));
         step.setTransformer(TRANSFORMER_MATCH);
         step.setConfiguration(getMatchConfig());
+        return step;
+    }
+
+    private TransformationStepConfig mergeMatch(int mergeStep, int matchStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> steps = Arrays.asList(mergeStep, matchStep, matchStep);
+        step.setInputSteps(steps);
+        step.setTransformer("bulkMatchMergerTransformer");
+
+        BulkMatchMergerTransformerConfig conf = new BulkMatchMergerTransformerConfig();
+        conf.setJoinField(batchStorePrimaryKey);
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        step.setConfiguration(confStr);
         return step;
     }
 
@@ -93,7 +174,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         TargetTable targetTable;
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step);
-        step.setInputSteps(Collections.singletonList(matchStep));
+        step.setInputSteps(Collections.singletonList(mergeMatchStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
         step.setConfiguration(getMergeMasterConfig());
 
@@ -155,7 +236,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         return matchKeys;
     }
 
-    private void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap, MatchKey key, String columnName) {
+    private void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap, MatchKey key,
+            String columnName) {
         if (cols.contains(columnName)) {
             keyMap.put(key, Collections.singletonList(columnName));
         }
@@ -171,5 +253,34 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         table.setAttributes(attrs);
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
         return table;
+    }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        super.onPostTransformationCompleted();
+        registerDiffSlim();
+        registerMasterSlim();
+
+    }
+
+    private void registerMasterSlim() {
+        Table table = metadataProxy.getTable(customerSpace.toString(),
+                TableUtils.getFullTableName(batchStoreTablePrefix + "_Slim", pipelineVersion));
+        if (table == null) {
+            throw new IllegalStateException("Did not generate new table as master Slim.");
+        }
+        dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(),
+                TableRoleInCollection.AccountBatchSlim, inactive);
+    }
+
+    private void registerDiffSlim() {
+        Table table = metadataProxy.getTable(customerSpace.toString(),
+                TableUtils.getFullTableName(diffTablePrefix + "_Slim", pipelineVersion));
+        if (table == null) {
+            throw new IllegalStateException("Did not generate new table as diff Slim.");
+        }
+        dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(),
+                TableRoleInCollection.AccountDiffSlim, inactive);
+
     }
 }

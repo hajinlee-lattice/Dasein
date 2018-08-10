@@ -2,18 +2,13 @@ package com.latticeengines.cdl.workflow.steps.update;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CONSOLIDATE_RETAIN;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -21,30 +16,18 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.manage.Column;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateRetainFieldConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntityStepConfiguration>
@@ -121,7 +104,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         baseTables.put(sourceName, sourceTable);
         step.setBaseTables(baseTables);
         if (inputStep < 0) {
-            useDiffTableAsSource(step);
+            useDiffTableAsSource(step, diffTableName);
         } else {
             step.setInputSteps(Collections.singletonList(inputStep));
         }
@@ -164,7 +147,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
     protected TransformationStepConfig sort(int diffStep, int partitions) {
         TransformationStepConfig step = new TransformationStepConfig();
         if (diffStep < 0) {
-            useDiffTableAsSource(step);
+            useDiffTableAsSource(step, diffTableName);
         } else {
             step.setInputSteps(Collections.singletonList(diffStep));
         }
@@ -190,9 +173,9 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         return step;
     }
 
-    protected void useDiffTableAsSource(TransformationStepConfig step) {
+    protected void useDiffTableAsSource(TransformationStepConfig step, String diffTable) {
         String sourceName = entity.name() + "Diff";
-        SourceTable sourceTable = new SourceTable(diffTableName, customerSpace);
+        SourceTable sourceTable = new SourceTable(diffTable, customerSpace);
         List<String> baseSources = step.getBaseSources();
         if (CollectionUtils.isEmpty(baseSources)) {
             baseSources = Collections.singletonList(sourceName);
