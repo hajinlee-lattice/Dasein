@@ -16,6 +16,7 @@ angular.module('lp.ratingsengine')
     this.init = function() {
 
         console.log("Initialize RatingsEngineStore");
+//         console.log('Test hot save');
 
         this.settings = {};
 
