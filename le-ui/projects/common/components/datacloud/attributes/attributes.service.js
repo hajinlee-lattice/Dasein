@@ -68,7 +68,7 @@ angular.module('common.attributes')
     this.modalCallback = function(args) {
         var modal = Modal.get(args.name);
         var ret = true;
-        
+
         switch (args.action) {
             case "closedForced": 
                 break;
@@ -81,7 +81,8 @@ angular.module('common.attributes')
                 modal.disableDischargeButton(true);
             
                 store.saveConfig().then(function(result) {
-                    if (modal && modal.name == 'AttrAdmin_Warning') {
+                    console.log(modal.name, modal, result, args);
+                    if (args.name == 'AttrAdmin_Warning') {
                         Modal.modalRemoveFromDOM(modal, args);
                     }
                 });

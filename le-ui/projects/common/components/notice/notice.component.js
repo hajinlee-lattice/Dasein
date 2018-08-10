@@ -33,6 +33,8 @@ angular.module('common.notice', [])
     };
 
     this.generate = function(type, opts) {
+        delete opts.type;
+
         this.set(angular.extend({
             type: type || 'info'
         }, opts));

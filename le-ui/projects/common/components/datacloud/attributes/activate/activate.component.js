@@ -60,7 +60,7 @@ angular.module('common.attributes.activate', [])
         vm.filters = vm.store.get('filters');
             
         vm.$onInit = function() {
-
+            //xkhjdfl();
         };
         
         vm.uiCanExit = vm.store.uiCanExit;

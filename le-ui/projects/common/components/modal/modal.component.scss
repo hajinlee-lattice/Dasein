@@ -2,10 +2,10 @@
   display: none;
   position: fixed;
   z-index: 33;
-  left: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
+  bottom: 0;
+  left: 0;
+  right: 0;
   overflow: auto;
   background-color: rgb(0, 0, 0);
   background-color: rgba(0, 0, 0, 0.5);
@@ -16,39 +16,40 @@
   }
   /* Modal Content Box */
   .le-modal-content {
+      position: fixed;
+      top: 50vh;
+      left: 50vw;
+      max-height: 80vh;
+      transform: translate(-50%, -50%);
       font-family: 'ProximaNova-Regular', Arial, sans-serif;
       display: flex;
-      max-height: 80vh;
       flex-direction: column;
       background-color: #fefefe;
-      margin: 8em auto;
-      padding: 0px;
-      width: 50%;
-      max-height: 80vh;
       border-radius: 5px;
       border-radius: 6px;
+      
       &.sm {
-          width: 380px;
+          width: 420px;
       }
       &.md {
           width: 640px;
       }
       &.lg {
-          width: 1024px;
+          width: 860px;
       }
       .le-modal-header {
-          height: 10%;
-          // min-height: 50px;
           display: flex;
           flex-direction: row-reverse;
           align-items: center;
           border-top-left-radius: 6px;
           border-top-right-radius: 6px;
+          min-height: 4em;
+          
           /* The Close Button */
           .close {
               font-size: 28px;
               font-weight: bold;
-              padding: 10px;
+              padding: 2px;
               padding-right: 1em;
               &:hover,
               &:focus {
@@ -61,8 +62,8 @@
           }
           .le-title-container {
               font-size: 20px;
-              width: 100%;
-              padding: 17px 1.2em;
+              width: 90%;
+              padding: 10px 1.2em;
               display: flex;
               align-items: center;
 
@@ -88,7 +89,6 @@
           border-bottom: 1px solid rgba(153, 152, 152, 0.405);
           overflow: auto;
           padding: 10px;
-          max-height: 80%;
           padding: 2em 2em;
           
           p {
@@ -102,6 +102,10 @@
             
             &:last-child {
               margin-bottom: 0;
+            }
+
+            li {
+              word-break: break-all;
             }
           }
 
@@ -132,7 +136,7 @@
           align-items: center;
           justify-content: center;
           padding: 0.75em 2em;
-          height: 10%;
+          min-height: 6em;
 
           button {
             width: 50%;
@@ -145,6 +149,14 @@
 
             &:first-child {
               margin-right: 0;
+            }
+
+            &.white-button:hover {
+                border-color: #457EBA;
+            }
+
+            &.white-button:active {
+                border-color: #999;
             }
           }
       }

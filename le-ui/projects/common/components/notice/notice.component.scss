@@ -1,10 +1,10 @@
 div.le-notice {
     div.messaging {
         position: fixed;
-        top: 50%;
+        top: 33%;
         left: 50%;
         transform: translate(-50%,-50%) rotateY(90deg);
-        z-index: 2;
+        z-index: 1000;
         pointer-events: none;
         transition: all 333ms ease; 
         transform-origin: center center;

@@ -43,21 +43,23 @@ angular
             return false;
         }
 
-        var uiErrorCheck = !!(response.error || response.error_description || response.errorMsg);
-        var uiActionCheck = !!(response.data && response.data.UIAction);
+        var data = response.data;
+        var uiErrorCheck = !!(data.error || data.error_description || data.errorMsg);
+        var uiActionCheck = !!(data.UIAction);
 
+        //console.log('-!- exceptions check:', uiErrorCheck, uiActionCheck, data);
         return uiErrorCheck || uiActionCheck;
     };
 
     this.process = function (response) {
         if (this.check(response)) {
+            //console.log('-!- exceptions process:', response);
             var config = response.config || { headers: {} },
                 params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),
                 payload = response.data,
                 uiAction = payload ? payload.UIAction : {},
-                method = (uiAction.view || params[0]).toLowerCase();
+                method = (uiAction ? uiAction.view : params[0]).toLowerCase();
             
-            //console.log('-!- exceptions process:', method, uiAction, payload);
             switch (method) {
                 case 'none': break;
                 case 'popup': this.show(Modal, response); break;
@@ -84,7 +86,7 @@ angular
             title = uiAction.title || (http_code + ' "' + http_err + '" ' + url),
             message = uiAction.message || payload.errorMsg || payload.error_description;
 
-        console.log('-!- exceptions show:', type, title, message, Service);
+        //console.log('-!- exceptions show:', type, title, message, Service);
         $timeout(function() {
             Service[type]({ title: title, message: message });
         }, 1);

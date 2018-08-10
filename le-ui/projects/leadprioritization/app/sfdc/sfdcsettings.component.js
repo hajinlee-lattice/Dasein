@@ -100,22 +100,25 @@ angular.module('lp.sfdc.credentials', ['ngAnimate', 'lp.sfdc', 'common.modal', '
                 tenantId = clientSession.Tenant.Identifier;
 
             SfdcService.generateAuthToken(emailAddress, tenantId).then(function (result) {
-                console.log(result);
+                // console.log(result);
                 if (result.Success == true) {
                     if (vm.cdlIsEnabled) {
-                        Banner.success({title: 'Email sent to ' + emailAddress, message: 'After you authenticate a new system org, a new ID will be listed below.'});
+                        Notice.success({
+                            delay: 6000,
+                            title: 'Email sent to ' + emailAddress, 
+                            message: 'After you authenticate a new system org, a new ID will be listed below.'
+                        });
                     } else {
-                        Banner.success({message: 'We have sent you an email with an access token and instructions for authenticating with Salesforce.'});
+                        Notice.success({
+                            delay: 5000,
+                            message: 'We have sent you an email with an access token and instructions for authenticating with Salesforce.'
+                        });
                     }
-
-                    $timeout(function(){
-                        Banner.get().shift();
-                    }, 5000);
                 } else {
                     if (vm.cdlIsEnabled) {
                         Banner.error({message: result.Errors[0]});
                     } else {
-                        Banner.success({message: 'Failed to Generate Salesforce Access Token.'});
+                        Banner.error({message: 'Failed to Generate Salesforce Access Token.'});
                     }
                     
                 }
