@@ -37,9 +37,9 @@ public class ActivationLimitValidator extends AttrValidator {
     private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
     private static final String PLS = "PLS";
-    private static final String EXPORT = "Export";
 
     private static final Logger log = LoggerFactory.getLogger(ActivationLimitValidator.class);
+
     protected ActivationLimitValidator() {
         super(VALIDATOR_NAME);
     }
@@ -72,7 +72,6 @@ public class ActivationLimitValidator extends AttrValidator {
     private void checkDataLicense(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs) {
         String tenantId = MultiTenantContext.getShortTenantId();
-        int totalSelectedPremiumNumber = 0;
         for (DataLicense license : DataLicense.values()) {
             int limit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, license.getDataLicense());
             List<AttrConfig> premiumActiveConfigs = configs.stream()
@@ -93,21 +92,7 @@ public class ActivationLimitValidator extends AttrValidator {
                     }
                 });
             }
-            totalSelectedPremiumNumber += userSelectedNumber;
         }
-        // Per PM's requirement, disable the total limit check, will clean it up
-        // int totalLimit =
-        // getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, null);
-        // int selected = totalSelectedPremiumNumber;
-        // if (selected > totalLimit) {
-        // userSelectedActiveConfigs.forEach(e -> {
-        // if (e.getDataLicense() != null) {
-        // addErrorMsg(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT,
-        // String.format(ValidationMsg.Errors.EXCEED_LIMIT, selected, EXPORT,
-        // totalLimit), e);
-        // }
-        // });
-        // }
     }
 
     // check category limit

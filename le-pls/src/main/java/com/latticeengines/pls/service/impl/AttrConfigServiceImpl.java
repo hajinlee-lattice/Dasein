@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.DataLakeService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -63,6 +62,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings.Type;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.AttrConfigService;
@@ -87,15 +87,17 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private static final String defaultDescription = "Default Description";
 
     public static final String UPDATE_SUCCESS_TITLE = "Your changes have been saved";
-    public static final String UPDATE_FAIL_ATTRIBUTE_TITLE = "Attribute In Use";
+    public static final String UPDATE_WARNING_ATTRIBUTE_TITLE = "Attribute In Use";
+    public static final String UPDATE_FAIL_TITLE = "Validation Error";
+    public static final String UPDATE_FAIL_MSG = "There are validation errors";
     public static final String UPDATE_USAGE_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be disabled until the dependency has been removed.";
     public static final String UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be deactivated until it is disabled from the following usecases.";
-    public static final String UPDATE_FAIL_CATEGORY_TITLE = "Category In Use";
+    public static final String UPDATE_WARNING_CATEGORY_TITLE = "Category In Use";
     public static final String UPDATE_USAGE_FAIL_CATEGORY_MSG = "This category is in use and cannot be disabled until the attributes have been removed.";
-    public static final String UPDATE_ACTIVATION_FAIL_CATEGORY_MSG = "This category is in use and cannot be deactivated until the attributes have been removed from the usecase(s).";
-    public static final String UPDATE_FAIL_SUBCATEGORY_TITLE = "Sub-category In Use";
+    public static final String UPDATE_ACTIVATION_FAIL_CATEGORY_MSG = "This category is in use and cannot be deactived until the attributes have been disabled.";
+    public static final String UPDATE_WARNING_SUBCATEGORY_TITLE = "Sub-category In Use";
     public static final String UPDATE_USAGE_FAIL_SUBCATEGORY_MSG = "This sub-category is in use and cannot be disabled until the attributes have been removed.";
-    public static final String UPDATE_ACTIVATION_FAIL_SUBCATEGORY_MSG = "This sub-category is in use and cannot be deactivated until the attributes have been removed from the usecase(s).";
+    public static final String UPDATE_ACTIVATION_FAIL_SUBCATEGORY_MSG = "This sub-category is in use and cannot be deactived until the attributes have been disabled.";
 
     static {
         usageToDisplayName.put(ColumnSelection.Predefined.Segment.getName(), "Segmentation");
@@ -194,8 +196,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(categoryName, request);
         AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest,
                 AttrConfigUpdateMode.Activation);
+        UIAction uiAction = processUpdateResponse(saveResponse, request, false);
         createUpdateActivationActions(categoryName, request);
-        return processUpdateResponse(saveResponse, request, false);
+        return uiAction;
     }
 
     private UIAction processUpdateResponse(AttrConfigRequest saveResponse, AttrConfigSelectionRequest request,
@@ -203,10 +206,11 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         UIAction uiAction = new UIAction();
         if (saveResponse != null) {
             if (saveResponse.hasError()) {
-                // TODO ygao parse the error message to make it more
-                // user-friendly
-                throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
-                        + JsonUtils.serialize(saveResponse.getDetails()));
+                uiAction.setTitle(UPDATE_FAIL_TITLE);
+                uiAction.setView(View.Banner);
+                uiAction.setStatus(Status.Error);
+                uiAction.setMessage(generateErrorMsg(saveResponse));
+                throw new UIActionException(uiAction, LedpCode.LEDP_18203);
             } else if (saveResponse.hasWarning()) {
                 // parse the mode of the request
                 int mode = parseModeForRequest(saveResponse, request);
@@ -214,21 +218,21 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                 switch (mode) {
                 case 0:
                     // attribute level
-                    uiAction.setTitle(UPDATE_FAIL_ATTRIBUTE_TITLE);
+                    uiAction.setTitle(UPDATE_WARNING_ATTRIBUTE_TITLE);
                     uiAction.setView(View.Modal);
                     uiAction.setStatus(Status.Error);
                     uiAction.setMessage(generateAttrLevelMsg(saveResponse, updateUsage));
                     throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
                 case 1:
                     // subcategory level
-                    uiAction.setTitle(UPDATE_FAIL_SUBCATEGORY_TITLE);
+                    uiAction.setTitle(UPDATE_WARNING_SUBCATEGORY_TITLE);
                     uiAction.setView(View.Modal);
                     uiAction.setStatus(Status.Error);
                     uiAction.setMessage(generateSubcategoryLevelMsg(saveResponse, updateUsage));
                     throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
                 case 2:
                     // category level
-                    uiAction.setTitle(UPDATE_FAIL_CATEGORY_TITLE);
+                    uiAction.setTitle(UPDATE_WARNING_CATEGORY_TITLE);
                     uiAction.setView(View.Modal);
                     uiAction.setStatus(Status.Error);
                     uiAction.setMessage(generateCategoryLevelMsg(saveResponse, updateUsage));
@@ -246,6 +250,24 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             log.warn(String.format("Resposne for request %s of tenant %s is null.", request.toString(), tenantId));
         }
         return uiAction;
+    }
+
+    @VisibleForTesting
+    String generateErrorMsg(AttrConfigRequest saveResponse) {
+        List<AttrValidation> validations = saveResponse.getDetails().getValidations();
+        Map<ValidationErrors.Type, Integer> errorMap = new HashMap<>();
+        validations.stream().forEach(validation -> {
+            Map<ValidationErrors.Type, List<String>> errors = validation.getValidationErrors().getErrors();
+            for (ValidationErrors.Type type : errors.keySet()) {
+                errorMap.put(type, errorMap.getOrDefault(type, 0) + 1);
+            }
+        });
+        StringBuilder html = new StringBuilder();
+        html.append(p(UPDATE_FAIL_MSG).render());
+        for (ValidationErrors.Type type : errorMap.keySet()) {
+            html.append(li(String.format(type.getMessage(), errorMap.get(type))).render());
+        }
+        return html.toString();
     }
 
     private void createUpdateActivationActions(String categoryName, AttrConfigSelectionRequest request) {

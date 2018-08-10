@@ -20,12 +20,22 @@ public class ValidationErrors {
     }
 
     public enum Type {
-        EXCEED_SYSTEM_LIMIT, //
-        EXCEED_DATA_LICENSE, //
-        EXCEED_USAGE_LIMIT, //
-        INVALID_ACTIVATION, //
-        INVALID_USAGE_CHANGE, //
-        INVALID_PROP_CHANGE, //
-        OTHER;
+        EXCEED_SYSTEM_LIMIT("System limit exceeded: %d attributes"), //
+        EXCEED_DATA_LICENSE("Data license limit exceeded: %d attributes"), //
+        EXCEED_USAGE_LIMIT("Usage limit exceeded: %d attributes"), //
+        INVALID_ACTIVATION("Cannot activate deprecated attribute: %d attributes"), //
+        INVALID_USAGE_CHANGE("Usage change is not allowed: %d attributes"), //
+        INVALID_PROP_CHANGE("Customization is not allowed: %d attributes");
+
+        private String message;
+
+        Type(String msg) {
+            this.message = msg;
+        }
+
+        public String getMessage() {
+            return this.message;
+        }
+
     }
 }

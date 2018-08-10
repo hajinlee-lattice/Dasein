@@ -320,7 +320,7 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_ATTRIBUTE_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_WARNING_ATTRIBUTE_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
@@ -338,7 +338,7 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_SUBCATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_WARNING_SUBCATEGORY_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
@@ -354,7 +354,7 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_CATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_WARNING_CATEGORY_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
@@ -388,7 +388,7 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_ATTRIBUTE_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_WARNING_ATTRIBUTE_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
@@ -406,7 +406,7 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_SUBCATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_WARNING_SUBCATEGORY_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
@@ -422,10 +422,28 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(e instanceof UIActionException);
             UIActionException uiActionException = (UIActionException) e;
             uiAction = uiActionException.getUIAction();
-            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_CATEGORY_TITLE);
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_WARNING_CATEGORY_TITLE);
             Assert.assertEquals(uiAction.getView(), View.Modal);
             Assert.assertEquals(uiAction.getStatus(), Status.Error);
             Assert.assertNotNull(uiAction.getMessage());
+        }
+
+        // validation error
+        when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
+                any(AttrConfigUpdateMode.class)))
+                        .thenReturn(AttrConfigServiceImplTestUtils.generateValidationErrorAttrConfigRequest());
+        try {
+            attrConfigService.updateUsageConfig(Category.ACCOUNT_ATTRIBUTES.getName(), "Company Profile", request);
+            Assert.fail("Should have thrown exception due to dependency check failure");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UIActionException);
+            UIActionException uiActionException = (UIActionException) e;
+            uiAction = uiActionException.getUIAction();
+            Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_FAIL_TITLE);
+            Assert.assertEquals(uiAction.getView(), View.Banner);
+            Assert.assertEquals(uiAction.getStatus(), Status.Error);
+            Assert.assertNotNull(uiAction.getMessage());
+            log.info("error message is:" + uiAction.getMessage());
         }
     }
 

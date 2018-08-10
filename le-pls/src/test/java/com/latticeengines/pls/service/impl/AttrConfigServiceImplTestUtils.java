@@ -9,6 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 
 public class AttrConfigServiceImplTestUtils {
     private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImplTestUtils.class);
@@ -833,6 +835,44 @@ public class AttrConfigServiceImplTestUtils {
         ValidationDetails details = new ValidationDetails();
         attrConfigRequest.setDetails(details);
         details.setValidations(validations);
+        return attrConfigRequest;
+    }
+
+    public static AttrConfigRequest generateValidationErrorAttrConfigRequest() {
+        AttrConfigRequest attrConfigRequest = generateHappyAttrConfigRequest();
+        String subcategory1 = "sub1";
+        String attrName1 = deselect[0];
+        String subcategory2 = "sub2";
+        String attrName2 = deselect[1];
+
+        ValidationDetails details = attrConfigRequest.getDetails();
+        List<AttrValidation> validations = details.getValidations();
+        AttrValidation validation1 = new AttrValidation();
+        validation1.setAttrName(attrName1);
+        validation1.setSubcategory(subcategory1);
+        ValidationErrors validationErrors1 = new ValidationErrors();
+        validation1.setValidationErrors(validationErrors1);
+        validations.add(validation1);
+        validationErrors1.setErrors(ImmutableMap.<ValidationErrors.Type, List<String>> builder()
+                .put(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT, Arrays.asList("")) //
+                .put(ValidationErrors.Type.EXCEED_USAGE_LIMIT, Arrays.asList("")) //
+                .put(ValidationErrors.Type.INVALID_ACTIVATION, Arrays.asList("")) //
+                .put(ValidationErrors.Type.INVALID_USAGE_CHANGE, Arrays.asList("")) //
+                .build());
+
+        AttrValidation validation2 = new AttrValidation();
+        validation2.setAttrName(attrName2);
+        validation2.setSubcategory(subcategory2);
+        ValidationErrors validationErrors2 = new ValidationErrors();
+        validation2.setValidationErrors(validationErrors2);
+        validations.add(validation2);
+        validationErrors2.setErrors(ImmutableMap.<ValidationErrors.Type, List<String>> builder()
+                .put(ValidationErrors.Type.EXCEED_DATA_LICENSE, Arrays.asList("")) //
+                .put(ValidationErrors.Type.INVALID_PROP_CHANGE, Arrays.asList("")) //
+                .put(ValidationErrors.Type.INVALID_ACTIVATION, Arrays.asList("")) //
+                .put(ValidationErrors.Type.INVALID_USAGE_CHANGE, Arrays.asList("")) //
+                .build());
+
         return attrConfigRequest;
     }
 
