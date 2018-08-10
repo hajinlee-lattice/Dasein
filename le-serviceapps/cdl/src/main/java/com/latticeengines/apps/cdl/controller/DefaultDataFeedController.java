@@ -108,10 +108,10 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeed(customerSpace, "", status);
     }
 
-    @PutMapping(value = "/nextinvoketime/{time}")
+    @PostMapping(value = "/updatenextinvoketime")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
-    public void updateDataFeedNextInvokeTime(@PathVariable String customerSpace, @PathVariable Date time) {
+    public void updateDataFeedNextInvokeTime(@PathVariable String customerSpace, @RequestBody Date time) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         datafeedService.updateDataFeedNextInvokeTime(customerSpace, time);
     }

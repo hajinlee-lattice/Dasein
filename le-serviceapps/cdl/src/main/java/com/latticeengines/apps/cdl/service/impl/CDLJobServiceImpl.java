@@ -107,13 +107,9 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Override
     public boolean submitJob(CDLJobType cdlJobType, String jobArguments) {
-        log.info("starting submit job");
         if (cdlJobType == CDLJobType.IMPORT) {
-            log.info("starting submit import job");
             submitImportJob(jobArguments);
-            log.info("end submit import job");
         } else if (cdlJobType == CDLJobType.PROCESSANALYZE) {
-            log.info("starting submit process analyze job");
             checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
                 orchestrateJob();
@@ -121,9 +117,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 log.error(e.getMessage());
                 throw e;
             }
-            log.info("end submit process analyze job");
         }
-        log.info("end submit job");
         return true;
     }
 
@@ -151,15 +145,10 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         if (allowAutoSchedule) {
             int invokeHour = zkConfigService.getInvokeTime(customerSpace);
-            log.info(String.format("configured invoke hour: %d", invokeHour));
-
             Tenant tenantInContext = MultiTenantContext.getTenant();
             try {
                 MultiTenantContext.setTenant(tenant);
                 invokeTime = getInvokeTime(processAnalyzeJobDetail, invokeHour, new Date(tenant.getRegisteredTime()));
-                if (invokeTime != null) {
-                    log.info(String.format("next invoke time for %s: %s", customerSpace.getTenantId(), invokeTime.toString()));
-                }
             } finally {
                 MultiTenantContext.setTenant(tenantInContext);
             }
@@ -169,57 +158,39 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private void orchestrateJob() {
         List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds();
-        log.info(String.format("data feeds count: %d", allDataFeeds.size()));
-
         long currentTimeMillis = System.currentTimeMillis();
         Date currentTime = new Date(currentTimeMillis);
-        log.info(String.format("current time: %s", currentTime.toString()));
-
 
         int runningProcessAnalyzeJobs = 0;
+        List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
         for (SimpleDataFeed dataFeed : allDataFeeds) {
             Tenant tenant = dataFeed.getTenant();
             if (dataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
-                log.info(String.format("ProcessAnalyzing tenant : %s", tenant.getId()));
                 runningProcessAnalyzeJobs++;
-            } else if (dataFeed.getStatus() == DataFeed.Status.Active &&
-                    (dataFeed.getNextInvokeTime() == null || dataFeed.getNextInvokeTime().before(currentTime))) {
-                log.info(String.format("Need update next invoke time for %s.", tenant.getId()));
+            } else if (dataFeed.getStatus() == DataFeed.Status.Active) {
                 MultiTenantContext.setTenant(tenant);
                 CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
                 Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
                 if (invokeTime != null) {
-                    try {
+                    if (dataFeed.getNextInvokeTime() == null || dataFeed.getNextInvokeTime().before(currentTime)) {
+                        log.info(String.format("Update next invoke time for %s. Next invoke time is: %s", tenant.getId(), invokeTime.toString()));
                         dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
-                    } catch (Exception e) {
-                        log.error(String.format("Update next invoke time for %s failed. Error: %s", tenant.getId(), e.getMessage()));
+                    }
+                    if (currentTimeMillis > invokeTime.getTime()) {
+                        log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
+                        list.add(new HashMap.SimpleEntry<>(invokeTime,
+                                new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
                     }
                 }
             }
         }
 
         if (runningProcessAnalyzeJobs >= concurrentProcessAnalyzeJobs) {
+            log.info("Running process analyze jobs count is more than concurrent process analyze jobs count.");
             return;
         }
 
-        List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
-        for (SimpleDataFeed dataFeed : allDataFeeds) {
-            if (dataFeed.getStatus() == DataFeed.Status.Active) {
-                Tenant tenant = dataFeed.getTenant();
-                MultiTenantContext.setTenant(tenant);
-                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, processAnalyzeJobDetail);
-                if (invokeTime != null && currentTimeMillis > invokeTime.getTime()) {
-                    log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
-                    list.add(new HashMap.SimpleEntry<>(invokeTime,
-                            new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
-                }
-            }
-        }
-
         list.sort(Comparator.comparing(Map.Entry::getKey));
-        log.info(String.format("need to submit process analyze jobs count: %d", list.size()));
-
         for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {
             SimpleDataFeed dataFeed = entry.getValue().getKey();
             CDLJobDetail processAnalyzeJobDetail = entry.getValue().getValue();
@@ -282,7 +253,6 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private int checkAndUpdateJobStatus(CDLJobType cdlJobType) {
-        log.info("start check and update job status");
         List<CDLJobDetail> details =cdlJobDetailEntityMgr.listAllRunningJobByJobType(cdlJobType);
         int runningJobs = details.size();
         for (CDLJobDetail cdlJobDetail : details) {
@@ -295,7 +265,6 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
         }
-        log.info("end check and update job status");
         return runningJobs;
     }
 
@@ -360,19 +329,14 @@ public class CDLJobServiceImpl implements CDLJobService {
         JobStatus jobStatus = job.getJobStatus();
         DataFeed dataFeed = dataFeedProxy.getDataFeed(cdlJobDetail.getTenant().getId());
         if (jobStatus == JobStatus.COMPLETED) {
-            log.info("update job detail status to completed");
             cdlJobDetail.setCdlJobStatus(CDLJobStatus.COMPLETE);
             cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
         } else {
-            log.info("update job detail status to fail");
             cdlJobDetail.setCdlJobStatus(CDLJobStatus.FAIL);
             cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
-            if (reachRetryLimit(cdlJobType, cdlJobDetail.getRetryCount())) {
-                log.info("reach retry limit");
-                if (dataFeed.getDrainingStatus() != DrainingStatus.NONE) {
-                    dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(),
-                            DrainingStatus.NONE.name());
-                }
+            if (reachRetryLimit(cdlJobType, cdlJobDetail.getRetryCount()) &&
+                    dataFeed.getDrainingStatus() != DrainingStatus.NONE) {
+                dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(), DrainingStatus.NONE.name());
             }
         }
     }
