@@ -1,10 +1,10 @@
 package com.latticeengines.datacloud.workflow.engine.steps;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -18,14 +18,13 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.IngestionStepConfiguration;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
-import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("ingestionStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(IngestionStep.class);
 
-    @Autowired
+    @Inject
     private IngestionProgressService ingestionProgressService;
 
     @Resource(name = "ingestionSFTPProviderService")
@@ -37,8 +36,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Resource(name = "ingestionSQLProviderService")
     private IngestionProviderService ingestionSQLProviderService;
 
-    @Autowired
-    protected JobService jobService;
+    @Resource(name = "ingestionS3Provider")
+    private IngestionProviderService ingestionS3Provider;
 
     private IngestionProgress progress;
 
@@ -63,6 +62,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             case SQL_TO_SOURCE:
                 ingestionSQLProviderService.ingest(progress);
                 break;
+            case S3:
+                ingestionS3Provider.ingest(progress);
+                break;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
@@ -74,8 +76,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     }
 
     private void failByException(Exception e) {
-        progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
-                .errorMessage(e.getMessage().substring(0, 1000)).commit(true);
+        progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED) //
+                .errorMessage(e.getMessage().substring(0, Math.min(1000, e.getMessage().length()))) //
+                .commit(true);
         log.error("Ingestion failed for progress: " + progress.toString(), e);
     }
 }

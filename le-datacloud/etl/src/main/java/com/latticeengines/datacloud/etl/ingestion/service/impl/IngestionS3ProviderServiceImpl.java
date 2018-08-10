@@ -1,0 +1,53 @@
+package com.latticeengines.datacloud.etl.ingestion.service.impl;
+
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.entitymgr.S3SourceEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.ingestion.S3Destination;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+
+@Service("ingestionS3Provider")
+public class IngestionS3ProviderServiceImpl extends IngestionProviderServiceImpl {
+
+    private static final Logger log = LoggerFactory.getLogger(IngestionS3ProviderServiceImpl.class);
+
+    @Inject
+    private S3SourceEntityMgr s3SourceEntityMgr;
+
+    @Value("dataplatform.queue.scheme")
+    private String queueScheme;
+
+    @Override
+    public void ingest(IngestionProgress progress) {
+        String destStr = progress.getDestination();
+        S3Destination destination = JsonUtils.deserialize(destStr, S3Destination.class);
+        log.info("Start ingesting to: " + JsonUtils.serialize(destination));
+
+        String sourceName = destination.getSourceName();
+        String sourceVersion = destination.getSourceVersion();
+        if (StringUtils.isBlank(sourceName) || StringUtils.isBlank(sourceVersion)) {
+            throw new IllegalArgumentException("Must provide both source name and source version");
+        }
+        String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        s3SourceEntityMgr.downloadToHdfs(sourceName, sourceVersion, queue);
+    }
+
+    @Override
+    public List<String> getMissingFiles(Ingestion ingestion) {
+        return Collections.emptyList();
+    }
+
+}

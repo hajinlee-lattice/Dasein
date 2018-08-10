@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
@@ -21,6 +23,8 @@ import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressUpdat
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
+import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
+import com.latticeengines.domain.exposed.datacloud.ingestion.S3Destination;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
@@ -50,6 +54,9 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
 
     @Autowired
     private IngestionVersionService ingestionVersionService;
+
+    @Value("${datacloud.collection.s3bucket}")
+    private String defaultBucket;
 
     @Override
     public List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields) {
@@ -116,6 +123,26 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             }
             progress.setDestination(hdfsPathBuilder.constructTransformationSourceDir(
                     sourceService.findBySourceName(sqlToSourceConfig.getSource()), progress.getVersion()).toString());
+            break;
+        case S3:
+            S3Configuration s3Configuration = (S3Configuration) ingestion.getProviderConfiguration();
+            String bucket = s3Configuration.getBucket();
+            S3Destination destination = new S3Destination();
+            destination.setSourceName(fileName);
+            destination.setSourceVersion(version);
+            if (StringUtils.isNotBlank(bucket) && !defaultBucket.equalsIgnoreCase(bucket)) {
+                destination.setS3Bucket(bucket);
+            }
+            if (s3Configuration.isUpdateCurrentVersion()) {
+                destination.setUpdateCurrentVersion(true);
+            }
+            String destStr = JsonUtils.serialize(destination);
+            if (destStr.length() > 1000) {
+                throw new IllegalArgumentException("Serialized destination config is longer than 1000 chars: " + destStr);
+            }
+            progress.setDestination(destStr);
+            progress.setSource(fileName);
+            progress.setVersion(version);
             break;
         default:
             throw new UnsupportedOperationException(

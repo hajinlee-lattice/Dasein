@@ -9,7 +9,7 @@ public interface IngestionEntityMgr {
 
     List<Ingestion> findAll();
 
-    public void save(Ingestion ingestion);
+    void save(Ingestion ingestion);
 
-    public void delete(Ingestion ingestion);
+    void delete(Ingestion ingestion);
 }

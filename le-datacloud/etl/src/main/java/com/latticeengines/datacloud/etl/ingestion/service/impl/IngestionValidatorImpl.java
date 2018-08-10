@@ -5,18 +5,22 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionValidator;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
+import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration.CollectCriteria;
@@ -27,11 +31,20 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 public class IngestionValidatorImpl implements IngestionValidator {
     private static final Logger log = LoggerFactory.getLogger(IngestionValidatorImpl.class);
 
-    @Autowired
+    @Inject
     private IngestionProgressEntityMgr ingestionProgressEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Inject
+    private HdfsPathBuilder hdfsPathBuilder;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value(("${aws.region}"))
+    private String defaultRegion;
 
     @Override
     public boolean isIngestionTriggered(Ingestion ingestion) {
@@ -78,6 +91,15 @@ public class IngestionValidatorImpl implements IngestionValidator {
                     throw new IllegalArgumentException(
                             "For collect criteria NEW_DATA, target source version cannot be earlier than current version");
                 }
+            }
+            return;
+        case S3:
+            if (StringUtils.isBlank(request.getFileName())) {
+                throw new RuntimeException("Please provide file name");
+            }
+            S3Configuration s3Configuration = (S3Configuration) ingestion.getProviderConfiguration();
+            if (Boolean.TRUE.equals(request.getUpdateCurrentVersion())) {
+                s3Configuration.setUpdateCurrentVersion(true);
             }
             return;
         default:

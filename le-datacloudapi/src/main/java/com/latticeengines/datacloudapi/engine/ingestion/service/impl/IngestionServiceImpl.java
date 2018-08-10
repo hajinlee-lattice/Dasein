@@ -223,7 +223,7 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     private List<IngestionProgress> submitAll(List<IngestionProgress> progresses) {
-        List<IngestionProgress> submittedProgresses = new ArrayList<IngestionProgress>();
+        List<IngestionProgress> submittedProgresses = new ArrayList<>();
         Boolean serviceTenantBootstrapped = false;
         for (IngestionProgress progress : progresses) {
             try {

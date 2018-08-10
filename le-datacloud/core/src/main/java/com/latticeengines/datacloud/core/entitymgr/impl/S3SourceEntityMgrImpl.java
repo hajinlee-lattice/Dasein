@@ -34,7 +34,6 @@ public class S3SourceEntityMgrImpl implements S3SourceEntityMgr {
 
     @Override
     public void downloadToHdfs(String sourceName, String version, String distCpQueue) {
-        System.out.println("Exists in S3: " + sourceSchemaExistsInS3(sourceName, version));
         if (!sourceExistsInS3(sourceName, version)) {
             throw new RuntimeException(String.format("Source %s at %s does not exists in S3", sourceName, version));
         }
