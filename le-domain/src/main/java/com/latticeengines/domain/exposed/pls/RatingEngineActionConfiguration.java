@@ -57,6 +57,8 @@ public class RatingEngineActionConfiguration extends ActionConfiguration {
         switch (this.subType) {
         case ACTIVATION:
             return String.format(SubType.ACTIVATION.getFormat(), this.ratingEngineId);
+        case DELETION:
+            return String.format(SubType.DELETION.getFormat(), this.ratingEngineId);
         case AI_MODEL_BUCKET_CHANGE:
             return String.format(SubType.AI_MODEL_BUCKET_CHANGE.getFormat(), this.modelId, this.ratingEngineId);
         case RULE_MODEL_BUCKET_CHANGE:
@@ -69,6 +71,7 @@ public class RatingEngineActionConfiguration extends ActionConfiguration {
     public enum SubType {
 
         ACTIVATION("Rating Engine %s is activated."), //
+        DELETION("Rating Engine %s has been deleted."), //
         AI_MODEL_BUCKET_CHANGE("Rating Buckets of Rating Model %s for Rating Engine %s has been updated."), //
         RULE_MODEL_BUCKET_CHANGE("Rating Rule of Rating Model %s for Rating Engine %s has been updated.");
 
@@ -81,6 +84,7 @@ public class RatingEngineActionConfiguration extends ActionConfiguration {
         public String getFormat() {
             return this.format;
         }
+
     }
 
 }

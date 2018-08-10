@@ -379,7 +379,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         updateStartTimeStampAndForJob(job);
         if (CollectionUtils.isNotEmpty(actions)) {
             Map<String, String> unfinishedInputContext = new HashMap<>();
-            List<Long> unfinishedActionIds = actions.stream().map(Action::getPid).collect(Collectors.toList());
+            List<Long> unfinishedActionIds = actions.stream()
+                    .filter(action -> isVisibleAction(action))
+                    .map(Action::getPid).collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
             if (expandChildrenJobs) {
@@ -387,6 +389,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
         }
         return job;
+    }
+
+    private Boolean isVisibleAction(Action action) {
+        return action.getActionConfiguration().getHiddenFromUI() != null
+                && !action.getActionConfiguration().getHiddenFromUI();
     }
 
     @VisibleForTesting
@@ -435,7 +442,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             // this action is a workflow job
             if (action.getTrackingId() != null) {
                 workflowJobIds.add(action.getTrackingId().toString());
-            } else {
+            } else if (isVisibleAction(action)) {
                 Job job = new Job();
                 job.setName(action.getType().getDisplayName());
                 job.setJobType(action.getType().getName());

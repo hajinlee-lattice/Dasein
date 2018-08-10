@@ -34,9 +34,12 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -219,7 +222,9 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testExpandActions() {
-        List<Job> expandedJobs = workflowJobService.expandActions(generateActions());
+        List<Action> actions = generateActions();
+        List<Job> expandedJobs = workflowJobService.expandActions(actions);
+        Assert.assertEquals(actions.size(), 5);
         Assert.assertEquals(expandedJobs.size(), 4);
         Job firstJob = expandedJobs.get(0);
         Assert.assertEquals(firstJob.getName(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName());
@@ -298,23 +303,35 @@ public class WorkflowJobServiceImplUnitTestNG {
         Action action1 = new Action();
         action1.setPid(1L);
         action1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action1.setActionConfiguration(new ImportActionConfiguration());
         action1.setActionInitiator(INITIATOR);
         Action action2 = new Action();
         action2.setPid(2L);
         action2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action2.setActionConfiguration(new ImportActionConfiguration());
         action2.setTrackingId(jobIds[0]);
         Action action3 = new Action();
         action3.setPid(3L);
         action3.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action3.setActionConfiguration(new ImportActionConfiguration());
         action3.setTrackingId(jobIds[1]);
         Action action4 = new Action();
         action4.setPid(4L);
         action4.setType(ActionType.METADATA_CHANGE);
+        action4.setActionConfiguration(new RatingEngineActionConfiguration());
         action4.setActionInitiator(INITIATOR);
+        Action action5 = new Action();
+        action5.setPid(5L);
+        action5.setType(ActionType.RATING_ENGINE_CHANGE);
+        ActionConfiguration actionConfig = new RatingEngineActionConfiguration();
+        actionConfig.setHiddenFromUI(true);
+        action5.setActionInitiator(INITIATOR);
+        action5.setActionConfiguration(actionConfig);
         actions.add(action1);
         actions.add(action2);
         actions.add(action3);
         actions.add(action4);
+        actions.add(action5);
         return actions;
     }
 

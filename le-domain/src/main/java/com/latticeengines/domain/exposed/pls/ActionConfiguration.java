@@ -16,4 +16,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 public abstract class ActionConfiguration {
 
     public abstract String serialize();
+
+    private Boolean hiddenFromUI = false;
+
+    public Boolean getHiddenFromUI() {
+        return hiddenFromUI;
+    }
+
+    public void setHiddenFromUI(Boolean hiddenFromUI) {
+        this.hiddenFromUI = hiddenFromUI;
+    }
 }

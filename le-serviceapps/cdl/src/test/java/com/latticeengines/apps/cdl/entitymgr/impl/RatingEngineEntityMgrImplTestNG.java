@@ -252,7 +252,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         validateRatingModelCreation(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getSegment());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
-        validateActionContext(createdRatingEngine);
+        validateActionContext(createdRatingEngine.getId(), RatingEngineActionConfiguration.SubType.ACTIVATION);
 
         log.info("The update date for the newly updated one is "
                 + ratingEngineEntityMgr.findById(ratingEngine.getId()).getUpdated());
@@ -283,7 +283,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         validateAIRatingModelCreation(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getSegment());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
-        validateActionContext(createdRatingEngine);
+        validateActionContext(createdRatingEngine.getId(), RatingEngineActionConfiguration.SubType.ACTIVATION);
 
         // test rating engine note update
         ratingEngineNotes = ratingEngineNoteEntityMgr.getAllByRatingEngine(createdRatingEngine);
@@ -389,7 +389,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(ratingEngineList.get(1).getDeleted());
     }
 
-    private void validateActionContext(RatingEngine ratingEngine) {
+    private void validateActionContext(String ratingEngineId,
+            RatingEngineActionConfiguration.SubType subType) {
         Action action = ActionContext.getAction();
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
@@ -398,15 +399,18 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 action.getActionConfiguration() instanceof RatingEngineActionConfiguration);
         Assert.assertEquals(
                 ((RatingEngineActionConfiguration) action.getActionConfiguration()).getSubType(),
-                RatingEngineActionConfiguration.SubType.ACTIVATION);
+                subType);
         Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration())
-                .getRatingEngineId(), ratingEngine.getId());
+                .getRatingEngineId(), ratingEngineId);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDeletion() {
         ratingEngineEntityMgr.deleteById(ratingEngineId, true);
+        validateActionContext(ratingEngineId, RatingEngineActionConfiguration.SubType.DELETION);
         ratingEngineEntityMgr.deleteById(aiRatingEngineId, true);
+        validateActionContext(aiRatingEngineId, RatingEngineActionConfiguration.SubType.DELETION);
+
         ratingEngineList = ratingEngineEntityMgr.findAll();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);

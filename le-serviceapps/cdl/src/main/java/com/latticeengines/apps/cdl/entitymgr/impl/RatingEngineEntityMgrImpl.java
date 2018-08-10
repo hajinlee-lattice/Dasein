@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.NoteOrigin;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
@@ -165,6 +166,7 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteById(String id, boolean hardDelete) {
         checkFeasibilityForDelete(id);
+        setDeletionActionContext(findById(id));
         ratingEngineDao.deleteById(id, hardDelete);
     }
 
@@ -514,6 +516,20 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
         reActionConfig.setSubType(RatingEngineActionConfiguration.SubType.ACTIVATION);
         ratingEngineActivateAction.setActionConfiguration(reActionConfig);
         ActionContext.setAction(ratingEngineActivateAction);
+    }
+    
+    private void setDeletionActionContext(RatingEngine ratingEngine) {
+        log.info(String.format("Set Deletion Action Context for Rating Engine %s",
+                ratingEngine.getId()));
+        Action ratingEngineDeletionAction = new Action();
+        ratingEngineDeletionAction.setType(ActionType.RATING_ENGINE_CHANGE);
+        ratingEngineDeletionAction.setActionInitiator(ratingEngine.getCreatedBy());
+        RatingEngineActionConfiguration reActionConfig = new RatingEngineActionConfiguration();
+        ((ActionConfiguration) reActionConfig).setHiddenFromUI(true);
+        reActionConfig.setRatingEngineId(ratingEngine.getId());
+        reActionConfig.setSubType(RatingEngineActionConfiguration.SubType.DELETION);
+        ratingEngineDeletionAction.setActionConfiguration(reActionConfig);
+        ActionContext.setAction(ratingEngineDeletionAction);
     }
 
     @VisibleForTesting
