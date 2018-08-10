@@ -10,7 +10,7 @@ module.exports = {
     vendor: "../common/vendor.index.js",
     login: "./index.js"
   },
-  devtool: "source-map",
+  devtool: "module-source-map",
   plugins: [
     new CleanWebpackPlugin(["dist"]),
     new HtmlWebpackPlugin({
@@ -20,6 +20,9 @@ module.exports = {
   ],
 
   output: {
+    devtoolModuleFilenameTemplate(info) {
+      return `file:///${info.absoluteResourcePath.replace(/\\/g, '/')}`;
+    },
     filename: "[name].bundle.js",
     path: path.resolve(__dirname, "dist")
   },
