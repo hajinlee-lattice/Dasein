@@ -26,7 +26,7 @@ public class IngestionS3ProviderServiceImpl extends IngestionProviderServiceImpl
     @Inject
     private S3SourceEntityMgr s3SourceEntityMgr;
 
-    @Value("dataplatform.queue.scheme")
+    @Value("${dataplatform.queue.scheme}")
     private String queueScheme;
 
     @Override
