@@ -279,24 +279,25 @@ angular
                     gotoNonemptyCategory: true
                 },
                 resolve: {
-                    EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                    // EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                    //     var deferred = $q.defer();
+
+                    //     DataCloudStore.setHost(ApiHost);
+
+                    //     DataCloudStore.getCount().then(function (result) {
+                    //         DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                    //         deferred.resolve(result.data);
+                    //     });
+
+                    //     return deferred.promise;
+                    // }],
+                    // Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                    Enrichments: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
                         var deferred = $q.defer();
 
                         DataCloudStore.setHost(ApiHost);
 
-                        DataCloudStore.getCount().then(function (result) {
-                            DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                            deferred.resolve(result.data);
-                        });
-
-                        return deferred.promise;
-                    }],
-                    Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
-                        var deferred = $q.defer();
-
-                        DataCloudStore.setHost(ApiHost);
-
-                        DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function (result) {
+                        DataCloudStore.getAllEnrichmentsConcurrently().then(function (result) {
                             deferred.resolve(result);
                         });
 
@@ -778,24 +779,25 @@ angular
                  * for now we're ducplciating these here from datacloud.routes because when minified the resolves fail
                  */
                 resolve: {
-                    EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                    // EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                    //     var deferred = $q.defer();
+
+                    //     DataCloudStore.setHost(ApiHost);
+
+                    //     DataCloudStore.getCount().then(function (result) {
+                    //         DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                    //         deferred.resolve(result.data);
+                    //     });
+
+                    //     return deferred.promise;
+                    // }],
+                    // Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                    Enrichments: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
                         var deferred = $q.defer();
 
                         DataCloudStore.setHost(ApiHost);
 
-                        DataCloudStore.getCount().then(function (result) {
-                            DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                            deferred.resolve(result.data);
-                        });
-
-                        return deferred.promise;
-                    }],
-                    Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
-                        var deferred = $q.defer();
-
-                        DataCloudStore.setHost(ApiHost);
-
-                        DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function (result) {
+                        DataCloudStore.getAllEnrichmentsConcurrently().then(function (result) {
                             deferred.resolve(result);
                         });
 

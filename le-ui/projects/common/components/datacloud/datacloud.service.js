@@ -171,7 +171,7 @@ angular.module('common.datacloud')
         this.subcategories[category] = item;
     }
 
-    this.getAllEnrichmentsConcurrently = function(total_count){
+    this.getAllEnrichmentsConcurrently = function(){
         var deferred = $q.defer(),
             /*  
              *  Most browsers support 6 concurrent connections, older IE supports two
@@ -179,27 +179,27 @@ angular.module('common.datacloud')
              */
             // concurrent does not help here, because backend cannot really paginate,
             // as it needs to gather all metadata anyway
-            connections = 1,
-            item_count = Math.ceil(total_count / connections),
-            iterations = Math.ceil(total_count / item_count);
+            connections = 1;
+            //item_count = Math.ceil(total_count / connections),
+            //iterations = Math.ceil(total_count / item_count);
         
         this.concurrent_count = 0;
 
-        if (this.enrichments && this.enrichments.length == total_count) {
+        if (this.enrichments/* && this.enrichments.length == total_count*/) {
             deferred.resolve(this.enrichments, true);
         } else {
-            for (var j=0; j<iterations; j++) {
+            //for (var j=0; j<iterations; j++) {
                 this.getEnrichments({ 
-                    max: item_count, 
-                    offset: j * item_count 
+                    //max: item_count, 
+                    //offset: j * item_count 
                 }, true).then(function(result) {
-                    DataCloudStore.concurrent_count++;
+                    //DataCloudStore.concurrent_count++;
 
-                    if (DataCloudStore.concurrent_count == iterations) {
+                    //if (DataCloudStore.concurrent_count == iterations) {
                         deferred.resolve(DataCloudStore.enrichments);
-                    }
+                    //}
                 });
-            }
+            //}
         }
 
         return deferred.promise;
@@ -212,11 +212,13 @@ angular.module('common.datacloud')
 
         if (this.enrichments && !nocache) {
             ret = (this.enrichments && this.enrichments.data ? this.enrichments.data : this.enrichments);
+            DataCloudStore.setMetadata('enrichmentsTotal', ret.length);
             deferred.resolve(ret);
         } else {
             DataCloudService.getEnrichments(opts).then(function(response){
                 ret = (response && response.data ? response.data : response);
                 DataCloudStore.setEnrichments(ret, concatEnrichments || false);
+                DataCloudStore.setMetadata('enrichmentsTotal', ret.length);
                 deferred.resolve(ret);
             });
         }
@@ -281,7 +283,6 @@ angular.module('common.datacloud')
 
     this.setAttributesCount = function(count){
         DataCloudStore.attributesCount = count;
-        console.log('DataCloudStore.attributesCount is set to', DataCloudStore.attributesCount);
     }
 
     this.getSelectedCount = function(){
@@ -564,8 +565,8 @@ angular.module('common.datacloud')
             method: 'get',
             url: url,
             params: {
-                offset: offset,
-                max: max,
+                //offset: offset,
+                //max: max,
                 onlySelectedAttributes: onlySelectedAttributes
             }
         }).then(function(response){

@@ -13,7 +13,7 @@ angular.module('common.datacloud.explorer', [
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, $rootScope, 
     Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentSelectMaximum, LookupStore, QueryService, QueryStore,
-    SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
+    SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, LookupResponse, 
     RatingsEngineModels, RatingsEngineStore, QueryTreeService, ExplorerUtils, ConfigureAttributesStore
 ){
     var vm = this,
@@ -54,7 +54,7 @@ angular.module('common.datacloud.explorer', [
         LookupResponse: LookupStore.response,
         no_lookup_results_message: false,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
-        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : EnrichmentCount),        
+        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : (Enrichments || []).length),        
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         show_segmentation: FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL),

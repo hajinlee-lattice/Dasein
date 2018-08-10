@@ -41,30 +41,31 @@ angular
     this.$get = function DataCloudResolvesFactory() {
         return {
             "main": {
-                EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                // EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                //     var deferred = $q.defer();
+
+                //     DataCloudStore.setHost(ApiHost);
+
+                //     DataCloudStore.getCount().then(function(result) {
+                //         DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                //         deferred.resolve(result.data);
+                //     });
+
+                //     return deferred.promise;
+                // }],
+                // Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                Enrichments: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
                     var deferred = $q.defer();
 
                     DataCloudStore.setHost(ApiHost);
 
-                    DataCloudStore.getCount().then(function(result) {
-                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                        deferred.resolve(result.data);
-                    });
-
-                    return deferred.promise;
-                }],
-                Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function(result) {
+                    DataCloudStore.getAllEnrichmentsConcurrently().then(function(result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 }], 
-                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', 'CollectionStatus', 'FeatureFlagService', function($q, DataCloudStore, ApiHost, EnrichmentCount, CollectionStatus, FeatureFlagService) {
+                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', 'Enrichments', 'CollectionStatus', 'FeatureFlagService', function($q, DataCloudStore, ApiHost, Enrichments, CollectionStatus, FeatureFlagService) {
                     var deferred = $q.defer();
 
                     DataCloudStore.setHost(ApiHost);
@@ -73,7 +74,7 @@ angular
                     var enabledCDL = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
                     var hasCollectionStatus = CollectionStatus != null && (CollectionStatus.AccountCount > 0 || CollectionStatus.ContactCount > 0);
 
-                    if ((enabledCDL && hasCollectionStatus) || (!enabledCDL && EnrichmentCount !== 0)) {
+                    if ((enabledCDL && hasCollectionStatus) || (!enabledCDL && (Enrichments || []).length !== 0)) {
                         DataCloudStore.getAllTopAttributes().then(function(result) {
                             deferred.resolve(result['Categories'] || result || {});
                         });
