@@ -25,7 +25,7 @@
                     </svg>
                     <p>Customers That Will Purchase A Product For The First Time</p>
                     <i class="fa fa-spinner fa-pulse fa-fw" ng-if="vm.datacollectionPrechecking"></i>
-                    <i class="fa fa-exclamation-circle show-tooltip delay bottom left" ng-if="!vm.datacollectionPrechecking">
+                    <i class="fa fa-exclamation-circle show-tooltip delay bottom left" ng-if="!vm.datacollectionPrechecking && !vm.datacollectionPrecheck.disableCrossSellModeling">
                         <div class="tooltip_">
                             <div class="cover">
                                 <p>Build a model to sell a Product Bundle to the customers that haven’t bought that Bundle before. Use this to sell durable products solution extensions, or to break into new customer cohorts with consumable goods or renewable licenses. If some customers in the Segment have already bought it, they won’t get Rated.</p>
@@ -44,7 +44,7 @@
                     </svg>
                     Customers That Will Purchase Again Next Quarter
                     <i class="fa fa-spinner fa-pulse fa-fw" ng-if="vm.datacollectionPrechecking"></i>
-                    <i class="fa fa-exclamation-circle show-tooltip delay bottom left" ng-if="!vm.datacollectionPrechecking">
+                    <i class="fa fa-exclamation-circle show-tooltip delay bottom left" ng-if="!vm.datacollectionPrechecking && !vm.datacollectionPrecheck.disableCrossSellModeling">
                         <div class="tooltip_">
                             <div class="cover">
                                 <p>Build a model to sell a Product Bundle to the customers that did buy the Product Bundle in the past, but now haven’t refilled within the expected timeframe. Use this to win back customers that may be refilling elsewhere, or to be proactive with a renewal or upgrade conversation. If some customers in the Segment have never bought, or have refilled too recently, they won’t get Rated.</p>

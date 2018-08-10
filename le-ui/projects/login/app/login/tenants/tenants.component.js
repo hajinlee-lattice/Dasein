@@ -26,7 +26,7 @@ angular.module('login.tenants', [
             vm.selected = null;
             vm.visible = true;
             vm.initialize = false;
-            vm.version = '3.0';
+            vm.version = ''; // '' defaults it to all, it could also be '4.0', '3.0'
 
             var ClientSession = BrowserStorageUtility.getClientSession();
             
