@@ -1,0 +1,170 @@
+ <!DOCTYPE html> 
+ <meta charset="utf-8"> 
+ <style> 
+  
+ .link { 
+   fill: none; 
+   stroke: #666; 
+   stroke-width: 1.0px; 
+ } 
+  
+.link.dependsonviapa {
+  stroke: pink;
+}
+
+.link.dependson {
+  stroke: blue;
+}
+
+.link.dependsonfortarget {
+  stroke: blue;
+}
+
+.link.dependsonfortraining {
+  stroke: blue;
+}
+
+  
+ .link.tenant { 
+   stroke: grey; 
+   stroke-dasharray: 0,4 1; 
+ } 
+  
+ circle { 
+   fill: #ccc; 
+   stroke: #333; 
+   stroke-width: 1.5px; 
+ } 
+  
+ text { 
+   font: 10px sans-serif; 
+   pointer-events: none; 
+   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff; 
+ } 
+  
+ </style> 
+ <body> 
+ <!--script src="//d3js.org/d3.v3.min.js"></script--> 
+ <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script> 
+ <script> 
+  
+ var links = [ 
+	 {{{{PLACE_HOLDER}}}} 
+ ]; 
+  
+ var nodes = {}; 
+  
+ // Compute the distinct nodes from the links. 
+ links.forEach(function(link) { 
+   link.source = nodes[link.source] || (nodes[link.source] = {name: link.source}); 
+   link.target = nodes[link.target] || (nodes[link.target] = {name: link.target}); 
+ }); 
+  
+ var width = 1460, 
+     height = 660; 
+  
+ var force = d3.layout.force() 
+     .nodes(d3.values(nodes)) 
+     .links(links) 
+     .size([width, height]) 
+     .linkDistance(linkDistance) 
+     .charge(-1000) 
+     .on("tick", tick) 
+     .start(); 
+  
+ var svg = d3.select("body").append("svg") 
+     .attr("width", width) 
+     .attr("height", height); 
+  
+ // Per-type markers, as they don't inherit styles. 
+ svg.append("defs").selectAll("marker") 
+     .data(["tenant", "dependsonviapa", "dependson", "dependsonfortraining", "dependsonfortarget"]) 
+   .enter().append("marker") 
+     .attr("id", function(d) { return d; }) 
+     .attr("viewBox", "0 -5 10 10") 
+     .attr("refX", 15) 
+     .attr("refY", -1.5) 
+     .attr("markerWidth", 6) 
+     .attr("markerHeight", 6) 
+     .attr("orient", "auto") 
+   .append("path") 
+     .attr("d", "M0,-5L10,0L0,5"); 
+  
+ var path = svg.append("g").selectAll("path") 
+     .data(force.links()) 
+   .enter().append("path") 
+     .attr("class", function(d) { return "link " + d.type; }) 
+     .attr("marker-end", function(d) { return "url(#" + d.type + ")"; }); 
+  
+ var circle = svg.append("g").selectAll("circle") 
+     .data(force.nodes()) 
+   .enter().append("circle") 
+     .attr("r", function(d){ 
+                             console.log(d);  
+                             var size = 6;  
+                             if(d.name.startsWith('TEN_')){ 
+                               size=1; 
+                             }  
+                             else if(d.name.startsWith('SEG_')){ 
+                               size=4; 
+                             }  
+                             else if(d.name.startsWith('REN_')){ 
+                               size=5; 
+                             }  
+                             else if(d.name.startsWith('ATR.REN.EV')){ 
+                               size=2; 
+                             }  
+                             else if(d.name.startsWith('ATR.REN.BKT_')){ 
+                               size=2; 
+                             }  
+                             else if(d.name.startsWith('ATR.REN.SCO_')){ 
+                               size=2; 
+                             }  
+                             else if(d.name.startsWith('PLY_')){ 
+                               size=12; 
+                             }  
+                             return size;}) 
+     .call(force.drag); 
+  
+ var text = svg.append("g").selectAll("text") 
+     .data(force.nodes()) 
+   .enter().append("text") 
+     .attr("x", 8) 
+     .attr("y", ".31em") 
+     .text(function(d) { return d.name; }); 
+  
+ // Use elliptical arc path segments to doubly-encode directionality. 
+ function tick() { 
+   path.attr("d", linkArc); 
+   circle.attr("transform", transform); 
+   text.attr("transform", transform); 
+ } 
+  
+ function linkDistance(d) { 
+     console.log(d); 
+     var ds = 100; 
+     if(d.type == 'tenant'){ 
+         ds = 2*ds; 
+     } 
+     else if(d.type == 'dependsonpa'){ 
+         ds = ds/3; 
+     } 
+     else if(d.type == 'dependsonviapa'){ 
+         ds = ds/3; 
+     } 
+     return ds; 
+ }  
+  
+ function linkArc(d) { 
+   var dx = d.target.x - d.source.x, 
+       dy = d.target.y - d.source.y, 
+       dr = Math.sqrt(dx * dx + dy * dy); 
+   return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y; 
+ } 
+  
+ function transform(d) { 
+   return "translate(" + d.x + "," + d.y + ")"; 
+ } 
+  
+ </script> 
+ </body> 
