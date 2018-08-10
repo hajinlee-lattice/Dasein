@@ -25,10 +25,10 @@ angular.module('lp.sfdc', [])
         return deferred.promise;
     }
 
-    this.getAccountIds = function(params) {
+    this.getAccountIds = function(externalSystemTypes) {
         var deferred = $q.defer();
 
-        SfdcService.getAccountIds(params).then(function(data) {
+        SfdcService.getAccountIds(externalSystemTypes).then(function(data) {
             SfdcStore.setAccountIds(data);
             deferred.resolve(data);
         });
@@ -112,13 +112,15 @@ angular.module('lp.sfdc', [])
         return deferred.promise;
     }
 
-    this.getAccountIds = function(params) {
+    this.getAccountIds = function(externalSystemTypes) {
         var deferred = $q.defer();
 
         $http({
             method: 'GET',
             url: '/pls/lookup-id-mapping/available-lookup-ids',
-            params: params
+            params: {
+                "externalSystemType[]": externalSystemTypes,
+            }
         }).then(
             function onSuccess(response) {
                 var result = response.data;

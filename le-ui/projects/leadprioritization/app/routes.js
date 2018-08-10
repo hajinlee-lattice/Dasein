@@ -1297,10 +1297,8 @@ angular
                 },
                 accountids: function($q, SfdcStore, externaltypes) {
                     var deferred = $q.defer();
-                    var params = {
-                        externalSystemType: externaltypes
-                    };
-                    SfdcStore.getAccountIds(params).then(function (result) {
+
+                    SfdcStore.getAccountIds(externaltypes).then(function (result) {
                         deferred.resolve(result);
                     });
 
