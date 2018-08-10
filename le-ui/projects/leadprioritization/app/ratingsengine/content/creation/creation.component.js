@@ -112,11 +112,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
                 var dataStore = model.advancedModelingConfig.custom_event.dataStores;
                 vm.availableAttributes = dataStore.length == 1 ? RatingsEngineStore.formatTrainingAttributes(dataStore[0]) : RatingsEngineStore.formatTrainingAttributes(dataStore[0]) + ' + ' + RatingsEngineStore.formatTrainingAttributes(dataStore[1]);
-
             }
-
-            console.log(vm.hasSettingsInfo);
-
         };
 
         vm.checkJobStatus = function() {

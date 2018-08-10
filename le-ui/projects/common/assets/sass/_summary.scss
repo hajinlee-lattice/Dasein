@@ -8,6 +8,9 @@ Page Summary / Sub-Nav Headers
   overflow: hidden;
   width: 100%;
   position: relative;
+  -webkit-box-shadow: inset 0px 0px 10px 0px rgba(0,0,0,0.35);
+  -moz-box-shadow: inset 0px 0px 10px 0px rgba(0,0,0,0.35);
+  box-shadow: inset 0px 0px 10px 0px rgba(0,0,0,0.35);
   &.SalesforceAccount, &.SalesforceLead, &.blue-fire {
     background-image: url("/assets/images/bkg-blue-fire.jpg");
     .headers {
@@ -155,6 +158,15 @@ Page Summary / Sub-Nav Headers
       dl:last-of-type {
         padding-right: 0;
       }
+    }
+  }
+
+  .flex-content-half {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;    
+    & > div {
+      width: 49.8%;
     }
   }
 

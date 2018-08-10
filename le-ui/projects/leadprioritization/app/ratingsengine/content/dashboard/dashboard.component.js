@@ -212,6 +212,8 @@ angular.module('lp.ratingsengine.dashboard', [
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
 
+        vm.isPublished = vm.dashboard.summary.isPublished ? true : false;
+
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
             vm.publishOrActivateButtonLabel = 'New Scoring Configuration';//vm.dashboard.summary.bucketMetadata.length > 0 ? 'New Scoring Configuration' : 'Activate Scoring';
@@ -283,10 +285,6 @@ angular.module('lp.ratingsengine.dashboard', [
             } else if (vm.predictionType === 'EXPECTED_VALUE') {
                 vm.prioritizeBy = 'Likely Amount of Spend';
             }
-
-
-
-            console.log(vm.configFilters);
         }
     }
 

@@ -21,6 +21,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         var ratingEngine = $scope.RatingEngine;
 
         $scope.IsRatingEngine = true;
+        $scope.viewingIteration = false;
         $scope.type = ratingEngine.type;
         $scope.displayName = ratingEngine.displayName;
         $scope.createdBy = ratingEngine.createdBy;
@@ -52,6 +53,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         }
 
         if($scope.typeContext == 'AI'){
+            $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
+
             var engineId = $stateParams.rating_id,
                 ratingModelId = data.ModelDetails.Name;
 
@@ -59,6 +62,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 $scope.iteration = iteration.AI;
                 $scope.isActiveModel = (ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
             });
+
+            
         }
 
         $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
@@ -120,6 +125,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             }
 
             if($scope.typeContext == 'AI'){
+                $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
+
                 var engineId = $stateParams.rating_id,
                     ratingModelId = data.ModelDetails.Name;
 

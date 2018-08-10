@@ -65,7 +65,7 @@ angular
     }
 
     vm.goToRatingEngineRoute = function() {
-        $state.go('home.ratingsengine.dashboard', { "rating_id": vm.stateParams.rating_id, "modelId": vm.stateParams.modelId });
+        $state.go('home.ratingsengine.dashboard', { "rating_id": vm.stateParams.rating_id, "modelId": vm.stateParams.modelId, viewingIteration: false });
     }
 
     vm.checkToState = function(toState) {

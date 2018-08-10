@@ -262,7 +262,9 @@ angular.module('lp.ratingsengine.ratingslist', [
                     var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : null,
                         modelJobId = model.AI.modelingJobId;
                     
-                    if ((modelId !== null) || (modelJobId !== null)) {
+                    if((rating.status === 'INACTIVE' && !vm.enableDelete(rating.id) && !vm.disableCancelJob(rating.id))){
+                        return;
+                    } else if ((modelId !== null) || (modelJobId !== null)) {
                         $state.go('home.ratingsengine.dashboard', { 
                             rating_id: rating.id, 
                             modelId: modelId,

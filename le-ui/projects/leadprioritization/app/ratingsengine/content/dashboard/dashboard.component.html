@@ -133,8 +133,8 @@
                             </span>
                         </span>
                     </h3>
-                    <h4 ng-if="vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0 || vm.dashboard.summary.isPublished == false">No Ratings Available</h4>
-                    <bar-chart ng-if="vm.dashboard.summary.isPublished"    
+                    <h4 ng-if="!vm.isPublished">No Ratings Available</h4>
+                    <bar-chart ng-if="vm.isPublished"    
                         config="vm.ratingEngine.chartConfig" 
                         bktlist="vm.dashboard.summary.bucketMetadata">
                     </bar-chart>
@@ -200,6 +200,7 @@
                                     </span>
                                 </td>
                                 <td>
+                                    
                                     <button 
                                         class="button link-button" 
                                         ng-click="vm.viewIteration(iteration)"

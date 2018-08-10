@@ -52,6 +52,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         labelDx = 0,
         modelType = modelData.ModelDetails.SourceSchemaInterpretation;
 
+
     function setHoverPosition(xPos, chartHeight) {
         var attributeHover = $(".attribute-hover"),
             hoverElem = $("#topPredictorAttributeHover"),
@@ -321,7 +322,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .text(function(d) { return d + "%"; } );
 
     // This is the % Leads or % Accounts label to the right of the chart
-    var isAccountBased = modelType == 'Account';
+    var isAccountBased = (modelType == 'Account' || modelType == 'SalesforceAccount');
     var percentText = isAccountBased ? ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_ACCOUNTS_LABEL").toUpperCase() : ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
     chart.append("text")
         .attr("x", width + 142)
