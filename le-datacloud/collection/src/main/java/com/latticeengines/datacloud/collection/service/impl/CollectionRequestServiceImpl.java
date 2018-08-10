@@ -159,7 +159,8 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
                     if (curDomain.compareTo(curReq.getDomain()) == 0 &&
                             (curReq.getStatus().compareTo(CollectionRequest.STATUS_COLLECTING) == 0 ||
                                     curReq.getStatus().compareTo(CollectionRequest.STATUS_READY) == 0 ||
-                                    (curReq.getStatus().compareTo(CollectionRequest.STATUS_DELIVERED) == 0 &&
+                                    ((curReq.getStatus().compareTo(CollectionRequest.STATUS_DELIVERED) == 0 ||
+                                        curReq.getStatus().compareTo(CollectionRequest.STATUS_FAILED) == 0) &&
                                             curRawReq.getRequestedTime().getTime() - curReq.getRequestedTime().getTime() < 1000L * vendorConfigService.getCollectingFreq(curVendor))))
                         rawReqFilter.set(posBuf[k], true);
                 }
