@@ -12,6 +12,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,8 +40,8 @@ import io.swagger.annotations.ApiModel;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OnDelete(action = OnDeleteAction.CASCADE)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-@NamedEntityGraph(name = "AIModel.details", attributeNodes = { @NamedAttributeNode("ratingEngine"),
-        @NamedAttributeNode("trainingSegment") })
+@NamedEntityGraphs(value = { @NamedEntityGraph(name = "AIModel.details", attributeNodes = {
+        @NamedAttributeNode("ratingEngine"), @NamedAttributeNode("trainingSegment") }) })
 @ApiModel("Represents AIModel JSON Object")
 public class AIModel extends RatingModel {
     public static final String AI_MODEL_PREFIX = "ai";

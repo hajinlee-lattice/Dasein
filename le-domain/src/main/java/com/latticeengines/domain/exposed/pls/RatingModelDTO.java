@@ -1,13 +1,14 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.pls.RatingModel;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -21,10 +22,18 @@ public class RatingModelDTO {
         this.setCreated(ratingModel.getCreated());
         this.setCreatedBy(ratingModel.getCreatedBy());
         this.setIteration(ratingModel.getIteration());
+        if (ratingModel instanceof RuleBasedModel) {
+            this.setRatingModelAttributes(ratingModel.getRatingModelAttributes());
+        }
         if (ratingModel instanceof AIModel) {
             this.setModelingJobStatus(((AIModel) ratingModel).getModelingJobStatus());
             this.setModelSummaryId(((AIModel) ratingModel).getModelSummaryId());
         }
+    }
+
+    public RatingModelDTO(RatingModel ratingModel, String derivedFromRatingModelId) {
+        this(ratingModel);
+        this.derivedFromRatingModelId = derivedFromRatingModelId;
     }
 
     @JsonProperty("id")
@@ -44,6 +53,12 @@ public class RatingModelDTO {
 
     @JsonProperty("modelSummaryId")
     private String modelSummaryId;
+
+    @JsonProperty("derivedFromRatingModelId")
+    private String derivedFromRatingModelId;
+
+    @JsonProperty("ratingmodel_attributes")
+    private Set<AttributeLookup> ratingModelAttributes;
 
     public void setId(String id) {
         this.id = id;
@@ -91,6 +106,22 @@ public class RatingModelDTO {
 
     public String getModelSummaryId() {
         return this.modelSummaryId;
+    }
+
+    public String getDerivedFromRatingModelId() {
+        return derivedFromRatingModelId;
+    }
+
+    public void setDerivedFromRatingModelId(String derivedFromRatingModelId) {
+        this.derivedFromRatingModelId = derivedFromRatingModelId;
+    }
+
+    public Set<AttributeLookup> getRatingModelAttributes() {
+        return this.ratingModelAttributes;
+    }
+
+    public void setRatingModelAttributes(Set<AttributeLookup> attributes) {
+        this.ratingModelAttributes = attributes;
     }
 
     @Override

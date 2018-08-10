@@ -1,7 +1,9 @@
 package com.latticeengines.apps.cdl.end2end;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +18,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -38,8 +43,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "LETest1529773529695";
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "JLM1533618545277";
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
     private MetadataSegment testSegment;
@@ -47,8 +52,11 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private RatingEngine cdlCERatingEngine;
     private AIModel lpiCEAIModel;
     private AIModel cdlCEAIModel;
+    private AIModel testCERemodel;
     private SourceFile testSourceFile;
     private final String testSourceFileName = "CustomEventModelE2ETestFile.csv";
+    private CustomEventModelingType testType;
+    private final Map<String, Category> refinedAttributes = new HashMap<>();
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
@@ -64,6 +72,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
 
     @BeforeClass(groups = { "end2end", "manual", "precheckin" })
     public void setup() {
+        testType = CustomEventModelingType.CDL;
     }
 
     /**
@@ -73,9 +82,17 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     public void end2endCDLStyleCustomEventModelTest() throws Exception {
         setupEnd2EndTestEnvironment();
         resumeCheckpoint(LOADING_CHECKPOINT);
-        CustomEventModelingType testType = CustomEventModelingType.CDL;
         bootstrap(testType);
         runCustomEventModel(testType);
+    }
+
+    /**
+     * This test is part of CD pipeline and Trunk Health
+     */
+    // @Test(groups = { "end2end", "precheckin" }, dependsOnMethods =
+    // "end2endCDLStyleCustomEventModelTest")
+    public void end2endCDLStyleCustomEventReModelTest() throws Exception {
+        runCustomEventRemodel(testType);
     }
 
     /**
@@ -93,9 +110,10 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             resumeCheckpoint(LOADING_CHECKPOINT);
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-        CustomEventModelingType testType = CustomEventModelingType.CDL;
+        testType = CustomEventModelingType.CDL;
         bootstrap(testType);
         runCustomEventModel(testType);
+        runCustomEventRemodel(testType);
     }
 
     private void runCustomEventModel(CustomEventModelingType type) {
@@ -118,6 +136,74 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                 RatingEngineStatus.INACTIVE);
     }
 
+    private void runCustomEventRemodel(CustomEventModelingType type) {
+        log.info("Starting Custom Event remodeling ...");
+        RatingEngine testRatingEngine = type == CustomEventModelingType.CDL ? cdlCERatingEngine : lpiCERatingEngine;
+        AIModel testAIModel = type == CustomEventModelingType.CDL ? cdlCEAIModel : lpiCEAIModel;
+        AIModel testCERemodel = new AIModel();
+        testCERemodel.setRatingEngine(testRatingEngine);
+        testCERemodel.setAdvancedModelingConfig(testAIModel.getAdvancedModelingConfig());
+        testCERemodel.setDerivedFromRatingModel(testAIModel.getId());
+        testCERemodel = (AIModel) ratingEngineProxy.createModelIteration(mainTestTenant.getId(),
+                testRatingEngine.getId(), testCERemodel);
+
+        Assert.assertNotEquals(
+                ((CustomEventModelingConfig) testAIModel.getAdvancedModelingConfig()).getSourceFileName(),
+                ((CustomEventModelingConfig) testCERemodel.getAdvancedModelingConfig()).getSourceFileName());
+        testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
+        Assert.assertEquals(testRatingEngine.getLatestIteration().getId(), testCERemodel.getId());
+
+        Map<String, List<ColumnMetadata>> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
+                testRatingEngine.getId(), testAIModel.getId());
+        Assert.assertNotNull(attrs);
+
+        verifyBucketMetadataGenerated(testRatingEngine);
+        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
+                testRatingEngine.getId(), testCERemodel.getId(), refineAttributes(attrs), "some@email.com");
+        log.info(String.format("Remodel workflow application id is %s", modelingWorkflowApplicationId));
+        JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        verifyBucketMetadataGeneratedAfterRemodel(testRatingEngine);
+        testCERemodel = (AIModel) ratingEngineProxy.getRatingModel(mainCustomerSpace, testRatingEngine.getId(),
+                testAIModel.getId());
+        Assert.assertEquals(testAIModel.getModelingJobStatus(), completedStatus);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifyBucketMetadataGenerated(testRatingEngine);
+        Assert.assertEquals(
+                ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId()).getStatus(),
+                RatingEngineStatus.INACTIVE);
+
+        attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(), testRatingEngine.getId(),
+                testCERemodel.getId());
+        Assert.assertNotNull(attrs);
+        verifyRefinedAttributes(attrs);
+    }
+
+    private void verifyRefinedAttributes(Map<String, List<ColumnMetadata>> attrs) {
+        for (String refinedAttribute : refinedAttributes.keySet()) {
+            ColumnMetadata cm = attrs.get(refinedAttributes.get(refinedAttribute).getName()).stream()
+                    .filter(attr -> attr.getAttrName().equals(refinedAttribute)).findFirst().get();
+            Assert.assertEquals(cm.getApprovedUsageList().size(), 1);
+            Assert.assertEquals(cm.getApprovedUsageList().get(0), ApprovedUsage.NONE);
+        }
+    }
+
+    private Map<String, List<ColumnMetadata>> refineAttributes(Map<String, List<ColumnMetadata>> attrs) {
+        int noOfAttributesToRefine = 3;
+        for (List<ColumnMetadata> attrList : attrs.values()) {
+            for (ColumnMetadata attr : attrList) {
+                if (attr.getImportanceOrdering() != null) {
+                    refinedAttributes.put(attr.getAttrName(), attr.getCategory());
+                    attr.setApprovedUsageList(Arrays.asList(ApprovedUsage.NONE));
+                    noOfAttributesToRefine--;
+                }
+                if (noOfAttributesToRefine == 0) {
+                    return attrs;
+                }
+            }
+        }
+        return attrs;
+    }
+
     private void bootstrap(CustomEventModelingType type) {
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
@@ -136,6 +222,14 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                 .getABCDBucketsByEngineId(mainTestTenant.getId(), testRatingEngine.getId());
         Assert.assertNotNull(bucketMetadataHistory);
         Assert.assertEquals(bucketMetadataHistory.size(), 1);
+        log.info("time is " + bucketMetadataHistory.keySet().toString());
+    }
+
+    private void verifyBucketMetadataGeneratedAfterRemodel(RatingEngine testRatingEngine) {
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
+                .getABCDBucketsByEngineId(mainTestTenant.getId(), testRatingEngine.getId());
+        Assert.assertNotNull(bucketMetadataHistory);
+        Assert.assertEquals(bucketMetadataHistory.size(), 2);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
     }
 

@@ -628,8 +628,9 @@ public enum LedpCode {
                     + "or 'DUNS' field."), //
     LEDP_31200("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
-    // le-serviceflows
+    // Generic Errors
     LEDP_32000("Validations failed: {0}"), //
+    LEDP_32001("Unsupported Operation: {0}"), //
 
     // le-saml
     LEDP_33000("An identity provider with ID {0} already exists"), //
@@ -756,6 +757,9 @@ public enum LedpCode {
     LEDP_40035("Modeling did not succeed for Iteration {0} of Model {1}. Customer Space {2}"), //
     LEDP_40036("Unable to find {0} for Iteration {1} of Model {2}. Customer Space {3}"), //
     LEDP_40037("Feature Importance was not populated in file {0} for ModelSUmmary {1}. Customer Space {2}"), //
+    LEDP_40038("Iterations are not supported for {0} Models. Customer Space {1}"), //
+    LEDP_40039("Cannot create iteration since no iteration to derive from has been provided. Customer Space {0}"), //
+    LEDP_40040("Cannot create an iteration derived from iteration of another Model. Customer Space {0}"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

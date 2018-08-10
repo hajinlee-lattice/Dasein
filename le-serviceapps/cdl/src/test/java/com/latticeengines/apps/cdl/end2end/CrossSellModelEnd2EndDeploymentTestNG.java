@@ -176,8 +176,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         log.info("Created rating engine " + testModel.getId());
         testIteration1 = (AIModel) testModel.getLatestIteration();
 
-        Assert.assertThrows(LedpException.class, () -> ratingEngineProxy.validateForModeling(mainTestTenant.getId(),
-                testModel.getId(), testIteration1.getId()));
+        Assert.assertThrows(LedpException.class,
+                () -> ratingEngineProxy.validateForModelingByRatingEngineId(mainTestTenant.getId(), testModel.getId(),
+                        testIteration1.getId()));
 
         List<String> targetProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy)
                 ? repeatTargetProducts : firstTargetProducts;
@@ -188,8 +189,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         testIteration1 = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testModel.getId(),
                 testIteration1.getId(), testIteration1);
 
-        Assert.assertTrue(ratingEngineProxy.validateForModeling(mainTestTenant.getId(), testModel.getId(),
-                testIteration1.getId()));
+        Assert.assertTrue(ratingEngineProxy.validateForModelingByRatingEngineId(mainTestTenant.getId(),
+                testModel.getId(), testIteration1.getId()));
 
         log.info("Updated rating model " + testIteration1.getId());
         log.info("/ratingengines/" + testModel.getId() + "/ratingmodels/" + testIteration1.getId());

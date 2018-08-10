@@ -61,6 +61,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
 
     protected RatingEngine ratingEngine;
 
+    private String derivedFromRatingModel;
+
     private Set<AttributeLookup> ratingModelAttributes;
 
     @Override
@@ -132,7 +134,7 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @JsonProperty("iteration")
-    @Column(name = "Iteration", nullable = false)
+    @Column(name = "ITERATION", nullable = false)
     public int getIteration() {
         return this.iteration;
     }
@@ -153,6 +155,16 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     @Transient
     public Set<AttributeLookup> getRatingModelAttributes() {
         return this.ratingModelAttributes;
+    }
+
+    @JsonProperty("derived_from_rating_model")
+    @Column(name = "DERIVED_FROM_RATING_MODEL")
+    public String getDerivedFromRatingModel() {
+        return derivedFromRatingModel;
+    }
+
+    public void setDerivedFromRatingModel(String derivedFromRatingModel) {
+        this.derivedFromRatingModel = derivedFromRatingModel;
     }
 
     public void setRatingModelAttributes(Set<AttributeLookup> attributes) {

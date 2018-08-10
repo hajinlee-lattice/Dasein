@@ -346,7 +346,7 @@ public class RatingEngineResource {
         if (ratingEngine == null) {
             throw new LedpException(LedpCode.LEDP_40013);
         } else {
-            ratingModel = ratingEngine.getActiveModel();
+            ratingModel = ratingEngine.getLatestIteration();
         }
         return ratingEngineService.getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType,
                 version);
@@ -361,14 +361,14 @@ public class RatingEngineResource {
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType, //
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
-        return getModelingQueryCountByRating(customerSpace, ratingEngineId, ratingModelId, modelingQueryType, version,
-                ratingEngine);
+        return getModelingQueryCountByRatingEngine(customerSpace, ratingEngineId, ratingModelId, modelingQueryType,
+                version, ratingEngine);
     }
 
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count")
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
-    public Long getModelingQueryCountByRating(@PathVariable String customerSpace, //
+    public Long getModelingQueryCountByRatingEngine(@PathVariable String customerSpace, //
             @PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId, //
             @RequestParam(value = "querytype") ModelingQueryType modelingQueryType,
@@ -379,7 +379,7 @@ public class RatingEngineResource {
         if (ratingEngine == null) {
             throw new LedpException(LedpCode.LEDP_40013);
         } else {
-            ratingModel = ratingEngine.getActiveModel();
+            ratingModel = ratingEngine.getLatestIteration();
         }
         return ratingEngineService.getModelingQueryCount(customerSpace, ratingEngine, ratingModel, modelingQueryType,
                 version);
@@ -389,7 +389,7 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
     @ResponseBody
     @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
-    public boolean validateForModeling(@PathVariable String customerSpace, //
+    public boolean validateForModelingByRatingId(@PathVariable String customerSpace, //
             @PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
@@ -397,6 +397,27 @@ public class RatingEngineResource {
 
         if (!(ratingModel instanceof AIModel)) {
             throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
+        }
+
+        return ratingEngineService.validateForModeling(customerSpace, ratingEngine, (AIModel) ratingModel);
+    }
+
+    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
+    @ResponseBody
+    @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
+    public boolean validateForModeling(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestBody RatingEngine ratingEngine) {
+        RatingModel ratingModel;
+        if (ratingEngine == null) {
+            throw new LedpException(LedpCode.LEDP_40013);
+        }
+
+        ratingModel = ratingEngine.getLatestIteration();
+        if (ratingModel == null || !(ratingModel instanceof AIModel)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "LatestIteration of the given Model is Null or unsupported for validation" });
         }
 
         return ratingEngineService.validateForModeling(customerSpace, ratingEngine, (AIModel) ratingModel);

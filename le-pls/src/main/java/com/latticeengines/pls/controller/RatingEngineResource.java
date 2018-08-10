@@ -26,7 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -348,7 +351,8 @@ public class RatingEngineResource {
             @RequestBody(required = false) Map<String, List<ColumnMetadata>> attributes) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
-            return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId, attributes, MultiTenantContext.getEmailAddress());
+            return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId, attributes,
+                    MultiTenantContext.getEmailAddress());
         } catch (Exception ex) {
             log.error("Modeling job failed!", ex);
             throw new RuntimeException("Modeling job failed, contact Lattice support for details!");
@@ -358,15 +362,37 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
     @ResponseBody
     @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
-    public boolean validateForModeling(@PathVariable String customerSpace, //
-            @PathVariable String ratingEngineId, //
+    public boolean validateForModeling(@PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
-            return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId, ratingModelId);
+            return ratingEngineProxy.validateForModelingByRatingEngineId(tenant.getId(), ratingEngineId, ratingModelId);
         } catch (Exception ex) {
             log.error("Validation failed, cannot model this iteration yet", ex);
             throw new RuntimeException("Validation failed, cannot model this iteration yet");
         }
+    }
+
+    @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
+    @ResponseBody
+    @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
+    public boolean validateForModeling(@PathVariable String customerSpace, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestBody RatingEngine ratingEngine) {
+        RatingModel ratingModel;
+        ratingModel = ratingEngine.getLatestIteration();
+        if (ratingModel == null || !(ratingModel instanceof AIModel)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "LatestIteration of the given Model is Null or unsupported for validation" });
+        }
+        try {
+            Tenant tenant = MultiTenantContext.getTenant();
+            return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId, ratingModelId, ratingEngine);
+        } catch (Exception ex) {
+            log.error("Validation failed, cannot model this iteration yet", ex);
+            throw new RuntimeException("Validation failed, cannot model this iteration yet");
+        }
+
     }
 }

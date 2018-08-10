@@ -21,6 +21,7 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
@@ -40,8 +41,7 @@ import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
 public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(AIModelServiceImplDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AIModelServiceImplDeploymentTestNG.class);
 
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
@@ -68,7 +68,8 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     protected MetadataSegment reTestSegment;
 
     protected RatingEngine aiRatingEngine;
-    protected AIModel aimodel;
+    protected AIModel iteration1;
+    protected AIModel iteration2;
     protected String aiRatingEngineId;
     protected String aiRatingModelId;
 
@@ -79,8 +80,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
                 constructSegment(SEGMENT_NAME));
         Assert.assertNotNull(createdSegment);
-        reTestSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
-                createdSegment.getName());
+        reTestSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), createdSegment.getName());
         log.info(String.format("Created metadata segment with name %s", reTestSegment.getName()));
 
     }
@@ -109,10 +109,9 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         ratingEngineService.deleteById(ratingEngine.getId());
     }
 
-    protected EventFrontEndQuery getRatingEngineModelingQueries(RatingEngine ratingEngine,
-            AIModel aiModel, ModelingQueryType queryType) {
-        return aiModelService.getModelingQuery(mainTestTenant.getId(), ratingEngine, aiModel,
-                queryType, null);
+    protected EventFrontEndQuery getRatingEngineModelingQueries(RatingEngine ratingEngine, AIModel aiModel,
+            ModelingQueryType queryType) {
+        return aiModelService.getModelingQuery(mainTestTenant.getId(), ratingEngine, aiModel, queryType, null);
     }
 
     @Test(groups = "deployment")
@@ -121,8 +120,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(aiRatingEngine.getType(), RatingEngineType.CROSS_SELL);
         aiRatingEngineId = aiRatingEngine.getId();
 
-        List<RatingModel> ratingModels = ratingEngineService
-                .getRatingModelsByRatingEngineId(aiRatingEngineId);
+        List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(aiRatingEngineId);
         Assert.assertEquals(ratingModels.size(), 1);
         aiRatingModelId = ratingModels.get(0).getId();
         Assert.assertNotNull(aiRatingModelId, "AIRatingModel is null");
@@ -134,10 +132,8 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         AIModel aiModel = getSpecificRatingModel();
         assertDefaultAIModel(aiModel);
 
-        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
-                .setTargetProducts(generateSeletedProducts());
-        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
-                .setTrainingProducts(generateTrainingProducts());
+        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).setTargetProducts(generateSelectedProducts());
+        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).setTrainingProducts(generateTrainingProducts());
         aiModel.setModelingJobId(APP_JOB_ID);
 
         updateRatingModel(aiModel);
@@ -162,12 +158,12 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         // test get specific rating model
         AIModel aiModel = getSpecificRatingModel();
 
-        ModelingConfigFilter spendFilter = new ModelingConfigFilter(
-                CrossSellModelingConfigKeys.SPEND_IN_PERIOD, ComparisonType.LESS_OR_EQUAL, 1500);
-        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(
-                CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD, ComparisonType.LESS_OR_EQUAL, 10);
-        ModelingConfigFilter trainFilter = new ModelingConfigFilter(
-                CrossSellModelingConfigKeys.TRAINING_SET_PERIOD, ComparisonType.PRIOR_ONLY, 4);
+        ModelingConfigFilter spendFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.SPEND_IN_PERIOD,
+                ComparisonType.LESS_OR_EQUAL, 1500);
+        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD,
+                ComparisonType.LESS_OR_EQUAL, 10);
+        ModelingConfigFilter trainFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.TRAINING_SET_PERIOD,
+                ComparisonType.PRIOR_ONLY, 4);
 
         Map<CrossSellModelingConfigKeys, ModelingConfigFilter> configFilters = new HashMap<>();
         configFilters.put(CrossSellModelingConfigKeys.SPEND_IN_PERIOD, spendFilter);
@@ -204,16 +200,16 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
                 modelPath, modelName, applicationId, modelVersion, uuid);
         ModelSummary modelSummary = null;
         try {
-            modelSummary = ModelSummaryUtils.createModelSummary(internalResourceProxy,
-                    mainTestTenant, modelConfiguration);
+            modelSummary = ModelSummaryUtils.createModelSummary(internalResourceProxy, mainTestTenant,
+                    modelConfiguration);
         } catch (IOException e) {
             Assert.fail("Could not create ModelSummary", e);
         }
         Assert.assertNotNull(modelSummary);
         log.info("Created ModelSummary ID: " + modelSummary.getId());
 
-        ModelSummary retModelSummary = internalResourceProxy.getModelSummaryFromModelId(
-                modelConfiguration.getModelId(), CustomerSpace.parse(mainTestTenant.getId()));
+        ModelSummary retModelSummary = internalResourceProxy.getModelSummaryFromModelId(modelConfiguration.getModelId(),
+                CustomerSpace.parse(mainTestTenant.getId()));
         Assert.assertNotNull(retModelSummary);
         Assert.assertNotNull(retModelSummary.getId());
 
@@ -229,16 +225,14 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdateRatingModelWithModelSummary" })
     private void testGetDependentAttrsInAllModels() {
-        List<AttributeLookup> attributes = ratingEngineService
-                .getDependentAttrsInAllModels(aiRatingEngineId);
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(aiRatingEngineId);
         Assert.assertNotNull(attributes);
         Assert.assertTrue(attributes.size() > 0);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInAllModels" })
     private void testGetDependentAttrsInActiveModel() {
-        List<AttributeLookup> attributes = ratingEngineService
-                .getDependentAttrsInActiveModel(aiRatingEngineId);
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(aiRatingEngineId);
         Assert.assertNotNull(attributes);
         Assert.assertTrue(attributes.size() > 0);
     }
@@ -260,31 +254,35 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         attributes.add("Account.LDC_Name");
         attributes.add("Account.Other");
 
-        List<RatingEngine> ratingEngines = ratingEngineService
-                .getDependingRatingEngines(attributes);
+        List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(attributes);
         Assert.assertNotNull(ratingEngines);
         Assert.assertEquals(ratingEngines.size(), 1);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
     private void testCreateAndUpdateModelIteration() {
-        AIModel aiModel = new AIModel();
-        aiModel.setCreatedBy(CREATED_BY);
-        aiModel.setAdvancedModelingConfig(new CrossSellModelingConfig());
-        aiModel.setRatingEngine(aiRatingEngine);
-        aiModel = aiModelService.createOrUpdate(aiModel, aiRatingEngineId);
+        RatingEngine createdRatingEngine = ratingEngineService.getRatingEngineById(aiRatingEngineId, false, false);
 
-        List<RatingModel> ratingModels = ratingEngineService
-                .getRatingModelsByRatingEngineId(aiRatingEngineId);
+        AIModel newIteration = new AIModel();
+        newIteration.setCreatedBy(CREATED_BY);
+        newIteration.setAdvancedModelingConfig(new CrossSellModelingConfig());
+        newIteration.setRatingEngine(aiRatingEngine);
+        Assert.assertThrows(LedpException.class, () -> aiModelService.createNewIteration(newIteration, aiRatingEngine));
+        newIteration.setDerivedFromRatingModel(createdRatingEngine.getLatestIteration().getId());
+        iteration2 = aiModelService.createNewIteration(newIteration, createdRatingEngine);
+
+        List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(aiRatingEngineId);
         Assert.assertEquals(ratingModels.size(), 2);
-        Assert.assertEquals(aiModel.getIteration(), 2);
+        Assert.assertEquals(iteration2.getIteration(), 2);
 
-        AIModel updatedAIModel = (AIModel) ratingEngineService.updateRatingModel(aiRatingEngineId,
-                aiModel.getId(), aiModel);
+        createdRatingEngine = ratingEngineService.getRatingEngineById(aiRatingEngineId, false, false);
+        Assert.assertEquals(createdRatingEngine.getLatestIteration().getId(), iteration2.getId());
+
+        AIModel updatedAIModel = (AIModel) ratingEngineService.updateRatingModel(aiRatingEngineId, newIteration.getId(),
+                newIteration);
         Assert.assertNotNull(updatedAIModel);
-        Assert.assertEquals(aiModel.getId(), updatedAIModel.getId());
-        Assert.assertEquals(aiModel.getIteration(), updatedAIModel.getIteration());
-
+        Assert.assertEquals(newIteration.getId(), updatedAIModel.getId());
+        Assert.assertEquals(newIteration.getIteration(), updatedAIModel.getIteration());
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreateAndUpdateModelIteration" })
@@ -313,7 +311,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         return (AIModel) rm;
     }
 
-    private List<String> generateSeletedProducts() {
+    private List<String> generateSelectedProducts() {
         List<String> selectedProducts = new ArrayList<>();
         selectedProducts.add(PRODUCT_ID1);
         selectedProducts.add(PRODUCT_ID2);
@@ -330,16 +328,15 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(aiModel);
         Assert.assertEquals(1, aiModel.getIteration());
 
+        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts());
+        Assert.assertTrue(
+                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts().contains(PRODUCT_ID1));
+        Assert.assertTrue(
+                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts().contains(PRODUCT_ID2));
+        Assert.assertFalse(CollectionUtils
+                .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
         Assert.assertNotNull(
-                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts());
-        Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
-                .getTargetProducts().contains(PRODUCT_ID1));
-        Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
-                .getTargetProducts().contains(PRODUCT_ID2));
-        Assert.assertFalse(CollectionUtils.isEmpty(
-                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
-        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
-                .getTrainingProducts().contains(PRODUCT_ID3));
+                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts().contains(PRODUCT_ID3));
         Assert.assertEquals(aiModel.getModelingYarnJobId().toString(), APP_JOB_ID);
     }
 
@@ -358,19 +355,16 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         if (testFilters == null) {
             return;
         }
-        Assert.assertNotNull(
-                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters());
-        Assert.assertEquals(
-                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().size(),
+        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters());
+        Assert.assertEquals(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().size(),
                 testFilters.size());
         for (ModelingConfigFilter filter : testFilters.values()) {
-            Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
-                    .getFilters().values().contains(filter));
+            Assert.assertTrue(
+                    CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().values().contains(filter));
         }
     }
 
-    private void assertUpdatedModelWithModelSummary(AIModel aiModel,
-            ModelSummary testModelSummary) {
+    private void assertUpdatedModelWithModelSummary(AIModel aiModel, ModelSummary testModelSummary) {
         assertUpdatedModelWithConfigFilters(aiModel, null);
 
         if (testModelSummary == null) {
@@ -385,10 +379,10 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(aiModel.getId());
         Assert.assertEquals(aiModel.getIteration(), 1);
 
-        Assert.assertTrue(CollectionUtils.isEmpty(
-                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts()));
-        Assert.assertTrue(CollectionUtils.isEmpty(
-                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
+        Assert.assertTrue(CollectionUtils
+                .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts()));
+        Assert.assertTrue(CollectionUtils
+                .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
         Assert.assertNull(aiModel.getTrainingSegment());
         Assert.assertNull(aiModel.getModelingYarnJobId());
     }
@@ -401,8 +395,8 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(ratingEngine);
     }
 
-    private void assertModelingQueries(EventFrontEndQuery targetQuery,
-            EventFrontEndQuery trainingQuery, EventFrontEndQuery eventQuery) {
+    private void assertModelingQueries(EventFrontEndQuery targetQuery, EventFrontEndQuery trainingQuery,
+            EventFrontEndQuery eventQuery) {
         Assert.assertNotNull(targetQuery);
 
         Assert.assertNotNull(trainingQuery);

@@ -62,7 +62,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     @SuppressWarnings("rawtypes")
     public List<RatingEngineSummary> getRatingEngineSummaries(String customerSpace, String status, String type,
-                                                              boolean publishedRatingsOnly) {
+            boolean publishedRatingsOnly) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotBlank(status)) {
@@ -120,19 +120,19 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public RatingEngine createOrUpdateRatingEngine(String customerSpace, RatingEngine ratingEngine,
-                                                   Boolean unlinkSegment) {
+            Boolean unlinkSegment) {
         String url = constructUrl(URL_PREFIX + createUnlinkSegmentSuffix(unlinkSegment),
                 shortenCustomerSpace(customerSpace), unlinkSegment);
         return post("create rating engine", url, ratingEngine, RatingEngine.class);
     }
 
     public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(String customerSpace,
-                                                                           RatingEngine ratingEngine) {
+            RatingEngine ratingEngine) {
         return createOrUpdateRatingEngineAndActionDTO(customerSpace, ratingEngine, false);
     }
 
     public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(String customerSpace,
-                                                                           RatingEngine ratingEngine, Boolean unlinkSegment) {
+            RatingEngine ratingEngine, Boolean unlinkSegment) {
         String url = constructUrl(URL_PREFIX + "/with-action" + createUnlinkSegmentSuffix(unlinkSegment),
                 shortenCustomerSpace(customerSpace), unlinkSegment);
         return post("create rating engine with action", url, ratingEngine, RatingEngineAndActionDTO.class);
@@ -159,7 +159,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public RatingModel updateRatingModel(String customerSpace, String ratingEngineId, String ratingModelId,
-                                         RatingModel ratingModel) {
+            RatingModel ratingModel) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return post("update rating model", url, ratingModel, ratingModel.getClass());
@@ -167,7 +167,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     @SuppressWarnings("unchecked")
     public Map<String, List<ColumnMetadata>> getIterationMetadata(String customerSpace, String ratingEngineId,
-                                                                  String ratingModelId) {
+            String ratingModelId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return JsonUtils.convertMapWithListValue(get("get metadata for a rating model", url, Map.class), String.class,
@@ -175,14 +175,14 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public RatingModelAndActionDTO updateRatingModelAndActionDTO(String customerSpace, String ratingEngineId,
-                                                                 String ratingModelId, RatingModel ratingModel) {
+            String ratingModelId, RatingModel ratingModel) {
         String url = constructUrl(URL_PREFIX + "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return post("update rating model with action", url, ratingModel, RatingModelAndActionDTO.class);
     }
 
     public void setScoringIteration(String customerSpace, String ratingEngineId, String ratingModelId,
-                                    List<BucketMetadata> bucketMetadatas, String userEmail) {
+            List<BucketMetadata> bucketMetadatas, String userEmail) {
         String url = constructUrl(
                 URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModel}/setScoringIteration/?useremail={userEmail}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, userEmail);
@@ -219,9 +219,9 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return JsonUtils.convertList(list, RatingEngineNote.class);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
-                                                                                     String ratingEngineId) {
+            String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/dependencies", shortenCustomerSpace(customerSpace),
                 ratingEngineId);
         Map raw = get("Get all dependencies of the rating engine ", url, Map.class);
@@ -248,26 +248,26 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public EventFrontEndQuery getModelingQueryByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
-                                                         ModelingQueryType modelingQueryType) {
+            ModelingQueryType modelingQueryType) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery" + "?querytype="
                 + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         return get("getModelingQuery", url, EventFrontEndQuery.class);
     }
 
     public EventFrontEndQuery getModelingQueryByRating(String customerSpace, String ratingEngineId, String aiModelId,
-                                                       ModelingQueryType modelingQueryType, RatingEngine ratingEngine) {
+            ModelingQueryType modelingQueryType, RatingEngine ratingEngine) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery" + "?querytype="
                 + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         return post("getModelingQuery", url, ratingEngine, EventFrontEndQuery.class);
     }
 
     public Long getModelingQueryCountByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
-                                                ModelingQueryType modelingQueryType) {
+            ModelingQueryType modelingQueryType) {
         return getModelingQueryCountByRatingId(customerSpace, ratingEngineId, aiModelId, modelingQueryType, null);
     }
 
     public Long getModelingQueryCountByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
-                                                ModelingQueryType modelingQueryType, DataCollection.Version version) {
+            ModelingQueryType modelingQueryType, DataCollection.Version version) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count"
                 + "?querytype=" + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         if (version != null) {
@@ -277,13 +277,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public Long getModelingQueryCountByRating(String customerSpace, String ratingEngineId, String aiModelId,
-                                              ModelingQueryType modelingQueryType, RatingEngine ratingEngine) {
+            ModelingQueryType modelingQueryType, RatingEngine ratingEngine) {
         return getModelingQueryCountByRating(customerSpace, ratingEngineId, aiModelId, modelingQueryType, ratingEngine,
                 null);
     }
 
     public Long getModelingQueryCountByRating(String customerSpace, String ratingEngineId, String aiModelId,
-                                              ModelingQueryType modelingQueryType, RatingEngine ratingEngine, DataCollection.Version version) {
+            ModelingQueryType modelingQueryType, RatingEngine ratingEngine, DataCollection.Version version) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count"
                 + "?querytype=" + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         if (version != null) {
@@ -293,28 +293,34 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public String modelRatingEngine(String customerSpace, String ratingEngineId, String ratingModelId,
-                                    Map<String, List<ColumnMetadata>> attributes,
-                                    String userEmail) {
+            Map<String, List<ColumnMetadata>> attributes, String userEmail) {
         String url = constructUrl(
                 URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model?useremail={userEmail}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, userEmail);
         return post("modelRatingEngine", url, attributes, String.class);
     }
 
-    public boolean validateForModeling(String customerSpace, String ratingEngineId, String ratingModelId) {
-        String url = constructUrl(
-                URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate",
+    public boolean validateForModelingByRatingEngineId(String customerSpace, String ratingEngineId,
+            String ratingModelId) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return get("validateForModeling", url, Boolean.class);
+    }
+
+    public boolean validateForModeling(String customerSpace, String ratingEngineId, String ratingModelId,
+            RatingEngine ratingEngine) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate",
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+        return post("validateForModeling", url, ratingEngine, Boolean.class);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
     public void updateModelingStatus(@PathVariable String customerSpace, //
-                                     @PathVariable String ratingEngineId, //
-                                     @PathVariable String ratingModelId, //
-                                     @RequestParam(value = "newStatus", required = true) JobStatus newStatus) {
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestParam(value = "newStatus", required = true) JobStatus newStatus) {
         String url = constructUrl(
                 URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus?newStatus={newStatus}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, newStatus);
@@ -322,14 +328,14 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public List<AttributeLookup> getDependingAttrsForModel(String customerSpace, RatingEngineType engineType,
-                                                           String modelId) {
+            String modelId) {
         String url = constructUrl(URL_PREFIX + "/dependingattrs/type/{engineType}/model/{modelId}",
                 shortenCustomerSpace(customerSpace), engineType, modelId);
         return getList("get depending attrs for rating model", url, AttributeLookup.class);
     }
 
     public RatingsCountResponse getRatingEngineCoverageInfo(String customerSpace,
-                                                            RatingsCountRequest ratingModelSegmentIds) {
+            RatingsCountRequest ratingModelSegmentIds) {
         String url = constructUrl(URL_PREFIX + "/coverage", shortenCustomerSpace(customerSpace));
         return post("getCoverage", url, ratingModelSegmentIds, RatingsCountResponse.class);
     }
@@ -339,9 +345,9 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public DataPage getEntityPreview(String customerSpace, String ratingEngineId, long offset, long maximum,
-                                     BusinessEntity entityType, String sortBy, Boolean descending, String bucketFieldName,
-                                     List<String> lookupFieldNames, Boolean restrictNotNullSalesforceId, String freeFormTextSearch,
-                                     List<String> selectedBuckets, String lookupIdColumn) {
+            BusinessEntity entityType, String sortBy, Boolean descending, String bucketFieldName,
+            List<String> lookupFieldNames, Boolean restrictNotNullSalesforceId, String freeFormTextSearch,
+            List<String> selectedBuckets, String lookupIdColumn) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL_PREFIX);
         sb.append("/{ratingEngineId}/entitypreview?offset={offset}&maximum={maximum}&entityType={entityType}");
@@ -362,8 +368,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public Long getEntityPreviewCount(String customerSpace, String ratingEngineId, BusinessEntity entityType,
-                                      Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets,
-                                      String lookupIdColumn) {
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets,
+            String lookupIdColumn) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL_PREFIX);
         sb.append("/{ratingEngineId}/entitypreview/count?entityType={entityType}");

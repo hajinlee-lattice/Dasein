@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
@@ -55,6 +56,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataStoreProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -100,6 +102,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
+    @Inject
+    private SourceFileProxy sourceFileProxy;
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -114,7 +119,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Override
     public List<AIModel> getAllRatingModelsByRatingEngineId(String ratingEngineId) {
-        return aiModelEntityMgr.findByRatingEngineId(ratingEngineId, null);
+        return aiModelEntityMgr.findAllByRatingEngineId(ratingEngineId);
     }
 
     @Override
@@ -133,6 +138,42 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             ratingModel.setTrainingSegment(segment);
         }
         return aiModelEntityMgr.createOrUpdateAIModel(ratingModel, ratingEngineId);
+    }
+
+    @Override
+    public AIModel createNewIteration(AIModel aiModel, RatingEngine ratingEngine) {
+        String customerSpace = CustomerSpace
+                .shortenCustomerSpace(CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString());
+        if (StringUtils.isEmpty(aiModel.getDerivedFromRatingModel())) {
+            throw new LedpException(LedpCode.LEDP_40039, new String[] { MultiTenantContext.getTenant().getId() });
+        }
+
+        AIModel derivedFromRatingModel = getRatingModelById(aiModel.getDerivedFromRatingModel());
+        if (!derivedFromRatingModel.getRatingEngine().getId().equals(ratingEngine.getId())) {
+            throw new LedpException(LedpCode.LEDP_40040, new String[] { MultiTenantContext.getTenant().getId() });
+        }
+
+        AIModel toCreate = new AIModel();
+        toCreate.setPredictionType(derivedFromRatingModel.getPredictionType());
+        toCreate.setCreatedBy(aiModel.getCreatedBy());
+        toCreate.setRatingEngine(ratingEngine);
+        toCreate.setTrainingSegment(aiModel.getTrainingSegment());
+        toCreate.setAdvancedModelingConfig(aiModel.getAdvancedModelingConfig());
+
+        if (ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
+            log.info("Cloning the Sourcefile and Training table for the new iteration");
+            CustomEventModelingConfig modelingConfig = (CustomEventModelingConfig) toCreate.getAdvancedModelingConfig();
+            String sourceFileName = modelingConfig.getSourceFileName();
+            String trainingTableName = sourceFileProxy.findByName(customerSpace, modelingConfig.getSourceFileName())
+                    .getTableName();
+            Table clonedTable = metadataProxy.cloneTable(customerSpace, trainingTableName);
+            sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(), customerSpace);
+            SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace, clonedTable.getName());
+            modelingConfig.setSourceFileName(clonedSourceFile.getName());
+            log.info("Completed cloning the Sourcefile and Training table for the new iteration");
+        }
+
+        return createOrUpdate(toCreate, ratingEngine.getId());
     }
 
     @Override

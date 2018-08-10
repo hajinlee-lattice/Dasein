@@ -20,4 +20,6 @@ public interface AIModelService extends RatingModelService<AIModel> {
 
     Map<String, List<ColumnMetadata>> getIterationMetadata(String customerSpace, RatingEngine ratingEngine,
             AIModel aiModel);
+
+    AIModel createNewIteration(AIModel aiModel, RatingEngine ratingEngine);
 }
