@@ -11,6 +11,7 @@ import "../common/lib/bower/ui-bootstrap-jpls-0.13.0";
 import "../common/app/utilities/utilities.index";
 import "../common/app/services/services.index";
 // import "../common/app/modules/modules.index";
+import '../common/components/components.index';
 import "../common/app/directives/ngEnterDirective";
 
 import "./app/login/login.routes";
