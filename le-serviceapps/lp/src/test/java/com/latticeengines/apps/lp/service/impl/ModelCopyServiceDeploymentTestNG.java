@@ -107,6 +107,7 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
     }
 
     private void waitToDownloadModel(String modelId) throws InterruptedException {
+        modelSummaryService.downloadModelSummary(tenant1.getId(), null);
         while (true) {
             ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
             if (modelSummary == null) {
