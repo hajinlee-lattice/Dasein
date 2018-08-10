@@ -212,7 +212,7 @@ public class OrchestrationServiceImpl implements OrchestrationService {
         IngestionRequest request = new IngestionRequest();
         request.setSubmitter(ORCHESTRATION);
         request.setSourceVersion(stage.getVersion());
-        ingestionService.ingest(stage.getEngineName(), request, hdfsPod);
+        ingestionService.ingest(stage.getEngineName(), request, hdfsPod, false);
     }
 
     private void startTransform(DataCloudEngineStage stage, String hdfsPod) {

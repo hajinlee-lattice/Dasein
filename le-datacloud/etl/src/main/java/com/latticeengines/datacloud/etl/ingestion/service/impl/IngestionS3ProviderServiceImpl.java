@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.S3SourceEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Destination;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -25,6 +26,9 @@ public class IngestionS3ProviderServiceImpl extends IngestionProviderServiceImpl
 
     @Inject
     private S3SourceEntityMgr s3SourceEntityMgr;
+
+    @Inject
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Value("${dataplatform.queue.scheme}")
     private String queueScheme;
@@ -43,6 +47,11 @@ public class IngestionS3ProviderServiceImpl extends IngestionProviderServiceImpl
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
         s3SourceEntityMgr.downloadToHdfs(sourceName, sourceVersion, queue);
+
+        if (Boolean.TRUE.equals(destination.getUpdateCurrentVersion())) {
+            log.info("Updating __CURRENT_VERSION to " + sourceVersion);
+            hdfsSourceEntityMgr.setCurrentVersion(sourceName, sourceVersion);
+        }
     }
 
     @Override

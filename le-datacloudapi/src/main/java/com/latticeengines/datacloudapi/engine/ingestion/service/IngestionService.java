@@ -10,7 +10,7 @@ public interface IngestionService {
     Ingestion getIngestionByName(String ingestionName);
 
     IngestionProgress ingest(String ingestionName, IngestionRequest ingestionRequest,
-                                     String hdfsPod);
+                                     String hdfsPod, boolean immediate);
 
     List<IngestionProgress> scan(String hdfsPod);
 

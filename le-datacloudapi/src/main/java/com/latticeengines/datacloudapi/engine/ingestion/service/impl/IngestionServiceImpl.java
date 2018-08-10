@@ -80,7 +80,7 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Override
     public IngestionProgress ingest(String ingestionName, IngestionRequest request,
-            String hdfsPod) {
+            String hdfsPod, boolean immediate) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
@@ -231,17 +231,21 @@ public class IngestionServiceImpl implements IngestionService {
                     dataCloudTenantService.bootstrapServiceTenant();
                     serviceTenantBootstrapped = true;
                 }
-                ApplicationId applicationId = submitWorkflow(progress);
-                progress = ingestionProgressService.updateSubmittedProgress(progress,
-                        applicationId.toString());
-                submittedProgresses.add(progress);
-                log.info("Submitted workflow for progress [" + progress + "]. ApplicationID = "
-                        + applicationId.toString());
+                progress = submit(progress);
             } catch (Exception e) {
                 log.error("Failed to submit workflow for progress " + progress, e);
             }
         }
         return submittedProgresses;
+    }
+
+    private IngestionProgress submit(IngestionProgress progress) {
+        ApplicationId applicationId = submitWorkflow(progress);
+        progress = ingestionProgressService.updateSubmittedProgress(progress,
+                applicationId.toString());
+        log.info("Submitted workflow for progress [" + progress + "]. ApplicationID = "
+                + applicationId.toString());
+        return progress;
     }
 
     private ApplicationId submitWorkflow(IngestionProgress progress) {
