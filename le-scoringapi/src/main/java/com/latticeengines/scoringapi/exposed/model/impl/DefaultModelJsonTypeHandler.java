@@ -509,17 +509,13 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
                 log.warn(
                         String.format("%d is less than minimum bound, setting to %s", percentile, BucketName.D.name()));
                 bucketName = BucketName.D;
-            } else if (percentile >= BucketName.D.getDefaultLowerBound()
-                    && percentile <= BucketName.D.getDefaultUpperBound()) {
+            } else if (percentile < BucketName.C.getDefaultLowerBound()) {
                 bucketName = BucketName.D;
-            } else if (percentile >= BucketName.C.getDefaultLowerBound()
-                    && percentile <= BucketName.C.getDefaultUpperBound()) {
+            } else if (percentile < BucketName.B.getDefaultLowerBound()) {
                 bucketName = BucketName.C;
-            } else if (percentile >= BucketName.B.getDefaultLowerBound()
-                    && percentile <= BucketName.B.getDefaultUpperBound()) {
+            } else if (percentile < BucketName.A.getDefaultLowerBound()) {
                 bucketName = BucketName.B;
-            } else if (percentile >= BucketName.A.getDefaultLowerBound()
-                    && percentile <= BucketName.A.getDefaultUpperBound()) {
+            } else if (percentile <= BucketName.A.getDefaultUpperBound()) {
                 bucketName = BucketName.A;
             } else {
                 log.warn(
