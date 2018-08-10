@@ -82,7 +82,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.VDB_MIGRATION, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //
-                LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM);
+                LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
+                LatticeFeatureFlag.LATTICE_MARKETO_SCORING);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);

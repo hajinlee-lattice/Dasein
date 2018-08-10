@@ -13,6 +13,7 @@ public enum LatticeFeatureFlag {
     ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES("EnableInternalEnrichmentAttributes",
             "Enable Internal Enrichment Attributes"), //
     LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights"), //
+    LATTICE_MARKETO_SCORING("LatticeMarketoScoring", "Lattice Integration for Marketo Scoring"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"), //
     ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"), //
