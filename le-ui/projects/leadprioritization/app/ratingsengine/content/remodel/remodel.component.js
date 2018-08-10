@@ -20,7 +20,7 @@ angular.module('lp.ratingsengine.remodel', [
                 WizardProgressContext: function () {
                     return 'ratingsengine.remodel';
                 },
-                WizardProgressItems: function ($stateParams, AtlasRemodelStore) {
+                WizardProgressItems: function ($state, AtlasRemodelStore) {
                     return [
                         { 
                             label: 'Training Changes', 
