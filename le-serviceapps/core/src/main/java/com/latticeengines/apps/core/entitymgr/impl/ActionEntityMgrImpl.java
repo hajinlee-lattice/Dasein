@@ -42,6 +42,18 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void create(List<Action> actions) {
+        actionDao.create(actions);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void copy(List<Action> actions) {
+        actionDao.create(actions, false);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Action> findAll() {
         return actionRepository.findAll();

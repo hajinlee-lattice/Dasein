@@ -8,6 +8,10 @@ public interface ActionService {
 
     Action create(Action action);
 
+    List<Action> create(List<Action> actions);
+
+    List<Action> copy(List<Action> actions);
+
     Action update(Action action);
 
     List<Action> findAll();

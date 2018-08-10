@@ -1,7 +1,9 @@
 package com.latticeengines.db.exposed.dao.impl;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -54,6 +56,32 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public void create(T entity) {
         setAuditingFields(entity);
         getCurrentSession().persist(entity);
+    }
+
+    @Override
+    public void create(Collection<T> entities) {
+        create(entities, true);
+    }
+
+    @Override
+    public void create(Collection<T> entities, boolean setAuditFields) {
+        Session session = getCurrentSession();
+        int batchSize = getBatchSize();
+
+        Iterator<T> iterator = entities.iterator();
+        for (int i = 0; iterator.hasNext(); i++) {
+            if (i > 0 && i % batchSize == 0) {
+                //flush a batch of inserts and release memory
+                session.flush();
+                session.clear();
+            }
+
+            T entity = iterator.next();
+            if (setAuditFields) {
+                setAuditingFields(entity);
+            }
+            session.persist(entity);
+        }
     }
 
     @Override

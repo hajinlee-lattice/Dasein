@@ -11,6 +11,10 @@ import com.latticeengines.domain.exposed.pls.Action;
 
 public interface ActionEntityMgr extends BaseEntityMgrRepository<Action, Long> {
 
+    void create(List<Action> actions);
+
+    void copy(List<Action> actions);
+
     void updateOwnerIdIn(Long ownerId, List<Long> actionPids);
 
     Action findByPid(@NonNull Long pid);

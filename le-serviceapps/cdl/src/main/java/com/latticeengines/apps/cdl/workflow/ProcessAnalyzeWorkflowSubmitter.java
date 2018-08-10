@@ -117,7 +117,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("customer: %s, data feed: %s, status: %s", customerSpace, datafeed.getName(),
                 datafeedStatus.getName()));
 
-        List<Long> lastFailedActionIds = getActionIdsFromLastFailedPA(customerSpace);
+        List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace);
 
         if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
             String errorMessage;
@@ -142,10 +142,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         try {
             Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
-            // add to front
-            actionAndJobIds.getLeft().addAll(0, lastFailedActionIds);
-            if (CollectionUtils.isNotEmpty(lastFailedActionIds)) {
+            if (CollectionUtils.isNotEmpty(lastFailedActions)) {
+                List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid).collect(Collectors.toList());
                 log.info("Inherit actions from last failed processAnalyze workflow, actionIds={}", lastFailedActionIds);
+                // create copies of last failed actions
+                lastFailedActions.forEach(action -> {
+                    action.setPid(null);
+                    action.setOwnerId(pidWrapper.getPid());
+                });
+                lastFailedActions = actionService.copy(lastFailedActions);
+                List<Long> copiedActionIds = lastFailedActions.stream().map(Action::getPid).collect(Collectors.toList());
+                // add to front
+                actionAndJobIds.getLeft().addAll(0, copiedActionIds);
             }
             updateActions(actionAndJobIds.getLeft(), pidWrapper.getPid());
 
@@ -231,7 +239,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
      * Return an empty list otherwise.
      */
     @VisibleForTesting
-    List<Long> getActionIdsFromLastFailedPA(String customerSpace) {
+    List<Action> getActionsFromLastFailedPA(String customerSpace) {
         DataFeedExecution lastDataFeedExecution = dataFeedProxy.getLatestExecution(
                 customerSpace, DataFeedExecutionJobType.PA);
         if (lastDataFeedExecution == null || lastDataFeedExecution.getWorkflowId() == null) {
@@ -258,7 +266,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                     return !ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()) &&
                             !ActionType.getDataCloudRelatedTypes().contains(action.getType());
                 })
-                .map(Action::getPid)
                 .collect(Collectors.toList());
     }
 

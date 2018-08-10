@@ -1,5 +1,6 @@
 package com.latticeengines.db.exposed.dao;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface BaseDao<T> {
@@ -7,6 +8,10 @@ public interface BaseDao<T> {
     void create(T entity);
 
     void createOrUpdate(T entity);
+
+    void create(Collection<T> entities);
+
+    void create(Collection<T> entities, boolean setAuditFields);
 
     void update(T entity);
 

@@ -147,7 +147,11 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         when(workflowProxy.getWorkflowExecution(anyString(), anyBoolean())).thenReturn(workflowExection);
         when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
 
-        List<Long> actionIds = processAnalyzeWorkflowSubmitter.getActionIdsFromLastFailedPA(customerSpace);
+        List<Long> actionIds = processAnalyzeWorkflowSubmitter
+                .getActionsFromLastFailedPA(customerSpace)
+                .stream()
+                .map(Action::getPid)
+                .collect(Collectors.toList());
 
         Assert.assertNotNull(actionIds);
         Assert.assertEquals(actionIds, inheritableActionIds);

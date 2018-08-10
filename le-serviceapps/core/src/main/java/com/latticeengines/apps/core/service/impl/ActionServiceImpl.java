@@ -63,6 +63,22 @@ public class ActionServiceImpl implements ActionService {
     }
 
     @Override
+    public List<Action> create(List<Action> actions) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        actions.forEach(action -> action.setTenant(tenant));
+        actionEntityMgr.create(actions);
+        return actions;
+    }
+
+    @Override
+    public List<Action> copy(List<Action> actions) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        actions.forEach(action -> action.setTenant(tenant));
+        actionEntityMgr.copy(actions);
+        return actions;
+    }
+
+    @Override
     public Action update(Action action) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (action.getTenant() != null) {
