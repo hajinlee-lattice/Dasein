@@ -20,7 +20,7 @@
                             <div class="contenteditable description" ng-class="{empty: !vm.play.description, editing: focus.description}" ng-focus="focus = {}; focus.description = true; vm.autofocus($event)" tabindex="-1">
                                 <span ng-show="!focus.description">{{vm.play.description}}</span>
                                 <div class="editor">
-                                    <textarea autofocus ng-show="focus.description" maxlength="1000" ng-blur="vm.edited('description'); focus = {};" name="description" ng-model="vm.editing.description" ng-init="vm.editing.description = vm.play.description"></textarea>
+                                    <textarea autofocus ng-show="focus.description" maxlength="255" ng-blur="vm.edited('description'); focus = {};" name="description" ng-model="vm.editing.description" ng-init="vm.editing.description = vm.play.description"></textarea>
                                 </div>
                             </div>
                         </p>
