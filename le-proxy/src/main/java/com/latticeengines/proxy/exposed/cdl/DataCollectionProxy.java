@@ -343,7 +343,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     public CDLDataSpace getCDLDataSpace(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/dataspace",shortenCustomerSpace(customerSpace));
-        return get("getCDLDataSpace", url, CDLDataSpace.class);
+        return get("createCDLDataSpace", url, CDLDataSpace.class);
     }
 
     public List<DynamoDataUnit> getDynamoDataUnits(String customerSpace, DataCollection.Version version,

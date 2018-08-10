@@ -1,9 +1,12 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -63,11 +66,13 @@ public class DataCollectionResourceDeploymentTestNG extends CDLDeploymentTestNGB
                     case Serving:
                         for (TableSpace testTableSpace : testTableSpaceList) {
                             Assert.assertNotNull(testTableSpace.getTables());
+                            Assert.assertTrue(CollectionUtils.isNotEmpty(testTableSpace.getTables()));
                         }
                         break;
                     case Batch:
                         for (TableSpace testTableSpace : testTableSpaceList) {
                             Assert.assertNotNull(testTableSpace.getHdfsPath());
+                            Assert.assertTrue(CollectionUtils.isNotEmpty(testTableSpace.getHdfsPath()));
                         }
                         break;
                     default:
@@ -77,5 +82,17 @@ public class DataCollectionResourceDeploymentTestNG extends CDLDeploymentTestNGB
         }
         Assert.assertEquals(cdlDataSpace.getEntities().get(BusinessEntity.PeriodTransaction).get(BusinessEntity.DataStore.Serving).get(0).getTableRole(), TableRoleInCollection.AggregatedPeriodTransaction);
         Assert.assertNotNull(cdlDataSpace.getOthers());
+
+        try {
+            log.info(" ");
+            //log.info(JsonUtils.serialize(CDLDataSpace));
+            log.info(JsonUtils.serialize(cdlDataSpace));
+            log.info(" ");
+
+        }
+        catch(Exception e) {
+            log.info(e.getMessage());
+        }
     }
+
 }

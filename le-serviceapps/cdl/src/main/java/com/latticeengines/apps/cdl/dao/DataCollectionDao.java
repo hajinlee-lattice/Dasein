@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -11,6 +12,6 @@ public interface DataCollectionDao extends BaseDao<DataCollection> {
     List<String> getTableNamesOfRole(String collectionName, TableRoleInCollection tableRole,
                                      DataCollection.Version version);
 
-    List<Object[]> findTableNamesOfAllRole(String collectionName);
+    Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> findTableNamesOfAllRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version);
 
 }

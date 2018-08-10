@@ -59,8 +59,8 @@ public interface DataCollectionService {
 
     DataCollection createDefaultCollection();
 
-    CDLDataSpace getCDLDataSpace(String cutstomerSpace);
+    CDLDataSpace createCDLDataSpace(String cutstomerSpace);
 
-    Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> getTableRoleNameMap(String customerSpace, String collectionName);
+    Map<TableRoleInCollection, Map<DataCollection.Version, List<Table>>> getTableRoleMap(String customerSpace, String collectionName);
 
 }

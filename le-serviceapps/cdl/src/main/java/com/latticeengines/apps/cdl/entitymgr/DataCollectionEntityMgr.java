@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -33,5 +34,5 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
 
     List<DataCollectionTable> findTablesFromCollection(String collectionName, String tableName);
 
-    List<Object[]> findTableNamesOfAllRole(String collectionName);
+    Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> findTableNamesOfAllRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version);
 }

@@ -289,6 +289,6 @@ public class DataCollectionResource {
     @ApiOperation(value = "Dump out the paths of tenant's CDL data space")
     public CDLDataSpace getCDLDataSpace(@PathVariable String customerSpace){
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getCDLDataSpace(customerSpace);
+        return dataCollectionService.createCDLDataSpace(customerSpace);
     }
 }
