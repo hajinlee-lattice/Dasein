@@ -11,7 +11,7 @@ import './assets/styles/main.scss';
  */
 import '../common/app/utilities/utilities.index';
 import '../common/app/services/services.index';
-import '../common/app/modules/modules.index';
+// import '../common/app/modules/modules.index';
 import '../common/app/directives/directives.index';
 
 import '../common/components/wizard/wizard.index';

@@ -6,6 +6,7 @@ import './exceptions/exceptions.component';
 import './modal/modal.component';
 import './pagination/pagination.component';
 import './notice/notice.component';
+import './timeout/session-timeout.component';
 
 
 

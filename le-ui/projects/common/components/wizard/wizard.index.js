@@ -2,7 +2,7 @@ console.log("Wizard module");
 // import angular from "angular";
 
 import '../../app/utilities/ResourceUtility';
-import '../../app/modules/ServiceError/ServiceErrorModule';
+// import '../../app/modules/ServiceError/ServiceErrorModule';
 import './progress/progress.component';
 
 import './controls/controls.component';
