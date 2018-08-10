@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,9 +79,9 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
+        ratingEngine.setId(UUID.randomUUID().toString());
 
-        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine,
-                mainTestTenant.getId());
+        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine);
         Assert.assertNotNull(createdRatingEngine);
         ratingEngineId = createdRatingEngine.getId();
         createdRatingEngine = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
@@ -108,19 +109,23 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // update ruleBasedModel by updating its selected attributes and rules
         ruleBasedModel.setRatingRule(generateRatingRule());
         ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
-        ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel(ruleBasedModel, ratingEngineId);
+        ruleBasedModelEntityMgr.updateRuleBasedModel(ruleBasedModel, ruleBasedModelEntityMgr.findById(ruleBasedModelId),
+                ratingEngineId);
         validateNonAction();
 
         // set Rating Engine to active to mimic the fact this Rating Engine is
         // complete.
         ratingEngine.setScoringIteration(createdRatingEngine.getLatestIteration());
-        ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
+        ratingEngineEntityMgr.updateRatingEngine(ratingEngine, ratingEngineEntityMgr.findById(ratingEngine.getId()),
+                false);
         ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
-        ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
+        ratingEngineEntityMgr.updateRatingEngine(ratingEngine, ratingEngineEntityMgr.findById(ratingEngine.getId()),
+                false);
 
         ruleBasedModel.setRatingRule(generateRatingRule());
         ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
-        ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel(ruleBasedModel, ratingEngineId);
+        ruleBasedModelEntityMgr.updateRuleBasedModel(ruleBasedModel, ruleBasedModelEntityMgr.findById(ruleBasedModelId),
+                ratingEngineId);
         validateActionContext(ruleBasedModel);
         ruleBasedModelList = ruleBasedModelEntityMgr.findAllByRatingEngineId(ratingEngineId);
         Assert.assertNotNull(ruleBasedModelList);

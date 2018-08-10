@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -220,13 +220,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
+    public Map<CDLObjectTypes, List<String>> getRatingEngineDependencies(String customerSpace,
             String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/dependencies", shortenCustomerSpace(customerSpace),
                 ratingEngineId);
         Map raw = get("Get all dependencies of the rating engine ", url, Map.class);
 
-        return JsonUtils.convertMapWithListValue(raw, RatingEngineDependencyType.class, String.class);
+        return JsonUtils.convertMapWithListValue(raw, CDLObjectTypes.class, String.class);
     }
 
     public Boolean createNote(String customerSpace, String ratingEngineId, NoteParams noteParams) {

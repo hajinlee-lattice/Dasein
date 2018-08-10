@@ -9,8 +9,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 
 public interface PlayEntityMgr extends BaseEntityMgrRepository<Play, Long> {
 
-    Play createOrUpdatePlay(Play entity);
-
     List<Play> findAll();
 
     List<Play> findAllByRatingEnginePid(long pid);
@@ -21,8 +19,10 @@ public interface PlayEntityMgr extends BaseEntityMgrRepository<Play, Long> {
 
     void deleteByName(String name, Boolean hardDelete);
 
-    void createOrUpdate(Play play);
-
     List<String> getAllDeletedPlayIds(boolean forCleanupOnly);
+
+    Play createPlay(Play play);
+
+    Play updatePlay(Play play, Play existingPlay);
 
 }

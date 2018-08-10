@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -59,7 +58,6 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataStoreProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 import reactor.core.publisher.Flux;
 
@@ -73,13 +71,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -137,7 +128,20 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             segment.setPid(segmentDTO.getPrimaryKey());
             ratingModel.setTrainingSegment(segment);
         }
-        return aiModelEntityMgr.createOrUpdateAIModel(ratingModel, ratingEngineId);
+        if (ratingModel.getId() == null) {
+            ratingModel.setId(AIModel.generateIdStr());
+            log.info(String.format("Creating an AI model with id %s for ratingEngine %s", ratingModel.getId(),
+                    ratingEngineId));
+            return aiModelEntityMgr.createAIModel(ratingModel, ratingEngineId);
+        } else {
+            AIModel retrievedAIModel = aiModelEntityMgr.findById(ratingModel.getId());
+            if (retrievedAIModel == null) {
+                log.warn(String.format("AIModel with id %s is not found. Creating a new one", ratingModel.getId()));
+                return aiModelEntityMgr.createAIModel(ratingModel, ratingEngineId);
+            } else {
+                return aiModelEntityMgr.updateAIModel(ratingModel, retrievedAIModel, ratingEngineId);
+            }
+        }
     }
 
     @Override
@@ -199,7 +203,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void findRatingModelAttributeLookups(AIModel ratingModel) {
         List<MetadataSegment> segments = new ArrayList<>();

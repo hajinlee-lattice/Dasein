@@ -2,13 +2,16 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
@@ -66,6 +69,7 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
     public Map<BusinessEntity, Long> updateSegmentCounts(String customerSpace, String segmentName) {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}/counts", //
                 shortenCustomerSpace(customerSpace), segmentName);
+        @SuppressWarnings("rawtypes")
         Map map = put("deleteSegmentByName", url, null, Map.class);
         return JsonUtils.convertMap(map, BusinessEntity.class, Long.class);
     }
@@ -85,10 +89,27 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("rawtypes")
-    public List<AttributeLookup> findDependingAttributes (String customerSpace, List<MetadataSegment> metadataSegments) {
+    public List<AttributeLookup> findDependingAttributes(String customerSpace, List<MetadataSegment> metadataSegments) {
         String url = constructUrl("/{customerSpace}/segments/attributes", //
                 shortenCustomerSpace(customerSpace));
         List raw = post("findDependingAttributes", url, metadataSegments, List.class);
         return JsonUtils.convertList(raw, AttributeLookup.class);
+    }
+
+    public Map<CDLObjectTypes, List<String>> getDependencies(String customerSpace, String segmentName) {
+        String url = constructUrl("/{customerSpace}/segments/{segmentName}/dependencies", //
+                shortenCustomerSpace(customerSpace), segmentName);
+        Map<?, ?> raw = get("getDependencies", url, Map.class);
+        Map<CDLObjectTypes, List<String>> result = new HashMap<>();
+        if (MapUtils.isNotEmpty(raw)) {
+            @SuppressWarnings("rawtypes")
+            Map<CDLObjectTypes, List> midResult = JsonUtils.convertMap(raw, CDLObjectTypes.class, List.class);
+            midResult.keySet().stream() //
+                    .forEach(k -> {
+                        List<?> list = midResult.get(k);
+                        result.put(k, JsonUtils.convertList(list, String.class));
+                    });
+        }
+        return result;
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 
 public abstract class JpaEntityMgrRepositoryImpl <T, ID> implements BaseEntityMgrRepository<T , ID> {
 
@@ -66,5 +67,9 @@ public abstract class JpaEntityMgrRepositoryImpl <T, ID> implements BaseEntityMg
     public T findByField(String fieldName, Object value) {
         throw new UnsupportedOperationException("findByField not implemented in JPA entity mgr yet.");
     }
-
+    
+    @Override
+    public ParsedDependencies parse(T entity, T existingEntity) {
+        return null;
+    }
 }

@@ -55,7 +55,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
     private String segmentName;
 
     private static final String TABLE_NAME = "Account1";
-    private static final String OTHER_SEGMENT_NAME = "OTHER_SEGMENT_NAME";
+    private static final String OTHER_SEGMENT_NAME = NamingUtils.uuid("OTHER_SEGMENT_NAME");
 
     private static final String SEGMENT_DISPLAY_NAME = "SEGMENT_DISPLAY_NAME";
     private static final String UPDATED_DISPLAY_SEGMENT_NAME = "UPDATED_DISPLAY_SEGMENT_NAME";
@@ -92,7 +92,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CustomerSpace.parse(tenantId).toString()));
         otherSegment.setTenant(MultiTenantContext.getTenant());
         otherSegment.setDataCollection(dataCollection);
-        segmentEntityMgr.createOrUpdate(otherSegment);
+        segmentEntityMgr.createSegment(otherSegment);
         MultiTenantContext.setTenant(mainTestTenant);
     }
 
@@ -108,7 +108,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         METADATA_SEGMENT.setAccountRestriction(Restriction.builder().let(BusinessEntity.Account, "A").eq(null).build());
         METADATA_SEGMENT.setDataCollection(dataCollection);
         METADATA_SEGMENT.setTenant(MultiTenantContext.getTenant());
-        segmentEntityMgr.createOrUpdate(METADATA_SEGMENT);
+        segmentEntityMgr.createSegment(METADATA_SEGMENT);
 
         MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         assertNotNull(retrieved);
@@ -154,7 +154,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         UPDATED_SEGMENT.setContacts(2L);
         UPDATED_SEGMENT.setProducts(3L);
 
-        segmentEntityMgr.createOrUpdateSegment(UPDATED_SEGMENT);
+        segmentEntityMgr.updateSegment(UPDATED_SEGMENT, segmentEntityMgr.findByName(segmentName));
 
         MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         assertNotNull(retrieved);

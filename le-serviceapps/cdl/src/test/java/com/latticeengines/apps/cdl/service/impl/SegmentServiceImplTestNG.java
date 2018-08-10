@@ -34,9 +34,11 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
     private RatingEngineService ratingEngineService;
 
     @BeforeClass(groups = "functional")
-    public void setup() { setupTestEnvironmentWithDummySegment(); }
+    public void setup() {
+        setupTestEnvironmentWithDummySegment();
+    }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testFindDependingAttributes() {
         List<MetadataSegment> segments = new ArrayList<>();
         segments.add(testSegment);
@@ -46,7 +48,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(attributeLookups.size(), 8);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testFindDependingAttributes", enabled = false)
+    @Test(groups = "functional", dependsOnMethods = "testFindDependingAttributes", enabled = true)
     public void testFindDependingSegments() {
         List<String> attributes = new ArrayList<>();
         attributes.add("Contact.CompanyName");
@@ -57,7 +59,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(segments.get(0).getDisplayName(), SEGMENT_NAME);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testFindDependingSegments", enabled = false)
+    @Test(groups = "functional", dependsOnMethods = "testFindDependingSegments", enabled = true)
     public void testCyclicDependency() {
         MetadataSegment segment1 = createSegment(SEGMENT_NAME + "1");
         MetadataSegment segment2 = createSegment(SEGMENT_NAME + "2");
@@ -109,8 +111,8 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     protected void setRestriction(MetadataSegment segment, RatingEngine ratingEngine) {
-        Restriction accountRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Rating,
-                RatingEngine.RATING_ENGINE_PREFIX + "_" + ratingEngine.getId()), Bucket.notNullBkt());
+        Restriction accountRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Rating, ratingEngine.getId()), Bucket.notNullBkt());
         segment.setAccountRestriction(accountRestriction);
         segmentService.createOrUpdateSegment(mainTestTenant.getId(), segment);
     }

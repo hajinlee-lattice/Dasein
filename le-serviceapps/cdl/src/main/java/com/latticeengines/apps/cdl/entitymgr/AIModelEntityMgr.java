@@ -10,7 +10,9 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 
 public interface AIModelEntityMgr extends BaseEntityMgrRepository<AIModel, Long> {
 
-    AIModel createOrUpdateAIModel(AIModel aiModel, String ratingEngineId);
+    AIModel createAIModel(AIModel aiModel, String ratingEngineId);
+
+    AIModel updateAIModel(AIModel aiModel, AIModel retrievedAIModel, String ratingEngineId);
 
     List<AIModel> findAllByRatingEngineId(String ratingEngineId);
 

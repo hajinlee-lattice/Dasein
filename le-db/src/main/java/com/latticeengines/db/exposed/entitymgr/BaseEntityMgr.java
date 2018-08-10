@@ -3,6 +3,7 @@ package com.latticeengines.db.exposed.entitymgr;
 import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 
 public interface BaseEntityMgr<T> {
 
@@ -25,5 +26,7 @@ public interface BaseEntityMgr<T> {
     T findByField(String fieldName, Object value);
 
     List<T> findAll();
+
+    ParsedDependencies parse(T entity, T existingEntity);
 
 }

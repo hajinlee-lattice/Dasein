@@ -16,6 +16,10 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     void upsertStats(String segmentName, StatisticsContainer statisticsContainer);
 
-    MetadataSegment createOrUpdateSegment(MetadataSegment segment);
+    MetadataSegment createSegment(MetadataSegment segment);
+
+    MetadataSegment updateSegment(MetadataSegment segment, MetadataSegment existingSegment);
+
+    void delete(MetadataSegment segment, Boolean ignoreDependencyCheck);
 
 }

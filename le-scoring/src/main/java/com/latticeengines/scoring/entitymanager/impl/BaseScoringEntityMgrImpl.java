@@ -6,10 +6,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-public abstract class BaseScoringEntityMgrImpl<T extends HasPid> implements BaseEntityMgr<T> {
+public abstract class BaseScoringEntityMgrImpl<T extends HasPid> extends BaseEntityMgrImpl<T> {
 
     public BaseScoringEntityMgrImpl() {
     }

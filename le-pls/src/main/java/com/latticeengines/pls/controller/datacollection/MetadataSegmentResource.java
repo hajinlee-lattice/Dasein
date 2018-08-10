@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller.datacollection;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.mortbay.log.Log;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
@@ -57,6 +60,14 @@ public class MetadataSegmentResource {
     @ApiOperation(value = "Get segment with name")
     public MetadataSegment getSegmentByName(@PathVariable String segmentName) {
         return metadataSegmentService.getSegmentByName(segmentName);
+    }
+
+    @GetMapping(value = "/{segmentName}/dependencies")
+    @ResponseBody
+    @ApiOperation(value = "Get all the dependencies")
+    public Map<CDLObjectTypes, List<String>> getDependencies(
+            @PathVariable String segmentName) throws Exception {
+        return metadataSegmentService.getDependencies(segmentName);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

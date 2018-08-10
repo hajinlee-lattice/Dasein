@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -38,4 +39,6 @@ public interface SegmentService {
     List<MetadataSegment> findDependingSegments(String customerSpace, List<String> attributes);
 
     void verifySegmentCyclicDependency(MetadataSegment metadataSegment);
+
+    Map<CDLObjectTypes, List<String>> getDependencies(String customerSpace, String segmentName) throws Exception;
 }

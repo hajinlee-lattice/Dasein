@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +54,8 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine1.setSegment(testSegment);
         ratingEngine1.setCreatedBy(CREATED_BY);
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
-        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine1,
-                mainTestTenant.getId());
+        ratingEngine1.setId(UUID.randomUUID().toString());
+        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
         ratingEngine1.setPid(createdRatingEngine.getPid());
@@ -63,7 +64,8 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine2.setSegment(testSegment);
         ratingEngine2.setCreatedBy(CREATED_BY);
         ratingEngine2.setType(RatingEngineType.RULE_BASED);
-        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine2, mainTestTenant.getId());
+        ratingEngine2.setId(UUID.randomUUID().toString());
+        createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine2);
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine2.setId(createdRatingEngine.getId());
         ratingEngine2.setPid(createdRatingEngine.getPid());
@@ -76,6 +78,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setRatingEngine(ratingEngine);
         play.setPlayStatus(PlayStatus.INACTIVE);
         play.setTenant(mainTestTenant);
+        play.setName(UUID.randomUUID().toString());
     }
 
     @AfterClass(groups = "functional")
@@ -88,7 +91,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCreate() {
-        playEntityMgr.createOrUpdatePlay(play);
+        playEntityMgr.createPlay(play);
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
@@ -126,7 +129,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         log.info("ratingEngine 1 is " + ratingEngine1.getId());
         log.info("ratingEngine 2 is " + ratingEngine2.getId());
 
-        playEntityMgr.createOrUpdatePlay(retrievedPlay);
+        playEntityMgr.updatePlay(retrievedPlay, playEntityMgr.getPlayByName(retrievedPlay.getName(), false));
         retrievedPlay = playEntityMgr.getPlayByName(playName, true);
         Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), playName);
@@ -188,7 +191,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
 
         retrievedPlay.setIsCleanupDone(Boolean.TRUE);
-        playEntityMgr.createOrUpdatePlay(retrievedPlay);
+        playEntityMgr.updatePlay(retrievedPlay, playEntityMgr.getPlayByName(retrievedPlay.getName(), true));
 
         retrievedPlay = playEntityMgr.getPlayByName(playName, true);
         Assert.assertNotNull(retrievedPlay);

@@ -61,7 +61,24 @@ public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedM
     @Override
     public RuleBasedModel createOrUpdate(RuleBasedModel ratingModel, String ratingEngineId) {
         log.info(String.format("Creating/Updating a rule based model for Rating Engine %s", ratingEngineId));
-        return ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel(ratingModel, ratingEngineId);
+        findRatingModelAttributeLookups(ratingModel);
+        if (ratingModel.getId() == null) {
+            ratingModel.setId(RuleBasedModel.generateIdStr());
+            log.info(String.format("Creating a rule based model with id %s for ratingEngine %s", ratingModel.getId(),
+                    ratingEngineId));
+            return ruleBasedModelEntityMgr.createRuleBasedModel(ratingModel, ratingEngineId);
+        } else {
+            RuleBasedModel retrievedRuleBasedModel = ruleBasedModelEntityMgr.findById(ratingModel.getId());
+            if (retrievedRuleBasedModel == null) {
+                log.warn(String.format("RuleBasedModel with id %s is not found. Creating a new one",
+                        ratingModel.getId()));
+                return ruleBasedModelEntityMgr.createRuleBasedModel(ratingModel, ratingEngineId);
+            } else {
+                findRatingModelAttributeLookups(retrievedRuleBasedModel);
+                return ruleBasedModelEntityMgr.updateRuleBasedModel(ratingModel, retrievedRuleBasedModel,
+                        ratingEngineId);
+            }
+        }
     }
 
     @Override

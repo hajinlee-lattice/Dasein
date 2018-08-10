@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +20,18 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -37,10 +40,8 @@ import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("segmentService")
@@ -63,20 +64,28 @@ public class SegmentServiceImpl implements SegmentService {
     @Inject
     private RatingEngineService ratingEngineService;
 
+    @Inject
+    private SegmentDependencyUtil segmentDependencyUtil;
+
+    @Inject
+    private DependencyChecker dependencyChecker;
+
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
         verifySegmentCyclicDependency(segment);
-        MetadataSegment segment1 = segmentEntityMgr.createOrUpdateSegment(segment);
-        evictRatingMetadataCache();
-        return segment1;
-    }
+        MetadataSegment segment1 = null;
 
-    @NoCustomerSpace
-    private MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
-        verifySegmentCyclicDependency(segment);
-        MetadataSegment segment1 = segmentEntityMgr.createOrUpdateSegment(segment);
-        evictRatingMetadataCache();
-        return segment1;
+        if (segment.getName() != null) {
+            MetadataSegment existingSegment = findByName(segment.getName());
+            if (existingSegment != null) {
+                segment1 = segmentEntityMgr.updateSegment(segment, existingSegment);
+                evictRatingMetadataCache();
+                return segment1;
+            }
+        }
+
+        segment.setName(NamingUtils.timestamp("Segment"));
+        return segmentEntityMgr.createSegment(segment);
     }
 
     @Override
@@ -86,10 +95,7 @@ public class SegmentServiceImpl implements SegmentService {
             return false;
         }
 
-        if (!ignoreDependencyCheck) {
-            checkDependency(segment);
-        }
-        segmentEntityMgr.delete(segment);
+        segmentEntityMgr.delete(segment, ignoreDependencyCheck);
         return true;
     }
 
@@ -152,23 +158,22 @@ public class SegmentServiceImpl implements SegmentService {
     @NoCustomerSpace
     public Map<BusinessEntity, Long> updateSegmentCounts(String segmentName) {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        MetadataSegment segment = findByName(segmentName);
-        if (segment != null) {
-            updateEntityCounts(segment);
+        MetadataSegment existingSegment = findByName(segmentName);
+        if (existingSegment != null) {
+            // use a deep copy to avoid changing restriction format to break UI
+            MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(existingSegment),
+                    MetadataSegment.class);
+            Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
+            counts.forEach(segmentCopy::setEntityCount);
+
             log.info("Updating counts for segment " + segmentName + " to "
-                    + JsonUtils.serialize(segment.getEntityCounts()));
-            segment = createOrUpdateSegment(segment);
-            map = segment.getEntityCounts();
+                    + JsonUtils.serialize(segmentCopy.getEntityCounts()));
+            segmentEntityMgr.updateSegment(segmentCopy, existingSegment);
+            evictRatingMetadataCache();
+
+            map = existingSegment.getEntityCounts();
         }
         return map;
-    }
-
-    @NoCustomerSpace
-    private void updateEntityCounts(MetadataSegment segment) {
-        // use a deep copy to avoid changing restriction format to break UI
-        MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
-        Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
-        counts.forEach(segment::setEntityCount);
     }
 
     @NoCustomerSpace
@@ -210,6 +215,12 @@ public class SegmentServiceImpl implements SegmentService {
         return entityProxy.getCount(customerSpace, frontEndQuery);
     }
 
+    @Override
+    public Map<CDLObjectTypes, List<String>> getDependencies(String customerSpace, String segmentName)
+            throws Exception {
+        return dependencyChecker.getDependencies(customerSpace, segmentName, CDLObjectTypes.Segment.name());
+    }
+
     private void evictRatingMetadataCache() {
         String tenantId = MultiTenantContext.getShortTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
@@ -223,7 +234,7 @@ public class SegmentServiceImpl implements SegmentService {
         Set<AttributeLookup> dependingAttributes = new HashSet<>();
         if (metadataSegments != null) {
             for (MetadataSegment metadataSegment : metadataSegments) {
-                findSegmentDependingAttributes(metadataSegment);
+                segmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
                 Set<AttributeLookup> attributeLookups = metadataSegment.getSegmentAttributes();
                 if (attributeLookups != null) {
                     dependingAttributes.addAll(metadataSegment.getSegmentAttributes());
@@ -241,7 +252,7 @@ public class SegmentServiceImpl implements SegmentService {
             List<MetadataSegment> metadataSegments = getSegments(customerSpace);
             if (metadataSegments != null) {
                 for (MetadataSegment metadataSegment : metadataSegments) {
-                    findSegmentDependingAttributes(metadataSegment);
+                    segmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
                     Set<AttributeLookup> segmentAttributes = metadataSegment.getSegmentAttributes();
                     if (segmentAttributes != null) {
                         for (AttributeLookup attributeLookup : segmentAttributes) {
@@ -282,14 +293,14 @@ public class SegmentServiceImpl implements SegmentService {
 
     @SuppressWarnings("unchecked")
     private Map<Long, String> segmentCyclicDependency(MetadataSegment segment, LinkedHashMap<Long, String> map) {
-        LinkedHashMap<Long, String> segmentMap = (LinkedHashMap<Long, String>)map.clone();
+        LinkedHashMap<Long, String> segmentMap = (LinkedHashMap<Long, String>) map.clone();
         segmentMap.put(segment.getPid(), segment.getName());
 
         List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(segment));
         for (AttributeLookup attributeLookup : attributeLookups) {
             if (attributeLookup.getEntity() == BusinessEntity.Rating) {
-                RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(
-                        RatingEngine.toEngineId(attributeLookup.getAttribute()), false);
+                RatingEngine ratingEngine = ratingEngineService
+                        .getRatingEngineById(RatingEngine.toEngineId(attributeLookup.getAttribute()), false);
 
                 if (ratingEngine != null) {
                     MetadataSegment childSegment = ratingEngine.getSegment();
@@ -308,80 +319,11 @@ public class SegmentServiceImpl implements SegmentService {
         return null;
     }
 
-    private void checkDependency(MetadataSegment segment) {
-        List<String> ratingEngineIds = ratingEngineService //
-                .getAllRatingEngineIdsInSegment(segment.getName(), false);
-
-        if (CollectionUtils.isNotEmpty(ratingEngineIds)) {
-            log.error(String.format(
-                    "Dependency check failed for deletion of segment=%s "
-                            + "as some rating engines %s are dependent on it.",
-                    segment.getName(), new HashSet<>(ratingEngineIds)));
-            throw new LedpException(LedpCode.LEDP_18189, new String[] { segment.getDisplayName() });
-        }
-    }
-
-    @NoCustomerSpace
-    private void findSegmentDependingAttributes(MetadataSegment metadataSegment) {
-        Set<AttributeLookup> segmentAttributes = new HashSet<>();
-        Set<Restriction> restrictions = getSegmentRestrictions(metadataSegment);
-        for (Restriction restriction : restrictions) {
-            segmentAttributes.addAll(RestrictionUtils.getRestrictionDependingAttributes(restriction));
-        }
-
-        metadataSegment.setSegmentAttributes(segmentAttributes);
-    }
-
-    @NoCustomerSpace
-    private Set<Restriction> getSegmentRestrictions(MetadataSegment metadataSegment) {
-        Set<Restriction> restrictionSet = new HashSet<>();
-
-        Restriction accountRestriction = metadataSegment.getAccountRestriction();
-        if (accountRestriction != null) {
-            restrictionSet.add(accountRestriction);
-        }
-
-        Restriction contactRestriction = metadataSegment.getContactRestriction();
-        if (contactRestriction != null) {
-            restrictionSet.add(contactRestriction);
-        }
-
-        FrontEndRestriction accountFrontEndRestriction = metadataSegment.getAccountFrontEndRestriction();
-        if (accountFrontEndRestriction != null) {
-            Restriction accountRestriction1 = accountFrontEndRestriction.getRestriction();
-            if (accountRestriction1 != null) {
-                restrictionSet.add(accountRestriction1);
-            }
-        }
-
-        FrontEndRestriction contactFrontEndRestriction = metadataSegment.getContactFrontEndRestriction();
-        if (contactFrontEndRestriction != null) {
-            Restriction contactRestriction1 = contactFrontEndRestriction.getRestriction();
-            if (contactRestriction1 != null) {
-                restrictionSet.add(contactRestriction1);
-            }
-        }
-
-        return restrictionSet;
-    }
-
     @NoCustomerSpace
     private String sanitize(String attribute) {
         if (StringUtils.isNotBlank(attribute)) {
             attribute = attribute.trim();
         }
         return attribute;
-    }
-
-    private List<String> convertAttributeLookupList(List<AttributeLookup> attributeLookups) {
-        List<String> attributes = null;
-        if (attributeLookups != null) {
-            attributes = new ArrayList<>();
-            for (AttributeLookup attributeLookup : attributeLookups) {
-                attributes.add(sanitize(attributeLookup.toString()));
-            }
-        }
-
-        return attributes;
     }
 }

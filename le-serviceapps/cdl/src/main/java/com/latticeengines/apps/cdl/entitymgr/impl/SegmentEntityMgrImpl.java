@@ -1,12 +1,16 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,29 +20,38 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.graph.EdgeType;
+import com.latticeengines.domain.exposed.graph.ParsedDependencies;
+import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> implements SegmentEntityMgr {
     private static final Logger log = LoggerFactory.getLogger(SegmentEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private SegmentDao segmentDao;
 
-    @Autowired
+    @Inject
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
+
+    @Inject
+    private SegmentDependencyUtil segmentDependencyUtil;
 
     @Override
     public BaseDao<MetadataSegment> getDao() {
@@ -59,7 +72,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public void delete(MetadataSegment segment) {
+    public void delete(MetadataSegment segment, Boolean ignoreDependencyCheck) {
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             throw new IllegalArgumentException("Cannot delete master segment");
         }
@@ -69,7 +82,34 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
+    public MetadataSegment createSegment(MetadataSegment segment) {
+        preprocessBeforeCreateOrUpdate(segment);
+
+        MetadataSegment existing = findByName(segment.getName());
+        if (existing != null) {
+            throw new RuntimeException("Segment already exists");
+        } else {
+            segmentDao.create(segment);
+            return segment;
+        }
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public MetadataSegment updateSegment(MetadataSegment segment, MetadataSegment existingSegment) {
+        preprocessBeforeCreateOrUpdate(segment);
+
+        if (existingSegment != null) {
+            existingSegment = cloneForUpdate(existingSegment, segment);
+            segmentDao.update(existingSegment);
+            setMetadataSegmentActionContext(existingSegment);
+            return existingSegment;
+        } else {
+            throw new RuntimeException("Segment does not already exists");
+        }
+    }
+
+    private void preprocessBeforeCreateOrUpdate(MetadataSegment segment) {
         segment.setTenant(MultiTenantContext.getTenant());
         if (segment.getDataCollection() == null) {
             DataCollection defaultCollection = dataCollectionEntityMgr.findDefaultCollection();
@@ -89,17 +129,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         }
         if (StringUtils.isBlank(segment.getName())) {
             segment.setName(NamingUtils.timestamp("Segment"));
-        }
-
-        MetadataSegment existing = findByName(segment.getName());
-        if (existing != null) {
-            existing = cloneForUpdate(existing, segment);
-            segmentDao.update(existing);
-            setMetadataSegmentActionContext(existing);
-            return existing;
-        } else {
-            segmentDao.create(segment);
-            return segment;
         }
     }
 
@@ -150,6 +179,22 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         statisticsContainer.setSegment(segment);
         statisticsContainer.setTenant(MultiTenantContext.getTenant());
         statisticsContainerEntityMgr.create(statisticsContainer);
+    }
+
+    @Override
+    public Set<Triple<String, String, String>> extractDependencies(MetadataSegment segment) {
+        Set<Triple<String, String, String>> attrDepSet = null;
+        segmentDependencyUtil.findSegmentDependingAttributes(segment);
+        Set<AttributeLookup> attributeLookups = segment.getSegmentAttributes();
+        for (AttributeLookup attributeLookup : attributeLookups) {
+            if (attributeLookup.getEntity() == BusinessEntity.Rating) {
+                attrDepSet = new HashSet<Triple<String, String, String>>();
+                attrDepSet.add(
+                        ParsedDependencies.tuple(attributeLookup.getEntity() + "." + attributeLookup.getAttribute(), //
+                                VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
+            }
+        }
+        return attrDepSet;
     }
 
     private MetadataSegment cloneForUpdate(MetadataSegment existing, MetadataSegment incoming) {

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
@@ -179,6 +180,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private void clearRatingCache() {
         String tenantId = MultiTenantContext.getShortTenantId();
         servingStoreCacheService.clearCache(tenantId, BusinessEntity.Rating);
+    }
+
+    @Override
+    public Map<CDLObjectTypes, List<String>> getDependencies(String segmentName) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        return segmentProxy.getDependencies(customerSpace, segmentName);
     }
 
 }

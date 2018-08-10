@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
@@ -47,9 +48,9 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
-import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -138,6 +139,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    private DependencyChecker dependencyChecker;
 
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;
@@ -267,9 +271,25 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             MetadataSegment segment = segmentService.findByName(tenant.getId(), segmentName);
             ratingEngine.setSegment(segment);
         }
-        ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenant.getId(), unlinkSegment);
+
+        if (ratingEngine.getId() == null) { // create a new Rating Engine
+            ratingEngine.setId(RatingEngine.generateIdStr());
+            ratingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine);
+        } else {
+            RatingEngine retrievedRatingEngine = ratingEngineEntityMgr.findById(ratingEngine.getId());
+            if (retrievedRatingEngine == null) {
+                log.warn(String.format("Rating Engine with id %s for tenant %s cannot be found", ratingEngine.getId(),
+                        tenant.getId()));
+                ratingEngine.setId(RatingEngine.generateIdStr());
+                ratingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine);
+            } else { // update an existing one by updating the delta passed from
+                // front end
+                ratingEngine = ratingEngineEntityMgr.updateRatingEngine(ratingEngine, retrievedRatingEngine,
+                        unlinkSegment);
+                evictRatingMetadataCache();
+            }
+        }
         updateLastRefreshedDate(tenant.getId(), ratingEngine);
-        evictRatingMetadataCache();
         return ratingEngine;
     }
 
@@ -371,8 +391,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public void deleteById(String id, boolean hardDelete) {
+        checkFeasibilityForDelete(id);
         if (shouldPropagateDelete == Boolean.TRUE) {
-            checkFeasibilityForDelete(id);
             List<Play> relatedPlays = playService.getAllFullPlays(false, id);
             if (CollectionUtils.isNotEmpty(relatedPlays)) {
                 relatedPlays.forEach(p -> playService.deleteByName(p.getName(), hardDelete));
@@ -476,20 +496,27 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
-            String ratingEngineId) {
-        // TODO: Once Anoop's Dependency framework is ready this method should
-        // use it
+    public Map<CDLObjectTypes, List<String>> getRatingEngineDependencies(String customerSpace, String ratingEngineId) {
         log.info(String.format("Attempting to find rating engine dependencies for Rating Engine %s", ratingEngineId));
+
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
         if (ratingEngine == null) {
             throw new LedpException(LedpCode.LEDP_40016, new String[] { ratingEngineId, customerSpace });
         }
 
-        HashMap<RatingEngineDependencyType, List<String>> dependencyMap = new HashMap<>();
-        dependencyMap.put(RatingEngineDependencyType.Play, playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid())
-                .stream().map(Play::getDisplayName).collect(Collectors.toList()));
+        HashMap<CDLObjectTypes, List<String>> dependencyMap = new HashMap<>();
+        try {
+            Map<CDLObjectTypes, List<String>> dep = dependencyChecker.getDependencies(customerSpace, ratingEngineId,
+                    CDLObjectTypes.Model.name());
+            if (MapUtils.isNotEmpty(dep)) {
+                dependencyMap.putAll(dep);
+            }
+        } catch (Exception e) {
+            log.info("fallback to original logic till graph based lookup is not stable: " + e.getMessage(), e);
 
+            dependencyMap.put(CDLObjectTypes.Play, playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid())
+                    .stream().map(Play::getDisplayName).collect(Collectors.toList()));
+        }
         return dependencyMap;
     }
 

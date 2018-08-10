@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -42,7 +43,8 @@ public class RatingEngineNoteServiceImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
-        ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
+        ratingEngine.setId(UUID.randomUUID().toString());
+        ratingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine);
     }
 
     @Test(groups = "functional")

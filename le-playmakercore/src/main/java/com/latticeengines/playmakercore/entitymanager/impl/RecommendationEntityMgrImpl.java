@@ -7,18 +7,18 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.playmakercore.dao.RecommendationDao;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 
 @Component("recommendationEntityMgr")
-public class RecommendationEntityMgrImpl implements RecommendationEntityMgr {
+public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendation> implements RecommendationEntityMgr {
 
     private static final String PLAY_LAUNCH_NAME_PREFIX = "recmm";
     private static final String PLAY_LAUNCH_NAME_FORMAT = "%s__%s";

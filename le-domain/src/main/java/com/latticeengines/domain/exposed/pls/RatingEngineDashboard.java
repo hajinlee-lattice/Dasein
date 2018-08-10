@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 
@@ -17,7 +17,7 @@ public class RatingEngineDashboard {
 
     private MetadataSegment segment;
 
-    private Map<RatingEngineDependencyType, List<String>> dependencies;
+    private Map<CDLObjectTypes, List<String>> dependencies;
 
     private List<RatingModelDTO> iterations;
 
@@ -53,11 +53,11 @@ public class RatingEngineDashboard {
         this.segment = segment;
     }
 
-    public Map<RatingEngineDependencyType, List<String>> getDependencies() {
+    public Map<CDLObjectTypes, List<String>> getDependencies() {
         return dependencies;
     }
 
-    public void setDependencies(Map<RatingEngineDependencyType, List<String>> dependencies) {
+    public void setDependencies(Map<CDLObjectTypes, List<String>> dependencies) {
         this.dependencies = dependencies;
     }
 

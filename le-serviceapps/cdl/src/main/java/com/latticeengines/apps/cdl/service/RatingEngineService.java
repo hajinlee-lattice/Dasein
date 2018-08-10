@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -62,7 +62,7 @@ public interface RatingEngineService {
 
     Map<String, List<ColumnMetadata>> getIterationMetadata(String ratingEngineId, String ratingModelId);
 
-    Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
+    Map<CDLObjectTypes, List<String>> getRatingEngineDependencies(String customerSpace,
             String ratingEngineId);
 
     EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,

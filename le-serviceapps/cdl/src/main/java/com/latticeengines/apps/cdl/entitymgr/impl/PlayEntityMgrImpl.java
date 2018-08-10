@@ -1,13 +1,14 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,14 +21,16 @@ import com.latticeengines.common.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.graph.EdgeType;
+import com.latticeengines.domain.exposed.graph.ParsedDependencies;
+import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("playEntityMgr")
 public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play, Long> implements PlayEntityMgr {
-
-    private static final Logger log = LoggerFactory.getLogger(PlayEntityMgrImpl.class);
 
     @Inject
     private PlayDao playDao;
@@ -44,7 +47,6 @@ public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play
     @Override
     public BaseJpaRepository<Play, Long> getRepositoryByContext() {
         if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
-            log.info("Use reader repository for PlayEntityMgr.");
             return playReaderRepository;
         } else {
             return playWriterRepository;
@@ -58,25 +60,19 @@ public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public Play createOrUpdatePlay(Play play) {
-        if (play.getName() == null) {
-            createNewPlay(play);
-            playDao.create(play);
-            return play;
-        } else {
-            Play retrievedPlay = getPlayByName(play.getName(), true);
-            if (retrievedPlay == null) {
-                log.warn(String.format("Play with name %s does not exist, creating it now", play.getName()));
-                createNewPlay(play);
-                playDao.create(play);
-                return play;
-            } else {
-                // Front end only sends delta to the back end to update existing
-                updateExistingPlay(retrievedPlay, play);
-                playDao.update(retrievedPlay);
-                return retrievedPlay;
-            }
-        }
+    public Play createPlay(Play play) {
+        createNewPlay(play);
+        playDao.create(play);
+        return play;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Play updatePlay(Play play, Play existingPlay) {
+        // Front end only sends delta to the back end to update existing
+        updateExistingPlay(existingPlay, play);
+        playDao.update(existingPlay);
+        return existingPlay;
     }
 
     private void createNewPlay(Play play) {
@@ -121,12 +117,6 @@ public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(Play entity) {
-        playDao.delete(entity);
-    }
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Play> findAll() {
         return super.findAll();
@@ -161,14 +151,24 @@ public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void createOrUpdate(Play play) {
-        createOrUpdatePlay(play);
-    }
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<String> getAllDeletedPlayIds(boolean forCleanupOnly) {
         return playDao.findAllDeletedPlayIds(forCleanupOnly);
+    }
+
+    @Override
+    public Set<Triple<String, String, String>> extractDependencies(Play play) {
+        String ratingId = play.getRatingEngine().getId();
+        RatingEngine rating = findRatingEngine(play);
+        String targetSegmentName = rating.getSegment().getName();
+
+        Set<Triple<String, String, String>> attrDepSet = new HashSet<Triple<String, String, String>>();
+        attrDepSet.add(ParsedDependencies.tuple(targetSegmentName, //
+                VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TARGET));
+        attrDepSet.add(ParsedDependencies.tuple(ratingId, //
+                VertexType.RATING_ENGINE, EdgeType.DEPENDS_ON));
+        attrDepSet.add(ParsedDependencies.tuple(BusinessEntity.Rating + "." + ratingId, //
+                VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
+        return attrDepSet;
     }
 }

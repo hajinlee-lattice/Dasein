@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -284,7 +284,7 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public Map<RatingEngineDependencyType, List<String>> getRatingEngigneDependencies(
+    public Map<CDLObjectTypes, List<String>> getRatingEngigneDependencies(
             @PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));

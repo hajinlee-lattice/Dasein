@@ -2,13 +2,10 @@ package com.latticeengines.apps.cdl.entitymgr;
 
 import java.util.List;
 
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 
-public interface RatingEngineEntityMgr {
-
-    RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId);
-
-    RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment);
+public interface RatingEngineEntityMgr extends BaseEntityMgrRepository<RatingEngine, Long> {
 
     List<RatingEngine> findAll();
 
@@ -25,5 +22,10 @@ public interface RatingEngineEntityMgr {
     void deleteById(String id, boolean hardDelete);
 
     void revertDelete(String id);
+
+    RatingEngine createRatingEngine(RatingEngine ratingEngine);
+
+    RatingEngine updateRatingEngine(RatingEngine ratingEngine, RatingEngine retrievedRatingEngine,
+            Boolean unlinkSegment);
 
 }

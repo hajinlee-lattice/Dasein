@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -68,8 +69,8 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         crossSellratingEngine.setCreatedBy(CREATED_BY);
         crossSellratingEngine.setType(RatingEngineType.CROSS_SELL);
 
-        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(crossSellratingEngine,
-                mainTestTenant.getId());
+        crossSellratingEngine.setId(UUID.randomUUID().toString());
+        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(crossSellratingEngine);
         Assert.assertNotNull(createdRatingEngine);
         crossSellRatingEngineId = createdRatingEngine.getId();
         createdRatingEngine = ratingEngineEntityMgr.findById(createdRatingEngine.getId(), true);
@@ -93,10 +94,11 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         assertDefaultAIModel(crossSellAIModel);
         Assert.assertEquals(crossSellAIModel.getRatingEngine().getId(), crossSellRatingEngineId);
 
-        // update crossSellAIModel by updating its selected attributes and rules
+        // update aiModel by updating its selected attributes and rules
         CrossSellModelingConfig.getAdvancedModelingConfig(crossSellAIModel)
                 .setTargetProducts(generateSeletedProducts());
-        crossSellAIModel = aiModelEntityMgr.createOrUpdateAIModel(crossSellAIModel, crossSellRatingEngineId);
+        crossSellAIModel = aiModelEntityMgr.updateAIModel(crossSellAIModel,
+                aiModelEntityMgr.findById(crossSellAIModel.getId()), crossSellRatingEngineId);
 
         aiModelList = aiModelEntityMgr.findAllByRatingEngineId(crossSellRatingEngineId, null);
 
@@ -114,7 +116,8 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 .setTrainingProducts(generateTrainingProducts());
 
         crossSellAIModel.setModelingJobId(APP_JOB_ID);
-        aiModelEntityMgr.createOrUpdateAIModel(crossSellAIModel, crossSellRatingEngineId);
+        aiModelEntityMgr.updateAIModel(crossSellAIModel, aiModelEntityMgr.findById(crossSellAIModel.getId()),
+                crossSellRatingEngineId);
 
         crossSellAIModel = aiModelEntityMgr.findById(crossSellAIModel.getId());
         Assert.assertNotNull(crossSellAIModel, "Could not find AIModel");
@@ -139,7 +142,8 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         configFitlers.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, repeatPurchaseFilter);
         CrossSellModelingConfig.getAdvancedModelingConfig(crossSellAIModel).setFilters(configFitlers);
 
-        aiModelEntityMgr.createOrUpdateAIModel(crossSellAIModel, crossSellRatingEngineId);
+        aiModelEntityMgr.updateAIModel(crossSellAIModel, aiModelEntityMgr.findById(crossSellAIModel.getId()),
+                crossSellRatingEngineId);
 
         crossSellAIModel = aiModelEntityMgr.findById(crossSellAIModel.getId());
         assertUpdatedModelWithConfigFilters(crossSellAIModel, configFitlers);
@@ -148,13 +152,15 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testUpdateRefineSettings" })
     public void testUpdateSegmentNull() {
         crossSellratingEngine.setSegment(null);
-        ratingEngineEntityMgr.createOrUpdateRatingEngine(crossSellratingEngine, mainTestTenant.getId(), false);
+        ratingEngineEntityMgr.updateRatingEngine(crossSellratingEngine,
+                ratingEngineEntityMgr.findById(crossSellratingEngine.getId(), true), false);
         crossSellratingEngine = ratingEngineEntityMgr.findById(crossSellRatingEngineId);
         Assert.assertNotNull(crossSellratingEngine);
         Assert.assertNotNull(crossSellratingEngine.getSegment());
 
         crossSellratingEngine.setSegment(null);
-        ratingEngineEntityMgr.createOrUpdateRatingEngine(crossSellratingEngine, mainTestTenant.getId(), true);
+        ratingEngineEntityMgr.updateRatingEngine(crossSellratingEngine,
+                ratingEngineEntityMgr.findById(crossSellratingEngine.getId(), true), true);
         crossSellratingEngine = ratingEngineEntityMgr.findById(crossSellRatingEngineId);
         Assert.assertNotNull(crossSellratingEngine);
         Assert.assertNotNull(crossSellratingEngine.getSegment());
@@ -167,9 +173,10 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         iteration.setRatingEngine(createdRatingEngine);
         iteration.setAdvancedModelingConfig(new CrossSellModelingConfig());
+        iteration.setId(UUID.randomUUID().toString());
         iteration.setDerivedFromRatingModel(createdRatingEngine.getLatestIteration().getId());
 
-        iteration = aiModelEntityMgr.createOrUpdateAIModel(iteration, crossSellRatingEngineId);
+        iteration = aiModelEntityMgr.createAIModel(iteration, crossSellRatingEngineId);
         Assert.assertNotNull(iteration);
         List<AIModel> aiModelList = aiModelEntityMgr.findAllByRatingEngineId(crossSellRatingEngineId, null);
         Assert.assertNotNull(aiModelList);
@@ -180,6 +187,10 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(crossSellAIModel.getRatingEngine().getId(), crossSellRatingEngineId);
         Assert.assertEquals(iteration.getRatingEngine().getId(), crossSellRatingEngineId);
         assertCreatedAIModel(iteration);
+
+        createdRatingEngine.setLatestIteration(iteration);
+        createdRatingEngine = ratingEngineEntityMgr.updateRatingEngine(createdRatingEngine,
+                ratingEngineEntityMgr.findById(crossSellRatingEngineId), false);
 
         createdRatingEngine = ratingEngineEntityMgr.findById(crossSellRatingEngineId);
         Assert.assertEquals(createdRatingEngine.getLatestIteration().getId(), iteration.getId());
@@ -201,8 +212,8 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         customEventRatingEngine.setCreatedBy(CREATED_BY);
         customEventRatingEngine.setType(RatingEngineType.CUSTOM_EVENT);
 
-        customEventRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(customEventRatingEngine,
-                mainTestTenant.getId());
+        customEventRatingEngine.setId(UUID.randomUUID().toString());
+        customEventRatingEngine = ratingEngineEntityMgr.createRatingEngine(customEventRatingEngine);
         Assert.assertNotNull(customEventRatingEngine);
         customEventRatingEngineId = customEventRatingEngine.getId();
         customEventRatingEngine = ratingEngineEntityMgr.findById(customEventRatingEngine.getId(), true);
@@ -232,13 +243,15 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testCreateCustomEvent" })
     public void testUpdateSegmentNullCustomEvent() {
         customEventRatingEngine.setSegment(null);
-        ratingEngineEntityMgr.createOrUpdateRatingEngine(customEventRatingEngine, mainTestTenant.getId(), false);
+        ratingEngineEntityMgr.updateRatingEngine(customEventRatingEngine,
+                ratingEngineEntityMgr.findById(customEventRatingEngine.getId(), true), false);
         customEventRatingEngine = ratingEngineEntityMgr.findById(customEventRatingEngineId);
         Assert.assertNotNull(customEventRatingEngine);
         Assert.assertNotNull(customEventRatingEngine.getSegment());
 
         customEventRatingEngine.setSegment(null);
-        ratingEngineEntityMgr.createOrUpdateRatingEngine(customEventRatingEngine, mainTestTenant.getId(), true);
+        ratingEngineEntityMgr.updateRatingEngine(customEventRatingEngine,
+                ratingEngineEntityMgr.findById(customEventRatingEngine.getId(), true), true);
         customEventRatingEngine = ratingEngineEntityMgr.findById(customEventRatingEngineId);
         Assert.assertNotNull(customEventRatingEngine);
         Assert.assertNull(customEventRatingEngine.getSegment());

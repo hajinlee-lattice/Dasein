@@ -1,10 +1,14 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -16,6 +20,9 @@ import com.latticeengines.apps.cdl.repository.writer.AIModelRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.graph.EdgeType;
+import com.latticeengines.domain.exposed.graph.ParsedDependencies;
+import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 
@@ -24,10 +31,10 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
 
     private static final Logger log = LoggerFactory.getLogger(AIModelEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private AIModelRepository aiModelRepository;
 
-    @Autowired
+    @Inject
     private AIModelDao aiModelDao;
 
     @Override
@@ -73,25 +80,18 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public AIModel createOrUpdateAIModel(AIModel aiModel, String ratingEngineId) {
-        if (aiModel.getId() == null) {
-            aiModel.setId(AIModel.generateIdStr());
-            log.info(String.format("Creating an AI model with id %s for ratingEngine %s", aiModel.getId(),
-                    ratingEngineId));
-            getDao().create(aiModel);
-            return aiModel;
-        } else {
-            AIModel retrievedAIModel = findById(aiModel.getId());
-            if (retrievedAIModel == null) {
-                log.warn(String.format("AIModel with id %s is not found. Creating a new one", aiModel.getId()));
-                getDao().create(aiModel);
-                return aiModel;
-            } else {
-                updateExistingAIModel(retrievedAIModel, aiModel, ratingEngineId);
-                getDao().update(retrievedAIModel);
-                return retrievedAIModel;
-            }
-        }
+    public AIModel createAIModel(AIModel aiModel, String ratingEngineId) {
+        log.info(String.format("Creating an AI model with id %s for ratingEngine %s", aiModel.getId(), ratingEngineId));
+        getDao().create(aiModel);
+        return aiModel;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public AIModel updateAIModel(AIModel aiModel, AIModel retrievedAIModel, String ratingEngineId) {
+        updateExistingAIModel(retrievedAIModel, aiModel, ratingEngineId);
+        getDao().update(retrievedAIModel);
+        return retrievedAIModel;
     }
 
     @Override
@@ -109,5 +109,21 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
         retrievedAIModel.setModelingJobStatus(aiModel.getModelingJobStatus());
         retrievedAIModel.setModelSummaryId(aiModel.getModelSummaryId());
         retrievedAIModel.getAdvancedModelingConfig().copyConfig(aiModel.getAdvancedModelingConfig());
+    }
+
+    @Override
+    public Set<Triple<String, String, String>> extractDependencies(AIModel aiModel) {
+        Set<Triple<String, String, String>> attrDepSet = null;
+        if (aiModel.getTrainingSegment() != null) {
+            attrDepSet = new HashSet<Triple<String, String, String>>();
+            attrDepSet.add(ParsedDependencies.tuple(aiModel.getTrainingSegment().getName(), //
+                    VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TRAINING));
+        }
+        return attrDepSet;
+    }
+
+    @Override
+    public boolean shouldSkipTenantDependency() {
+        return true;
     }
 }

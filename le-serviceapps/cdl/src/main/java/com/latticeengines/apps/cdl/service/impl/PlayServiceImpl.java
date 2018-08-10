@@ -100,7 +100,23 @@ public class PlayServiceImpl implements PlayService {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
         play.setTenant(tenant);
-        Play retrievedPlay = playEntityMgr.createOrUpdatePlay(play);
+        Play retrievedPlay = null;
+        boolean shouldCreateNew = false;
+        if (StringUtils.isBlank(play.getName())) {
+            shouldCreateNew = true;
+        } else {
+            retrievedPlay = playEntityMgr.getPlayByName(play.getName(), true);
+            if (retrievedPlay == null) {
+                shouldCreateNew = true;
+            }
+        }
+
+        if (shouldCreateNew) {
+            play.setName(play.generateNameStr());
+            retrievedPlay = playEntityMgr.createPlay(play);
+        } else {
+            retrievedPlay = playEntityMgr.updatePlay(play, retrievedPlay);
+        }
         return getFullPlay(retrievedPlay, shouldLoadCoverage, null);
     }
 

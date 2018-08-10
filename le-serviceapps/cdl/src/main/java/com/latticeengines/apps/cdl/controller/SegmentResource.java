@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,6 +22,7 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
@@ -56,6 +58,15 @@ public class SegmentResource {
     public MetadataSegment getSegment(@PathVariable String customerSpace, @PathVariable String segmentName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return segmentService.findByName(customerSpace, segmentName);
+    }
+
+    @GetMapping(value = "/{segmentName}/dependencies")
+    @ResponseBody
+    @ApiOperation(value = "Get all the dependencies")
+    public Map<CDLObjectTypes, List<String>> getDependencies(@PathVariable String customerSpace,
+            @PathVariable String segmentName) throws Exception {
+        log.info(String.format("get all dependencies for segmentName=%s", segmentName));
+        return segmentService.getDependencies(customerSpace, segmentName);
     }
 
     @RequestMapping(value = "/pid/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -126,7 +137,7 @@ public class SegmentResource {
     @PostMapping(value = "/attributes")
     @ResponseBody
     @ApiOperation(value = "get attributes for segments")
-    public List<AttributeLookup> findDependingAttributes (@PathVariable String customerSpace,
+    public List<AttributeLookup> findDependingAttributes(@PathVariable String customerSpace,
             @RequestBody List<MetadataSegment> metadataSegments) {
         return segmentService.findDependingAttributes(metadataSegments);
     }

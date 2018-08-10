@@ -35,8 +35,8 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
-import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -301,13 +301,13 @@ public class TestPlayCreationHelper {
         playName = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
-        Map<RatingEngineDependencyType, List<String>> dependencies = ratingEngineProxy
-                .getRatingEngineDependencies(tenant.getId(), ratingEngine.getId());
+        Map<CDLObjectTypes, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
+                ratingEngine.getId());
         Assert.assertNotNull(dependencies);
         Assert.assertEquals(dependencies.size(), 1);
-        Assert.assertNotNull(dependencies.get(RatingEngineDependencyType.Play));
-        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).size(), 1);
-        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).get(0), play.getDisplayName());
+        Assert.assertNotNull(dependencies.get(CDLObjectTypes.Play));
+        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play).size(), 1);
+        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play).get(0), play.getDisplayName());
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(playName);
         List<TalkingPointDTO> createTPResponse = talkingPointProxy.createOrUpdate(tps,
@@ -320,8 +320,8 @@ public class TestPlayCreationHelper {
         dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine.getId());
         Assert.assertNotNull(dependencies);
         Assert.assertEquals(dependencies.size(), 1);
-        Assert.assertNotNull(dependencies.get(RatingEngineDependencyType.Play));
-        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).size(), 2);
+        Assert.assertNotNull(dependencies.get(CDLObjectTypes.Play));
+        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play).size(), 2);
 
         playList = playProxy.getPlays(tenant.getId(), null, null);
         Assert.assertNotNull(playList);
