@@ -67,17 +67,17 @@ public class IdToDisplayNameTranslator {
 
     private String idToDisplayName(String type, String objId) {
         String displayName = objId;
-        if (type.equals(VertexType.PLAY)) {
+        if (type.equals(CDLObjectTypes.Play.name())) {
             Play play = playEntityMgr.getPlayByName(objId, false);
             if (play != null) {
                 displayName = play.getDisplayName();
             }
-        } else if (type.equals(VertexType.RATING_ENGINE)) {
+        } else if (type.equals(CDLObjectTypes.Model.name())) {
             RatingEngine ratingEngine = ratingEngineEntityMgr.findById(objId);
             if (ratingEngine != null) {
                 displayName = ratingEngine.getDisplayName();
             }
-        } else if (type.equals(VertexType.SEGMENT)) {
+        } else if (type.equals(CDLObjectTypes.Segment)) {
             MetadataSegment segment = segmentEntityMgr.findByName(objId);
             if (segment != null) {
                 displayName = segment.getDisplayName();
