@@ -226,7 +226,7 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
-            var model = vm.ratingEngine.activeModel;
+            var model = vm.ratingEngine.scoring_iteration;
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -235,8 +235,6 @@ angular.module('lp.ratingsengine.dashboard', [
                 } else {
                     vm.hasSettingsInfo = true;
                 }
-
-                console.log(model);
 
                 vm.targetProducts = model.AI.advancedModelingConfig[type].targetProducts;
                 vm.modelingStrategy = model.AI.advancedModelingConfig[type].modelingStrategy;
@@ -290,18 +288,22 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.init = function() {
 
-        // console.log(vm.ratingEngine);
+        console.log(vm.ratingEngine);
         // console.log(vm.modelSummary);
-        // console.log(vm.dashboard);
+        console.log(vm.dashboard);
 
         vm.initModalWindow();
         vm.initDataModel();
     }
 
     vm.isIterationActive = function(iterationId){
-        if(vm.ratingEngine.activeModel.AI && vm.ratingEngine.activeModel.AI.id == iterationId){
-            return true;
-        }else {
+        if(vm.ratingEngine.scoring_iteration != null) {
+            if(vm.ratingEngine.scoring_iteration.AI.id == iterationId){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
             return false;
         }
     }
@@ -337,12 +339,13 @@ angular.module('lp.ratingsengine.dashboard', [
     };
 
     vm.isJobRunning = function(){
-        var activeModel = vm.ratingEngine.activeModel;
         var jobStatus = '';
         if(vm.ratingEngine.type === 'RULE_BASED'){
+            var activeModel = vm.ratingEngine.activeModel;
             jobStatus = activeModel.rule.modelingJobStatus;
         }else{
-            jobStatus = activeModel.AI.modelingJobStatus;
+            var scoring_iteration = vm.ratingEngine.scoring_iteration;
+            jobStatus = scoring_iteration.AI.modelingJobStatus;
         }
 
         switch(jobStatus){

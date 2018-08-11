@@ -7,9 +7,7 @@ angular.module('lp.ratingsengine.remodel.filters', [])
     controller: function ($state, $stateParams, AttrConfigStore) {
         var vm = this;
 
-        vm.$onInit = function() {
-
-        };
+        vm.$onInit = function() {};
 
     }
 });

@@ -3,14 +3,14 @@ angular.module('lp.ratingsengine.remodel')
     var store = this;
 
     this.init = function(){
+        this.remodelIteration = null;
+
         this.filters = {
-            page: 1,
-            pagesize: 25,
+            currentPage: 1,
+            pageSize: 10,
             sortPrefix: '+',
             queryText: ''
         };
-
-        this.remodelIteration = null;
 
         this.limit = -1;
         this.selected = [];
@@ -100,10 +100,17 @@ angular.module('lp.ratingsengine.remodel')
                         delete attribute.OriginalApprovedUsage; 
                     });
                 }
+                var hasWarningAttributes = category.filter(function(attribute) {
+                    return attribute.hasWarning;
+                });
+                if(hasWarningAttributes.length > 0){
+                    angular.forEach(hasWarningAttributes, function(attribute){
+                        delete attribute.hasWarning; 
+                    });
+                }
             });
 
-            // var attributesString = JSON.stringify(attributes);
-
+            // Launch Model
             AtlasRemodelService.launchModeling(engineId, modelId, attributes).then(function(applicationid){
                 console.log(applicationid);
 

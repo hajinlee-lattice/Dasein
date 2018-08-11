@@ -116,9 +116,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                     RatingsEngineStore.setTrainingSegment(null);
                     vm.ratingModel.trainingSegment = null;
                 }
-
-                console.log(RatingsEngineStore.getConfigFilters());
-
             });
 
             $timeout(function () {
@@ -270,10 +267,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
                 }
 
-                console.log(vm.checkboxModel.spend);
-
                 if(vm.checkboxModel.spend) {
-                    console.log("yo");
                     vm.configFilters.SPEND_IN_PERIOD = {
                         "configName": "SPEND_IN_PERIOD",
                         "criteria": vm.spendCriteria,
@@ -308,8 +302,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                 }
 
                 vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
-
-                console.log(vm.ratingEngine);
 
                 $timeout(function () {
                     vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);

@@ -49,7 +49,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             var type = ratingEngine.type.toLowerCase();
             $scope.typeContext = 'AI';
 
-            $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+            $scope.modelingStrategy = ratingEngine.scoring_iteration.AI.advancedModelingConfig[type].modelingStrategy;
         }
 
         if($scope.typeContext == 'AI'){
@@ -60,14 +60,18 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
             RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
                 $scope.iteration = iteration.AI;
-                $scope.isActiveModel = (ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
+                $scope.isActiveModel = (ratingEngine.scoring_iteration.AI.iteration === iteration.AI.iteration) ? true : false;
+
+                if($scope.viewingIteration) {
+                    $scope.createdBy = iteration.AI.createdBy;
+                }
             });
 
             
         }
 
-        $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
-        $scope.modelIsReady = ((ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined));
+        $scope.activeIteration = ratingEngine.scoring_iteration[$scope.typeContext].iteration;
+        $scope.modelIsReady = ((ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId !== undefined));
         $scope.activeStatus = ratingEngine.status;
 
         $scope.$on('statusChange', function(event, args) {
@@ -121,7 +125,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 var type = ratingEngine.type.toLowerCase();
                 $scope.typeContext = 'AI';
 
-                $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+                $scope.modelingStrategy = ratingEngine.scoring_iteration.AI.advancedModelingConfig[type].modelingStrategy;
             }
 
             if($scope.typeContext == 'AI'){
@@ -132,12 +136,16 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
                 RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
                     $scope.iteration = iteration.AI;
-                    $scope.isActiveModel = (ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
+                    $scope.isActiveModel = (ratingEngine.scoring_iteration.AI.iteration === iteration.AI.iteration) ? true : false;
+
+                    if($scope.viewingIteration) {
+                        $scope.createdBy = iteration.AI.createdBy;
+                    }
                 });
             }
             
-            $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
-            $scope.modelIsReady = ((ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined));
+            $scope.activeIteration = ratingEngine.scoring_iteration[$scope.typeContext].iteration;
+            $scope.modelIsReady = ((ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId !== undefined));
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
             $scope.activeStatus = ratingEngine.status;
 

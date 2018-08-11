@@ -7,10 +7,10 @@
     <table class="attr-list-results noselect-children">
         <thead>
             <tr>
-                <th ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'display_name'">
+                <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'hasWarning'">
                     <span class="ico ico-warning"></span>
-                    <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'display_name')" class="fa fa-sort"></i>
-                    <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                    <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'hasWarning')" class="fa fa-sort"></i>
+                    <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'hasWarning')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                 </th>
                 <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'ImportanceOrdering'">
                     Used by Model
@@ -27,7 +27,7 @@
                     <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'DisplayName')" class="fa fa-sort"></i>
                     <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'DisplayName')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                 </th>
-                <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'display_name'">
+                <th ng-click="up = !up; $ctrl.sortBy = (up ? '-' : '') + 'ApprovedUsage'">
                     Enabled
                     <i ng-if="!$ctrl.endsWith($ctrl.sortBy, 'ApprovedUsage')" class="fa fa-sort"></i>
                     <i ng-if="$ctrl.endsWith($ctrl.sortBy, 'ApprovedUsage')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
@@ -42,7 +42,7 @@
                         | limitTo: $ctrl.pageSize))"
                 ng-class="{'disabled': attribute.ApprovedUsage[0] == 'None'}">
                 <td>
-                    <span class="ico ico-warning" ng-if="attribute.IsCoveredByOptionalRule || attribute.IsCoveredByMandatoryRule"></span>
+                    <span class="ico ico-warning" ng-if="attribute.hasWarning"></span>
                 </td>
                 <td>
                     <span class="ico ico-check" ng-if="attribute.ImportanceOrdering"></span>
@@ -58,20 +58,11 @@
             </tr>
         </tbody>
     </table>
-
-    <ul class="attr-pagination-bottom">
-    <!-- <ul class="attr-pagination-bottom" ng-init="pagesize = 12" ng-show="max > 1"> -->
+    <ul class="attr-pagination-bottom" ng-show="max > 1">
         <li class="attr-pagination pull-right">
-            <!-- <pd-pagination-controls 
-                current="$ctrl.currentPage" 
-                max="max = ($ctrl.header.filter.filtered | filter: $ctrl.query).length / pagesize"
-                class="pull-right">
-            </pd-pagination-controls> -->
-
             <pd-pagination-controls
                 current="$ctrl.currentPage"
-                max="$ctrl.getCategoryAttributes().length / $ctrl.pageSize"
-                ng-if="$ctrl.getCategoryAttributes().length > 10">
+                max="max = ($ctrl.getCategoryAttributes() | filter: $ctrl.queryText).length / $ctrl.pageSize">
             </pd-pagination-controls>
         </li>
     </ul>

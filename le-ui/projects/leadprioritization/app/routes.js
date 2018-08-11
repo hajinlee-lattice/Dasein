@@ -400,6 +400,8 @@ angular
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
 
+                    console.log($stateParams.modelId);
+
                     ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
                         deferred.resolve(result);
                     });

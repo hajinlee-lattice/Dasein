@@ -48,7 +48,7 @@
             width: 98%;
             margin-bottom: 10px;
             position: relative;
-            padding: 0px 10px;
+            padding: 0px 10px 16px;
             border: #eaeaea solid 1px;
             background: rgba(255,255,255,0.5);
             border-radius: 2px;
@@ -114,6 +114,7 @@
         margin-bottom: 4px;
     }
     .creation-history {
+        margin-bottom: 0;
         th:last-of-type, td:last-of-type {
             text-align: right;
         }

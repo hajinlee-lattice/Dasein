@@ -56,9 +56,6 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
             // Set default category in the store
             vm.selectedCategory = Object.keys(vm.categories)[0];
             vm.setCategoryData(vm.selectedCategory);
-
-            vm.filters = AtlasRemodelStore.getFilters();
-
         }
 
         vm.setCategoryData = function(category){

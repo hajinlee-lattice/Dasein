@@ -6,7 +6,7 @@
                 <span class="fa fa-times" ng-show="$ctrl.query.length && !$ctrl.queryInProgress"></span>
                 <span class="fa fa-spinner fa-pulse fa-fw" ng-show="$ctrl.queryInProgress"></span>
             </a>
-            <input type="text" class="form-control" placeholder="Search" ng-model="$ctrl.filters.queryText" ng-change="$ctrl.filters.currentPage = 1" />
+            <input type="text" class="form-control" placeholder="Search" ng-model="$ctrl.filters.queryText" ng-change="$ctrl.filters.currentPage = 1" ng-model-options="{ debounce: 500 }" />
         </div>
     </li>
 </ul>

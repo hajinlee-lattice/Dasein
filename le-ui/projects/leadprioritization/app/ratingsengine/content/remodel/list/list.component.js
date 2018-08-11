@@ -7,45 +7,60 @@ angular.module('lp.ratingsengine.remodel.list', [])
     controller: function ($scope, $state, $stateParams, AtlasRemodelStore) {
         var vm = this;
 
+        angular.extend(vm, {
+            store: AtlasRemodelStore,
+            params: $stateParams,
+            allAttributes: AtlasRemodelStore.getRemodelAttributes(),
+            currentPage: vm.filters.currentPage,
+            pageSize: vm.filters.pageSize,
+            queryText: vm.filters.queryText,
+            sortBy: 'DisplayName'
+        });
+
+        // $scope.$watch('category', function(newValue, oldValue) {
+        //     if(newValue != oldValue) {
+        //         vm.filters.currentPage = 1;
+        //     }
+        // });
+
         vm.$onInit = function() {
 
-            vm.store = AtlasRemodelStore;
-            vm.params = $stateParams;
-            vm.allAttributes = AtlasRemodelStore.getRemodelAttributes(),
-            vm.currentPage = 1;
-            vm.pageSize = 10;
-            vm.sortBy = 'DisplayName';
+            console.log(vm.filters);
 
         };
 
         vm.getCategoryAttributes = function(){
-            vm.category = AtlasRemodelStore.get('category');
-            return vm.allAttributes[vm.category];
+            var category = AtlasRemodelStore.get('category'),
+                categoryAttributes = vm.allAttributes[category];
+
+            angular.forEach(categoryAttributes, function(attribute){
+                attribute.hasWarning = (attribute.IsCoveredByOptionalRule || attribute.IsCoveredByMandatoryRule) ? true : false;
+            });
+
+            return categoryAttributes;
         }
 
         vm.searchFilter = function(attr) {
-            // var text = vm.filters.queryText; 
+            var text = vm.filters.queryText;
+            if (text) {
 
-            // if (text) {
-
-            //     console.log(vm.filters.queryText, attr);
-            //     var chkName = attr.DisplayName.indexOf(text) >= 0;
-            //     var chkCategory = (attr.Category || '').indexOf(text) >= 0;
+                var chkName = attr.DisplayName.indexOf(text) >= 0,
+                    chkCategory = (attr.Category || '').indexOf(text) >= 0;
                 
-            //     if (chkName || chkCategory) {
-            //         return true;
-            //     } else if (attr.Attributes) {
-            //         for (var i=0; i<attr.Attributes.length; i++) {
-            //             if (attr.Attributes[i].DisplayName.indexOf(text) >= 0) {
-            //                 return true;
-            //             }
-            //         }
-            //     }
-            // } else {
-            //     return true;
-            // }
+                if (chkName || chkCategory) {
+                    return true;
+                } else if (attr.Attributes) {
+                    for (var i=0; i<attr.Attributes.length; i++) {
+                        if (attr.Attributes[i].DisplayName.indexOf(text) >= 0) {
+                            return true;
+                        }
+                    }
+                }
+            } else {
+                return true;
+            }
 
-            return true;
+            return false;
         }
 
         vm.endsWith = function(item, string) {

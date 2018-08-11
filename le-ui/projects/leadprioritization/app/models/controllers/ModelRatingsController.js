@@ -52,17 +52,41 @@ angular.module('lp.models.ratings', [
         // console.log(vm.currentConfiguration);
         // console.log(vm.workingBuckets);
 
-        // console.log(vm.ratingsSummary.total_num_leads);
-
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
 
         if(vm.section === 'dashboard.scoring') {
             vm.ratingModelId = $stateParams.ratingEngine.activeModel.AI.id;
         } else if (vm.section === 'dashboard.ratings') {
-            RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
-                vm.ratingModelId = result.activeModel.AI.id;
+
+            // Get dahsboard data for list of iterations
+            var dashboard = ModelStore.getDashboardData(),
+                dashboardIterations = dashboard.iterations;
+
+            vm.activeIterations = [];
+
+            // use only iterations that have active modelSummaryId by creating new array
+            angular.forEach(dashboardIterations, function(iteration){
+                if (iteration.modelSummaryId) {
+                    vm.activeIterations.push(iteration);
+                }
             });
+
+
+            // console.log($stateParams);
+            // console.log(activeIterations);
+
+            // Set correct iteration as default for select menu
+            for(var i = 0; i < vm.activeIterations.length; i++) {
+                if (vm.activeIterations[i].modelSummaryId === $stateParams.modelId) {
+                    vm.activeIteration = vm.activeIterations[i];
+                }
+            }
+
+            vm.ratingModelId = vm.activeIteration.id;
+            // RatingsEngineStore.getRating($stateParams.rating_id).then(function (ratingEngine) {
+            //     vm.ratingModelId = ratingEngine.activeModel.AI.id;
+            // });
         }
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
@@ -72,6 +96,13 @@ angular.module('lp.models.ratings', [
         };
 
         renderChart();
+    }
+
+    vm.changeIterationData = function(){
+        $state.go('home.model.ratings', {
+            modelId: vm.activeIteration.modelSummaryId,
+            rating_id: $stateParams.rating_id
+        }, { reload: true });
     }
 
     function renderChart(){
@@ -119,7 +150,7 @@ angular.module('lp.models.ratings', [
             vm.bucketNames = ['A', 'B', 'C', 'D', 'E', 'F'];
             vm.canAddBucket = false;
         } else if (vm.buckets.length < 6) {
-            vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
+            vm.bucketNames = ['A', 'B', 'C', 'D', 'E'];
             vm.canAddBucket = true;
         };
 
@@ -397,7 +428,7 @@ angular.module('lp.models.ratings', [
             if (value.length === 6) {
                 vm.bucketNames = ['A', 'B', 'C', 'D', 'E', 'F'];
             } else if (value.length < 6) {
-                vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
+                vm.bucketNames = ['A', 'B', 'C', 'D', 'E'];
             };
         });
 

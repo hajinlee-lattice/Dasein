@@ -15,7 +15,6 @@ angular.module('lp.ratingsengine')
 
     this.init = function() {
 
-        console.log("Initialize RatingsEngineStore");
 //         console.log('Test hot save');
 
         this.settings = {};
@@ -781,7 +780,6 @@ angular.module('lp.ratingsengine')
         var currentConfig = this.configFilters;
         if(currentConfig != null){
             this.configFilters = angular.extend(currentConfig, configFilters);
-            console.log(this.configFilters);
         } else {
             this.configFilters = configFilters;
         }
