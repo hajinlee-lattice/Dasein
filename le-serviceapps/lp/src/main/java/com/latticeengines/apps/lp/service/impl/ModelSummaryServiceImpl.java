@@ -409,7 +409,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 getEventToModelSummary(modelApplicationIdToEventColumn);
                 return true;
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("Fail to invoke getEventToModelSummary" + e);
                 return false;
             }
         }
@@ -445,7 +445,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         try {
             result = callable.call();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ModelDownloaderCallable failed " + e);
             throw new RuntimeException(e);
         }
 
@@ -467,7 +467,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 modelSummaryIds.add(UuidUtils.extractUuid(summary));
             } catch (Exception e) {
                 // Skip any model summaries that have unexpected ID syntax
-                log.warn(e.getMessage());
+                log.warn("Failed to add model summary id " + e.getMessage());
             }
         }
         return modelSummaryIds;
