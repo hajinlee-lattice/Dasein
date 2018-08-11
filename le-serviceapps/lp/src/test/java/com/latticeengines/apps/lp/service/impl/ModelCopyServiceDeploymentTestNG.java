@@ -107,7 +107,8 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
     }
 
     private void waitToDownloadModel(String modelId) throws InterruptedException {
-        modelSummaryService.downloadModelSummary(tenant1.getId(), null);
+    	Map<String, String> modelApplicationIdToEventColumn = new HashMap<String, String>();
+        modelSummaryService.downloadModelSummary(tenant1.getId(), modelApplicationIdToEventColumn);
         while (true) {
             ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
             if (modelSummary == null) {
