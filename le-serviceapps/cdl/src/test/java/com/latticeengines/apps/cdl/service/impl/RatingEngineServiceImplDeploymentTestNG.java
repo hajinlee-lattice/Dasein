@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -47,13 +50,9 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(RatingEngineServiceImplDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingEngineServiceImplDeploymentTestNG.class);
 
     private static final String RATING_ENGINE_NAME = "Rating Engine";
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
@@ -90,8 +89,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
                 constructSegment(SEGMENT_NAME));
         Assert.assertNotNull(createdSegment);
-        reTestSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
-                createdSegment.getName());
+        reTestSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), createdSegment.getName());
         log.info(String.format("Created metadata segment with name %s", reTestSegment.getName()));
     }
 
@@ -104,8 +102,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         rbRatingEngineId = rbRatingEngine.getId();
         // Only mock the Rulebased Rating data in Redshift to test the filtering
         // logic
-        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), rbRatingEngineId,
-                null);
+        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), rbRatingEngineId, null);
 
         // Test AI Rating Engine
         aiRatingEngine = createRatingEngine(RatingEngineType.CROSS_SELL);
@@ -135,7 +132,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(createdRatingEngine.getNote());
 
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
-        Assert.assertNotNull(createdRatingEngine.getActiveModel());
+        Assert.assertNotNull(createdRatingEngine.getLatestIteration());
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
         switch (createdRatingEngine.getType()) {
         case RULE_BASED:
@@ -150,14 +147,13 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     }
 
     private void detailedAssertionForRuleBasedModel(RatingEngine createdRatingEngine) {
-        Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
-        RuleBasedModel model = (RuleBasedModel) createdRatingEngine.getActiveModel();
+        Assert.assertNotNull(createdRatingEngine.getLatestIteration());
+        RuleBasedModel model = (RuleBasedModel) createdRatingEngine.getLatestIteration();
         Set<String> selectedAttributes = new HashSet<>(model.getSelectedAttributes());
         Assert.assertNotNull(selectedAttributes);
         Assert.assertFalse(selectedAttributes.isEmpty());
         Assert.assertNotNull(model.getRatingRule());
-        TreeMap<String, Map<String, Restriction>> bucketRuleMap = model.getRatingRule()
-                .getBucketToRuleMap();
+        TreeMap<String, Map<String, Restriction>> bucketRuleMap = model.getRatingRule().getBucketToRuleMap();
         Assert.assertNotNull(bucketRuleMap);
         Assert.assertFalse(bucketRuleMap.isEmpty());
         Arrays.asList(RatingBucketName.values()).stream() //
@@ -169,11 +165,9 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
                     List<Boolean> hasNonEmptyPrepopulatedRules = new ArrayList<>();
                     rulesMap.keySet().stream() //
                             .forEach(t -> {
-                                Assert.assertTrue(FrontEndQueryConstants.ACCOUNT_RESTRICTION
-                                        .equals(t) //
+                                Assert.assertTrue(FrontEndQueryConstants.ACCOUNT_RESTRICTION.equals(t) //
                                         || FrontEndQueryConstants.CONTACT_RESTRICTION.equals(t));
-                                Assert.assertTrue(FrontEndQueryConstants.ACCOUNT_RESTRICTION
-                                        .equals(t) //
+                                Assert.assertTrue(FrontEndQueryConstants.ACCOUNT_RESTRICTION.equals(t) //
                                         || FrontEndQueryConstants.CONTACT_RESTRICTION.equals(t));
                                 Restriction topRestriction = rulesMap.get(t);
                                 if (topRestriction != null) {
@@ -187,8 +181,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
                                         BucketRestriction unusedRestriction = (BucketRestriction) u;
                                         Assert.assertTrue(unusedRestriction.getIgnored());
                                         Assert.assertTrue(
-                                                selectedAttributes.contains(
-                                                        unusedRestriction.getAttr().toString()),
+                                                selectedAttributes.contains(unusedRestriction.getAttr().toString()),
                                                 String.format(
                                                         "selectedAttributes = %s, unusedRestriction.getAttr() = %s, unusedRestriction = %s",
                                                         JsonUtils.serialize(selectedAttributes),
@@ -214,8 +207,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(summaries);
         Assert.assertEquals(summaries.size(), 2);
         Assert.assertEquals(summaries.get(0).getSegmentDisplayName(), SEGMENT_NAME);
-        Assert.assertEquals(summaries.get(0).getSegmentName(),
-                rbRatingEngine.getSegment().getName());
+        Assert.assertEquals(summaries.get(0).getSegmentName(), rbRatingEngine.getSegment().getName());
 
         // test get list of ratingEngine summaries filtered by type and status
         summaries = getAllRatingEngineSummaries(null, null);
@@ -228,30 +220,26 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(summaries.size(), 2);
         summaries = getAllRatingEngineSummaries(null, RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 0);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.ACTIVE.name());
+        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 0);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.INACTIVE.name());
+        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(), RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.ACTIVE.name());
+        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 0);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.INACTIVE.name());
+        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
         // test Rating Attributes in Redshift
-        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.INACTIVE.name(), true);
+        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.INACTIVE.name(),
+                true);
         Assert.assertEquals(summaries.size(), 0);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.INACTIVE.name(), false);
+        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.INACTIVE.name(),
+                false);
         Assert.assertEquals(summaries.size(), 1);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.INACTIVE.name(), true);
+        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(), RatingEngineStatus.INACTIVE.name(),
+                true);
         Assert.assertEquals(summaries.size(), 1);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.INACTIVE.name(), false);
+        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(), RatingEngineStatus.INACTIVE.name(),
+                false);
         Assert.assertEquals(summaries.size(), 1);
 
         // test basic find For RuleBased
@@ -274,15 +262,14 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         log.info("String is " + createdRatingEngineStr);
 
         // test rating engine note creation
-        List<RatingEngineNote> ratingEngineNotes = ratingEngineNoteService
-                .getAllByRatingEngineId(rbRatingEngineId);
+        List<RatingEngineNote> ratingEngineNotes = ratingEngineNoteService.getAllByRatingEngineId(rbRatingEngineId);
         Assert.assertNotNull(ratingEngineNotes);
         Assert.assertEquals(ratingEngineNotes.size(), 1);
         Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE);
 
         switch (type) {
         case RULE_BASED:
-            RatingModel rm = ratingEngine.getActiveModel();
+            RatingModel rm = ratingEngine.getLatestIteration();
             Assert.assertNotNull(rm);
             Assert.assertTrue(rm instanceof RuleBasedModel);
             Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
@@ -310,31 +297,29 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 2);
 
-        List<RatingEngineSummary> summaries = getAllRatingEngineSummaries(
-                RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.name());
+        List<RatingEngineSummary> summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
         summaries = getAllRatingEngineSummaries(null, RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 2);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.INACTIVE.name());
+        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(), RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 0);
         summaries = getAllRatingEngineSummaries(null, RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 0);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.ACTIVE.name());
+        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
         // test Rating Attributes in Redshift
-        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.ACTIVE.name(), true);
+        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.ACTIVE.name(),
+                true);
         Assert.assertEquals(summaries.size(), 0);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(),
-                RatingEngineStatus.ACTIVE.name(), false);
+        summaries = getAllRatingEngineSummaries(RatingEngineType.CROSS_SELL.name(), RatingEngineStatus.ACTIVE.name(),
+                false);
         Assert.assertEquals(summaries.size(), 1);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.ACTIVE.name(), true);
+        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.name(),
+                true);
         Assert.assertEquals(summaries.size(), 1);
-        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(),
-                RatingEngineStatus.ACTIVE.name(), false);
+        summaries = getAllRatingEngineSummaries(RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.name(),
+                false);
         Assert.assertEquals(summaries.size(), 1);
         summaries = getAllRatingEngineSummaries(null, RatingEngineStatus.ACTIVE.name(), true);
         Assert.assertEquals(summaries.size(), 1);
@@ -359,12 +344,10 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(RATING_ENGINE_NAME, updatedRatingEngine.getDisplayName());
         Assert.assertTrue(updatedRatingEngine.getUpdated().after(updatedDate));
         log.info("Created date is " + createdDate);
-        log.info(
-                "The create date for the newly updated one is " + updatedRatingEngine.getCreated());
+        log.info("The create date for the newly updated one is " + updatedRatingEngine.getCreated());
 
         // test rating engine note update
-        List<RatingEngineNote> ratingEngineNotes = ratingEngineNoteService
-                .getAllByRatingEngineId(ratingEngine.getId());
+        List<RatingEngineNote> ratingEngineNotes = ratingEngineNoteService.getAllByRatingEngineId(ratingEngine.getId());
         Assert.assertNotNull(ratingEngineNotes);
         Assert.assertEquals(ratingEngineNotes.size(), 2);
         Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE);
@@ -389,16 +372,14 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(replicated);
         Assert.assertNotNull(original);
 
-        if (original.getActiveModel() != null) {
-            Assert.assertNotNull(replicated.getActiveModel());
-            Assert.assertNotEquals(replicated.getActiveModel().getId(),
-                    original.getActiveModel().getId());
+        if (original.getLatestIteration() != null) {
+            Assert.assertNotNull(replicated.getLatestIteration());
+            Assert.assertNotEquals(replicated.getLatestIteration().getId(), original.getLatestIteration().getId());
         }
 
         if (original.getLatestIteration() != null) {
             Assert.assertNotNull(replicated.getLatestIteration());
-            Assert.assertNotEquals(replicated.getLatestIteration().getId(),
-                    original.getLatestIteration().getId());
+            Assert.assertNotEquals(replicated.getLatestIteration().getId(), original.getLatestIteration().getId());
         }
 
         Assert.assertNull(replicated.getScoringIteration());
@@ -417,14 +398,12 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(replicated.getType(), original.getType());
         Assert.assertEquals(replicated.getStatus(), RatingEngineStatus.INACTIVE);
         Assert.assertFalse(replicated.getDeleted());
-        Assert.assertEquals(replicated.getAdvancedRatingConfigStr(),
-                original.getAdvancedRatingConfigStr());
+        Assert.assertEquals(replicated.getAdvancedRatingConfigStr(), original.getAdvancedRatingConfigStr());
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testReplicate" })
     public void testCreateModelIteration() {
-        RuleBasedModel ruleBasedModel = createRuleBasedModel(rbRatingEngine.getActiveModel());
-
+        RuleBasedModel ruleBasedModel = createRuleBasedModel();
         boolean exception = false;
         try {
             ratingEngineService.createModelIteration(rbRatingEngine, ruleBasedModel);
@@ -435,7 +414,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         }
         assertTrue(exception);
 
-        AIModel aiModel = createAIModel(aiRatingEngine.getActiveModel());
+        AIModel aiModel = createAIModel(aiRatingEngine.getLatestIteration());
         aiModel.setDerivedFromRatingModel(aiRatingEngine.getLatestIteration().getId());
         aiModel = (AIModel) ratingEngineService.createModelIteration(aiRatingEngine, aiModel);
 
@@ -444,15 +423,12 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(ratingModels.size(), 2);
         log.info("Assert Iteration : " + aiModel.getIteration());
         Assert.assertEquals(aiModel.getIteration(), 2);
-        Assert.assertEquals(((RatingModel) aiModel).getCreatedBy(), CREATED_BY);
-        Assert.assertNotEquals(aiRatingEngine.getActiveModel().getId(),
-                aiRatingEngine.getLatestIteration().getId());
+        Assert.assertEquals(aiModel.getCreatedBy(), CREATED_BY);
         Assert.assertEquals(aiRatingEngine.getLatestIteration().getId(), aiModel.getId());
-        Assert.assertNotEquals(aiRatingEngine.getActiveModel().getId(), aiModel.getId());
         Assert.assertEquals(aiRatingEngine.getId(), aiModel.getRatingEngine().getId());
     }
 
-    protected RuleBasedModel createRuleBasedModel(RatingModel ratingModel) {
+    protected RuleBasedModel createRuleBasedModel() {
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         ruleBasedModel.setId(RuleBasedModel.generateIdStr());
         return ruleBasedModel;
@@ -573,8 +549,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
     protected RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate,
             boolean populateActiveModel) {
-        return ratingEngineService.getRatingEngineById(ratingEngineId, populateRefreshedDate,
-                populateActiveModel);
+        return ratingEngineService.getRatingEngineById(ratingEngineId, populateRefreshedDate, populateActiveModel);
     }
 
     protected RatingEngine createOrUpdate(RatingEngine ratingEngine) {
@@ -607,16 +582,14 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     protected MetadataSegment createSegment(String segmentName) {
         MetadataSegment segment = new MetadataSegment();
         segment.setDisplayName(segmentName);
-        MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
-                segment);
+        MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
 
         try {
             Thread.sleep(2 * 1000);
         } catch (InterruptedException e) {
         }
 
-        return segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
-                createdSegment.getName());
+        return segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), createdSegment.getName());
     }
 
     protected RatingEngine createRatingEngine(MetadataSegment segment) {
@@ -630,10 +603,8 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     }
 
     protected void setRestriction(MetadataSegment segment, RatingEngine ratingEngine) {
-        Restriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Rating,
-                        RatingEngine.RATING_ENGINE_PREFIX + "_" + ratingEngine.getId()),
-                Bucket.notNullBkt());
+        Restriction accountRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Rating,
+                RatingEngine.RATING_ENGINE_PREFIX + "_" + ratingEngine.getId()), Bucket.notNullBkt());
         segment.setAccountRestriction(accountRestriction);
         segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
     }
