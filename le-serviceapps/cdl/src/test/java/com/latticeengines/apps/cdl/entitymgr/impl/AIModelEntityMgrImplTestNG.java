@@ -193,7 +193,6 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 ratingEngineEntityMgr.findById(crossSellRatingEngineId), false);
 
         createdRatingEngine = ratingEngineEntityMgr.findById(crossSellRatingEngineId);
-        Assert.assertEquals(createdRatingEngine.getLatestIteration().getId(), iteration.getId());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateIteration" })

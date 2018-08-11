@@ -163,6 +163,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         toCreate.setRatingEngine(ratingEngine);
         toCreate.setTrainingSegment(aiModel.getTrainingSegment());
         toCreate.setAdvancedModelingConfig(aiModel.getAdvancedModelingConfig());
+        toCreate.setDerivedFromRatingModel(derivedFromRatingModel.getId());
 
         if (ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
             log.info("Cloning the Sourcefile and Training table for the new iteration");

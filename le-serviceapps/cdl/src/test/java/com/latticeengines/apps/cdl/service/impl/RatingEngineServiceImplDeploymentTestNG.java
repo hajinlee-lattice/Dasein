@@ -431,11 +431,12 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         } catch (Exception e) {
             exception = true;
             assertTrue(e instanceof LedpException);
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_31107);
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40038);
         }
         assertTrue(exception);
 
         AIModel aiModel = createAIModel(aiRatingEngine.getActiveModel());
+        aiModel.setDerivedFromRatingModel(aiRatingEngine.getLatestIteration().getId());
         aiModel = (AIModel) ratingEngineService.createModelIteration(aiRatingEngine, aiModel);
 
         List<RatingModel> ratingModels = getRatingModelsByRatingEngineId(aiRatingEngineId);

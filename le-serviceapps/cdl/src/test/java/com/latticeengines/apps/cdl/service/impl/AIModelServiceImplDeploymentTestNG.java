@@ -268,7 +268,8 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         newIteration.setAdvancedModelingConfig(new CrossSellModelingConfig());
         newIteration.setRatingEngine(aiRatingEngine);
         Assert.assertThrows(LedpException.class, () -> aiModelService.createNewIteration(newIteration, aiRatingEngine));
-        newIteration.setDerivedFromRatingModel(createdRatingEngine.getLatestIteration().getId());
+        String derivedFromModelID = createdRatingEngine.getLatestIteration().getId();
+        newIteration.setDerivedFromRatingModel(derivedFromModelID);
         iteration2 = aiModelService.createNewIteration(newIteration, createdRatingEngine);
 
         List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(aiRatingEngineId);
@@ -276,13 +277,13 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(iteration2.getIteration(), 2);
 
         createdRatingEngine = ratingEngineService.getRatingEngineById(aiRatingEngineId, false, false);
-        Assert.assertEquals(createdRatingEngine.getLatestIteration().getId(), iteration2.getId());
+        Assert.assertEquals(iteration2.getDerivedFromRatingModel(), derivedFromModelID);
 
-        AIModel updatedAIModel = (AIModel) ratingEngineService.updateRatingModel(aiRatingEngineId, newIteration.getId(),
-                newIteration);
+        AIModel updatedAIModel = (AIModel) ratingEngineService.updateRatingModel(aiRatingEngineId, iteration2.getId(),
+                iteration2);
         Assert.assertNotNull(updatedAIModel);
-        Assert.assertEquals(newIteration.getId(), updatedAIModel.getId());
-        Assert.assertEquals(newIteration.getIteration(), updatedAIModel.getIteration());
+        Assert.assertEquals(iteration2.getId(), updatedAIModel.getId());
+        Assert.assertEquals(iteration2.getIteration(), updatedAIModel.getIteration());
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreateAndUpdateModelIteration" })
