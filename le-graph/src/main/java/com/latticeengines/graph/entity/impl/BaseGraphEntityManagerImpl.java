@@ -1,8 +1,10 @@
 package com.latticeengines.graph.entity.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -40,7 +42,7 @@ public abstract class BaseGraphEntityManagerImpl implements BaseGraphEntityManag
             GraphTraversalSource g = graphUtil.initTraversalSource(cluster);
 
             GraphTraversal<Vertex, Vertex> traversal = g.V(vertexId);
-            List<String> dependencies = new ArrayList<>();
+            Set<String> dependencies = new HashSet<>();
             traversal.inE().outV() //
                     .choose(__.properties(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY) //
                             .hasValue(GraphConstants.JUMP_DURING_DEP_CHECK), //
@@ -50,7 +52,7 @@ public abstract class BaseGraphEntityManagerImpl implements BaseGraphEntityManag
                         dependencies.add(dv.id().toString());
                     });
             cluster.close();
-            return dependencies;
+            return new ArrayList<>(dependencies);
         } catch (
 
         Exception ex) {
