@@ -54,7 +54,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private AIModel cdlCEAIModel;
     private AIModel testCERemodel;
     private SourceFile testSourceFile;
-    private final String testSourceFileName = "CustomEventModelE2ETestFile.csv";
+    private final String testSourceFileName = "CustomEventModelE2ETestFile2.csv";
     private CustomEventModelingType testType;
     private final Map<String, Category> refinedAttributes = new HashMap<>();
 
@@ -164,8 +164,8 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         verifyBucketMetadataGeneratedAfterRemodel(testRatingEngine);
         testCERemodel = (AIModel) ratingEngineProxy.getRatingModel(mainCustomerSpace, testRatingEngine.getId(),
-                testAIModel.getId());
-        Assert.assertEquals(testAIModel.getModelingJobStatus(), completedStatus);
+                testCERemodel.getId());
+        Assert.assertEquals(testCERemodel.getModelingJobStatus(), completedStatus);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         verifyBucketMetadataGenerated(testRatingEngine);
         Assert.assertEquals(
@@ -244,7 +244,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         SchemaInterpretation schemaInterpretation = type == CustomEventModelingType.CDL ? SchemaInterpretation.Account
                 : SchemaInterpretation.SalesforceAccount;
         String entity = type == CustomEventModelingType.CDL ? SchemaInterpretation.Account.name() : null;
-        testSourceFile = fileUploadProxy.uploadFile(getSourceFileName(type), false, "CustomEventModelTest.csv",
+        testSourceFile = fileUploadProxy.uploadFile(getSourceFileName(type), false, testSourceFileName,
                 schemaInterpretation, entity, csvResource);
 
         FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(getSourceFileName(type),
@@ -291,7 +291,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
         RatingEngine testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(),
                 ratingEngine);
 
-        AIModel testAIModel = (AIModel) testRatingEngine.getActiveModel();
+        AIModel testAIModel = (AIModel) testRatingEngine.getLatestIteration();
         configureCustomEventModel(testAIModel, getSourceFileName(type), type);
         CustomEventModelingConfig advancedConf = CustomEventModelingConfig.getAdvancedModelingConfig(testAIModel);
         advancedConf.setSourceFileName(testSourceFile.getName());

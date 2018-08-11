@@ -96,6 +96,9 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("IsCoveredByMandatoryRule")
     private boolean isCoveredByMandatoryRule;
 
+    @JsonProperty("AssociatedDataRules")
+    private List<String> AssociatedDataRules;
+
     // TODO: Attribute Customization should be migrated to new metadata
     // framework
     @Deprecated
@@ -582,12 +585,10 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.importanceOrdering = importanceOrdering;
     }
 
-    @JsonProperty("IsCoveredByOptionalRule")
     public boolean isCoveredByOptionalRule() {
         return isCoveredByOptionalRule;
     }
 
-    @JsonProperty("IsCoveredByOptionalRule")
     public void setIsCoveredByOptionalRule(boolean isCoveredByOptionalRule) {
         this.isCoveredByOptionalRule = isCoveredByOptionalRule;
     }
@@ -598,6 +599,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
         this.isCoveredByMandatoryRule = isCoveredByMandatoryRule;
+    }
+
+    public List<String> getAssociatedDataRules() {
+        return AssociatedDataRules;
+    }
+
+    public void setAssociatedDataRules(List<String> associatedDataRules) {
+        AssociatedDataRules = associatedDataRules;
     }
 
     public ColumnMetadata clone() {

@@ -1171,6 +1171,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
         metadata.setIsCoveredByMandatoryRule(getIsCoveredByMandatoryRule());
         metadata.setIsCoveredByOptionalRule(getIsCoveredByOptionalRule());
+        metadata.setAssociatedDataRules(getAssociatedDataRules());
         return metadata;
     }
 
