@@ -88,18 +88,22 @@ public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedM
 
     @Override
     public void findRatingModelAttributeLookups(RuleBasedModel ratingModel) {
-        TreeMap<String, Map<String, Restriction>> rulesMap = ratingModel.getRatingRule().getBucketToRuleMap();
-        Iterator it = rulesMap.keySet().iterator();
         Set<AttributeLookup> attributes = new HashSet<>();
-        while (it.hasNext()) {
-            Map<String, Restriction> rules = rulesMap.get(it.next());
-            for (Map.Entry<String, Restriction> entry : rules.entrySet()) {
-                attributes.addAll(RestrictionUtils.getRestrictionDependingAttributes(entry.getValue()));
+        if (ratingModel != null && ratingModel.getRatingRule() != null) {
+            TreeMap<String, Map<String, Restriction>> rulesMap = ratingModel.getRatingRule().getBucketToRuleMap();
+            Iterator<?> it = rulesMap.keySet().iterator();
+            while (it.hasNext()) {
+                Map<String, Restriction> rules = rulesMap.get(it.next());
+                for (Map.Entry<String, Restriction> entry : rules.entrySet()) {
+                    attributes.addAll(RestrictionUtils.getRestrictionDependingAttributes(entry.getValue()));
+                }
             }
         }
-        MetadataSegment segment = ruleBasedModelEntityMgr.inflateParentSegment(ratingModel);
-        if (segment != null) {
-            attributes.addAll(segmentService.findDependingAttributes(Collections.singletonList(segment)));
+        if (ratingModel != null) {
+            MetadataSegment segment = ruleBasedModelEntityMgr.inflateParentSegment(ratingModel);
+            if (segment != null) {
+                attributes.addAll(segmentService.findDependingAttributes(Collections.singletonList(segment)));
+            }
         }
         ratingModel.setRatingModelAttributes(attributes);
     }
