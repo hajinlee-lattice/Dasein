@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.service.impl;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,9 +32,8 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { //"classpath:test-pls-context.xml", 
-		"classpath:test-testframework-cleanup-context.xml", 
-		"classpath:playmakercore-context.xml",
+@ContextConfiguration(locations = { // "classpath:test-pls-context.xml",
+        "classpath:test-testframework-cleanup-context.xml", "classpath:playmakercore-context.xml",
         "classpath:test-playmaker-context.xml" })
 public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
@@ -115,11 +115,10 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         int countOfNonDeletedRecommendations = recommendations.size();
         Assert.assertEquals(countOfNonDeletedRecommendations, maxUpdateRows * 2);
 
-        playProxy.deletePlay(tenant.getId(), play.getName(), false);
-
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
-                .cleanupRecommendationsDueToDeletedPlays();
+                .cleanupRecommendationsDueToDeletedPlays(Arrays.asList(play.getName()));
         Assert.assertEquals(count, countOfNonDeletedRecommendations);
+        playProxy.deletePlay(tenant.getId(), play.getName(), false);
 
         recommendations = recommendationEntityMgr//
                 .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //

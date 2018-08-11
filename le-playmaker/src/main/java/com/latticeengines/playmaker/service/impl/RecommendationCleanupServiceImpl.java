@@ -78,10 +78,16 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
     }
 
     int cleanupRecommendationsDueToDeletedPlays() {
+        return cleanupRecommendationsDueToDeletedPlays(null);
+    }
+
+    int cleanupRecommendationsDueToDeletedPlays(List<String> deletedPlayIdsForCleanup) {
         String tenantId = MultiTenantContext.getTenant().getId();
         int totalDeletedCount = 0;
         try {
-            List<String> deletedPlayIdsForCleanup = playProxy.getDeletedPlayIds(tenantId, true);
+            if (CollectionUtils.isEmpty(deletedPlayIdsForCleanup)) {
+                deletedPlayIdsForCleanup = playProxy.getDeletedPlayIds(tenantId, true);
+            }
 
             if (CollectionUtils.isNotEmpty(deletedPlayIdsForCleanup)) {
                 long timestamp = System.currentTimeMillis();
