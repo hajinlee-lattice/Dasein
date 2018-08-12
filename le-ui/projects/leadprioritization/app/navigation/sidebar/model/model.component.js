@@ -34,7 +34,7 @@ angular
                 ratingModelId = vm.model.ModelDetails.Name;
 
             RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
-                vm.isActiveModel = (vm.ratingEngine.activeModel.AI.iteration === iteration.AI.iteration) ? true : false;
+                vm.isActiveModel = (vm.ratingEngine.scoring_iteration.AI.iteration === iteration.AI.iteration) ? true : false;
             });
 
             vm.viewingIteration = $stateParams.viewingIteration ? true : false;
