@@ -56,7 +56,9 @@ angular.module('lp.models.ratings', [
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
 
         if(vm.section === 'dashboard.scoring') {
+
             vm.ratingModelId = $stateParams.ratingEngine.activeModel.AI.id;
+
         } else if (vm.section === 'dashboard.ratings') {
 
             // Get dahsboard data for list of iterations
@@ -101,7 +103,8 @@ angular.module('lp.models.ratings', [
     vm.changeIterationData = function(){
         $state.go('home.model.ratings', {
             modelId: vm.activeIteration.modelSummaryId,
-            rating_id: $stateParams.rating_id
+            rating_id: $stateParams.rating_id,
+            viewingIteration: false
         }, { reload: true });
     }
 
