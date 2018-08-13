@@ -121,9 +121,7 @@ public class AttributeRepository {
                 }
                 Map<String, ColumnMetadata> attrMap = attrMaps.get(role);
                 ColumnMetadata attribute = attrMap.get(lookup.getAttribute());
-                if (attribute == null) {
-                    log.warn("Cannot find metadata for attribute " + lookup + ", skip it.");
-                } else {
+                if (attribute != null) {
                     attributes.put(lookup, attribute);
                 }
             }
