@@ -400,10 +400,10 @@ public class DependencyGraphEntityMgrAspect {
                         String toVertexType = k.getRight().getRight();
                         List<List<Map<String, String>>> translatedPaths = nameTranslator
                                 .translatePaths(potentialCircularDependencies.get(k));
-                        String v1 = String.format("%s %s", nameTranslator.translateType(fromVertexType), //
+                        String v1 = String.format("%s '%s'", nameTranslator.translateType(fromVertexType), //
                                 nameTranslator.idToDisplayName(fromVertexId, //
                                         nameTranslator.translateType(fromVertexType)));
-                        String v2 = String.format("%s %s", nameTranslator.translateType(toVertexType), //
+                        String v2 = String.format("%s '%s'", nameTranslator.translateType(toVertexType), //
                                 nameTranslator.idToDisplayName(toVertexId, //
                                         nameTranslator.translateType(toVertexType)));
                         sb.append(String.format(
@@ -415,7 +415,7 @@ public class DependencyGraphEntityMgrAspect {
                                     sb.append("Path [");
                                     p.stream() //
                                             .forEach(v -> {
-                                                sb.append(String.format("%s %s -> ",
+                                                sb.append(String.format("%s '%s' -> ",
                                                         v.get(IdToDisplayNameTranslator.TYPE),
                                                         v.get(IdToDisplayNameTranslator.DISPLAY_NAME)));
                                             });
