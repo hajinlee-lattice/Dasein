@@ -184,6 +184,10 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.setData = function() {}
 
+    vm.isPublished = function(rating) {
+
+    }
+
     vm.checkState = function(type) {
         var map = {
             'home.segment.explorer.attributes':'attributes',

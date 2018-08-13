@@ -40,7 +40,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
             vm.setValidation('creation', true);
 
-            var model = vm.ratingEngine.published_iteration.AI;
+            var model = vm.ratingEngine.latest_iteration.AI;
             vm.type = vm.ratingEngine.type.toLowerCase();
 
             vm.predictionType = model.predictionType;  
@@ -117,7 +117,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         vm.checkJobStatus = function() {
 
-            var appId = vm.ratingEngine.published_iteration.AI.modelingJobId ? vm.ratingEngine.published_iteration.AI.modelingJobId : RatingsEngineStore.getApplicationId(); // update once backend sets modelingjobId for CE
+            var appId = vm.ratingEngine.latest_iteration.AI.modelingJobId ? vm.ratingEngine.latest_iteration.AI.modelingJobId : RatingsEngineStore.getApplicationId(); // update once backend sets modelingjobId for CE
             if (appId) {
                 JobsStore.getJobFromApplicationId(appId).then(function(result) {
 

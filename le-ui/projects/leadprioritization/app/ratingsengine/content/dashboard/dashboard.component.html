@@ -60,7 +60,10 @@
             </div>
             <div class="content">
                 <div ng-if="!vm.isRulesBased">
-                    <h3>Creation Settings</h3>
+                    <h3>
+                        Creation Settings
+                        <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
+                    </h3>
 
                     <!-- <dl>
                         <dt ng-repeat-start="setting in vm.settings">{{setting.label}}</dt>
@@ -129,7 +132,7 @@
                     <h3>
                         Ratings 
                         <span ng-if="!vm.isRulesBased">
-                            ( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )
+                            <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
                             <span class="more-info show-tooltip top delay">
                                 i
                                 <div class="tooltip_ small">
