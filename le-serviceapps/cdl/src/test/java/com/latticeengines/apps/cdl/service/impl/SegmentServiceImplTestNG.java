@@ -72,13 +72,12 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         } catch (InterruptedException e) {
         }
 
-        setRestriction(segment1, ratingEngine1);
         setRestriction(segment2, ratingEngine2);
 
         boolean exception = false;
         try {
             segment1.setDisplayName("Test");
-            segmentService.createOrUpdateSegment(mainTestTenant.getId(), segment1);
+            setRestriction(segment1, ratingEngine1);
         } catch (Exception e) {
             exception = true;
             assertTrue(e instanceof LedpException);
