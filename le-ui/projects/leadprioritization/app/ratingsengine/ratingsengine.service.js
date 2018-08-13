@@ -1,7 +1,7 @@
 angular.module('lp.ratingsengine')
 .service('RatingsEngineStore', function(
-    $q, $state, $stateParams,  $rootScope, RatingsEngineService, DataCloudStore,
-    BrowserStorageUtility, SegmentStore, ImportWizardService, $timeout, JobsStore
+    $q, $state, $stateParams,  $rootScope,  $timeout,
+    RatingsEngineService, DataCloudStore, BrowserStorageUtility, SegmentStore, ImportWizardService, JobsStore, Banner
 ){
     var RatingsEngineStore = this;
     
@@ -192,8 +192,9 @@ angular.module('lp.ratingsengine')
                     progressDisabled: true,
                     nextLabel: 'Next',
                     showNextSpinner: true,
+                    afterNextValidation: true,
                     nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveAIRatingModel(nextState);
+                        RatingsEngineStore.nextValidateTraining(nextState); // validate here
                     } 
                 },
                 { 
@@ -409,8 +410,6 @@ angular.module('lp.ratingsengine')
     this.saveRating = function(rating) {
         var deferred = $q.defer(),
             ClientSession = BrowserStorageUtility.getClientSession(); 
-
-        console.log(rating);
 
         var opts = {
             createdBy: rating.createdBy !== undefined ? rating.createdBy : ClientSession.EmailAddress,
@@ -909,9 +908,32 @@ angular.module('lp.ratingsengine')
         });
     }
 
-    this.nextSaveAIRatingModel = function(nextState){
+    this.nextValidateTraining = function(nextState) {
+        var ratingId = $stateParams.rating_id,
+            modelId = $stateParams.modelId; // no model id here
 
+        RatingsEngineStore.getRating(ratingId).then(function(rating) {
+            var modelAIId = rating.activeModel.AI.id; // use this instead of model id
+            
+            RatingsEngineService.validateModel(ratingId, modelAIId).then(function(result) {
+                var success = !result.data.errorCode;
+                if(success) {
+                    RatingsEngineStore.nextSaveAIRatingModel(nextState);
+                } else {
+                    RatingsEngineStore.setValidation('training', true);
+                    Banner.error({
+                        title: result.data.errorCode,
+                        message:result.data.errorMsg
+                    });
+                }
+            });
+        });
+
+    }
+
+    this.nextSaveAIRatingModel = function(nextState){
         var ratingId = $stateParams.rating_id;
+
         RatingsEngineStore.getRating(ratingId).then(function(rating){
 
             var model = rating.activeModel.AI,
@@ -1398,6 +1420,28 @@ angular.module('lp.ratingsengine')
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
                 deferred.resolve(errorMsg);
+            }
+        );
+    
+        return deferred.promise;
+    }
+
+    this.validateModel = function(ratingId, modelId){
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: '/pls/ratingengines/' + ratingId + '/ratingmodels/' + modelId + '/model/validate',
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                deferred.resolve(response);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+                deferred.resolve(response);
             }
         );
     

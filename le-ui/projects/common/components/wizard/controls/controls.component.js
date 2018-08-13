@@ -157,6 +157,9 @@ angular.module('common.wizard.controls', [])
 
         if (WizardValidationStore.getValidation) {
             vm.valid = WizardValidationStore.getValidation(currentStep);
+            if(vm.item && vm.item.afterNextValidation) {
+                vm.nextDisabled = !vm.valid;
+            }
         } else {
             vm.valid = true;
         }

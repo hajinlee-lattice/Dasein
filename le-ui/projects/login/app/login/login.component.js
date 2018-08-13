@@ -71,14 +71,16 @@ angular.module('login')
         };
 
         vm.aptrinsic = function(login, tenant) {
-            window.aptrinsic("identify", { 
-                "id": login.username, // Required for logged in app users 
-                "email": login.username
-            },{ 
-            //Account Fields 
-                "id": tenant.Identifier, //Required 
-                "name": tenant.DisplayName
-            });
+            if(window.aptrinsic) {
+                window.aptrinsic("identify", { 
+                    "id": login.username, // Required for logged in app users 
+                    "email": login.username
+                },{ 
+                //Account Fields 
+                    "id": tenant.Identifier, //Required 
+                    "name": tenant.DisplayName
+                });
+            }
         };
 
         vm.clickLogout = function($event) {

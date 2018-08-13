@@ -20,12 +20,27 @@ angular.module('lp.ratingsengine.remodel', [
                 WizardProgressContext: function () {
                     return 'ratingsengine.remodel';
                 },
-                WizardProgressItems: function ($state, AtlasRemodelStore) {
+                WizardProgressItems: function ($state, AtlasRemodelStore, RatingsEngineService, Banner) {
                     return [
                         { 
                             label: 'Training Changes', 
                             state: 'training', 
-                            nextFn: '',
+                            nextFn: function(nextState) {
+                                var ratingId = $state.params.engineId,
+                                    modelId = $state.params.modelId;
+
+                                RatingsEngineService.validateModel(ratingId, modelId).then(function(result) {
+                                    var success = !result.data.errorCode;
+                                    if(success) {
+                                        $state.go(nextState);
+                                    } else {
+                                        Banner.error({
+                                            title: result.data.errorCode,
+                                            message:result.data.errorMsg
+                                        });
+                                    }
+                                });
+                            }, 
                             progressDisabled: false 
                         },
                         { 
