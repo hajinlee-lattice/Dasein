@@ -463,9 +463,9 @@ public class AttrConfigServiceImplUnitTestNG {
         log.info("html for Attr Level is " + html);
         Assert.assertTrue(
                 html.contains(String.format("<p>%s</p>", AttrConfigServiceImpl.UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG)));
-        Assert.assertTrue(html.contains("<li>Segment</li>"));
-        Assert.assertTrue(html.contains("<li>CompanyProfile</li>"));
-        Assert.assertTrue(html.contains("<li>Enrichment</li>"));
+        Assert.assertTrue(html.contains("<li>Segmentation</li>"));
+        Assert.assertTrue(html.contains("<li>Company Profile</li>"));
+        Assert.assertTrue(html.contains("<li>Export</li>"));
     }
 
     @Test(groups = "unit")

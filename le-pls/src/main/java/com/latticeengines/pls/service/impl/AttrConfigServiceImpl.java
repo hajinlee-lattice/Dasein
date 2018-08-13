@@ -374,7 +374,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     html.append(b(mapTypeToDisplayName(type)).render());
                     html.append(ul().with( //
                             each(warnings.get(type), entity -> //
-                            li(mapUsageToDisplayName(entity)))) //
+                            li(entity))) //
                             .render());
                 }
             }
@@ -382,7 +382,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             html.append(p(UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG).render());
             html.append(ul().with( //
                     each(warnings.get(Type.USAGE_ENABLED), entity -> //
-                    li(entity))) //
+                    li(mapUsageToDisplayName(entity)))) //
                     .render());
         }
         return html.toString();
