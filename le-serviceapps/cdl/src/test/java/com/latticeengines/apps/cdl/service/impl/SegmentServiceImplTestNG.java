@@ -82,7 +82,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         } catch (Exception e) {
             exception = true;
             assertTrue(e instanceof LedpException);
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40025);
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40041);
         }
         assertTrue(exception);
     }

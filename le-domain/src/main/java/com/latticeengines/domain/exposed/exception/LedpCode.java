@@ -760,7 +760,9 @@ public enum LedpCode {
     LEDP_40038("Iterations are not supported for {0} Models. Customer Space {1}"), //
     LEDP_40039("Cannot create iteration since no iteration to derive from has been provided. Customer Space {0}"), //
     LEDP_40040("Cannot create an iteration derived from iteration of another Model. Customer Space {0}"), //
-
+    LEDP_40041("Potential circular dependencies found. {0}"), //
+    LEDP_40042("Cannot delete {0} as there are direct dependencies on it: {1}"), //
+    
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
 

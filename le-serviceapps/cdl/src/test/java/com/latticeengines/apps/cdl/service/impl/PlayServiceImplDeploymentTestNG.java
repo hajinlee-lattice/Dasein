@@ -241,7 +241,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
             }
         } catch (LedpException ex) {
             if (shouldPropagateDelete != Boolean.TRUE) {
-                Assert.assertEquals(ex.getCode(), LedpCode.LEDP_18175);
+                Assert.assertEquals(ex.getCode(), LedpCode.LEDP_40042);
                 retrievedPlay = playService.getPlayByName(playName, false);
                 Assert.assertNotNull(retrievedPlay);
                 Assert.assertEquals(retrievedPlay.getName(), playName);

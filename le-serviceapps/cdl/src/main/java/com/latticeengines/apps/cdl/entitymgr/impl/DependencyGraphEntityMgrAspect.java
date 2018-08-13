@@ -24,6 +24,8 @@ import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.GraphConstants;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
@@ -382,8 +384,8 @@ public class DependencyGraphEntityMgrAspect {
 
         if (CollectionUtils.isNotEmpty(dependencies)) {
             Map<String, List<Map<String, String>>> translatedDependencies = nameTranslator.translate(dependencies);
-            throw new RuntimeException(String.format("Cannot delete %s as there are direct dependencies on it: %s",
-                    vertexId, JsonUtils.serialize(translatedDependencies)));
+            throw new LedpException(LedpCode.LEDP_40042,
+                    new String[] { vertexId, JsonUtils.serialize(translatedDependencies) });
         }
     }
 
@@ -423,7 +425,7 @@ public class DependencyGraphEntityMgrAspect {
                                 });
                     });
 
-            throw new RuntimeException(sb.toString());
+            throw new LedpException(LedpCode.LEDP_40041, new String[] { sb.toString() });
         }
     }
 }
