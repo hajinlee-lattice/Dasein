@@ -52,14 +52,16 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 cm.disableGroup(ColumnSelection.Predefined.Enrichment);
                 cm.disableGroup(ColumnSelection.Predefined.TalkingPoint);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
-                cm.disableGroup(ColumnSelection.Predefined.Model);
+                //TODO: YSong-M22 even if inactive, we still want to use it for model
+                // cm.disableGroup(ColumnSelection.Predefined.Model);
             }
 
             if (AttrState.Deprecated.equals(cm.getAttrState())) {
                 // disable these useages if it is deprecated attribute.
                 cm.disableGroup(ColumnSelection.Predefined.Enrichment);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
-                cm.disableGroup(ColumnSelection.Predefined.Model);
+                //TODO: YSong-M22 even if deprecated, we still want to use it for model
+                // cm.disableGroup(ColumnSelection.Predefined.Model);
             }
 
             return cm;
