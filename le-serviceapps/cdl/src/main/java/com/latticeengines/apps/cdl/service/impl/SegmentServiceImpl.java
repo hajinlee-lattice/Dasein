@@ -84,7 +84,9 @@ public class SegmentServiceImpl implements SegmentService {
             }
         }
 
-        segment.setName(NamingUtils.timestamp("Segment"));
+        if (StringUtils.isBlank(segment.getName())) {
+            segment.setName(NamingUtils.timestamp("Segment"));
+        }
         return segmentEntityMgr.createSegment(segment);
     }
 
@@ -168,7 +170,7 @@ public class SegmentServiceImpl implements SegmentService {
 
             log.info("Updating counts for segment " + segmentName + " to "
                     + JsonUtils.serialize(segmentCopy.getEntityCounts()));
-            segmentEntityMgr.updateSegment(segmentCopy, existingSegment);
+            existingSegment = segmentEntityMgr.updateSegment(segmentCopy, existingSegment);
             evictRatingMetadataCache();
 
             map = existingSegment.getEntityCounts();

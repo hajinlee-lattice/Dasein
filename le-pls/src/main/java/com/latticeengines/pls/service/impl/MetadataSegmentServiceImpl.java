@@ -98,17 +98,18 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 .createOrUpdateSegmentAndActionDTO(customerSpace, segment);
         Action action = metadataSegmentAndAction.getAction();
         registerAction(action, MultiTenantContext.getTenant());
-        MetadataSegment updatedSegment = translateForFrontend(metadataSegmentAndAction.getMetadataSegment());
+        MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegmentAndAction.getMetadataSegment());
+        String segmentName = createdOrUpdatedSegment.getName();
         try {
             Thread.sleep(500);
-            log.info("Updating entity counts for segment " + segment.getName());
-            Map<BusinessEntity, Long> counts = segmentProxy.updateSegmentCounts(customerSpace, segment.getName());
-            counts.forEach(updatedSegment::setEntityCount);
+            log.info("Updating entity counts for segment " + segmentName);
+            Map<BusinessEntity, Long> counts = segmentProxy.updateSegmentCounts(customerSpace, segmentName);
+            counts.forEach(createdOrUpdatedSegment::setEntityCount);
         } catch (Exception e) {
-            log.warn("Failed to update entity counts for segment " + segment.getName());
+            log.warn("Failed to update entity counts for segment " + segmentName);
         }
         clearRatingCache();
-        return updatedSegment;
+        return createdOrUpdatedSegment;
     }
 
     @Override

@@ -103,7 +103,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         MetadataSegment returned = testSegmentProxy.createOrUpdate(newSegment);
         Assert.assertNotNull(returned);
         Assert.assertNotNull(returned.getName());
-        Assert.assertNotEquals(returned.getName(), segmentName);
+        Assert.assertEquals(returned.getName(), segmentName);
         segmentName = returned.getName();
         Assert.assertEquals(returned.getDisplayName(), displayName);
         Assert.assertEquals(returned.getDescription(), description);
