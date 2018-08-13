@@ -176,7 +176,7 @@ angular.module('mainApp.appCommon.widgets.TalkingPointWidget', [
             x = x.replace(/([^a-zA-Z0-9.])?(False)([^a-zA-Z0-9.])?/gi, "$1false$3");
             x = x.replace(/[^a-zA-Z0-9.]OR[^a-zA-Z0-9.]/g, "||");
             x = x.replace(/[^a-zA-Z0-9.]AND[^a-zA-Z0-9.]/g, "&&");
-            x = x.replace(/[^a-zA-Z0-9.]null[^a-zA-Z0-9.]/g, "'null'");
+            x = x.replace(/[^a-zA-Z0-9.]null[^a-zA-Z0-9.]/g, "''");
 
             /*
                 FIXME:  The middle regex breaks on multi-word strings, so the bookend regex's

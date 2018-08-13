@@ -57,19 +57,19 @@ angular.module('common.datacloud')
         };
         this.attributesCount = null;
         this.validFreeTextTypes = ['alpha', 'enum', 'email', 'phone', 'uri']; //PLS-8870
-    }
+    };
 
     this.init();
 
     this.clear = function() {
         this.init();
-    }
+    };
 
     var getObj = function(path, obj) {
         return path.split('.').reduce(function(obj, i) {
             return obj[i];
         }, obj);
-    }
+    };
 
     var setObj = function (path, value, scope) {
         var levels = path.split('.'),
@@ -88,19 +88,19 @@ angular.module('common.datacloud')
                 target = obj;
             }
         });
-    }
+    };
 
     this.getMetadata = function(name) {
         return getObj(name, this.metadata);
-    }
+    };
 
     this.setMetadata = function(name, value) {
         setObj(name, value, this.metadata);
-    }
+    };
 
     this.setHost = function(value) {
         DataCloudService.setHost(value);
-    }
+    };
 
     this.getPremiumSelectMaximum = function(){
         var deferred = $q.defer();
@@ -113,11 +113,11 @@ angular.module('common.datacloud')
             });
         }
         return deferred.promise;
-    }
+    };
 
     this.setPremiumSelectMaximum = function(item){
         DataCloudStore.premiumSelectMaximum = item;
-    }
+    };
 
     this.getSelectMaximum = function(){
         var deferred = $q.defer();
@@ -131,11 +131,11 @@ angular.module('common.datacloud')
             });
         }
         return deferred.promise;
-    }
+    };
 
     this.setSelectMaximum = function(item){
         DataCloudStore.selectMaximum = item;
-    }
+    };
 
     this.getCategories = function(){
         var deferred = $q.defer();
@@ -148,11 +148,11 @@ angular.module('common.datacloud')
             });
         }
         return deferred.promise;
-    }
+    };
 
     this.setCategories = function(item){
         this.categories = item;
-    }
+    };
 
     this.getSubcategories = function(category){
         var deferred = $q.defer();
@@ -165,11 +165,11 @@ angular.module('common.datacloud')
             });
         }
         return deferred.promise;
-    }
+    };
 
     this.setSubcategories = function(category, item){
         this.subcategories[category] = item;
-    }
+    };
 
     this.getAllEnrichmentsConcurrently = function(){
         var deferred = $q.defer(),
@@ -203,7 +203,7 @@ angular.module('common.datacloud')
         }
 
         return deferred.promise;
-    }
+    };
 
     this.getEnrichments = function(opts, concatEnrichments, nocache){
         var deferred = $q.defer(),
@@ -224,7 +224,7 @@ angular.module('common.datacloud')
         }
 
         return deferred.promise;
-    }
+    };
 
     this.setEnrichments = function(enrichments, concatEnrichments) {
         if (concatEnrichments) {
@@ -232,19 +232,19 @@ angular.module('common.datacloud')
         } else {
             this.enrichments = enrichments;
         }
-    }
+    };
 
     this.setEnrichmentsMap = function(map) {
         this.enrichmentsMap = map;
-    }
+    };
 
     this.getEnrichmentsMap = function(key) {
         return key ? this.enrichmentsMap[key] : this.enrichmentsMap;
-    }
+    };
 
     this.updateEnrichments = function(enrichments){
         this.enrichments = enrichments;
-    }
+    };
 
     this.getCount = function(){
         var deferred = $q.defer();
@@ -259,11 +259,11 @@ angular.module('common.datacloud')
         }
         
         return deferred.promise;
-    }
+    };
 
     this.setCount = function(count){
         DataCloudStore.count = count;
-    }
+    };
 
     this.getAttributesCount = function() {
         // This call is really a workaround for the fact that getCount() will first
@@ -279,11 +279,11 @@ angular.module('common.datacloud')
         }
         
         return deferred.promise;
-    }
+    };
 
     this.setAttributesCount = function(count){
         DataCloudStore.attributesCount = count;
-    }
+    };
 
     this.getSelectedCount = function(){
         var deferred = $q.defer();
@@ -295,7 +295,7 @@ angular.module('common.datacloud')
             });
         }
         return deferred.promise;
-    }
+    };
 
     this.getTopAttributes = function(opts) {
         var deferred = $q.defer(),
@@ -319,7 +319,7 @@ angular.module('common.datacloud')
             });
         }
         return deferred.promise;
-    }
+    };
 
     this.getAllTopAttributes = function(opts) {
         var deferred = $q.defer(),
@@ -338,12 +338,12 @@ angular.module('common.datacloud')
         }
 
         return deferred.promise;
-    }
+    };
 
     this.setTopAttributes = function(items, category) {
         this.topAttributes = this.topAttributes || {};
         this.topAttributes[category] = items;
-    }
+    };
 
     this.getCube = function() {
         var deferred = $q.defer();
@@ -356,20 +356,20 @@ angular.module('common.datacloud')
             });
         }
         return deferred.promise;
-    }
+    };
 
     this.setCube = function(cube) {
         DataCloudStore.cube = cube;
-    }
+    };
 
     this.getFeedbackModal = function() {
         return this.feedbackModal;
-    }
+    };
 
     this.setFeedbackModal = function(bool, obj) {
         this.feedbackModal.context = obj;
         return this.feedbackModal.show = bool;
-    }
+    };
 
     this.sendFeedback = function(report, type) {
         var deferred = $q.defer(),
@@ -379,19 +379,19 @@ angular.module('common.datacloud')
             deferred.resolve(response);
         });
         return deferred.promise;
-    }
+    };
 
     var flattenRatingsEngineAttributes = function(ratingsEngine) {
         return (ratingsEngine && ratingsEngine[0] && ratingsEngine[0].rule && ratingsEngine[0].rule.selectedAttributes ? ratingsEngine[0].rule.selectedAttributes : []);
-    }
+    };
 
     this.setRatingsEngineAttributes = function(attributes) {
         this.ratingsEngineAttributes = attributes;
-    }
+    };
 
     this.getCurrentRatingsEngineAttributes = function() {
         return this.ratingsEngineAttributes;
-    }
+    };
 
     this.getRatingsEngineAttributes = function(ratingsEngineId, ratingModelId) {
         var deferred = $q.defer();
@@ -400,7 +400,7 @@ angular.module('common.datacloud')
             deferred.resolve(response.data);
         });
         return deferred.promise;
-    }
+    };
 
     this.setSelectedRatingsEngineAttribute = function(attribute_id) {
         var index = this.ratingsEngineAttributes.indexOf(attribute_id);
@@ -409,7 +409,7 @@ angular.module('common.datacloud')
         } else {
             this.ratingsEngineAttributes.push(attribute_id)
         }
-    }
+    };
 
     this.setSelectedRatingsEngineAttributes = function(attributes) {
         if(attributes)  {
@@ -417,7 +417,7 @@ angular.module('common.datacloud')
                 DataCloudStore.setSelectedRatingsEngineAttribute(value);
             });
         }
-    }
+    };
 
     this.selectRatingsEngineAttributes = function(rating_id, rating_model_id, attributes) {
         var deferred = $q.defer();
@@ -427,7 +427,7 @@ angular.module('common.datacloud')
             deferred.resolve(response);
         });
         return deferred.promise;
-    }
+    };
 
 })
 .service('DataCloudService', function($q, $http, $state, $stateParams, SegmentStore) {
@@ -441,21 +441,21 @@ angular.module('common.datacloud')
 
     this.setHost = function(value) {
         this.host = value;
-    }
+    };
 
     this.inModel = function() {
         var name = $state.current.name.split('.');
 
         return name[1] == 'model';
-    }
+    };
 
     this.inSegment = function() {
         return this.path == this.paths['customer'];
-    }
+    };
 
     this.url = function(customerDataUrl, internalDataUrl) {
         return this.host + this.path + (this.inSegment() ? customerDataUrl : internalDataUrl);
-    }
+    };
 
     this.getPremiumSelectMaximum = function(){
         var deferred = $q.defer();
@@ -468,7 +468,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getSelectMaximum = function(){
         var deferred = $q.defer();
@@ -481,7 +481,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getCount = function(){
         var deferred = $q.defer(),
@@ -495,7 +495,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getAttributesCount = function(){
         var deferred = $q.defer(),
@@ -509,7 +509,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getSelectedCount = function(){
         var deferred = $q.defer();
@@ -522,7 +522,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getCategories = function(){
         var deferred = $q.defer();
@@ -535,7 +535,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getSubcategories = function(category){
         var deferred = $q.defer();
@@ -551,7 +551,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getEnrichments = function(opts){
         var deferred = $q.defer(),
@@ -574,7 +574,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.setEnrichments = function(data){
         var deferred = $q.defer();
@@ -590,7 +590,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getAllTopAttributes = function(opts) {
         var deferred = $q.defer(),
@@ -604,7 +604,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getCube = function(opts){
         var deferred = $q.defer(),
@@ -624,7 +624,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.setFlags = function(opts, flags){
         var deferred = $q.defer(),
@@ -642,7 +642,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.setFlag = function(opts, boolean){
         var deferred = $q.defer(),
@@ -661,7 +661,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.setFlagsByCategory = function(opts, flags){
         var deferred = $q.defer(),
@@ -682,7 +682,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.setFlagsBySubcategory = function(opts, flags){
         var deferred = $q.defer(),
@@ -705,7 +705,7 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.sendFeedback = function(opts, type) {
         var deferred = $q.defer(),
@@ -724,22 +724,24 @@ angular.module('common.datacloud')
         });
         
         return deferred.promise;
-    }
+    };
 
     this.getRatingsEngineAttributes = function(ratingsEngineId, ratingModelId) {
         var deferred = $q.defer();
+        
         $http({
             method: 'get',
             url: this.host + '/ratingengines/' + ratingsEngineId + '/ratingmodels' + (ratingModelId ? '/' + ratingModelId : ''),
         }).then(function(response){
             deferred.resolve(response);
         });
+
         return deferred.promise;
-    }
+    };
 
     var flattenRatingsEngineAttributes = function(ratingsEngine) {
         return (ratingsEngine && ratingsEngine.rule && ratingsEngine.rule.selectedAttributes ? ratingsEngine.rule.selectedAttributes : []);
-    }
+    };
 
     this.selectRatingsEngineAttributes = function(ratingsEngineId, ratingModelId, attributes) {
         var deferred = $q.defer(),
@@ -758,6 +760,7 @@ angular.module('common.datacloud')
             var saved_attributes = flattenRatingsEngineAttributes(response.data);
             deferred.resolve(saved_attributes);
         });
+
         return deferred.promise;
-    }
+    };
 });

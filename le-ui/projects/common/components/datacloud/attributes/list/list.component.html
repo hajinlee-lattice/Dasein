@@ -43,7 +43,7 @@
                         | filter: $ctrl.getFiltering()))
                         | orderBy: [ $ctrl.filters.sortPrefix + 'DisplayName' ]
                         | startFrom: ($ctrl.filters.page - 1) * $ctrl.filters.pagesize
-                        | limitTo: $ctrl.filters.pagesize"
+                        | limitTo: $ctrl.getPageSize()"
             ng-class="{
                 'disabled': $ctrl.isDisabled(item),
                 'category': item.Attributes

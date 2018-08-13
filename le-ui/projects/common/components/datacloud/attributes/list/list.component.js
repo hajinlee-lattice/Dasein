@@ -101,10 +101,12 @@ angular.module('common.attributes.list', [])
                 vm.buckets[vm.subcategory] = { Bkts: { List: [] } };
                 vm.store.getBucketData(vm.category, vm.subcategory);
             }
-
-            return vm.subcategory 
+var ret = vm.subcategory 
                 ? vm.attributes[vm.subcategory] 
                 : vm.data.config.Subcategories;
+
+                console.log(ret);
+            return ret;
         };
 
         vm.getCount = function() {
@@ -349,7 +351,7 @@ angular.module('common.attributes.list', [])
                     obj[property] = false;
                 }
             });
-
+            
             return obj;
         };
 
