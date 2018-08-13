@@ -52,13 +52,13 @@ module.exports = [{
     path: '/projects/atlas',
     html5mode: true,
     pages: {
-        '/lp/': 'index.html',
-        '/lp/index': 'index.html'
+        '/atlas/': 'index.html',
+        '/atlas/index': 'index.html'
     },
     folders: {
-        '/lp/app': '/app',
-        '/lp/assets': '/assets',
-        '/lp/lib': '/lib'
+        '/atlas/app': '/app',
+        '/atlas/assets': '/assets',
+        '/atlas/lib': '/lib'
     }
 },{
     path: '/projects/insights',

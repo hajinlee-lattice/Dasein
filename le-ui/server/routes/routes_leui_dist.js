@@ -46,19 +46,19 @@ module.exports = [{
     path: '/projects/atlas',
     html5mode: true,
     pages: {
-        '/lp/': '/dist/indexwp.html',
-        '/lp/index': '/dist/indexwp.html',
-        '/lp/old': 'assets/index.html',
-        '/lp/old/index': 'assets/index.html'
+        '/atlas/': '/dist/indexwp.html',
+        '/atlas/index': '/dist/indexwp.html',
+        '/atlas/old': 'assets/index.html',
+        '/atlas/old/index': 'assets/index.html'
     },
     folders: {
-        '/lp' : '/dist',
+        '/atlas' : '/dist',
         '/dist': '/dist',
-        '/lp/app': '/app',
-        '/lp/assets': '/assets',
-        '/lp/lib': '/lib',
-        '/lp/assets': '/assets',
-        '/lp/lib/js': '/lib/js',
+        '/atlas/app': '/app',
+        '/atlas/assets': '/assets',
+        '/atlas/lib': '/lib',
+        '/atlas/assets': '/assets',
+        '/atlas/lib/js': '/lib/js',
     }
 },{
     path: '/projects/insights',

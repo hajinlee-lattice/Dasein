@@ -231,7 +231,7 @@ section.container.custom-fields {
         }
         /*
         &:before {
-            background-image: url("/lp/assets/images/bkg-field-mapping-import.png");
+            background-image: url("/atlas/assets/images/bkg-field-mapping-import.png");
             background-position: top left;
             background-repeat: no-repeat;
             background-size: 150px 95px;
@@ -240,7 +240,7 @@ section.container.custom-fields {
             height: 95px;
         }
         &:after {
-            background-image: url("/lp/assets/images/bkg-field-mapping-lattice.png");
+            background-image: url("/atlas/assets/images/bkg-field-mapping-lattice.png");
             background-position: top right;
             background-repeat: no-repeat;
             background-size: 166px 82px;
@@ -485,17 +485,17 @@ Create Model: Validate Import View
             }
             &.uploaded-leads {
                 h2 {
-                    background-image: url("/lp/assets/images/ico-uploaded.png");
+                    background-image: url("/atlas/assets/images/ico-uploaded.png");
                 }
             }
             &.excluded-leads {
                 h2 {
-                    background-image: url("/lp/assets/images/ico-excluded.png");
+                    background-image: url("/atlas/assets/images/ico-excluded.png");
                 }
             }
             &.used-leads {
                 h2 {
-                    background-image: url("/lp/assets/images/ico-accepted.png");
+                    background-image: url("/atlas/assets/images/ico-accepted.png");
                 }
             }
         }

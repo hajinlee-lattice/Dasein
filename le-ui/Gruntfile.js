@@ -10,7 +10,7 @@ module.exports = function (grunt) {
         versionString: versionStringConfig,
         dir: {
             common: './projects/common',
-            lp: './projects/atlas',
+            atlas: './projects/atlas',
             pd: './projects/prospectdiscovery',
             login: './projects/login',
             ng2: './projects/ng2',
@@ -332,10 +332,10 @@ module.exports = function (grunt) {
                     ]
                 }
             },
-            lp:     {
+            atlas:     {
                 files: {
-                    '<%= dir.lp %>/<%= dir.assets %>/styles/production.css': [
-                        '<%= dir.lp %>/<%= dir.assets %>/styles/main.scss'
+                    '<%= dir.atlas %>/<%= dir.assets %>/styles/production.css': [
+                        '<%= dir.atlas %>/<%= dir.assets %>/styles/main.scss'
                     ]
                 }
             },
@@ -362,12 +362,12 @@ module.exports = function (grunt) {
                 ],
                 tasks: ['sass:login']
             },
-            lp: {
+            atlas: {
                 files: [
-                    '<%= dir.lp %>/<%= dir.app %>/**/*.scss',
-                    '<%= dir.lp %>/<%= dir.assets %>/styles/**/*.scss'
+                    '<%= dir.atlas %>/<%= dir.app %>/**/*.scss',
+                    '<%= dir.atlas %>/<%= dir.assets %>/styles/**/*.scss'
                 ],
-                tasks: ['sass:lp']
+                tasks: ['sass:atlas']
             },
             pd: {
                 files: [
@@ -379,10 +379,10 @@ module.exports = function (grunt) {
 
         concurrent: {
             sass: {
-                tasks: [ 'sass:common', 'sass:login', 'sass:lp' ]
+                tasks: [ 'sass:common', 'sass:login', 'sass:atlas' ]
             },
             watch: {
-                tasks: [ 'watch:common', 'watch:login', 'watch:lp'/*, 'run:ng2'*/ ],
+                tasks: [ 'watch:common', 'watch:login', 'watch:atlas'/*, 'run:ng2'*/ ],
                 options: {
                     logConcurrentOutput: true
                 }

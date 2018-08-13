@@ -101,11 +101,12 @@ angular.module('common.attributes.list', [])
                 vm.buckets[vm.subcategory] = { Bkts: { List: [] } };
                 vm.store.getBucketData(vm.category, vm.subcategory);
             }
-var ret = vm.subcategory 
+            
+            var ret = vm.subcategory 
                 ? vm.attributes[vm.subcategory] 
                 : vm.data.config.Subcategories;
 
-                console.log(ret);
+            //console.log(ret);
             return ret;
         };
 

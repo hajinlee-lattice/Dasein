@@ -41,14 +41,14 @@ module.exports = [{
     path: '/projects/atlas',
     html5mode: true,
     pages: {
-        '/lp/': 'assets/index.html',
-        '/lp/index': 'assets/index.html'
+        '/atlas/': 'assets/index.html',
+        '/atlas/index': 'assets/index.html'
     },
     folders: {
-        '/lp/assets': '/assets',
-        '/lp/lib/js': '/lib/js',
-        '/lp': '/assets',
-        '/lp/assets/images': '/assets/images'
+        '/atlas/assets': '/assets',
+        '/atlas/lib/js': '/lib/js',
+        '/atlas': '/assets',
+        '/atlas/assets/images': '/assets/images'
     }
 },{
     path: '/projects/insights',

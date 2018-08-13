@@ -56,15 +56,15 @@ module.exports = [{
     path: '/projects/atlas',
     html5mode: true,
     pages: {
-        '/lp/': '/dist/indexwp.html',
-        '/lp/index': '/dist/indexwp.html'
+        '/atlas/': '/dist/indexwp.html',
+        '/atlas/index': '/dist/indexwp.html'
     },
     folders: {
-        '/lp' : '/dist',
+        '/atlas' : '/dist',
         '/dist': '/dist',
-        '/lp/app': '/app',
-        '/lp/assets': '/assets',
-        '/lp/lib': '/lib'
+        '/atlas/app': '/app',
+        '/atlas/assets': '/assets',
+        '/atlas/lib': '/lib'
     }
 },{
     path: '/projects/insights',

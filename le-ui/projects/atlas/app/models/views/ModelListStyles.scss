@@ -4,7 +4,7 @@ Model List
 .no-models {
     padding: 10em 0 6em;
     margin-bottom: 10em;
-    background: url('/lp/assets/images/bg_no_models.png') no-repeat center center;
+    background: url('/atlas/assets/images/bg_no_models.png') no-repeat center center;
 }
 .home #main-content {
     margin-top: 20px;
@@ -182,10 +182,10 @@ Model List
         font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
         padding-right: 1.75em;
         font-size: 18px;
-        background: url('/lp/assets/images/ico-pencil.png') no-repeat top right;
+        background: url('/atlas/assets/images/ico-pencil.png') no-repeat top right;
         text-align: left;
         &:hover {
-            background: url('/lp/assets/images/ico-pencil-hover.png') no-repeat top right;
+            background: url('/atlas/assets/images/ico-pencil-hover.png') no-repeat top right;
         }
         &:after {
             color: #bfbfbf;

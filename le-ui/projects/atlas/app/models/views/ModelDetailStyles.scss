@@ -148,11 +148,11 @@ Model Details
             }
             .model-details .page-title .back-button {
                 padding: 20px 50px 20px 0;
-                background: url('/lp/assets/images/bg_back_button.png') no-repeat left center;
+                background: url('/atlas/assets/images/bg_back_button.png') no-repeat left center;
                 color: #999;
             }
                 .model-details .page-title .back-button:hover {
-                    background: url('/lp/assets/images/bg_back_button_hover.png') no-repeat left center;
+                    background: url('/atlas/assets/images/bg_back_button_hover.png') no-repeat left center;
                 }
             .model-details .page-title h1 {
                 margin: 0;
@@ -183,19 +183,19 @@ Model Details
     float: right;
     text-transform: uppercase;
     padding: 4px 29px 0px;
-    background: url('/lp/assets/images/bg_more_button.jpg') no-repeat right center;
+    background: url('/atlas/assets/images/bg_more_button.jpg') no-repeat right center;
     color: #477cba;
     margin-top: 17px;
 }
     .toggleDetails:hover {
-        background: url('/lp/assets/images/bg_more_button_hover.jpg') no-repeat right center;
+        background: url('/atlas/assets/images/bg_more_button_hover.jpg') no-repeat right center;
         color:#3888e8;
     }
     .toggleDetails.less {
-        background: url('/lp/assets/images/bg_less_button.jpg') no-repeat right center;
+        background: url('/atlas/assets/images/bg_less_button.jpg') no-repeat right center;
     }
         .toggleDetails.less:hover {
-            background: url('/lp/assets/images/bg_less_button_hover.jpg') no-repeat right center;
+            background: url('/atlas/assets/images/bg_less_button_hover.jpg') no-repeat right center;
         }
 .meta-group {
     float: left;
