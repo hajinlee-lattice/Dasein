@@ -374,7 +374,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     html.append(b(mapTypeToDisplayName(type)).render());
                     html.append(ul().with( //
                             each(warnings.get(type), entity -> //
-                            li(entity))) //
+                            li(mapUsageToDisplayName(entity)))) //
                             .render());
                 }
             }
