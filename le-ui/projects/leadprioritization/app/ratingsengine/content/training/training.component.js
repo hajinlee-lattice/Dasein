@@ -160,7 +160,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.trainingSegment = selectedSegment[0];
             RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
             vm.ratingModel.trainingSegment = vm.trainingSegment;
-
+            vm.updateSegmentSelected(vm.trainingSegment);
             vm.autcompleteChange();
         }
 
@@ -169,6 +169,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             angular.forEach(selectedProducts, function(product){
                 vm.trainingProducts.push(product.ProductId);
             });
+            vm.updateProductsSelected(vm.trainingProducts);
             RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
             vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts = vm.trainingProducts;
 
@@ -385,7 +386,19 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         }
 
-        
+        vm.updateSegmentSelected = function(trainingSegment) {
+            if(vm.ratingEngine.activeModel.AI){
+                vm.ratingEngine.latest_iteration.AI.trainingSegment = (trainingSegment ? trainingSegment : null);
+                vm.ratingEngine.activeModel.AI.trainingSegment = (trainingSegment ? trainingSegment : null);
+            }
+        }
+        vm.updateProductsSelected = function(listProducts) {
+            if(vm.ratingEngine.activeModel.AI){
+                vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.targetProducts = listProducts;
+                vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts = listProducts;
+            }
+        }
+
         vm.formOnChange = function(){
             $timeout(function () {
                 if(vm.engineType === 'cross_sell'){

@@ -170,3 +170,24 @@ NOTE: The changes made in this mode are going to be reflected till `npm run buil
 `nodea`: start node server on stack A
 `nodeb`: start node server on stack B 
 
+
+
+#Visual Studio code setup debug mode
+If you want to run VSC in debug mode create 
+launch.json file with the following content
+
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Atlas Dev-Mode",
+      "url": "http://localhost:3001", // or whatever port you use
+      "webRoot": "${workspaceFoler}"
+    }
+  ]
+}
