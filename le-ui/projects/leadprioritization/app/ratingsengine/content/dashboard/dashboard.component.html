@@ -142,7 +142,7 @@
                             </span>
                         </span>
                     </h3>
-                    <h4 ng-if="!vm.isPublished">No Ratings Available</h4>
+                    <h4 ng-if="!vm.isPublished" class="no-ratings-header">No Ratings Available</h4>
                     <bar-chart ng-if="vm.isPublished"    
                         config="vm.ratingEngine.chartConfig" 
                         bktlist="vm.dashboard.summary.bucketMetadata">

@@ -158,7 +158,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 id: vm.ratingEngine.id,
                 status: newStatus
             }
-        var model = vm.ratingEngine.activeModel;
+        var model = vm.ratingEngine.scoring_iteration;
         RatingsEngineService.saveRating(newRating).then(function(data){
 
             //This call is made because the POST API does not return 
@@ -226,7 +226,7 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
-            var model = vm.ratingEngine.scoring_iteration;
+            var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.activeModel;
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -344,8 +344,8 @@ angular.module('lp.ratingsengine.dashboard', [
             var activeModel = vm.ratingEngine.activeModel;
             jobStatus = activeModel.rule.modelingJobStatus;
         }else{
-            var scoring_iteration = vm.ratingEngine.scoring_iteration;
-            jobStatus = scoring_iteration.AI.modelingJobStatus;
+            var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.activeModel;
+            jobStatus = model.AI.modelingJobStatus;
         }
 
         switch(jobStatus){

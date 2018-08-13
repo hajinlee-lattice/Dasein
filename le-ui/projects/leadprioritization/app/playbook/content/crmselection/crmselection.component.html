@@ -54,7 +54,7 @@
                     </tbody>
                 </table>
 
-                <div class="coverage-counts">
+                <div class="coverage-counts" ng-if="$ctrl.orgIsRegistered">
                     <div ng-if="$ctrl.loadingCoverageCounts">
                         <span class="fa fa-spinner fa-pulse fa-fw"></span> Looking for blank account IDs for the selected System Org.
                     </div>
