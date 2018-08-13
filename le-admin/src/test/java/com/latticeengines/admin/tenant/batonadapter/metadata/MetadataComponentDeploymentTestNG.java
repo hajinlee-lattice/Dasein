@@ -47,10 +47,13 @@ public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         metadataUrl = microserviceUrl + "/metadata";
     }
 
-    public void installMetadata() {
+    public void installMetadata() throws InterruptedException {
         loginAD();
         bootstrap(contractId, tenantId, ModelingComponent.componentName, modelingComponentDeploymentTestNG.getModelingDocumentDirectory());
+        waitUntilStateIsNotInitial(contractId, tenantId, ModelingComponent.componentName);
         bootstrap(contractId, tenantId, PLSComponent.componentName, plsComponentTestNG.getPLSDocumentDirectory());
+        waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
+        Thread.sleep(5000L);
         bootstrap(contractId, tenantId, MetadataComponent.componentName, batonService.getDefaultConfiguration(getServiceName()));
     }
 
