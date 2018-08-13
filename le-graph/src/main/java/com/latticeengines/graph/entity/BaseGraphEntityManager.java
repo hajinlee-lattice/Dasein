@@ -13,6 +13,8 @@ public interface BaseGraphEntityManager {
 
     List<String> checkDirectVertexDependencies(String vertexId) throws Exception;
 
+    List<List<String>> checkPotentialCircularDependencies(String inVertexId, String outVertexId) throws Exception;
+
     boolean dropVertex(String vertexId, boolean failIfDependencyExist) throws Exception;
 
     boolean dropEdge(String inVertexId, String outVertexId, String edgeLabel) throws Exception;

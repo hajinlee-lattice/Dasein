@@ -26,6 +26,7 @@ public class IdToDisplayNameTranslator {
 
     public static final String ID = "id";
     public static final String DISPLAY_NAME = "displayName";
+    public static final String TYPE = "type";
 
     @Inject
     private SegmentEntityMgr segmentEntityMgr;
@@ -65,7 +66,30 @@ public class IdToDisplayNameTranslator {
         return result;
     }
 
-    private String idToDisplayName(String type, String objId) {
+    public List<List<Map<String, String>>> translatePaths(List<List<Map<String, String>>> inputList) {
+        List<List<Map<String, String>>> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(inputList)) {
+            inputList.stream() //
+                    .forEach(path -> {
+                        List<Map<String, String>> pathInfo = new ArrayList<>();
+                        result.add(pathInfo);
+                        path.stream() //
+                                .forEach(in -> {
+                                    Map<String, String> objInfo = new HashMap<>();
+                                    String objId = in.get(GraphConstants.OBJECT_ID_KEY);
+                                    String objType = in.get(NameSpaceUtil.TYPE_KEY);
+                                    String translatedType = translateType(objType);
+                                    String displayName = idToDisplayName(translatedType, objId);
+                                    objInfo.put(DISPLAY_NAME, displayName);
+                                    objInfo.put(TYPE, translatedType);
+                                    pathInfo.add(objInfo);
+                                });
+                    });
+        }
+        return result;
+    }
+
+    public String idToDisplayName(String type, String objId) {
         String displayName = objId;
         if (type.equals(CDLObjectTypes.Play.name())) {
             Play play = playEntityMgr.getPlayByName(objId, false);
@@ -86,7 +110,7 @@ public class IdToDisplayNameTranslator {
         return displayName;
     }
 
-    private String translateType(String vertexType) {
+    public String translateType(String vertexType) {
         String translatedType = vertexType;
         if (vertexType.equals(VertexType.PLAY)) {
             translatedType = CDLObjectTypes.Play.name();

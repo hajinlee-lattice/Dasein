@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -94,8 +96,7 @@ public class DependencyGraphEntityMgrAspect {
             MetadataSegment existingSegment = (MetadataSegment) joinPoint.getArgs()[1];
             ParsedDependencies parsedDependencies = segmentEntityMgr.parse(segment, existingSegment);
 
-            graphAction.addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, segment.getName(),
-                    VertexType.SEGMENT);
+            addEdges(parsedDependencies, segment.getName(), VertexType.SEGMENT);
 
             MetadataSegment result = (MetadataSegment) joinPoint.proceed(joinPoint.getArgs());
 
@@ -160,8 +161,7 @@ public class DependencyGraphEntityMgrAspect {
             if (!isDelete && !alreadyDeleted) {
                 parsedDependencies = ratingEngineEntityMgr.parse(ratingEngine, existingRatingEngine);
 
-                graphAction.addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngine.getId(),
-                        VertexType.RATING_ENGINE);
+                addEdges(parsedDependencies, ratingEngine.getId(), VertexType.RATING_ENGINE);
             }
 
             RatingEngine result = (RatingEngine) joinPoint.proceed(joinPoint.getArgs());
@@ -197,8 +197,7 @@ public class DependencyGraphEntityMgrAspect {
             String ratingEngineId = (String) joinPoint.getArgs()[1];
             ParsedDependencies parsedDependencies = ruleBasedModelEntityMgr.parse(ruleBasedModel, null);
 
-            graphAction.addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngineId,
-                    VertexType.RATING_ENGINE);
+            addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
         }
     }
 
@@ -211,8 +210,7 @@ public class DependencyGraphEntityMgrAspect {
             ParsedDependencies parsedDependencies = ruleBasedModelEntityMgr.parse(ruleBasedModel,
                     existingRuleBasedModel);
 
-            graphAction.addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngineId,
-                    VertexType.RATING_ENGINE);
+            addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
 
             RuleBasedModel result = (RuleBasedModel) joinPoint.proceed(joinPoint.getArgs());
 
@@ -231,8 +229,7 @@ public class DependencyGraphEntityMgrAspect {
             String ratingEngineId = (String) joinPoint.getArgs()[1];
             ParsedDependencies parsedDependencies = aiModelEntityMgr.parse(aiModel, null);
 
-            graphAction.addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngineId,
-                    VertexType.RATING_ENGINE);
+            addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
         }
     }
 
@@ -244,8 +241,7 @@ public class DependencyGraphEntityMgrAspect {
             String ratingEngineId = (String) joinPoint.getArgs()[2];
             ParsedDependencies parsedDependencies = aiModelEntityMgr.parse(ruleBasedModel, existingRuleBasedModel);
 
-            graphAction.addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngineId,
-                    VertexType.RATING_ENGINE);
+            addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
 
             AIModel result = (AIModel) joinPoint.proceed(joinPoint.getArgs());
 
@@ -318,8 +314,7 @@ public class DependencyGraphEntityMgrAspect {
             if (!isDelete && !alreadyDeleted) {
                 parsedDependencies = playEntityMgr.parse(play, existingPlay);
 
-                graphAction.addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, play.getName(),
-                        VertexType.PLAY);
+                addEdges(parsedDependencies, play.getName(), VertexType.PLAY);
             }
 
             Play result = (Play) joinPoint.proceed(joinPoint.getArgs());
@@ -389,6 +384,46 @@ public class DependencyGraphEntityMgrAspect {
             Map<String, List<Map<String, String>>> translatedDependencies = nameTranslator.translate(dependencies);
             throw new RuntimeException(String.format("Cannot delete %s as there are direct dependencies on it: %s",
                     vertexId, JsonUtils.serialize(translatedDependencies)));
+        }
+    }
+
+    private void addEdges(ParsedDependencies parsedDependencies, String vertexId, String vertexType) throws Exception {
+        Map<Pair<Pair<String, String>, Pair<String, String>>, List<List<Map<String, String>>>> potentialCircularDependencies = graphAction
+                .addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, vertexId, vertexType);
+        if (MapUtils.isNotEmpty(potentialCircularDependencies)) {
+            StringBuilder sb = new StringBuilder();
+            potentialCircularDependencies.keySet().stream() //
+                    .forEach(k -> {
+                        String fromVertexId = k.getLeft().getLeft();
+                        String fromVertexType = k.getLeft().getRight();
+                        String toVertexId = k.getRight().getLeft();
+                        String toVertexType = k.getRight().getRight();
+                        List<List<Map<String, String>>> translatedPaths = nameTranslator
+                                .translatePaths(potentialCircularDependencies.get(k));
+                        String v1 = String.format("%s %s", nameTranslator.translateType(fromVertexType), //
+                                nameTranslator.idToDisplayName(fromVertexId, //
+                                        nameTranslator.translateType(fromVertexType)));
+                        String v2 = String.format("%s %s", nameTranslator.translateType(toVertexType), //
+                                nameTranslator.idToDisplayName(toVertexId, //
+                                        nameTranslator.translateType(toVertexType)));
+                        sb.append(String.format(
+                                "%s cannot depend on %s as it will cause circular dependencies. "
+                                        + "Dependency path from %s to %s already exist: ", //
+                                v1, v2, v2, v1));
+                        translatedPaths.stream() //
+                                .forEach(p -> {
+                                    sb.append("Path [");
+                                    p.stream() //
+                                            .forEach(v -> {
+                                                sb.append(String.format("%s %s -> ",
+                                                        v.get(IdToDisplayNameTranslator.TYPE),
+                                                        v.get(IdToDisplayNameTranslator.DISPLAY_NAME)));
+                                            });
+                                    sb.append("]. ");
+                                });
+                    });
+
+            throw new RuntimeException(sb.toString());
         }
     }
 }

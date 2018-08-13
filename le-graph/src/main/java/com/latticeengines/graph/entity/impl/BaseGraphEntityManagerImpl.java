@@ -19,6 +19,7 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality;
+import org.apache.tinkerpop.gremlin.structure.util.detached.DetachedVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ import com.latticeengines.domain.exposed.graph.GraphConstants;
 import com.latticeengines.graph.GraphUtil;
 import com.latticeengines.graph.entity.BaseGraphEntityManager;
 
-public abstract class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
+public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
 
     private static final Logger log = LoggerFactory.getLogger(BaseGraphEntityManagerImpl.class);
 
@@ -53,6 +54,43 @@ public abstract class BaseGraphEntityManagerImpl implements BaseGraphEntityManag
                     });
             cluster.close();
             return new ArrayList<>(dependencies);
+        } catch (
+
+        Exception ex) {
+            if (graphUtil.getIgnoreException()) {
+                log.info("Ignoring exception till graph service is stable: " + ex.getMessage(), ex);
+                return null;
+            } else {
+                throw ex;
+            }
+        }
+    }
+
+    @Override
+    public List<List<String>> checkPotentialCircularDependencies(String inVertexId, String outVertexId)
+            throws Exception {
+        log.info(String.format("inVertexId = %s, outVertexId = %s", inVertexId, outVertexId));
+        try {
+            Cluster cluster = graphUtil.initCluster();
+            GraphTraversalSource g = graphUtil.initTraversalSource(cluster);
+
+            GraphTraversal<Vertex, Vertex> traversal = g.V(inVertexId);
+            List<List<String>> paths = new ArrayList<>();
+            traversal.repeat(__.outE().inV()) //
+                    .until(__.hasId(outVertexId)) //
+                    .path() //
+                    .forEachRemaining(p -> {
+                        List<Object> pathObjects = p.objects();
+                        if (pathObjects != null && !pathObjects.isEmpty()) {
+                            List<String> path = new ArrayList<>();
+                            pathObjects.stream().filter(o -> o instanceof DetachedVertex).forEach(o -> {
+                                path.add(((DetachedVertex) o).id().toString());
+                            });
+                            paths.add(path);
+                        }
+                    });
+            cluster.close();
+            return paths;
         } catch (
 
         Exception ex) {

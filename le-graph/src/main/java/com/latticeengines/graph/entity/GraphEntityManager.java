@@ -19,6 +19,10 @@ public interface GraphEntityManager {
     List<Map<String, String>> checkDirectVertexDependencies(String customerSpace, String overrideEnv,
             String overrideVersion, String overrideTenant, String objectId, String type) throws Exception;
 
+    List<List<Map<String, String>>> checkPotentialCircularDependencies(String customerSpace, String overrideEnv,
+            String overrideVersion, String overrideTenant, String fromObjectId, String fromObjectType,
+            String toObjectId, String toObjectType) throws Exception;
+
     boolean dropVertex(String customerSpace, String overrideEnv, String overrideVersion, String overrideTenant,
             VertexDeletionRequest request) throws Exception;
 
