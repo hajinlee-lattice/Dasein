@@ -19,7 +19,7 @@ public abstract class ActionConfiguration {
 
     private Boolean hiddenFromUI = false;
 
-    public Boolean getHiddenFromUI() {
+    public Boolean isHiddenFromUI() {
         return hiddenFromUI;
     }
 

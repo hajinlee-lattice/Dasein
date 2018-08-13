@@ -379,8 +379,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         updateStartTimeStampAndForJob(job);
         if (CollectionUtils.isNotEmpty(actions)) {
             Map<String, String> unfinishedInputContext = new HashMap<>();
-            List<Long> unfinishedActionIds = actions.stream()
-                    .filter(action -> isVisibleAction(action))
+            List<Long> unfinishedActionIds = actions.stream().filter(action -> isVisibleAction(action))
                     .map(Action::getPid).collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
@@ -392,8 +391,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     private Boolean isVisibleAction(Action action) {
-        return action.getActionConfiguration().getHiddenFromUI() != null
-                && !action.getActionConfiguration().getHiddenFromUI();
+        return action.getActionConfiguration() == null
+                || (action.getActionConfiguration() != null && action.getActionConfiguration().isHiddenFromUI() != null
+                        && !action.getActionConfiguration().isHiddenFromUI());
     }
 
     @VisibleForTesting
@@ -648,7 +648,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return false;
         }
 
-        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getShortTenantId(), applicationId);
+        SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getShortTenantId(),
+                applicationId);
         return sourceFile != null;
     }
 
