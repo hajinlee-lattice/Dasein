@@ -10,22 +10,17 @@ fi
 if [ -f "/etc/ledp/ledp_keystore.jks" ]; then
     echo "copying jks file from /etc/ledp/ledp_keystore.jks"
     cp -f /etc/ledp/ledp_keystore.jks /etc/pki/java/tomcat.jks
-    chmod 600 /etc/pki/java/tomcat.jks
     cp -f /etc/ledp/cacerts /etc/pki/java/cacerts
-    chmod 600 /etc/pki/java/cacerts
 fi
-
 if [ -f "/etc/ledp/lattice.crt" ]; then
     echo "Copying /etc/ledp/lattice.crt to /etc/pki/tls/server.crt"
     cp -f /etc/ledp/lattice.crt /etc/pki/tls/server.crt
 fi
-chmod 600 /etc/pki/tls/server.crt
-
 if [ -f "/etc/ledp/lattice.pem" ]; then
     echo "Copying /etc/ledp/lattice.pem /etc/pki/tls/server.key"
     cp -f /etc/ledp/lattice.pem /etc/pki/tls/server.key
 fi
-chmod 600 /etc/pki/tls/server.key
+chmod -R 644 /etc/pki/tls
 
 if [ -f "/etc/ledp/jmxtrans-agent.jar" ]; then
     echo "Copying /etc/ledp/jmxtrans-agent.jar to /var/lib/jmxtrans-agent.jar"
