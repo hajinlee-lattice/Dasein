@@ -38,7 +38,7 @@ module.exports = [{
         '/pd/lib': '/lib'
     }
 },{
-    path: '/projects/leadprioritization',
+    path: '/projects/atlas',
     html5mode: true,
     pages: {
         '/lp/': 'assets/index.html',

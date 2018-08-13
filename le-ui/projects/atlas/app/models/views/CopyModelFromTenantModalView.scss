@@ -1,0 +1,137 @@
+[data-ng-controller="CopyModelFromTenantModalController"] {
+    &.modal-dialog {
+        width: auto;
+        text-align: center;
+    }
+    .modal-content {
+        width: auto;
+        display: inline-block;
+        text-align: left;
+    }
+    .modal-body {
+        padding: 0;
+    }
+    #close-button {
+        margin-top: -2px;
+        opacity: .8;
+        font-size: 24px;
+        border: none;
+        background: transparent;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+    }
+    .model-copy-dialog {
+        width: 800px;
+        .lists-container {
+            @include flex-container();
+            .tenants,
+            .models {
+                @include flex-item(1 0 auto);
+                max-width: 50%;
+                opacity: .2;
+                background: #f1f1f1;
+                &.active {
+                    opacity: 1;
+                    background: none;
+                }
+                &:nth-child(1) {
+                    border-right: 1px solid #e5e5e5;
+                }
+                h4 {
+                    border-bottom: 1px solid #e5e5e5;
+                }
+                .list-container, h4 {
+                    padding: 20px 30px;
+                }
+                .list-container {
+                    @include flex-container();
+                    -webkit-flex-direction: column;
+                    -ms-flex-direction: column;
+                    flex-direction: column;
+                    
+                    padding-top: 5px;
+                    height: 200px;
+                    position: relative;
+                    ul.filters {
+                        @include flex-item(0 1 auto);
+                        text-align: right;
+                        li {
+                            display: inline-block;
+                            &.query {
+                                padding-bottom: 5px;
+                                .ng-search {
+                                    .form-control {
+                                        width: 140px;
+                                    }
+                                    .button {
+                                        padding: 11px 8px;
+                                    }
+                                }
+                            }
+                            &.version {
+                                margin-right: 10px;
+                                input {
+                                    position: relative;
+                                    top: 2px;
+                                }
+                            }
+                        }
+                    }
+                    .list {
+                        @include flex-item(1 1 auto);
+                        overflow: hidden;
+                        overflow-y: auto;
+                        cursor: pointer;
+                        & > li {
+                            @include text-ellipsis();
+                            padding: 2px;
+                            &.selected {
+                                background: #f1f1f1;
+                            }
+                        }
+                    }
+                    .loader {
+                        font-size: 70px;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                    }
+                }
+            }
+        }
+        .modal-footer {
+            @include flex-container();
+            padding-left: 0;
+            p {
+                @include flex-item(1 1 auto);
+                line-height: normal;
+                position: relative;
+                strong {
+                    position: absolute;
+                    bottom: 3px;
+                    right: 0;
+                }
+
+            }
+            button {
+                @include flex-item(0 1 auto);
+                display: inline-block;
+                margin-left: 10px;
+            }
+        }
+    }
+    .model-copy-success {
+        h4, p {
+            border-bottom: 1px solid #e5e5e5;
+            padding: 20px;
+        }
+        .button-container {
+            padding: 20px;
+            text-align: right;
+        }
+    }
+}

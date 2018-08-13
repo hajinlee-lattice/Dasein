@@ -1,0 +1,93 @@
+section.ratingsengine {
+    .ratingengine-summary {
+        .header {
+            h2 {
+                background-image: url('/assets/images/ico-ratings.png');
+            }
+        }
+        .content-body {
+            .list {
+                .item {
+                    ul {
+                        & > li {
+                            &.accounts,
+                            &.contacts {
+                                @include flex-item(0 1 auto);
+                                text-align: right;
+                            }
+                        }
+                    }
+                    &[disabled] {
+                        pointer-events: none;
+                        opacity: .5;
+                    }
+                }
+            }
+        }
+        textarea {
+            resize: none;
+            min-height: 60px;
+            height: 60px;
+        }
+    }
+    ul.query-rules-buckets-container {
+        display: block;
+
+        li.query-rules-buckets-bucket {
+            display: inline-block;
+            text-align: center;
+            width: 15%;
+            margin: 1.5em 1% 0px;
+            
+            &:first-child {
+                margin-left: 0;
+            }
+            
+            &:last-child {
+                margin-right: 0;
+            }
+
+            div.bucket-box {
+                background: #fafafa;
+                padding: 1.5em 0;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+
+                .bucket-label {
+                    h2 {
+                        padding-left: 0;
+                    }
+                }
+
+                .bucket-resource {
+                    text-transform: uppercase;
+                    font-size: 0.85em;
+                }
+
+                .bucket-resource-count {
+
+                    .count-number {
+
+                    }
+
+                    .count-percentage {
+
+                    }
+                }
+            }
+
+            &.disable div.bucket-box {
+                background: white;
+                border-color: #e8e8e8;
+                color: #bbb;
+                h2 {
+                    color: #bbb;
+                }
+            }
+
+            div.bucket-rulecount {
+                margin: 2em 0 1em;
+            }
+        }
+    }
+}

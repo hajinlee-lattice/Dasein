@@ -1,0 +1,56 @@
+<section class="ratings-engine-ai-products container">
+    <div class="header-container">
+        <div class="title-container">
+            <p class="title">What Products will you sell into the segment?</p>
+        </div>
+        <div class="actions-container">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="columns twelve product-table-container">
+            <div class="product-table-toolbar">
+                <div class="search-container">
+                    <a>
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                    </a>
+                    <input type="text" placeholder="Search" class="search-input">
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="product-selection">
+                            <span>Selected <a>{{vm.getProductsSelectedCount()}}</a></span><span>/{{vm.getTotalProductsCount()}}</span>
+                        </th>
+                        <th>Product Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="product in vm.products">
+                        <td class="table-selection">
+                            <input type="checkbox" ng-click="vm.selectProduct($index)" ng-checked="{{product.selected}}">
+                        </td>
+                        <td>{{product.displayName}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row">
+            <dic class="columns twelve pagination-container">
+                <div class="pagination">
+                    <a class="pagination-left" ng-click="vm.loadPreviousePage()" ng-disabled="{{vm.page == 1}}">
+                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                    </a>
+                    <label for="">
+                        <input type="text" id="page" class="max-pages" value="{{vm.page}}" disabled>
+                        <span>/ {{vm.maxpages}}</span>
+                    </label>
+                    <a class="pagination-right" ng-click="vm.loadNextPage()" ng-disabled="{{vm.page == vm.maxpages}}">
+                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </dic>
+        </div>
+    </div>
+</section>

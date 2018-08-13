@@ -1,0 +1,27 @@
+<div class="columns ten offset-one box-outline leads-table">
+    <div class="section-header">
+        <h4>{{title}}</h4>
+    </div>
+    <div class="section-body wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th class="lead-company">{{ResourceUtility.getString('SAMPLE_LEAD_GRID_COMPANY_LABEL')}}</th>
+                    <th data-ng-if='source != "SalesforceAccount"' class="lead-contact">{{ResourceUtility.getString('SAMPLE_LEAD_GRID_CONTACT_LABEL')}}</th>
+                    <th data-ng-if='source == "SalesforceAccount"' class="lead-contact">{{ResourceUtility.getString('SAMPLE_LEAD_GRID_WEBSITE_LABEL')}}</th>
+                    <th class="lead-converted">{{ResourceUtility.getString('SAMPLE_LEAD_GRID_CONVERTED_LABEL')}}</th>
+                    <th class="lead-score">{{ResourceUtility.getString('SAMPLE_LEAD_GRID_SCORE_LABEL')}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="lead in leads">
+                    <td>{{lead.Company}}</td>
+                    <td data-ng-if='source != "SalesforceAccount"'>{{lead.Contact}}</td>
+                    <td data-ng-if='source == "SalesforceAccount"'>{{lead.Website}}</td>
+                    <td class="lead-converted"><i class="fa fa-check" data-ng-show="lead.Converted"></i></td>
+                    <td class="lead-score">{{lead.Score}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,17 @@
+<div class="tp-preview container">
+    <div ng-show="vm.talkingPoints.length">
+        <label>Account:
+            <select
+                class="form-control"
+                ng-change="vm.onAccountChange()"
+                ng-model="vm.selected"
+                ng-selected="vm.selected"
+                ng-options="item.name for item in vm.accounts">
+            </select>
+        </label>
+        <iframe  id="tppreview_iframe" class="tppreview_iframe" ng-src="{{vm.sceIframeSrc}}"></iframe>
+    </div>
+    <div ng-show="!vm.talkingPoints.length">
+        <p>There are no talking points created</p>
+    </div>
+</div>

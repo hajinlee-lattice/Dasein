@@ -1,0 +1,29 @@
+<section class="tabs interior stretched" ng-if="vm.cdlEnabled && !vm.inJob()">
+    <ul>
+        <li ui-sref="home.jobs.data" ui-sref-active="active">
+            <div class="tab-container">
+                <h2>Data Processing & Analysis</h2>
+                <div>
+                    <span class="count">{{vm.JobsStore.data.importJobs.length}}</span>
+                </div>
+            </div>
+        </li>
+        <li ui-sref="home.jobs.status" ui-sref-active="active">
+            <div class="tab-container">
+                <h2>Model Jobs</h2>
+                <div>
+                    <span class="count">{{vm.JobsStore.data.jobs.length}}</span>
+                </div>
+            </div>
+        </li>
+        <li ui-sref="home.jobs.export" ui-sref-active="active">
+            <div class="tab-container">
+                <h2>Segment Export</h2>
+                <div>
+                    <span class="count">{{vm.JobsStore.data.exportJobs.length}}</span>
+                </div>
+            </div>
+        </li>
+    </ul>
+</section>
+<section class="summary-blank-line" ng-if="!vm.cdlEnabled"></section>

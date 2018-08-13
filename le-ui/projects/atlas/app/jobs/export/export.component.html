@@ -1,0 +1,78 @@
+<section class="export-jobs">
+    <div class="jobs-page container">
+    <div data-ng-if="vm.showDownloadMessage" class="success-message">
+        <h3> Your download has now begun. </h3>
+        <i class="fa fa-times fa-inverse" data-ng-click="vm.hideDownloadMessage()"></i>
+    </div>
+        <div class="table-header">
+            <div class="row list-header">
+                <div class="pull-left">
+                    <menu-dropdown config="vm.header.maxperpage"></menu-dropdown>
+                    <menu-sort-by config="vm.header.sort" store="jobs.export.sort"></menu-sort-by>
+                    <search-filter query="vm.query" current="vm.currentPage"></search-filter>
+                </div>
+            </div>
+        </div>
+        <div class="le-grid">
+                <div class="le-header le-row">
+                    <div class="le-cell le-col-start-1 le-col-span-2">Time Stamp</div>
+                    <div class="le-cell le-col-start-3 le-col-span-3">Segment Name</div>
+                    <div class="le-cell le-col-start-6 le-col-span-2">Export Type</div>
+                    <div class="le-cell le-col-start-8 le-col-span-3">User</div>
+                    <div class="le-cell le-col-start-11 le-col-span-2">Status</div>
+                </div>
+                
+                <div class="le-row export-row" ng-if="vm.jobs.length != 0"
+                                    ng-repeat="export in vm.jobs | 
+                                            orderBy:'-startTimestamp'|
+                                            orderBy: vm.header.sort.order + vm.header.sort.property |
+                                            filter: vm.query | 
+                                            startFrom: (vm.currentPage - 1) * vm.pagesize |
+                                            limitTo: vm.pagesize"
+                    index="$index" ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}">
+                    <div class="le-cell le-col-start-1 le-col-span-2">{{export.startTimestamp  | date : 'MM/dd/yyyy h:mma'}}</div>
+                    <div class="le-cell le-col-start-3 le-col-span-3"> 
+                        <span class="text-ellipsis">
+                            {{export.inputs['SEGMENT_DISPLAY_NAME'] || '--'}}
+                        </span>
+                    </div>
+                    <div class="le-cell le-col-start-6 le-col-span-2"> {{export.inputs['EXPORT_OBJECT_TYPE'] || '--'}} </div>
+                    <div class="le-cell le-col-start-8 le-col-span-3">{{export.user}}</div>
+                    <div class="le-cell le-col-start-11 le-col-span-2">
+                        <a ng-if="export.jobStatus == 'Completed' && !vm.isExpired(export)" href="javascript:void(0)" ng-click="vm.downloadSegmentExport(export.inputs['SEGMENT_EXPORT_ID'])" class="blue-text text-ellipsis">
+                            <span>Download</span>
+                        </a>
+                        <span ng-if="export.jobStatus != 'Completed' || vm.isExpired(export)"  >
+                            <span class="text-ellipsis">{{vm.getStatus(export)}}</span>
+                            <i class="fa fa-spinner fa-spin spinner-icon" aria-hidden="true" ng-if="export.jobStatus != 'Failed' && !vm.isExpired(export)"></i>
+                        </span>
+                        
+
+                    </div>
+
+                </div>
+                <div class="le-row info-row" ng-if="vm.loading && vm.jobs.length == 0">
+                    <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
+                        <span>
+                            <span class="loading-small"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="le-row info-row" ng-if="vm.jobs.length == 0 && !vm.loading">
+                    <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
+                        <span> There are no jobs to show at the moment </span>
+                    </div>
+                </div>
+        </div>
+
+        <div class="le-grid grid-footer" ng-show="max > 1">
+            <div class="le-row">
+                <div class="le-col-span-12">
+                    <pd-pagination-controls current="vm.currentPage" max="max = (vm.jobs | filter: vm.query).length / vm.pagesize">
+
+                    </pd-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

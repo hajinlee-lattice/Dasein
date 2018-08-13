@@ -1,0 +1,21 @@
+<div class="playbook-preview container" ng-class="{'dashboard-content': vm.stateParams.section.indexOf('dashboard.') !== -1}">
+    <div class="inner-container">
+        <div class="header">
+            <h2>Preview Talking Points</h2>
+        </div>
+        <cg-talking-point-preview play="vm.play"></cg-talking-point-preview>
+
+        <div class="footer" ng-if="vm.stateParams.section.indexOf('dashboard.') !== -1" >
+            <button class="back button white-button" ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Back</button>
+            <div class="publish-info">
+                <span class="published-button" ng-if="!vm.published.Success">
+                    <button class="publish button blue-button" ng-click="vm.publish()" ng-disabled="vm.showPublishingSpinner">Publish</button>
+                    <i ng-if="vm.showPublishingSpinner" class="fa fa-spinner fa-spin fa-fw"></i>
+                </span>
+                <span class="published-text" ng-if="vm.published.Success">
+                    Talking Points have been published.
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

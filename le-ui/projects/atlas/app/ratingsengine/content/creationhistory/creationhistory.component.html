@@ -1,0 +1,64 @@
+<section id="main-content" class="container creation-history">
+
+    <table>
+    	<thead>
+    		<tr>
+    			<th class="sortable" ng-click="vm.sortBy = 'displayName'; vm.sortDesc = !vm.sortDesc">
+                    Model
+                    <i  aria-hidden="true" 
+                        ng-class="{
+                            'fa fa-sort': vm.sortBy != 'displayName',
+                            'fa fa-sort-desc': vm.sortBy === 'displayName' && vm.sortDesc, 
+                            'fa fa-sort-asc': vm.sortBy === 'displayName' && !vm.sortDesc}"></i>
+                </th>
+    			<th class="sortable" ng-click="vm.sortBy = 'createdBy'; vm.sortDesc = !vm.sortDesc">
+                    Created By
+                    <i  aria-hidden="true" 
+                        ng-class="{
+                            'fa fa-sort': vm.sortBy != 'createdBy',
+                            'fa fa-sort-desc': vm.sortBy === 'createdBy' && vm.sortDesc, 
+                            'fa fa-sort-asc': vm.sortBy === 'createdBy' && !vm.sortDesc}"></i>
+                </th>
+    			<th>Internal ID</th>
+    			<th class="sortable" ng-click="vm.sortBy = 'created'; vm.sortDesc = !vm.sortDesc">
+                    Created On
+                    <i  aria-hidden="true" 
+                        ng-class="{
+                            'fa fa-sort': vm.sortBy != 'created',
+                            'fa fa-sort-desc': vm.sortBy === 'created' && vm.sortDesc, 
+                            'fa fa-sort-asc': vm.sortBy === 'created' && !vm.sortDesc}"></i>
+                </th>
+    			<th class="sortable" ng-click="vm.sortBy = 'status'; vm.sortDesc = !vm.sortDesc">
+                    Status
+                    <i  aria-hidden="true" 
+                        ng-class="{
+                            'fa fa-sort': vm.sortBy != 'status',
+                            'fa fa-sort-desc': vm.sortBy === 'status' && vm.sortDesc, 
+                            'fa fa-sort-asc': vm.sortBy === 'status' && !vm.sortDesc}"></i>
+                </th>
+    		</tr>
+    	</thead>
+    	<tbody>
+    		<tr 
+    			ng-repeat="
+    				rating in vm.current.ratings |
+                    orderBy:vm.sortBy:vm.sortDesc |
+    				startFrom: (current - 1) * pagesize |
+                    limitTo: pagesize">
+    			<td>{{rating.displayName}}</td>
+    			<td>{{rating.createdBy}}</td>
+    			<td>{{rating.id}}</td>
+    			<td>{{rating.created | date}}</td>
+    			<td><span ng-class="rating.status === 'ACTIVE' ? 'green-text' : 'red-text'">{{rating.status}}</span></td>
+    		</tr>
+    	</tbody>
+    </table>
+    
+
+
+    <div class="pull-right" ng-init="pagesize = 10; current = 1" ng-show="max > 1">
+        <pd-pagination-controls current="current" max="max = (vm.current.ratings.length / pagesize)">
+        </pd-pagination-controls>
+    </div>
+
+</section>

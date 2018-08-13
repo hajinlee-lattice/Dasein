@@ -1,0 +1,25 @@
+.play-list {
+	.tile-header h2 {
+		background-image: url('/assets/images/ico-insights.png');
+	}
+	.CROSS_SELL_FIRST_PURCHASE {
+		.bar-graph {
+			background-color: #4BAEB5 !important;	
+		}
+	}
+	.CROSS_SELL_REPEAT_PURCHASE {
+		.bar-graph {
+			background-color: #218F73 !important;	
+		}			
+	}
+	.CUSTOM_EVENT {
+		.bar-graph {
+			background-color: #5EA83D !important;	
+		}
+	}
+	.RULE_BASED {
+		.bar-graph {
+			background-color: #8166A3 !important;	
+		}
+	}
+}

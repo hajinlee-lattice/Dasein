@@ -1,0 +1,51 @@
+<div class="modal-dialog" data-ng-controller="FieldMappingSettingsController">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">{{ResourceUtility.getString('FIELDS_ADVANCED_SETTINGS')}}</h4>
+        </div>
+
+        <div data-ng-show="saveInProgress">
+            <div class="modal-body progress">
+                <h2>{{ResourceUtility.getString('GENERAL_SAVING')}}</h2>
+                <div class="meter bar">
+                    <span class="indeterminate"></span>
+                </div>
+            </div>
+        </div>
+
+        <div data-ng-hide="saveInProgress">
+            <div class="modal-body">
+                <div class="row">
+                    <label id="oneLeadPerDomainCheckbox">
+                        <input type="checkbox" id="cbox1" data-ng-model="oneLeadPerDomain">{{sourceType!='SalesforceAccount' ? "One Lead Per Account" : "One Record Per Account"}}
+                        <span 
+                            ng-if="sourceTypeInfoTemplate"
+                            tooltips 
+                            tooltip-template="{{ sourceTypeInfoTemplate }}"
+                            tooltip-size="large"
+                            tooltip-side="bottom"
+                            tooltip-close-button="true" 
+                        class="more-info">&#105;</span>
+                    </label><br />
+                    <label id="includePersonalEmailDomainsCheckbox"><input type="checkbox" id="cbox2" data-ng-model="includePersonalEmailDomains" data-ng-checked="includePersonalEmailDomains"> Include Personal Email Domains </label><br />
+                    <label id="useLatticeAttributesCheckbox"><input type="checkbox" id="cbox3" data-ng-model="useLatticeAttributes" data-ng-checked="useLatticeAttributes"> Use Lattice Data Cloud Attributes </label>
+                    <label id="enableTransfromationsCheckbox"><input type="checkbox" id="cbox4" data-ng-model="enableTransformations" data-ng-checked="enableTransformations"> Enable Transformations </label>
+                </div>
+            </div>
+        </div>
+
+        <div data-ng-hide="saveInProgress">
+            <div class="modal-footer">
+                <div class="row">
+                    <div class="six columns">
+                        <button class="button gray-button block-button" type="button" data-ng-click="cancelClicked()">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+                    </div>
+                    <div class="six columns">
+                        <button class="button orange-button block-button" href="javascript:void(0)" ng-disabled="{{ saveClicked }}" data-ng-click="saveSettingsClicked($event)">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

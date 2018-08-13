@@ -1,0 +1,33 @@
+.playbook-content.crm-selection.container h2 {
+	padding-left: 0;
+}
+.crm-selection {
+	strong {
+		font-weight: bold;
+	}
+	label {
+		display: inline;
+	}
+	tr.disabled {
+		background: #f9f9f9;
+    	color: #b3b3b3;
+	}
+	.ico {
+		padding: 13px 9px;
+	}
+	[data-stooltip]:after {
+		top: -38px;
+		width: 200px;
+		left: -100px;
+		white-space: normal;
+	}
+	.coverage-counts {
+		padding-top: 20px;
+		margin-top: 30px;
+		border-top: #ddd solid 1px;
+		color: #676767;
+		.blank-ids {
+			color: #333;
+		}
+	}
+}

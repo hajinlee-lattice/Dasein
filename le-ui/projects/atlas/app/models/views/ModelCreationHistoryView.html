@@ -1,0 +1,9 @@
+<div data-ng-controller="ModelCreationHistoryController">
+    <div class="no-models text-center"  data-ng-show="showNoModels">
+            <h2>{{ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
+    </div>
+    <div data-ng-hide="showNoModels || loading">
+        <section id="modelCreationHistoryContainer">
+        </section>
+    </div>
+</diV>

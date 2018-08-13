@@ -1,0 +1,430 @@
+.filter-drop-area ul {
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+    list-style-type: none;
+    margin: 10px -1px 10px 10px;
+    min-height: 54px;
+    padding: 0px;
+}
+
+.filter-drop-area>ul>li>ul,
+.filter-drop-area>ul>li>ul>.header {
+    border-top-right-radius: 4px;
+}
+
+.filter-drop-area.fillSpace {
+    top: 40px;
+}
+
+.filter-drop-area>ul {
+    margin-right: 265px;
+    padding: 10px 0px 10px 0px;
+}
+
+li.drop-area-placeholder {
+    background-color: $drop-area-bg-color;
+    border: 3px dashed $drop-area-border-color;
+    border-radius: 6px;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+}
+
+.filter-list {
+    @include filter-list-gradient;
+    color: $placeholder-text-color;
+    border-left: 1px solid $primary-border-color;
+    bottom: 0px;
+    padding: 27px 0px 0px 10px;
+    position: absolute;
+    right: 20px;
+    top: 40px;
+    width: 220px;
+}
+
+.logical-list{
+    margin: 10px 0px 10px 0px;
+}
+
+.logical-source {
+    border-radius: 5px;
+    color: white;
+    line-height: 25px;
+    list-style-type: none;
+    margin: 0px 10px 0px 0px;
+    max-width: 50px;
+    min-height: 25px;
+    min-width: 50px;
+    text-align: center;
+}
+
+.concrete-list-title {
+    margin: 20px 0px 0px 0px;
+}
+
+.filter-list h4 {
+    font-style: italic;
+    margin: 8px 0px 4px 0px;
+    font-weight: normal;
+}
+
+.concrete-list-search>input {
+    height: 30px;
+    margin: 0px;
+    padding: 0px;
+    width: 155px;
+}
+
+.filter-drop-area li.Concrete {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.filter-drop-area p {
+    display: inline-block;
+    margin: 0px 0px 0px 5px;
+    padding: 0px;
+}
+
+ul.OR,
+ul.AND {
+    border: 1px solid $primary-border-color;
+    margin-left: 25px;
+}
+
+ul.OR.odd,
+ul.AND.odd {
+    background: $secondary-bg-color;
+}
+
+ul.OR.even,
+ul.AND.even {
+    background: $primary-bg-color;
+}
+
+.Concrete:hover {
+    box-shadow: 0px 0px 15px -6px;
+    cursor: move;
+}
+
+.Logical:hover {
+    cursor: move;
+}
+
+.filter-drop-area>ul.highlight {
+    background-color: $drop-area-bg-color;
+}
+
+.Concrete {
+    @include filter-node-gradient;
+    border: 1px solid $primary-border-color;
+    border-radius: 4px;
+    margin: 0px 10px 10px 10px;
+    min-width: 400px;
+    transition: border 0.1s ease-in-out;
+}
+
+.concrete-placeholder {
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+    box-shadow: inset 0px 2px 9px #5A5A5A;
+    height: 50px;
+    margin: 0px 0px 10px 10px;
+}
+.concrete-helper {
+    background: #e9e9e9;
+    box-shadow: 0px 2px 9px #5a5a5a;
+    height: 50px;
+    list-style-type: none;
+    margin: 0px;
+    max-height: 50px;
+    max-width: 200px;
+    min-height: 50px;
+    min-width: 200px;
+    padding: 0px;
+    width: 200px;
+}
+
+li.Concrete div {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.logical-delete{
+    background: url("../images/icn_big_red_close.png") no-repeat right center;
+    height: 22px;
+    margin: -22px -22px 0px 0px;
+    width: 22px;
+}
+
+.logical-delete,
+.filter-delete,
+li.Concrete .standardDeleteButton {
+    float: right;
+    visibility: hidden;
+}
+
+li:hover>.logical-delete,
+li:hover>.standardDeleteButton {
+    visibility: visible;
+    cursor: pointer;
+}
+
+li.header {
+    padding: 10px;
+    margin: 0px 0px 10px 0px;
+    border-top-left-radius: 4px;
+}
+
+.logical-list {
+    cursor: move;
+}
+
+li.header.OR {
+    @include filter-OR-gradient;
+}
+li.header.AND {
+    @include filter-AND-gradient;
+}
+
+.btn.OR,
+.btn.AND {
+    color: $main-navigation-text-color;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.btn.OR,
+.logical-list .OR,
+.logical-source.OR,
+.connective-toggle.OR {
+    background: $lattice-deep-blue;
+    background-color: $lattice-dark-orange;
+}
+
+.btn.AND,
+.logical-list .AND,
+.logical-source.AND,
+.connective-toggle.AND {
+    background: $lattice-deep-blue;
+    background-color: $lattice-deep-blue;
+}
+
+//Right hand (draggable) list styles
+.draggable-list-area {
+    padding: 0px 20px 0px 0px;
+    margin: 0px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: absolute;
+    top: 210px;
+    bottom: 0px;
+    max-width: 200px;
+}
+
+.draggable-list-area>ul {
+    padding: 0px;
+    margin: 0px;
+}
+
+.draggable-list-item {
+    background: $filter-list-bg-color;
+    border: 1px solid $primary-border-color;
+    border-radius: 4px;
+    color: $primary-text-color;
+    cursor: move;
+    height: 30px;
+    line-height: 30px;
+    list-style-type: none;
+    margin: 0px 0px 5px 0px;
+    max-width: 180px;
+    min-width: 170px;
+    padding-left: 10px;
+    vertical-align: middle;
+}
+
+.logical-list ul{
+    margin: 0px;
+    padding: 0px;
+}
+
+.logical-list li{
+    display: inline-block;
+}
+//END Right hand (draggable) list styles
+
+// Filter Expression (top area) styles
+.filter-expression-area {
+    font-size: 15px;
+    padding: 0px 0px 0px 20px;
+    height: 39px;
+    line-height: 39px;
+    border-bottom: 1px solid $primary-border-color;
+    @include header-gradient;
+}
+//END Filter Expression (top area) styles
+
+//individual Node styles
+li.Concrete .number-filter-input,
+li.Concrete .date-filter-input {
+    vertical-align: middle;
+    margin: 0px;
+    padding: 0px 0px 0px 2px;
+    height: 30px;
+    border: 1px solid $primary-border-color;
+}
+li.Concrete img.ui-datepicker-trigger {
+    vertical-align: middle;
+}
+//End Date Node Styles
+
+
+// IN OPERATOR STYLES
+li.Concrete div.string-filter-container {
+   border: 1px solid $primary-border-color;
+   border-right: none;
+   max-width: 350px;
+   overflow: hidden;
+}
+
+li.Concrete div.string-filter-table {
+    display: table;
+    width: 350px;
+}
+
+.string-filter-row {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+    display: table-row;
+}
+
+.string-filter-row>li {
+    display: table-cell;
+    background: $primary-bg-color;
+}
+
+.string-filter-row.read-only>li {
+    display: table-cell;
+    background: #EBEBE4;
+}
+
+.string-filter-row .text-box>input {
+    border: none;
+    font-family: 'Helvetica', Arial, Lucida Grande, sans-serif !important;
+    font-size: 12px;
+    height: 30px;
+    margin:0px;
+    max-width: 2px;
+    padding:0px 0px 0px 2px;
+}
+
+.string-filter-row .text-box>input:focus {
+    outline: none;
+}
+
+.string-filter-row .text-box.last{
+    overflow: hidden;
+    min-width: 5px;
+}
+.string-filter-row .text-box.last>input {
+    max-width: none;
+    width: 100%;
+}
+
+.hidden-input {
+    font-family: 'Helvetica', Arial, Lucida Grande, sans-serif !important;
+    font-size: 12px;
+    height: auto;
+    position: absolute;
+    visibility: hidden;
+    width: auto;
+}
+
+.ro-bit {
+    border-left: 3px solid #EBEBE4;
+    height: 30px;
+    vertical-align: middle;
+}
+
+.string-filter-row .bit>span {
+    background-color: #BDD9FF;
+    border: 1px solid #3679bd;
+    border-radius: 3px;
+    height: 20px;
+    padding: 0px 5px 0px 5px;
+    white-space: nowrap;
+}
+
+.string-filter-row .bit>span.active,
+.string-filter-row .bit>span:hover {
+    border: 1px solid #000;
+}
+.string-filter-row .close {
+    color: #3679bd;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-size: 10px;
+    height: 18px;
+    margin-left: 4px;
+}
+.string-filter-row .close:hover {
+    color: #000;
+}
+
+.string-count {
+    background: $primary-bg-color;
+    border: 1px solid $primary-border-color;
+    border-left: none;
+    font-weight: bold;
+    line-height: 30px;
+    margin-left: -3px;
+    padding: 0px 5px 0px 5px;
+}
+
+.string-count.read-only{
+    background: #EBEBE4;
+}
+
+.in_operator_control.ui-dialog-content.ui-widget-content {
+  padding: 0px;
+}
+
+.modal-top-nav>.left>ul,
+.modal-top-nav>.right>ul {
+  display: inline-block;
+  list-style-type: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+.modal-top-nav>.right>ul>li {
+  display: inline-block;
+  padding-left: 12px;
+}
+
+#dialogContainer .modal-body {
+  top: 40px;
+}
+
+.modal-body>.modal-list {
+  margin: 0px;
+  padding: 0px;
+}
+
+.modal-body .modal-list-item {
+  float: left;
+  max-width: inherent;
+  padding-left: 10px;
+  width: 50%;
+}
+
+.select-all-container {
+  padding: 15px 0px 15px 20px
+}
+
+.select-all-container>span {
+  color: $link-color;
+  cursor: pointer;
+  padding: 0px 10px 0px 0px;
+}
+//END IN OPERATOR STYLES

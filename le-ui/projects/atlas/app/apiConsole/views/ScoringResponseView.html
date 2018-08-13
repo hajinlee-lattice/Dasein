@@ -1,0 +1,51 @@
+<div data-ng-show="!scoringRequested">{{ResourceUtility.getString('API_CONSOLE_SCORING_RESPONSE_LABEL_TEST_API')}}</div>
+<div data-ng-show="scoringRequested">
+    <div data-ng-show="scoreRecordLoading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div data-ng-show="!scoreRecordLoading">
+        <div class="global-error local-error" data-ng-show="showScoringRequestError && scoringRequestError != null">
+            <span><i class="fa fa-exclamation-triangle fa-inverse"></i>{{scoringRequestError}}</span>
+        </div>
+        <div data-ng-if="score != null" class="score circle">
+            <label class="form-control">{{ResourceUtility.getString('API_CONSOLE_SCORING_RESPONSE_LABEL_SCORE_')}}&nbsp;
+                <div id="scoreResponseContainer" class="score-response">
+                    <div id="scoreArcDisplay">
+                        <div data-arc-chart
+                            data-chart-size="{{ChartSize}}"
+                            data-chart-value="{{score}}"
+                            data-chart-total="{{ChartTotal}}"
+                            data-chart-color="{{ChartColor}}"
+                            data-chart-label="{{ChartLabel}}"></div>
+                    </div>
+                </div>
+            </label>
+        </div>
+        <div ng-if="score != null" class="response-json">
+            <div>
+                <span style="font-weight: bold">Score:</span>
+                <span>{{score}}</span>
+            </div>
+            <div ng-if="warnings != null">
+                <span style="font-weight: bold">Warnings:</span>
+                <span>{{warnings}}</span>
+            </div>
+            <div ng-if="classification != null">
+                <span style="font-weight: bold">Classification:</span>
+                <span>{{classification}}</span>
+            </div>
+            <div ng-if="scoreId != null">
+                <span style="font-weight: bold">Score Id:</span>
+                <span>{{scoreId}}</span>
+            </div>
+            <div ng-if="scoreTimestamp != null">
+                <span style="font-weight: bold">Score Timestamp:</span>
+                <span>{{scoreTimestamp}}</span>
+            </div>
+        </div>
+        <div data-ng-show="timeElapsed != null">
+            <label>{{ResourceUtility.getString('API_CONSOLE_LABEL_TIME_ELAPSED')}}</label>&nbsp;<span>{{timeElapsed}}</span>
+        </div>
+    </div>
+</div>

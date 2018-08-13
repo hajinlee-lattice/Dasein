@@ -1,0 +1,429 @@
+@import "tabs/jobstabs.component.scss";
+@import "processing/import-jobs.component.scss";
+@import "report/jobreport/jobreport.component.scss";
+@import "export/export.component.scss";
+
+.job-blocked{
+    color: #f47d42;
+}
+
+.jobs-page {
+    .table-header {
+        width: 100%;
+        padding: 0;
+        
+    }
+    pd-pagination-controls,
+    .jobs-pagination-controls {
+        float: right;
+        margin-left: .5em;
+    }
+}
+.jobs-summary {
+    &.summary.blue-fire .black-summary-list.stats h3.summary-title {
+        text-align: center;
+    }
+    .stats.black-summary-list {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: space-between;
+        flex-wrap: wrap-reverse;
+        padding-top: 1em;
+        padding-bottom: 1em;
+    }
+    div.row {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+    }
+    div.row div.columns {
+        display: flex;
+    }
+
+    div.stats-group {
+        dl:nth-child(even) {
+            border-left: 0;
+            padding-left: 0;
+        }
+        dl:nth-child(even):last-child {
+            width: 100%;
+            padding: 0 0.5em;
+            border-top: 1px solid #999;
+        }
+        dl {
+            width: 50%;
+            height: 4em;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+
+            dd,
+            dt {
+                text-align: center;
+            }
+        }
+    }
+}
+.job-success-message {
+    background: rgb(113, 188, 81);
+    margin: 20px 0;
+    padding: 15px 10px 15px 40px;
+    color: white !important;
+
+    div {
+        color: white;
+        font-size: 20px;
+        position: relative;
+
+        i {
+            position: absolute;
+            right: 25px;
+            top: 16px;
+        }
+    }
+}
+.job-creation-failed {
+    background: rgb(164, 1, 15);
+    margin-top: 20px;
+    padding: 15px 10px 15px 40px;
+    color: white !important;
+
+    div {
+        color: white;
+        font-size: 20px;
+        position: relative;
+
+        i {
+            position: absolute;
+            right: 25px;
+            top: 16px;
+        }
+    }
+}
+.selected-icon {
+    background-color: rgb(81, 135, 192) !important;
+}
+.breadcrumb {
+    /*centering*/
+    display: inline-block;
+    overflow: hidden;
+    background-color: #f7f7f7 !important;
+    text-align: center;
+}
+.breadcrumb div {
+    color: black !important;
+    text-decoration: none;
+    outline: none;
+    display: table;
+    float: left;
+    font-size: 15px;
+    position: relative;
+    height: 60px;
+    width: 196px;
+    margin-top: 10px;
+}
+.importMatchAndModelWorkflow .breadcrumb div {
+    width: 33%;
+}
+
+.breadcrumb div:first-child:before {
+    left: 14px;
+}
+.chevron-row {
+    padding-bottom: 1px;
+    border-bottom: #e7e7e7 solid 1px;
+    padding: 18px;
+    &:after {
+        display: table;
+        content: "";
+        clear: both;
+    }
+}
+.progress-info {
+    ul, div {
+        float: left;
+    }
+    ul {
+        margin: 0;
+        padding: 0;
+        li {
+            margin: 0 0 2px 0;
+        }
+    }
+}
+@media only screen and (min-width: 768px) {
+    .progress-info {
+        ul {
+            float: left;
+        }
+        div {
+            float: right;
+        }
+    }
+}
+.download-error-report {
+    border: rgba(0,0,0,0.3) solid 1px;
+    background: #fff;
+    margin: 0 0 0 26px;
+    width: 260px;
+    padding: 10px;
+    strong {
+        font-weight: bold;
+    }
+    p {
+        margin-bottom: 6px;
+    }
+}
+.jobs-table {
+    min-width: 860px;
+}
+.jobs-table-content {
+    color: black;
+    font-size: 15px;
+    .model-name {
+        @include text-ellipsis();
+        display: inline-block;
+        max-width: 100%;
+    }
+    tooltip {
+        tip {
+            font-size: 14px;
+            min-width: 122px;
+            width: auto;
+        }
+    }
+
+    .ngAnimate,
+    .ngAnimate * {
+      -webkit-transition: all 200ms linear;
+      transition: all 200ms linear;
+
+      &.ng-animate {
+        overflow: hidden;
+      }
+
+      &.ng-enter  {
+          min-height: 0;
+          max-height: 0;
+      }
+
+      &.ng-enter-active {
+          min-height: 45px;
+          max-height: auto;
+      }
+
+      &.ng-leave  {
+          min-height: 45px;
+          max-height: auto;
+      }
+
+      &.ng-leave-active {
+          min-height: 0;
+          max-height: 0;
+      }
+    }
+
+    .job-td-row {
+        position: relative;
+        min-height: 45px;
+        width: 100%;
+        box-shadow: 0 -1px 0px 0px #e7e7e7 inset;
+
+        .job-list-item {
+            position: relative;
+        }
+    }
+
+    span.button {
+        padding: 0;
+        border-radius: 3px;
+        vertical-align: top;
+
+        i {
+            margin-right: .6em;
+        }
+        a,span {
+            padding: 0 .8em 0;
+            color: #eee;
+            display: inline-block;
+        }
+        a:visited, a:active {
+            color: #eee;
+        }
+        a:hover {
+            color: white;
+        }
+        span {
+            color: black;
+        }
+    }
+
+    .expanded-true {
+        background: #f7f7f7;
+    }
+
+    div.clearfix {
+        padding-left: 10px;
+
+        * {
+            animation: none;
+            transition: all 0s linear;
+        }
+
+        .Completed {
+            color: rgb(113, 188, 81);
+        }
+
+        .Failed, .Cancelled {
+            color: rgb(233, 33, 45);
+        }
+        .ng-hide-add-active {
+            display: none;
+        }
+    }
+
+    span.job-status-username {
+        padding-right: 2em;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+}
+
+.jobs-table.jobs-import-container{
+    .jobs-table-content.import-jobs{
+        font-size: 12px;
+        line-height: 3;
+        margin-top: -18px;
+        .job-list-item.job-td-row{
+            float: none;
+        }
+    }
+    .cell{
+        padding-left: 10px;
+    }
+    
+    .transparent{
+        opacity: 0;
+    }
+
+    .contact{
+        font-size: 12px;
+        padding: 1em;
+    }
+    .icon-failed {
+        padding: 10px;
+        color: #F16A24;
+    }
+
+
+
+    th.columns{
+        margin: 4px 0 0 0;
+    }
+    .columns{
+        margin: 4px 0 0 0;
+    }
+}
+.data-import-jobs-table {
+    margin-bottom: 0;
+}
+
+/*adding the arrows for the breadcrumbs using rotated pseudo elements*/
+.breadcrumb div:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -30px; /*half of square's length*/
+    /*same dimension as the line-height of .breadcrumb a */
+    width: 60px;
+    height: 60px;
+    /*as you see the rotated square takes a larger height. which makes it tough to position it properly. So we are going to scale it down so that the diagonals become equal to the line-height of the link. We scale it to 70.7% because if square's:
+    length = 1; diagonal = (1^2 + 1^2)^0.5 = 1.414 (pythagoras theorem)
+    if diagonal required = 1; length = 1/1.414 = 0.707*/
+    transform: scale(0.707) rotate(45deg);
+    /*we need to prevent the arrows from getting buried under the next link*/
+    z-index: 1;
+    background: white;
+    /*stylish arrow design using box shadow*/
+    box-shadow:
+        5px -5px 0 5px #f7f7f7;
+    border-radius: 0 0px 0 50px;
+}
+/*we dont need an arrow after the last link*/
+.breadcrumb div:last-child:after {
+    content: none;
+}
+
+.breadcrumb.flat {
+    width: 90%;
+    padding: 0px 0px;
+    border-radius: 0px;
+}
+.flat div {
+    background: white;
+    color: black;
+    transition: all 0.5s;
+}
+.flat div .icon {
+    right: 0;
+    z-index: 99;
+    padding-right: 12px;
+}
+.fa.fa-check {
+    color: rgb(113, 188, 81);
+}
+.flat div span:last-child, .flat div span:nth-last-child(2) {
+    right: 15px;
+}
+
+section.jobs-processing.container{
+    display: flex;
+    flex-direction: column;
+
+    .table-toolbar {
+        display: flex;
+        padding-bottom: 20px;
+        flex-direction: row;
+        // border: 1px solid blue;
+        .left-container{
+            // border: 1px solid green;
+            width: 100%;
+        }
+        .rigth-container {
+            width: 30%;
+            flex-direction: row;
+            align-content: flex-end;
+            margin-right: -3px;
+
+    
+            @media screen and (max-width: 1228px) {
+                width: 50%;
+                margin-right: -60px;
+            }
+
+            @media screen and (max-width: 1161px) {
+                margin-right: -50px;
+            }
+            @media screen and (max-width: 1127px) {
+                margin-right: -40px;
+            }
+            @media screen and (max-width: 1073px) {
+                margin-right: -30px;
+            }
+            @media screen and (max-width: 1010px) {
+                margin-right: -4px;
+            }
+        }
+    }
+    tr{
+        height: 50px;
+        // border: 1px solid green;
+        vertical-align: middle;
+    }
+
+    
+}

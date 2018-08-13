@@ -1,0 +1,40 @@
+<ul class="fields">
+    <li>
+        <label for="options">% Change Spend in last</label>
+        <!-- <input type="number" min=1 max=20 ng-model="vm.options['SpendChange']['WITHIN']['Val']" ng-value="vm.getVals('WITHIN', vm.steps[vm.step].data.SpendChange)"> / -->
+        <select id="options"
+            class="form-control"
+            ng-required="!vm.options['SpendChange']['WITHIN']['Val']"
+            ng-init="vm.initValue('SpendChange.WITHIN.Val', vm.getVals('WITHIN', vm.steps[vm.step].data.SpendChange))" 
+            ng-model="vm.options['SpendChange']['WITHIN']['Val']" 
+            ng-change="vm.setOptions(form)"
+            ng-disabled="!(vm.options['SpendChange']['WITHIN']['Period'])"
+            ng-options="option disable when option > vm.options['SpendChange']['BETWEEN']['Val'] for option in vm.newArray(vm.periods[vm.options['SpendChange']['WITHIN']['Period']])">
+                <option value="" hidden disabled>Select</option>
+            </select>
+        <select id="options"
+            class="form-control"
+            ng-required="!vm.options['SpendChange']['WITHIN']['Period']"
+            ng-init="vm.initValue('SpendChange.WITHIN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.SpendChange))" 
+            ng-model="vm.options['SpendChange']['WITHIN']['Period']" 
+            ng-change="vm.setOptions(form); vm.options['SpendChange']['BETWEEN']['Period'] = vm.options['SpendChange']['WITHIN']['Period']"
+            ng-options="period.value as period.label for period in vm.periodsOptions">
+                <option value="" hidden disabled>--</option>
+            </select>
+    </li>
+    <li>
+        <label for="options">% Change Spend prior to</label>
+        <select id="options"
+            class="form-control"
+            ng-required="!vm.options['SpendChange']['BETWEEN']['Val']"
+            ng-init="vm.initValue('SpendChange.BETWEEN.Val', vm.getVals('BETWEEN', vm.steps[vm.step].data.SpendChange))" 
+            ng-model="vm.options['SpendChange']['BETWEEN']['Val']" 
+            ng-change="vm.setOptions(form)"
+            ng-disabled="!(vm.options['SpendChange']['WITHIN']['Period'])"
+            ng-options="option disable when option < vm.options['SpendChange']['WITHIN']['Val'] for option in vm.newArray(vm.periods[vm.options['SpendChange']['WITHIN']['Period']])">
+                <option value="" hidden disabled>Select</option>
+            </select>
+        
+        <strong ng-init="vm.initValue('SpendChange.BETWEEN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.SpendChange))">{{vm.options['SpendChange']['WITHIN']['Period'] + (vm.options['SpendChange']['WITHIN']['Period'] ? 's' : '')|| ' -- '}}</strong>
+    </li>
+</ul>

@@ -1,0 +1,47 @@
+@import "entry/entry.component.scss";
+@import "content/calendar/calendar.component.scss";
+@import "entry/accounts/accounts.component.scss";
+@import "entry/contacts/contacts.component.scss";
+@import "entry/productpurchases/productpurchases.component.scss";
+@import "entry/productbundles/productbundles.component.scss";
+@import "entry/producthierarchy/producthierarchy.component.scss";
+@import "content/accountids/accountids.component.scss";
+@import "content/contactids/contactids.component.scss";
+@import "content/transactionids/transactionids.component.scss";
+@import "content/productids/productids.component.scss";
+@import "content/producthierarchyids/producthierarchyids.component.scss";
+@import "content/producthierarchy/producthierarchy.component.scss";
+@import "content/thirdpartyids/thirdpartyids.component.scss";
+@import "content/latticefields/latticefields.component.scss";
+@import "content/customfields/customfields.component.scss";
+@import "content/jobstatus/jobstatus.component.scss";
+
+.file-import-content {
+    .header h2 {
+        background: none;
+        padding-left: 0;
+    }
+
+    form {
+        @include flex-container;
+        flex-wrap: wrap;
+        .id-options {
+            @include flex-item(0 1 auto);
+            width: 50%;
+            padding: 10px 0;
+            padding-right: 50px;
+            &:nth-child(even) {
+                padding-right: 0;
+            }
+        }
+        select {
+            background: #fff;
+            height: 30px;
+            font-size: 14px;
+            option[disabled],
+            .disabled {
+                color: #a6a6a6;
+            }
+        }
+    }
+}

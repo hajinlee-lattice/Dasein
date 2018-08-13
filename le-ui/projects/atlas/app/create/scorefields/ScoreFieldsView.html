@@ -1,0 +1,196 @@
+<section class="container custom-fields score-file">
+	<script type="text/ng-template" id="score-field-mapping-row-template.html">
+		<td class="field-mapping-inputs">
+			<select required
+				class="form-control"
+				ng-model="field.userField"
+				ng-change="vm.changeField(field)"
+				ng-class="{'required': vm.requiredFieldsMissing[field.mappedField], 'disabled': (field.userField == vm.ignoredFieldLabel && !vm.requiredFieldsMissing[field.mappedField])}"
+				ng-disabled="vm.NextClicked">
+				<option value="{{ ::vm.ignoredFieldLabel }}"
+						ng-if="field.userField && field.userField !== vm.ignoredFieldLabel"
+						ng-selected="!field.userField">
+					{{ ::vm.ignoredFieldLabel }}
+				</option>
+				<option value="{{ field.userField }}"
+						ng-selected="true">
+						{{ (vm.AvailableFields.length === 0 && field.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : field.userField }}
+				</option>
+				<option value="{{ AvailableField }}"
+						ng-repeat="AvailableField in vm.AvailableFields"
+						ng-if="AvailableField !== field.userField">
+					{{ AvailableField }}
+				</option>
+			</select>
+		</td>
+		<td class="field-mapping-label">
+			<label class="strong">
+				{{ standardField }}
+			</label>
+		</td>
+	</script>
+
+	<div class="row field-mapping-form" ng-if="vm.initialized">
+		<form novalidate name="RequiredFieldMappingForm">
+			<div class="ten offset-one columns box-outline">
+				<div class="section-header">
+					<h4>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MAP_FIELDS_TITLE')}}</h4>
+					<h5>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MAP_FIELDS_LABEL')}}</h5>
+				</div>
+				<hr />
+				<table class="section-body unstyled field-mapping-standard">
+					<thead>
+						<tr>
+							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
+							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:1"
+							ng-init="field = vm.standardFieldMappings[standardField]"
+							ng-if="field.mappedField !== null"
+							ng-include="'score-field-mapping-row-template.html'">
+						</tr>
+						<tr class="field-mapping-row-spacer field-mapping-row-spacer-odd"><td colspan=100></td></tr>
+						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:2:1"
+							ng-init="field = vm.standardFieldMappings[standardField]"
+							ng-if="field.mappedField !== null"
+							ng-include="'score-field-mapping-row-template.html'">
+						</tr>
+						<tr class="field-mapping-row-spacer field-mapping-row-spacer-odd"><td colspan=100></td></tr>
+						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:1:3"
+							ng-init="field = vm.standardFieldMappings[standardField]"
+							ng-if="field.mappedField !== null"
+							ng-include="'score-field-mapping-row-template.html'">
+						</tr>
+						<tr class="field-mapping-row-spacer field-mapping-row-spacer-odd"><td colspan=100></td></tr>
+						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:vm.standardFieldsList.length:4"
+							ng-init="field = vm.standardFieldMappings[standardField]"
+							ng-if="field.mappedField !== null"
+							ng-include="'score-field-mapping-row-template.html'">
+						</tr>
+					</tbody>
+				</table>
+
+				<div class="container section-actions" ng-if="!vm.NextClicked">
+					<div class="pull-left">
+						<button type="button"
+							class="button gray-button nav-button"
+							ng-click="vm.clickCancel()">
+							CANCEL
+						</button>
+
+					</div>
+					<div class="section-validation pull-left" ng-if="!vm.FormValidated">
+						<div class="has-error">
+							<ul class="help-block">
+								<li ng-if="vm.requiredFieldsMissing['Id']">Please map Id</li>
+								<li ng-if="vm.requiredFieldsMissing['CompanyName'] || vm.requiredFieldsMissing['Email'] || vm.requiredFieldsMissing['Website'] || vm.requiredFieldsMissing['DUNS']">Please map {{::vm.schema === 'SalesforceAccount' ? 'Website' : 'Email'}} {{::vm.useFuzzyMatch ? 'or Company Name or DUNS' : ''}}</li>
+							</ul>
+						</div>
+					</div>
+					<div class="pull-right">
+						<button type="button"
+							class="button orange-button nav-button"
+							ng-disabled="!vm.FormValidated"
+							ng-click="vm.clickNext()">
+							{{::vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+						</button>
+					</div>
+					<div class="pull-right section-actions-tertiary">
+						<button type="button"
+								ui-sref="home.model.scoring"
+								class="button gray-button nav-button">
+							BACK
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<div class="row field-mapping-form" ng-if="vm.initialized">
+		<form novalidate name="AdditionalFieldMappingForm">
+			<div class="ten offset-one columns box-outline" ng-class="{ 'disabled': !vm.NextClicked }">
+				<div class="section-header">
+					<h4 ng-class="{'silent': !vm.NextClicked}">{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MAP_FIELDS_ADDITIONAL_TITLE')}}<span class="default" ng-if="!vm.NextClicked"> - Step 2</span></h4>
+					<h5 ng-if="vm.NextClicked">
+						{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MAP_FIELDS_ADDITIONAL_CHECK')}}
+					</h5>
+				</div>
+				<span ng-if="!vm.NextClicked" style="display:block;margin-top:1em;"></span>
+				<hr ng-if="vm.NextClicked" />
+				<table class="section-body unstyled field-mapping-additional" ng-if="vm.NextClicked">
+					<thead>
+						<tr>
+							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
+							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="field in vm.additionalFieldMappings"
+							ng-if="field.mappedField !== null">
+							<td class="field-mapping-label">
+								<label for="fieldType_{{ field.mappedField }}">
+									{{ field.mappedField }}
+								</label>
+							</td>
+							<td class="field-mapping-inputs">
+								<select required
+										name="mapping_lattice_field_select_{{ field.mappedField }}"
+										class="form-control"
+										ng-model="field.userField"
+										ng-change="vm.changeField(field)"
+										ng-class="{'required': vm.requiredFieldsMissing[field.mappedField], 'disabled': (field.userField == vm.ignoredFieldLabel && !vm.requiredFieldsMissing[field.mappedField])}">
+									<option value="{{ vm.ignoredFieldLabel }}"
+											ng-if="field.userField && field.userField !== vm.ignoredFieldLabel"
+											ng-selected="!field.userField">
+										{{ vm.ignoredFieldLabel }}
+									</option>
+									<option value="{{ field.userField }}"
+											ng-selected="true">
+										{{ (vm.AvailableFields.length === 0 && field.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : field.userField }}
+									</option>
+									<option value="{{ AvailableField }}"
+											ng-repeat="AvailableField in vm.AvailableFields"
+											ng-if="AvailableField !== field.userField">
+										{{ AvailableField }}
+									</option>
+								</select>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<div class="container section-actions" ng-if="vm.NextClicked">
+					<div class="pull-left">
+						<button data-ng-click="vm.clickCancel()" class="button gray-button nav-button" type="button">
+							CANCEL
+						</button>
+					</div>
+					<div class="pull-right">
+						<button
+								ng-click="vm.clickNextScore(); NextClicked2 = true;"
+								ng-disabled="fieldMappingForm.$invalid || NextClicked2 || !vm.FormValidated"
+								class="button orange-button nav-button"
+								type="button">
+							{{::vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+						</button>
+					</div>
+					<div class="pull-right section-actions-tertiary">
+						<button
+								ng-click="vm.clickRemap()"
+								class="button gray-button nav-button"
+								type="button">
+							EDIT PREVIOUS FIELDS
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</section>

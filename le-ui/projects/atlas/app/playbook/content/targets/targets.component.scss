@@ -1,0 +1,61 @@
+.playbook-targets {
+     & > .header,
+     &.sub-header {
+        h2 {
+            background-repeat: no-repeat;
+            background-image: url('/assets/images/ico-targets.png');
+        }
+    }
+    &.sub-header {
+        h2 {
+            padding-left: 30px;
+            margin-bottom: 10px;
+        }
+    }
+
+    .target-tabs {
+        border-bottom: 1px solid #f1f1f1;
+        vertical-align: bottom;
+        padding-bottom: 3px;
+        margin-bottom: 1em;
+        li {
+            display: inline;
+            margin-right: 8px;
+            background-color: #f1f1f1;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            padding: 6px 8px;
+            border: solid #e4e4e4;
+            border-width: 1px 1px 1px 1px;
+            cursor: pointer;
+            text-align: center;
+            width: 100px;
+            &.active {
+                background-color: white;
+                border-bottom: 1px solid white;
+            }
+        }
+    }
+
+    table.list-table {
+        td {
+            border-right: none !important;
+        }
+        th {
+            color: black !important;
+        }
+        .sort {
+            &:after {
+                margin-left: 3px;
+                content: "\f078";
+                font-family: FontAwesome;
+                font-style: normal;
+                font-weight: normal;
+                text-decoration: inherit;
+            }
+            &.sort-desc:after {
+                content: "\f077";
+            }
+        }
+    }
+}

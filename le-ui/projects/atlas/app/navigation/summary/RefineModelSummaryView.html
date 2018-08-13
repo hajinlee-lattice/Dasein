@@ -1,0 +1,60 @@
+<div class="summary blue-fire">
+
+	<div class="data">
+		<div class="type-overview">
+	        <div class="stats black-summary-list stats-group">
+	            <h3 class="summary-title">{{vm.schemaInterpretation == 'SalesforceLead' ? 'Leads' : 'Accounts'}}</h3>
+	            <dl>
+	                <dt>Before</dt>
+	                <dd id="detail-status">{{vm.totalRecords}}</dd>
+	            </dl>
+	            <dl>
+	                <dt>After</dt>
+	                <dd id="detail-created">{{vm.totalRecordsAfterDisplay}}</dd>
+	            </dl>
+	        </div>
+	    </div><!-- End .type-overview -->
+
+	    <div class="type-leads">
+	        <div class="stats black-summary-list stats-group">
+	            <h3 class="summary-title">Success Events</h3>
+	            <dl>
+	                <dt>Before</dt>
+	                <dd id="detail-status">{{vm.successEvents}}</dd>
+	            </dl>
+	            <dl>
+	                <dt>After</dt>
+	                <dd id="detail-created">{{vm.successEventsAfterDisplay}}</dd>
+	            </dl>
+	        </div>
+	    </div><!-- End .type-leads -->
+
+	    <div class="type-conversions">
+	        <div class="stats black-summary-list stats-group">
+	            <h3 class="summary-title">Conversion Rate</h3>
+	            <dl>
+	                <dt>Before</dt>
+	                <dd id="detail-status">{{vm.conversionRate}}%</dd>
+	            </dl>
+	            <dl>
+	                <dt>After</dt>
+	                <dd id="detail-created">{{vm.conversionRateAfter}}%</dd>
+	            </dl>
+	        </div>
+	    </div><!-- End .type-conversions -->
+
+	</div><!-- End .data -->
+
+    <div class="nav review-model">
+		<div class="button angled-button" ui-sref-active="active">
+			<a ui-sref="home.model.review.columns"><span>Training Attributes</span></a>
+		</div>
+		<!-- <div class="button angled-button" ui-sref-active-eq="active">
+	        <a ui-sref="home.model.review"><span>Training Rows</span></a>
+	    </div> -->
+	    <div class="pull-right">
+	    	<button type="button" data-ng-click="vm.createModelClicked()" class="button orange-button nav-primary-button">Create New Model</button>
+	    </div>
+	</div><!-- End .nav -->
+
+</div>

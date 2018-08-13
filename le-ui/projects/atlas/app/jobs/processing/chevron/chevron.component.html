@@ -1,0 +1,23 @@
+<div class="job-subactions le-col-start-1 le-col-span-12">
+    <div class="le-row chevron-element">
+        <ol class="wizard job-status le-col-start-1 le-col-span-12">
+            <li class="le-col-span-3 chevron-element" 
+                ng-repeat="(key, value) in vm.chevronConfig"
+                ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
+                <div class="chevron-element">
+
+                    <span class="step-container">
+                        <span>{{value.lable}} </span>
+                        <span class="end-time" title="Completion time" ng-if="vm.isStepDone($index) && !vm.isStepFailed($index) && !vm.isStepRunning($index)">{{vm.getEndTime(key) | date : 'MM/dd/yyyy h:mma'}}</span>
+                    </span>
+                    <span>
+                        <span class="loading-small" ng-if="vm.isStepRunning(key)"></span>
+                        <i class="fa fa-check" ng-if="vm.isStepDone(key) && !vm.isStepFailed(key) && !vm.isStepRunning(key)"></i>
+                        <i class="fa fa-exclamation-triangle" ng-if="vm.isStepFailed(key)"></i>
+                    </span>
+
+                </div>
+            </li>
+        </ol>
+    </div>
+</div>

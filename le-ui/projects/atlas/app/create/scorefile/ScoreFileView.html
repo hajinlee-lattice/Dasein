@@ -1,0 +1,48 @@
+<section class="container setup-import score-file">
+  <form name="uploadForm" novalidate>
+
+    <div class="row" ng-if="vm.showImportError">
+      <div class="ten offset-one columns">
+        <div class="messaging error-messaging">You're file could not be scored.</div>
+      </div>
+    </div>
+
+    <div class="row">
+        <div class="ten offset-one columns box-outline">
+          <div class="section-header">
+            <h4>{{ vm.schema }} File</h4>
+            <h5>Upload a CSV file with {{ vm.schema | lowercase }}s to score. {{:: !vm.isPmml ? 'After a file is uploaded you will have a chance to map it to the fields in the model.' : '' }}</h5>
+          </div>
+          <hr />
+          <div
+              file-uploader-container
+              params="vm.params"
+              input-name="csvFileName"
+              default-message="vm.params.defaultMessage"
+              file-select="vm.fileSelect(fileName)"
+              file-load="vm.fileLoad(headers)"
+              file-done="vm.fileDone(result)"
+              file-cancel="vm.fileCancel()"
+              class="section-body with-padding form-group file-upload"
+              ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
+          </div>
+          <hr />
+          <div class="container section-actions">
+            <div class="three columns pull-left">
+              <button type="button" ui-sref="home.model.jobs" class="button gray-button block-button">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
+            </div>
+            <div class="three columns pull-right">
+              <button
+                  type="button"
+                  class="button orange-button block-button"
+                  ng-disabled="uploadForm.$invalid || !vm.uploaded"
+                  ng-click="vm.clickNext(vm_uploader.choosenFileName)">
+                {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>

@@ -1,0 +1,22 @@
+<div class="modal-dialog modal-sm" data-ng-controller="StaleModelController">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<!--           <h4 class="modal-title">{{ResourceUtility.getString('MODEL_STALE_TITLE')}}</h4> -->
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="twelve columns">
+              <p>{{ResourceUtility.getString('MODEL_STALE_SERVICE_ERROR')}}</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="row">
+            <div class="six columns offset-six">
+              <button class="button orange-button block-button" type="button" data-ng-click="confirmClick()">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>

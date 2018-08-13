@@ -41,7 +41,7 @@ Instructions are for Linux (Ubuntu) found via Google. Mac/Windows is similar, us
     This project is built only in grunt
     `insights`
     This project can be built with grunt or webpack
-    `leadprioritization`
+    `atlas`
     This project can be built with grunt or webpack
     This project contains the atlas code base
     `login`
@@ -69,14 +69,14 @@ Instructions are for Linux (Ubuntu) found via Google. Mac/Windows is similar, us
 During this process the UI is going to call stack A for the API
 Configuration for NODE_ENV ./bin/.enva
 1. cd to the root of le-ui folder
-2. `npm run wpdeva` ==> This command is going to call wp in watch mode for login, leadprioritization, insight projects. It is also calling devsetup.js (bin folder) 
+2. `npm run wpdeva` ==> This command is going to call wp in watch mode for login, atlas, insight projects. It is also calling devsetup.js (bin folder) 
 3. open browser on localhost:3001 ==> login app shown
 
 - USE OF STACK B
 During this process the UI is going to call stack B for the API
 Configuration for NODE_ENV ./bin/.envb
 1. cd to the root of le-ui folder
-2. `npm run wpdeva` ==> This command is going to call wp in watch mode for login, leadprioritization, insight projects. It is also calling devsetup.js (bin folder) 
+2. `npm run wpdeva` ==> This command is going to call wp in watch mode for login, atlas, insight projects. It is also calling devsetup.js (bin folder) 
 3. open browser on localhost:3001 ==> login app shown
 
 - BUILD PRODUCTION and RUN LOCAL
@@ -88,7 +88,7 @@ NOTE: The changes made in this mode are going to be reflected till `npm run buil
 ##BUILD FOR PRODUCTION
 `npm run build`
 1. The grunt tasks runner is going to produce inside ./projects/common/assets the min.js files
-2. The webpack bundler is going to produce inside login, leadprioritization, insights a `dist` folder with html, js, other resorces
+2. The webpack bundler is going to produce inside login, atlas, insights a `dist` folder with html, js, other resorces
 
 ##package.json scripts
 `install`: install all the node modules in all the projects and at the root level
@@ -119,7 +119,7 @@ NOTE: The changes made in this mode are going to be reflected till `npm run buil
 `//`: 
 `InstallCommon`: Install node modules in the `common` project
 `InstallPD`: 
-`InstallLP`: Install node modules in `leadprioritization` project
+`InstallLP`: Install node modules in `atlas` project
 `InstallLP2`:
 `InstallInsights`: Install node modules in `insights` project
 `InstallDante`: Install node modules in `dante` project
@@ -158,8 +158,8 @@ NOTE: The changes made in this mode are going to be reflected till `npm run buil
 `lint_admin`: 
 `wp-loginbuild`: build login project in production mode (dist folder generated inside login folder)
 `wp-logindev`: build login project and start webpack in watch mode (if changes are made the bundle is regenerated)
-`wp-lpdev`: build leadprioritization project and start webpack in watch mode (if changes are made the bundle is regenerated)
-`wp-lpprod`: build leadprioritization project in production mode (dist folder generated inside leadprioritization folder) 
+`wp-lpdev`: build atlas project and start webpack in watch mode (if changes are made the bundle is regenerated)
+`wp-lpprod`: build atlas project in production mode (dist folder generated inside atlas folder) 
 `wp-insightsbuild`: build insights project in production mode (dist folder generated inside insights folder) 
 `wp-insightsdev`: build insights project and start webpack in watch mode (if changes are made the bundle is regenerated)
 `wpdeva`: build the projects and starts webpack in watch mode on stack A 

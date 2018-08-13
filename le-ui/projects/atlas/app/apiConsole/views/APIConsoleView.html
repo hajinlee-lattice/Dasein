@@ -1,0 +1,23 @@
+<section id="api-console" class="container" ng-controller="APIConsoleController">
+    <div data-ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div data-ng-if="!loading && !showLoadingError">
+        <div class="summary blue-fire">
+            <div class="caption left"><label>{{ResourceUtility.getString('API_CONSOLE_TITLE_REQUEST')}}</label></div>
+            <i class="fa fa-exchange"></i>
+            <div class="caption right"><label>{{ResourceUtility.getString('API_CONSOLE_TITLE_RESPONSE')}}</label></div>
+        </div>
+        <div class="body">
+            <div class="row">
+                <div class="columns half border-right">
+                    <scoring-request></scoring-request>
+                </div>
+                <div class="columns half second">
+                    <scoring-response></scoring-response>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

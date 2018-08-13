@@ -1,0 +1,36 @@
+<div id="delete-user-modal">
+    <div class="modal-dialog" data-ng-controller="DeleteUserController">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">{{ResourceUtility.getString('DELETE_USER_TITLE')}}</h4>
+            </div>
+            <div class="modal-body">
+                <div data-ng-show="deleteInProgress">
+                    <div class="loader"> </div>
+                    <h2 class="text-center">{{ deleteLoadingMsg }}</h2>
+                </div>
+                <table class="delete-warning" data-ng-hide="deleteInProgress">
+                    <tr>
+                        <td><i class="fa fa-exclamation-triangle fa-2x text-danger"></i></td>
+                        <td>{{ResourceUtility.getString('DELETE_USER_CONFIRM_MESSAGE')}}</td>
+                    </tr>
+                </table>
+                <div class="global-error local-error" data-ng-show="showDeleteUserError">
+                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{deleteUserErrorMessage}}</span>
+                    <button class="close btn btn-link" data-ng-click="showDeleteUserError = false;"><i class="fa fa-times fa-inverse"></i></button>
+                </div>
+            </div>
+            <div data-ng-hide="deleteInProgress" class="modal-footer">
+                <div class="row">
+                    <div class="six columns">
+                        <button class="button gray-button block-button" data-ng-click="noClick()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
+                    </div>
+                    <div class="six columns">
+                        <button class="button orange-button block-button" data-ng-click="yesClick()">{{ResourceUtility.getString('BUTTON_YES_LABEL')}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

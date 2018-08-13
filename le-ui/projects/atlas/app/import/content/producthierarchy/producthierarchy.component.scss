@@ -1,0 +1,68 @@
+.import-producthierarchy {
+    h2 {
+        background-image: url('/assets/images/ico-data-import-dark.png');
+    }
+
+    select {
+        background: #fff;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .dedupe-options {
+        @include flex-container;
+        flex-direction: row;
+    }
+
+    .dedupe-options-item {
+        @include flex-item(0 0 auto);
+        width: 50%;
+        margin: 20px 0 34px;
+        &:first-child {
+            padding-right: 2em;
+        }
+        &:last-child {
+            padding-left: 2em;
+        }
+    }
+    
+    .button-tabs {
+        display: flex;
+        justify-content: space-between;
+        .button {
+            width: 100%;
+            padding: 68px 40px 15px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: baseline;
+            background-repeat: no-repeat;
+            background-position: center 22px;
+            text-transform: none;
+            color: #333;
+            height: 130px;
+            max-height: 130px;
+            span {
+                white-space: pre-wrap;
+            }
+            &.custom-dedupe {
+                background-image: url('/assets/images/ico-id-dark.png');
+            }
+            &.lattice-dedupe {
+                background-image: url('/assets/images/ico-small-lattice-logo-dark.png');
+            }
+            &.blue-button {
+                color: #fff;
+                &.custom-dedupe {
+                    background-image: url('/assets/images/ico-id-white.png');
+                }
+                &.lattice-dedupe {
+                    background-image: url('/assets/images/ico-small-lattice-logo-white.png');
+                }
+            }
+        }
+    }
+
+    .text-block {
+        margin: 2em 0;
+    }
+}

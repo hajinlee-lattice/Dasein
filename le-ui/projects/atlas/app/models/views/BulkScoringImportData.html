@@ -1,0 +1,63 @@
+<section class="container setup-import">
+<form name="uploadForm" novalidate>
+  
+    <div class="row">
+        <div class="six columns offset-three">
+          <div 
+              file-uploader-container
+              label="{{vm.params.label}}"
+              info-template="vm.params.infoTemplate"
+              params="vm.params"
+              input-name="csvFileName"
+              default-message="vm.params.defaultMessage"
+              file-select="vm.fileSelect(fileName)"
+              file-load="vm.fileLoad(headers)"
+              file-done="vm.fileDone(result)"
+              file-cancel="vm.fileCancel()"
+              class="form-group file-upload" 
+              ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
+          </div>
+        </div>
+    </div>
+
+    <div class="row">
+    	<div class="three columns offset-three">
+    		<button type="button" ui-sref="home.model.jobs" class="button gray-button block-button">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
+    	</div>
+    	<div class="three columns">
+            <button 
+                type="button" 
+                class="button orange-button block-button"
+                ng-disabled="uploadForm.$invalid || !vm.uploaded"
+                ng-click="vm.clickNext(vm_uploader.choosenFileName)">
+              {{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+            </button>
+    	</div>
+    </div>
+    <br><br>
+    <div class="row">
+        <div class="six columns offset-three">
+            <table class="no-stripes">
+                <thead>
+                    <tr>
+                        <th>Required Fields</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="requiredField in vm.requiredFields | orderBy: -requiredField | startFrom: (vm.current - 1) * vm.pagesize | limitTo: vm.pagesize">
+                        <td>{{requiredField}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row required-fields-pagination" ng-init="vm.pagesize = 10; vm.current = 1" ng-show="vm.max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls current="vm.current" max="vm.max = vm.requiredFields.length / vm.pagesize">
+            </pd-pagination-controls>
+        </div>
+    </div>
+
+</form>
+</section>

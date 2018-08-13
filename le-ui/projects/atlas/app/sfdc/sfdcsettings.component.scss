@@ -1,0 +1,22 @@
+.salesforce-settings {
+	.row {
+		margin-bottom: 40px;
+	}
+	button, table {
+		margin-top: 10px;
+	}
+	select {
+		height: 30px;
+	}
+	.unregisterd {
+		display: none;
+	}
+	.disabled {
+		background: #eaeaea;
+		color: #7d7d7d;
+		.unregisterd {
+			font-style: italic;
+			display: inline-block;
+		}
+	}
+}

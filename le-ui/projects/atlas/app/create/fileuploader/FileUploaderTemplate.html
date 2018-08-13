@@ -1,0 +1,65 @@
+<label for="loadfile" ng-if="vm_uploader_container.label || vm_uploader_container.infoTemplate">
+  <span class="tooltip-label">{{ vm_uploader_container.label }} <span ng-if="vm_uploader.fileRequired == 'false'">(optional)</span></span>
+
+    <span ng-if="vm_uploader_container.infoTemplate">
+        <span class="show-tooltip delay {{vm_uploader_container.getTooltipConfig('tooltipSide') || 'top'}}" ng-class="{'gray-tip': vm_uploader_container.getTooltipConfig('whiteBackground')}">
+            <span class="more-info"> &#105; </span>
+            <div class="tooltip_ {{vm_uploader_container.getTooltipConfig('tooltipSize') || 'large'}}">
+                <div class="cover" ng-class="{'white-background': vm_uploader_container.getTooltipConfig('whiteBackground'), 'white-font': vm_uploader_container.getTooltipConfig('whiteFont')}" ng-bind-html="vm_uploader_container.infoTemplate">
+                </div>
+            </div>
+        </span>
+    </span>
+
+</label>
+
+<div class="fileUpload button form-control" ng-class="{ 'required': vm_uploader.fileRequired == 'true' }">
+    <span id="csvFileUploadMessage" class="placeholder" ng-if="vm_uploader.showFileIcon()">
+      {{ vm_uploader.defaultMessageFn() || vm_uploader.defaultMessage }}
+    </span>
+    
+    <div 
+        class="progress processing" 
+        ng-show="vm_uploader.showCompressingBar()" 
+        ng-style="{ width: vm_uploader.compress_percent + '%' }">
+      <span><span></span></span>
+    </div>
+    <div 
+        class="progress uploading {{vm_uploader.uploaded ? 'finished' : 'animate'}}" 
+        ng-show="vm_uploader.showUploadingBar()" 
+        ng-style="{width: (vm_uploader.uploaded ? '100' : vm_uploader.upload_percent) + '%'}">
+      <span><span></span></span>
+    </div>
+    
+    <span ng-show="vm_uploader.showFileDisplayName()">
+      {{vm_uploader.selectedFileDisplayName}}
+    </span>
+    
+    <input 
+        type="file"
+        accept="{{ vm_uploader.fileAccept ? vm_uploader.fileAccept : '.csv' }}"
+        id="uploadBtn"
+        name="{{ vm_uploader_container.inputName }}"
+        class="upload"
+        onclick="this.value = null"
+        ng-hide="vm_uploader.uploading"
+        ng-model="vm_uploader.selectedFileName"
+        ng-required="{{vm_uploader.fileRequired}}"
+        ng-disabled="vm_uploader.inputDisabled"
+        file-uploader="vm_uploader.selectedFile" />
+    
+    <i class="fa fa-file-text" ng-if="vm_uploader.showFileIcon()"></i>
+    <i class="fa fa-spinner fa-pulse" ng-if="vm_uploader.showSpinnerIcon()"></i>
+    <i class="fa fa-close" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCancelIcon()"></i>
+    <i class="fa fa-check" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCheckIcon()"></i>
+</div>
+
+<p class="help-block">
+  {{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}
+</p>
+<p class="uploader-message">
+  {{vm_uploader.message}}
+  <span class="pull-right">
+    {{ vm_uploader.percentage ? vm_uploader.percentage + '%' : '' }}
+  </span>
+</p>

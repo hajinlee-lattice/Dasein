@@ -1,0 +1,93 @@
+<div class="ratingengine-segment playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
+    <div class="inner-container">
+        <form name="segment_form">
+            <div class="header">
+                <h2 ng-if="vm.type.engineType != 'RULE_BASED' && vm.stateParams.wizard_steps != 'customevent'">Which segment do you want to sell into?</h2>
+                <h2 ng-if="vm.type.engineType === 'RULE_BASED'">Segments</h2>
+                <h2 ng-if="vm.stateParams.wizard_steps == 'customevent'">Which segment do you want to score?</h2>
+            </div>
+
+            <div class="content-body no-data" ng-if="!vm.hasSegments">
+                There are currently no Segments to select. <br/>Please <a ui-sref="home.segment.explorer.attributes({segment:'Create'})">create at least one Segment</a> in order to create your Model.
+            </div>
+
+            <div class="content-body" ng-if="vm.hasSegments">
+
+                <div ng-if="vm.stateParams.wizard_steps == 'customevent' && vm.showScoreTrainingFileOption" class="checkbox-option"> 
+                  <label>
+                    <input type="checkbox" ng-model="vm.scoreTrainingFile"
+                           ng-click="vm.selectTrainingFile()">
+                    Only score the training file
+                   </label><br/>
+                </div>
+
+                <div class="filters">
+                    <div class="ng-search" ng-class="{'disabled': vm.scoreTrainingFile}">
+                        <input type="text" class="form-control" placeholder="Search {{vm.segments.length}} Segments" ng-model="vm.search" ng-disabled="vm.scoreTrainingFile"/>
+                        <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
+                            <span class="fa fa-search" ng-show="!vm.search.length"></span>
+                            <span class="fa fa-times" ng-show="vm.search.length"></span>
+                        </a>
+                    </div>
+                </div>
+
+                <ul class="list">
+                    <li class="item header segment">
+                        <ul>
+                            <li class="name" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'display_name'">
+                                Segment
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                            </li>
+                            <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'accounts'">
+                                Accounts
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                            </li>
+                            <li class="contacts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'contacts'">
+                                Contacts 
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                            </li>
+                        </ul>
+                    </li>
+                    <li 
+                        ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) 
+                                    | orderBy: vm.sortBy
+                                    | startFrom: (vm.currentPage - 1) * vm.pageSize 
+                                    | limitTo: vm.pageSize"
+                        ng-disabled="vm.block_user || vm.scoreTrainingFile"
+                        class="item segment">
+                        <ul>
+                            <li class="name">
+                                <input  type="radio" 
+                                        id="{{segment.name}}" 
+                                        name="segment.name"
+                                        ng-value="segment.name"
+                                        ng-model="vm.stored.segment_selection" 
+                                        ng-click="vm.setSegment(segment)" />
+                                <label for="{{segment.name}}">{{segment.display_name}}</label></li>
+                            <li class="accounts">
+                                <span ng-if="segment.accounts">{{segment.accounts|number}}</span>
+                                <span ng-if="!segment.accounts">0</span>
+                            </li>
+                            <li class="contacts">
+                                <span ng-if="segment.contacts">{{segment.contacts|number}}</span>
+                                <span ng-if="!segment.contacts">0</span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="pd-pagination-container-margin-top pull-right">
+                    <pd-pagination-controls
+                        current="vm.currentPage"
+                        max="filteredList.length / vm.pageSize"
+                        ng-if="vm.showPagination">
+                    </pd-pagination-controls>
+                </div>
+            </div><!-- End .content-body -->
+            <button class="button blue-button" ng-if="vm.stateParams.section === 'dashboard.segment'" ng-click="vm.savePlay()" ng-disabled="!vm.stored.segment_selection">Save</button>
+        </form>
+    </div>
+</div>

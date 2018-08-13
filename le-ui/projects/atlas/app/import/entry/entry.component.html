@@ -1,0 +1,76 @@
+<section class="container setup-import data-import" ng-controller="ImportEntry as vm">
+  <div class="row">
+    <div class="global-error local-error" data-ng-show="vm.showImportError">
+        <i data-ng-click="vm.showImportError = false;" class="fa fa-times fa-inverse close"></i>
+        {{vm.importErrorMsg}}
+    </div>
+    <div class="columns eight offset-two box-outline">
+      <div class="section-header">
+        <h4>Import</h4>
+      </div>
+      <hr />
+      <div class="section-body with-padding">
+        <div class="button-tabs">
+          <div class="button account {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Account', 'accounts');" ui-sref="home.import.entry.accounts">
+            <span>Accounts</span>
+          </div>
+          <div class="button contact {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Contact', 'contacts');" ui-sref="home.import.entry.contacts">
+            <span>Contacts</span>
+          </div>
+          <div class="button purchases {{ vm.goState == 'product_purchases' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Transaction', 'product_purchases');" ui-sref="home.import.entry.product_purchases" ng-if="vm.showProductPurchaseImport">
+            <span>Product Purchases</span>
+          </div>
+          <div class="button products {{ vm.goState == 'product_bundles' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_bundles', 'BundleSchema');" ui-sref="home.import.entry.product_bundles" ng-if="vm.showProductBundleImport">
+            <span>Product Bundles</span>
+          </div>
+          <div class="button product_hierarchy {{ vm.goState == 'product_hierarchy' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_hierarchy', 'HierarchySchema');" ui-sref="home.import.entry.product_hierarchy" ng-if="vm.showProductHierarchyImport">
+            <span>Product Hierarchy</span>
+          </div>
+        </div>
+        
+        <div class="import-additional-info import-additional-info-{{vm.goState}}" ui-view="entry_content"></div>
+        <div ng-if="vm.invalidcolumns.length > 0" class="invalid-columns-container">
+            <div>
+                <i class="fa fa-exclamation-triangle"></i>
+                <p> The uploaded file containes a reserved character (^/). Please check and upload again.</p>
+            </div>
+            <span ng-click="vm.closeWarning()">x</span>
+        </div>
+        <div
+            file-uploader-container
+            label="Select and Upload File"
+            params="vm.params"
+            input-name="csvFileName"
+            file-select="vm.fileSelect(fileName)"
+            file-load="vm.fileLoad(headers)"
+            file-done="vm.fileDone(result)"
+            file-cancel="vm.fileCancel()"
+            class="form-group file-upload" 
+            default-message-fn="vm.getDefaultMessage()"
+            ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
+        </div>
+      </div>
+      <hr />
+      <div class="container section-actions row form-actions">
+        <div class="pull-left">
+            <button 
+                type="button" 
+                class="button white-button block-button"
+                ui-sref="home.segment.explorer.attributes({segment:'Create'})">
+              Back
+            </button>
+        </div>
+
+        <div class="pull-right">
+            <button 
+                type="button" 
+                class="button blue-button"
+                ng-disabled="!vm.next"
+                ng-click="vm.click()">
+              Next, Field Mappings
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

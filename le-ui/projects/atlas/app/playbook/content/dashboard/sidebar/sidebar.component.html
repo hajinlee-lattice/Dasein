@@ -1,0 +1,42 @@
+<ul class="menu playbook-view">
+    <li role="presentation">
+        <a ui-sref="home.playbook">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}">
+                <span class="ico ico-back no-svg"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}</span>
+        </a>
+    </li>
+    <li role="presentation" ng-class="{active: vm.state.current.name == 'home.playbook.dashboard'}" ng-disabled="vm.menuDisabled || vm.dashboardDisabled">
+        <a ui-sref="home.playbook.dashboard({play_name: vm.play_name})">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_PLAY_OVERVIEW')}}">
+                <span class="ico ico-insights ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_PLAY_OVERVIEW')}}</span>
+        </a>
+    </li>
+    <li role="presentation" ui-sref-active="active" ng-disabled="vm.menuDisabled || vm.targetsDisabled">
+        <a ui-sref="home.playbook.dashboard.targets({play_name: vm.play_name, segment: vm.segment})">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}">
+                <span class="ico ico-targets ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}</span>
+        </a>
+    </li>
+    <li role="presentation" ui-sref-active="active" ng-disabled="vm.menuDisabled || vm.talkingPointsDisabled">
+        <a ui-sref="home.playbook.dashboard.insights({play_name: vm.play_name})">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_INSIGHTS')}}">
+                <span class="ico ico-scoring ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_INSIGHTS')}}</span>
+        </a>
+    </li>
+    <li role="presentation" ui-sref-active="active" ng-disabled="vm.menuDisabled || vm.launchHistoryDisabled">
+        <a ui-sref="home.playbook.dashboard.launchhistory({play_name: vm.play_name})">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_LAUNCH_HISTORY')}}">
+                <span class="ico ico-refine ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_LAUNCH_HISTORY')}}</span>
+        </a>
+    </li>
+</ul>

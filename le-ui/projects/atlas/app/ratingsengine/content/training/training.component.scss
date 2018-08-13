@@ -1,0 +1,134 @@
+.numerical-container input[type=number] {
+    max-width: 200px;
+}
+.ratingengine-training {
+    .header {
+        h2 {
+            padding-left: 0;
+            margin-bottom: 4px;
+            // background-image: url('/assets/images/ico-segments.png');
+        }
+        p {
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+    }
+    h3 {
+        font-size: 16px;
+        text-transform: none;
+        font-weight: normal;
+        color: #000;
+        margin-top: 20px;
+    }
+    .advanced-options {
+        label {
+            font-size: 14px;
+        }
+    }
+    .content-body {
+        @include flex-container;
+    }
+    .checkbox-list {
+        width: 60%;
+        .form-group {
+            @include flex-container;
+            margin-bottom: 18px;
+            & > input {
+                width: 15px;
+                margin-right: 6px;
+                margin-top: 6px;
+            }       
+            div {
+                width: 100%;
+                p {
+                    font-size: 14px;
+                }
+                select {
+                    display: inline-block;
+                    width: auto;
+                    margin-right: 10px;
+                }
+                &.input-group {
+                    display: inline-block;
+                    width: auto;
+                    input, span {
+                        display: inline-block;
+                        width: auto;
+                    }
+                }
+                &.chip {
+                    width: auto;    
+                }
+            }
+            &.auto-select-group > div {
+                margin-left: 0;
+                .chips-query-container .text-container .query {
+                    margin-bottom: 0;
+                }
+            }
+            &.purchased-before-period {
+                display: block;
+                p, select {
+                    display: inline-block;
+                    width: auto;
+                }
+            }
+        }
+        &.full-width {
+            width: 100%;
+            margin-bottom: 18px;
+            .form-group {
+                margin-bottom: 0;
+            }
+        }
+    }
+    .data {
+        width: 40%;
+        padding-left: 20px;
+        li {
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 20px;
+            border-radius: 4px;
+        }
+        .stats-group {
+            @include flex-container;
+            flex-direction: column;
+            dl {
+                border-left: none;
+                padding: 0;
+                margin-bottom: 8px;
+            }
+            @media screen and (min-width: 930px) {
+                flex-direction: row;
+                justify-content: space-between;
+                dl {
+                    border-left: #999 solid 1px;
+                    padding: 0 0.75em;
+                    margin-bottom: 0;
+                    &:first-of-type {
+                        border-left: 0;
+                        padding-left: 0;
+                    }
+                }
+            }
+        }
+        h3 {
+            font-size: 14px;
+            padding: 0px 0 10px;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: normal;
+        }
+        dt {
+            text-transform: uppercase;
+            font-size: 9px;
+        }
+        dd {
+            font-size: 14px;
+            @media screen and (min-width: 930px) {
+                font-size: 16px;
+            }
+        }
+    }
+}

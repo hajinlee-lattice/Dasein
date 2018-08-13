@@ -1,0 +1,111 @@
+<div
+        class="model-tile model-type-{{data.ModelFileType}} {{isActive ? '' : 'inactive'}}"
+        ng-click="tileClick($event)"
+        ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
+        ui-sref="{{data.ModelFileType != 'PmmlModel'?'home.model.attributes':'home.model.jobs'}}({ modelId: '{{ data.Id | escape }}' })">
+    <div class="model-image {{ data.ModelType }} {{ data.ModelFileType }}"></div>
+    <div class="model-title" data-ng-if="!nameStatus.editing">
+        <h2 data-type="text" data-placement="right" class="editable editable-click" title="{{::data.DisplayName}}">{{::data.DisplayName | limitTo: 36 }}{{::data.DisplayName.length > 36 ? '&hellip;' : ''}}</h2>
+        <h2 class="edit">
+            <button
+                    type="button"
+                    ng-click="customMenuClick($event)"
+                    ng-class="{ 'open': showCustomMenu }">
+                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
+            </button>
+            <ul class="model-menu" ng-if="showCustomMenu">
+                <li
+                    data-ng-if="!isActive && mayActivateModels"
+                    data-ng-click="updateAsActiveClick($event); Activating = true;">
+                    <a href="javascript:void(0)">Activate</a>
+                    <i class="fa {{Activating ? 'fa-spinner fa-pulse fa-fw' : 'fa-play-circle-o'}}"></i>
+                </li>
+                <li
+                    ui-sref="home.model.ratings({ modelId: '{{ data.Id | escape }}' })"
+                    data-ng-if="isNotPmmlModel && hasRatingsAvailable"
+                    data-ng-click="reviewRatingsClick($event)">
+                    <a href="javascript:void(0)" title="Review Ratings">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}</a>
+                    <i class="ico ico-ratings"></i>
+                </li>
+                <li
+                    data-ng-if="mayChangeModelNames"
+                    data-ng-click="modelNameEditClick($event)">
+                    <a href="javascript:void(0)" data-title="Enter Model Name">Rename</a>
+                    <i class="fa fa-edit"></i>
+                </li>
+                <li
+                    ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })"
+                    data-ng-if="data.ModelType && showRefineAndClone && isNotPmmlModel && !data.Uploaded"
+                    data-ng-click="refineAndCloneClick($event)">
+                    <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
+                    <i class="fa fa-clone"></i>
+                </li>
+                <li
+                    ui-sref="home.model.remodel({ modelId: '{{ data.Id | escape }}' })"
+                    data-ng-if="data.ModelType && canRemodel"
+                    data-ng-click="remodelClick($event)">
+                    <a href="javascript:void(0)" title="Remodel">Remodel</a>
+                    <i class="fa fa-files-o"></i>
+                </li>
+                <li
+                    ui-sref="home.model.review.columns({ modelId: '{{ data.Id | escape }}' })"
+                    data-ng-if="data.ModelType && showReviewModel && isNotPmmlModel"
+                    data-ng-click="reviewClick($event)">
+                    <a href="javascript:void(0)">Review Model</a>
+                    <i class="fa fa-eye"></i>
+                </li>
+
+                <li
+                    data-ng-if="isActive && mayActivateModels"
+                    data-ng-click="updateAsInactiveClick($event);">
+                    <a href="javascript:void(0)">Deactivate</a>
+                    <i class="fa {{Deactivating ? 'fa-spinner fa-pulse fa-fw' : 'fa-stop-circle-o'}}"></i>
+                </li>
+
+                <li
+                    data-ng-if="showRefineAndClone && !data.Uploaded"
+                    data-ng-click="showCopyModelToTenantModal($event, data)">
+                    <a href="javascript:void(0)">Port</a>
+                    <i class="ico ico-lattice-dots"></i>
+                </li>
+
+                <li
+                    data-ng-if="mayDeleteModels && !isActive"
+                    data-ng-click="deleteModelClick($event)">
+                    <a href="javascript:void(0)">Delete</a>
+                    <i class="fa fa-trash"></i>
+                </li>
+            </ul>
+        </h2>
+    </div>
+    <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
+        <div novalidate class="form-inline editable-container editableform" name="form">
+            <div class="control-group">
+                <input type="text" class="form-control" data-ng-model="DisplayName" placeholder="{{::DisplayName}}"/>
+                <div class="editable-buttons">
+                    <button class="button blue-button editable-cancel" data-ng-click="cancel($event)">Cancel</button>
+                    <button class="button orange-button editable-submit" data-ng-click="submit($event)">Save</button>
+                </div>
+                <label class="global-error model-error" data-ng-if="showNameEditError">
+                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{::nameEditErrorMessage}}</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="meta-data">
+        <div class="stats">
+            <div class="small">{{::ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</div>
+            <div>{{::data.CreatedDate}}</div>
+        </div>
+        <div class="status">
+            <!-- <span data-ng-if="menuFlag" class="orange-text">
+            {{::ResourceUtility.getString('MODEL_DETAILS_REVIEW_RATINGS_LABEL')}}</span> -->
+            <span data-ng-if="!isActive" class="error-text">{{::ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</span>
+            <span data-ng-if="isActive" class="success-text">{{::ResourceUtility.getString('MODEL_DETAILS_ACTIVE_LABEL')}}</span>
+        </div>
+    </div>
+    <div ng-if="!isActive && modelRecommendation" class="model-rec">
+        <span data-stooltip="Remodel Recommended"><i class="fa fa-exclamation-triangle"></i></span>
+    </div>
+
+</div><!-- End .model -->

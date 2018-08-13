@@ -1,0 +1,54 @@
+.lattice-fields {
+	&.file-import-content {
+		.header {
+			h2 {
+				background-image: url('/assets/images/ico-small-lattice-logo-color.png');
+				background-repeat: no-repeat;
+				padding: 5px;
+				padding-left: 40px;
+			}
+			strong {
+				//font-weight: bold;
+				//color: dark-gray;
+			}
+		}
+	}
+
+	h3 {
+		font-size: 14px;
+		font-weight: normal;
+		background-repeat: no-repeat;
+		text-transform: none;
+		background-position: left;
+		background-size: 14px;
+		padding: 8px 0 6px 22px;
+		margin: 40px 0 10px;
+		border-bottom: #ddd solid 1px;
+		&:first-of-type {
+			margin-top: 20px;
+		}
+		background-image: url('/assets/images/ico-third-party-id-dark.png');
+		&.Contacts-matching {
+			background-image: url('/assets/images/ico-user-black.png');
+		}
+		&.analysis {
+			background-image: url('/assets/images/ico-analysis-fields-dark.png');
+		}
+	}
+	ul {
+		width: 100%;
+		li {
+			display: inline-block;
+			width: 48%;
+			margin-right: 2%;
+			margin-bottom: 14px;
+			&:nth-child(even){
+				margin-right: 0;
+			}
+		}
+	}
+	p {
+		margin-bottom: 16px;
+	}
+
+}

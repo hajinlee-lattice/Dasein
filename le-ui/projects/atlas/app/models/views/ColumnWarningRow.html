@@ -1,0 +1,46 @@
+<td>
+    <div>
+        <input 
+                type="checkbox"
+                ng-attr-id="{{columnWarning.dataRuleName}}"
+                data-ng-click="warningExcludeToggled($event, columnWarning)"
+                data-ng-checked="ruleNameToDataRules[columnWarning.dataRuleName].enabled"
+                data-ng-disabled="shouldBeDisabled()" />
+    </div>
+    <!-- <div data-ng-if="vm.showLatticeAttr" data-ng-repeat="columnName in latticeColumnNames" ng-if="columnWarningExpanded">
+        <input 
+                type="checkbox" 
+                data-ng-click="columnExcludeToggled($event, columnName)"
+                data-ng-checked="columnRemediated(columnName)" />
+    </div>
+    <div data-ng-if="vm.showCustomAttr" data-ng-repeat="columnName in customColumnNames" ng-if="columnWarningExpanded">
+        <input
+                type="checkbox"
+                data-ng-click="columnExcludeToggled($event, columnName)"
+                data-ng-checked="columnRemediated(columnName)" />
+    </div> -->
+    <div data-ng-repeat="columnName in columnWarning.flaggedColumnNames" ng-if="columnWarningExpanded" class="expanded-rule">
+        <input
+                type="checkbox"
+                data-ng-click="columnExcludeToggled($event, columnName)"
+                data-ng-if="shouldDisplayColumn(columnName)"
+                data-ng-checked="columnRemediated(columnName)" />
+    </div>
+</td>
+
+<td>
+    <div>
+        {{interface.show == 'all' ? columnTotal : interface.show == 'lattice' ? latticeWarningTotal : customWarningTotal}}
+    </div>
+    <div data-ng-show="columnWarningExpanded" data-ng-repeat="columnName in columnWarning.flaggedColumnNames" data-ng-if="shouldDisplayColumn(columnName)" class="expanded-rule" title="{{columnNameToColumnDisplayName[columnName]}}">
+        {{columnNameToColumnDisplayName[columnName]}}
+    </div>
+</td>
+
+<td>{{ruleNameToDataRules[columnWarning.dataRuleName].displayName}}</td>
+
+<td>{{ruleNameToDataRules[columnWarning.dataRuleName].description}}</td>
+
+<td data-ng-click="expandColumnWarningClicked()">
+    <i ng-if="columnWarning.flaggedItemCount > 0" class="fa fa-angle-double-{{columnWarningExpanded ? 'up' : 'down'}} fa-lg"></i>
+</td>

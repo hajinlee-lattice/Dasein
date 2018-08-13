@@ -1,0 +1,98 @@
+<section class="jobs-page container">
+
+    <div class="row">
+        <div class="twelve columns">
+            <div data-ng-if="succeeded" class="job-success-message">
+                <div>{{successMsg}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobSuccessMessage()"></i></a></div>
+                <span>Analytics are now available.</span>
+            </div>
+            <div data-ng-if="!hideCreationMessage && jobCreationSuccess" class="job-success-message">
+                <div>{{jobQueuedMessage}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
+                <span>It will start running shortly, which will allow you to track the progress</span>
+            </div>
+            <div data-ng-if="!hideCreationMessage && !jobCreationSuccess" class="job-creation-failed">
+                <div>{{jobQueuedMessage}}<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
+                <span>Please retry or wait for a fix</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-header">
+        <div class="row list-header">
+            <div class="pull-left">
+                <menu-dropdown config="header.maxperpage"></menu-dropdown>
+                <menu-filter-by config="header.filter" store="jobs.list.filter" current="currentPage"></menu-filter-by>
+                <menu-sort-by config="header.sort" store="jobs.list.sort"></menu-sort-by>
+                <search-filter query="query" current="currentPage"></search-filter>
+            </div>
+            <div class="row jobs-pagination-controls" ng-init="current = 1" ng-show="max > 1">
+                <div class="twelve columns">
+                    <pd-pagination-controls current="currentPage" max="max = (header.filter.filtered | filter: query).length / pagesize">
+                    </pd-pagination-controls>
+                </div>
+            </div>
+            <div class="pull-right">
+                <!--
+                <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
+                -->
+
+                <a ng-if="state == 'model'" ng-click="checkStatusBeforeScore()" class="button orange-button">Score a File</a>
+
+            </div>
+        </div><!-- End .row -->
+    </div><!-- End .table-header -->
+
+
+    <div class="row jobs-table">
+        <div class="columns twelve panel panel-default box-outline">
+            <div class="section-body">
+                <table class="no-tbody">
+                    <thead>
+                        <tr class="row">
+                            <th class="columns two">Timestamp</th>
+                            <th class="columns three" ng-if="state != 'model'">Model Name</th>
+                            <th class="columns two" ng-if="state == 'model'">File Name</th>
+                            <th class="columns two" ng-if="state != 'model'">Job Type</th>
+                            <th class="columns two">Status</th>
+                            <th class="columns two">&nbsp;</th>
+                            <!-- <span class="columns three">User</span> -->
+                        </tr>
+                    </thead>
+                </table>
+
+                <div class="jobs-table-content">
+                    <div
+                        data-job-status-row
+                        data-ng-repeat="job in header.filter.filtered |
+                            filter: query |
+                            orderBy: header.sort.order + header.sort.property |
+                            startFrom: (currentPage - 1) * pagesize |
+                            limitTo: pagesize"
+                        job="job"
+                        state="state"
+                        statuses="statuses"
+                        expanded="expanded"
+                        cancelling="cancelling"
+                        admin="isInternalAdmin"
+                        auth="auth"
+                        TenantId="TenantId"
+                        class="job-td-row ngAnimate">
+                    </div>
+                </div>
+            </div>
+            <div class="section-actions" ng-if="(header.filter.filtered | filter: query).length == 0 && ! loadingJobs">
+                There are no jobs to show at the moment
+            </div>
+            <div class="section-actions" ng-if="loadingJobs && header.filter.filtered.length == 0">
+                Loading...
+            </div>
+        </div>
+    </div>
+    <div class="row jobs-pagination-controls" ng-show="max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls current="currentPage" max="max = (header.filter.filtered | filter: query).length / pagesize">
+            </pd-pagination-controls>
+        </div>
+    </div>
+
+</section>

@@ -1,0 +1,25 @@
+<div class="modal-dialog" data-ng-controller="BasicConfirmationController">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{{::title}}</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="twelve columns">
+              <p>{{::text}}</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="row">
+            <div class="six columns">
+              <button class="button gray-button block-button" type="button" data-ng-click="cancelClick()">{{::cancelLabel}}</button>
+            </div>
+            <div class="six columns">
+              <a class="button orange-button block-button" href="#" data-ng-click="confirmClick($event)">{{::confirmLabel}}</a>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>

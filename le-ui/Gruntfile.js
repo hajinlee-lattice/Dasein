@@ -10,7 +10,7 @@ module.exports = function (grunt) {
         versionString: versionStringConfig,
         dir: {
             common: './projects/common',
-            lp: './projects/leadprioritization',
+            lp: './projects/atlas',
             pd: './projects/prospectdiscovery',
             login: './projects/login',
             ng2: './projects/ng2',

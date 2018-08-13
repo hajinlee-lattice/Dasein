@@ -1,0 +1,43 @@
+<section id="ModelRatingsDemoView" class="model-ratings">
+
+    <div class="container row">
+        <div class="twelve columns">
+
+        	<h3>Currently Published Configuration</h3>
+
+            <ul class="bucket-tiles buckets-4 published">
+            	<li>
+                    <div class="bucket-label">A</div>
+                    <dl>
+                        <dt>Score Range</dt>
+                        <dd>99-95</dd>
+                    </dl>
+                </li>
+            	<li>
+                    <div class="bucket-label">B</div>
+                    <dl>
+                        <dt>Score Range</dt>
+                        <dd>94-85</dd>
+                    </dl>
+                </li>
+            	<li>
+                    <div class="bucket-label">C</div>
+                    <dl>
+                        <dt>Score Range</dt>
+                        <dd>84-50</dd>
+                    </dl>
+                </li>
+            	<li>
+                    <div class="bucket-label">D</div>
+                    <dl>
+                        <dt>Score Range</dt>
+                        <dd>49-5</dd>
+                    </dl>
+                </li>
+            </ul><!-- End .bucket-tiles -->
+            <h4 ng-if="!vm.cdlIsEnabled">Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
+
+        </div><!-- End .twelve.columns -->
+    </div><!-- End .row -->
+
+</section>

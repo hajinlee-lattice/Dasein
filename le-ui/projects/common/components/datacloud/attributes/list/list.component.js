@@ -336,6 +336,9 @@ var ret = vm.subcategory
 
             return false;
         };
+        vm.getPageSize = function() {
+            return $ctrl.filters.pagesize;
+        };
 
         vm.getFiltering = function() {
             var obj = {};
@@ -351,7 +354,7 @@ var ret = vm.subcategory
                     obj[property] = false;
                 }
             });
-            
+
             return obj;
         };
 

@@ -32,7 +32,7 @@ module.exports = [{
         '/login/help': '/help'
     }
 },{
-    path: '/projects/prospectdiscovery',
+    path: '/projects/atlas',
     pages: {
         '/pd/': 'index.html',
         '/pd/index': 'index.html'
@@ -43,7 +43,7 @@ module.exports = [{
         '/pd/lib': '/lib'
     }
 },{
-    path: '/projects/leadprioritization',
+    path: '/projects/atlas',
     html5mode: true,
     pages: {
         '/lp/': '/dist/indexwp.html',

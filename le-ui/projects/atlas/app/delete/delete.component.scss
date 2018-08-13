@@ -1,0 +1,87 @@
+.delete-container {
+    .warning-message {
+        text-align:center;
+        font-weight:bold;
+    }
+    .success-message {
+        text-align:center;
+        font-weight:bold;
+        color:#fff
+    }
+    .local-error {
+        position: relative;
+        margin-bottom: 20px;
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    }
+    .columns.box-outline .section-body.with-padding {
+        margin: 1.5em 3em;
+    }
+    .options-text {
+        font-weight: 500;
+        font-size: 14px;
+    }
+    .button-tabs {
+        @include flex-container;
+        margin-bottom: 50px;
+        .button {
+            @include flex-item(1 1 auto);
+            width: calc(100% / 3);
+            align-self: stretch;
+            padding: 15px 6px 6px;
+            margin-right: 10px;
+            &:last-child {
+               margin-right: 0; 
+            }
+            background-repeat: no-repeat;
+            background-position: center 22px;
+            text-transform: none;
+            color: #333;
+            height: auto;
+            line-height: normal;
+            border-radius: 8px;
+            span {
+                @include text-ellipsis;
+                display: block;
+                text-align: center;
+                padding-bottom: 5px;
+                font-weight: bold;
+            }
+            img {
+                padding-bottom: 5px;
+            }
+            &.blue-button {
+                color: #fff;
+            }
+        }
+    }
+    tooltip tip {
+        background: #fff;
+        border: 1px solid #d3d3d3;
+        h4 {
+            color: #000000;
+            margin-bottom:10px;
+        }
+        p {
+            color: #000000;
+        }
+    }
+    tooltip._top tip tip-arrow {
+        border-top: 6px solid #d3d3d3;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .file-upload-with-padding {
+        margin-left: 23px;
+        margin-top: -22px;
+    }
+    .range-container {
+        margin-left: 23px;
+        margin-bottom: 20px;
+    }
+}

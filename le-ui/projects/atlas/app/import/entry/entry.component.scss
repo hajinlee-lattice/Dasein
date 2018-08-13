@@ -1,0 +1,138 @@
+.setup-import.data-import {
+    .local-error {
+        position: relative;
+        margin-bottom: 20px;
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    }
+    .columns.box-outline .section-body.with-padding {
+        margin: 1.5em 3em;
+    }
+    .import-additional-info {
+        margin: 2em 0;
+        font-size: 15px;
+    }
+    .button-tabs {
+        @include flex-container;
+        .button {
+            @include flex-item(1 1 auto);
+            width: calc(100% / 5);
+            align-self: stretch;
+            padding: 68px 6px 6px;
+            margin-right: 10px;
+            &:last-child {
+               margin-right: 0; 
+            }
+            background-repeat: no-repeat;
+            background-position: center 22px;
+            text-transform: none;
+            color: #333;
+            height: auto;
+            line-height: normal;
+            border-radius: 8px;
+            span {
+                @include text-ellipsis;
+                display: block;
+                text-align: center;
+            }
+            &.account {
+                background-image: url('/assets/images/ico-accounts-dark.png');
+            }
+            &.contact {
+                background-image: url('/assets/images/ico-contacts-dark.png');
+            }
+            &.eloqua {
+                background-image: url('/assets/images/ico-eloqua-dark.png');
+            }
+            &.products {
+                background-image: url('/assets/images/ico-products-dark.png');
+            }
+            &.purchases {
+                background-image: url('/assets/images/ico-purchases-dark.png');
+            }
+            &.product_hierarchy {
+                background-image: url('/assets/images/ico-product_hierarchy-dark.png');
+            }
+            &.blue-button {
+                color: #fff;
+                &.account {
+                    background-image: url('/assets/images/ico-accounts-white.png');
+                }
+                &.contact {
+                    background-image: url('/assets/images/ico-contacts-white.png');
+                }
+                &.eloqua {
+                    background-image: url('/assets/images/ico-eloqua-white.png');
+                } 
+                &.products {
+                    background-image: url('/assets/images/ico-products-white.png');
+                }
+                &.purchases {
+                    background-image: url('/assets/images/ico-purchases-white.png');
+                }
+                &.product_hierarchy {
+                    background-image: url('/assets/images/ico-product_hierarchy-white.png');
+                }
+            }
+        }
+    }
+    .download-link {
+        display: inline-block;
+        margin: 20px 0;
+    }
+    .example-table {
+        overflow-x: scroll;
+        table {
+            width: 100%;
+        }
+        thead th {
+            background: #f2f1f1;
+            color: #333 !important;
+            font-size: 12px;
+            font-weight: bold;
+            padding-left: 8px;
+        }
+        tbody td {
+            background: #fafbfb;
+            font-size: 12px;
+            font-weight: normal;
+            padding: 4px;
+            padding-left: 8px;
+        }
+    }
+    .form-group {
+        margin-bottom: 60px;
+    }
+
+    .invalid-columns-container {
+        margin-bottom: 10px;        
+        padding: 10px;
+        width: 100%;
+        display: flex;
+        font-size: 14px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ffa500;
+        max-height: 150px;
+        overflow-y: auto;
+        color: white;
+
+        &>div{
+            
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            &>p {
+                padding-left: 10px;
+            }
+        }
+        &>span{
+            cursor: pointer;
+            padding: 4px;
+        }
+    }
+}
