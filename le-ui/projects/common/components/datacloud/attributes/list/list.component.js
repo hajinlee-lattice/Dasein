@@ -337,7 +337,7 @@ var ret = vm.subcategory
             return false;
         };
         vm.getPageSize = function() {
-            return $ctrl.filters.pagesize;
+            return vm.filters.pagesize;
         };
 
         vm.getFiltering = function() {
