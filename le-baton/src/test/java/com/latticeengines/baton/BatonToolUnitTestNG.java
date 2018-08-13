@@ -29,11 +29,12 @@ public class BatonToolUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private BatonService service = new BatonServiceImpl();
+    private BatonService service;
     
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
+        service = new BatonServiceImpl();
     }
 
     @AfterMethod(groups = "unit")

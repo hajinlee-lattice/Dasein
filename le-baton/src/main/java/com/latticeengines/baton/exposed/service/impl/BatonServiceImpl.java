@@ -52,8 +52,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 
-import javax.annotation.PostConstruct;
-
 public class BatonServiceImpl implements BatonService {
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
@@ -62,7 +60,7 @@ public class BatonServiceImpl implements BatonService {
     private static final long WAIT_TIMEOUT = 5000;
     private static final int MAX_RETRY_TIMES = 3;
 
-    private static TreeCache cache = null;
+    private static TreeCache cache = getTreeCache();
 
     // boolean will work, just need an object to wait on
     private static final AtomicBoolean cacheLoaded = new AtomicBoolean(false);
@@ -618,7 +616,6 @@ public class BatonServiceImpl implements BatonService {
         return products.stream().anyMatch(product -> hasProduct(customerSpace, product));
     }
 
-    @PostConstruct
     private static TreeCache getTreeCache() {
         cache = new TreeCache(CamilleEnvironment.getCamille().getCuratorClient(),
                 PathBuilder.buildPodPath(CamilleEnvironment.getPodId()).toString());

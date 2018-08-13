@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 
 public class BatonServiceImplUnitTestNG {
 
-    private BatonService batonService = new BatonServiceImpl();
+    private BatonService batonService;
 
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
@@ -34,6 +34,7 @@ public class BatonServiceImplUnitTestNG {
         props.displayName = "Tenant for testing";
         CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
 
+        batonService = new BatonServiceImpl();
         batonService.createTenant("CONTRACT1", "TENANT1", CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, info);
     }
 
