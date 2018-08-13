@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -284,8 +284,7 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public Map<CDLObjectTypes, List<String>> getRatingEngigneDependencies(
-            @PathVariable String ratingEngineId) {
+    public Map<CDLObjectTypes, List<String>> getRatingEngigneDependencies(@PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));
         return ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngineId);
@@ -353,9 +352,12 @@ public class RatingEngineResource {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId, attributes,
                     MultiTenantContext.getEmailAddress());
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception ex) {
-            log.error("Modeling job failed!", ex);
-            throw new RuntimeException("Modeling job failed, contact Lattice support for details!");
+            log.error("Failed to begin modeling job due to an unknown error!", ex);
+            throw new RuntimeException(
+                    "Failed to begin modeling job due to an unknown error, contact Lattice support for details!");
         }
     }
 
@@ -367,9 +369,11 @@ public class RatingEngineResource {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.validateForModelingByRatingEngineId(tenant.getId(), ratingEngineId, ratingModelId);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception ex) {
-            log.error("Validation failed, cannot model this iteration yet", ex);
-            throw new RuntimeException("Validation failed, cannot model this iteration yet");
+            log.error("Failed to validate due to an unknown server error.", ex);
+            throw new RuntimeException("Unable to validate due to an unknown server error");
         }
     }
 
@@ -389,10 +393,11 @@ public class RatingEngineResource {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId, ratingModelId, ratingEngine);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception ex) {
-            log.error("Validation failed, cannot model this iteration yet", ex);
-            throw new RuntimeException("Validation failed, cannot model this iteration yet");
+            log.error("Failed to validate due to an unknown server error.", ex);
+            throw new RuntimeException("Unable to validate due to an unknown server error");
         }
-
     }
 }
