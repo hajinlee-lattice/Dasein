@@ -41,17 +41,17 @@ public class AttrSpecification {
     }
 
     public static AttrSpecification CDL_DERIVED_PB() {
-        return new AttrSpecification("CDL Derived Attributes for Product Bundles", true, true, false, false, false,
+        return new AttrSpecification("CDL Derived Attributes for Product Bundles", true, true, false, true, false,
                 false, false, false, false, false, true, false);
     }
 
     public static AttrSpecification CDL_DERIVED_WBC() {
-        return new AttrSpecification("CDL Derived Attributes for Website Behavior Categories", true, true, true, true,
+        return new AttrSpecification("CDL Derived Attributes for Website Behavior Categories", true, true, false, true,
                 false, false, false, true, false, false, true, false);
     }
 
     public static AttrSpecification CDL_RATING() {
-        return new AttrSpecification("CDL Rating Attributes", true, true, false, false, false, false, false, false,
+        return new AttrSpecification("CDL Rating Attributes", true, true, false, true, false, false, false, false,
                 false, false, false, false);
     }
 
