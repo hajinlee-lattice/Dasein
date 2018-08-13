@@ -620,7 +620,7 @@ public class AttrConfigTestUtils {
         attrConfig.putProperty(ColumnSelection.Predefined.TalkingPoint.name(), prop6);
 
         AttrConfigProp<AttrState> prop7 = new AttrConfigProp<>();
-        prop7.setAllowCustomization(true);
+        prop7.setAllowCustomization(false);
         prop7.setSystemValue(AttrState.Inactive);
         if (enableThisAttr) {
             prop7.setCustomValue(AttrState.Active);

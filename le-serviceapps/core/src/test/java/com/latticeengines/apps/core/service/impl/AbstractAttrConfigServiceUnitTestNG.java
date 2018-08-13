@@ -76,14 +76,16 @@ public class AbstractAttrConfigServiceUnitTestNG {
         AttrConfigCategoryOverview overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(
                 generatePropertyListWithSomeActive(), Category.INTENT, Arrays.asList(ColumnMetadataKey.State), false);
         log.info("overviewWithSomeActive is " + overview);
-        Assert.assertEquals(overview.getTotalAttrs() - generatePropertyListWithSomeActive().size(), 0);
+        // attr9 's State allowCustomization is false. For Activate/Deactivate
+        // page, hide attributes that are: Inactive and AllowCustomization=FALSE
+        Assert.assertEquals(overview.getTotalAttrs() - (generatePropertyListWithSomeActive().size() - 1), 0);
         Assert.assertEquals(overview.getLimit() - intentLimit, 0);
         Map<String, Map<?, Long>> propSummary = overview.getPropSummary();
         Assert.assertNotNull(propSummary);
         Assert.assertEquals(propSummary.size(), 1);
         Assert.assertTrue(propSummary.containsKey(ColumnMetadataKey.State));
         Map<?, Long> map = propSummary.get(ColumnMetadataKey.State);
-        Assert.assertEquals(map.get(AttrState.Inactive).longValue() - 5, 0L);
+        Assert.assertEquals(map.get(AttrState.Inactive).longValue() - 4, 0L);
         Assert.assertEquals(map.get(AttrState.Active).longValue() - 4, 0L);
 
         overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(generatePropertyListWithSomeUsedForSegment(),
@@ -100,7 +102,9 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.CompanyProfile.getName()));
         map = propSummary.get(ColumnSelection.Predefined.Segment.getName());
         Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 1, 0L);
-        Assert.assertEquals(map.get(Boolean.FALSE).longValue() - 3, 0L);
+        // For Enable/Disable page, hide hide attributes that are: disabled and
+        // AllowCustomization=FALSE.
+        Assert.assertNull(map.get(Boolean.FALSE));
         map = propSummary.get(ColumnSelection.Predefined.Enrichment.getName());
         Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 4, 0L);
         map = propSummary.get(ColumnSelection.Predefined.TalkingPoint.getName());

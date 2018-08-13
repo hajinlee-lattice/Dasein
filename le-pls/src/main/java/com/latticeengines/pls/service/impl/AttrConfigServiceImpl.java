@@ -365,12 +365,18 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         StringBuilder html = new StringBuilder();
         if (updateUsage) {
             html.append(p(UPDATE_USAGE_FAIL_ATTRIBUTE_MSG).render());
-            for (Type type : warnings.keySet()) {
-                html.append(b(mapTypeToDisplayName(type)).render());
-                html.append(ul().with( //
-                        each(warnings.get(type), entity -> //
-                        li(entity))) //
-                        .render());
+            // PLS-9851 the order of the section is Segment -> Models -> Play ->
+            // Talking Point -> Company Profile
+            List<Type> sortedTypes = Arrays.asList(Type.IMPACTED_SEGMENTS, Type.IMPACTED_RATING_ENGINES,
+                    Type.IMPACTED_RATING_MODELS, Type.IMPACTED_PLAYS, Type.IMPACTED_COMPANY_PROFILES);
+            for (Type type : sortedTypes) {
+                if (warnings.containsKey(type)) {
+                    html.append(b(mapTypeToDisplayName(type)).render());
+                    html.append(ul().with( //
+                            each(warnings.get(type), entity -> //
+                            li(entity))) //
+                            .render());
+                }
             }
         } else {
             html.append(p(UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG).render());
@@ -517,12 +523,26 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             for (AttrConfig attrConfig : attrConfigRequest.getAttrConfigs()) {
                 Map<String, AttrConfigProp<?>> attrProps = attrConfig.getAttrProps();
                 if (attrProps != null) {
-
+                    /*
+                     * DP-6630 For Activate/Deactivate page, hide attributes
+                     * that are: Inactive and AllowCustomization=FALSE
+                     * 
+                     * For Enable/Disable page, hide attributes that are:
+                     * disabled and AllowCustomization=FALSE.
+                     * 
+                     * 'onlyActivateAttrs=false' indicates it is
+                     * Activate/Deactivate page
+                     */
                     boolean includeCurrentAttr = true;
+                    AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
+                            .get(ColumnMetadataKey.State);
                     if (applyActivationFilter) {
-                        AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
-                                .get(ColumnMetadataKey.State);
                         if (AttrState.Inactive.equals(getActualValue(attrConfigProp))) {
+                            includeCurrentAttr = false;
+                        }
+                    } else {
+                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))
+                                && !attrConfigProp.isAllowCustomization()) {
                             includeCurrentAttr = false;
                         }
                     }
@@ -553,8 +573,19 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                         }
 
                         // check designated property
-                        AttrConfigProp<?> attrConfigProp = attrProps.get(property);
-                        if (attrConfigProp != null) {
+                        AttrConfigProp<?> configProp = attrProps.get(property);
+                        if (configProp != null) {
+                            /*
+                             * For Enable/Disable page, hide attributes that
+                             * are: disabled and AllowCustomization=FALSE.
+                             */
+                            if (applyActivationFilter) {
+                                if (!configProp.isAllowCustomization()
+                                        && Boolean.FALSE.equals((Boolean) getActualValue(configProp))) {
+                                    continue;
+                                }
+                            }
+
                             AttrDetail attrDetail = new AttrDetail();
                             attrDetail.setAttribute(attrConfig.getAttrName());
                             attrDetail.setDisplayName(getDisplayName(attrProps));
@@ -562,7 +593,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
                             if (property.equals(ColumnMetadataKey.State)) {
                                 // set the selection status
-                                AttrState actualState = (AttrState) getActualValue(attrConfigProp);
+                                AttrState actualState = (AttrState) getActualValue(configProp);
                                 if (AttrState.Active.equals(actualState)) {
                                     selected++;
                                     attrDetail.setSelected(true);
@@ -571,7 +602,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                                     attrDetail.setSelected(false);
                                 }
                             } else if (usagePropertyList.contains(property)) {
-                                Boolean actualState = (Boolean) getActualValue(attrConfigProp);
+                                Boolean actualState = (Boolean) getActualValue(configProp);
                                 if (Boolean.TRUE.equals(actualState)) {
                                     selected++;
                                     attrDetail.setSelected(true);
@@ -586,7 +617,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                             }
 
                             // set the frozen status for attr & subcategory
-                            if (!attrConfigProp.isAllowCustomization()) {
+                            if (!configProp.isAllowCustomization()) {
                                 attrDetail.setIsFrozen(true);
                                 subcategoryDetail.setHasFrozenAttrs(true);
                             }

@@ -165,14 +165,30 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             for (AttrConfig attrConfig : renderedList) {
                 Map<String, AttrConfigProp<?>> attrProps = attrConfig.getAttrProps();
                 if (attrProps != null) {
+                    /*
+                     * DP-6630 For Activate/Deactivate page, hide attributes
+                     * that are: Inactive and AllowCustomization=FALSE
+                     * 
+                     * For Enable/Disable page, hide attributes that are:
+                     * disabled and AllowCustomization=FALSE.
+                     * 
+                     * 'onlyActivateAttrs=false' indicates it is
+                     * Activate/Deactivate page
+                     */
                     boolean includeCurrentAttr = true;
+                    AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
+                            .get(ColumnMetadataKey.State);
                     if (onlyActiveAttrs) {
-                        AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
-                                .get(ColumnMetadataKey.State);
                         if (AttrState.Inactive.equals(getActualValue(attrConfigProp))) {
                             includeCurrentAttr = false;
                         }
+                    } else {
+                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))
+                                && !attrConfigProp.isAllowCustomization()) {
+                            includeCurrentAttr = false;
+                        }
                     }
+
                     if (includeCurrentAttr) {
                         AttrConfigProp<?> configProp = attrProps.get(propertyName);
                         String attrName = attrConfig.getAttrName();
@@ -187,6 +203,16 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             if (actualValue == null) {
                                 log.warn(String.format("configProp %s does not have proper value", configProp));
                                 continue;
+                            }
+
+                            /*
+                             * For Enable/Disable page, hide attributes that
+                             * are: disabled and AllowCustomization=FALSE.
+                             */
+                            if (onlyActiveAttrs) {
+                                if (!configProp.isAllowCustomization() && Boolean.FALSE.equals(actualValue)) {
+                                    continue;
+                                }
                             }
                             Long count = valueNumberMap.getOrDefault(actualValue, 0L);
                             valueNumberMap.put((T) actualValue, count + 1);

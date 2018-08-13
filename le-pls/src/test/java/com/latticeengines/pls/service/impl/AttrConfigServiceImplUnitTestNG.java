@@ -241,7 +241,7 @@ public class AttrConfigServiceImplUnitTestNG {
         log.info("testGetDetailAttrForActivation activationDetail is " + activationDetail);
         Assert.assertEquals(activationDetail.getEntity(), CategoryUtils.getEntity(Category.CONTACT_ATTRIBUTES));
         Assert.assertEquals(activationDetail.getSelected() - 4L, 0);
-        Assert.assertEquals(activationDetail.getTotalAttrs() - 9L, 0);
+        Assert.assertEquals(activationDetail.getTotalAttrs() - 8L, 0);
         Assert.assertEquals(activationDetail.getSubcategories().size(), 8);
         Assert.assertTrue(activationDetail.getSubcategories().parallelStream()
                 .allMatch(entry -> entry.getHasFrozenAttrs() == false));
@@ -265,10 +265,10 @@ public class AttrConfigServiceImplUnitTestNG {
                 "Segmentation");
         log.info("testGetDetailAttrForUsageWithNonPremiumCategory selectionDetail is " + selectionDetail);
         Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
-        Assert.assertEquals(selectionDetail.getTotalAttrs() - 4L, 0);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
         Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
         Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
-                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 1);
+                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 4);
     }
 
     @Test(groups = "unit")
@@ -286,12 +286,12 @@ public class AttrConfigServiceImplUnitTestNG {
         when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.INTENT.getName())).thenReturn(request);
         AttrConfigSelectionDetail selectionDetail = attrConfigService
                 .getAttrConfigSelectionDetails(Category.INTENT.getName(), "Segmentation");
-        log.info("testGetDetailAttrForUsageWithPremiumCategoru selectionDetail is " + selectionDetail);
+        log.info("testGetDetailAttrForUsageWithPremiumCategory selectionDetail is " + selectionDetail);
         Assert.assertEquals(selectionDetail.getSelected() - 1L, 0);
-        Assert.assertEquals(selectionDetail.getTotalAttrs() - 4L, 0);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
         Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
         Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
-                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 1);
+                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 4);
     }
 
     @Test(groups = "unit")
