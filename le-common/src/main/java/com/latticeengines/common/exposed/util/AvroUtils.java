@@ -243,7 +243,7 @@ public class AvroUtils {
                 return countOneFile(configuration, matches.get(0));
             }
 
-            ExecutorService executorService = Executors.newFixedThreadPool(Math.min(16, matches.size()));
+            ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, matches.size()));
             Map<String, Future<Long>> futures = new HashMap<>();
             for (final String match : matches) {
                 Future<Long> future = executorService.submit(() -> countOneFile(configuration, match));
