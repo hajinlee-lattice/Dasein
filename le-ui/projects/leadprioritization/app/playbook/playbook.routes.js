@@ -606,9 +606,6 @@ angular
                 },
                 WizardContainerId: function() {
                     return 'playbook';
-                },
-                DisableWizardNavOnLastStep: function () {
-                    return null;
                 }
             },
             views: {

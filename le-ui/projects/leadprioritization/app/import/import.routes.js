@@ -152,9 +152,6 @@ angular
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'account');
                 },
-                DisableWizardNavOnLastStep: function () {
-                    return null;
-                },
                 WizardControlsOptions: function() {
                     return { 
                         backState: 'home.import.entry.accounts', 
@@ -332,9 +329,6 @@ angular
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contact');
                 },
-                DisableWizardNavOnLastStep: function () {
-                    return null;
-                },
                 WizardControlsOptions: function() {
                     return { backState: 'home.import.entry.contacts', nextState: 'home.jobs.data' };
                 }
@@ -493,9 +487,6 @@ angular
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'transaction');
                 },
-                DisableWizardNavOnLastStep: function () {
-                    return null;
-                },
                 WizardControlsOptions: function() {
                     return { backState: 'home.import.entry.product_purchases', nextState: 'home.jobs.data' };
                 }
@@ -599,9 +590,6 @@ angular
                         wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product');
-                },
-                DisableWizardNavOnLastStep: function () {
-                    return null;
                 },
                 WizardControlsOptions: function() {
                     return { backState: 'home.import.entry.product_bundles', nextState: 'home.jobs.data' };
@@ -717,9 +705,6 @@ angular
                         wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product_hierarchy');
-                },
-                DisableWizardNavOnLastStep: function () {
-                    return null;
                 },
                 WizardControlsOptions: function() {
                     return { backState: 'home.import.entry.product_hierarchy', nextState: 'home.jobs.data' };

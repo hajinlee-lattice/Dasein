@@ -60,9 +60,6 @@ angular.module('lp.ratingsengine.remodel', [
                         
                     return title;
                 },
-                DisableWizardNavOnLastStep: function () {
-                    return null;
-                },
                 WizardControlsOptions: function ($stateParams) {
                     return {
                         backState: {

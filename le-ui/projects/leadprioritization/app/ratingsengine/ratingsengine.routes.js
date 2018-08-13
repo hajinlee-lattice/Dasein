@@ -693,9 +693,6 @@ angular
                     WizardCustomHeaderSteps: function() {
                         return ['segment.attributes', 'segment.attributes.add', 'segment.attributes.rules'];
                     },
-                    DisableWizardNavOnLastStep: function () {
-                        return null;
-                    },
                     WizardControlsOptions: function (RatingsEngineStore) {
                         return {
                             backState: 'home.ratingsengine.ratingsenginetype',
@@ -1043,9 +1040,6 @@ angular
                     WizardContainerId: function () {
                         return 'ratingsengine';
                     },
-                    DisableWizardNavOnLastStep: function () {
-                        return null;
-                    },
                     WizardControlsOptions: function (RatingsEngineStore) {
                         return {
                             backState: 'home.ratingsengine.ratingsenginetype',
@@ -1220,9 +1214,6 @@ angular
                             deferred.resolve(result);
                         });
                         return deferred.promise;
-                    },
-                    DisableWizardNavOnLastStep: function () {
-                        return true;
                     }
                 },
                 views: {
@@ -1289,9 +1280,6 @@ angular
                     },
                     WizardContainerId: function () {
                         return 'ratingsengine';
-                    },
-                    DisableWizardNavOnLastStep: function () {
-                        return null;
                     },
                     WizardControlsOptions: function (RatingsEngineStore) {
                         return {
@@ -1450,9 +1438,6 @@ angular
                     },
                     products: function () {
                         return [];
-                    },
-                    DisableWizardNavOnLastStep: function () {
-                        return true;
                     }
                 },
                 views: {

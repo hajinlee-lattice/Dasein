@@ -17,7 +17,6 @@
     li {
         position: relative;
         text-decoration: none;
-        cursor: pointer;
         margin-bottom: 40px;
         padding-left: 30px;
         transition: none;
@@ -61,16 +60,7 @@
                 opacity: 1;
             }
         }
-
-        &.ignore-ngclick {
-            cursor: default;
-        }
-    }
-    
-    *[ng-click]:not(.ignore-ngclick) {
-        cursor: pointer;
-    }
-    
+    }    
     li.previous {
         cursor: default;
         

@@ -68,14 +68,16 @@ angular.module('lp.ratingsengine.remodel')
             clientSession = BrowserStorageUtility.getClientSession(),
             createdBy = clientSession.EmailAddress;
 
+        iteration.AI.derived_from_rating_model = iteration.AI.id;
+        iteration.AI.createdBy = createdBy;
+
         if(iteration.AI.advancedModelingConfig.cross_sell){
             iteration.AI.advancedModelingConfig.cross_sell.filters = RatingsEngineStore.getConfigFilters();
         } else {
             iteration.AI.advancedModelingConfig.custom_event = RatingsEngineStore.getConfigFilters();
         }
 
-        // Sanitize iteration to remove data and add createBy
-        iteration.AI.createdBy = createdBy;
+        // Sanitize iteration to remove data
         delete iteration.AI.pid;
         delete iteration.AI.id;
         delete iteration.AI.modelingJobId;
@@ -83,10 +85,13 @@ angular.module('lp.ratingsengine.remodel')
         delete iteration.AI.modelSummaryId;
 
         console.log(iteration);
+        
 
         // Save iteration
         AtlasRemodelService.saveIteration(engineId, iteration).then(function(result){
             
+            console.log(result);
+
             var modelId = result.AI.id,
                 attributes = store.getRemodelAttributes();
 
