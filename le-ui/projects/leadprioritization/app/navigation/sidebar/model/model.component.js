@@ -28,20 +28,9 @@ angular
         vm.Uploaded = Model.ModelDetails.Uploaded;
         vm.HasRatingsAvailable = HasRatingsAvailable;
         
-
         if(vm.IsRatingEngine) {
-            var engineId = vm.ratingEngine.id,
-                ratingModelId = vm.model.ModelDetails.Name;
-
-            RatingsEngineStore.getRatingModel(engineId, ratingModelId).then(function(iteration){
-                vm.isActiveModel = (vm.ratingEngine.scoring_iteration.AI.iteration === iteration.AI.iteration) ? true : false;
-            });
-
             vm.viewingIteration = $stateParams.viewingIteration ? true : false;
-
-            console.log(vm.viewingIteration);
         }
-
 
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {
             vm.HasRatingsAvailable = true;

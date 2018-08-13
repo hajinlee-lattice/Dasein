@@ -226,7 +226,7 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
-            var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.activeModel;
+            var model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration : vm.ratingEngine.latest_iteration;
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -298,7 +298,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.isIterationActive = function(iterationId){
         if(vm.ratingEngine.scoring_iteration != null) {
-            if(vm.ratingEngine.scoring_iteration.AI.id == iterationId){
+            if(vm.ratingEngine.published_iteration.AI.id == iterationId){
                 return true;
             } else {
                 return false;
@@ -344,7 +344,7 @@ angular.module('lp.ratingsengine.dashboard', [
             var activeModel = vm.ratingEngine.activeModel;
             jobStatus = activeModel.rule.modelingJobStatus;
         }else{
-            var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.activeModel;
+            var model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration : vm.ratingEngine.latest_iteration;
             jobStatus = model.AI.modelingJobStatus;
         }
 
