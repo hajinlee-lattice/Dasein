@@ -66,7 +66,6 @@ angular.module('lp.jobs.import', [
         vm.pagesize = 10;
         vm.query = '';
         vm.currentPage = 1;
-        vm.msgUrl = 'app/jobs/processing/actions.incompleted.message.html';
         vm.header = {
             filter: {
                 label: 'Filter By',
@@ -113,57 +112,12 @@ angular.module('lp.jobs.import', [
             queuedMsg: null,
         });
 
-        vm.initModalWindow = function () {
-            vm.config = {
-                'name': "import_jobs",
-                'type': 'sm',
-                'title': 'Warning',
-                'titlelength': 100,
-                'dischargetext': 'Cancel',
-                'dischargeaction': 'cancel',
-                'closeaction': 'forcecancel',
-                'confirmtext': 'Yes, Run Now',
-                'confirmaction': 'proceed',
-                'icon': 'fa fa-exclamation-triangle',
-                'iconstyle': {'color': 'white'},
-                'confirmcolor': 'blue-button',
-                'showclose': true,
-                'headerconfig': {'background-color':'#FDC151', 'color':'white'},
-                'confirmstyle' : {'background-color':'#FDC151'}
-            };
 
-            vm.modalCallback = function (args) {
-               
-                if (vm.config.confirmaction === args.action) {
-                    vm.callback({ 'action': 'run', 'obj': args.data });
-                }else{
-                    var data = Modal.getData(vm.config.name);
-                    vm.callback({ 'action': args.action, 'obj': data });
-                }
-                if('closedForced' !== args.action){
-                    vm.toggleModal();
-                    vm.msgUrl = 'app/jobs/processing/actions.incompleted.message.html';
-                }
-            };
-            vm.toggleModal = function (data) {
-                var modal = Modal.get(vm.config.name);
-                if (modal) {
-                    modal.toggle(data);
-                }
-            };
-
-            vm.rowExpanded = function(row, state){
-                vm.rowStatus[row] = state;
-            };
-
-            $scope.$on("$destroy", function () {
-                Modal.remove(vm.config.name);
-            });
+        vm.rowExpanded = function(row, state){
+            vm.rowStatus[row] = state;
         };
-
         vm.init = function () {
             vm.jobs = JobsStore.getList('import');
-            vm.initModalWindow();
 
             var filterStore = FilterService.getFilters('jobs.dataprocessing.pagesize');
             if(filterStore) {
@@ -171,9 +125,7 @@ angular.module('lp.jobs.import', [
             }
         };
 
-        vm.viewUrl = function () {
-            return vm.msgUrl;
-        };
+
 
         this.init();
 

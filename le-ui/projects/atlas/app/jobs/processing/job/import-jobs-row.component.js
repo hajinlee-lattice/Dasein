@@ -23,16 +23,23 @@ angular.module('lp.jobs.import.row', [
 
 
         function callbackModalWindow(action) {
-            if (action && action.action === 'run') {
-                if(action.obj){
-                    action.obj.jobStatus = 'Waiting';
+            var modal = Modal.get('p&aJob_Warning');
+            
+            
+            if (action && action.action === 'ok') {
+                if(modal){
+                    modal.waiting(true);
                 }
+               
+                $scope.job.jobStatus = 'Waiting';
                 $scope.disableButton = true;
                 JobsStore.runJob($scope.job).then(function (result) {
-
+                    if(modal){
+                        Modal.modalRemoveFromDOM(modal, {name: 'p&aJob_Warning'});
+                    }
                     $scope.disableButton = true;
                     if(result.Success === true && action.obj) {
-                        action.obj.jobStatus = 'Pending';
+                        $scope.job.jobStatus = 'Pending';
                     } else {
                         var errorMsg = result.errorMsg;
                         ServiceErrorUtility.showBanner({data: {errorMsg: errorMsg}});
@@ -40,6 +47,9 @@ angular.module('lp.jobs.import.row', [
                     
                 });
             }else{
+                if(modal){
+                    Modal.modalRemoveFromDOM(modal, {name: 'p&aJob_Warning'});
+                }
                 $scope.disableButton = false;
             }
         }
@@ -117,16 +127,35 @@ angular.module('lp.jobs.import.row', [
             $scope.vm.rowStatus[$scope.index] = $scope.expanded;
         };
 
-        $scope.vm.run = function (job) {
-            // $scope.clicked = true;
+        $scope.run = function (job) {
             var show = $scope.showWarningRun(job);
-            if (show) {
-                $scope.vm.toggleModal(job);
+            var msg = $scope.getWarningMessage(job);
+            if (msg != null) {
+                Modal.warning({
+                    name: 'p&aJob_Warning',
+                    title: "Run Job",
+                    message: msg,
+                    confirmtext: "Yes, Run"
+                }, callbackModalWindow);
             } else {
-                // var obj = JSON.stringify(job);
-                $scope.vm.callback({ 'action': 'run', 'obj': job });
+                callbackModalWindow({action: 'ok'});
             }
         };
+        $scope.getWarningMessage = function(job){
+            var formerFailed = $scope.vm.isLastOneFailed();
+            var someIncompleted = $scope.showWarningRun(job);
+            var msg = null;
+            if(formerFailed === true){
+                if(someIncompleted){
+                    msg = "<p>The data refresh in your previous job failed to succeed. </p><p>Re-import your previous data if you need them in your latest data refresh</p><br><br><p>Some actions are not completed yet. If you wish to run the Data Processing Job now, only the completed actions will be taken. </p><p>The actions are still running the validation will be queued to the next Processing Job.</p><p>You won't be able to run the next job until the current job is done.</p>";
+                }else{
+                    msg = "<p>The data refresh in your previous job failed to succeed. </p><p>Re-import your previous data if you need them in your latest data refresh</p>";
+                }
+            }else if (someIncompleted){
+                msg = "<p>Some actions are not completed yet. If you wish to run the Data Processing Job now, only the completed actions will be taken. </p><p>The actions are still running the validation will be queued to the next Processing Job.</p><p>You won't be able to run the next job until the current job is done.</p>";
+            }
+            return msg;
+        }
 
         $scope.showWarningRun = function (job) {
             var subJobs = job.subJobs;
@@ -152,21 +181,8 @@ angular.module('lp.jobs.import.row', [
         };
         
         $scope.mouseDownRun  = function(job){
-            var formerFailed = $scope.vm.isLastOneFailed();
-            $scope.vm.callback = callbackModalWindow;
             $scope.disableButton = true;
-            
-            if(formerFailed === true){
-                var someIncompleted = $scope.showWarningRun(job);
-                if(someIncompleted){
-                    $scope.vm.msgUrl = 'app/jobs/processing/actions.failed.incomplete.message.html';
-                }else{
-                    $scope.vm.msgUrl = 'app/jobs/processing/actions.failed.message.html';
-                }
-                $scope.vm.toggleModal(job);
-            }else{
-                $scope.vm.run(job);
-            }
+            $scope.run(job);
         };
 
         $scope.getJobStatus = function(job){
