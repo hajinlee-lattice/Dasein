@@ -350,8 +350,6 @@ public class WorkflowServiceImpl implements WorkflowService {
             try {
                 status = getStatus(workflowId);
                 keepUpdate(workflowPid, jobUpdate);
-                // pre-warm the cache
-                jobCacheService.putAsync(workflowId.getId());
                 if (status == null) {
                     break;
                 } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
@@ -433,6 +431,10 @@ public class WorkflowServiceImpl implements WorkflowService {
                 }
                 try {
                     keepUpdate(workflowPid, jobUpdate);
+                    if (workflowId != null) {
+                        // pre-warm the cache
+                        jobCacheService.putAsync(workflowId.getId());
+                    }
                     Thread.sleep(checkInterval);
                 } catch (Exception e) {
                     if (isDone) {

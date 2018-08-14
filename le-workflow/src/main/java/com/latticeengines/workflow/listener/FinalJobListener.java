@@ -1,5 +1,6 @@
 package com.latticeengines.workflow.listener;
 
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -31,6 +32,9 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     @Autowired
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
+    @Autowired
+    private JobCacheService jobCacheService;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -41,6 +45,9 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         try {
             if (!updateStatus(executionId, jobExecution)) {
                 throw new RuntimeException("Can not update workflow job status, Id=" + executionId);
+            }
+            if (executionId != null) {
+                jobCacheService.putAsync(executionId);
             }
         } finally {
             if (caller != null) {

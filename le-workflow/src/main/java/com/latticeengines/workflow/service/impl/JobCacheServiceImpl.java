@@ -5,6 +5,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobCache;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -166,7 +167,8 @@ public class JobCacheServiceImpl implements JobCacheService {
             cacheWriter.setUpdateTimeByWorkflowIds(workflowIds, true, timestamp);
             cacheWriter.setUpdateTimeByWorkflowIds(workflowIds, false, timestamp);
         }
-        return service.submit(new RefreshCacheRunnable(workflowIds, forceRefresh ? null : timestamp));
+        return service.submit(new RefreshCacheRunnable(
+                MultiTenantContext.getTenant(), workflowIds, forceRefresh ? null : timestamp));
     }
 
     private boolean isCacheExpired(JobCache cache) {
@@ -224,19 +226,6 @@ public class JobCacheServiceImpl implements JobCacheService {
         }
     }
 
-    /*
-     * refresh the cache entry asynchronously if it expired and return the job in the current entry
-     * (may be stale)
-     */
-    private Job handleJobCache(JobCache jobCache, long workflowId) {
-        // cache hit
-        if (isCacheExpired(jobCache)) {
-            // trigger cache update asynchronously and return stale data
-            putAsync(Collections.singletonList(workflowId), false);
-        }
-        return jobCache.getJob();
-    }
-
     private void check(WorkflowJob workflowJob) {
         Preconditions.checkNotNull(workflowJob);
         Preconditions.checkNotNull(workflowJob.getWorkflowId());
@@ -257,27 +246,36 @@ public class JobCacheServiceImpl implements JobCacheService {
         if (workflowJob == null) {
             return null;
         }
+        Tenant prevTenant = MultiTenantContext.getTenant();
         // set tenant for report retrieval
-        MultiTenantContext.setTenant(workflowJob.getTenant());
-        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl,
-                workflowJob, includeDeatils);
+        try {
+            MultiTenantContext.setTenant(workflowJob.getTenant());
+            return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl,
+                    workflowJob, includeDeatils);
+        } finally {
+            // restore the value before
+            MultiTenantContext.setTenant(prevTenant);
+        }
     }
 
     /*
      * Asynchronously refresh cache entries for target jobs.
      */
     private class RefreshCacheRunnable implements Runnable {
-        private List<Long> workflowIds;
-        private Long updateTime;
+        private final Tenant tenant;
+        private final List<Long> workflowIds;
+        private final Long updateTime;
 
-        RefreshCacheRunnable(@NotNull List<Long> workflowIds, @Nullable Long updateTime) {
+        RefreshCacheRunnable(@Nullable Tenant tenant, @NotNull List<Long> workflowIds, @Nullable Long updateTime) {
             Preconditions.checkNotNull(workflowIds);
+            this.tenant = tenant;
             this.workflowIds = workflowIds.stream().filter(Objects::nonNull).collect(Collectors.toList());
             this.updateTime = updateTime;
         }
 
         @Override
         public void run() {
+            Tenant prevTenant = MultiTenantContext.getTenant();
             try {
                 List<Long> ids = new ArrayList<>(workflowIds);
                 List<Long> detailIds = new ArrayList<>(workflowIds);
@@ -290,6 +288,12 @@ public class JobCacheServiceImpl implements JobCacheService {
                     detailIds = removeUpdatedIds(workflowIds, detailUpdateTimes, updateTime);
                 }
 
+                MultiTenantContext.setTenant(tenant);
+                if (tenant == null) {
+                    log.info("Set tenant to null in MultiTenantContext");
+                } else {
+                    log.info("Set tenant to Tenant(PID={}, ID={})", tenant.getPid(), tenant.getId());
+                }
                 // merge IDs and dedup
                 List<Long> jobIds = Stream.concat(ids.stream(), detailIds.stream()).distinct().collect(Collectors.toList());
                 List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(jobIds);
@@ -308,21 +312,29 @@ public class JobCacheServiceImpl implements JobCacheService {
                         .filter(job -> detailIdSet.contains(job.getWorkflowId()))
                         .map(workflowJob -> transform(workflowJob, true))
                         .collect(Collectors.toList());
+                List<Long> cachedJobIds = jobs.stream().map(Job::getId).collect(Collectors.toList());
+                List<Long> cachedDetailJobIds = jobs.stream().map(Job::getId).collect(Collectors.toList());
                 log.info("Populating job caches, updateTime={}, size={}, IDs={}",
-                        updateTime, jobIds.size(), getWorkflowIdsStr(jobIds));
+                        updateTime, cachedJobIds.size(), getWorkflowIdsStr(cachedJobIds));
+                log.info("Populating detail job caches, updateTime={}, size={}, IDs={}",
+                        updateTime, cachedDetailJobIds.size(), getWorkflowIdsStr(cachedDetailJobIds));
                 cacheWriter.put(jobs, false);
                 cacheWriter.put(detailJobs, true);
             } catch (Exception e) {
                 log.error(String.format("Fail to refresh job caches, updateTime=%d, size=%d, IDs=%s",
                         updateTime, workflowIds.size(), getWorkflowIdsStr(workflowIds)), e);
+            } finally {
+                MultiTenantContext.setTenant(prevTenant);
             }
         }
 
         private void logUpdatedIds(List<Long> filteredIds, List<Long> originalIds) {
             Set<Long> idSet = new HashSet<>(filteredIds);
             List<Long> updatedIds = originalIds.stream().filter(id -> !idSet.contains(id)).collect(Collectors.toList());
-            log.info("Skipping already updated job caches, updateTime={}, size={}, IDs={}",
-                    updateTime, updatedIds.size(), getWorkflowIdsStr(updatedIds));
+            if (!updatedIds.isEmpty()) {
+                log.info("Skipping already updated job caches, updateTime={}, size={}, IDs={}",
+                        updateTime, updatedIds.size(), getWorkflowIdsStr(updatedIds));
+            }
         }
 
         private List<Long> removeUpdatedIds(List<Long> ids, List<Long> times, @NotNull Long updateTime) {

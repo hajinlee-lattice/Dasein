@@ -167,7 +167,8 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
     private void cleanup(JobCacheTest test) {
         Job job = new Job();
         job.setId(test.workflowId);
-        writer.clear(job, test.includeDetails);
+        writer.clear(job, true);
+        writer.clear(job, false);
         JobCache cache = writer.getByWorkflowId(test.workflowId, test.includeDetails);
         // make sure it is indeed cleared
         Assert.assertNull(cache);
