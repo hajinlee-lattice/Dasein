@@ -50,6 +50,12 @@ public class UuidUtils {
         return tokens[7];
     }
 
+    public static String parseAppId(String hdfsPath) {
+        hdfsPath = PathUtils.stripoutProtocol(hdfsPath);
+        String[] tokens = hdfsPath.split("/");
+        return tokens[8];
+    }
+
     public static String shortenUuid(UUID uuid) {
         ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
         bb.putLong(uuid.getMostSignificantBits());

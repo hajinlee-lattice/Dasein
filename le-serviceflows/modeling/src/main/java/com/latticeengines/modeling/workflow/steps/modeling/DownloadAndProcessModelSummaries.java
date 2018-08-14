@@ -48,11 +48,6 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
             throw new LedpException(LedpCode.LEDP_28012);
         }
 
-        if (!modelSummaryProxy.downloadModelSummary(configuration.getCustomerSpace().toString(),
-                modelApplicationIdToEventColumn)) {
-            throw new LedpException(LedpCode.LEDP_28029);
-        }
-
         Map<String, ModelSummary> eventToModelSummary = modelSummaryProxy.getEventToModelSummary(
                 configuration.getCustomerSpace().getTenantId(), modelApplicationIdToEventColumn);
 

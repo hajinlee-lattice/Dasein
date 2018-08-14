@@ -403,10 +403,10 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Override
     public boolean downloadModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn) {
-        boolean result = downloadModelSummary(tenantId);
+        boolean result = downloadModelSummaryForTenant(tenantId, modelApplicationIdToEventColumn);
         if (!result) {
             try {
-                getEventToModelSummary(modelApplicationIdToEventColumn);
+                getEventToModelSummary(tenantId, modelApplicationIdToEventColumn);
                 return true;
             } catch (Exception e) {
                 log.error("Fail to invoke getEventToModelSummary" + e);
@@ -416,15 +416,21 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         return true;
     }
 
-    @Override
-    public boolean downloadModelSummary(String tenantId) {
+    private boolean downloadModelSummaryForTenant(String tenantId, Map<String, String> modelApplicationIdToEventColumn) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
         }
 
+        Set<String> applicationFilters = null;
+        if (modelApplicationIdToEventColumn != null) {
+            applicationFilters = new HashSet<>();
+            for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
+                applicationFilters.add(modelApplicationId.replace("application_", ""));
+            }
+        }
+
         long startTime = System.currentTimeMillis();
-        log.info(String.format("Begin download for tenant: %s", tenantId));
         Set<String> modelSummaryIds = getModelSummaryIds();
         ModelDownloaderCallable.Builder builder = new ModelDownloaderCallable.Builder();
         builder.modelServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
@@ -434,22 +440,19 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 .yarnConfiguration(yarnConfiguration) //
                 .modelSummaryParser(modelSummaryParser) //
                 .featureImportanceParser(featureImportanceParser) //
-                .modelSummaryIds(modelSummaryIds);
+                .modelSummaryIds(modelSummaryIds)
+                .applicationFilters(applicationFilters);
         ModelDownloaderCallable callable = new ModelDownloaderCallable(builder);
 
-        log.info("Add exclude flag: " + tenantId);
         modelSummaryDownloadFlagEntityMgr.addExcludeFlag(tenantId);
-
-        log.info("Model summary download executor submit");
         Boolean result;
         try {
+            log.info(String.format("Model summary download executor submit, tenant: %s", tenantId));
             result = callable.call();
         } catch (Exception e) {
             log.error("ModelDownloaderCallable failed " + e);
             throw new RuntimeException(e);
         }
-
-        log.info("Remove exclude flag: " + tenantId);
         modelSummaryDownloadFlagEntityMgr.removeExcludeFlag(tenantId);
 
         long totalSeconds = (System.currentTimeMillis() - startTime);
@@ -474,7 +477,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public Map<String, ModelSummary> getEventToModelSummary(Map<String, String> modelApplicationIdToEventColumn) {
+    public Map<String, ModelSummary> getEventToModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn) {
         Map<String, ModelSummary> eventToModelSummary = new HashMap<>();
         Set<String> foundModels = new HashSet<>();
 
@@ -493,7 +496,22 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                         eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
                         foundModels.add(modelApplicationId);
                     } else {
-                        log.info("Still waiting for model:" + modelApplicationId);
+                        downloadModelSummary(tenantId, modelApplicationIdToEventColumn);
+                    }
+                }
+            }
+
+            if (eventToModelSummary.size() < modelApplicationIdToEventColumn.size()) {
+                for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
+                    if (!foundModels.contains(modelApplicationId)) {
+                        ModelSummary model = modelSummaryEntityMgr.findByApplicationId(modelApplicationId);
+
+                        if (model != null) {
+                            eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
+                            foundModels.add(modelApplicationId);
+                        } else {
+                            log.error("");
+                        }
                     }
                 }
             }

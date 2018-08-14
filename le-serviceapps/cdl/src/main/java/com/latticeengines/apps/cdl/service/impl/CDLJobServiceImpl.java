@@ -114,7 +114,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             try {
                 orchestrateJob();
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed" + e);
                 throw e;
             }
         }

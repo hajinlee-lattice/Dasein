@@ -41,10 +41,6 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
                 throw new LedpException(LedpCode.LEDP_28012);
             }
 
-            if (!modelSummaryProxy.downloadModelSummary(configuration.getCustomerSpace().toString())) {
-                throw new LedpException(LedpCode.LEDP_28029);
-            }
-
             Map<String, ModelSummary> eventToModelSummary = modelSummaryProxy.getEventToModelSummary(
                     configuration.getCustomerSpace().getTenantId(), modelApplicationIdToEventColumn);
 

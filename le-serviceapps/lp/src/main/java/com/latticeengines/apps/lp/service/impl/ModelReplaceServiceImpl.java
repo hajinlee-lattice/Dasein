@@ -73,7 +73,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
             ModelSummary targetModelSummary = modelSummaryEntityMgr.getByModelId(targetModelId);
 
             processHdfsData(sourceTenantId, targetTenantId, sourceModelSummary, targetModelSummary);
-            modelSummaryService.downloadModelSummary(targetTenantId);
+            modelSummaryService.downloadModelSummary(targetTenantId, null);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);

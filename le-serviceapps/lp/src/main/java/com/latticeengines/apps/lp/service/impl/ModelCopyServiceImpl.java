@@ -48,7 +48,7 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         try (PerformanceTimer timer = new PerformanceTimer("Copy model function")) {
             result = modelService.copyModel(modelSummary, sourceTenantId, targetTenantId);
         }
-        modelSummaryService.downloadModelSummary(targetTenantId);
+        modelSummaryService.downloadModelSummary(targetTenantId, null);
         return result;
     }
 

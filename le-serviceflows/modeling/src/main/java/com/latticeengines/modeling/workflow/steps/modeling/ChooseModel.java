@@ -54,10 +54,6 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
             proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         }
 
-        if (!modelSummaryProxy.downloadModelSummary(configuration.getCustomerSpace().toString())) {
-            throw new LedpException(LedpCode.LEDP_28029);
-        }
-
         Collection<ModelSummary> modelSummaries = modelSummaryProxy.getEventToModelSummary(
                 configuration.getCustomerSpace().getTenantId(), modelApplicationIdToEventColumn).values();
 

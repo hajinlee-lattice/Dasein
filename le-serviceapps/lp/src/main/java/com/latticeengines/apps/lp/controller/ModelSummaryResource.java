@@ -77,6 +77,6 @@ public class ModelSummaryResource {
             @RequestBody Map<String, String> modelApplicationIdToEventColumn) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         log.info(String.format("Get event to model summary for tenant %s", customerSpace));
-        return modelSummaryService.getEventToModelSummary(modelApplicationIdToEventColumn);
+        return modelSummaryService.getEventToModelSummary(customerSpace, modelApplicationIdToEventColumn);
     }
 }

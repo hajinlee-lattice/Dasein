@@ -38,11 +38,9 @@ public interface ModelSummaryService {
 
     void updateLastUpdateTime(String modelId);
 
-    boolean downloadModelSummary(String tenantId);
-
     boolean downloadModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn);
 
     Set<String> getModelSummaryIds();
 
-    Map<String, ModelSummary> getEventToModelSummary(Map<String, String> modelApplicationIdToEventColumn);
+    Map<String, ModelSummary> getEventToModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn);
 }

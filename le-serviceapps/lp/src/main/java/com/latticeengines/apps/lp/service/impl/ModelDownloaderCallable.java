@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -48,6 +49,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     private ModelSummaryParser parser;
     private FeatureImportanceParser featureImportanceParser;
     private Set<String> modelSummaryIds;
+    private Set<String> applicationFilters;
 
     public ModelDownloaderCallable(Builder builder) {
         this.tenant = builder.getTenant();
@@ -58,6 +60,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         this.parser = builder.getModelSummaryParser();
         this.featureImportanceParser = builder.getFeatureImportanceParser();
         this.modelSummaryIds = builder.getModelSummaryIds();
+        this.applicationFilters = builder.getApplicationFilters();
     }
 
     @Override
@@ -76,10 +79,9 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                     return false;
                 }
 
-                String name = file.getPath().getName().toString();
+                String name = file.getPath().getName();
                 return name.equals("modelsummary.json");
             }
-
         };
 
         HdfsUtils.HdfsFileFilter folderFilter = new HdfsUtils.HdfsFileFilter() {
@@ -130,6 +132,10 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             String constraintViolationId = StringUtils.EMPTY;
             try {
                 String modelSummaryId = UuidUtils.parseUuid(file);
+                String appId = UuidUtils.parseAppId(file);
+                if (CollectionUtils.isNotEmpty(applicationFilters) && !applicationFilters.contains(appId)) {
+                    continue;
+                }
                 synchronized (modelSummaryIds) {
                     if (modelSummaryIds.contains(modelSummaryId)) {
                         continue;
@@ -261,6 +267,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         private ModelSummaryParser modelSummaryParser;
         private FeatureImportanceParser featureImportanceParser;
         private Set<String> modelSummaryIds;
+        private Set<String> applicationFilters;
+
 
         public Builder() {
 
@@ -306,6 +314,11 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             return this;
         }
 
+        public Builder applicationFilters(Set<String> applicationFilters) {
+            this.applicationFilters = applicationFilters;
+            return this;
+        }
+
         public Tenant getTenant() {
             return tenant;
         }
@@ -338,6 +351,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             return modelSummaryIds;
         }
 
+        public Set<String> getApplicationFilters() { return  applicationFilters; }
     }
 
 }
