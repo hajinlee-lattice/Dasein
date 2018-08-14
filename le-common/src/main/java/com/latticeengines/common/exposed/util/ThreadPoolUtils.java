@@ -45,7 +45,7 @@ public class ThreadPoolUtils {
         Runtime.getRuntime().addShutdownHook(new Thread(pool::shutdownNow));
         return pool;
     }
-    
+
     public static ForkJoinPool getForkJoinThreadPool(String name, Integer size) {
         // custom workerThreadFactory for ensuring specified thread name prefix
         ForkJoinWorkerThreadFactory workerThreadFactory = //

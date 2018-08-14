@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -103,8 +104,7 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
     public List<RuleBasedModel> findAllByRatingEngineId(String ratingEngineid) {
         RatingEngine ratingEngine = ratingEngineDao.findById(ratingEngineid);
         if (ratingEngine == null || ratingEngine.getPid() == null) {
-            throw new NullPointerException(
-                    String.format("Rating Engine with id of %s cannot be found", ratingEngineid));
+            return Collections.emptyList();
         }
         return ruleBasedModelDao.findAllByField("FK_RATING_ENGINE_ID", ratingEngine.getPid());
     }

@@ -63,8 +63,8 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         log.info(String.format("Step 3 - Loading related plays completed for : %s", ratingEngineId));
 
         // get dependencies
-        Map<CDLObjectTypes, List<String>> dependencies = ratingEngineService
-                .getRatingEngineDependencies(customerSpace, ratingEngineId);
+        Map<CDLObjectTypes, List<String>> dependencies = ratingEngineService.getRatingEngineDependencies(customerSpace,
+                ratingEngineId);
         log.info(String.format("Step 3.1 - Loading related dependencies completed for : %s", ratingEngineId));
 
         // get iterations

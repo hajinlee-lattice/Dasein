@@ -851,7 +851,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
                     List<RatingModel> ratingModels = ratingModelService
                             .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
-                    if (ratingModels != null) {
+                    if (CollectionUtils.isNotEmpty(ratingModels)) {
                         rm: for (RatingModel ratingModel : ratingModels) {
                             ratingModelService.findRatingModelAttributeLookups(ratingModel);
                             Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
