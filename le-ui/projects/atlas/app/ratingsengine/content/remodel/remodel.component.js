@@ -84,7 +84,9 @@ angular.module('lp.ratingsengine.remodel', [
                                 modelId: $stateParams.modelId
                             }
                         },
-                        nextState: 'home.ratingsengine.dashboard'
+                        nextState: 'home.ratingsengine.dashboard',
+                        secondaryLink: 'home.ratingsengine'
+
                     };
                 }
             },
