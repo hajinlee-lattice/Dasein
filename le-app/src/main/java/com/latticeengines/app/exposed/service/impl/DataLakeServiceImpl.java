@@ -214,7 +214,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     private List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
         // Only return attributes for account now
         String tenantId = MultiTenantContext.getShortTenantId();
-        List<ColumnMetadata> accountAttrs = _dataLakeService.getCachedServingMetadataForEntity(tenantId, BusinessEntity.Account);
+        List<ColumnMetadata> accountAttrs = _dataLakeService.getCachedServingMetadataForEntity(tenantId,
+                BusinessEntity.Account);
         accountAttrs = accountAttrs.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
         // Hack to limit attributes for talking points temporarily PLS-7065
                 && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
@@ -508,16 +509,20 @@ public class DataLakeServiceImpl implements DataLakeService {
         Runnable statsCubeRunnable = () -> {
             log.info("Getting stats cubes for " + tenantId);
             Map<String, StatsCube> cubes = _dataLakeService.getStatsCubesFromCache(tenantId);
-            Map<String, StatsCube> mapCopy = new HashMap<>();
-            cubes.forEach((key, cube) -> {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                KryoUtils.write(bos, cube);
-                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-                StatsCube cubeCopy = KryoUtils.read(bis, StatsCube.class);
-                mapCopy.put(key, cubeCopy);
-            });
-            concurrentStatsCubeMap.putAll(mapCopy);
-            log.info("Finished getting stats cubes for " + tenantId);
+            if (cubes != null) {
+                Map<String, StatsCube> mapCopy = new HashMap<>();
+                cubes.forEach((key, cube) -> {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    KryoUtils.write(bos, cube);
+                    ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+                    StatsCube cubeCopy = KryoUtils.read(bis, StatsCube.class);
+                    mapCopy.put(key, cubeCopy);
+                });
+                concurrentStatsCubeMap.putAll(mapCopy);
+                log.info("Finished getting stats cubes for " + tenantId);
+            } else {
+                log.warn("There's no stats cubes for tenantId=" + tenantId);
+            }
         };
         runnables.add(statsCubeRunnable);
         ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 30, 2);
