@@ -1181,6 +1181,9 @@ angular
                         });
 
                         return deferred.promise;
+                    }],
+                    iteration: [function(){
+                        return null;
                     }]
                 },
                 views: {

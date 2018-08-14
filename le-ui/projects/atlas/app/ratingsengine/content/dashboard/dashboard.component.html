@@ -42,8 +42,11 @@
                     <button
                         class="button orange-button"
                         ui-sref="home.model.ratings({ 
-                            modelId: vm.ratingEngine.activeModel.AI.modelSummaryId, 
-                            rating_id: $stateParams.rating_id })"
+                            rating_id: vm.ratingEngine.id,
+                            modelId: vm.ratingEngine.latest_iteration.AI.modelSummaryId,
+                            section: 'dashboard.ratings',
+                            ratingEngine: vm.ratingEngine
+                        })"
                         ng-if="!vm.isRulesBased"
                         ng-disabled="vm.dashboard.summary.bucketMetadata.length === 0 || vm.isJobRunning()">
                         {{ vm.publishOrActivateButtonLabel }}
@@ -62,7 +65,7 @@
                 <div ng-if="!vm.isRulesBased">
                     <h3>
                         Creation Settings
-                        <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
+                        <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )</span>
                     </h3>
 
                     <!-- <dl>
@@ -132,7 +135,7 @@
                     <h3>
                         Ratings 
                         <span ng-if="!vm.isRulesBased">
-                            <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
+                            <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )</span>
                             <span class="more-info show-tooltip top delay">
                                 i
                                 <div class="tooltip_ small">

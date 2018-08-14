@@ -70,8 +70,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             
         }
 
-        $scope.activeIteration = ratingEngine.published_iteration ? ratingEngine.published_iteration[$scope.typeContext].iteration : ratingEngine.latest_iteration[$scope.typeContext].iteration;
-        $scope.modelIsReady = ratingEngine.published_iteration ? ((ratingEngine.published_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.published_iteration[$scope.typeContext].modelSummaryId !== undefined)) : ((ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
+        $scope.activeIteration = ratingEngine.scoring_iteration ? ratingEngine.scoring_iteration[$scope.typeContext].iteration : ratingEngine.latest_iteration[$scope.typeContext].iteration;
+        $scope.modelIsReady = ratingEngine.scoring_iteration ? ((ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.published_iteration[$scope.typeContext].modelSummaryId !== undefined)) : ((ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
         $scope.activeStatus = ratingEngine.status;
 
         $scope.$on('statusChange', function(event, args) {
@@ -85,21 +85,15 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         var dashboard = ModelStore.getDashboardData();
         var modelDetails = data.ModelDetails;
 
-        // console.log(dashboard);
-
         $scope.displayName = modelDetails[widgetConfig.NameProperty];
         $scope.IsPmml = data.IsPmml;
         $scope.IsRatingEngine = (modelDetails.Name.substring(0,2) === 'ai');
 
         if($scope.IsRatingEngine){
             var engineId = $stateParams.rating_id,
-                ratingEngine = RatingsEngineStore.getCurrentRating(),
-                type = ratingEngine.type.toLowerCase();
+                ratingEngine = RatingsEngineStore.getRatingEngine();
 
-
-            // console.log(engineId);
-            // console.log(ratingEngine);
-
+            var type = ratingEngine.type.toLowerCase();
 
             $scope.$on('statusChange', function(event, args) {
                 $scope.activeStatus = args.activeStatus;
@@ -144,8 +138,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 });
             }
             
-            $scope.activeIteration = ratingEngine.published_iteration ? ratingEngine.published_iteration[$scope.typeContext].iteration : ratingEngine.latest_iteration[$scope.typeContext].iteration;
-            $scope.modelIsReady = ratingEngine.published_iteration ? ((ratingEngine.published_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.published_iteration[$scope.typeContext].modelSummaryId !== undefined)) : ((ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
+            $scope.activeIteration = ratingEngine.scoring_iteration ? ratingEngine.scoring_iteration[$scope.typeContext].iteration : ratingEngine.latest_iteration[$scope.typeContext].iteration;
+            $scope.modelIsReady = ratingEngine.scoring_iteration ? ((ratingEngine.scoring_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.published_iteration[$scope.typeContext].modelSummaryId !== undefined)) : ((ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== null) || (ratingEngine.latest_iteration[$scope.typeContext].modelSummaryId !== undefined));
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
             $scope.activeStatus = ratingEngine.status;
 

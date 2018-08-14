@@ -257,16 +257,31 @@ angular
                 rating_id: '',
                 viewingIteration: false
             },
-            onEnter: ['IsCdl', 'Model', 'RatingEngine', 'BackStore', function(IsCdl, Model, RatingEngine, BackStore) {
-                var displayName =  Model.ModelDetails.DisplayName;
-                var backState = 'home.models';
+            onEnter: ['$stateParams', 'IsCdl', 'Model', 'RatingEngine', 'BackStore', function($stateParams, IsCdl, Model, RatingEngine, BackStore) {
+                
+                if ($stateParams.viewingIteration){
+                    var backState =  'home.ratingsengine.dashboard',
+                        backParams = {
+                            "rating_id": $stateParams.rating_id, 
+                            "modelId": $stateParams.modelId, 
+                            "viewingIteration": false 
+                        },
+                        displayName = 'Dashboard';
 
-                if(IsCdl === true){
-                    backState = 'home.ratingsengine';
-                    displayName = RatingEngine.displayName;
+                    BackStore.setBackLabel(displayName);
+                    BackStore.setBackState(backState);
+                    BackStore.setBackParams(backParams);
+                } else {
+                    var displayName =  Model.ModelDetails.DisplayName;
+                    var backState = 'home.models';
+
+                    if(IsCdl === true){
+                        backState = 'home.ratingsengine';
+                        displayName = RatingEngine.displayName;
+                    }
+                    BackStore.setBackLabel(displayName);
+                    BackStore.setBackState(backState);
                 }
-                BackStore.setBackLabel(displayName);
-                BackStore.setBackState(backState);
             }],
             resolve: {
                 IsCdl : function(FeatureFlagService){
@@ -371,7 +386,6 @@ angular
                 pageIcon: 'ico-performance',
                 pageTitle: 'Performance'
             },
-           
             views: {
                 "main@": {
                     controller: function($scope, $compile, ModelStore) {
@@ -399,8 +413,6 @@ angular
                 RatingsSummary: function($q, $stateParams, ModelRatingsService) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
-
-                    console.log($stateParams.modelId);
 
                     ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
                         deferred.resolve(result);

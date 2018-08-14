@@ -211,8 +211,12 @@ angular.module('lp.ratingsengine.dashboard', [
         vm.hasBuckets = vm.ratingEngine.counts != null;
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
-
         vm.isPublished = vm.dashboard.summary.isPublished ? true : false;
+
+        console.log($stateParams);
+        console.log(vm.ratingEngine);
+
+        RatingsEngineStore.setRatingEngine(vm.ratingEngine);
 
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
@@ -226,7 +230,7 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
-            var model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration : vm.ratingEngine.latest_iteration;
+            var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.latest_iteration;
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -288,17 +292,17 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.init = function() {
 
-        console.log(vm.ratingEngine);
+        // console.log(vm.ratingEngine);
         // console.log(vm.modelSummary);
-        console.log(vm.dashboard);
+        // console.log(vm.dashboard);
 
         vm.initModalWindow();
         vm.initDataModel();
     }
 
     vm.isIterationActive = function(iterationId){
-        if(vm.ratingEngine.published_iteration != null) {
-            if(vm.ratingEngine.published_iteration.AI.id == iterationId){
+        if(vm.ratingEngine.scoring_iteration != null) {
+            if(vm.ratingEngine.scoring_iteration.AI.id == iterationId){
                 return true;
             } else {
                 return false;
@@ -344,7 +348,7 @@ angular.module('lp.ratingsengine.dashboard', [
             var activeModel = vm.ratingEngine.activeModel;
             jobStatus = activeModel.rule.modelingJobStatus;
         }else{
-            var model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration : vm.ratingEngine.latest_iteration;
+            var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.latest_iteration;
             jobStatus = model.AI.modelingJobStatus;
         }
 

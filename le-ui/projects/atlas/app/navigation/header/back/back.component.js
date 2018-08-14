@@ -1,6 +1,7 @@
 angular.module('common.navigation.back', [])
 .service('BackStore', function() {
     this.backState = '';
+    this.backParams = null;
     this.backLabel = '';
     this.hide = false;
 
@@ -10,6 +11,14 @@ angular.module('common.navigation.back', [])
 
     this.getBackState = function() {
         return this.backState;
+    }
+
+    this.setBackParams = function(params) {
+        this.backParams = params;
+    }
+
+    this.getBackParams = function() {
+        return this.backParams;
     }
 
     this.setBackLabel = function(label) {
@@ -38,6 +47,7 @@ angular.module('common.navigation.back', [])
         this.$onInit = function() {
             vm.headerBack = BackStore.getBackLabel();
             vm.backName = BackStore.getBackState();
+            vm.backParams = BackStore.getBackParams();
             vm.hide = BackStore.isHidden();
         };
 
@@ -47,6 +57,10 @@ angular.module('common.navigation.back', [])
 
         vm.getBackState = function() {
             return BackStore.getBackState();
+        }
+
+        vm.getBackParams = function() {
+            return BackStore.getBackParams();
         }
 
         vm.isHidden = function() {

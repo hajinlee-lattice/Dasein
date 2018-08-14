@@ -3,6 +3,9 @@ angular.module('lp.ratingsengine.remodel')
     var store = this;
 
     this.init = function(){
+
+        console.log("init remodel store");
+
         this.remodelIteration = null;
 
         this.filters = {

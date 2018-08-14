@@ -10,7 +10,7 @@ angular.module('lp.ratingsengine.remodel.training', [])
                 segments: ['SegmentService', function (SegmentService) {
                     return SegmentService.GetSegments();
                 }],
-                products: ['$q', '$stateParams', 'RatingsEngineStore', function ($q, $stateParams, RatingsEngineStore) {
+                products: ['$q', 'RatingsEngineStore', function ($q, RatingsEngineStore) {
                     var deferred = $q.defer();
 
                     var params = {
@@ -20,8 +20,21 @@ angular.module('lp.ratingsengine.remodel.training', [])
                     RatingsEngineStore.getProducts(params).then(function (result) {
                         deferred.resolve(result);
                     });
-
                     return deferred.promise;
+                }],
+                iteration: ['$q', '$stateParams', 'RatingsEngineStore', 'AtlasRemodelStore', 'ratingEngine', function($q, $stateParams, RatingsEngineStore, AtlasRemodelStore, ratingEngine){
+                    var deferred = $q.defer(),
+                        engineId = $stateParams.engineId,
+                        modelId = $stateParams.modelId;
+
+                    RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+                        AtlasRemodelStore.setRemodelIteration(result);
+                        RatingsEngineStore.setRatingEngine(ratingEngine);
+
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
+
                 }]
             },
             views: {

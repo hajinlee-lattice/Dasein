@@ -9,6 +9,7 @@ angular.module('lp.ratingsengine.wizard.training', [
         ratingEngine: '<',
         segments: '<',
         products: '<',
+        iteration: '<'
     },
     controller: function (
         $q, $scope, $stateParams, $timeout,
@@ -30,9 +31,9 @@ angular.module('lp.ratingsengine.wizard.training', [
             scoringCountReturned: false,
             recordsCountReturned: false,
             purchasesCountReturned: false,
-            iteration: AtlasRemodelStore.getRemodelIteration(),
             pageTitle: ($stateParams.section === 'wizard.ratingsengine_segment') ? 'How do you want to train the model?' : 'Do you want to change the way the model is trained?',
-            checkboxModel: {}
+            checkboxModel: {},
+            repeatPurchaseRemodel: true
         });
 
         vm.getNumericalConfig = function(){
@@ -43,30 +44,44 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
+            // RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+            //     AtlasRemodelStore.setRemodelIteration(result);
+            //     RatingsEngineStore.setRatingEngine(ratingEngine);
+
+            //     deferred.resolve(result);
+            // });
+
+            console.log(vm.ratingEngine);
+            console.log(vm.iteration);
+            console.log(AtlasRemodelStore.getRemodelIteration());
+
             // Data variables
-            vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.activeModel.AI;
+            vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
 
-            // State variables
-            vm.repeatPurchaseRemodel = (vm.repeatPurchase && ($stateParams.section != "wizard.ratingsengine_segment")) ? true : false;
 
             if($stateParams.section != "wizard.ratingsengine_segment"){
                 if(vm.engineType == 'cross_sell'){
-                    // Setup form for Cross Sell Models
+
                     vm.filters = vm.iteration.AI.advancedModelingConfig.cross_sell.filters;
-                    RatingsEngineStore.setConfigFilters(vm.filters);
 
                     vm.repeatPurchase = (vm.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') ? true : false;
+                    if(vm.repeatPurchase){
+                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value.toString();
+                    } else {
+                        vm.repeatPurchaseRemodel = false;
+                    }
+
+                    console.log(vm.repeatPurchaseRemodel);
+
+                    // Setup form for Cross Sell Models
+                    RatingsEngineStore.setConfigFilters(vm.filters);
 
                     vm.checkboxModel = {
                         spend: vm.filters.SPEND_IN_PERIOD ? true : false,
                         quantity: vm.filters.QUANTITY_IN_PERIOD ? true : false,
                         periods: vm.filters.TRAINING_SET_PERIOD ? true : false
                     };
-
-                    if(vm.repeatPurchase){
-                        vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value.toString();
-                    }
 
                     vm.spendCriteria = vm.filters.SPEND_IN_PERIOD ? vm.filters.SPEND_IN_PERIOD.criteria : "GREATER_OR_EQUAL";
                     vm.spendValue = vm.filters.SPEND_IN_PERIOD ? vm.filters.SPEND_IN_PERIOD.value : 1500;
