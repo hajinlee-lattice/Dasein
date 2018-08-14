@@ -1,9 +1,0 @@
-import './accountfields/accountfields.component';
-import './accounts/accounts.component';
-import './contactfields/contactfields.component';
-import './contacts/contacts.component';
-import './eloquoa/eloquoa.component';
-import './productbundles/productbundles.component';
-import './producthierarchy/producthierarchy.component';
-import './productpurchases/productpurchases.component';
-import './entry.component';
