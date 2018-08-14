@@ -10,14 +10,15 @@ CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
+    ANACONDA_VERSION=5.2.0
 
     UNAME=`uname`
     if [[ "${UNAME}" == 'Darwin' ]]; then
         echo "You are on Mac"
-        ANACONDA_SH=Anaconda2-4.3.0-MacOSX-x86_64.sh
+        ANACONDA_SH=Anaconda2-${ANACONDA_VERSION}-MacOSX-x86_64.sh
     else
         echo "You are on ${UNAME}"
-        ANACONDA_SH=Anaconda2-4.3.0-Linux-x86_64.sh
+        ANACONDA_SH=Anaconda2-${ANACONDA_VERSION}-Linux-x86_64.sh
     fi
 
     if [ -f $ARTIFACT_DIR/$ANACONDA_SH ]; then
@@ -33,8 +34,9 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     pushd $ARTIFACT_DIR
     sudo bash $ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
     popd
-    $ANACONDA_HOME/bin/pip install -r $WSHOME/le-dev/scripts/requirements.txt
     sudo chown -R $USER $ANACONDA_HOME
+    $ANACONDA_HOME/bin/pip install --upgrade pip
+    $ANACONDA_HOME/bin/pip install -r $WSHOME/le-dev/scripts/requirements.txt
 fi
 
 for CONDAENV in 'lattice|2.7.13' 'v01|2.7.13'
