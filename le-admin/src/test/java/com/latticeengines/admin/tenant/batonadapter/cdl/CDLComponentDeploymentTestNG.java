@@ -58,6 +58,7 @@ public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         loginAD();
         bootstrap(contractId, tenantId, PLSComponent.componentName,
                 plsComponentDeploymentTestNG.getPLSDocumentDirectory());
+        waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
         bootstrap(contractId, tenantId, CDLComponent.componentName,
                 batonService.getDefaultConfiguration(getServiceName()));
         BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, CDLComponent.componentName);

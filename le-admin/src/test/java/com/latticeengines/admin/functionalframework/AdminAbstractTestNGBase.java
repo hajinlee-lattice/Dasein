@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +52,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -66,7 +67,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
 
     protected static final String ADTesterUsername = "testuser1";
     protected static final String ADTesterPassword = "Lattice1";
-    protected static final BatonService batonService = new BatonServiceImpl();
+    protected static BatonService batonService;
     protected static final FeatureFlagDefinition FLAG_DEFINITION = newFlagDefinition();
     protected static final String FLAG_ID = "TestFlag";
 
@@ -87,6 +88,13 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
             "");
 
     public AdminAbstractTestNGBase() {
+    }
+
+    @PostConstruct
+    public void initialize() {
+        if (batonService == null) {
+            batonService = new BatonServiceImpl();
+        }
     }
 
     abstract protected String getRestHostPort();

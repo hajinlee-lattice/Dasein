@@ -3,7 +3,6 @@ package com.latticeengines.admin.tenant.batonadapter;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.Base64Utils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -14,6 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
