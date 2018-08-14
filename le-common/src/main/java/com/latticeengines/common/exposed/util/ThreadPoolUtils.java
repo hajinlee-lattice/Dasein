@@ -1,6 +1,7 @@
 package com.latticeengines.common.exposed.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -60,61 +61,70 @@ public class ThreadPoolUtils {
 
     public static <T> List<T> runCallablesInParallel(ExecutorService executorService, List<Callable<T>> callables,
             int timeoutInMinutes, int intervalInSeconds) {
-        int numTasks = CollectionUtils.size(callables);
-        List<Future<T>> futures = callables.stream().map(executorService::submit).collect(Collectors.toList());
-        List<T> results = new ArrayList<>();
-        long startTime = System.currentTimeMillis();
-        long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
-        while (CollectionUtils.isNotEmpty(futures)) {
-            if (System.currentTimeMillis() - startTime > timeout) {
-                throw new RuntimeException("Cannot finish all callables within timeout.");
-            }
-            List<Future> toBeRemoved = new ArrayList<>();
-            futures.forEach(future -> {
-                try {
-                    T result = future.get(intervalInSeconds, TimeUnit.SECONDS);
-                    results.add(result);
-                    toBeRemoved.add(future);
-                } catch (TimeoutException e) {
-                    // ignore
-                } catch (InterruptedException | ExecutionException e) {
-                    toBeRemoved.add(future);
-                    throw new RuntimeException(e);
+        if (CollectionUtils.isNotEmpty(callables)) {
+            int numTasks = CollectionUtils.size(callables);
+            List<Future<T>> futures = callables.stream().map(executorService::submit).collect(Collectors.toList());
+            List<T> results = new ArrayList<>();
+            long startTime = System.currentTimeMillis();
+            long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
+            while (CollectionUtils.isNotEmpty(futures)) {
+                if (System.currentTimeMillis() - startTime > timeout) {
+                    throw new RuntimeException("Cannot finish all callables within timeout.");
                 }
-            });
-            toBeRemoved.forEach(futures::remove);
+                List<Future> toBeRemoved = new ArrayList<>();
+                futures.forEach(future -> {
+                    try {
+                        T result = future.get(intervalInSeconds, TimeUnit.SECONDS);
+                        results.add(result);
+                        toBeRemoved.add(future);
+                    } catch (TimeoutException e) {
+                        // ignore
+                    } catch (InterruptedException | ExecutionException e) {
+                        toBeRemoved.add(future);
+                        throw new RuntimeException(e);
+                    }
+                });
+                toBeRemoved.forEach(futures::remove);
+            }
+            double duration = (System.currentTimeMillis() - startTime) * 0.001;
+            log.info("Finished all of " + numTasks + " callable futures in " + duration + " sec.");
+            return results;
+        } else {
+            log.warn("Empty callables are submitted, skip execution and return empty list.");
+            return Collections.emptyList();
         }
-        double duration = (System.currentTimeMillis() - startTime) * 0.001;
-        log.info("Finished all of " + numTasks + " callable futures in " + duration + " sec.");
-        return results;
     }
 
     public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService, List<T> runnables,
             int timeoutInMinutes, int intervalInSeconds) {
-        int numTasks = CollectionUtils.size(runnables);
-        List<Future<?>> futures = runnables.stream().map(executorService::submit).collect(Collectors.toList());
-        long startTime = System.currentTimeMillis();
-        long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
-        while (CollectionUtils.isNotEmpty(futures)) {
-            if (System.currentTimeMillis() - startTime > timeout) {
-                throw new RuntimeException("Cannot finish all runnables within timeout.");
-            }
-            List<Future> toBeRemoved = new ArrayList<>();
-            futures.forEach(future -> {
-                try {
-                    future.get(intervalInSeconds, TimeUnit.SECONDS);
-                    toBeRemoved.add(future);
-                } catch (TimeoutException e) {
-                    // ignore
-                } catch (InterruptedException | ExecutionException e) {
-                    toBeRemoved.add(future);
-                    throw new RuntimeException(e);
+        if (CollectionUtils.isEmpty(runnables)) {
+            int numTasks = CollectionUtils.size(runnables);
+            List<Future<?>> futures = runnables.stream().map(executorService::submit).collect(Collectors.toList());
+            long startTime = System.currentTimeMillis();
+            long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
+            while (CollectionUtils.isNotEmpty(futures)) {
+                if (System.currentTimeMillis() - startTime > timeout) {
+                    throw new RuntimeException("Cannot finish all runnables within timeout.");
                 }
-            });
-            toBeRemoved.forEach(futures::remove);
+                List<Future> toBeRemoved = new ArrayList<>();
+                futures.forEach(future -> {
+                    try {
+                        future.get(intervalInSeconds, TimeUnit.SECONDS);
+                        toBeRemoved.add(future);
+                    } catch (TimeoutException e) {
+                        // ignore
+                    } catch (InterruptedException | ExecutionException e) {
+                        toBeRemoved.add(future);
+                        throw new RuntimeException(e);
+                    }
+                });
+                toBeRemoved.forEach(futures::remove);
+            }
+            double duration = (System.currentTimeMillis() - startTime) * 0.001;
+            log.info("Finished all of " + numTasks + " runnable futures in " + duration + " sec.");
+        } else {
+            log.warn("Empty runnables are submitted, skip execution.");
         }
-        double duration = (System.currentTimeMillis() - startTime) * 0.001;
-        log.info("Finished all of " + numTasks + " runnable futures in " + duration + " sec.");
     }
 
 }
