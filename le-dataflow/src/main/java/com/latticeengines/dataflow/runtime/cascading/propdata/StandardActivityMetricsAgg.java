@@ -220,7 +220,7 @@ public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityM
         Integer margin = null;
         if (context.marginContext.totalAmount != 0 && context.marginContext.totalCost != 0) {
             margin = (int) Math.round(100.0 * (context.marginContext.totalAmount - context.marginContext.totalCost)
-                    / context.marginContext.totalCost);
+                    / context.marginContext.totalAmount);
         }
         result.set(namePositionMap.get(ActivityMetricsUtils.getNameWithPeriod(metrics)), margin);
         return result;

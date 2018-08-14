@@ -456,22 +456,22 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
     // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1__AS, W_1__TS, W_1__W_2_2__SC, EVER__HP, W_2__SW
     private Object[][] depivotedMetricsData = new Object[][] { //
-            { "AID1", "PID1", 50, 85, 45.0, 45.0, 125, true, 100 }, //
-            { "AID1", "PID2", 50, 85, 45.0, 45.0, 125, true, 81 }, //
-            { "AID1", "PID3", 50, 122, 45.0, 45.0, 125, true, 100 }, //
-            { "AID1", "PID4", 50, 122, 45.0, 45.0, 125, true, 131 }, //
+            { "AID1", "PID1", 33, 85, 45.0, 45.0, 125, true, 100 }, //
+            { "AID1", "PID2", 33, 85, 45.0, 45.0, 125, true, 81 }, //
+            { "AID1", "PID3", 33, 122, 45.0, 45.0, 125, true, 100 }, //
+            { "AID1", "PID4", 33, 122, 45.0, 45.0, 125, true, 131 }, //
 
-            { "AID2", "PID1", 33, 169, 20.0, 20.0, 100, true, 100 }, //
-            { "AID2", "PID2", 33, 169, 20.0, 20.0, 0, true, 162 }, //
+            { "AID2", "PID1", 25, 169, 20.0, 20.0, 100, true, 100 }, //
+            { "AID2", "PID2", 25, 169, 20.0, 20.0, 0, true, 162 }, //
             { "AID2", "PID3", null, null, 0.0, 0.0, -100, true, 100 }, //
             { "AID2", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID3", "PID1", -56, 150, 20.0, 20.0, 0, true, 140 }, //
+            { "AID3", "PID1", -125, 150, 20.0, 20.0, 0, true, 140 }, //
             { "AID3", "PID2", null, null, 0.0, 0.0, 0, true, null }, //
             { "AID3", "PID3", null, null, 0.0, 0.0, 0, true, null }, //
             { "AID3", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID4", "PID1", 300, 90, 60.0, 60.0, 100, true, 84 }, //
+            { "AID4", "PID1", 75, 90, 60.0, 60.0, 100, true, 84 }, //
             { "AID4", "PID2", null, 120, 20.0, 20.0, 100, true, 140 }, //
             { "AID4", "PID3", null, 120, 20.0, 20.0, 100, true, 140 }, //
             { "AID4", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
@@ -481,12 +481,12 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             { "AID5", "PID3", null, null, 0.0, 0.0, 0, false, null }, //
             { "AID5", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID6", "PID1", 100, 100, 10.0, 10.0, 100, true , 100}, //
-            { "AID6", "PID2", 100, 100, 10.0, 10.0, 100, true , 100}, //
+            { "AID6", "PID1", 50, 100, 10.0, 10.0, 100, true, 100 }, //
+            { "AID6", "PID2", 50, 100, 10.0, 10.0, 100, true, 100 }, //
             { "AID6", "PID3", null, null, 0.0, 0.0, 0, false , null}, //
             { "AID6", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
-            { "AID7", "PID1", 100, null, 10.0, 10.0, 100, true, null }, //
+            { "AID7", "PID1", 50, null, 10.0, 10.0, 100, true, null }, //
             { "AID7", "PID2", null, null, 0.0, 0.0, 0, false, null }, //
             { "AID7", "PID3", null, null, 0.0, 0.0, 0, false, null }, //
             { "AID7", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
@@ -509,22 +509,22 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     // AM_PID4__W_1__MG, AM_PID4__W_1__SW, AM_PID4__W_2__SW, AM_PID4__W_1__AS, AM_PID4__W_1__TS, AM_PID4__W_1__W_2_2__SC, AM_PID4__EVER__HP
     private Object[][] pivotMetricsData = new Object[][] {
             { "AID1", //
-                    50, 85, 100, 45.0, 45.0, 125, true, //
-                    50, 85, 81, 45.0, 45.0, 125, true, //
-                    50, 122, 100, 45.0, 45.0, 125, true, //
-                    50, 122, 131, 45.0, 45.0, 125, true }, //
+                    33, 85, 100, 45.0, 45.0, 125, true, //
+                    33, 85, 81, 45.0, 45.0, 125, true, //
+                    33, 122, 100, 45.0, 45.0, 125, true, //
+                    33, 122, 131, 45.0, 45.0, 125, true }, //
             { "AID2", //
-                    33, 169, 100, 20.0, 20.0, 100, true, //
-                    33, 169, 162, 20.0, 20.0, 0, true, //
+                    25, 169, 100, 20.0, 20.0, 100, true, //
+                    25, 169, 162, 20.0, 20.0, 0, true, //
                     null, null, 100, 0.0, 0.0, -100, true, //
                     null, null, null, 0.0, 0.0, 0, false }, //
             { "AID3", //
-                    -56, 150, 140, 20.0, 20.0, 0, true, //
+                    -125, 150, 140, 20.0, 20.0, 0, true, //
                     null, null, null, 0.0, 0.0, 0, true, //
                     null, null, null, 0.0, 0.0, 0, true, //
                     null, null, null, 0.0, 0.0, 0, false }, //
             { "AID4", //
-                    300, 90, 84, 60.0, 60.0, 100, true, //
+                    75, 90, 84, 60.0, 60.0, 100, true, //
                     null, 120, 140, 20.0, 20.0, 100, true, //
                     null, 120, 140, 20.0, 20.0, 100, true, //
                     null, null, null, 0.0, 0.0, 0, false }, //
@@ -534,12 +534,12 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
                     null, null, null, 0.0, 0.0, 0, false, //
                     null, null, null, 0.0, 0.0, 0, false }, //
             { "AID6", //
-                    100, 100, 100, 10.0, 10.0, 100, true, //
-                    100, 100, 100, 10.0, 10.0, 100, true, //
+                    50, 100, 100, 10.0, 10.0, 100, true, //
+                    50, 100, 100, 10.0, 10.0, 100, true, //
                     null, null, null, 0.0, 0.0, 0, false, //
                     null, null, null, 0.0, 0.0, 0, false }, //
             { "AID7", //
-                    100, null, null, 10.0, 10.0, 100, true, //
+                    50, null, null, 10.0, 10.0, 100, true, //
                     null, null, null, 0.0, 0.0, 0, false, //
                     null, null, null, 0.0, 0.0, 0, false, //
                     null, null, null, 0.0, 0.0, 0, false }, //
