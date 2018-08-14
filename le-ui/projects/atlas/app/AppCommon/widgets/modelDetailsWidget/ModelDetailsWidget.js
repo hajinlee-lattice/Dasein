@@ -49,9 +49,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             var type = ratingEngine.type.toLowerCase();
             $scope.typeContext = 'AI';
 
-            console.log(ratingEngine);
-
-            $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+            $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
         }
 
         if($scope.typeContext == 'AI'){
@@ -127,7 +125,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 var type = ratingEngine.type.toLowerCase();
                 $scope.typeContext = 'AI';
 
-                console.log(ratingEngine);
                 $scope.modelingStrategy = ratingEngine.latest_iteration.AI.advancedModelingConfig[type].modelingStrategy;
             }
 

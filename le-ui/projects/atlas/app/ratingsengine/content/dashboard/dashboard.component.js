@@ -297,7 +297,7 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.isIterationActive = function(iterationId){
-        if(vm.ratingEngine.scoring_iteration != null) {
+        if(vm.ratingEngine.published_iteration != null) {
             if(vm.ratingEngine.published_iteration.AI.id == iterationId){
                 return true;
             } else {
