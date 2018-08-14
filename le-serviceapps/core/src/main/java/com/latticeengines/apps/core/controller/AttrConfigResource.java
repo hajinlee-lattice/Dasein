@@ -66,7 +66,7 @@ public class AttrConfigResource {
             @RequestBody List<String> propertyNames) {
         List<Category> categories = categoryNames != null
                 ? categoryNames.stream().map(this::resolveCategory).collect(Collectors.toList())
-                : Arrays.asList(Category.values()).stream().filter(category -> !category.isHiddenFromUi())
+                : Arrays.stream(Category.values()).filter(category -> !category.isHiddenFromUi())
                         .collect(Collectors.toList());
         return attrConfigService.getAttrConfigOverview(categories, propertyNames, activeOnly);
     }

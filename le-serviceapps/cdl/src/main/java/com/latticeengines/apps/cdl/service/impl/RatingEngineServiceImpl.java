@@ -814,19 +814,20 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingEngine> ratingEngines = getAllRatingEngines();
         if (ratingEngines != null) {
             for (RatingEngine ratingEngine : ratingEngines) {
-                ratingModelService = getRatingModelService(ratingEngine.getType());
-
-                List<RatingModel> ratingModels = ratingModelService
-                        .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
-                if (ratingModels != null) {
-                    for (RatingModel ratingModel : ratingModels) {
-                        ratingModelService.findRatingModelAttributeLookups(ratingModel);
-                        Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
-                        if (attributeLookups != null) {
-                            for (AttributeLookup modelAttribute : attributeLookups) {
-                                if (attributes.contains(sanitize(modelAttribute.toString()))) {
-                                    ratingModelSet.add(ratingModel);
-                                    break;
+                if (!Boolean.TRUE.equals(ratingEngine.getDeleted())) {
+                    ratingModelService = getRatingModelService(ratingEngine.getType());
+                    List<RatingModel> ratingModels = ratingModelService
+                            .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
+                    if (ratingModels != null) {
+                        for (RatingModel ratingModel : ratingModels) {
+                            ratingModelService.findRatingModelAttributeLookups(ratingModel);
+                            Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
+                            if (attributeLookups != null) {
+                                for (AttributeLookup modelAttribute : attributeLookups) {
+                                    if (attributes.contains(sanitize(modelAttribute.toString()))) {
+                                        ratingModelSet.add(ratingModel);
+                                        break;
+                                    }
                                 }
                             }
                         }

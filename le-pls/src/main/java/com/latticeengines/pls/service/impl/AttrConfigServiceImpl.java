@@ -135,7 +135,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
                 MultiTenantContext.getShortTenantId(),
                 Category.getPremiunCategories().stream().map(Category::getName).collect(Collectors.toList()),
-                Arrays.asList(ColumnMetadataKey.State), false);
+                Collections.singletonList(ColumnMetadataKey.State), false);
         for (Category category : Category.getPremiunCategories()) {
             AttrConfigCategoryOverview<AttrState> activationOverview = (AttrConfigCategoryOverview<AttrState>) map
                     .get(category.getName());
