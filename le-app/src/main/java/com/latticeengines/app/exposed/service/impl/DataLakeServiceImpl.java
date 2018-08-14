@@ -509,16 +509,20 @@ public class DataLakeServiceImpl implements DataLakeService {
         Runnable statsCubeRunnable = () -> {
             log.info("Getting stats cubes for " + tenantId);
             Map<String, StatsCube> cubes = _dataLakeService.getStatsCubesFromCache(tenantId);
-            if (cubes != null) {
+            if (MapUtils.isNotEmpty(cubes)) {
                 Map<String, StatsCube> mapCopy = new HashMap<>();
                 cubes.forEach((key, cube) -> {
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    KryoUtils.write(bos, cube);
-                    ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-                    StatsCube cubeCopy = KryoUtils.read(bis, StatsCube.class);
-                    mapCopy.put(key, cubeCopy);
+                    if (cube != null) {
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        KryoUtils.write(bos, cube);
+                        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+                        StatsCube cubeCopy = KryoUtils.read(bis, StatsCube.class);
+                        mapCopy.put(key, cubeCopy);
+                    }
                 });
-                concurrentStatsCubeMap.putAll(mapCopy);
+                if (MapUtils.isNotEmpty(mapCopy)) {
+                    concurrentStatsCubeMap.putAll(mapCopy);
+                }
                 log.info("Finished getting stats cubes for " + tenantId);
             } else {
                 log.warn("There's no stats cubes for tenantId=" + tenantId);
