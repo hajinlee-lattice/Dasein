@@ -7,6 +7,9 @@ public class IngestionRequest {
     @JsonProperty("Submitter")
     private String submitter;
 
+    @JsonProperty("StartNow")
+    private Boolean startNow;
+
     @JsonProperty("FileName")
     private String fileName; // Only for Ingestion type: SFTP
 
@@ -22,6 +25,14 @@ public class IngestionRequest {
 
     public void setSubmitter(String submitter) {
         this.submitter = submitter;
+    }
+
+    public Boolean getStartNow() {
+        return startNow;
+    }
+
+    public void setStartNow(Boolean startNow) {
+        this.startNow = startNow;
     }
 
     public String getFileName() {

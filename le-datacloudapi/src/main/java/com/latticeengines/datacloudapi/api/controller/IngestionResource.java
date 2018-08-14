@@ -42,6 +42,7 @@ public class IngestionResource {
     public IngestionProgress ingest(@PathVariable String ingestionName,
             @RequestBody IngestionRequest ingestionRequest,
             @RequestParam(value = "HdfsPod", required = false, defaultValue = "") String hdfsPod) {
-        return ingestionService.ingest(ingestionName, ingestionRequest, hdfsPod, true);
+        boolean immediate = Boolean.TRUE.equals(ingestionRequest.getStartNow());
+        return ingestionService.ingest(ingestionName, ingestionRequest, hdfsPod, immediate);
     }
 }
