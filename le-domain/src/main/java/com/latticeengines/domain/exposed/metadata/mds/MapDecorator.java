@@ -62,7 +62,11 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
                         return cm;
                     }
                 }) //
-                .doOnComplete(() -> log.info(getLoggerName() + ": Rendered " + counter.get() + " attributes.")) //
+                .doOnComplete(() -> {
+                    if (counter.get() > 0) {
+                        log.info(getLoggerName() + ": Rendered " + counter.get() + " attributes.");
+                    }
+                }) //
                 .doOnError(t -> log.error(getLoggerName() + ": Failed to render.", t));
     }
 
@@ -87,7 +91,9 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
                     if (counter.get() != null) {
                         count = counter.get().get();
                     }
-                    log.info(getLoggerName() + ": Rendered " + count + " attributes.");
+                    if (count > 0) {
+                        log.info(getLoggerName() + ": Rendered " + count + " attributes.");
+                    }
                 }) //
                 .doOnError(t -> log.error(getLoggerName() + ": Failed to render.", t));
     }
