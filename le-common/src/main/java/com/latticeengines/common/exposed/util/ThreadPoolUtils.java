@@ -97,7 +97,7 @@ public class ThreadPoolUtils {
 
     public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService, List<T> runnables,
             int timeoutInMinutes, int intervalInSeconds) {
-        if (CollectionUtils.isEmpty(runnables)) {
+        if (CollectionUtils.isNotEmpty(runnables)) {
             int numTasks = CollectionUtils.size(runnables);
             List<Future<?>> futures = runnables.stream().map(executorService::submit).collect(Collectors.toList());
             long startTime = System.currentTimeMillis();
