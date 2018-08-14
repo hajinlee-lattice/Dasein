@@ -59,7 +59,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(segments.get(0).getDisplayName(), SEGMENT_NAME);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testFindDependingSegments", enabled = true)
+    @Test(groups = "functional", dependsOnMethods = "testFindDependingSegments", enabled = false)
     public void testCyclicDependency() {
         MetadataSegment segment1 = createSegment(SEGMENT_NAME + "1");
         MetadataSegment segment2 = createSegment(SEGMENT_NAME + "2");

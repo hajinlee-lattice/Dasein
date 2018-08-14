@@ -100,6 +100,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         preprocessBeforeCreateOrUpdate(segment);
 
         if (existingSegment != null) {
+            existingSegment = findByName(existingSegment.getName());
             existingSegment = cloneForUpdate(existingSegment, segment);
             segmentDao.update(existingSegment);
             setMetadataSegmentActionContext(existingSegment);
