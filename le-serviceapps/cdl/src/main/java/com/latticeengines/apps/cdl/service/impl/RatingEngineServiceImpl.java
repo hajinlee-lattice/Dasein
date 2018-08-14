@@ -814,6 +814,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingEngine> ratingEngines = getAllRatingEngines();
         if (ratingEngines != null) {
             for (RatingEngine ratingEngine : ratingEngines) {
+                // TODO: [YSong-M22] this check can be removed
+                // TODO: [YSong-M22] after we clean up orphan rating engines
+                // TODO: [YSong-M22] (engines without segment)
                 if (!Boolean.TRUE.equals(ratingEngine.getDeleted())) {
                     ratingModelService = getRatingModelService(ratingEngine.getType());
                     List<RatingModel> ratingModels = ratingModelService
@@ -848,6 +851,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             List<RatingEngine> ratingEngines = getAllRatingEngines();
             if (ratingEngines != null) {
                 for (RatingEngine ratingEngine : ratingEngines) {
+                    // TODO: [YSong-M22] this check can be removed
+                    // TODO: [YSong-M22] after we clean up orphan rating engines
+                    // TODO: [YSong-M22] (engines without segment)
                     if (!Boolean.TRUE.equals(ratingEngine.getDeleted())) {
                         ratingModelService = getRatingModelService(ratingEngine.getType());
                         List<RatingModel> ratingModels = ratingModelService
