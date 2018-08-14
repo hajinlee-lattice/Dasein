@@ -142,7 +142,8 @@ public class LoginResource {
 
             doc.setResult(result);
         } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001 || e.getCode() == LedpCode.LEDP_18002 || e.getCode() == LedpCode.LEDP_18123) {
+            if (e.getCode() == LedpCode.LEDP_18001 || e.getCode() == LedpCode.LEDP_18002
+                    || e.getCode() == LedpCode.LEDP_18123) {
                 throw new LoginException(e);
             }
             throw e;
@@ -176,9 +177,29 @@ public class LoginResource {
     public SimpleBooleanResponse logout(HttpServletRequest request) {
         String token = request.getHeader(Constants.AUTHORIZATION);
         if (StringUtils.isNotEmpty(token)) {
-            sessionService.logout(new Ticket(token));
+            // Make sure the token has at least two parts separated by a period in order to generate a valid ticket.
+            if (token.split("\\.").length > 1) {
+                sessionService.logout(new Ticket(token));
+                return SimpleBooleanResponse.successResponse();
+            } else {
+                log.warn("Invalid token (missing period) passed by HttpServletRequest to Logout.");
+                // For now, return a successful response even though the token was invalid.  Based on the behavior of
+                // login above, it looks like the proper response would be to through an exception.  However, throwing
+                // exception is undesirable because they might trigger pager duty.  Returning a failure response was
+                // considered but from looking at the UI code, unless a HTTP 401 Unauthorized response status code is
+                // set, the UI doesn't properly clear the user state on a failed response.  It seemed the only way to
+                // set the 401 code was to throw an exception so a failed response won't do.  Since the desired outcome
+                // of an invalid token is to clear the user state and logout the user which is the same as the behavior
+                // for a valid token, we return a successful response to trigger the proper logout action.
+                // TODO: Reevaluate the proper response for this error condition (return success, return failures, or
+                //       throw exception).
+                return SimpleBooleanResponse.successResponse();
+            }
+        } else {
+            log.warn("Logout request made with empty token.");
+            // See above invalid token case as to why we return a successful response here despite the empty token.
+            return SimpleBooleanResponse.successResponse();
         }
-        return SimpleBooleanResponse.successResponse();
     }
 
     @RequestMapping(value = "/password/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")

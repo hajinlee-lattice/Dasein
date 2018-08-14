@@ -3,10 +3,18 @@ package com.latticeengines.security.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.security.exposed.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -46,8 +54,8 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
         creds.setUsername(adminUsername);
         creds.setPassword(DigestUtils.sha256Hex(adminPassword));
 
-        LoginDocument loginDoc = restTemplate
-                .postForObject(getRestAPIHostPort() + "/login", creds, LoginDocument.class);
+        LoginDocument loginDoc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds,
+                LoginDocument.class);
         assertNotNull(loginDoc.getData());
     }
 
@@ -91,4 +99,71 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
         }
     }
 
+    @Test(groups = { "functional", "deployment" })
+    public void logout() {
+        Credentials creds = new Credentials();
+        creds.setUsername(adminUsername);
+        creds.setPassword(DigestUtils.sha256Hex(adminPassword));
+
+        // Do we need to log in before we log out?  I'm not sure if I'm doing this correctly.
+        LoginDocument loginDoc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds,
+                LoginDocument.class);
+        assertNotNull(loginDoc.getData());
+
+        // Extract authorization token from login response to use for logout.
+        String token = loginDoc.getUniqueness() + "." + loginDoc.getRandomness();
+
+        // Build HTTP header that includes the authorization token.
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(Constants.AUTHORIZATION, token);
+        HttpEntity<HttpHeaders> headerEntity = new HttpEntity<>(headers);
+
+        HttpEntity<SimpleBooleanResponse> responseEntity = restTemplate.exchange(
+                getRestAPIHostPort() + "/logout", HttpMethod.GET, headerEntity, SimpleBooleanResponse.class);
+        assertTrue(responseEntity.getBody().isSuccess());
+    }
+
+    @Test(groups = { "functional", "deployment" })
+    public void logoutEmptyToken() {
+        Credentials creds = new Credentials();
+        creds.setUsername(adminUsername);
+        creds.setPassword(DigestUtils.sha256Hex(adminPassword));
+
+        // Do we need to log in before we log out?  I'm not sure if I'm doing this correctly.
+        LoginDocument loginDoc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds,
+                LoginDocument.class);
+        assertNotNull(loginDoc.getData());
+
+        // Set an empty authorization token in the logout request HTTP header.
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(Constants.AUTHORIZATION, "");
+        HttpEntity<HttpHeaders> headerEntity = new HttpEntity<>(headers);
+
+        HttpEntity<SimpleBooleanResponse> responseEntity = restTemplate.exchange(
+                getRestAPIHostPort() + "/logout", HttpMethod.GET, headerEntity, SimpleBooleanResponse.class);
+        assertTrue(responseEntity.getBody().isSuccess());
+    }
+
+    @Test(groups = { "functional", "deployment" })
+    public void logoutInvalidToken() {
+        Credentials creds = new Credentials();
+        creds.setUsername(adminUsername);
+        creds.setPassword(DigestUtils.sha256Hex(adminPassword));
+
+        // Do we need to log in before we log out?  I'm not sure if I'm doing this correctly.
+        LoginDocument loginDoc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds,
+                LoginDocument.class);
+        assertNotNull(loginDoc.getData());
+
+        // Extract authorization token from login response to use for logout HTTP header.  Do not place a period
+        // between the uniqueness and randomness component to trigger an invalid token error.
+        String token = loginDoc.getUniqueness() + loginDoc.getRandomness();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(Constants.AUTHORIZATION, token);
+        HttpEntity<HttpHeaders> headerEntity = new HttpEntity<>(headers);
+
+        HttpEntity<SimpleBooleanResponse> responseEntity = restTemplate.exchange(
+                getRestAPIHostPort() + "/logout", HttpMethod.GET, headerEntity, SimpleBooleanResponse.class);
+        assertTrue(responseEntity.getBody().isSuccess());
+    }
 }
