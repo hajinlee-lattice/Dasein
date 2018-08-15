@@ -409,8 +409,8 @@ angular.module('lp.ratingsengine.wizard.training', [
         }
         vm.updateProductsSelected = function(listProducts) {
             if(vm.ratingEngine.activeModel.AI){
-                vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.targetProducts = listProducts;
-                vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts = listProducts;
+                vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.trainingProducts = listProducts;
+                vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingProducts = listProducts;
             }
         }
 
