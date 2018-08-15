@@ -919,12 +919,6 @@ angular.module('lp.ratingsengine')
                 var success = !result.data.errorCode;
                 if(success) {
                     RatingsEngineStore.nextSaveAIRatingModel(nextState);
-                } else {
-                    RatingsEngineStore.setValidation('training', true);
-                    Banner.error({
-                        title: result.data.errorCode,
-                        message:result.data.errorMsg
-                    });
                 }
             });
         });

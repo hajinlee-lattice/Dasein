@@ -455,7 +455,28 @@ attr-categories,
                         }
                     }
                     .category-label {
-                        @include text-ellipsis();
+                        .category-label-span {
+                            @include text-ellipsis();
+                            display: inline-block;
+                            max-width: calc(100% - 20px);
+                        }
+                        .more-info {
+                            padding: 2px;
+                            text-align: center;
+                            width: 11px;
+                            height: 11px;
+                            position: relative;
+                            top: -8px;
+                            font-size: 8px;
+                            text-transform: none;
+                            cursor: pointer;
+                            .tooltip_ {
+                                .cover {
+                                    text-align: center;
+                                    color: white;
+                                }
+                            }
+                        }
                     }
                 }
                 .count {

@@ -33,11 +33,6 @@ angular.module('lp.ratingsengine.remodel', [
                                     var success = !result.data.errorCode;
                                     if(success) {
                                         $state.go(nextState);
-                                    } else {
-                                        Banner.error({
-                                            title: result.data.errorCode,
-                                            message:result.data.errorMsg
-                                        });
                                     }
                                 });
                             }, 

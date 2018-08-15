@@ -92,7 +92,8 @@ angular.module('common.datacloud.explorer', [
         segment: $stateParams.segment,
         inWizard: false,
         datacollectionPrecheck: null,
-        datacollectionPrechecking: false
+        datacollectionPrechecking: false,
+        collectionStatus: null
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
@@ -160,6 +161,9 @@ angular.module('common.datacloud.explorer', [
 
         DataCloudStore.setFeedbackModal(false);
 
+        QueryStore.getCollectionStatus().then(function(result) {
+            vm.collectionStatus = result;
+        });
     }
 
     /* some rules that might hide the page */

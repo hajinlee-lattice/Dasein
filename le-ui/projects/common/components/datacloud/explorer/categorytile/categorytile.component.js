@@ -10,7 +10,7 @@ angular
         },
         controllerAs: 'vm',
         templateUrl: '/components/datacloud/explorer/categorytile/categorytile.component.html',
-        controller: function ($scope, $document, $timeout, $interval, DataCloudStore, QueryStore) {
+        controller: function ($scope, $document, $timeout, $interval, DataCloudStore, QueryStore, moment) {
             var vm = $scope.vm;
 
             angular.extend(vm, { });
@@ -214,6 +214,17 @@ angular
                 if(attribute.Entity === 'PurchaseHistory'){
                     return attribute.Subcategory;
                 }
+            }
+
+            vm.getDateMap = function(category) {
+                var categoryKey = category.toUpperCase().replace(' ','_'),
+                    timestamp = (vm.collectionStatus && vm.collectionStatus.DateMap ? vm.collectionStatus.DateMap[categoryKey] : ''),
+                    lastDataRefresh = '';
+                if(timestamp) {
+                    lastDataRefresh = 'Last Data Refresh: ' + moment(timestamp).format('MMMM DD, YYYY');
+                    return lastDataRefresh;
+                }
+                return lastDataRefresh;
             }
         }
     };
