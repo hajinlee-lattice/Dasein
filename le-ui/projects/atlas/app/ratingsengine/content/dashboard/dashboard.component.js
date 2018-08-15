@@ -209,7 +209,18 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.initDataModel = function(){
-        vm.relatedItems = vm.dashboard.plays;
+        vm.relatedItems = [];
+        Object.keys(vm.dashboard.dependencies).forEach(function(type) {
+            if (vm.dashboard.dependencies[type]) {
+                vm.dashboard.dependencies[type].forEach(function(name) {
+                    vm.relatedItems.push({
+                        type: type,
+                        name: name
+                    });
+                });
+            }
+        });
+
         vm.hasBuckets = vm.ratingEngine.counts != null;
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
