@@ -32,17 +32,21 @@ import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGB
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.service.TenantService;
 
+import javax.inject.Inject;
+
 public class MetadataComponentTestNG extends MetadataFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private MetadataService mdService;
+
+    @Inject
+    private BatonService batonService;
 
     private Tenant tenant;
 
-    private static final BatonService batonService = new BatonServiceImpl();
     private static final String serviceName = "Metadata";
     private static final String tenantName = "Metadata Component Test Tenant";
     private static final String contractId = "MetadataComponentTest";

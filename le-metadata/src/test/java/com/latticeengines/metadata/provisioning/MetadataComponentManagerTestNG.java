@@ -1,15 +1,16 @@
 package com.latticeengines.metadata.provisioning;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -21,13 +22,13 @@ import com.latticeengines.security.exposed.service.TenantService;
 
 public class MetadataComponentManagerTestNG extends MetadataFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private MetadataComponentManager componentManager;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private MetadataService mdService;
 
     private Tenant tenant;
