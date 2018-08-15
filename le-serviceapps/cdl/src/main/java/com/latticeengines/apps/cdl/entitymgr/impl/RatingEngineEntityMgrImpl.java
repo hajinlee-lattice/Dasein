@@ -122,7 +122,7 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RatingEngine> findAll() {
-        return super.findAll();
+        return ratingEngineDao.findAll();
     }
 
     @Override
@@ -477,10 +477,9 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
         ratingEngineActivateAction.setActionConfiguration(reActionConfig);
         ActionContext.setAction(ratingEngineActivateAction);
     }
-    
+
     private void setDeletionActionContext(RatingEngine ratingEngine) {
-        log.info(String.format("Set Deletion Action Context for Rating Engine %s",
-                ratingEngine.getId()));
+        log.info(String.format("Set Deletion Action Context for Rating Engine %s", ratingEngine.getId()));
         Action ratingEngineDeletionAction = new Action();
         ratingEngineDeletionAction.setType(ActionType.RATING_ENGINE_CHANGE);
         ratingEngineDeletionAction.setActionInitiator(ratingEngine.getCreatedBy());
