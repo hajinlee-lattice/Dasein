@@ -1176,4 +1176,15 @@ public class AttrConfigTestUtils {
                         useForCompanyProfile, useForTalkingPoint));
         return renderedList;
     }
+
+    public static int getErrorNumber(List<AttrConfig> configs) {
+        int numErrors = 0;
+        for (AttrConfig config : configs) {
+            if (config.getValidationErrors() != null) {
+                numErrors++;
+            }
+        }
+        return numErrors;
+    }
+
 }
