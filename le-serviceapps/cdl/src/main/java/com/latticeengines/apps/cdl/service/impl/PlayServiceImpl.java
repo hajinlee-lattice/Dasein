@@ -117,7 +117,7 @@ public class PlayServiceImpl implements PlayService {
         } else {
             retrievedPlay = playEntityMgr.updatePlay(play, retrievedPlay);
         }
-        return getFullPlay(retrievedPlay, shouldLoadCoverage, null);
+        return getFullPlay(retrievedPlay, shouldLoadCoverage, tenant);
     }
 
     @Override
