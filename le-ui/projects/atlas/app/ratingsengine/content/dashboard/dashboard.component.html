@@ -65,7 +65,7 @@
                 <div ng-if="!vm.isRulesBased">
                     <h3>
                         Creation Settings
-                        <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )</span>
+                        <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
                     </h3>
 
                     <!-- <dl>
@@ -135,7 +135,7 @@
                     <h3>
                         Ratings 
                         <span ng-if="!vm.isRulesBased">
-                            <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )</span>
+                            <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
                             <span class="more-info show-tooltip top delay">
                                 i
                                 <div class="tooltip_ small">
@@ -183,7 +183,9 @@
                                 <td>{{ iteration.created | date }}</td>
                                 <td>{{ iteration.createdBy }}</td>
                                 <td class="green-text">
-                                    <span ng-if="vm.isIterationActive(iteration.id)">ACTIVE</span>
+                                    <span ng-if="
+                                        vm.isIterationActive(iteration.id) &&
+                                        vm.statusIsActive">ACTIVE</span>
                                 </td>
                                 <td>
                                     <span 
@@ -220,7 +222,7 @@
                                         class="button link-button" 
                                         ng-click="vm.viewIteration(iteration)"
                                         ng-if="
-                                            (!vm.isIterationActive(iteration.id) || iteration.modelingJobStatus != 'Pending') && 
+                                            iteration.modelingJobStatus === 'Completed' && 
                                             iteration.modelSummaryId">View</button>
                                     <button 
                                         class="button link-button" 

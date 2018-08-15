@@ -212,8 +212,7 @@ angular.module('lp.ratingsengine.dashboard', [
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
         vm.isPublished = vm.dashboard.summary.isPublished ? true : false;
-
-        console.log($stateParams);
+        
         console.log(vm.ratingEngine);
 
         RatingsEngineStore.setRatingEngine(vm.ratingEngine);
@@ -230,7 +229,7 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
-            var model = vm.ratingEngine.scoring_iteration ? vm.ratingEngine.scoring_iteration : vm.ratingEngine.latest_iteration;
+            var model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration : vm.ratingEngine.latest_iteration;
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
@@ -292,9 +291,9 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.init = function() {
 
-        // console.log(vm.ratingEngine);
+        console.log(vm.ratingEngine);
         // console.log(vm.modelSummary);
-        // console.log(vm.dashboard);
+        // console.log(vm.dashboard.iterations);
 
         vm.initModalWindow();
         vm.initDataModel();

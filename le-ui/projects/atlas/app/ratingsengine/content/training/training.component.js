@@ -33,7 +33,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             purchasesCountReturned: false,
             pageTitle: ($stateParams.section === 'wizard.ratingsengine_segment') ? 'How do you want to train the model?' : 'Do you want to change the way the model is trained?',
             checkboxModel: {},
-            repeatPurchaseRemodel: true
+            repeatPurchaseRemodel: false
         });
 
         vm.getNumericalConfig = function(){
@@ -68,11 +68,8 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.repeatPurchase = (vm.ratingEngine.advancedRatingConfig.cross_sell.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') ? true : false;
                     if(vm.repeatPurchase){
                         vm.purchasedBeforePeriod = vm.filters.PURCHASED_BEFORE_PERIOD.value.toString();
-                    } else {
-                        vm.repeatPurchaseRemodel = false;
+                        vm.repeatPurchaseRemodel = true;
                     }
-
-                    console.log(vm.repeatPurchaseRemodel);
 
                     // Setup form for Cross Sell Models
                     RatingsEngineStore.setConfigFilters(vm.filters);
@@ -103,6 +100,9 @@ angular.module('lp.ratingsengine.wizard.training', [
                         deduplicationType: vm.filters.deduplicationType ? true : false,
                         excludePublicDomains: (vm.filters.excludePublicDomains == true) ? true : false,
                         transformationGroup: (vm.filters.transformationGroup == 'NONE') ? true : false
+                        // oneRecordPerAccount: false,
+                        // includePersonalEmailDomains: false,
+                        // useCuratedAttributes: false,
                     }
                 }
             }
@@ -377,7 +377,8 @@ angular.module('lp.ratingsengine.wizard.training', [
                 }
 
                 if(vm.checkboxModel.excludePublicDomains) {
-                    vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains;
+                    console.log(vm.configFilters.excludePublicDomains);
+                    vm.configFilters.excludePublicDomains = true;
                 } else {
                     delete vm.configFilters.excludePublicDomains;
                 }
@@ -389,6 +390,8 @@ angular.module('lp.ratingsengine.wizard.training', [
                 }
 
                 
+                console.log(vm.configFilters);
+
                 if(vm.checkboxModel.datacloud || vm.checkboxModel.cdl || vm.checkboxModel.deduplicationType || vm.checkboxModel.excludePublicDomains || vm.checkboxModel.transformationGroup) {
                     RatingsEngineStore.setConfigFilters(vm.configFilters);
                     vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
@@ -421,7 +424,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                 } else {
                     vm.validateCustomEventForm();
                 }
-            }, 1500);
+            }, 2000);
         };
         
     }

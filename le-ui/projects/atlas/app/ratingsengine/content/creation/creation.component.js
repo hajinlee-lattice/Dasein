@@ -38,6 +38,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         vm.$onInit = function() {
 
+            console.log(vm.ratingEngine);
+
             vm.setValidation('creation', true);
 
             var model = vm.ratingEngine.latest_iteration.AI;

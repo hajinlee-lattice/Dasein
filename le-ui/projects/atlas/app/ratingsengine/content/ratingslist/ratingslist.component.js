@@ -256,14 +256,21 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
+
+
+        console.log();
         
         var tileState = vm.current.tileStates[rating.id];
 
         if(tileState.editRating !== true){
             RatingsEngineStore.getModel(rating.id).then(function(model){
                 if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT'){
+
+                    console.log("Here");
+                    console.log(model);
+
                     var jobStatus = model.AI.modelingJobStatus;
-                    var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : null,
+                    var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : '',
                         modelJobId = model.AI.modelingJobId;
                     
                     if((rating.status === 'INACTIVE' && !vm.enableDelete(rating.id) && !vm.disableCancelJob(rating.id))){
