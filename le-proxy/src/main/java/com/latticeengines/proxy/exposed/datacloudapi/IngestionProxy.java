@@ -1,6 +1,5 @@
 package com.latticeengines.proxy.exposed.datacloudapi;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,16 +21,7 @@ public class IngestionProxy extends MicroserviceRestApiProxy implements Ingestio
     public List<IngestionProgress> scan(String hdfsPod) {
         String url = constructUrl("/?HdfsPod={hdfsPod}", hdfsPod);
         List<?> list = post("scan_ingestion", url, "", List.class);
-        List<IngestionProgress> progresses = new ArrayList<>();
-        if (list == null) {
-            return progresses;
-        }
-        for (Object obj : list) {
-            String json = JsonUtils.serialize(obj);
-            IngestionProgress progress = JsonUtils.deserialize(json, IngestionProgress.class);
-            progresses.add(progress);
-        }
-        return progresses;
+        return JsonUtils.convertList(list, IngestionProgress.class);
     }
 
     @Override

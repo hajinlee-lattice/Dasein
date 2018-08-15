@@ -232,6 +232,7 @@ public class IngestionServiceImpl implements IngestionService {
                     serviceTenantBootstrapped = true;
                 }
                 progress = submit(progress);
+                submittedProgresses.add(progress);
             } catch (Exception e) {
                 log.error("Failed to submit workflow for progress " + progress, e);
             }
