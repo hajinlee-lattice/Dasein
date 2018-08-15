@@ -45,7 +45,8 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
     }
 
     @Inject
-    public RatingDisplayMetadataStoreImpl(CDLNamespaceService cdlNamespaceService, RatingEngineService ratingEngineService) {
+    public RatingDisplayMetadataStoreImpl(CDLNamespaceService cdlNamespaceService,
+            RatingEngineService ratingEngineService) {
         this.cdlNamespaceService = cdlNamespaceService;
         this.ratingEngineService = ratingEngineService;
     }
@@ -99,10 +100,14 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
         });
     }
 
-    private String getSecondaryDisplayName(String suffix) {
+    @Override
+    public String getSecondaryDisplayName(String suffix) {
         String secondaryDisplayName = null;
         if (StringUtils.isBlank(suffix)) {
             secondaryDisplayName = "Rating";
+        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.Probability)
+                .equalsIgnoreCase(suffix.substring(1))) {
+            secondaryDisplayName = "Probability";
         } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.ExpectedRevenue)
                 .equalsIgnoreCase(suffix.substring(1))) {
             secondaryDisplayName = "Weighted Revenue";

@@ -7,5 +7,6 @@ public class VertexType {
     public static final String RATING_ENGINE = "REN";
     public static final String RATING_ATTRIBUTE = "ATR.REN.BKT";
     public static final String RATING_SCORE_ATTRIBUTE = "ATR.REN.SCO";
+    public static final String RATING_PROB_ATTRIBUTE = "ATR.REN.PRB";
     public static final String RATING_EV_ATTRIBUTE = "ATR.REN.EV";
 }

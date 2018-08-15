@@ -12,12 +12,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -37,12 +41,16 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private final ServingStoreCacheService servingStoreCacheService;
 
+    private final GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
+
     @Inject
     public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ActionService actionService,
-            ServingStoreCacheService servingStoreCacheService) {
+            ServingStoreCacheService servingStoreCacheService,
+            GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
         this.segmentProxy = segmentProxy;
         this.actionService = actionService;
         this.servingStoreCacheService = servingStoreCacheService;
+        this.graphDependencyToUIActionUtil = graphDependencyToUIActionUtil;
     }
 
     @Override
@@ -94,8 +102,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
         segment = translateForBackend(segment);
-        MetadataSegmentAndActionDTO metadataSegmentAndAction = segmentProxy
-                .createOrUpdateSegmentAndActionDTO(customerSpace, segment);
+        MetadataSegmentAndActionDTO metadataSegmentAndAction;
+        try {
+            metadataSegmentAndAction = segmentProxy.createOrUpdateSegmentAndActionDTO(customerSpace, segment);
+        } catch (Exception ex) {
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+        }
         Action action = metadataSegmentAndAction.getAction();
         registerAction(action, MultiTenantContext.getTenant());
         MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegmentAndAction.getMetadataSegment());
@@ -116,6 +128,40 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     public void deleteSegmentByName(String name) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         segmentProxy.deleteSegmentByName(customerSpace, name);
+    }
+
+    @Override
+    public Map<String, List<String>> getDependencies(String segmentName) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        return segmentProxy.getDependencies(customerSpace, segmentName);
+    }
+
+    @Override
+    public UIAction getDependenciesModelAndView(String segmentName) {
+        Map<String, List<String>> dependencies = getDependencies(segmentName);
+        UIAction uiAction = graphDependencyToUIActionUtil.processUpdateResponse(dependencies);
+        return uiAction;
+    }
+
+    @Override
+    public UIAction deleteSegmentByNameModelAndView(String segmentName) {
+        UIAction uiAction = null;
+        try {
+            deleteSegmentByName(segmentName);
+            uiAction = graphDependencyToUIActionUtil.generateUIAction("Segment is deleted successfully", View.Notice,
+                    Status.Success, null);
+        } catch (LedpException ex) {
+            if (ex instanceof LedpException && ((LedpException) ex).getCode() == LedpCode.LEDP_40042) {
+                uiAction = graphDependencyToUIActionUtil.generateUIAction(
+                        "Segment cannot be deleted as it is being used in following: ", View.Modal, Status.Error,
+                        graphDependencyToUIActionUtil.generateHtmlMsg(graphDependencyToUIActionUtil
+                                .extractDependencies(ex.getMessage(), LedpCode.LEDP_40042)));
+            } else {
+                uiAction = graphDependencyToUIActionUtil.generateUIAction("Segment deletion failed", View.Banner,
+                        Status.Error, ex.getMessage());
+            }
+        }
+        return uiAction;
     }
 
     private MetadataSegment translateForBackend(MetadataSegment segment) {
@@ -182,11 +228,4 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         String tenantId = MultiTenantContext.getShortTenantId();
         servingStoreCacheService.clearCache(tenantId, BusinessEntity.Rating);
     }
-
-    @Override
-    public Map<CDLObjectTypes, List<String>> getDependencies(String segmentName) {
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return segmentProxy.getDependencies(customerSpace, segmentName);
-    }
-
 }

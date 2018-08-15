@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
@@ -96,14 +95,14 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(raw, AttributeLookup.class);
     }
 
-    public Map<CDLObjectTypes, List<String>> getDependencies(String customerSpace, String segmentName) {
+    public Map<String, List<String>> getDependencies(String customerSpace, String segmentName) {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}/dependencies", //
                 shortenCustomerSpace(customerSpace), segmentName);
         Map<?, ?> raw = get("getDependencies", url, Map.class);
-        Map<CDLObjectTypes, List<String>> result = new HashMap<>();
+        Map<String, List<String>> result = new HashMap<>();
         if (MapUtils.isNotEmpty(raw)) {
             @SuppressWarnings("rawtypes")
-            Map<CDLObjectTypes, List> midResult = JsonUtils.convertMap(raw, CDLObjectTypes.class, List.class);
+            Map<String, List> midResult = JsonUtils.convertMap(raw, String.class, List.class);
             midResult.keySet().stream() //
                     .forEach(k -> {
                         List<?> list = midResult.get(k);

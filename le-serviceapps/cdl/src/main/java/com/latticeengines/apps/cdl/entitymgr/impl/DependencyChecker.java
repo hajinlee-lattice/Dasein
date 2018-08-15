@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.graph.DependenciesToGraphAction;
 
 @Component
@@ -28,11 +27,11 @@ public class DependencyChecker {
     @Inject
     private IdToDisplayNameTranslator idToDisplayNameTranslator;
 
-    public Map<CDLObjectTypes, List<String>> getDependencies(String customerSpace, String objectId, String objectType)
+    public Map<String, List<String>> getDependencies(String customerSpace, String objectId, String objectType)
             throws Exception {
         log.info(String.format("Attempting to find dependencies for id = %s, type = %s", objectId, objectType));
 
-        HashMap<CDLObjectTypes, List<String>> dependencyMap = new HashMap<>();
+        HashMap<String, List<String>> dependencyMap = new HashMap<>();
         if (idToDisplayNameTranslator.toVertexType(objectType) != null) {
             List<Map<String, String>> dependencies = //
                     dependenciesToGraphAction.checkDirectDependencies(//
@@ -44,17 +43,13 @@ public class DependencyChecker {
             if (MapUtils.isNotEmpty(translatedDependencies)) {
                 translatedDependencies.keySet().stream() //
                         .forEach(k -> {
-                            CDLObjectTypes type = CDLObjectTypes.valueOf(k);
-                            if (type != null) {
-                                if (CollectionUtils.isNotEmpty(translatedDependencies.get(k))) {
-                                    dependencyMap.put(type, new ArrayList<>());
-                                    translatedDependencies.get(k).stream() //
-                                            .forEach(v -> dependencyMap.get(type)
-                                                    .add(v.get(IdToDisplayNameTranslator.DISPLAY_NAME)));
-                                }
+                            if (CollectionUtils.isNotEmpty(translatedDependencies.get(k))) {
+                                dependencyMap.put(k, new ArrayList<>());
+                                translatedDependencies.get(k).stream() //
+                                        .forEach(v -> dependencyMap.get(k)
+                                                .add(v.get(IdToDisplayNameTranslator.DISPLAY_NAME)));
                             }
                         });
-
             }
         }
         return dependencyMap;

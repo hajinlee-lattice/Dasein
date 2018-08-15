@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.graph.LabelUtil;
 import com.latticeengines.domain.exposed.graph.NameSpaceUtil;
 import com.latticeengines.domain.exposed.graph.VertexCreationRequest;
 import com.latticeengines.domain.exposed.graph.VertexDeletionRequest;
-import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.graph.GraphUtil;
 import com.latticeengines.graph.entity.BaseGraphEntityManager;
 import com.latticeengines.graph.entity.GraphEntityManager;
@@ -74,18 +73,6 @@ public class GraphEntityManagerImpl extends BaseGraphEntityManagerImpl
         propMap.put(GraphConstants.NS_KEY,
                 graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(), true));
 
-        if (request.getType().trim().equals(VertexType.RATING_ATTRIBUTE)
-                || request.getType().trim().equals(VertexType.RATING_SCORE_ATTRIBUTE)
-                || request.getType().trim().equals(VertexType.RATING_EV_ATTRIBUTE)) {
-            if (!propMap.containsKey(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY)) {
-                propMap.put(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY, //
-                        GraphConstants.CASCADE_ON_DELETE);
-            }
-            if (!propMap.containsKey(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY)) {
-                propMap.put(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY, //
-                        GraphConstants.JUMP_DURING_DEP_CHECK);
-            }
-        }
         Map<String, Map<String, Map<String, String>>> outgoingEdgesToVertices = new HashMap<>();
 
         if (MapUtils.isNotEmpty(request.getOutgoingEdgesToVertices())) {

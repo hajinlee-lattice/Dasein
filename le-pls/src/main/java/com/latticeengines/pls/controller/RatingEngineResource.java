@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -42,6 +44,9 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -49,6 +54,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ActionService;
+import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineDashboardProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -72,6 +78,9 @@ public class RatingEngineResource {
 
     @Inject
     private RatingCoverageProxy ratingCoverageProxy;
+
+    @Inject
+    private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
     @Inject
     private ActionService actionService;
@@ -167,8 +176,14 @@ public class RatingEngineResource {
     public RatingEngine createOrUpdateRatingEngine(@RequestBody RatingEngine ratingEngine,
             @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingEngineAndActionDTO ratingEngineAndAction = ratingEngineProxy
-                .createOrUpdateRatingEngineAndActionDTO(tenant.getId(), ratingEngine, unlinkSegment);
+        RatingEngineAndActionDTO ratingEngineAndAction;
+        try {
+            ratingEngineAndAction = ratingEngineProxy.createOrUpdateRatingEngineAndActionDTO(tenant.getId(),
+                    ratingEngine, unlinkSegment);
+        } catch (Exception ex) {
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+        }
+
         Action action = ratingEngineAndAction.getAction();
         registerAction(action, tenant);
         return ratingEngineAndAction.getRatingEngine();
@@ -181,7 +196,12 @@ public class RatingEngineResource {
     public Boolean deleteRatingEngine(@PathVariable String ratingEngineId, //
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         Tenant tenant = MultiTenantContext.getTenant();
-        ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete);
+        try {
+            ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete);
+        } catch (Exception ex) {
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40042);
+        }
+
         return true;
     }
 
@@ -215,7 +235,11 @@ public class RatingEngineResource {
     @ApiOperation(value = "Create a Rating Model iteration associated with a Rating Engine given its id")
     public RatingModel createModelIteration(@PathVariable String ratingEngineId, @RequestBody RatingModel ratingModel) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.createModelIteration(tenant.getId(), ratingEngineId, ratingModel);
+        try {
+            return ratingEngineProxy.createModelIteration(tenant.getId(), ratingEngineId, ratingModel);
+        } catch (Exception ex) {
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+        }
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}")
@@ -232,8 +256,14 @@ public class RatingEngineResource {
     public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingModelAndActionDTO ratingModelAndAction = ratingEngineProxy.updateRatingModelAndActionDTO(tenant.getId(),
-                ratingEngineId, ratingModelId, ratingModel);
+        RatingModelAndActionDTO ratingModelAndAction;
+        try {
+            ratingModelAndAction = ratingEngineProxy.updateRatingModelAndActionDTO(tenant.getId(), ratingEngineId,
+                    ratingModelId, ratingModel);
+        } catch (Exception ex) {
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+        }
+
         Action action = ratingModelAndAction.getAction();
         registerAction(action, tenant);
         return ratingModelAndAction.getRatingModel();
@@ -284,10 +314,25 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public Map<CDLObjectTypes, List<String>> getRatingEngigneDependencies(@PathVariable String ratingEngineId) {
+    public Map<String, List<String>> getRatingEngineDependencies(@PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));
         return ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngineId);
+    }
+
+    @GetMapping(value = "/{ratingEngineId}/dependencies/modelAndView")
+    @ResponseBody
+    @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
+    public ModelAndView getRatingEnigneDependenciesModelAndView(@PathVariable String ratingEngineId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));
+        Map<String, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
+                ratingEngineId);
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies);
+        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Dependencies on the model", View.Modal,
+                Status.Info, message);
+        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
     @PostMapping(value = "/{ratingEngineId}/notes")

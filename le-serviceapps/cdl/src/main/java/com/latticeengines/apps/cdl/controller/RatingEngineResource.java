@@ -32,7 +32,6 @@ import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -192,7 +191,7 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public Map<CDLObjectTypes, List<String>> getRatingEngigneDependencies(
+    public Map<String, List<String>> getRatingEngineDependencies(
             @PathVariable String customerSpace, @PathVariable String ratingEngineId) {
         log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s", ratingEngineId));
         return ratingEngineService.getRatingEngineDependencies(customerSpace, ratingEngineId);

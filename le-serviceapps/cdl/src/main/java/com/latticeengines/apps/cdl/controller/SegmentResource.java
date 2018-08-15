@@ -63,7 +63,7 @@ public class SegmentResource {
     @GetMapping(value = "/{segmentName}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies")
-    public Map<CDLObjectTypes, List<String>> getDependencies(@PathVariable String customerSpace,
+    public Map<String, List<String>> getDependencies(@PathVariable String customerSpace,
             @PathVariable String segmentName) throws Exception {
         log.info(String.format("get all dependencies for segmentName=%s", segmentName));
         return segmentService.getDependencies(customerSpace, segmentName);

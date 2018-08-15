@@ -105,9 +105,6 @@ public class TestPlayCreationHelper {
     private EntityProxyImpl entityProxy;
 
     @Inject
-    private RatingProxy ratingProxy;
-
-    @Inject
     private PlayProxy playProxy;
 
     @Inject
@@ -301,13 +298,13 @@ public class TestPlayCreationHelper {
         playName = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
-        Map<CDLObjectTypes, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
+        Map<String, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
                 ratingEngine.getId());
         Assert.assertNotNull(dependencies);
         Assert.assertEquals(dependencies.size(), 1);
-        Assert.assertNotNull(dependencies.get(CDLObjectTypes.Play));
-        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play).size(), 1);
-        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play).get(0), play.getDisplayName());
+        Assert.assertNotNull(dependencies.get(CDLObjectTypes.Play.getObjectType()));
+        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play.getObjectType()).size(), 1);
+        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play.getObjectType()).get(0), play.getDisplayName());
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(playName);
         List<TalkingPointDTO> createTPResponse = talkingPointProxy.createOrUpdate(tps,
@@ -320,8 +317,8 @@ public class TestPlayCreationHelper {
         dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine.getId());
         Assert.assertNotNull(dependencies);
         Assert.assertEquals(dependencies.size(), 1);
-        Assert.assertNotNull(dependencies.get(CDLObjectTypes.Play));
-        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play).size(), 2);
+        Assert.assertNotNull(dependencies.get(CDLObjectTypes.Play.getObjectType()));
+        Assert.assertEquals(dependencies.get(CDLObjectTypes.Play.getObjectType()).size(), 2);
 
         playList = playProxy.getPlays(tenant.getId(), null, null);
         Assert.assertNotNull(playList);

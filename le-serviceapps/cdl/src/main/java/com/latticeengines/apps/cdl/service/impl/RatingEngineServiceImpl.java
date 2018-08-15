@@ -496,7 +496,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public Map<CDLObjectTypes, List<String>> getRatingEngineDependencies(String customerSpace, String ratingEngineId) {
+    public Map<String, List<String>> getRatingEngineDependencies(String customerSpace, String ratingEngineId) {
         log.info(String.format("Attempting to find rating engine dependencies for Rating Engine %s", ratingEngineId));
 
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
@@ -504,9 +504,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             throw new LedpException(LedpCode.LEDP_40016, new String[] { ratingEngineId, customerSpace });
         }
 
-        HashMap<CDLObjectTypes, List<String>> dependencyMap = new HashMap<>();
+        HashMap<String, List<String>> dependencyMap = new HashMap<>();
         try {
-            Map<CDLObjectTypes, List<String>> dep = dependencyChecker.getDependencies(customerSpace, ratingEngineId,
+            Map<String, List<String>> dep = dependencyChecker.getDependencies(customerSpace, ratingEngineId,
                     CDLObjectTypes.Model.name());
             if (MapUtils.isNotEmpty(dep)) {
                 dependencyMap.putAll(dep);
@@ -514,7 +514,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         } catch (Exception e) {
             log.info("fallback to original logic till graph based lookup is not stable: " + e.getMessage(), e);
 
-            dependencyMap.put(CDLObjectTypes.Play, playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid())
+            dependencyMap.put(CDLObjectTypes.Play.name(), playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid())
                     .stream().map(Play::getDisplayName).collect(Collectors.toList()));
         }
         return dependencyMap;

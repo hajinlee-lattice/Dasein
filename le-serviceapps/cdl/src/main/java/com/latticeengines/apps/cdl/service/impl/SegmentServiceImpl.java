@@ -218,7 +218,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public Map<CDLObjectTypes, List<String>> getDependencies(String customerSpace, String segmentName)
+    public Map<String, List<String>> getDependencies(String customerSpace, String segmentName)
             throws Exception {
         return dependencyChecker.getDependencies(customerSpace, segmentName, CDLObjectTypes.Segment.name());
     }

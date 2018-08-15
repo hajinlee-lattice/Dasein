@@ -242,11 +242,6 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
             ratingEngineNote.setRatingEngine(retrievedRatingEngine);
             ratingEngineNote.setOrigin(NoteOrigin.NOTE.name());
             ratingEngineNote.setId(UUID.randomUUID().toString());
-            // ratingEngineNote.setRatingEngine(retrievedRatingEngine);
-            log.info("=====ratingEngine.getNote() != null===========ratingEngineNote\n\n"
-                    + JsonUtils.serialize(ratingEngineNote) + "\n\n");
-            log.info("=====ratingEngine.getNote() != null===========retrievedRatingEngine\n\n"
-                    + JsonUtils.serialize(retrievedRatingEngine) + "\n\n");
 
             retrievedRatingEngine.addRatingEngineNote(ratingEngineNote);
         }
@@ -546,7 +541,6 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
         String tenantId = MultiTenantContext.getTenant().getId();
         retrievedRatingEngine = findById(retrievedRatingEngine.getId());
         updateExistingRatingEngine(retrievedRatingEngine, ratingEngine, tenantId, unlinkSegment);
-        // return findById(retrievedRatingEngine.getId());
         log.info(retrievedRatingEngine.toString());
         return retrievedRatingEngine;
     }

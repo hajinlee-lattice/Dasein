@@ -18,10 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -65,9 +69,17 @@ public class MetadataSegmentResource {
     @GetMapping(value = "/{segmentName}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies")
-    public Map<CDLObjectTypes, List<String>> getDependencies(
-            @PathVariable String segmentName) throws Exception {
+    public Map<String, List<String>> getDependencies(@PathVariable String segmentName) throws Exception {
         return metadataSegmentService.getDependencies(segmentName);
+    }
+
+    @GetMapping(value = "/{segmentName}/dependencies/modelAndView")
+    @ResponseBody
+    @ApiOperation(value = "Get all the dependencies")
+    public ModelAndView getDependenciesModelAndView(@PathVariable String segmentName) throws Exception {
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        UIAction uiAction = metadataSegmentService.getDependenciesModelAndView(segmentName);
+        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -82,6 +94,14 @@ public class MetadataSegmentResource {
             }
         }
         return metadataSegmentService.createOrUpdateSegment(metadataSegment);
+    }
+
+    @RequestMapping(value = "/{segmentName}/modelAndView", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ApiOperation(value = "Delete a segment by name")
+    public ModelAndView deleteSegmentByNameModelAndView(@PathVariable String segmentName) {
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        UIAction uiAction = metadataSegmentService.deleteSegmentByNameModelAndView(segmentName);
+        return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")

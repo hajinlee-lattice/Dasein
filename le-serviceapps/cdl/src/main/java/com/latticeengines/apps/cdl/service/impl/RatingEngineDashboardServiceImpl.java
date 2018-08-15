@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.RatingEngineDashboardService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -63,7 +62,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         log.info(String.format("Step 3 - Loading related plays completed for : %s", ratingEngineId));
 
         // get dependencies
-        Map<CDLObjectTypes, List<String>> dependencies = ratingEngineService.getRatingEngineDependencies(customerSpace,
+        Map<String, List<String>> dependencies = ratingEngineService.getRatingEngineDependencies(customerSpace,
                 ratingEngineId);
         log.info(String.format("Step 3.1 - Loading related dependencies completed for : %s", ratingEngineId));
 

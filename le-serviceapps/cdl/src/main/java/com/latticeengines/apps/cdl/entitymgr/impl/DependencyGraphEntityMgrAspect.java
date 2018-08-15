@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
@@ -34,7 +35,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingEngine.ScoreType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -117,17 +118,23 @@ public class DependencyGraphEntityMgrAspect {
             ParsedDependencies parsedDependencies = ratingEngineEntityMgr.parse(ratingEngine, null);
             graphAction.createVertex(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngine.getId(),
                     VertexType.RATING_ENGINE);
+            createRatingAttributeVertices(ratingEngine);
+        }
+    }
 
-            if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
-                createRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-            } else if (ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
-                createRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-                createRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE, "_score");
-            } else {
-                createRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-                createRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE, "_score");
-                createRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE, "_ev");
-            }
+    private void createRatingAttributeVertices(RatingEngine ratingEngine) throws Exception {
+        switch (ratingEngine.getType()) {
+        case CROSS_SELL:
+        case PROSPECTING:
+            createRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE,
+                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.ExpectedRevenue));
+        case CUSTOM_EVENT:
+            createRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE,
+                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score));
+            createRatingAttr(ratingEngine, VertexType.RATING_PROB_ATTRIBUTE,
+                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Probability));
+        default:
+            createRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
         }
     }
 
@@ -173,16 +180,7 @@ public class DependencyGraphEntityMgrAspect {
                         VertexType.RATING_ENGINE);
             }
             if (isDelete && !alreadyDeleted) {
-                if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
-                    deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-                } else if (ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
-                    deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-                    deleteRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE, "_score");
-                } else {
-                    deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-                    deleteRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE, "_score");
-                    deleteRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE, "_ev");
-                }
+                deleteRatingAttributeVertices(ratingEngine);
                 graphAction.deleteVertex(MultiTenantContext.getTenant().getId(), ratingEngine.getId(),
                         VertexType.RATING_ENGINE);
             }
@@ -264,17 +262,7 @@ public class DependencyGraphEntityMgrAspect {
             RatingEngine ratingEngine = ratingEngineEntityMgr.findById(ratingId);
 
             joinPoint.proceed(joinPoint.getArgs());
-
-            if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
-                deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-            } else if (ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
-                deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-                deleteRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE, "_score");
-            } else {
-                deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-                deleteRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE, "_score");
-                deleteRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE, "_ev");
-            }
+            deleteRatingAttributeVertices(ratingEngine);
             graphAction.deleteVertex(MultiTenantContext.getTenant().getId(), ratingEngine.getId(),
                     VertexType.RATING_ENGINE);
         }
@@ -367,8 +355,14 @@ public class DependencyGraphEntityMgrAspect {
         edgeProperties.add(null);
         parsedDependencies.setAddDependencies(addDependencies);
 
-        graphAction.createVertex(MultiTenantContext.getTenant().getId(), parsedDependencies, objectId, vertexType, null,
-                edgeProperties);
+        Map<String, String> vertexProperties = new HashMap<>();
+        vertexProperties.put(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY, //
+                GraphConstants.CASCADE_ON_DELETE);
+        vertexProperties.put(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY, //
+                GraphConstants.JUMP_DURING_DEP_CHECK);
+
+        graphAction.createVertex(MultiTenantContext.getTenant().getId(), parsedDependencies, objectId, vertexType,
+                vertexProperties, edgeProperties);
         return objectId;
     }
 
@@ -383,9 +377,29 @@ public class DependencyGraphEntityMgrAspect {
                 .checkDirectDependencies(MultiTenantContext.getTenant().getId(), vertexId, vertexType);
 
         if (CollectionUtils.isNotEmpty(dependencies)) {
+            Map<String, List<Map<String, String>>> translatedDependenciesWithId = nameTranslator
+                    .translate(dependencies);
+            Map<String, List<String>> translatedDependencies = new HashMap<>();
+            translatedDependenciesWithId.keySet().stream() //
+                    .filter(type -> CollectionUtils.isNotEmpty(translatedDependenciesWithId.get(type))) //
+                    .forEach(type -> {
+                        translatedDependencies.put(type, new ArrayList<>());
+                        translatedDependenciesWithId.get(type).stream().forEach(dep -> {
+                            translatedDependencies.get(type) //
+                                    .add(dep.get(IdToDisplayNameTranslator.DISPLAY_NAME));
+                        });
+                    });
+            throw new LedpException(LedpCode.LEDP_40042, new String[] { JsonUtils.serialize(translatedDependencies) });
+        }
+    }
+
+    private void checkDeleteSafetyWithId(String vertexId, String vertexType) throws Exception {
+        List<Map<String, String>> dependencies = graphAction
+                .checkDirectDependencies(MultiTenantContext.getTenant().getId(), vertexId, vertexType);
+
+        if (CollectionUtils.isNotEmpty(dependencies)) {
             Map<String, List<Map<String, String>>> translatedDependencies = nameTranslator.translate(dependencies);
-            throw new LedpException(LedpCode.LEDP_40042,
-                    new String[] { vertexId, JsonUtils.serialize(translatedDependencies) });
+            throw new LedpException(LedpCode.LEDP_40042, new String[] { JsonUtils.serialize(translatedDependencies) });
         }
     }
 
@@ -403,29 +417,49 @@ public class DependencyGraphEntityMgrAspect {
                         List<List<Map<String, String>>> translatedPaths = nameTranslator
                                 .translatePaths(potentialCircularDependencies.get(k));
                         String v1 = String.format("%s '%s'", nameTranslator.translateType(fromVertexType), //
-                                nameTranslator.idToDisplayName(fromVertexId, //
-                                        nameTranslator.translateType(fromVertexType)));
+                                nameTranslator.idToDisplayName( //
+                                        fromVertexType, fromVertexId));
                         String v2 = String.format("%s '%s'", nameTranslator.translateType(toVertexType), //
-                                nameTranslator.idToDisplayName(toVertexId, //
-                                        nameTranslator.translateType(toVertexType)));
+                                nameTranslator.idToDisplayName( //
+                                        toVertexType, toVertexId));
                         sb.append(String.format(
                                 "%s cannot depend on %s as it will cause circular dependencies. "
-                                        + "Dependency path from %s to %s already exist: ", //
+                                        + "Dependency path from %s to %s already exist: \n", //
                                 v1, v2, v2, v1));
                         translatedPaths.stream() //
                                 .forEach(p -> {
                                     sb.append("Path [");
+                                    AtomicInteger firstTime = new AtomicInteger(1);
                                     p.stream() //
                                             .forEach(v -> {
-                                                sb.append(String.format("%s '%s' -> ",
-                                                        v.get(IdToDisplayNameTranslator.TYPE),
+                                                sb.append(String.format("%s%s '%s'", //
+                                                        firstTime.get() == 1 ? "" : " -> ", //
+                                                        v.get(IdToDisplayNameTranslator.TYPE), //
                                                         v.get(IdToDisplayNameTranslator.DISPLAY_NAME)));
+                                                firstTime.incrementAndGet();
                                             });
-                                    sb.append("]. ");
+                                    sb.append("]\n");
                                 });
                     });
 
             throw new LedpException(LedpCode.LEDP_40041, new String[] { sb.toString() });
         }
     }
+
+    private void deleteRatingAttributeVertices(RatingEngine ratingEngine) throws Throwable {
+        switch (ratingEngine.getType()) {
+        case CROSS_SELL:
+        case PROSPECTING:
+            deleteRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE,
+                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.ExpectedRevenue));
+        case CUSTOM_EVENT:
+            deleteRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE,
+                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score));
+            deleteRatingAttr(ratingEngine, VertexType.RATING_PROB_ATTRIBUTE,
+                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Probability));
+        default:
+            deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
+        }
+    }
+
 }

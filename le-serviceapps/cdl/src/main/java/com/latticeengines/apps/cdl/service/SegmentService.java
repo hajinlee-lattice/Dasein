@@ -40,5 +40,5 @@ public interface SegmentService {
 
     void verifySegmentCyclicDependency(MetadataSegment metadataSegment);
 
-    Map<CDLObjectTypes, List<String>> getDependencies(String customerSpace, String segmentName) throws Exception;
+    Map<String, List<String>> getDependencies(String customerSpace, String segmentName) throws Exception;
 }

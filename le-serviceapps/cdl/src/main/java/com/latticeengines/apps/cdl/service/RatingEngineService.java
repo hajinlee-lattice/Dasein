@@ -62,7 +62,7 @@ public interface RatingEngineService {
 
     Map<String, List<ColumnMetadata>> getIterationMetadata(String ratingEngineId, String ratingModelId);
 
-    Map<CDLObjectTypes, List<String>> getRatingEngineDependencies(String customerSpace,
+    Map<String, List<String>> getRatingEngineDependencies(String customerSpace,
             String ratingEngineId);
 
     EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,

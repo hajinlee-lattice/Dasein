@@ -3,9 +3,9 @@ package com.latticeengines.pls.service;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 
 public interface MetadataSegmentService {
     List<MetadataSegment> getSegments();
@@ -20,5 +20,9 @@ public interface MetadataSegmentService {
 
     void deleteSegmentByName(String name);
 
-    Map<CDLObjectTypes, List<String>> getDependencies(String segmentName);
+    Map<String, List<String>> getDependencies(String segmentName);
+
+    UIAction getDependenciesModelAndView(String segmentName);
+
+    UIAction deleteSegmentByNameModelAndView(String segmentName);
 }

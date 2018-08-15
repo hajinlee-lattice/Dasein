@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
+import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.graph.GraphConstants;
 import com.latticeengines.domain.exposed.graph.NameSpaceUtil;
@@ -20,10 +21,13 @@ import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngine.ScoreType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component
 public class IdToDisplayNameTranslator {
 
+    public static final String RATING_ATTRIBUTE = "Rating Attribute";
     public static final String ID = "id";
     public static final String DISPLAY_NAME = "displayName";
     public static final String TYPE = "type";
@@ -36,6 +40,9 @@ public class IdToDisplayNameTranslator {
 
     @Inject
     private PlayEntityMgr playEntityMgr;
+
+    @Inject
+    private RatingDisplayMetadataStore ratingDisplayMetadataStore;
 
     public Map<String, List<Map<String, String>>> translate(List<Map<String, String>> inputList) {
         Map<String, List<Map<String, String>>> result = new HashMap<>();
@@ -50,6 +57,7 @@ public class IdToDisplayNameTranslator {
                         }
                         Map<String, String> objInfo = new HashMap<>();
                         objInfo.put(ID, objId);
+                        objInfo.put(TYPE, objType);
                         result.get(translatedType).add(objInfo);
                     });
             result.keySet().stream() //
@@ -57,7 +65,7 @@ public class IdToDisplayNameTranslator {
                         result.get(type).stream() //
                                 .forEach(objInfo -> {
                                     String objId = objInfo.get(ID);
-                                    String displayName = idToDisplayName(type, objId);
+                                    String displayName = idToDisplayName(objInfo.get(TYPE), objId);
                                     objInfo.put(DISPLAY_NAME, displayName);
                                 });
                     });
@@ -79,7 +87,7 @@ public class IdToDisplayNameTranslator {
                                     String objId = in.get(GraphConstants.OBJECT_ID_KEY);
                                     String objType = in.get(NameSpaceUtil.TYPE_KEY);
                                     String translatedType = translateType(objType);
-                                    String displayName = idToDisplayName(translatedType, objId);
+                                    String displayName = idToDisplayName(objType, objId);
                                     objInfo.put(DISPLAY_NAME, displayName);
                                     objInfo.put(TYPE, translatedType);
                                     pathInfo.add(objInfo);
@@ -91,21 +99,52 @@ public class IdToDisplayNameTranslator {
 
     public String idToDisplayName(String type, String objId) {
         String displayName = objId;
-        if (type.equals(CDLObjectTypes.Play.name())) {
+        if (type.equals(VertexType.PLAY)) {
             Play play = playEntityMgr.getPlayByName(objId, false);
             if (play != null) {
                 displayName = play.getDisplayName();
             }
-        } else if (type.equals(CDLObjectTypes.Model.name())) {
+        } else if (type.equals(VertexType.RATING_ENGINE)) {
             RatingEngine ratingEngine = ratingEngineEntityMgr.findById(objId);
             if (ratingEngine != null) {
                 displayName = ratingEngine.getDisplayName();
             }
-        } else if (type.equals(CDLObjectTypes.Segment)) {
+        } else if (type.equals(VertexType.SEGMENT)) {
             MetadataSegment segment = segmentEntityMgr.findByName(objId);
             if (segment != null) {
                 displayName = segment.getDisplayName();
             }
+        } else if (type.equals(VertexType.RATING_ATTRIBUTE) //
+                || type.equals(VertexType.RATING_SCORE_ATTRIBUTE) //
+                || type.equals(VertexType.RATING_PROB_ATTRIBUTE) //
+                || type.equals(VertexType.RATING_EV_ATTRIBUTE)) {
+            String displayNameSuffix = "";
+            String modelId = objId.substring((BusinessEntity.Rating + ".").length());
+            ScoreType scoreType = ScoreType.Rating;
+            if (type.equals(VertexType.RATING_SCORE_ATTRIBUTE)) {
+                scoreType = ScoreType.Score;
+            } else if (type.equals(VertexType.RATING_PROB_ATTRIBUTE)) {
+                scoreType = ScoreType.Probability;
+            } else if (type.equals(VertexType.RATING_EV_ATTRIBUTE)) {
+                scoreType = ScoreType.ExpectedRevenue;
+            }
+
+            if (scoreType != ScoreType.Rating) {
+                modelId = modelId.substring(0,
+                        modelId.lastIndexOf( //
+                                "_" + RatingEngine.SCORE_ATTR_SUFFIX //
+                                        .get(scoreType)));
+            }
+
+            RatingEngine model = ratingEngineEntityMgr.findById(modelId);
+            if (model != null) {
+                displayName = model.getDisplayName();
+            }
+
+            if (scoreType != ScoreType.Rating) {
+                displayNameSuffix = " " + ratingDisplayMetadataStore.getSecondaryDisplayName("_" + scoreType.name());
+            }
+            displayName += displayNameSuffix;
         }
         return displayName;
     }
@@ -118,6 +157,12 @@ public class IdToDisplayNameTranslator {
             translatedType = CDLObjectTypes.Model.name();
         } else if (vertexType.equals(VertexType.SEGMENT)) {
             translatedType = CDLObjectTypes.Segment.name();
+        } else if (vertexType.equals(VertexType.RATING_ATTRIBUTE)) {
+            translatedType = RATING_ATTRIBUTE;
+        } else if (vertexType.equals(VertexType.RATING_SCORE_ATTRIBUTE)) {
+            translatedType = RATING_ATTRIBUTE;
+        } else if (vertexType.equals(VertexType.RATING_EV_ATTRIBUTE)) {
+            translatedType = RATING_ATTRIBUTE;
         }
         return translatedType;
     }
