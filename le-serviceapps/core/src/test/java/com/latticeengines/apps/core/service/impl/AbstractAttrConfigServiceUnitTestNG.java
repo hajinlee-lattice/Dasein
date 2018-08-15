@@ -150,6 +150,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
         ColumnMetadata data = AttrConfigTestUtils.getLDCNonPremiumData(Category.FIRMOGRAPHICS);
         List<ColumnMetadata> dataList = Arrays.asList(data);
         List<AttrConfig> renderList = cdlAttrConfigServiceImpl.render(dataList, null);
+        Assert.assertEquals(renderList.size(), dataList.size());
         AttrConfig config = renderList.get(0);
         Map<String, AttrConfigProp<?>> props = config.getAttrProps();
         // currently, always render 11 entries
@@ -169,11 +170,13 @@ public class AbstractAttrConfigServiceUnitTestNG {
         dataList = Arrays.asList(data);
         // transfer null customer config
         renderList = cdlAttrConfigServiceImpl.render(dataList, null);
+        Assert.assertEquals(renderList.size(), dataList.size());
         List<AttrConfig> expectedList = Arrays
                 .asList(AttrConfigTestUtils.getLDCNonPremiumAttr(Category.FIRMOGRAPHICS, false));
         Assert.assertEquals(renderList, expectedList);
         // transfer empty customer config
         renderList = cdlAttrConfigServiceImpl.render(dataList, new ArrayList<>());
+        Assert.assertEquals(renderList.size(), dataList.size());
         Assert.assertEquals(renderList, expectedList);
         // transfer custom config with partial config
         config = new AttrConfig();
