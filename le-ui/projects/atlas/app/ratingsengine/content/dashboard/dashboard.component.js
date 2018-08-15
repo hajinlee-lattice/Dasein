@@ -79,6 +79,8 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     });
 
+    console.log(vm.dashboard);
+
     vm.initModalWindow = function() {
         vm.config = {
             'name': "rating_engine_deactivate",
@@ -213,8 +215,6 @@ angular.module('lp.ratingsengine.dashboard', [
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
         vm.isPublished = vm.dashboard.summary.isPublished ? true : false;
         
-        console.log(vm.ratingEngine);
-
         RatingsEngineStore.setRatingEngine(vm.ratingEngine);
 
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
@@ -229,20 +229,24 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
             vm.modelingStrategy = 'RULE_BASED';
         } else {
-            var model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration : vm.ratingEngine.latest_iteration;
+            if(vm.ratingEngine.published_iteration || vm.ratingEngine.scoring_iteration) {
+                vm.model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration.AI : vm.ratingEngine.scoring_iteration.AI;
+            } else {
+                vm.model = vm.ratingEngine.latest_iteration.AI;
+            }
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
-                if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment == null && model.AI.advancedModelingConfig[type].filters.targetProducts == null) {
+                if ((Object.keys(vm.model.advancedModelingConfig[type].filters).length === 0 || (vm.model.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(vm.model.AI.advancedModelingConfig[type].filters).length === 1)) && vm.model.AI.trainingSegment == null && vm.model.AI.advancedModelingConfig[type].filters.targetProducts == null) {
                     vm.hasSettingsInfo = false;
                 } else {
                     vm.hasSettingsInfo = true;
                 }
 
-                vm.targetProducts = model.AI.advancedModelingConfig[type].targetProducts;
-                vm.modelingStrategy = model.AI.advancedModelingConfig[type].modelingStrategy;
-                vm.configFilters = model.AI.advancedModelingConfig[type].filters;
-                vm.trainingProducts = model.AI.advancedModelingConfig[type].trainingProducts;
+                vm.targetProducts = vm.model.advancedModelingConfig[type].targetProducts;
+                vm.modelingStrategy = vm.model.advancedModelingConfig[type].modelingStrategy;
+                vm.configFilters = vm.model.advancedModelingConfig[type].filters;
+                vm.trainingProducts = vm.model.advancedModelingConfig[type].trainingProducts;
 
                 if (vm.configFilters['SPEND_IN_PERIOD']) {
                     if (vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
@@ -277,9 +281,9 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.ratingEngineType = 'Custom Event';
             }
 
-            vm.modelSummary = model.AI.modelSummaryId;
-            vm.predictionType = model.AI.predictionType;
-            vm.trainingSegment = model.AI.trainingSegment;
+            vm.modelSummary = vm.model.modelSummaryId;
+            vm.predictionType = vm.model.predictionType;
+            vm.trainingSegment = vm.model.trainingSegment;
 
             if (vm.predictionType === 'PROPENSITY') {
                 vm.prioritizeBy = 'Likely to Buy';
@@ -292,8 +296,7 @@ angular.module('lp.ratingsengine.dashboard', [
     vm.init = function() {
 
         console.log(vm.ratingEngine);
-        // console.log(vm.modelSummary);
-        // console.log(vm.dashboard.iterations);
+        // console.log(vm.dashboard);
 
         vm.initModalWindow();
         vm.initDataModel();

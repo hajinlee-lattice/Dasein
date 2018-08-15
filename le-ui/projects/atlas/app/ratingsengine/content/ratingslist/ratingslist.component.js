@@ -266,9 +266,6 @@ angular.module('lp.ratingsengine.ratingslist', [
             RatingsEngineStore.getModel(rating.id).then(function(model){
                 if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT'){
 
-                    console.log("Here");
-                    console.log(model);
-
                     var jobStatus = model.AI.modelingJobStatus;
                     var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : '',
                         modelJobId = model.AI.modelingJobId;

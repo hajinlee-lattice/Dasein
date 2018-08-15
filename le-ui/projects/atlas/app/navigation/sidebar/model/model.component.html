@@ -8,7 +8,7 @@
             <span class="badge blue-badge pull-right" ng-show="vm.totalmodels">{{vm.totalmodels}}</span>
         </a>
     </li>
-    <li ng-if="vm.IsRatingEngine" role="presentation" ui-sref-active="active">
+    <li ng-if="vm.IsRatingEngine && !vm.isDashboardRatings" role="presentation" ui-sref-active="active">
         <a ng-click="vm.goToRatingEngineRoute()">
             <span 
                 class="ico-container" 
@@ -16,6 +16,16 @@
                 <span class="ico ico-back no-svg"></span>
             </span>
             <span class="label">Back to dashboard</span>
+        </a>
+    </li>
+    <li ng-if="vm.IsRatingEngine && vm.isDashboardRatings" role="presentation" ui-sref-active="active">
+        <a ui-sref="home.ratingsengine">
+            <span 
+                class="ico-container" 
+                data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}">
+                <span class="ico ico-back no-svg"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}</span>
         </a>
     </li>
     <li ng-if="vm.IsRatingEngine && !vm.viewingIteration">
@@ -26,7 +36,9 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}</span>
         </a>
     </li>
-    <li ng-if="!vm.IsPmml && vm.viewingIteration" role="presentation" ui-sref-active="active">
+    <li ng-if="
+        (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
+        (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.attributes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
                 <span class="ico ico-attributes ico-light-gray"></span>
@@ -34,7 +46,9 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}</span>
         </a>
     </li>
-    <li ng-if="!vm.IsPmml && vm.viewingIteration" role="presentation" ui-sref-active="active">
+    <li ng-if="
+        (!vm.IsPmml && vm.IsRatingEngine && vm.viewingIteration) ||
+        (!vm.IsPmml && !vm.IsRatingEngine)" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.performance" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}">
                 <span class="ico ico-performance ico-light-gray"></span>

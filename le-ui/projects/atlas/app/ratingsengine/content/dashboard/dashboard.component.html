@@ -90,17 +90,17 @@
                         <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.prioritizeBy }}</dd>
 
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Available Attributes:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.getCustomEventAvailableAttributes(vm.ratingEngine.activeModel.AI)}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.getCustomEventAvailableAttributes(vm.model)}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Score External File:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Training File:</dt>
-                        <dd class="text-ellipsis" ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.sourceFileName}}</dd>
+                        <dd class="text-ellipsis" ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.model.advancedModelingConfig.custom_event.sourceFileName}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">One record per account:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Include personal email domains:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Use curated attributes:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.transformationGroup ? 'No' : 'Yes'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.transformationGroup ? 'No' : 'Yes'}}</dd>
 
                         <dt ng-if="vm.hasSettingsInfo">Training:</dt>
                         <dd ng-if="vm.hasSettingsInfo">
@@ -148,8 +148,8 @@
                             </span>
                         </span>
                     </h3>
-                    <h4 ng-if="!vm.isPublished" class="no-ratings-header">No Ratings Available</h4>
-                    <bar-chart ng-if="vm.isPublished"    
+                    <h4 ng-if="!vm.isPublished || (vm.dashboard.summary.bucketMetadata == null)" class="no-ratings-header">No Ratings Available</h4>
+                    <bar-chart ng-if="vm.isPublished && (vm.dashboard.summary.bucketMetadata != null)"
                         config="vm.ratingEngine.chartConfig" 
                         bktlist="vm.dashboard.summary.bucketMetadata">
                     </bar-chart>

@@ -22,11 +22,14 @@ angular
 
     vm.init = function() {
 
+        console.log($stateParams);
+
         vm.IsPmml = IsPmml,
         vm.IsRatingEngine = IsRatingEngine,
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
         vm.Uploaded = Model.ModelDetails.Uploaded;
         vm.HasRatingsAvailable = HasRatingsAvailable;
+        vm.isDashboardRatings = ($stateParams.section == 'dashboard.ratings') ? true : false;
         
         if(vm.IsRatingEngine) {
             vm.viewingIteration = $stateParams.viewingIteration ? true : false;

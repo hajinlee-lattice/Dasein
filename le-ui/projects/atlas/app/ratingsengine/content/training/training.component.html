@@ -17,14 +17,16 @@
                             <input 
                                 type="checkbox"
                                 class="form-control"
-                                ng-model="$ctrl.checkboxModel.datacloud" />
+                                ng-model="$ctrl.checkboxModel.datacloud"
+                                ng-disabled="$ctrl.disableDataCloud" />
                             <div>Your matched 3rd-Party Attributes provided through Lattice</div>
                         </li>
                         <li class="form-group">
                             <input 
                                 type="checkbox"
                                 class="form-control"
-                                ng-model="$ctrl.checkboxModel.cdl" />
+                                ng-model="$ctrl.checkboxModel.cdl"
+                                ng-disabled="$ctrl.disableCDL" />
                             <div>Your Imported 1st-Party Attributes (My Data Attributes)</div>
                         </li>
                     </ul>

@@ -89,10 +89,19 @@ angular.module('lp.ratingsengine.wizard.training', [
                     vm.periodsCriteria = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.criteria : "WITHIN";
                     vm.periodsValue = vm.filters.TRAINING_SET_PERIOD ? vm.filters.TRAINING_SET_PERIOD.value : 2;
 
+
+                    vm.validateCrossSellForm();
+
+                    // $timeout(function () {
+                    
+                    // });
+
                 } else {
                     // Setup form for Custom Event Models
                     vm.filters = vm.iteration.AI.advancedModelingConfig.custom_event;
                     RatingsEngineStore.setConfigFilters(vm.filters);
+
+                    vm.configFilters.sourceFileName = vm.filters.sourceFileName;
 
                     vm.checkboxModel = {
                         datacloud: (vm.filters.dataStores.indexOf('DataCloud') > -1) ? true : false,
@@ -104,6 +113,18 @@ angular.module('lp.ratingsengine.wizard.training', [
                         // includePersonalEmailDomains: false,
                         // useCuratedAttributes: false,
                     }
+
+                    vm.configFilters.dataStores = [];
+                    if(vm.checkboxModel.datacloud) {
+                        console.log("PUSH");
+                        vm.configFilters.dataStores.push('DataCloud');
+                    }
+                    if(vm.checkboxModel.cdl) {
+                        console.log("PUSH");
+                        vm.configFilters.dataStores.push('CDL');
+                    }
+
+                    vm.validateCustomEventForm();
                 }
             }
 
@@ -133,13 +154,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                 }
             });
 
-            $timeout(function () {
-                if(vm.engineType == 'cross_sell'){
-                    vm.validateCrossSellForm();
-                } else {
-                    vm.validateCustomEventForm();
-                }
-            });
         }
 
 
@@ -347,27 +361,30 @@ angular.module('lp.ratingsengine.wizard.training', [
                 RatingsEngineStore.validation.training = true;
                 RatingsEngineStore.validation.refine = true;
 
-                vm.configFilters.sourceFileName = vm.filters.sourceFileName;
                 RatingsEngineStore.setConfigFilters(vm.configFilters);
 
-                vm.configFilters.dataStores = [];
+                vm.dataStores = vm.configFilters.dataStores;
 
-                if(vm.checkboxModel.datacloud) {
-                    vm.configFilters.dataStores.push('DataCloud');
+
+                vm.disableCDL = (!vm.checkboxModel.datacloud && vm.checkboxModel.cdl) ? true : false;
+                vm.disableDataCloud = (vm.checkboxModel.datacloud && !vm.checkboxModel.cdl) ? true : false;
+
+                if (vm.checkboxModel.datacloud){
+                    if(vm.dataStores.indexOf('DataCloud') == -1){
+                        vm.configFilters.dataStores.push('DataCloud');
+                    }
                 } else {
-                    var dataStores = vm.configFilters.dataStores,
-                        index = dataStores.indexOf('DataCloud');
-                    
-                    dataStores.splice(index, 1);
+                    var index = vm.dataStores.indexOf('DataCloud');
+                    vm.dataStores.splice(index, 1);
                 }
 
                 if(vm.checkboxModel.cdl) {
-                    vm.configFilters.dataStores.push('CDL');
+                    if(vm.dataStores.indexOf('CDL') == -1){
+                        vm.configFilters.dataStores.push('CDL');
+                    }
                 } else {
-                    var dataStores = vm.configFilters.dataStores,
-                        index = dataStores.indexOf('CDL');
-                    
-                    dataStores.splice(index, 1);
+                    var index = vm.dataStores.indexOf('CDL');
+                    vm.dataStores.splice(index, 1);
                 }
 
                 if(vm.checkboxModel.deduplicationType) {
@@ -376,11 +393,11 @@ angular.module('lp.ratingsengine.wizard.training', [
                     delete vm.configFilters.deduplicationType;
                 }
 
-                if(vm.checkboxModel.excludePublicDomains) {
-                    console.log(vm.configFilters.excludePublicDomains);
-                    vm.configFilters.excludePublicDomains = true;
+                vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains ? true : false;
+                if(vm.checkboxModel.transformationGroup) {
+                    vm.configFilters.transformationGroup = 'NONE';
                 } else {
-                    delete vm.configFilters.excludePublicDomains;
+                    delete vm.configFilters.transformationGroup;
                 }
 
                 if(vm.checkboxModel.transformationGroup) {
@@ -389,13 +406,17 @@ angular.module('lp.ratingsengine.wizard.training', [
                     delete vm.configFilters.transformationGroup;
                 }
 
-                
-                console.log(vm.configFilters);
+                $timeout(function () {
+                    // console.log(vm.checkboxModel);
+                    // console.log(vm.configFilters);
 
-                if(vm.checkboxModel.datacloud || vm.checkboxModel.cdl || vm.checkboxModel.deduplicationType || vm.checkboxModel.excludePublicDomains || vm.checkboxModel.transformationGroup) {
                     RatingsEngineStore.setConfigFilters(vm.configFilters);
-                    vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
-                }
+
+                    if(vm.checkboxModel.datacloud || vm.checkboxModel.cdl || vm.checkboxModel.deduplicationType || vm.checkboxModel.excludePublicDomains || vm.checkboxModel.transformationGroup) {
+                        RatingsEngineStore.setConfigFilters(vm.configFilters);
+                        vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
+                    }
+                }, 250);
 
             } else {
                 RatingsEngineStore.validation.training = false;
@@ -424,7 +445,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                 } else {
                     vm.validateCustomEventForm();
                 }
-            }, 2000);
+            }, 1500);
         };
         
     }

@@ -38,8 +38,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         vm.$onInit = function() {
 
-            console.log(vm.ratingEngine);
-
             vm.setValidation('creation', true);
 
             var model = vm.ratingEngine.latest_iteration.AI;
@@ -108,6 +106,9 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                 }
 
             } else if (vm.type == 'custom_event') {
+
+                console.log();
+
                 vm.hasSettingsInfo = true;
                 vm.ratingEngineType = 'Custom Event'
                 vm.prioritizeBy = 'Likely to Buy';
