@@ -82,9 +82,10 @@ public abstract class RatingEngineTemplate {
                             .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
                             .collect(Collectors.toList()));
             } else {
-                if (((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() == JobStatus.COMPLETED) {
-                    List<BucketMetadata> bucketMetadataList = bucketedScoreProxy
-                            .getLatestABCDBucketsByEngineId(tenantId, ratingEngine.getId());
+                if (ratingEngine.getPublishedIteration() != null && ((AIModel) ratingEngine.getPublishedIteration())
+                        .getModelingJobStatus() == JobStatus.COMPLETED) {
+                    List<BucketMetadata> bucketMetadataList = bucketedScoreProxy.getLatestABCDBucketsByModelGuid(
+                            tenantId, ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId());
                     bucketMetadataList = BucketedScoreSummaryUtils.sortBucketMetadata(bucketMetadataList, false);
                     ratingEngineSummary.setBucketMetadata(bucketMetadataList);
                 }
