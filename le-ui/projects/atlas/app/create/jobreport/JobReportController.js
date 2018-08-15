@@ -34,6 +34,4 @@ angular.module('lp.create.import.report', [
         '&TenantId=' + $scope.TenantId;
     
     $scope.ResourceUtility = ResourceUtility;
-
-    ServiceErrorUtility.process({ data: JobResult });
 });
