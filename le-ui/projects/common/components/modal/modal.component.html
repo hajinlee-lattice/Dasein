@@ -7,7 +7,7 @@
                 <span class="ico-container" ng-style="modalConfig.headerconfig">
                     <i class="title-icon" ng-class="modalConfig.icon" aria-hidden="true" ng-style="modalConfig.iconstyle"></i>
                 </span>
-                <p class="le-title">
+                <p class="le-title" title="{{modalConfig.title}}">
                     {{modalConfig.title | cut:true:config.titlelength:' ...'}}
                 </p>
             </div>
