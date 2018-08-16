@@ -256,9 +256,6 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
-
-
-        console.log();
         
         var tileState = vm.current.tileStates[rating.id];
 
@@ -270,9 +267,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                     var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : '',
                         modelJobId = model.AI.modelingJobId;
                     
-                    if((rating.status === 'INACTIVE' && !vm.enableDelete(rating.id) && !vm.disableCancelJob(rating.id))){
-                        return;
-                    } else if ((modelId !== null) || (modelJobId !== null)) {
+                    if ((modelId !== null) || (modelJobId !== null)) {
                         $state.go('home.ratingsengine.dashboard', { 
                             rating_id: rating.id, 
                             modelId: modelId,

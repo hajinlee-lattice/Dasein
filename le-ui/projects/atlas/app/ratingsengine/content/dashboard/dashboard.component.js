@@ -248,7 +248,7 @@ angular.module('lp.ratingsengine.dashboard', [
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
-                if ((Object.keys(vm.model.advancedModelingConfig[type].filters).length === 0 || (vm.model.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(vm.model.AI.advancedModelingConfig[type].filters).length === 1)) && vm.model.AI.trainingSegment == null && vm.model.AI.advancedModelingConfig[type].filters.targetProducts == null) {
+                if ((Object.keys(vm.model.advancedModelingConfig[type].filters).length === 0 || (vm.model.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(vm.model.advancedModelingConfig[type].filters).length === 1)) && vm.model.trainingSegment == null && vm.model.advancedModelingConfig[type].filters.targetProducts == null) {
                     vm.hasSettingsInfo = false;
                 } else {
                     vm.hasSettingsInfo = true;
