@@ -5,7 +5,7 @@ angular.module('common.attributes.list', [])
     bindings: {
         filters: '<'
     },
-    controller: function ($state, AttrConfigStore, BrowserStorageUtility) {
+    controller: function ($state, $filter, AttrConfigStore, BrowserStorageUtility) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -106,7 +106,7 @@ angular.module('common.attributes.list', [])
                 ? vm.attributes[vm.subcategory] 
                 : vm.data.config.Subcategories;
 
-            //console.log(ret);
+            //console.log(vm.getPageSize(), (vm.filters.page - 1) * vm.getPageSize(), ret, filtering);
             return ret;
         };
 
@@ -356,7 +356,7 @@ angular.module('common.attributes.list', [])
                 }
             });
 
-            return obj;
+            return vm.subcategory ? obj : { Attributes: obj };
         };
 
         vm.go = function(subcategory) {

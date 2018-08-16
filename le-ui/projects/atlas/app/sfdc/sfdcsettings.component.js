@@ -104,9 +104,9 @@ angular.module('lp.sfdc.credentials', ['ngAnimate', 'lp.sfdc', 'common.modal', '
                 if (result.Success == true) {
                     if (vm.cdlIsEnabled) {
                         Notice.success({
-                            delay: 6000,
+                            delay: 5000,
                             title: 'Email sent to ' + emailAddress, 
-                            message: 'After you authenticate a new system org, a new ID will be listed below.'
+                            message: 'Your one-time authentication token has been sent to your email.'
                         });
                     } else {
                         Notice.success({
