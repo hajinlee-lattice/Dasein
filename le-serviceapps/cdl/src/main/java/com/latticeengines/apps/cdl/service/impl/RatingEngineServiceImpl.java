@@ -264,8 +264,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             throw new NullPointerException("Entity is null when creating a rating engine.");
         }
 
-        verifyRatingEngineCyclicDependency(ratingEngine);
-
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingEngine.getSegment() != null) {
             String segmentName = ratingEngine.getSegment().getName();
@@ -913,26 +911,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         return new ArrayList<>(ratingEngineSet);
-    }
-
-    @Override
-    public void verifyRatingEngineCyclicDependency(RatingEngine ratingEngine) {
-        RatingEngine existing = getRatingEngineById(ratingEngine.getId(), false);
-        if (existing != null) {
-            Map<Long, String> ratingEngineMap = ratingEngineCyclicDependency(existing, new LinkedHashMap<>());
-            if (ratingEngineMap != null) {
-                StringBuilder message = new StringBuilder();
-                for (Map.Entry<Long, String> entry : ratingEngineMap.entrySet()) {
-                    if (entry.getKey() != -1) {
-                        message.append(String.format("Rating engine '%s' --> ", entry.getValue()));
-                    } else {
-                        message.append(String.format("Rating engine '%s'.", entry.getValue()));
-                    }
-                }
-
-                throw new LedpException(LedpCode.LEDP_40024, new String[] { message.toString() });
-            }
-        }
     }
 
     @SuppressWarnings("unchecked")

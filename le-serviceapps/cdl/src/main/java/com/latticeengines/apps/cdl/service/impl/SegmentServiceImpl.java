@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +20,6 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
-import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
@@ -32,12 +30,9 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -62,9 +57,6 @@ public class SegmentServiceImpl implements SegmentService {
     private EntityProxy entityProxy;
 
     @Inject
-    private RatingEngineService ratingEngineService;
-
-    @Inject
     private SegmentDependencyUtil segmentDependencyUtil;
 
     @Inject
@@ -72,7 +64,6 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
-        verifySegmentCyclicDependency(segment);
         MetadataSegment segment1 = null;
 
         if (segment.getName() != null) {
@@ -218,8 +209,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public Map<String, List<String>> getDependencies(String customerSpace, String segmentName)
-            throws Exception {
+    public Map<String, List<String>> getDependencies(String customerSpace, String segmentName) throws Exception {
         return dependencyChecker.getDependencies(customerSpace, segmentName, CDLObjectTypes.Segment.name());
     }
 
@@ -269,56 +259,6 @@ public class SegmentServiceImpl implements SegmentService {
         }
 
         return dependingMetadataSegments;
-    }
-
-    @Override
-    public void verifySegmentCyclicDependency(MetadataSegment metadataSegment) {
-        if (metadataSegment != null) {
-            MetadataSegment existing = findByName(metadataSegment.getName());
-            if (existing != null) {
-                Map<Long, String> segmentMap = segmentCyclicDependency(existing, new LinkedHashMap<>());
-                if (segmentMap != null) {
-                    StringBuilder message = new StringBuilder();
-                    for (Map.Entry<Long, String> entry : segmentMap.entrySet()) {
-                        if (entry.getKey() != -1) {
-                            message.append(String.format("Segment '%s' --> ", entry.getValue()));
-                        } else {
-                            message.append(String.format("Segment '%s'.", entry.getValue()));
-                        }
-                    }
-
-                    throw new LedpException(LedpCode.LEDP_40025, new String[] { message.toString() });
-                }
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<Long, String> segmentCyclicDependency(MetadataSegment segment, LinkedHashMap<Long, String> map) {
-        LinkedHashMap<Long, String> segmentMap = (LinkedHashMap<Long, String>) map.clone();
-        segmentMap.put(segment.getPid(), segment.getName());
-
-        List<AttributeLookup> attributeLookups = findDependingAttributes(Collections.singletonList(segment));
-        for (AttributeLookup attributeLookup : attributeLookups) {
-            if (attributeLookup.getEntity() == BusinessEntity.Rating) {
-                RatingEngine ratingEngine = ratingEngineService
-                        .getRatingEngineById(RatingEngine.toEngineId(attributeLookup.getAttribute()), false);
-
-                if (ratingEngine != null) {
-                    MetadataSegment childSegment = ratingEngine.getSegment();
-                    if (childSegment != null) {
-                        if (segmentMap.containsKey(childSegment.getPid())) {
-                            segmentMap.put(new Long(-1l), childSegment.getName());
-                            return segmentMap;
-                        } else {
-                            return segmentCyclicDependency(childSegment, segmentMap);
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
     }
 
     @NoCustomerSpace

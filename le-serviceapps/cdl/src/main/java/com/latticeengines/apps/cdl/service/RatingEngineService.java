@@ -62,8 +62,7 @@ public interface RatingEngineService {
 
     Map<String, List<ColumnMetadata>> getIterationMetadata(String ratingEngineId, String ratingModelId);
 
-    Map<String, List<String>> getRatingEngineDependencies(String customerSpace,
-                                                          String ratingEngineId);
+    Map<String, List<String>> getRatingEngineDependencies(String customerSpace, String ratingEngineId);
 
     EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
                                         ModelingQueryType modelingQueryType, DataCollection.Version version);
@@ -83,8 +82,6 @@ public interface RatingEngineService {
     List<RatingModel> getDependingRatingModels(List<String> attributes);
 
     List<RatingEngine> getDependingRatingEngines(List<String> attributes);
-
-    void verifyRatingEngineCyclicDependency(RatingEngine ratingEngine);
 
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
 

@@ -491,18 +491,18 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         RatingEngine ratingEngine2 = createRatingEngine(segment1);
 
         setRestriction(segment1, ratingEngine1);
-        setRestriction(segment2, ratingEngine2);
-
         boolean exception = false;
         try {
-            ratingEngine2.setNote("Test");
-            createOrUpdate(ratingEngine2);
+            setRestriction(segment2, ratingEngine2);
         } catch (Exception e) {
             exception = true;
             assertTrue(e instanceof LedpException);
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40024);
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40041);
         }
         assertTrue(exception);
+
+        ratingEngine2.setNote("Test");
+        createOrUpdate(ratingEngine2);
     }
 
     protected void deleteSoftRatingEngine(String ratingEngineId) {
@@ -603,8 +603,8 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     }
 
     protected void setRestriction(MetadataSegment segment, RatingEngine ratingEngine) {
-        Restriction accountRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Rating,
-                RatingEngine.RATING_ENGINE_PREFIX + "_" + ratingEngine.getId()), Bucket.notNullBkt());
+        Restriction accountRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Rating, ratingEngine.getId()), Bucket.notNullBkt());
         segment.setAccountRestriction(accountRestriction);
         segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
     }
