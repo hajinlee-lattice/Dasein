@@ -381,43 +381,7 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.getRuleCount = function(bkt, entity) {
-        // console.log(bkt, ' = ', entity);
-        if (bkt) {
-            var buckets = [
-                vm.rating_rule.bucketToRuleMap[bkt.bucket] 
-            ];
-        } else {
-            var buckets = [];
-
-            vm.bucketLabels.forEach(function(bucketName, index) {
-                buckets.push(vm.rating_rule.bucketToRuleMap[bucketName]); 
-            });
-        }
-
-        var accountRestrictions = [], contactRestrictions = [];
-        var filteredAccounts = [], filteredContacts = [];
-
-        buckets.forEach(function(bucket, index) {
-            accountRestrictions = QueryStore.getAllBuckets(bucket['account_restriction'].logicalRestriction.restrictions);
-            contactRestrictions = QueryStore.getAllBuckets(bucket['contact_restriction'].logicalRestriction.restrictions);
-
-            filteredAccounts = filteredAccounts.concat(accountRestrictions.filter(function(value, index) {
-                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id && !value.bucketRestriction.ignored;
-            }));
-
-            filteredContacts = filteredContacts.concat(contactRestrictions.filter(function(value, index) {
-                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id && !value.bucketRestriction.ignored;
-            }));
-        });
-        if (entity) {
-            var counts = {
-                        'account': filteredAccounts.length, 
-                        'contact': filteredContacts.length
-                    };
-            return counts;
-        }
-
-        return filteredAccounts.length + filteredContacts.length;
+        return QueryStore.getRuleCount(bkt,  vm.rating_rule.bucketToRuleMap, vm.bucketLabels, entity);
     }
 
     vm.getRatingsAndRecordCounts = function(model, segmentName) {

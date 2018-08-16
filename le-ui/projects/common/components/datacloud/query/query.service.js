@@ -146,6 +146,46 @@ angular.module('common.datacloud.query')
             return this.counts;
         };
 
+        this.getRuleCount = function(bkt, bucketToRuleMap, bucketLabels, entity){
+            // console.log(bkt, ' = ', entity);
+            if (bkt) {
+                var buckets = [
+                    bucketToRuleMap[bkt.bucket] 
+                ];
+            } else {
+                var buckets = [];
+
+                bucketLabels.forEach(function(bucketName, index) {
+                    buckets.push(bucketToRuleMap[bucketName]); 
+                });
+            }
+
+            var accountRestrictions = [], contactRestrictions = [];
+            var filteredAccounts = [], filteredContacts = [];
+
+            buckets.forEach(function(bucket, index) {
+                accountRestrictions = QueryStore.getAllBuckets(bucket['account_restriction'].logicalRestriction.restrictions);
+                contactRestrictions = QueryStore.getAllBuckets(bucket['contact_restriction'].logicalRestriction.restrictions);
+
+                filteredAccounts = filteredAccounts.concat(accountRestrictions.filter(function(value, index) {
+                    return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id && !value.bucketRestriction.ignored;
+                }));
+
+                filteredContacts = filteredContacts.concat(contactRestrictions.filter(function(value, index) {
+                    return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id && !value.bucketRestriction.ignored;
+                }));
+            });
+            if (entity) {
+                var counts = {
+                            'account': filteredAccounts.length, 
+                            'contact': filteredContacts.length
+                        };
+                return counts;
+            }
+
+            return filteredAccounts.length + filteredContacts.length;
+        };
+
         this.setAccounts = function(query) {
             var deferred = $q.defer();
 

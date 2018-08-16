@@ -68,7 +68,7 @@ angular.module('lp.ratingsengine.wizard.summary', [])
     	// 	note: vm.rating.note,
     	// 	status: vm.rating.status
         // }
-        console.log('$stateParams ====> ', $stateParams);
+        // console.log('$stateParams ====> ', $stateParams);
     }
 
     vm.initCoverageMap = function(map) {
@@ -96,29 +96,7 @@ angular.module('lp.ratingsengine.wizard.summary', [])
     }
 
     vm.getRuleCount = function(bkt) {
-        if (bkt) {
-            var buckets = [
-                vm.rating_rule.bucketToRuleMap[bkt.bucket] 
-            ];
-        } else {
-            var buckets = [];
-
-            vm.bucketLabels.forEach(function(bucketName, index) {
-                buckets.push(vm.rating_rule.bucketToRuleMap[bucketName]); 
-            });
-        }
-
-        var filtered = [], restrictions = [];
-
-        buckets.forEach(function(bucket, index) {
-            restrictions = QueryStore.getAllBuckets(bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions);
-            
-            filtered = filtered.concat(restrictions.filter(function(value, index) {
-                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
-            }));
-        })
-
-        return filtered.length;
+        return QueryStore.getRuleCount(bkt, vm.rating_rule.bucketToRuleMap, vm.bucketLabels);
     }
 
     vm.getRuleRecordCounts = function(restrictions) {
