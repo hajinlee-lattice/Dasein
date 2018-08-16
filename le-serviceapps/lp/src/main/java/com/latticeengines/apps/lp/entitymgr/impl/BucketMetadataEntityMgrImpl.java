@@ -107,4 +107,11 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
         return repository.findByCreationTimestampAndBucketName(timestamp, BucketName.fromValue(bucketName));
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<BucketMetadata> getAllBucketMetadatasForEngineFromReader(String engineId) {
+        return repository.findAllFirstByRatingEngine_Id(engineId);
+
+    }
+
 }

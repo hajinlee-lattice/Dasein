@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
+import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
@@ -167,6 +168,14 @@ public class RatingEngineResource {
     public RatingEngineDashboard getRatingsDashboard(@PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         return ratingEngineDashboardProxy.getRatingEngineDashboardById(tenant.getId(), ratingEngineId);
+    }
+
+    @GetMapping(value = "/{ratingEngineId}/publishedhistory", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get a published bucket metadata per iteration of a rating engine given its id")
+    public List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(@PathVariable String ratingEngineId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.getPublishedHistory(tenant.getId(), ratingEngineId);
     }
 
     @PostMapping(value = "")

@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
+import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -191,8 +192,8 @@ public class RatingEngineResource {
     @GetMapping(value = "/{ratingEngineId}/dependencies")
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
-    public Map<String, List<String>> getRatingEngineDependencies(
-            @PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+    public Map<String, List<String>> getRatingEngineDependencies(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
         log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s", ratingEngineId));
         return ratingEngineService.getRatingEngineDependencies(customerSpace, ratingEngineId);
     }
@@ -212,6 +213,14 @@ public class RatingEngineResource {
             @PathVariable String ratingEngineId) {
         return ratingEngineDashboardService.getRatingsDashboard(CustomerSpace.parse(customerSpace).toString(),
                 ratingEngineId);
+    }
+
+    @GetMapping(value = "/{ratingEngineId}/publishedhistory", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get a published bucket metadata per iteration of a rating engine given its id")
+    public List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(@PathVariable String customerSpace,
+                                                                        @PathVariable String ratingEngineId) {
+        return ratingEngineService.getPublishedHistory(CustomerSpace.parse(customerSpace).toString(), ratingEngineId);
     }
 
     @GetMapping(value = "/{ratingEngineId}/entitypreview", headers = "Accept=application/json")

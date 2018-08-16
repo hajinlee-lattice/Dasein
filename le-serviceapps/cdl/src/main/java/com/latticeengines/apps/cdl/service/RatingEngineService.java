@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -13,6 +12,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -32,7 +32,7 @@ public interface RatingEngineService {
     List<String> getAllRatingEngineIdsInSegment(String segmentName);
 
     List<String> getAllRatingEngineIdsInSegment(String segmentName, //
-            boolean considerPublishedOnly);
+                                                boolean considerPublishedOnly);
 
     RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate, boolean populateActiveModel);
 
@@ -63,16 +63,16 @@ public interface RatingEngineService {
     Map<String, List<ColumnMetadata>> getIterationMetadata(String ratingEngineId, String ratingModelId);
 
     Map<String, List<String>> getRatingEngineDependencies(String customerSpace,
-            String ratingEngineId);
+                                                          String ratingEngineId);
 
     EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-            ModelingQueryType modelingQueryType, DataCollection.Version version);
+                                        ModelingQueryType modelingQueryType, DataCollection.Version version);
 
     Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-            ModelingQueryType modelingQueryType, DataCollection.Version version);
+                               ModelingQueryType modelingQueryType, DataCollection.Version version);
 
     String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel,
-            Map<String, List<ColumnMetadata>> userEditedAttributes, String userEmail);
+                             Map<String, List<ColumnMetadata>> userEditedAttributes, String userEmail);
 
     List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId);
 
@@ -89,7 +89,9 @@ public interface RatingEngineService {
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
 
     void setScoringIteration(String ratingEngineId, String ratingModelId, List<BucketMetadata> bucketMetadatas,
-            String userEmail);
+                             String userEmail);
 
     boolean validateForModeling(String customerSpace, RatingEngine ratingEngine, AIModel ratingModel);
+
+    List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(String customerSpace, String ratingEngineId);
 }

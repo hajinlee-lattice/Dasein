@@ -22,6 +22,7 @@ public class RatingModelDTO {
         this.setCreated(ratingModel.getCreated());
         this.setCreatedBy(ratingModel.getCreatedBy());
         this.setIteration(ratingModel.getIteration());
+        this.setDerivedFromRatingModelId(ratingModel.getDerivedFromRatingModel());
         if (ratingModel instanceof RuleBasedModel) {
             this.setRatingModelAttributes(ratingModel.getRatingModelAttributes());
         }
@@ -29,11 +30,6 @@ public class RatingModelDTO {
             this.setModelingJobStatus(((AIModel) ratingModel).getModelingJobStatus());
             this.setModelSummaryId(((AIModel) ratingModel).getModelSummaryId());
         }
-    }
-
-    public RatingModelDTO(RatingModel ratingModel, String derivedFromRatingModelId) {
-        this(ratingModel);
-        this.derivedFromRatingModelId = derivedFromRatingModelId;
     }
 
     @JsonProperty("id")

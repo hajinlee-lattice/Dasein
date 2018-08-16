@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -30,6 +29,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
+import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -209,6 +209,15 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
                 ratingEngineId);
         Map map = put("update rating engine counts", url, null, Map.class);
         return JsonUtils.convertMap(map, String.class, Long.class);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/publishedhistory",
+                shortenCustomerSpace(customerSpace), ratingEngineId);
+        return getList("get published history for given rating engine Id", url,
+                RatingModelWithPublishedHistoryDTO.class);
     }
 
     @SuppressWarnings("rawtypes")

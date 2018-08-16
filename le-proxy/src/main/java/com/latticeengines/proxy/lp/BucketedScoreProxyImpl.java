@@ -73,6 +73,14 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     }
 
     @Override
+    public List<BucketMetadata> getAllBucketsByEngineId(String customerSpace, String engineId) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/ratingengines/{ratingEngineId}",
+                shortenCustomerSpace(customerSpace), engineId);
+        return getList("get bucket metadata history for engine", url, BucketMetadata.class);
+    }
+
+    @Override
     public BucketedScoreSummary getBucketedScoreSummary(String customerSpace, String modelGuid) {
         String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/summary/model/{modelGuid}",
                 shortenCustomerSpace(customerSpace), modelGuid);

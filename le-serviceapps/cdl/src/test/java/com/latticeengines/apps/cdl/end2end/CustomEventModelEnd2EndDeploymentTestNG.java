@@ -54,7 +54,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     private AIModel cdlCEAIModel;
     private AIModel testCERemodel;
     private SourceFile testSourceFile;
-    private final String testSourceFileName = "CustomEventModelE2ETestFile2.csv";
+    private final String testSourceFileName = "CustomEventModelE2ETestFile4.csv";
     private CustomEventModelingType testType;
     private final Map<String, Category> refinedAttributes = new HashMap<>();
 
@@ -89,8 +89,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     /**
      * This test is part of CD pipeline and Trunk Health
      */
-    // @Test(groups = { "end2end", "precheckin" }, dependsOnMethods =
-    // "end2endCDLStyleCustomEventModelTest")
+    @Test(groups = { "end2end", "precheckin" }, dependsOnMethods = "end2endCDLStyleCustomEventModelTest")
     public void end2endCDLStyleCustomEventReModelTest() throws Exception {
         runCustomEventRemodel(testType);
     }
@@ -162,15 +161,14 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                 testRatingEngine.getId(), testCERemodel.getId(), refineAttributes(attrs), "some@email.com");
         log.info(String.format("Remodel workflow application id is %s", modelingWorkflowApplicationId));
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
-        verifyBucketMetadataGeneratedAfterRemodel(testRatingEngine);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         testCERemodel = (AIModel) ratingEngineProxy.getRatingModel(mainCustomerSpace, testRatingEngine.getId(),
                 testCERemodel.getId());
         Assert.assertEquals(testCERemodel.getModelingJobStatus(), completedStatus);
-        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        verifyBucketMetadataGenerated(testRatingEngine);
         Assert.assertEquals(
                 ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
+        verifyBucketMetadataGeneratedAfterRemodel(testRatingEngine);
 
         attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(), testRatingEngine.getId(),
                 testCERemodel.getId());

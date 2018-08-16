@@ -78,6 +78,11 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Override
+    public List<BucketMetadata> getAllByRatingEngineId(String ratingEngineId) {
+        return bucketMetadataEntityMgr.getAllBucketMetadatasForEngineFromReader(ratingEngineId);
+    }
+
+    @Override
     public void createABCDBuckets(CreateBucketMetadataRequest request) {
         if (StringUtils.isBlank(request.getModelGuid())) {
             throw new IllegalArgumentException("Must specify model GUID");
