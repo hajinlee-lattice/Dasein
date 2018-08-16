@@ -184,12 +184,11 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
     @Override
     public Set<Triple<String, String, String>> extractDependencies(MetadataSegment segment) {
-        Set<Triple<String, String, String>> attrDepSet = null;
+        Set<Triple<String, String, String>> attrDepSet = new HashSet<Triple<String, String, String>>();
         segmentDependencyUtil.findSegmentDependingAttributes(segment);
         Set<AttributeLookup> attributeLookups = segment.getSegmentAttributes();
         for (AttributeLookup attributeLookup : attributeLookups) {
             if (attributeLookup.getEntity() == BusinessEntity.Rating) {
-                attrDepSet = new HashSet<Triple<String, String, String>>();
                 attrDepSet.add(
                         ParsedDependencies.tuple(attributeLookup.getEntity() + "." + attributeLookup.getAttribute(), //
                                 VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
