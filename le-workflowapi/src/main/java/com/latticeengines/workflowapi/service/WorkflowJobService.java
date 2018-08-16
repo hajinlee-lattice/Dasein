@@ -30,6 +30,8 @@ public interface WorkflowJobService {
 
     List<Job> getJobsByCustomerSpace(String customerSpace, Boolean includeDetails);
 
+    List<Job> getJobsByCustomerSpaceFromCache(String customerSpace, Boolean includeDetails);
+
     List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
                                    Boolean includeDetails, Boolean hasParentId, Long parentJobId);
 

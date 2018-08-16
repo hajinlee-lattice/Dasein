@@ -43,6 +43,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String timelineServiceUrl;
 
+    @Value("${workflow.jobs.disableCache:false}")
+    private Boolean disableCache;
+
     @Autowired
     private JobCacheService jobCacheService;
 
@@ -139,7 +142,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public Job getJobByWorkflowIdFromCache(String customerSpace, @NotNull Long workflowId, boolean includeDetails) {
+        if (disableCache) {
+            return getJobByWorkflowId(customerSpace, workflowId, includeDetails);
+        }
         Job job =  jobCacheService.getByWorkflowId(workflowId, includeDetails);
+        checkExecutionId(Collections.singletonList(toWorkflowJob(job)));
         checkLastUpdateTime(Collections.singletonList(toWorkflowJob(job)));
         return job;
     }
@@ -184,6 +191,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
+    public List<Job> getJobsByCustomerSpaceFromCache(String customerSpace, Boolean includeDetails) {
+        if (disableCache) {
+            return getJobsByCustomerSpace(customerSpace, includeDetails);
+        }
+        try {
+            List<Job> jobs = jobCacheService.getByTenant(MultiTenantContext.getTenant(), includeDetails);
+            checkExecutionId(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
+            checkLastUpdateTime(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
+            return jobs;
+        } catch (Exception e) {
+            log.error(String.format(
+                    "Failed to retrieve jobs from cache for customer space %s, fallback to database", customerSpace), e);
+            // fallback
+            return getJobsByCustomerSpace(customerSpace, includeDetails);
+        }
+    }
+
+    @Override
+    @WithCustomerSpace
     public List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
                                           Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         Optional<List<Long>> optionalWorkflowIds = Optional.ofNullable(workflowIds);
@@ -209,7 +235,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowIdsFromCache(String customerSpace, @NotNull List<Long> workflowIds, boolean includeDetails) {
+        if (disableCache) {
+            return getJobsByWorkflowIds(customerSpace, workflowIds, null, includeDetails, false, -1L);
+        }
         List<Job> jobs = jobCacheService.getByWorkflowIds(workflowIds, includeDetails);
+        checkExecutionId(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
         checkLastUpdateTime(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
         return jobs;
     }
@@ -384,6 +414,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private WorkflowJob toWorkflowJob(@NotNull Job job) {
         WorkflowJob workflowJob = new WorkflowJob();
         workflowJob.setPid(job.getPid());
+        if (job.getStartTimestamp() != null) {
+            workflowJob.setStartTimeInMillis(job.getStartTimestamp().getTime());
+        }
         workflowJob.setStatus(job.getJobStatus() == null ? null : job.getJobStatus().name());
         return workflowJob;
     }

@@ -36,7 +36,9 @@ public class WorkflowJobUtils {
         job.setOutputs(getOutputs(workflowJob));
         job.setReports(getReports(reportService, workflowJob));
         job.setUser(workflowJob.getUserId());
-        job.setJobStatus(JobStatus.fromString(workflowJob.getStatus()));
+        if (workflowJob.getStatus() != null) {
+            job.setJobStatus(JobStatus.fromString(workflowJob.getStatus()));
+        }
         job.setName(workflowJob.getType());
 
         ErrorDetails errorDetails = workflowJob.getErrorDetails();
@@ -77,7 +79,7 @@ public class WorkflowJobUtils {
             job.setStartTimestamp(null);
         }
 
-        if (job.getJobStatus().isTerminated()) {
+        if (job.getJobStatus() != null && job.getJobStatus().isTerminated()) {
             if (workflowStatus != null) {
                 job.setEndTimestamp(workflowStatus.getEndTime());
             } else {

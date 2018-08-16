@@ -8,9 +8,11 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobCache;
+import com.latticeengines.domain.exposed.workflow.JobListCache;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.cache.JobCacheWriter;
+import com.latticeengines.workflow.cache.TenantJobIdListCacheWriter;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
@@ -44,11 +46,16 @@ public class JobCacheServiceImpl implements JobCacheService {
     private static final Logger log = LoggerFactory.getLogger(JobCacheServiceImpl.class);
 
     private static final int NUM_THREADS = 8;
-    private static final int EXPIRE_TIME_IN_MILLIS = 30000;
     private static final int LOG_NUM_IDS_LIMIT = 20;
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String timelineServiceUrl;
+
+    @Value("${workflow.jobs.cache.jobExpireTimeInMillis:30000}")
+    private int runningJobExpireTimeInMillis; // expire time for job cache entries
+
+    @Value("${workflow.jobs.cache.jobIdListExpireTimeInMillis:300000}")
+    private int idListExpireTimeInMillis; // expire time for job id list cache entries
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
@@ -62,7 +69,55 @@ public class JobCacheServiceImpl implements JobCacheService {
     @Autowired
     private JobCacheWriter cacheWriter;
 
+    @Autowired
+    private TenantJobIdListCacheWriter jobIdListCacheWriter;
+
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("job-cache-service", NUM_THREADS);
+
+    @Override
+    public List<Job> getByTenant(Tenant tenant, boolean includeDetails) {
+        Preconditions.checkNotNull(tenant);
+        Preconditions.checkNotNull(tenant.getPid());
+
+        JobListCache jobListCache = jobIdListCacheWriter.get(tenant);
+        boolean cacheValid = true;
+        if (jobListCache == null) {
+            // cache miss
+            log.info("JobIdListCache does not exist for tenant (PID={})", tenant.getPid());
+            cacheValid = false;
+        } else if (isCacheExpired(jobListCache)) {
+            // cache expired
+            log.info("JobIdListCache expired for tenant (PID={})", tenant.getPid());
+            cacheValid = false;
+        }
+
+        Tenant prevTenant = MultiTenantContext.getTenant();
+        try {
+            MultiTenantContext.setTenant(tenant);
+            if (!cacheValid) {
+                jobListCache = new JobListCache();
+                // TODO optimize to only get workflowId & pid
+                List<Job> jobs = workflowJobEntityMgr.findAll()
+                        .stream()
+                        .map(workflowJob -> {
+                            Job job = new Job();
+                            job.setId(workflowJob.getWorkflowId());
+                            job.setPid(workflowJob.getPid());
+                            return job;
+                        })
+                        .collect(Collectors.toList());
+                jobListCache.setJobs(jobs);
+                if (!jobs.isEmpty()) {
+                    log.info("Refresh JobIdListCache for tenant (PID={}), size={}", tenant.getPid(), jobs.size());
+                }
+                // refresh id list cache
+                service.execute(() -> jobIdListCacheWriter.set(tenant, jobs));
+            }
+            return getTenantJobsInCache(jobListCache, includeDetails);
+        } finally {
+            MultiTenantContext.setTenant(prevTenant);
+        }
+    }
 
     @Override
     public Job getByWorkflowId(Long workflowId, boolean includeDetails) {
@@ -145,6 +200,72 @@ public class JobCacheServiceImpl implements JobCacheService {
         return putAsync(workflowIds, true);
     }
 
+    @Override
+    public void evict(Tenant tenant) {
+        if (tenant == null || tenant.getPid() == null) {
+            // noop for invalid param
+            return;
+        }
+
+        log.info("Evict JobIdListCache for tenant (PID={})", tenant.getPid());
+        jobIdListCacheWriter.clear(tenant);
+    }
+
+    /*
+     * MultiTenantContext should be already configured
+     */
+    private List<Job> getTenantJobsInCache(JobListCache jobListCache, boolean includeDetails) {
+        if (jobListCache.getJobs().isEmpty()) {
+            log.info("No jobs cached for tenant (PID={})", MultiTenantContext.getTenant().getPid());
+            return Collections.emptyList();
+        }
+        // job object to store ids
+        List<Job> jobs = jobListCache.getJobs();
+        List<Long> workflowIds = jobs
+                .stream()
+                .filter(job -> job != null && job.getId() != null)
+                .map(Job::getId)
+                .collect(Collectors.toList());
+        // pids of jobs that does not have workflowId
+        List<Long> workflowPIds = jobs
+                .stream()
+                .filter(job -> job != null && job.getId() == null && job.getPid() != null)
+                .map(Job::getPid)
+                .collect(Collectors.toList());
+        log.info("Retrieve jobs with workflow IDs in tenant (PID={}), size={}, jobIds={}",
+                MultiTenantContext.getTenant().getPid(), workflowIds.size(), getWorkflowIdsStr(workflowIds));
+        if (!workflowPIds.isEmpty()) {
+            log.info("Retrieve jobs with only pid in tenant (PID={}), size={}, pids={}",
+                    MultiTenantContext.getTenant().getPid(), workflowPIds.size(), getWorkflowIdsStr(workflowPIds));
+        }
+        Map<Long, Job> workflowIdJobMap = getByWorkflowIds(workflowIds, includeDetails)
+                .stream()
+                .collect(Collectors.toMap(Job::getId, job -> job));
+        Map<Long, Job> pidJobMap = getPidJobMap(workflowPIds, includeDetails);
+        return jobs.stream()
+                .map(job -> {
+                    if (job.getId() != null) {
+                        return workflowIdJobMap.get(job.getId());
+                    } else {
+                        return pidJobMap.get(job.getPid());
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private Map<Long, Job> getPidJobMap(@NotNull List<Long> pids, boolean includeDetails) {
+        if (pids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return workflowJobEntityMgr.findByWorkflowPids(pids)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(job -> transform(job, includeDetails))
+                .collect(Collectors.toMap(Job::getPid, job -> job));
+    }
+
     /*
      * if forceRefresh is
      * true: cache entry will be populated
@@ -183,7 +304,16 @@ public class JobCacheServiceImpl implements JobCacheService {
         }
 
         long timestamp = System.currentTimeMillis();
-        return timestamp - cache.getUpdatedAt() > EXPIRE_TIME_IN_MILLIS;
+        return timestamp - cache.getUpdatedAt() > runningJobExpireTimeInMillis;
+    }
+
+    private boolean isCacheExpired(JobListCache cache) {
+        if (cache.getUpdatedAt() == null) {
+            return true;
+        }
+
+        long timestamp = System.currentTimeMillis();
+        return timestamp - cache.getUpdatedAt() > idListExpireTimeInMillis;
     }
 
     private List<Job> getMissingJobs(List<Long> missingJobIds, boolean includeDetails) {

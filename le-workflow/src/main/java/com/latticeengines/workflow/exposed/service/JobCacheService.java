@@ -1,5 +1,7 @@
 package com.latticeengines.workflow.exposed.service;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
@@ -7,6 +9,16 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 public interface JobCacheService {
+    /**
+     * Retrieve a list of {@link WorkflowJob} with specified {@link Tenant} and transform them into {@link Job}. Have the
+     * same read through cache behavior as {@link JobCacheService#getByWorkflowId(Long, boolean)} for individual object.
+     *
+     * @param tenant target tenant, should not be {@literal null} and has non-null {@link Tenant#getPid()}
+     * @param includeDetails flag to include job details in the returned object
+     * @return list of transformed {@link Job} (no {@literal null} in the list)
+     */
+    List<Job> getByTenant(@NotNull Tenant tenant, boolean includeDetails);
+
     /**
      * Try to retrieve {@link WorkflowJob} with specified workflow ID from cache first. If the cache entry does not
      * exist, retrieve from datastore and populate the cache. Transform the retrieved object to {@link Job} and return
@@ -50,4 +62,11 @@ public interface JobCacheService {
      * @return a future to represent the cache refresh task
      */
     Future<?> putAsync(List<Long> workflowIds);
+
+    /**
+     * Delete job id list cache entry associated with the target {@link Tenant}. The input {@link Tenant} must not be
+     * {@literal null} and has non-null {@link Tenant#getPid()}, otherwise this function will have no effect (noop)
+     * @param tenant target tenant
+     */
+    void evict(Tenant tenant);
 }

@@ -126,7 +126,7 @@ public class WorkflowResource {
             return workflowJobService.getJobsByWorkflowIds(customerSpace, null, optionalTypes.get(),
                     optionalIncludeDetails.orElse(true), false, -1L);
         } else {
-            return workflowJobService.getJobsByCustomerSpace(customerSpace, optionalIncludeDetails.orElse(true));
+            return workflowJobService.getJobsByCustomerSpaceFromCache(customerSpace, optionalIncludeDetails.orElse(true));
         }
     }
 

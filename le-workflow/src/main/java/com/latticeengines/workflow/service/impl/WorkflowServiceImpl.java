@@ -186,6 +186,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         jobUpdate.setLastUpdateTime(currentTime);
         workflowJobUpdateEntityMgr.create(jobUpdate);
 
+        jobCacheService.evict(tenant);
+
         return new WorkflowExecutionId(jobExecutionId);
     }
 
@@ -203,6 +205,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         jobUpdate.setCreateTime(currentTime);
         jobUpdate.setLastUpdateTime(currentTime);
         workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
+
+        jobCacheService.evict(workflowJob.getTenant());
 
         return new WorkflowExecutionId(jobExecutionId);
     }
@@ -245,6 +249,8 @@ public class WorkflowServiceImpl implements WorkflowService {
                 jobUpdate.setLastUpdateTime(System.currentTimeMillis());
                 workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
             }
+
+            jobCacheService.evict(workflowJob.getTenant());
 
             log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
                     workflowExecutionId.getId(), jobExecutionId));

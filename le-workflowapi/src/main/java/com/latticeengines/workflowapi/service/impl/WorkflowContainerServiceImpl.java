@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -54,6 +55,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     private JobService jobService;
 
     @Autowired
+    private JobCacheService jobCacheService;
+
+    @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Autowired
@@ -99,6 +103,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
             workflowJob.setApplicationId(appId.toString());
             workflowJobEntityMgr.updateApplicationId(workflowJob);
+
+            jobCacheService.evict(workflowJob.getTenant());
 
             return appId;
         } catch (Exception exc) {
@@ -151,6 +157,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
             workflowJob.setApplicationId(jobId);
             workflowJobEntityMgr.updateApplicationId(workflowJob);
+
+            jobCacheService.evict(workflowJob.getTenant());
 
             return jobId;
         } catch (Exception exc) {
