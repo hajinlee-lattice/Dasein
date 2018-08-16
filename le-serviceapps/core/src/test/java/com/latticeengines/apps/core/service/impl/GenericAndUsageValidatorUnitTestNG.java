@@ -44,22 +44,12 @@ public class GenericAndUsageValidatorUnitTestNG {
 
         attrList = AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, true, true, true, true, true);
         genericValidator.validate(new ArrayList<>(), attrList);
-        int num = 0;
-        for (AttrConfig config : attrList) {
-            if (config.getValidationErrors() != null) {
-                num++;
-            }
-        }
+        int num = AttrConfigTestUtils.getErrorNumber(attrList);
         Assert.assertEquals(attrList.size() - 4, num);
 
         attrList = AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false, false, false, false, false);
         genericValidator.validate(new ArrayList<>(), attrList);
-        num = 0;
-        for (AttrConfig config : attrList) {
-            if (config.getValidationErrors() != null) {
-                num++;
-            }
-        }
+        num = AttrConfigTestUtils.getErrorNumber(attrList);
         Assert.assertEquals(0, num);
     }
 
@@ -69,21 +59,11 @@ public class GenericAndUsageValidatorUnitTestNG {
         List<AttrConfig> attrList = AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, true, true, true,
                 true, true);
         usageValidator.validate(new ArrayList<>(), attrList);
-        int num = 0;
-        for (AttrConfig config : attrList) {
-            if (config.getValidationErrors() != null) {
-                num++;
-            }
-        }
+        int num = AttrConfigTestUtils.getErrorNumber(attrList);
         Assert.assertEquals(attrList.size() - 6, num);
         attrList = AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false, false, false, false, false);
         genericValidator.validate(new ArrayList<>(), attrList);
-        num = 0;
-        for (AttrConfig config : attrList) {
-            if (config.getValidationErrors() != null) {
-                num++;
-            }
-        }
+        num = AttrConfigTestUtils.getErrorNumber(attrList);
         Assert.assertEquals(0, num);
     }
 
