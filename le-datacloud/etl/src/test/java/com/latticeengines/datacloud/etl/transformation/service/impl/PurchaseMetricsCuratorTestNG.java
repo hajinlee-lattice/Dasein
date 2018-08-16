@@ -463,12 +463,12 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
             { "AID2", "PID1", 25, 169, 20.0, 20.0, 100, true, 100 }, //
             { "AID2", "PID2", 25, 169, 20.0, 20.0, 0, true, 162 }, //
-            { "AID2", "PID3", null, null, 0.0, 0.0, -100, true, 100 }, //
-            { "AID2", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
+            { "AID2", "PID3", null, 0, 0.0, 0.0, -100, true, 100 }, //
+            { "AID2", "PID4", null, 0, 0.0, 0.0, 0, false, 0 }, //
 
             { "AID3", "PID1", -125, 150, 20.0, 20.0, 0, true, 140 }, //
-            { "AID3", "PID2", null, null, 0.0, 0.0, 0, true, null }, //
-            { "AID3", "PID3", null, null, 0.0, 0.0, 0, true, null }, //
+            { "AID3", "PID2", null, 0, 0.0, 0.0, 0, true, 0 }, //
+            { "AID3", "PID3", null, 0, 0.0, 0.0, 0, true, 0 }, //
             { "AID3", "PID4", null, null, 0.0, 0.0, 0, false, null }, //
 
             { "AID4", "PID1", 75, 90, 60.0, 60.0, 100, true, 84 }, //
@@ -516,12 +516,12 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             { "AID2", //
                     25, 169, 100, 20.0, 20.0, 100, true, //
                     25, 169, 162, 20.0, 20.0, 0, true, //
-                    null, null, 100, 0.0, 0.0, -100, true, //
-                    null, null, null, 0.0, 0.0, 0, false }, //
+                    null, 0, 100, 0.0, 0.0, -100, true, //
+                    null, 0, 0, 0.0, 0.0, 0, false }, //
             { "AID3", //
                     -125, 150, 140, 20.0, 20.0, 0, true, //
-                    null, null, null, 0.0, 0.0, 0, true, //
-                    null, null, null, 0.0, 0.0, 0, true, //
+                    null, 0, 0, 0.0, 0.0, 0, true, //
+                    null, 0, 0, 0.0, 0.0, 0, true, //
                     null, null, null, 0.0, 0.0, 0, false }, //
             { "AID4", //
                     75, 90, 84, 60.0, 60.0, 100, true, //
@@ -622,8 +622,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             Assert.assertNotNull(expected);
             Assert.assertTrue(
                     isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekMG)), expected[2]));
-            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSW)),
-                    expected[3]));
+            Assert.assertTrue(isObjEquals(record.get(ActivityMetricsUtils.getNameWithPeriod(weekSW)), expected[3]));
             Assert.assertTrue(isObjEquals(
                     record.get(ActivityMetricsUtils.getNameWithPeriod(weekAS)), expected[4]));
             Assert.assertTrue(isObjEquals(

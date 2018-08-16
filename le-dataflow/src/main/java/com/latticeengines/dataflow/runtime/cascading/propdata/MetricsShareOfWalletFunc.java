@@ -46,11 +46,16 @@ public class MetricsShareOfWalletFunc extends BaseOperation implements Function 
         double stSpend = arguments.getDouble(stField);
         if (apSpend != 0 && (atSpend == 0 || spSpend == 0 || stSpend == 0)) {
             log.error(
-                    "FATAL: account spend on product is not 0, while account total spend is 0, or segment spend on product is 0, or segment total spend is 0");
+                    "FATAL: account spend on one product is not 0, while account total spend is 0, or segment spend on one product is 0, or segment total spend is 0");
             functionCall.getOutputCollector().add(Tuple.size(1));
             return;
         }
-        if (apSpend == 0) {
+        if (spSpend != 0 && stSpend == 0) {
+            log.error("FATAL: segment spend on one product is not 0, while segment total spend is 0");
+            functionCall.getOutputCollector().add(Tuple.size(1));
+            return;
+        }
+        if (atSpend == 0 || spSpend == 0 || stSpend == 0) {
             functionCall.getOutputCollector().add(Tuple.size(1));
             return;
         }

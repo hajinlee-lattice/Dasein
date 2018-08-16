@@ -273,7 +273,9 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
 
         List<Aggregation> accountTotalSpendAgg = Collections.singletonList(
                 new Aggregation("_APSpend_", "_ATSpend_", AggregationType.SUM));
-        Node atSpend = apSpend.groupBy(new FieldList(InterfaceName.AccountId.name()), accountTotalSpendAgg)
+        Node atSpend = apSpend
+                .groupBy(new FieldList(InterfaceName.AccountId.name(), InterfaceName.SpendAnalyticsSegment.name()),
+                        accountTotalSpendAgg)
                 .renamePipe("_at_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         List<Aggregation> segmentProductSpendAgg = Collections
@@ -286,22 +288,31 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
                 .singletonList(new Aggregation("_SPSpend_", "_STSpend_", AggregationType.SUM));
         Node stSpend = spSpend.groupBy(new FieldList(InterfaceName.SpendAnalyticsSegment.name()), semgentTotalSpendAgg)
                 .renamePipe("_st_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
+        
+        Node base = atSpend
+                .join(new FieldList(InterfaceName.SpendAnalyticsSegment.name()), spSpend,
+                        new FieldList(InterfaceName.SpendAnalyticsSegment.name()), JoinType.INNER) //
+                .retain(InterfaceName.AccountId.name(), InterfaceName.ProductId.name(),
+                        InterfaceName.SpendAnalyticsSegment.name());
 
-        periodTable = apSpend.join(new FieldList(InterfaceName.AccountId.name()), atSpend,
-                new FieldList(InterfaceName.AccountId.name()), JoinType.LEFT)
+        Node sw = base
+                .join(new FieldList(config.getGroupByFields()), apSpend, new FieldList(config.getGroupByFields()),
+                        JoinType.LEFT) //
+                .join(new FieldList(InterfaceName.AccountId.name()), atSpend,
+                        new FieldList(InterfaceName.AccountId.name()), JoinType.INNER) //
                 .join(new FieldList(InterfaceName.SpendAnalyticsSegment.name(), InterfaceName.ProductId.name()),
                         spSpend,
                         new FieldList(InterfaceName.SpendAnalyticsSegment.name(), InterfaceName.ProductId.name()),
-                        JoinType.LEFT)
+                        JoinType.INNER) //
                 .join(new FieldList(InterfaceName.SpendAnalyticsSegment.name()), stSpend,
-                        new FieldList(InterfaceName.SpendAnalyticsSegment.name()), JoinType.LEFT);
+                        new FieldList(InterfaceName.SpendAnalyticsSegment.name()), JoinType.INNER);
 
-        periodTable = periodTable.apply(
+        sw = sw.apply(
                 new MetricsShareOfWalletFunc(ActivityMetricsUtils.getNameWithPeriod(metrics), "_APSpend_", "_ATSpend_",
                         "_SPSpend_", "_STSpend_"),
-                new FieldList(periodTable.getFieldNames()), metricsMetadata.get(metrics))
+                new FieldList(sw.getFieldNames()), metricsMetadata.get(metrics))
                 .retain(new FieldList(retainFields));
-        return periodTable.renamePipe("_sw_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
+        return sw.renamePipe("_sw_" + ActivityMetricsUtils.getNameWithPeriod(metrics));
     }
 
     private Node appendSegment(Node periodTable) {
