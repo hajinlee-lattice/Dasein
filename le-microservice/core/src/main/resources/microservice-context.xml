@@ -26,7 +26,7 @@
 
     <bean id="apiVersionManager"
           class="com.latticeengines.common.exposed.version.VersionManager">
-        <constructor-arg name="currentVersion" value="4.9.2-SNAPSHOT"/>
+        <constructor-arg name="currentVersion" value="5.0.0-SNAPSHOT"/>
     </bean>
 
     <import resource="classpath:monitor-aspects-context.xml"/>
