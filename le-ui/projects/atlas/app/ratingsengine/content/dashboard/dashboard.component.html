@@ -48,7 +48,7 @@
                             ratingEngine: vm.ratingEngine
                         })"
                         ng-if="!vm.isRulesBased"
-                        ng-disabled="vm.dashboard.summary.bucketMetadata.length === 0 || vm.isJobRunning()">
+                        ng-disabled="!vm.canNewScoringConfig()">
                         {{ vm.publishOrActivateButtonLabel }}
                     </button>
                     <button

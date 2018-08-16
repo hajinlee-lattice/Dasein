@@ -374,11 +374,24 @@ angular.module('lp.ratingsengine.dashboard', [
 
     };
 
+    vm.canNewScoringConfig = function() {
+        var can = !((vm.dashboard.summary.bucketMetadata && vm.dashboard.summary.bucketMetadata.length === 0) || vm.isJobRunning());
+        if(vm.dashboard.iterations){
+            var iterations  = vm.dashboard.iterations;
+            can = iterations.some(function(iteration){
+                return (iteration.modelingJobStatus === 'Completed');
+            });
+        }
+        return can;
+    }
+
     vm.canCreatePlay = function(){
-        if(vm.ratingEngine.status === 'ACTIVE' && Dashboard.summary.isPublished){
-            return true;
-        }else{
-            return false;
+        if(vm.isRulesBased && vm.playbookEnabled){
+            return vm.ratingEngine.status === 'ACTIVE';
+        }
+        if(!vm.isRulesBased && vm.playbookEnabled){
+            // console.log(vm.dashboard.summary.isPublished);
+            return (vm.dashboard.summary.isPublished && vm.ratingEngine.status === 'ACTIVE');
         }
     };
 
