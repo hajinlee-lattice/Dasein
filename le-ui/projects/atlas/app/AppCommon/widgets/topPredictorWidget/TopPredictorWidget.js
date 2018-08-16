@@ -39,6 +39,17 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.internalCategories = internalCategoryObj.categories;
         $scope.showInternalCategories = internalCategoryObj.total > 0;
 
+        console.log($scope.internalCategories);
+        for (var i = 0; i < $scope.internalCategories.length; i++) {
+            if($scope.internalCategories[i].name == 'ACCOUNT_ATTRIBUTES') {
+                $scope.internalCategories[i].name = 'My Attributes';
+                $scope.internalCategories[i].color = '#457DB9';
+            }
+            if($scope.internalCategories[i].name == 'Product Spend Profile') {
+                $scope.internalCategories[i].color = '#B887B6';
+            }
+        }
+
         // Get External category list
         var externalCategoryObj = data.ExternalAttributes;
         $scope.externalPredictorTotal = externalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
