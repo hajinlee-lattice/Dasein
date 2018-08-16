@@ -158,25 +158,33 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                 vm.changeEnumCmpValue = function () {
                     switch (vm.enumCmpModel) {
-                        case 'is empty': 
-                            vm.enumCmpModel = 'IS_NULL'; 
-                            vm.vals.length = 0; 
-                            break;
-                        case 'is present': 
-                            vm.enumCmpModel = 'IS_NOT_NULL'; 
-                            vm.vals.length = 0; 
-                            break;
-                        case 'is': 
-                            vm.enumCmpModel = vm.vals.length == 1 
-                                ? 'EQUAL' 
-                                : 'IN_COLLECTION'; 
-                            break;
-                        case 'is not': 
-                            vm.enumCmpModel = vm.vals.length == 1 
-                                ? 'NOT_EQUAL' 
-                                : 'NOT_IN_COLLECTION';
+                        case 'IS_NULL':
+                        case 'IS_NOT_NULL': 
+                            vm.vals.length = 0;
                             break;
                     }
+
+                    // switch (vm.enumCmpModel) {
+                    //     case 'is empty': 
+                    //         vm.enumCmpModel = 'IS_NULL'; 
+                    //         vm.vals.length = 0; 
+                    //         break;
+                    //     case 'is present': 
+                    //         vm.enumCmpModel = 'IS_NOT_NULL'; 
+                    //         vm.vals.length = 0; 
+                    //         break;
+                    //     case 'is': 
+                    //         vm.enumCmpModel = vm.vals.length == 1 
+                    //             ? 'EQUAL' 
+                    //             : 'IN_COLLECTION'; 
+                    //         break;
+                    //     case 'is not': 
+                    //         vm.enumCmpModel = vm.vals.length == 1 
+                    //             ? 'NOT_EQUAL' 
+                    //             : 'NOT_IN_COLLECTION';
+                    //         break;
+                    // }
+
 
                     // if (vm.enumCmpModel == 'is empty') {
                     //     vm.enumCmpModel = 'IS_NULL';

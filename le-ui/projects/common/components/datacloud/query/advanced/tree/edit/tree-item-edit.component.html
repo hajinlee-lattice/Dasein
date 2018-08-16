@@ -24,11 +24,11 @@
 
                     <span ng-if="vm.showItem('Enum') && !vm.showItem('Percent')" class="query-section-item-operation">
                         <!-- PLEASE LEAVE THIS SELECT ALONE -->
-                        <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()">
-                            <option ng-selected="vm.enumCmpModel == 'EQUAL' || vm.enumCmpModel == 'IN_COLLECTION'" ng-value="EQUAL" ng-if="vm.vals.length > 0">is</option>
-                            <option ng-selected="vm.enumCmpModel == 'NOT_EQUAL' || vm.enumCmpModel == 'NOT_IN_COLLECTION'" ng-value="NOT_EQUAL" ng-if="vm.vals.length > 0">is not</option>
-                            <option ng-selected="vm.enumCmpModel == 'IS_NULL'" ng-value="IS_NULL">is empty</option>
-                            <option ng-selected="vm.enumCmpModel == 'IS_NOT_NULL'" ng-value="IS_NOT_NULL">is present</option>
+                       <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()">
+                            <option ng-selected="vm.enumCmpModel == 'EQUAL' || vm.enumCmpModel == 'IN_COLLECTION'" ng-value="vm.vals.length == 1 ? 'EQUAL' : 'IN_COLLECTION'" ng-if="vm.vals.length > 0">is</option>
+                            <option ng-selected="vm.enumCmpModel == 'NOT_EQUAL' || vm.enumCmpModel == 'NOT_IN_COLLECTION'" ng-value="vm.vals.length == 1 ? 'NOT_EQUAL' : 'NOT_IN_COLLECTION'" ng-if="vm.vals.length > 0">is not</option>
+                            <option ng-selected="vm.enumCmpModel == 'IS_NULL'" ng-value="'IS_NULL'">is empty</option>
+                            <option ng-selected="vm.enumCmpModel == 'IS_NOT_NULL'" ng-value="'IS_NOT_NULL'">is present</option>
                         </select>
 
                         <a ng-click="vm.goToEnumPicker()" href="javascript:void(0)" class="default-link">Add{{(vm.vals.length > 0 ? ' or Remove ' : ' ')}}Values</a>
