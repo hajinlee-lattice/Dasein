@@ -42,6 +42,6 @@ public class PerformanceTimer implements Closeable {
 
     @Override
     public void close() {
-        logger.info(String.format("[Metric] %s ElapsedTime=%d ms", timerMessage, new Date().getTime() - start.getTime()));
+        // logger.info(String.format("[Metric] %s ElapsedTime=%d ms", timerMessage, new Date().getTime() - start.getTime()));
     }
 }
