@@ -228,7 +228,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         String cloneTable = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 MultiTenantContext.getCustomerSpace(), existing.getNamespace()).append(clone.getName()).toString();
         try {
-            if (HdfsUtils.fileExists(yarnConfiguration, cloneTable)) {
+            if (HdfsUtils.isDirectory(yarnConfiguration, cloneTable)
+                    || HdfsUtils.fileExists(yarnConfiguration, cloneTable)) {
                 HdfsUtils.rmdir(yarnConfiguration, cloneTable);
             }
             HdfsUtils.mkdir(yarnConfiguration, cloneTable);
