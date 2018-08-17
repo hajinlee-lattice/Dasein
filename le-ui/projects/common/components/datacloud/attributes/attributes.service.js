@@ -164,7 +164,7 @@ angular.module('common.attributes')
 
     this.isChanged = function() {
         if (!this.data.original.Entity) {
-            return true;
+            return false;
         }
 
         var hasChanged = false;

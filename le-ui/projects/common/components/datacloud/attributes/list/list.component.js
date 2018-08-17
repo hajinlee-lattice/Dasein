@@ -5,7 +5,7 @@ angular.module('common.attributes.list', [])
     bindings: {
         filters: '<'
     },
-    controller: function ($state, $filter, AttrConfigStore, BrowserStorageUtility) {
+    controller: function ($state, AttrConfigStore, BrowserStorageUtility) {
         var vm = this;
 
         vm.store = AttrConfigStore;
