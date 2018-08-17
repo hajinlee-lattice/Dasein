@@ -209,6 +209,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                              * For Enable/Disable page, hide attributes that
                              * are: disabled and AllowCustomization=FALSE.
                              */
+                            totalAttrs++;
                             if (onlyActiveAttrs) {
                                 if (!configProp.isAllowCustomization() && Boolean.FALSE.equals(actualValue)) {
                                     continue;
@@ -216,7 +217,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             }
                             Long count = valueNumberMap.getOrDefault(actualValue, 0L);
                             valueNumberMap.put((T) actualValue, count + 1);
-                            totalAttrs++;
                         } else {
                             log.warn(String.format("Attr %s does not have property %s", attrConfig.getAttrName(),
                                     propertyName));

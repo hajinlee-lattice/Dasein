@@ -73,7 +73,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = "unit")
-    public void testGetAttrConfigOverviewWithFourActiveAttrs() {
+    public void testGetAttrConfigOverviewWithSomeActiveAttrs() {
         AttrConfigCategoryOverview overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(
                 generatePropertyListWithSomeActive(), Category.INTENT, Arrays.asList(ColumnMetadataKey.State), false);
         log.info("overviewWithSomeActive is " + overview);
@@ -93,7 +93,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
         overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(generatePropertyListWithSomeUsedForSegment(),
                 Category.FIRMOGRAPHICS, getPropertyNames(), true);
         log.info("overviewWithWithSomeUsedForSegment is " + overview);
-        Assert.assertEquals(overview.getTotalAttrs() - 3, 0);
+        Assert.assertEquals(overview.getTotalAttrs() - 6, 0);
         Assert.assertNull(overview.getLimit());
         propSummary = overview.getPropSummary();
         Assert.assertNotNull(propSummary);
@@ -106,14 +106,14 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 2, 0L);
         // For Enable/Disable page, hide hide attributes that are: disabled and
         // AllowCustomization=FALSE.
-        Assert.assertNull(map.get(Boolean.FALSE));
+        Assert.assertEquals(map.get(Boolean.FALSE).longValue() - 3, 0L);
 
         map = propSummary.get(ColumnSelection.Predefined.Enrichment.getName());
-        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 3, 0L);
+        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 6, 0L);
         map = propSummary.get(ColumnSelection.Predefined.TalkingPoint.getName());
-        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 3, 0L);
+        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 6, 0L);
         map = propSummary.get(ColumnSelection.Predefined.CompanyProfile.getName());
-        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 3, 0L);
+        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 6, 0L);
 
         overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(
                 AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, false, false, false, false, false),
@@ -258,10 +258,10 @@ public class AbstractAttrConfigServiceUnitTestNG {
                 AttrConfigTestUtils.getLDCInternalAttr(Category.INTENT, true, true, false, false, false), //
                 AttrConfigTestUtils.getCDLStdAttr(Category.INTENT, true, false, false, false, false), //
                 AttrConfigTestUtils.getCDLLookIDAttr(Category.INTENT, false, true, false, false, false), //
-                AttrConfigTestUtils.getCDLAccountExtensionAttr(Category.INTENT, false, false, false, false, false), //
-                AttrConfigTestUtils.getCDLContactExtensionAttr(Category.INTENT, false, false, false, false, false), //
-                AttrConfigTestUtils.getCDLDerivedPBAttr(Category.INTENT, false, false, false, false, false), //
-                AttrConfigTestUtils.getCDLRatingAttr(Category.INTENT, false, false, false, false, false));
+                AttrConfigTestUtils.getCDLAccountExtensionAttr(Category.INTENT, true, false, false, false, false), //
+                AttrConfigTestUtils.getCDLContactExtensionAttr(Category.INTENT, true, false, false, false, false), //
+                AttrConfigTestUtils.getCDLDerivedPBAttr(Category.INTENT, true, false, false, false, false), //
+                AttrConfigTestUtils.getCDLRatingAttr(Category.INTENT, true, false, false, false, false));
         return renderedList;
     }
 
