@@ -113,7 +113,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(batchStoreTablePrefix);
-        targetTable.setPrimaryKey(batchStorePrimaryKey);
         step.setTargetTable(targetTable);
         return step;
     }

@@ -138,7 +138,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(tablePrefix + "_Slim");
-        targetTable.setPrimaryKey(batchStorePrimaryKey);
         step.setTargetTable(targetTable);
 
         CopierConfig conf = new CopierConfig();
@@ -181,8 +180,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(batchStoreTablePrefix);
-        targetTable.setPrimaryKey(batchStorePrimaryKey);
-        targetTable.setLastModifiedKey(InterfaceName.CDLUpdatedTime.name());
         step.setTargetTable(targetTable);
         return step;
     }
