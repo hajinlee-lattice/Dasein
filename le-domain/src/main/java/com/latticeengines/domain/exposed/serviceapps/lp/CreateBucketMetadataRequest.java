@@ -25,6 +25,9 @@ public class CreateBucketMetadataRequest {
     @JsonProperty("RatingEngineId")
     private String ratingEngineId;
 
+    @JsonProperty("IsPublished")
+    private boolean isPublished;
+
     public List<BucketMetadata> getBucketMetadataList() {
         return bucketMetadataList;
     }
@@ -56,4 +59,8 @@ public class CreateBucketMetadataRequest {
     public void setRatingEngineId(String ratingEngineId) {
         this.ratingEngineId = ratingEngineId;
     }
+
+    public boolean isPublished() { return isPublished; }
+
+    public void setPublished(boolean published) { isPublished = published; }
 }

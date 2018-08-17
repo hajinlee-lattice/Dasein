@@ -109,9 +109,24 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<BucketMetadata> getAllBucketMetadatasForEngineFromReader(String engineId) {
-        return repository.findAllFirstByRatingEngine_Id(engineId);
+    public List<BucketMetadata> getAllPublishedBucketMetadatasForEngineFromReader(String engineId) {
+        List<BucketMetadata> toReturn = readerRepository.findByRatingEngine_IdAndPublishedVersionNotNull(engineId);
+        toReturn.forEach(bucketMetadata -> bucketMetadata.setModelSummaryId(bucketMetadata.getModelSummary().getId()));
+        return toReturn;
+    }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Integer getMaxPublishedVersionByModelId(String modelId) {
+        BucketMetadata bm = readerRepository.findFirstByModelSummary_IdOrderByPublishedVersionDesc(modelId);
+        return bm == null ? null : bm.getPublishedVersion();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<BucketMetadata> getPublishedMetadataByModelGuidAndPublishedVersionFromReader(String modelSummaryId,
+            Integer publishedVersion) {
+        return readerRepository.findByModelSummary_IdAndPublishedVersion(modelSummaryId, publishedVersion);
     }
 
 }

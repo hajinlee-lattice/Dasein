@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -72,6 +73,10 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @Column(name = "LIFT", nullable = false)
     private double lift;
 
+    @JsonProperty("published_version")
+    @Column(name = "PUBLISHED_VERSION")
+    private Integer publishedVersion;
+
     @JsonProperty("creation_timestamp")
     @Column(name = "CREATION_TIMESTAMP", nullable = false)
     private long creationTimestamp;
@@ -79,6 +84,10 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @JsonProperty("last_modified_by_user")
     @Column(name = "LAST_MODIFIED_BY_USER")
     private String lastModifiedByUser;
+
+    @JsonProperty("model_summary_id")
+    @Transient
+    private String modelSummaryId;
 
     @Override
     public Long getPid() {
@@ -149,6 +158,22 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         this.lift = lift;
     }
 
+    public Integer getPublishedVersion() {
+        return publishedVersion;
+    }
+
+    public void setPublishedVersion(Integer publishedVersion) {
+        this.publishedVersion = publishedVersion;
+    }
+
+    public String getModelSummaryId() {
+        return modelSummaryId;
+    }
+
+    public void setModelSummaryId(String modelSummaryId) {
+        this.modelSummaryId = modelSummaryId;
+    }
+
     public long getCreationTimestamp() {
         return creationTimestamp;
     }
@@ -197,12 +222,10 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         } else if (obj instanceof BucketMetadata) {
             BucketMetadata bucketMetadata = (BucketMetadata) obj;
             return this.getModelSummary().getId().equals(bucketMetadata.getModelSummary().getId())
-                    && this.getRatingEngine().getId()
-                            .equals(bucketMetadata.getRatingEngine().getId())
+                    && this.getRatingEngine().getId().equals(bucketMetadata.getRatingEngine().getId())
                     && this.getBucketName().equals(bucketMetadata.getBucketName())
                     && this.getRightBoundScore() == bucketMetadata.getRightBoundScore()
-                    && this.getLift() == bucketMetadata.getLift()
-                    && this.getNumLeads() == bucketMetadata.getNumLeads();
+                    && this.getLift() == bucketMetadata.getLift() && this.getNumLeads() == bucketMetadata.getNumLeads();
         }
         return false;
     }

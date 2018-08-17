@@ -22,6 +22,9 @@ public interface BucketedMetadataRepository extends BaseJpaRepository<BucketMeta
 
     BucketMetadata findByCreationTimestampAndBucketName(long creationTimestamp, BucketName bucketName);
 
-    List<BucketMetadata> findAllFirstByRatingEngine_Id(String engineId);
+    List<BucketMetadata> findByRatingEngine_IdAndPublishedVersionNotNull(String engineId);
 
+    BucketMetadata findFirstByModelSummary_IdOrderByPublishedVersionDesc(String modelId);
+
+    List<BucketMetadata> findByModelSummary_IdAndPublishedVersion(String modelSummaryId, Integer publishedVersion);
 }

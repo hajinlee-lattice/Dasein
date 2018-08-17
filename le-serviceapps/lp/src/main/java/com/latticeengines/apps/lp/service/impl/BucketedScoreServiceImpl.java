@@ -68,6 +68,16 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Override
+    public List<BucketMetadata> getPublishedBucketMetadataByModelGuid(String modelSummaryId) {
+        Integer maxPublishedVersion = bucketMetadataEntityMgr.getMaxPublishedVersionByModelId(modelSummaryId);
+        if (maxPublishedVersion == null) {
+            return new ArrayList<>();
+        }
+        return bucketMetadataEntityMgr.getPublishedMetadataByModelGuidAndPublishedVersionFromReader(modelSummaryId,
+                maxPublishedVersion);
+    }
+
+    @Override
     public List<BucketMetadata> getABCDBucketsByModelGuidAcrossTenant(String modelGuid) {
         return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForModelFromReader(modelGuid);
     }
@@ -78,8 +88,8 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Override
-    public List<BucketMetadata> getAllByRatingEngineId(String ratingEngineId) {
-        return bucketMetadataEntityMgr.getAllBucketMetadatasForEngineFromReader(ratingEngineId);
+    public List<BucketMetadata> getAllPublishedBucketsByRatingEngineId(String ratingEngineId) {
+        return bucketMetadataEntityMgr.getAllPublishedBucketMetadatasForEngineFromReader(ratingEngineId);
     }
 
     @Override
@@ -90,10 +100,14 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         List<BucketMetadata> bucketMetadataList = request.getBucketMetadataList();
         bucketMetadataList = BucketedScoreSummaryUtils.sortBucketMetadata(bucketMetadataList, false);
         long creationTimestamp = System.currentTimeMillis();
+        Integer publishedVersion = getPublishedVersion(request.isPublished(), request.getModelGuid());
+
         bucketMetadataList.forEach(bucketMetadata -> {
             bucketMetadata.setCreationTimestamp(creationTimestamp);
             bucketMetadata.setLastModifiedByUser(request.getLastModifiedBy());
+            bucketMetadata.setPublishedVersion(publishedVersion);
         });
+
         bucketMetadataEntityMgr.createBucketMetadata(bucketMetadataList, request.getModelGuid(),
                 request.getRatingEngineId());
         if (StringUtils.isNotBlank(request.getModelGuid())) {
@@ -104,12 +118,27 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         }
     }
 
+    private Integer getPublishedVersion(boolean published, String modelSummaryId) {
+        if (published) {
+            Integer maxPublishedVersion = bucketMetadataEntityMgr
+                    .getMaxPublishedVersionByModelId(modelSummaryId);
+            if (maxPublishedVersion == null) {
+                return 0;
+            } else {
+                return maxPublishedVersion + 1;
+            }
+        }
+        return null;
+    }
+
     @Override
     public List<BucketMetadata> updateABCDBuckets(UpdateBucketMetadataRequest request) {
         List<BucketMetadata> bucketMetadataList = request.getBucketMetadataList();
         String modelGuid = request.getModelGuid();
         List<BucketMetadata> updated = new ArrayList<>();
         bucketMetadataList = BucketedScoreSummaryUtils.sortBucketMetadata(bucketMetadataList, false);
+        Integer publishedVersion = getPublishedVersion(request.isPublished(), request.getModelGuid());
+
         for (BucketMetadata bucketMetadata : bucketMetadataList) {
             if (bucketMetadata.getCreationTimestamp() <= 0) {
                 throw new RuntimeException(
@@ -121,6 +150,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             if (existing != null) {
                 existing.setNumLeads(bucketMetadata.getNumLeads());
                 existing.setLift(bucketMetadata.getLift());
+                existing.setPublishedVersion(publishedVersion);
                 bucketMetadataEntityMgr.update(existing);
                 if (existing.getModelSummary() != null && StringUtils.isNotBlank(existing.getModelSummary().getId())) {
                     modelGuid = existing.getModelSummary().getId();

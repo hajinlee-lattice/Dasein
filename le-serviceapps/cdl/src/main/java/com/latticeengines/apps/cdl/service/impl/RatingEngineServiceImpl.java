@@ -680,31 +680,29 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
         validateAIRatingEngine(ratingEngine);
 
-        List<BucketMetadata> publishedBuckets = bucketedScoreProxy
-                .getAllBucketsByEngineId(CustomerSpace.shortenCustomerSpace(customerSpace), ratingEngineId);
-        if (CollectionUtils.isEmpty(publishedBuckets)) {
-            log.warn("No buckets have been published for Rating Engine: " + ratingEngineId);
-            return null;
-        }
+        Map<String, HashMap<Long, List<BucketMetadata>>> publishedBucketsGroupedByCreationTime = Flux
+                .fromIterable(bucketedScoreProxy.getAllPublishedBucketsByEngineId(
+                        CustomerSpace.shortenCustomerSpace(customerSpace), ratingEngineId))
+                .filter(bucket -> bucket.getPublishedVersion() != null)
+                .collect(HashMap<String, HashMap<Long, List<BucketMetadata>>>::new, (returnMap, bucket) -> {
+                    if (!returnMap.containsKey(bucket.getModelSummaryId())) {
+                        returnMap.put(bucket.getModelSummaryId(), new HashMap<>());
+                    }
+
+                    if (!returnMap.get(bucket.getModelSummaryId()).containsKey(bucket.getCreationTimestamp())) {
+                        returnMap.get(bucket.getModelSummaryId()).put(bucket.getCreationTimestamp(), new ArrayList<>());
+                    }
+                    returnMap.get(bucket.getModelSummaryId()).get(bucket.getCreationTimestamp()).add(bucket);
+
+                }).block();
 
         RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
         return Flux.fromIterable(ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngineId))
                 .map(iteration -> (AIModel) iteration)
-                .filter(iteration -> !StringUtils.isEmpty(iteration.getModelSummaryId()))
+                .filter(iteration -> StringUtils.isNotEmpty(iteration.getModelSummaryId()))
                 .map(iteration -> new RatingModelWithPublishedHistoryDTO(iteration,
-                        bucketedScoreProxy.getABCDBucketsByModelGuid(customerSpace, iteration.getModelSummaryId())
-                /*
-                 * Flux.fromIterable(publishedBuckets) .filter(bucket ->
-                 * bucket.getModelSummary().getId()
-                 * .equals(iteration.getModelSummaryId()))
-                 * .collect(HashMap<Long, List<BucketMetadata>>::new,
-                 * (returnMap, bucket) -> { if
-                 * (!returnMap.containsKey(bucket.getCreationTimestamp() )) {
-                 * returnMap.put(bucket.getCreationTimestamp(), new
-                 * ArrayList<>()); }
-                 * returnMap.get(bucket.getCreationTimestamp()).add( bucket);
-                 * }).block()
-                 */)).collectList().block();
+                        publishedBucketsGroupedByCreationTime.get(iteration.getModelSummaryId())))
+                .collectList().block();
 
     }
 

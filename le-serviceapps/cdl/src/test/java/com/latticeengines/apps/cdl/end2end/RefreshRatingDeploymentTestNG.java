@@ -48,7 +48,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "LETest1525384230782";
+    private static final String EXISTING_TENANT = "JLM1533618545277";
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
@@ -293,6 +293,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         log.info("time is " + bucketMetadataHistory.keySet().toString());
         List<BucketMetadata> latestBucketedMetadata = bucketedScoreProxy
                 .getLatestABCDBucketsByEngineId(mainTestTenant.getId(), engineId);
+        latestBucketedMetadata.forEach(bucket -> Assert.assertEquals(bucket.getPublishedVersion().intValue(), 0));
         log.info("bucket metadata is " + JsonUtils.serialize(latestBucketedMetadata));
     }
 }

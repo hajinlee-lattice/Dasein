@@ -84,7 +84,7 @@ public abstract class RatingEngineTemplate {
             } else {
                 if (ratingEngine.getPublishedIteration() != null && ((AIModel) ratingEngine.getPublishedIteration())
                         .getModelingJobStatus() == JobStatus.COMPLETED) {
-                    List<BucketMetadata> bucketMetadataList = bucketedScoreProxy.getLatestABCDBucketsByModelGuid(
+                    List<BucketMetadata> bucketMetadataList = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(
                             tenantId, ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId());
                     bucketMetadataList = BucketedScoreSummaryUtils.sortBucketMetadata(bucketMetadataList, false);
                     ratingEngineSummary.setBucketMetadata(bucketMetadataList);

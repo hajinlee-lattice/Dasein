@@ -72,7 +72,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
 
-        // TODO: @kliu dataCloudBuildNumber has already been saved to DB in GenerateProcessingReport step.
+        // TODO: @kliu dataCloudBuildNumber has already been saved to DB in
+        // GenerateProcessingReport step.
         if (StringUtils.isNotBlank(configuration.getDataCloudBuildNumber())) {
             dataCollectionProxy.updateDataCloudBuildNumber(customerSpace.toString(),
                     configuration.getDataCloudBuildNumber());
@@ -176,6 +177,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                     request.setRatingEngineId(engineId);
                     request.setLastModifiedBy(configuration.getUserId());
                     request.setBucketMetadataList(bucketMetadata);
+                    request.setPublished(true);
                     bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
                 } else {
                     log.info("Updating bucket metadata for modelGUID=" + modelGuid + " : "
@@ -183,6 +185,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                     UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
                     request.setModelGuid(modelGuid);
                     request.setBucketMetadataList(bucketMetadata);
+                    request.setPublished(true);
                     bucketedScoreProxy.updateABCDBuckets(customerSpace.toString(), request);
                 }
             });

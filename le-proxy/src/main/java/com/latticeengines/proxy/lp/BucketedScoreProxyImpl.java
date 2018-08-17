@@ -66,6 +66,15 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     }
 
     @Override
+    public List<BucketMetadata> getPublishedBucketMetadataByModelGuid(String customerSpace, String modelSummaryId) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/bucketedscore/publishedbuckets/model/{modelSummaryId}",
+                shortenCustomerSpace(customerSpace), modelSummaryId);
+        List list = get("get up-to-date bucket metadata history for model", url, List.class);
+        return JsonUtils.convertList(list, BucketMetadata.class);
+    }
+
+    @Override
     public List<BucketMetadata> getLatestABCDBucketsByEngineId(String customerSpace, String engineId) {
         String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/uptodateabcdbuckets/engine/{engineId}",
                 shortenCustomerSpace(customerSpace), engineId);
@@ -73,9 +82,9 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     }
 
     @Override
-    public List<BucketMetadata> getAllBucketsByEngineId(String customerSpace, String engineId) {
+    public List<BucketMetadata> getAllPublishedBucketsByEngineId(String customerSpace, String engineId) {
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/ratingengines/{ratingEngineId}",
+                "/customerspaces/{customerSpace}/bucketedscore/publishedbuckets/ratingengines/{ratingEngineId}",
                 shortenCustomerSpace(customerSpace), engineId);
         return getList("get bucket metadata history for engine", url, BucketMetadata.class);
     }

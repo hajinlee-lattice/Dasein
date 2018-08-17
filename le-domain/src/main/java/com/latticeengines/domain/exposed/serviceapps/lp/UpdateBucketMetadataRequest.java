@@ -19,6 +19,9 @@ public class UpdateBucketMetadataRequest {
     @JsonProperty("BucketMetadataList")
     private List<BucketMetadata> bucketMetadataList;
 
+    @JsonProperty("IsPublished")
+    private boolean isPublished;
+
     public List<BucketMetadata> getBucketMetadataList() {
         return bucketMetadataList;
     }
@@ -35,4 +38,7 @@ public class UpdateBucketMetadataRequest {
         this.modelGuid = modelGuid;
     }
 
+    public boolean isPublished() { return isPublished; }
+
+    public void setPublished(boolean published) { isPublished = published; }
 }

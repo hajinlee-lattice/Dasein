@@ -22,11 +22,12 @@ public interface BucketedScoreProxy {
 
     List<BucketMetadata> getLatestABCDBucketsByEngineId(String customerSpace, String engineId);
 
-    List<BucketMetadata> getAllBucketsByEngineId(String customerSpace, String engineId);
+    List<BucketMetadata> getAllPublishedBucketsByEngineId(String customerSpace, String engineId);
 
     BucketedScoreSummary getBucketedScoreSummary(String customerSpace, String modelGuid);
 
     BucketedScoreSummary createOrUpdateBucketedScoreSummary(String customerSpace, String modelGuid,
             BucketedScoreSummary summary);
 
+    List<BucketMetadata> getPublishedBucketMetadataByModelGuid(String tenantId, String modelSummaryId);
 }
