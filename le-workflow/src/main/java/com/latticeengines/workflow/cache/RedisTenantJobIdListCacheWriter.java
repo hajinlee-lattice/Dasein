@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.workflow.JobListCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
@@ -19,19 +20,24 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component("tenantJobIdListCacheWriter")
 public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWriter {
 
-    private static final List<Class<? extends Throwable>> RETRY_EXCEPTIONS =
-            Collections.singletonList(RedisConnectionFailureException.class);
+    private static final Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTIONS = new HashMap<>();
     private static final String CACHE_KEY_PREFIX = CacheName.Constants.JobsCacheName;
     private static final String DELIMITER = ":";
     private static final String JOB_ID_LIST_KEY = "JOB_ID_LIST";
+
+    static {
+        RETRY_EXCEPTIONS.put(RedisConnectionFailureException.class, true);
+        RETRY_EXCEPTIONS.put(RedisSystemException.class, true);
+    }
 
     @Value("${proxy.retry.initialwaitmsec:500}")
     private long initialWaitMsec;

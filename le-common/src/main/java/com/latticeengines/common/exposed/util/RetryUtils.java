@@ -18,10 +18,8 @@ public class RetryUtils {
     }
 
     public static RetryTemplate getExponentialBackoffRetryTemplate(
-            int maxAttempts, long initialWaitMsec, double multiplier, List<Class<? extends Throwable>> retryExceptions) {
+            int maxAttempts, long initialWaitMsec, double multiplier, Map<Class<? extends Throwable>, Boolean> retryExceptionMap) {
         RetryTemplate template = new RetryTemplate();
-        Map<Class<? extends Throwable>, Boolean> retryExceptionMap = retryExceptions
-                .stream().collect(Collectors.toMap(e -> e, e -> true));
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(maxAttempts, retryExceptionMap, true);
         template.setRetryPolicy(retryPolicy);
         ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();

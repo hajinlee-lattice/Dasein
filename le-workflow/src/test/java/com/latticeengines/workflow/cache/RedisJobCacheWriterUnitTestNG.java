@@ -30,7 +30,7 @@ public class RedisJobCacheWriterUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setUp() {
         retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate(
-                MAX_ATTEMPTS, INITIAL_WAIT_MILLIS, MULTIPLIER, Collections.singletonList(Exception.class));
+                MAX_ATTEMPTS, INITIAL_WAIT_MILLIS, MULTIPLIER, Collections.singletonMap(Exception.class, true));
     }
 
     @Test(groups = "unit", dataProvider = "jobCacheProvider")

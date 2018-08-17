@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -148,6 +149,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Job job =  jobCacheService.getByWorkflowId(workflowId, includeDetails);
         checkExecutionId(Collections.singletonList(toWorkflowJob(job)));
         checkLastUpdateTime(Collections.singletonList(toWorkflowJob(job)));
+        if (!currentTenantHasAccess(job)) {
+            return null;
+        }
+        removeTenantInfo(job);
         return job;
     }
 
@@ -184,9 +189,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
-        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(
+        List<Job> jobs = workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(
                 reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails))
                 .collect(Collectors.toList());
+        jobs.forEach(this::removeTenantInfo);
+        return jobs;
     }
 
     @Override
@@ -199,6 +206,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             List<Job> jobs = jobCacheService.getByTenant(MultiTenantContext.getTenant(), includeDetails);
             checkExecutionId(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
             checkLastUpdateTime(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
+            jobs.forEach(this::removeTenantInfo);
             return jobs;
         } catch (Exception e) {
             log.error(String.format(
@@ -241,7 +249,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         List<Job> jobs = jobCacheService.getByWorkflowIds(workflowIds, includeDetails);
         checkExecutionId(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
         checkLastUpdateTime(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
-        return jobs;
+        return jobs.stream().filter(this::currentTenantHasAccess).collect(Collectors.toList());
     }
 
     @Override
@@ -406,6 +414,37 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         return workflowJobs;
+    }
+
+    /*
+     * determine whether current tenant has access to the target job
+     */
+    private boolean currentTenantHasAccess(Job job) {
+        if (MultiTenantContext.getTenant() == null || job == null) {
+            return true;
+        }
+
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (job.getTenantId() != null && !job.getTenantId().equals(tenant.getId())) {
+            return false;
+        }
+        if (job.getTenantPid() != null && !job.getTenantPid().equals(tenant.getPid())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /*
+     * remove tenant info added to the cache entry for authorization
+     */
+    private void removeTenantInfo(Job job) {
+        if (job == null) {
+            return;
+        }
+
+        job.setTenantPid(null);
+        job.setTenantId(null);
     }
 
     /*

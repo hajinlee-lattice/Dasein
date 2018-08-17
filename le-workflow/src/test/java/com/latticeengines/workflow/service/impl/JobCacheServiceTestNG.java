@@ -56,7 +56,7 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
     private ReportService reportService;
 
     private RetryTemplate retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate(
-            MAX_WAIT_ATTEMPTS, WAIT_INTERVALS, MULTIPLIER, Collections.singletonList(Exception.class));
+            MAX_WAIT_ATTEMPTS, WAIT_INTERVALS, MULTIPLIER, Collections.singletonMap(Exception.class, true));
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String timelineServiceUrl;

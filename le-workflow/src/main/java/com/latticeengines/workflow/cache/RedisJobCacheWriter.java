@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +31,16 @@ import java.util.stream.Stream;
 @Component("jobCacheWriter")
 public class RedisJobCacheWriter implements JobCacheWriter {
 
-    private static final List<Class<? extends Throwable>> RETRY_EXCEPTIONS =
-            Collections.singletonList(RedisConnectionFailureException.class);
+    private static final Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTIONS = new HashMap<>();
     private static final String CACHE_KEY_PREFIX = CacheName.Constants.JobsCacheName;
     private static final String DELIMITER = ":";
     private static final String DETAIL_KEY = "detail";
     private static final String UPDATE_TIME_KEY = "update_time";
+
+    static {
+        RETRY_EXCEPTIONS.put(RedisConnectionFailureException.class, true);
+        RETRY_EXCEPTIONS.put(RedisSystemException.class, true);
+    }
 
     private enum CacheType {
         WORKFLOW_ID

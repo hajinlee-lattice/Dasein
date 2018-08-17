@@ -380,8 +380,13 @@ public class JobCacheServiceImpl implements JobCacheService {
         // set tenant for report retrieval
         try {
             MultiTenantContext.setTenant(workflowJob.getTenant());
-            return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl,
+            Job job = WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl,
                     workflowJob, includeDeatils);
+            if (workflowJob.getTenant() != null) {
+                job.setTenantId(workflowJob.getTenant().getId());
+                job.setTenantPid(workflowJob.getTenant().getPid());
+            }
+            return job;
         } finally {
             // restore the value before
             MultiTenantContext.setTenant(prevTenant);

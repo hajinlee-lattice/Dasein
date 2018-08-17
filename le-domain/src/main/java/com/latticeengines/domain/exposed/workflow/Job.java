@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -40,6 +41,8 @@ public class Job implements HasId<Long>, HasName {
     private Integer numDisplayedSteps;
     private String note;
     private List<Job> subJobs;
+    private Long tenantPid;
+    private String tenantId;
 
     @JsonProperty
     public Long getPid() {
@@ -250,6 +253,30 @@ public class Job implements HasId<Long>, HasName {
             this.subJobs = new ArrayList<>();
         }
         this.subJobs.add(job);
+    }
+
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Long getTenantPid() {
+        return tenantPid;
+    }
+
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public void setTenantPid(Long tenantPid) {
+        this.tenantPid = tenantPid;
+    }
+
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override
