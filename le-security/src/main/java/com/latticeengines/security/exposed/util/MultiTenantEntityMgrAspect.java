@@ -83,6 +83,9 @@ public class MultiTenantEntityMgrAspect {
                     Filter filter = session.enableFilter("tenantFilter");
                     filter.setParameter("tenantFilterId", tenant.getPid());
                     log.debug("Turn on multi tenant filter: tenantId=" + tenant.getId());
+                } else {
+                    log.error("Session is null for tenant " + tenant.getId()
+                            + ", entityManager " + entityManager.getClass().getSimpleName());
                 }
             });
         }

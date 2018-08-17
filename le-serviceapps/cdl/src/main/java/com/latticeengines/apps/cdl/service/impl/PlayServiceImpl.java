@@ -458,6 +458,7 @@ public class PlayServiceImpl implements PlayService {
     public List<Play> findDependingPalys(List<String> attributes) {
         Set<Play> dependingPlays = new HashSet<>();
         if (attributes != null) {
+            log.info("getting play " + MultiTenantContext.getCustomerSpace());
             List<Play> plays = getAllPlays();
             if (plays != null) {
                 for (Play play : plays) {
