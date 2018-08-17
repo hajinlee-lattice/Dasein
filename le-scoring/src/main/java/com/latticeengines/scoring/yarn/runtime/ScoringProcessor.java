@@ -547,8 +547,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private void writeToErrorFile(CSVPrinter csvFilePrinter, String id, String errorMessage) throws IOException {
         if (StringUtils.isNotEmpty(errorMessage)) {
             if (!idColumnName.equals(InterfaceName.InternalId.name())) {
-                // csvFilePrinter.printRecord(idToInternalIdMap.get(id), id,
-                // errorMessage);
+                csvFilePrinter.printRecord("", id, errorMessage);
             } else {
                 csvFilePrinter.printRecord(id, "", errorMessage);
             }

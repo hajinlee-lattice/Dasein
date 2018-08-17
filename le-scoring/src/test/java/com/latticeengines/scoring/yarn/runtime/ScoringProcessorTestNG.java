@@ -243,7 +243,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(avrofiles.size(), 1);
         Assert.assertEquals(csvfiles.size(), 1);
         checkScoreAvro(avrofiles.get(0), withAttributes);
-        // checkErrorCSV(csvfiles.get(0));
+        checkErrorCSV(csvfiles.get(0));
     }
 
     private void checkScoreAvro(String path, boolean withAttributes) throws IllegalArgumentException, Exception {
