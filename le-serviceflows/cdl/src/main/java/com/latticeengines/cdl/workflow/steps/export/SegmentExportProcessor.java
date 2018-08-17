@@ -82,6 +82,8 @@ public abstract class SegmentExportProcessor {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
+    private String avroFilePath;
+
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     private List<Predefined> filterByPredefinedSelection = //
@@ -196,7 +198,8 @@ public abstract class SegmentExportProcessor {
             String avroPath = path + "avro/";
 
             try {
-                HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), avroPath + avroFileName);
+                avroFilePath = avroPath + avroFileName;
+                HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), avroFilePath);
             } finally {
                 FileUtils.deleteQuietly(localFile);
             }
@@ -406,5 +409,10 @@ public abstract class SegmentExportProcessor {
     @VisibleForTesting
     void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
         this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    }
+
+    @VisibleForTesting
+    public String getAvroFilePath() {
+        return avroFilePath;
     }
 }

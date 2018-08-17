@@ -147,6 +147,7 @@ public class TestPlayCreationHelper {
         tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
         MultiTenantContext.setTenant(tenant);
         log.info("Tenant = " + tenant.getId());
+        deploymentTestBed.switchToSuperAdmin(tenant);
     }
 
     public Tenant getTenant() {
@@ -691,6 +692,14 @@ public class TestPlayCreationHelper {
                     .and(new ArrayList<>()).build();
         }
         bucketInfo.put(key, info);
+    }
+
+    public GlobalAuthDeploymentTestBed getDeploymentTestBed() {
+        return deploymentTestBed;
+    }
+
+    public MetadataSegment getSegment() {
+        return segment;
     }
 
 }

@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,11 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
 
     @Override
     public void execute() {
+        execute(yarnConfiguration);
+    }
+
+    public void execute(Configuration yarnConfiguration) {
+
         SegmentExportStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
         String exportId = config.getMetadataSegmentExportId();
@@ -73,8 +79,8 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
             log.info(String.format("Processing accountRestriction: %s", JsonUtils.serialize(accountRestriction)));
             log.info(String.format("Processing contactRestriction: %s", JsonUtils.serialize(contactRestriction)));
 
-            segmentExportProcessorFactory.getProcessor(metadataSegmentExport.getType()).executeExportActivity(tenant,
-                    config, yarnConfiguration);
+            segmentExportProcessorFactory.getProcessor(metadataSegmentExport.getType()) //
+                    .executeExportActivity(tenant, config, yarnConfiguration);
 
             internalResourceRestApiProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.COMPLETED);
         } catch (Exception ex) {
@@ -91,5 +97,10 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
     @VisibleForTesting
     void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
         this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    }
+
+    @VisibleForTesting
+    void setSegmentExportProcessorFactory(SegmentExportProcessorFactory segmentExportProcessorFactory) {
+        this.segmentExportProcessorFactory = segmentExportProcessorFactory;
     }
 }
