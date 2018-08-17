@@ -26,7 +26,7 @@ angular.module('lp.models.ratings', [
   };
 })
 .controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore) {
+    ResourceUtility, Model, Notice, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore) {
 
     var vm = this;
     angular.extend(vm, {
@@ -356,18 +356,20 @@ angular.module('lp.models.ratings', [
             ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
                     RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE').then(function(result){
-                        vm.showSuccess = true;
                         vm.chartNotUpdated = true;
                         vm.updateContent = true;
                         vm.savingConfiguration = false;
+                        Notice.success({
+                            delay: 4000,
+                            title: 'Publish Configuration', 
+                            message: 'Your new ratings configuration has been published.'
+                        });
                         $rootScope.$broadcast('statusChange', { 
                             activeStatus: 'ACTIVE'
                         });
                         $timeout( function(){ 
                             vm.updateContent = false;
-                            vm.showSuccess = false;
-                            
-                        }, 200);
+                        }, 300);
                     });
                    
                 } else {
@@ -379,14 +381,17 @@ angular.module('lp.models.ratings', [
         } else {
             ModelRatingsService.CreateABCDBuckets(vm.modelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
-                    vm.showSuccess = true;
                     vm.chartNotUpdated = true;
                     vm.updateContent = true;
+                    Notice.success({
+                        delay: 4000,
+                        title: 'Publish Configuration', 
+                        message: 'Your new ratings configuration has been published.'
+                    });
                     $timeout( function(){ 
                         vm.updateContent = false;
-                        vm.showSuccess = false;
-                        
                     }, 200);
+                    
                 } else {
                     vm.savingConfiguration = false;
                     vm.createBucketsErrorMessage = result;
