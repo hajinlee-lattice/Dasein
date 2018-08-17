@@ -168,8 +168,10 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
     public Boolean deleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId, //
-            @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
-        ratingEngineService.deleteById(ratingEngineId, hardDelete);
+            @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete, //
+            @RequestParam(value = "action-initiator", required = false) String actionInitiator) {
+        log.info(String.format("Delete rating engine %s, action initiated by %s ", ratingEngineId, actionInitiator));
+        ratingEngineService.deleteById(ratingEngineId, hardDelete, actionInitiator);
         return true;
     }
 

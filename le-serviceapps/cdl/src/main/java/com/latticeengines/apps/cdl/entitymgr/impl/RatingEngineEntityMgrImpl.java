@@ -76,6 +76,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.apps.core.service.ActionService;
 
 @Component("ratingEngineEntityMgr")
 public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<RatingEngine, Long>
@@ -103,6 +104,9 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
 
     @Inject
     private PlayEntityMgr playEntityMgr;
+
+    @Inject
+    private ActionService actionService;
 
     @Override
     public BaseDao<RatingEngine> getDao() {
@@ -170,10 +174,10 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteById(String id, boolean hardDelete) {
+    public void deleteById(String id, boolean hardDelete, String actionInitiator) {
         checkFeasibilityForDelete(id);
-        setDeletionActionContext(findById(id));
         ratingEngineDao.deleteById(id, hardDelete);
+        registerDeleteAction(id, actionInitiator);
     }
 
     private void checkFeasibilityForDelete(String id) {
@@ -473,17 +477,18 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
         ActionContext.setAction(ratingEngineActivateAction);
     }
 
-    private void setDeletionActionContext(RatingEngine ratingEngine) {
-        log.info(String.format("Set Deletion Action Context for Rating Engine %s", ratingEngine.getId()));
+    private void registerDeleteAction(String ratingEngineId, String actionInitiator) {
+        log.info(String.format("Register Deletion Action for Rating Engine %s", ratingEngineId));
         Action ratingEngineDeletionAction = new Action();
         ratingEngineDeletionAction.setType(ActionType.RATING_ENGINE_CHANGE);
-        ratingEngineDeletionAction.setActionInitiator(ratingEngine.getCreatedBy());
+        ratingEngineDeletionAction.setActionInitiator(actionInitiator);
+        ratingEngineDeletionAction.setTenant(MultiTenantContext.getTenant());
         RatingEngineActionConfiguration reActionConfig = new RatingEngineActionConfiguration();
         ((ActionConfiguration) reActionConfig).setHiddenFromUI(true);
-        reActionConfig.setRatingEngineId(ratingEngine.getId());
+        reActionConfig.setRatingEngineId(ratingEngineId);
         reActionConfig.setSubType(RatingEngineActionConfiguration.SubType.DELETION);
         ratingEngineDeletionAction.setActionConfiguration(reActionConfig);
-        ActionContext.setAction(ratingEngineDeletionAction);
+        actionService.create(ratingEngineDeletionAction);
     }
 
     @VisibleForTesting

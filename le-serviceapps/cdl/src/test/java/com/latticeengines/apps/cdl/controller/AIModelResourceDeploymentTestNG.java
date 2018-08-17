@@ -51,6 +51,6 @@ public class AIModelResourceDeploymentTestNG extends AIModelServiceImplDeploymen
 
     @Override
     protected void deleteRatingEngine(RatingEngine ratingEngine) {
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), ratingEngine.getId(), true);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), ratingEngine.getId(), true, "test@lattice-engines.com");
     }
 }

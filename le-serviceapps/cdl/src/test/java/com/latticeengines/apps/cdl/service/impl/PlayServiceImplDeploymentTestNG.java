@@ -222,7 +222,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
 
         try {
-            ratingEngineService.deleteById(ratingEngine1.getId(), false);
+            ratingEngineService.deleteById(ratingEngine1.getId(), false, CREATED_BY);
             if (shouldPropagateDelete != Boolean.TRUE) {
                 Assert.fail("Should not be able to delete rating engine if non-deleted play exists");
             } else {

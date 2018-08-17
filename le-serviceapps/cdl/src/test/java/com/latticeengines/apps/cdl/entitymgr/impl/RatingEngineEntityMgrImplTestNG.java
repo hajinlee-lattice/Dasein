@@ -320,7 +320,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.createPlay(play);
         re = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
         try {
-            ratingEngineEntityMgr.deleteById(re.getId(), false);
+            ratingEngineEntityMgr.deleteById(re.getId(), false, CREATED_BY);
             Assert.fail("Should have thrown exeption due to the transition should fail");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -334,7 +334,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setDeleted(true);
         playEntityMgr.updatePlay(play, playEntityMgr.getPlayByName(play.getName(), false));
         try {
-            ratingEngineEntityMgr.deleteById(re.getId(), false);
+            ratingEngineEntityMgr.deleteById(re.getId(), false, CREATED_BY);
             Assert.fail("Should have thrown exeption due to the transition should fail");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -351,7 +351,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         re = ratingEngineEntityMgr.findById(ratingEngine.getId());
         // Soft Delete should now succeed
-        ratingEngineEntityMgr.deleteById(re.getId(), false);
+        ratingEngineEntityMgr.deleteById(re.getId(), false, CREATED_BY);
         RatingEngine retrievedRe = ratingEngineEntityMgr.findById(ratingEngine.getId());
         Assert.assertNotNull(retrievedRe);
         Assert.assertTrue(retrievedRe.getDeleted());
@@ -370,7 +370,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineList.size(), 0);
 
         // Soft Delete again
-        ratingEngineEntityMgr.deleteById(ratingEngine.getId(), false);
+        ratingEngineEntityMgr.deleteById(ratingEngine.getId(), false, CREATED_BY);
         retrievedRe = ratingEngineEntityMgr.findById(ratingEngine.getId());
         Assert.assertNotNull(retrievedRe);
         Assert.assertTrue(retrievedRe.getDeleted());
@@ -380,7 +380,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         re.setStatus(RatingEngineStatus.INACTIVE);
         ratingEngineEntityMgr.updateRatingEngine(re, ratingEngineEntityMgr.findById(aiRatingEngineId), false);
 
-        ratingEngineEntityMgr.deleteById(aiRatingEngineId, false);
+        ratingEngineEntityMgr.deleteById(aiRatingEngineId, false, CREATED_BY);
         retrievedRe = ratingEngineEntityMgr.findById(aiRatingEngineId);
         Assert.assertNotNull(retrievedRe);
         Assert.assertTrue(retrievedRe.getDeleted());
@@ -405,10 +405,8 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDeletion() {
-        ratingEngineEntityMgr.deleteById(ratingEngineId, true);
-        validateActionContext(ratingEngineId, RatingEngineActionConfiguration.SubType.DELETION);
-        ratingEngineEntityMgr.deleteById(aiRatingEngineId, true);
-        validateActionContext(aiRatingEngineId, RatingEngineActionConfiguration.SubType.DELETION);
+        ratingEngineEntityMgr.deleteById(ratingEngineId, true, CREATED_BY);
+        ratingEngineEntityMgr.deleteById(aiRatingEngineId, true, CREATED_BY);
 
         ratingEngineList = ratingEngineEntityMgr.findAll();
         Assert.assertNotNull(ratingEngineList);

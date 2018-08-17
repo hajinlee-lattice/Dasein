@@ -385,11 +385,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public void deleteById(String id) {
-        deleteById(id, true);
+        deleteById(id, true, null);
     }
 
     @Override
-    public void deleteById(String id, boolean hardDelete) {
+    public void deleteById(String id, boolean hardDelete, String actionInitiator) {
         checkFeasibilityForDelete(id);
         if (shouldPropagateDelete == Boolean.TRUE) {
             List<Play> relatedPlays = playService.getAllFullPlays(false, id);
@@ -397,7 +397,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 relatedPlays.forEach(p -> playService.deleteByName(p.getName(), hardDelete));
             }
         }
-        ratingEngineEntityMgr.deleteById(id, hardDelete);
+        ratingEngineEntityMgr.deleteById(id, hardDelete, actionInitiator);
         evictRatingMetadataCache();
     }
 

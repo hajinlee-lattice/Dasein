@@ -19,7 +19,7 @@ public interface RatingEngineEntityMgr extends BaseEntityMgrRepository<RatingEng
 
     RatingEngine findById(String id, boolean withActiveModel);
 
-    void deleteById(String id, boolean hardDelete);
+    void deleteById(String id, boolean hardDelete, String actionInitiator);
 
     void revertDelete(String id);
 

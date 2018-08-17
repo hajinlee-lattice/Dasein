@@ -174,7 +174,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
             segmentProxy.deleteSegmentByName(mainTestTenant.getId(), segmentName);
             Assert.fail("Should not be able to delete segment if rating engine is associated with it");
         } catch (Exception ex) {
-            ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), ratingEngineId, false);
+            ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), ratingEngineId, false, "test@lattice-engines.com");
             segmentProxy.deleteSegmentByName(mainTestTenant.getId(), segmentName);
         }
     }

@@ -206,7 +206,7 @@ public class RatingEngineResource {
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         Tenant tenant = MultiTenantContext.getTenant();
         try {
-            ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete);
+            ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete, MultiTenantContext.getEmailAddress());
         } catch (Exception ex) {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40042);
         }

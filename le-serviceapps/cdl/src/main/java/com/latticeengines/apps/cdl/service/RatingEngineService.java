@@ -50,7 +50,7 @@ public interface RatingEngineService {
 
     void deleteById(String id);
 
-    void deleteById(String id, boolean hardDelete);
+    void deleteById(String id, boolean hardDelete, String actionInitiator);
 
     void revertDelete(String id);
 

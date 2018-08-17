@@ -382,7 +382,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         // Soft Delete Rule Based Rating Engine
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), false);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), false, CREATED_BY);
         List<RatingEngine> ratingEngineList = ratingEngineProxy.getAllDeletedRatingEngines(mainTestTenant.getId());
         Assert.assertEquals(ratingEngineList.size(), 1);
 
@@ -392,8 +392,8 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(ratingEngineList.size(), 0);
 
         // Soft Delete Rule Based Rating Engine & AI Rating Engine
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), false);
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId(), false);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), false, CREATED_BY);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId(), false, CREATED_BY);
         RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re1.getId());
         Assert.assertTrue(ratingEngine.getDeleted());
         ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re2.getId());
@@ -406,8 +406,8 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
 
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), true);
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId(), true);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), true, CREATED_BY);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId(), true, CREATED_BY);
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId());
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);

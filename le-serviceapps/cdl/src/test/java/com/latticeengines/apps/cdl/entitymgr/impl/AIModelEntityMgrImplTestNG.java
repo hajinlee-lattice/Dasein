@@ -197,7 +197,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateIteration" })
     public void testDelete() {
-        ratingEngineEntityMgr.deleteById(crossSellratingEngine.getId(), true);
+        ratingEngineEntityMgr.deleteById(crossSellratingEngine.getId(), true, CREATED_BY);
         crossSellAIModel = aiModelEntityMgr.findById(crossSellAIModel.getId());
         Assert.assertNull(crossSellAIModel, "AIModel is not deleted");
     }
@@ -258,7 +258,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateSegmentNullCustomEvent" })
     public void testDeleteCustomEvent() {
-        ratingEngineEntityMgr.deleteById(customEventRatingEngine.getId(), true);
+        ratingEngineEntityMgr.deleteById(customEventRatingEngine.getId(), true, CREATED_BY);
         customEventAIModel = aiModelEntityMgr.findById(customEventAIModel.getId());
         Assert.assertNull(customEventAIModel, "AIModel is not deleted");
     }
