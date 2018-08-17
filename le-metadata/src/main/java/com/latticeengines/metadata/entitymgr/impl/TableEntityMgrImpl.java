@@ -241,7 +241,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         newExtract.setName(NamingUtils.uuid("Extract"));
         AtomicLong count = new AtomicLong(0);
         if (existing.getExtracts() != null && existing.getExtracts().size() > 0) {
-            existing.getExtracts().forEach(extract -> {
+            for (int i = 0; i < existing.getExtracts().size(); i++) {
+                Extract extract = existing.getExtracts().get(i);
                 String srcPath = extract.getPath();
                 boolean singleFile = false;
                 if (!srcPath.endsWith("*.avro")) {
@@ -253,12 +254,26 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     }
                 }
                 try {
+                    // Multiple extracts could contain files with same name. We
+                    // need to rename to avoid copy failure due to name conflict
+                    String renameSuffix = existing.getExtracts().size() > 1 ? "_" + String.valueOf(i) : null;
                     if (singleFile) {
                         log.info(String.format("Copying table data from %s to %s", srcPath, cloneTable));
                         HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneTable);
+                        if (existing.getExtracts().size() > 1) {
+                            String fileName = new org.apache.hadoop.fs.Path(srcPath).getName();
+                            String rename = HdfsUtils.appendSuffixToFileName(fileName, renameSuffix);
+                            HdfsUtils.rename(yarnConfiguration,
+                                    new org.apache.hadoop.fs.Path(cloneTable, fileName).toString(),
+                                    new org.apache.hadoop.fs.Path(cloneTable, rename).toString());
+                            log.info(String.format(
+                                    "Rename file %s to %s to avoid potential name conflict for files in multiple extracts",
+                                    new org.apache.hadoop.fs.Path(cloneTable, fileName).toString(),
+                                    new org.apache.hadoop.fs.Path(cloneTable, rename).toString()));
+                        }
                     } else {
                         log.info(String.format("Copying table data as glob from %s to %s", srcPath, cloneTable));
-                        HdfsUtils.copyGlobToDir(yarnConfiguration, srcPath, cloneTable);
+                        HdfsUtils.copyGlobToDir(yarnConfiguration, srcPath, cloneTable, renameSuffix);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", srcPath,
@@ -268,7 +283,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 if (extract.getProcessedRecords() != null && extract.getProcessedRecords() > 0) {
                     count.addAndGet(extract.getProcessedRecords());
                 }
-            });
+            }
         }
         newExtract.setProcessedRecords(count.get());
         newExtract.setExtractionTimestamp(System.currentTimeMillis());

@@ -22,6 +22,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.crypto.key.KeyProvider;
 import org.apache.hadoop.crypto.key.KeyProviderFactory;
@@ -601,15 +602,30 @@ public class HdfsUtils {
         }
     }
 
-    public static void copyGlobToDir(Configuration configuration, String sourceGlob, String targetDir)
-            throws IOException {
+    public static void copyGlobToDir(Configuration configuration, String sourceGlob, String targetDir,
+            String tgtNameSuffix) throws IOException {
         if (!isDirectory(configuration, targetDir)) {
             mkdir(configuration, targetDir);
         }
         for (String filePath : getFilesByGlob(configuration, sourceGlob)) {
             String fileName = new Path(filePath).getName();
+            fileName = appendSuffixToFileName(fileName, tgtNameSuffix);
             copyFiles(configuration, filePath, new Path(targetDir, fileName).toString());
         }
+    }
+
+    public static String appendSuffixToFileName(String fileName, String suffix) {
+        if (StringUtils.isBlank(suffix)) {
+            return fileName;
+        }
+        if (StringUtils.isEmpty(fileName)) {
+            return suffix;
+        }
+        if (!fileName.contains(".")) {
+            return fileName + suffix;
+        }
+        int dotIndex = fileName.indexOf(".");
+        return fileName.substring(0, dotIndex) + suffix + fileName.substring(dotIndex);
     }
 
     public static FileChecksum getCheckSum(Configuration configuration, String path) throws IOException {

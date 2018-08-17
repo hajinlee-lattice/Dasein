@@ -7,8 +7,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.tools.DistCpOptions;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -48,4 +49,24 @@ public class HdfsUtilsUnitTestNG {
 
         AvroUtils.iterator(yarnConfiguration, tgtDir + "/*.avro").forEachRemaining(System.out::println);
     }
+
+    @Test(groups = "unit", dataProvider = "FileNameAndSuffix", enabled = true)
+    public void testAppendSuffixToFileName(String fileName, String suffix, String expected) {
+        Assert.assertEquals(HdfsUtils.appendSuffixToFileName(fileName, suffix), expected);
+    }
+
+    @DataProvider(name = "FileNameAndSuffix")
+    private Object[][] fileNameAndSuffix() {
+        return new Object[][] {
+                { "A.avro", "B", "AB.avro" }, //
+                { "A", "B", "AB" }, //
+                { "A.", "B", "AB." }, //
+                { ".avro", "B", "B.avro" }, //
+                { "A.csv.gz", "B", "AB.csv.gz" }, //
+                { ".", "B", "B." }, //
+                { "A.avro", null, "A.avro" }, //
+                { "", "B", "B" }, //
+                { null, "B", "B" }, //
+        };
+    };
 }

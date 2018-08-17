@@ -4,7 +4,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,20 +16,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.ldap.control.PagedResultsRequestControl;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
-
-import parquet.filter.PagedRecordFilter;
 
 public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
     
@@ -106,6 +109,25 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "addStorageMechanism" })
+    public void cloneTable() throws IOException {
+        Table cloned = mdService.cloneTable(CustomerSpace.parse(customerSpace1), TABLE1);
+        assertNotNull(cloned);
+        List<Extract> extracts = cloned.getExtracts();
+        Assert.assertNotNull(extracts);
+        Assert.assertEquals(extracts.size(), 1);
+        Extract extract = extracts.get(0);
+        List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, extract.getPath());
+        Assert.assertNotNull(files);
+        Assert.assertEquals(files.size(), 2);
+        String[] expected = { "Extract1_0.avro", "Extract2_1.avro" };
+        Set<String> expectedSet = new HashSet<>(Arrays.asList(expected));
+        files.forEach(file -> {
+            String fileName = new org.apache.hadoop.fs.Path(file).getName();
+            Assert.assertTrue(expectedSet.contains(fileName));
+        });
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "cloneTable" })
     public void renameTable() {
         Table table = mdService.getTable(CustomerSpace.parse(customerSpace1), TABLE1, true);
         assertNotNull(table);
@@ -114,7 +136,7 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         Table newTable = mdService.getTable(CustomerSpace.parse(customerSpace1), newName, true);
         assertEquals(newTable.getPid(), table.getPid());
     }
-    
+
     @DataProvider(name = "tableProvider")
     public Object[][] tableProvider() {
         return new Object[][] { {customerSpace1, TABLE1 }, {customerSpace2, TABLE1 }, };
