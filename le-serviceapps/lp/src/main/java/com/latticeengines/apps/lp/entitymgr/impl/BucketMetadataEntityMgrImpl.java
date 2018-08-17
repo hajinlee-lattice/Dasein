@@ -96,7 +96,6 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<BucketMetadata> getUpToDateBucketMetadatasForEngineFromReader(String engineId) {
         RatingEngine ratingEngine = ratingEngineRepository.findById(engineId);
-
         AIModel aiModel = aiModelRepostiry.findByPid(ratingEngine.getLatestIteration().getPid());
         return getUpToDateBucketMetadatasForModelFromReader(aiModel.getModelSummaryId());
     }

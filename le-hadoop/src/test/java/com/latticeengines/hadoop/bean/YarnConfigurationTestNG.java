@@ -70,6 +70,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "functional")
     public void testS3DistCp() throws Exception {
+        // from hdfs to s3
         List<Pair<String, Class<?>>> columns = ImmutableList.of( //
                 Pair.of("Id", Integer.class), //
                 Pair.of("Value", String.class)
@@ -83,27 +84,47 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         AvroUtils.uploadAvro(yarnConfiguration, data, columns, "test", srcDir);
         Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
 
-        String tgtDir = leStack + "/HdfsUtilsTest/output";
-        String s3Uri = "s3n://" + s3Bucket + "/" + tgtDir;
+        String tgtDir = "/" + leStack + "/HdfsUtilsTest/output";
         if (s3Service.isNonEmptyDirectory(s3Bucket, tgtDir)) {
             s3Service.cleanupPrefix(s3Bucket, tgtDir);
         }
         Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
 
+        // copy to unencrypted folder first
+        String tgtDirUnenctyped = tgtDir + "_unencrypted";
+        if (s3Service.isNonEmptyDirectory(s3Bucket, tgtDirUnenctyped)) {
+            s3Service.cleanupPrefix(s3Bucket, tgtDirUnenctyped);
+        }
+        Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDirUnenctyped));
+        String s3Uri = "s3n://" + s3Bucket + tgtDirUnenctyped;
+
         // demo overwrite aws key and secret
         Properties properties = new Properties();
+        properties.setProperty("mapreduce.job.user.classpath.first", "true");
         properties.setProperty("fs.s3n.awsAccessKeyId", awsKey);
         properties.setProperty("fs.s3n.awsSecretAccessKey", awsSecret);
         Configuration configuration = ConfigurationUtils.createFrom(yarnConfiguration, properties);
         HdfsUtils.distcp(configuration, srcDir, s3Uri, "default");
-        Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, s3Uri));
 
+        // move to encrypted folder with kms key
+        String kmsKey = "0e9daa04-1400-4e55-88c5-b238a9d01721";
+        s3Service.changeKeyRecursive(s3Bucket, tgtDirUnenctyped, tgtDir, kmsKey);
+        s3Service.cleanupPrefix(s3Bucket, tgtDirUnenctyped);
+
+        // assert HDFS to S3 copy: reading does not need ams key
+        Assert.assertTrue(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
+        Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDirUnenctyped));
         InputStream is = s3Service.readObjectAsStream(s3Bucket, tgtDir + "/test.avro");
         AvroUtils.readFromInputStream(is).forEach(System.out::println);
 
+        // reverse copy -- also need unencrypted staging
         HdfsUtils.rmdir(yarnConfiguration, srcDir);
         Assert.assertFalse(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
+        // staging to default key
+        s3Service.changeKeyRecursive(s3Bucket, tgtDir, tgtDirUnenctyped, "");
         HdfsUtils.distcp(yarnConfiguration, s3Uri, srcDir, "default");
+        // delete staging
+        s3Service.cleanupPrefix(s3Bucket, tgtDirUnenctyped);
         Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
         AvroUtils.iterator(yarnConfiguration, srcDir + "/*.avro").forEachRemaining(System.out::println);
     }

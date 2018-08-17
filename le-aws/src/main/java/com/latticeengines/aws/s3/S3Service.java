@@ -27,4 +27,6 @@ public interface S3Service {
     boolean objectExist(String bucket, String object);
 
     boolean isNonEmptyDirectory(String bucket, String prefix);
+
+    void changeKeyRecursive(String bucket, String srcFolder, String tgtFolder, String keyId);
 }
