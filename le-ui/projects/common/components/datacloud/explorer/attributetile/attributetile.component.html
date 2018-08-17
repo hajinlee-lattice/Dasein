@@ -87,8 +87,8 @@
                             && enrichment.Entity === 'Rating'"
                         vm='vm'    
                         statcount="statcount = vm.getAttributeRules(enrichment, stat).length"
-                        config="vm.getChartConfig(vm.bktlist)" 
-                        bktlist="vm.bktlist"
+                        config="vm.getChartConfig(vm.getBktListRating(enrichment))" 
+                        bktlist="vm.getBktListRating(enrichment)"
                         callback="vm.chartRowClicked"
                         enrichment="enrichment">
         </bar-chart>

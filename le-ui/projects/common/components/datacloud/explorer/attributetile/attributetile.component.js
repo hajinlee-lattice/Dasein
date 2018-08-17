@@ -205,6 +205,10 @@ angular
                 }
 
                 vm.NumberUtility = NumberUtility;
+
+                vm.getBktListRating = function(enrichment){
+                    return vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List;
+                }
             }
         };
     });
