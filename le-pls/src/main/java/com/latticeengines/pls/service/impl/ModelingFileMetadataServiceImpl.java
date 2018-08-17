@@ -172,6 +172,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         resolveMetadata(sourceFile, fieldMappingDocument, table, true);
     }
 
+    @Override
+    public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName, boolean checkHeaderFormat) {
+        return validateHeaderFields(stream, leCsvParser, fileName, checkHeaderFormat, false);
+    }
+
     private void decodeFieldMapping(FieldMappingDocument fieldMappingDocument) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null) {
             return;
@@ -334,7 +339,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
-            String fileDisplayName, boolean checkHeaderFormat) {
+            String fileDisplayName, boolean checkHeaderFormat, boolean withCDLHeader) {
 
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -354,8 +359,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForLongHeaders(headerFields);
-        Collection<String> reservedWords = Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName);
-        Collection<String> reservedBeginings = Arrays.asList(DataCloudConstants.CEAttr, DataCloudConstants.EAttr);
+        Collection<String> reservedWords = new ArrayList<>(Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName));
+        Collection<String> reservedBeginings = new ArrayList<>(Arrays.asList(DataCloudConstants.CEAttr, DataCloudConstants.EAttr));
+        if (withCDLHeader) {
+            reservedWords.addAll(ValidateFileHeaderUtils.CDL_RESERVED_FIELDS);
+            reservedBeginings.addAll(ValidateFileHeaderUtils.CDL_RESERVED_PREFIX);
+        }
         ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords,
                 reservedBeginings);
         return stream;

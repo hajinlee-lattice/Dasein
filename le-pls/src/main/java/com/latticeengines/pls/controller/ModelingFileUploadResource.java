@@ -206,7 +206,7 @@ public class ModelingFileUploadResource {
             }
 
             stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, csvFileName,
-                    checkHeaderFormat);
+                    checkHeaderFormat, !StringUtils.isEmpty(entity));
             if (!StringUtils.isEmpty(entity)) {
                 schemaInterpretation = SchemaInterpretation.getByName(entity);
             }

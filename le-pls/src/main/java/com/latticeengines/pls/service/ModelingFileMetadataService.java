@@ -26,6 +26,9 @@ public interface ModelingFileMetadataService {
     InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser,
             String fileName, boolean checkHeaderFormat);
 
+    InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser,
+                                     String fileName, boolean checkHeaderFormat, boolean withCDLHeader);
+
     Map<SchemaInterpretation, List<LatticeSchemaField>> getSchemaToLatticeSchemaFields(
             boolean excludeLatticeDataAttributes);
 
