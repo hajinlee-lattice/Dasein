@@ -2,9 +2,9 @@ angular.module('lp.segments.segments', [
     'mainApp.segments.modals.DeleteSegmentModal',
     'lp.tile.edit'
 ])
-.controller('SegmentationListController', function ($q, $scope, $element, $state, $stateParams,
+.controller('SegmentationListController', function ($q, $scope, $rootScope, $element, $state, $stateParams,
     SegmentsList, Enrichments, Cube, DeleteSegmentModal, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
-    DataCloudStore, LookupResponse, LookupStore, PercentStore
+    DataCloudStore, LookupResponse, LookupStore, PercentStore, AttrConfigStore
 ) {
     var vm = this;
 
@@ -176,11 +176,33 @@ angular.module('lp.segments.segments', [
     }
 
 
+    $rootScope.$on('tileEditSegment:ok', function(e) {
+        var tileState = vm.tileStates[vm.lastClickedSegment.name];
+        tileState.showCustomMenu = false;
+        tileState.editSegment = true;
+        tileState.loading = false;
+    });
+
+    $rootScope.$on('tileEditSegment:cancel', function(e) {
+        var tileState = vm.tileStates[vm.lastClickedSegment.name];
+        tileState.showCustomMenu = false;
+        tileState.editSegment = false;
+        tileState.loading = false;
+    });
+
     vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
         var tileState = vm.tileStates[segment.name];
-        tileState.showCustomMenu = !tileState.showCustomMenu;
-        tileState.editSegment = !tileState.editSegment;
+        tileState.loading = true;
+        SegmentService.GetSegmentDependenciesModelView(segment.name, 'SegmentStore.modalSetTileEditSegment').then(function(result) {
+            vm.lastClickedSegment = segment;
+            tileState.loading = false;
+            var config = result.UIAction;
+            if(config.view === 'Notice' && config.status === 'Success') {
+                tileState.showCustomMenu = !tileState.showCustomMenu;
+                tileState.editSegment = !tileState.editSegment;
+            }
+        });
     };
 
     vm.nameChanged = function(segment) {

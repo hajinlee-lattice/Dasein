@@ -918,14 +918,14 @@ angular.module('lp.ratingsengine')
             RatingsEngineService.validateModel(ratingId, modelAIId).then(function(result) {
                 var success = !result.data.errorCode;
                 if(success) {
-                    RatingsEngineStore.nextSaveAIRatingModel(nextState);
+                    RatingsEngineStore.nextSaveAIRatingModel(nextState, true);
                 }
             });
         });
 
     }
 
-    this.nextSaveAIRatingModel = function(nextState){
+    this.nextSaveAIRatingModel = function(nextState, validate){
         var ratingId = $stateParams.rating_id;
 
         RatingsEngineStore.getRating(ratingId).then(function(rating){
@@ -964,18 +964,35 @@ angular.module('lp.ratingsengine')
                 var route = nextState,
                     lastRoute = route.split(/[\.]+/);
 
-                if (lastRoute[lastRoute.length-1] === 'creation') {
-                    // console.log("Model Updated & Launch", model);
-                    RatingsEngineStore.nextLaunchAIModel(nextState, model);
+                if(validate) {
+                    RatingsEngineService.validateModel(ratingId, obj.AI.id).then(function(result) {
+                        var success = !result.data.errorCode;
+                        if(success) {
+                            if (lastRoute[lastRoute.length-1] === 'creation') {
+                                // console.log("Model Updated & Launch", model);
+                                RatingsEngineStore.nextLaunchAIModel(nextState, model);
+                            } else {
+                                // console.log("Model Updated", model);
+                                if(nextState) {
+                                    $state.go(nextState, { rating_id: ratingId });
+                                }
+                            }
+                        }
+                    });
                 } else {
-                    // console.log("Model Updated", model);
-                    if(nextState) {
-                        $state.go(nextState, { rating_id: ratingId });
+                    if (lastRoute[lastRoute.length-1] === 'creation') {
+                        // console.log("Model Updated & Launch", model);
+                        RatingsEngineStore.nextLaunchAIModel(nextState, model);
+                    } else {
+                        // console.log("Model Updated", model);
+                        if(nextState) {
+                            $state.go(nextState, { rating_id: ratingId });
+                        }
                     }
                 }
+
             });
         });
-        
     }
 
     this.setAvailableFields = function(availableFields) {

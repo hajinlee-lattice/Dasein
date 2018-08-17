@@ -1,9 +1,11 @@
 angular
 .module('lp.segments.segments')
-.service('SegmentStore', function($q, SegmentService) {
+.service('SegmentStore', function($q, $rootScope, SegmentService) {
     var SegmentStore = this;
 
     this.segments = [];
+    this.tileEditSegment = false;
+
 
     this.setSegments = function(segments) {
         this.segments = segments;
@@ -11,6 +13,20 @@ angular
 
     this.getSegments = function() {
         return this.segments;
+    }
+
+    this.modalSetTileEditSegment = function(config) {
+        SegmentStore.setTileEditSegment((config.action === 'ok'));
+        $rootScope.$broadcast('tileEditSegment:'+config.action);
+        return true;
+    }
+
+    this.setTileEditSegment = function(bool) {
+        this.tileEditSegment = bool;
+    }
+
+    this.getTileEditSegment = function() {
+        return this.tileEditSegment;
     }
 
     this.flattenSegmentRestrictions = function(segment) {
@@ -313,7 +329,7 @@ angular
     this.DeleteSegment = function(segmentName) {
         var deferred = $q.defer(),
             result = {},
-            url = '/pls/datacollection/segments/' + segmentName;
+            url = '/pls/datacollection/segments/' + segmentName + '/modelAndView';
 
         $http({
             method: 'DELETE',
@@ -489,6 +505,33 @@ angular
         return deferred.promise;
     }        
 
+    this.GetSegmentDependenciesModelView = function(segmentId, errorDisplayCallback) {
+        var deferred = $q.defer(),
+            result,
+            url = '/pls/datacollection/segments/' + segmentId + '/dependencies/modelAndView';
 
+        $http({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Accept': 'application/json',
+                'ErrorDisplayCallback': errorDisplayCallback
+            }
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+                
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
 
 });

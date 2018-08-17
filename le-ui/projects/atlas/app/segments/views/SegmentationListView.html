@@ -35,7 +35,10 @@
                     ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null"
                 >
                     <div class="tile-header" ng-if="!vm.tileStates[segment.name].editSegment">
-                        <h2 title="{{segment.display_name}}">{{segment.display_name | limitTo: 44 }}{{segment.display_name.length > 44 ? '&hellip;' : ''}}</h2>
+                        <h2 title="{{segment.display_name}}">
+                            {{segment.display_name | limitTo: 44 }}{{segment.display_name.length > 44 ? '&hellip;' : ''}}
+                            <i class="fa fa-spinner fa-pulse fa-fw" ng-if="vm.tileStates[segment.name].loading"></i>
+                        </h2>
                         <div class="edit" ng-if="!segment.is_master_segment">
                             <button
                                     type="button"

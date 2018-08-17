@@ -18,7 +18,10 @@ angular.module('mainApp.login.services.LoginService', [
         $http({
             method: 'POST',
             url: '/pls/login',
-            data: params
+            data: params,
+            headers: {
+                'ErrorDisplayMethod': 'none'
+            }
          }).then(
             function onSuccess(response) {
                 console.log('BACK Again');

@@ -32,7 +32,12 @@ angular.module('lp.ratingsengine.remodel', [
                                 RatingsEngineService.validateModel(ratingId, modelId).then(function(result) {
                                     var success = !result.data.errorCode;
                                     if(success) {
-                                        $state.go(nextState);
+                                        RatingsEngineService.validateModel(ratingId, modelId).then(function(result) {
+                                            var success = !result.data.errorCode;
+                                            if(success) {
+                                                $state.go(nextState);
+                                            }
+                                        });
                                     }
                                 });
                             }, 
