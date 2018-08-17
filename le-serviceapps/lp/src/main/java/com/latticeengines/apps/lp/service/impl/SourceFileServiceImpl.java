@@ -1,5 +1,6 @@
 package com.latticeengines.apps.lp.service.impl;
 
+import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
@@ -84,6 +85,11 @@ public class SourceFileServiceImpl implements SourceFileService {
                 copySourceFile(request.getTargetTable(), originalSourceFile, targetTenant);
             }
         }
+    }
+
+    @Override
+    public List<SourceFile> findAllSourceFiles() {
+        return sourceFileEntityMgr.findAllSourceFiles();
     }
 
     private void copySourceFile(String tableName, SourceFile originalSourceFile, Tenant targetTenant) {

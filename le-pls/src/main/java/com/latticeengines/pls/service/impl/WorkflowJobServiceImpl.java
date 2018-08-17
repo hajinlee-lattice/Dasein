@@ -58,6 +58,7 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -96,6 +97,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -496,13 +500,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     private void updateAllJobs(List<Job> jobs) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
-        List<ModelSummary> modelSummaries = modelSummaryService.getModelSummaries("all");
+        List<ModelSummary> modelSummaries = modelSummaryProxy.getModelSummaries(customerSpace.toString(), "all");
         for (ModelSummary modelSummary : modelSummaries) {
             modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
         }
 
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         boolean hasCG = batonService.hasProduct(customerSpace, LatticeProduct.CG);
         Map<String, RatingEngineSummary> ratingIdToRatingEngineSummaries = new HashMap<>();
         if (hasCG) {

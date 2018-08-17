@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -356,11 +357,21 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             summaries = modelSummaryEntityMgr.findAllValid();
         }
 
+        List<SourceFile> sourceFiles = sourceFileService.findAllSourceFiles();
+        Set<String> trainingTableNames = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(sourceFiles)) {
+            for (SourceFile file : sourceFiles) {
+                if (file.getTableName() != null && !file.getTableName().isEmpty()) {
+                    trainingTableNames.add(file.getTableName());
+                }
+            }
+        }
+
         for (ModelSummary summary : summaries) {
             summary.setPredictors(new ArrayList<>());
             summary.setDetails(null);
             getModelSummaryHasRating(summary);
-            getModelSummaryTrainingFileState(summary);
+            getModelSummaryTrainingFileState(summary, trainingTableNames);
         }
         return summaries;
     }
@@ -375,6 +386,14 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             } else {
                 summary.setTrainingFileExist(true);
             }
+        }
+    }
+
+    private void getModelSummaryTrainingFileState(ModelSummary summary, Set<String> trainingTableNames) {
+        if (summary.getTrainingTableName() == null || summary.getTrainingTableName().isEmpty()) {
+            summary.setTrainingFileExist(false);
+        } else {
+            summary.setTrainingFileExist(trainingTableNames.contains(summary.getTrainingTableName()));
         }
     }
 

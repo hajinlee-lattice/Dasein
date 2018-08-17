@@ -2,9 +2,11 @@ package com.latticeengines.proxy.lp;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -27,10 +29,10 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
     }
 
     @Override
-    public ModelSummary getModelSummaryById(String customerSpace, String modelSummaryId) {
-        String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/{modelSummaryId}",
-                shortenCustomerSpace(customerSpace), modelSummaryId);
-        return get("set model summary download flag", url, ModelSummary.class);
+    public ModelSummary getModelSummaryByModelId(String customerSpace, String modelId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/getmodelsummarybymodelid/{modelSummaryId}",
+                shortenCustomerSpace(customerSpace), modelId);
+        return get("get model summary by model id", url, ModelSummary.class);
     }
 
     @Override
@@ -54,7 +56,7 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, ModelSummary> getEventToModelSummary(String customerSpace,
-            Map<String, String> modelApplicationIdToEventColumn) {
+                                                            Map<String, String> modelApplicationIdToEventColumn) {
         String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/geteventtomodelsummary",
                 shortenCustomerSpace(customerSpace));
 
@@ -64,5 +66,25 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
             res = JsonUtils.convertMap(resObj, String.class, ModelSummary.class);
         }
         return res;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<ModelSummary> getModelSummaries(String customerSpace, String selection) {
+        String baseUrl = "/customerspaces/{customerSpace}/modelsummaries";
+        String url = parseOptionalParameter(baseUrl, "selection", selection);
+        url = constructUrl(url, shortenCustomerSpace(customerSpace));
+
+        List<?> res = get("get model summaries", url, List.class);
+        return JsonUtils.convertList(res, ModelSummary.class);
+
+    }
+
+    String parseOptionalParameter(String baseUrl, String parameterName, String parameterValue) {
+        if (StringUtils.isNotEmpty(parameterValue)) {
+            return String.format(baseUrl + "?%s=%s", parameterName, parameterValue);
+        } else {
+            return baseUrl;
+        }
     }
 }

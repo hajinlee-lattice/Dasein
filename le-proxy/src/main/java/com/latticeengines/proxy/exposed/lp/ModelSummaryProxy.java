@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.lp;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -8,7 +9,7 @@ public interface ModelSummaryProxy {
 
     void setDownloadFlag(String customerSpace);
 
-    ModelSummary getModelSummaryById(String customerSpace, String modelSummaryId);
+    ModelSummary getModelSummaryByModelId(String customerSpace, String modelId);
 
     // List<?> getActiveModelSummaries(CustomerSpace customerSpace);
     //
@@ -33,4 +34,6 @@ public interface ModelSummaryProxy {
 
     Map<String, ModelSummary> getEventToModelSummary(String customerSpace,
             Map<String, String> modelApplicationIdToEventColumn);
+
+    List<ModelSummary> getModelSummaries(String customerSpace, String selection);
 }

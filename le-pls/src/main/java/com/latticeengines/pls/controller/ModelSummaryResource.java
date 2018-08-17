@@ -35,6 +35,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelAlertService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -72,6 +73,9 @@ public class ModelSummaryResource {
     @Autowired
     private TenantService tenantService;
 
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
+
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
@@ -91,7 +95,7 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Get list of model summary ids available to the user")
     public List<ModelSummary> getModelSummaries(@RequestParam(value = "selection", required = false) String selection) {
-        return modelSummaryService.getModelSummaries(selection);
+        return modelSummaryProxy.getModelSummaries(MultiTenantContext.getShortTenantId(), selection);
     }
 
     @RequestMapping(value = "/updated/{timeframe}", method = RequestMethod.GET, headers = "Accept=application/json")

@@ -1,5 +1,6 @@
 package com.latticeengines.apps.lp.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -11,11 +12,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -34,9 +36,6 @@ public class ModelSummaryResource {
     private ModelSummaryDownloadFlagEntityMgr downloadFlagEntityMgr;
 
     @Inject
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Inject
     private ModelSummaryService modelSummaryService;
 
     @PostMapping("/downloadflag")
@@ -48,11 +47,11 @@ public class ModelSummaryResource {
         downloadFlagEntityMgr.addDownloadFlag(customerSpace);
     }
 
-    @GetMapping("/{modelSummaryId}")
+    @GetMapping("/getmodelsummarybymodelid/{modelSummaryId}")
     @ResponseBody
     @ApiOperation(value = "Get a model summary by the given momdel summary id")
-    public ModelSummary setDownloadFlag(@PathVariable String customerSpace, @PathVariable String modelSummaryId) {
-        return modelSummaryEntityMgr.getByModelId(modelSummaryId);
+    public ModelSummary getModelSummaryByModelId(@PathVariable String customerSpace, @PathVariable String modelSummaryId) {
+        return modelSummaryService.getModelSummaryByModelId(modelSummaryId);
     }
 
     @PostMapping("/downloadmodelsummary")
@@ -61,7 +60,6 @@ public class ModelSummaryResource {
     public Boolean downloadModelSummary(@PathVariable String customerSpace,
             @RequestBody(required = false) Map<String, String> modelApplicationIdToEventColumn) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        log.info(String.format("Download model summary for tenant %s", customerSpace));
         try {
             return modelSummaryService.downloadModelSummary(customerSpace, modelApplicationIdToEventColumn);
         } catch (Exception e) {
@@ -76,7 +74,14 @@ public class ModelSummaryResource {
     public Map<String, ModelSummary> getEventToModelSummary(@PathVariable String customerSpace,
             @RequestBody Map<String, String> modelApplicationIdToEventColumn) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        log.info(String.format("Get event to model summary for tenant %s", customerSpace));
         return modelSummaryService.getEventToModelSummary(customerSpace, modelApplicationIdToEventColumn);
+    }
+
+    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of model summary ids available to the user")
+    public List<ModelSummary> getModelSummaries(@PathVariable String customerSpace,
+            @RequestParam(value = "selection", required = false) String selection) {
+        return modelSummaryService.getModelSummaries(selection);
     }
 }

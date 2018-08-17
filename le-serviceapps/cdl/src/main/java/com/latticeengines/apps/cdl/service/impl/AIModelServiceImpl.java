@@ -251,7 +251,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             throw new LedpException(LedpCode.LEDP_40035,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
-        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryById(customerSpace, aiModel.getModelSummaryId());
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryByModelId(customerSpace, aiModel.getModelSummaryId());
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_40036,
                     new String[] { "ModelSummary", aiModel.getId(), ratingEngine.getId(), customerSpace });

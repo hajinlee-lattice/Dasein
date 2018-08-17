@@ -316,24 +316,6 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         return modelSummaryEntityMgr.findByModelId(modelId, returnRelational, returnDocument, validOnly);
     }
 
-    @Override
-    public List<ModelSummary> getModelSummaries(String selection) {
-        List<ModelSummary> summaries;
-        if (selection != null && selection.equalsIgnoreCase("all")) {
-            summaries = modelSummaryEntityMgr.findAll();
-        } else {
-            summaries = modelSummaryEntityMgr.findAllValid();
-        }
-
-        for (ModelSummary summary : summaries) {
-            summary.setPredictors(new ArrayList<>());
-            summary.setDetails(null);
-            getModelSummaryHasRating(summary);
-            getModelSummaryTrainingFileState(summary);
-        }
-        return summaries;
-    }
-
     private void getModelSummaryTrainingFileState(ModelSummary summary) {
         if (summary.getTrainingTableName() == null || summary.getTrainingTableName().isEmpty()) {
             summary.setTrainingFileExist(false);

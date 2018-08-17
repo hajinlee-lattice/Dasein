@@ -1,5 +1,7 @@
 package com.latticeengines.apps.lp.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
@@ -20,4 +22,6 @@ public interface SourceFileService {
     void copySourceFile(CopySourceFileRequest request);
 
     SourceFile getByTableNameCrossTenant(String name);
+
+    List<SourceFile> findAllSourceFiles();
 }
