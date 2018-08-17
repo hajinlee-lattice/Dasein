@@ -16,6 +16,10 @@
 
     <bean id="recommendationRetryAspect"
         class="com.latticeengines.playmaker.aspect.RecommendationRetryAspect" />
+        
+    <bean id="metricPublishAspect"
+        class="com.latticeengines.playmaker.aspect.MetricPublishAspect" />
+        
 
 
 </beans>
