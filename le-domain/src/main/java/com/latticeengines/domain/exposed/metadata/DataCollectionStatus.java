@@ -204,7 +204,7 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
     }
 
     @JsonProperty("DateMap")
-    public Map getDateMap() {
+    public Map<Category, Long> getDateMap() {
         return this.detail.getDateMap();
     }
 

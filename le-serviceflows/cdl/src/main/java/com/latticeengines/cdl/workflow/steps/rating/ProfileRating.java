@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -134,6 +135,8 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         registerDynamoExport(ratingTableName);
 
         cleanupTemporaryTables();
+
+        updateStatusDateForRating();
     }
 
     @Override
@@ -284,4 +287,11 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         exportToDynamo(tableName, InterfaceName.AccountId.name(), null);
     }
 
+    private void updateStatusDateForRating() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Long PATime = getLongValueFromContext(PA_TIMESTAMP);
+        Map<Category, Long> dateMap = status.getDateMap();
+        dateMap.put(Category.RATING, PATime);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
+    }
 }

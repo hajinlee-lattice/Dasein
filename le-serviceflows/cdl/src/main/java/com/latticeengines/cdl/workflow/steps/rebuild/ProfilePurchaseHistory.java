@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -170,6 +171,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         // serving store is renamed
         registerDynamoExport();
         generateReport();
+
+        updateStatusDateForProductSpend();
     }
 
     @Override
@@ -558,5 +561,14 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), getEntity().getServingStore(),
                 inactive);
         exportToDynamo(tableName, InterfaceName.AccountId.name(), null);
+    }
+
+    private void updateStatusDateForProductSpend() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Long PATime = getLongValueFromContext(PA_TIMESTAMP);
+        Map<Category, Long> dateMap = status.getDateMap();
+        dateMap.put(Category.PRODUCT_SPEND, PATime);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
+
     }
 }
