@@ -64,7 +64,7 @@ angular
 
         var payload = response.data,
             uiAction = payload.UIAction || {},
-            type = (uiAction.status || 'error').toLowerCase(),
+            method = (uiAction.status || 'error').toLowerCase(),
             http_err = response.statusText,
             http_code = response.status,
             url = response.config.url,
@@ -76,7 +76,7 @@ angular
             cbMethod = callback ? cbSplit[1] : null;
 
         $timeout(function() {
-            Service[type](opts, cbMethod ? cbService[cbMethod] : null);
+            Service[method](opts, cbMethod ? cbService[cbMethod].bind(cbService) : null);
         }, 1);
     };
 
