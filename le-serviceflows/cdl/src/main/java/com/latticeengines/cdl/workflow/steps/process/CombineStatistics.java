@@ -195,7 +195,6 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
                 }
             });
         }
-        removeObjectFromContext(RATING_LIFTS);
     }
 
     private boolean isRatingAttr(String attrName) {
