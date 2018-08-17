@@ -68,6 +68,7 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -172,7 +173,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         registerDynamoExport();
         generateReport();
 
-        updateStatusDateForProductSpend();
+        updateDCStatusForProductSpend();
     }
 
     @Override
@@ -563,11 +564,9 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         exportToDynamo(tableName, InterfaceName.AccountId.name(), null);
     }
 
-    private void updateStatusDateForProductSpend() {
+    private void updateDCStatusForProductSpend() {
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        Long PATime = getLongValueFromContext(PA_TIMESTAMP);
-        Map<Category, Long> dateMap = status.getDateMap();
-        dateMap.put(Category.PRODUCT_SPEND, PATime);
+        status = DataCollectionStatusUtils.updateTimeForPSChange(status, getLongValueFromContext(PA_TIMESTAMP));
         putObjectInContext(CDL_COLLECTION_STATUS, status);
 
     }

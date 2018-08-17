@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -289,9 +290,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
 
     private void updateStatusDateForRating() {
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        Long PATime = getLongValueFromContext(PA_TIMESTAMP);
-        Map<Category, Long> dateMap = status.getDateMap();
-        dateMap.put(Category.RATING, PATime);
+        status = DataCollectionStatusUtils.updateTimeForRatingChange(status, getLongValueFromContext(PA_TIMESTAMP));
         putObjectInContext(CDL_COLLECTION_STATUS, status);
     }
 }

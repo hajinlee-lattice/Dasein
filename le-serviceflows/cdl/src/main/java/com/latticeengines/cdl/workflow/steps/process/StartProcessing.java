@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase;
@@ -122,15 +124,15 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putLongValueInContext(PA_TIMESTAMP, System.currentTimeMillis());
 
         // get current active collection status
-        DataCollectionStatus detail = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
+        DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
                 null);
-        detail.setEvaluationDate(evaluationDate);
-        detail.setApsRollingPeriod(configuration.getApsRollingPeriod());
-        log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(detail));
-        if (detail.getDateMap() == null) {
-            generateDateValueForCollectionDetail(detail);
+        dcStatus.setEvaluationDate(evaluationDate);
+        dcStatus.setApsRollingPeriod(configuration.getApsRollingPeriod());
+        log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(dcStatus));
+        if (MapUtils.isEmpty(dcStatus.getDateMap())) {
+            dcStatus = DataCollectionStatusUtils.initDateMap(dcStatus, getLongValueFromContext(PA_TIMESTAMP));
         }
-        putObjectInContext(CDL_COLLECTION_STATUS, detail);
+        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
 
         DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace.toString(),
                 DataFeedExecutionJobType.PA, jobId);
@@ -227,24 +229,15 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             if (DataCloudVersion.versionComparator.compare(currentVersion, statusVersion) != 0) {
                 createSystemAction(ActionType.DATA_CLOUD_CHANGE, ActionType.DATA_CLOUD_CHANGE.getDisplayName());
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-                Long PATime = getLongValueFromContext(PA_TIMESTAMP);
-                Map<Category, Long> dateMap = status.getDateMap();
-                dateMap.put(Category.FIRMOGRAPHICS, PATime);
-                dateMap.put(Category.GROWTH_TRENDS, PATime);
-                dateMap.put(Category.INTENT, PATime);
-                dateMap.put(Category.ONLINE_PRESENCE, PATime);
-                dateMap.put(Category.TECHNOLOGY_PROFILE, PATime);
-                dateMap.put(Category.WEBSITE_KEYWORDS, PATime);
-                dateMap.put(Category.WEBSITE_PROFILE, PATime);
-                dateMap.put(Category.ACCOUNT_ATTRIBUTES, PATime);
+                status = DataCollectionStatusUtils.updateTimeForDCChange(status,
+                        getLongValueFromContext(PA_TIMESTAMP));
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
             } else if (StringUtils.compare(
                     currentVersion.getRefreshVersionVersion(), statusVersion.getRefreshVersionVersion()) != 0) {
                 createSystemAction(ActionType.INTENT_CHANGE, ActionType.INTENT_CHANGE.getDisplayName());
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-                Long PATime = getLongValueFromContext(PA_TIMESTAMP);
-                Map<Category, Long> dateMap = status.getDateMap();
-                dateMap.put(Category.INTENT, PATime);
+                status = DataCollectionStatusUtils.updateTimeForIntentChange(status,
+                        getLongValueFromContext(PA_TIMESTAMP));
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
             }
         }
@@ -369,16 +362,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         });
         if (entityImportsMap.containsKey(BusinessEntity.Account)) {
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-            Long PATime = getLongValueFromContext(PA_TIMESTAMP);
-            Map<Category, Long> dateMap = status.getDateMap();
-            dateMap.put(Category.ACCOUNT_ATTRIBUTES, PATime);
+            status = DataCollectionStatusUtils.updateTimeForAccountChange(status,
+                    getLongValueFromContext(PA_TIMESTAMP));
             putObjectInContext(CDL_COLLECTION_STATUS, status);
         }
         if (entityImportsMap.containsKey(BusinessEntity.Contact)) {
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-            Long PATime = getLongValueFromContext(PA_TIMESTAMP);
-            Map<Category, Long> dateMap = status.getDateMap();
-            dateMap.put(Category.CONTACT_ATTRIBUTES, PATime);
+            status = DataCollectionStatusUtils.updateTimeForContactChange(status,
+                    getLongValueFromContext(PA_TIMESTAMP));
             putObjectInContext(CDL_COLLECTION_STATUS, status);
         }
         putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
@@ -441,24 +432,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
         log.info("Removing stats in " + inactiveVersion);
         dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
-    }
-
-    private void generateDateValueForCollectionDetail(DataCollectionStatus detail) {
-        Long PATime = getLongValueFromContext(PA_TIMESTAMP);
-        Map<Category, Long> dateMap = new HashMap<>();
-        detail.setDateMap(dateMap);
-        dateMap.put(Category.FIRMOGRAPHICS, PATime);
-        dateMap.put(Category.GROWTH_TRENDS, PATime);
-        dateMap.put(Category.INTENT, PATime);
-        dateMap.put(Category.ONLINE_PRESENCE, PATime);
-        dateMap.put(Category.TECHNOLOGY_PROFILE, PATime);
-        dateMap.put(Category.WEBSITE_KEYWORDS, PATime);
-        dateMap.put(Category.WEBSITE_PROFILE, PATime);
-        dateMap.put(Category.ACCOUNT_ATTRIBUTES, PATime);
-        dateMap.put(Category.CONTACT_ATTRIBUTES, PATime);
-        dateMap.put(Category.RATING, PATime);
-        dateMap.put(Category.PRODUCT_SPEND, PATime);
-
     }
 
     public static class RebuildEntitiesProvider {
