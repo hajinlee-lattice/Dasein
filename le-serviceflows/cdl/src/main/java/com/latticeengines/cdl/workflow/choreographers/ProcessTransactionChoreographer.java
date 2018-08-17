@@ -213,8 +213,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         boolean should = super.shouldRebuild();
 
         log.info(String.format(
-                "Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, hasProducts=%b, productChoreographer.update=%b, productChoreographer.rebuild=%b",
-                reset, hasRawStore, hasProducts, productChoreographer.update, productChoreographer.rebuild));
+                "Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, hasProducts=%b, productChoreographer.hasChange=%b",
+                reset, hasRawStore, hasProducts, productChoreographer.hasChange));
 
         if (reset) {
             return should;
@@ -222,7 +222,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
         if (!should) {
             if (hasRawStore && hasProducts) {
-                if (productChoreographer.update || productChoreographer.rebuild) {
+                if (productChoreographer.hasChange) {
                     log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
                     should = true;
                 }
@@ -259,17 +259,17 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         boolean purchaseMetricsChanged = grapherContext.isPurchaseMetricsChanged();
 
         log.info(String.format(
-                "Important flag to decide purchase history profile: purchaseMetricsChanged=%b, hasProducts=%b, hasAccounts=%b, hasRawStore=%b, update=%b, rebuild=%b, accountChoreographer.update=%b, accountChoreographer.rebuildNotForDataCloudChange=%b, productChoreographer.update=%b, productChoreographer.rebuild=%b",
+                "Important flag to decide purchase history profile: purchaseMetricsChanged=%b, hasProducts=%b, hasAccounts=%b, hasRawStore=%b, update=%b, rebuild=%b, accountChoreographer.update=%b, accountChoreographer.rebuildNotForDataCloudChange=%b, productChoreographer.hasChange=%b",
                 purchaseMetricsChanged, hasProducts, hasAccounts, hasRawStore, update, rebuild,
                 accountChoreographer.update, accountChoreographer.rebuildNotForDataCloudChange,
-                productChoreographer.update, productChoreographer.rebuild));
+                productChoreographer.hasChange));
 
         if (hasProducts && hasAccounts) {
             if (hasRawStore && (accountChoreographer.update || (accountChoreographer.rebuildNotForDataCloudChange))) {
                 log.info("Need to rebuild purchase history due to Account changes.");
                 shouldCalc = true;
             }
-            if (hasRawStore && (productChoreographer.update || productChoreographer.rebuild)) {
+            if (hasRawStore && productChoreographer.hasChange) {
                 log.info("Need to rebuild purchase history due to Product changes.");
                 shouldCalc = true;
             }

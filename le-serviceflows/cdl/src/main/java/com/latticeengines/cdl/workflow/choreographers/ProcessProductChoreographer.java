@@ -41,6 +41,8 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
     @Inject
     private RebuildProductWorkflow rebuildProductWorkflow;
 
+    boolean hasChange = false;
+
     @Override
     protected AbstractStep mergeStep() {
         return mergeProduct;
@@ -128,8 +130,11 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
                         log.info("Change to skip because finalRecords is " + String.valueOf(finalRecords));
                     }
                 }
-                if (skip)
+                if (skip) {
                     updateFlags(seq, entity);
+                } else {
+                    hasChange = true;
+                }
             }
         }
 
