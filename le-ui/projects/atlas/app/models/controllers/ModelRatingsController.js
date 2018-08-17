@@ -60,23 +60,17 @@ angular.module('lp.models.ratings', [
             vm.ratingModelId = $stateParams.ratingEngine.activeModel.AI.id;
 
         } else if (vm.section === 'dashboard.ratings') {
-
             // Get dahsboard data for list of iterations
             var dashboard = ModelStore.getDashboardData(),
                 dashboardIterations = dashboard.iterations;
 
-            vm.activeIterations = [];
-
             // use only iterations that have active modelSummaryId by creating new array
+            vm.activeIterations = [];
             angular.forEach(dashboardIterations, function(iteration){
-                if (iteration.modelSummaryId) {
+                if (iteration.modelSummaryId && (iteration.modelingJobStatus != 'Failed')) {
                     vm.activeIterations.push(iteration);
                 }
             });
-
-
-            // console.log($stateParams);
-            // console.log(activeIterations);
 
             // Set correct iteration as default for select menu
             for(var i = 0; i < vm.activeIterations.length; i++) {
@@ -86,9 +80,6 @@ angular.module('lp.models.ratings', [
             }
 
             vm.ratingModelId = vm.activeIteration.id;
-            // RatingsEngineStore.getRating($stateParams.rating_id).then(function (ratingEngine) {
-            //     vm.ratingModelId = ratingEngine.activeModel.AI.id;
-            // });
         }
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
@@ -355,17 +346,21 @@ angular.module('lp.models.ratings', [
             var aiModelId = vm.ratingModelId;
             ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, aiModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
+
                     RatingsEngineStore.saveRatingStatus(rating_id, 'ACTIVE').then(function(result){
                         vm.chartNotUpdated = true;
                         vm.updateContent = true;
                         vm.savingConfiguration = false;
+
                         Notice.success({
                             delay: 4000,
                             title: 'Publish Configuration', 
                             message: 'Your new ratings configuration has been published.'
                         });
+
                         $rootScope.$broadcast('statusChange', { 
-                            activeStatus: 'ACTIVE'
+                            activeStatus: 'ACTIVE',
+                            activeIteration: vm.activeIteration.iteration
                         });
                         $timeout( function(){ 
                             vm.updateContent = false;

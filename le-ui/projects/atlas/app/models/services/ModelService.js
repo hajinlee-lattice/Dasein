@@ -38,15 +38,11 @@ angular.module('mainApp.models.services.ModelService', [
             model = this.modelsMap[modelId];
 
         if (typeof model == 'object') {
-            console.log("!!!!!!!!!!!!!!!!!!!!", model);
             deferred.resolve(model);
         } else {
             ModelService.GetModelById(modelId).then(function(result) {
                 if (result != null && result.success === true) {
                     ModelStore.addModel(modelId, result.resultObj);
-
-                    console.log("????????????????", result.resultObj);
-
                     deferred.resolve(result.resultObj);
                 } else {
                     deferred.reject(result.resultObj);

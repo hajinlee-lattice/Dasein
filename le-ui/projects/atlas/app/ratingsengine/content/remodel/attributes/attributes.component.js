@@ -29,7 +29,8 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
 .component('remodelAttributes', {
     templateUrl: 'app/ratingsengine/content/remodel/attributes/attributes.component.html',
     bindings: {
-        attributes: '<'
+        attributes: '<',
+        filters: '<'
     },
     controller: function (
         $q, $scope, $stateParams, $timeout,
@@ -59,6 +60,8 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
         }
 
         vm.setCategoryData = function(category){
+            vm.filters.currentPage = 1;
+            console.log(category, vm.filters);
             AtlasRemodelStore.set('category', category);
         }
     }

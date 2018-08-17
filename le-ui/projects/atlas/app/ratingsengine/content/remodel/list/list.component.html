@@ -38,7 +38,7 @@
             <tr ng-repeat="attribute in (filteredList = ($ctrl.getCategoryAttributes()
                         | filter: $ctrl.searchFilter
                         | orderBy: $ctrl.sortBy
-                        | startFrom: ($ctrl.currentPage - 1) * $ctrl.pageSize
+                        | startFrom: ($ctrl.filters.currentPage - 1) * $ctrl.pageSize
                         | limitTo: $ctrl.pageSize))"
                 ng-class="{'disabled': attribute.ApprovedUsage[0] == 'None'}">
                 <td>
@@ -61,7 +61,7 @@
     <ul class="attr-pagination-bottom" ng-show="max > 1">
         <li class="attr-pagination pull-right">
             <pd-pagination-controls
-                current="$ctrl.currentPage"
+                current="$ctrl.filters.currentPage"
                 max="max = ($ctrl.getCategoryAttributes() | filter: $ctrl.queryText).length / $ctrl.pageSize">
             </pd-pagination-controls>
         </li>

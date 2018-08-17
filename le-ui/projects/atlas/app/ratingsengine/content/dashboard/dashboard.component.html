@@ -181,7 +181,7 @@
                             <!-- <tr ng-repeat="iteration in vm.dashboard.iterations | orderBy: '-iteration' | limitTo: 5"> -->
                                 <td>{{ iteration.iteration }}</td>
                                 <td>{{ iteration.created | date }}</td>
-                                <td>{{ iteration.createdBy }}</td>
+                                <td class="text-ellipsis">{{ iteration.createdBy }}</td>
                                 <td class="green-text">
                                     <span ng-if="
                                         vm.isIterationActive(iteration.id) &&

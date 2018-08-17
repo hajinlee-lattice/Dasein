@@ -11,7 +11,6 @@ angular.module('lp.ratingsengine.remodel.list', [])
             store: AtlasRemodelStore,
             params: $stateParams,
             allAttributes: AtlasRemodelStore.getRemodelAttributes(),
-            currentPage: vm.filters.currentPage,
             pageSize: vm.filters.pageSize,
             queryText: vm.filters.queryText,
             sortBy: 'DisplayName'
@@ -25,7 +24,7 @@ angular.module('lp.ratingsengine.remodel.list', [])
 
         vm.$onInit = function() {
 
-            console.log(vm.filters);
+            // console.log(vm.filters);
 
         };
 

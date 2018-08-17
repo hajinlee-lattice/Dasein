@@ -51,9 +51,9 @@ angular.module('lp.ratingsengine.wizard.training', [
             //     deferred.resolve(result);
             // });
 
-            console.log(vm.ratingEngine);
-            console.log(vm.iteration);
-            console.log(AtlasRemodelStore.getRemodelIteration());
+            // console.log(vm.ratingEngine);
+            // console.log(vm.iteration);
+            // console.log(AtlasRemodelStore.getRemodelIteration());
 
             // Data variables
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
@@ -102,28 +102,25 @@ angular.module('lp.ratingsengine.wizard.training', [
                     RatingsEngineStore.setConfigFilters(vm.filters);
 
                     vm.configFilters.sourceFileName = vm.filters.sourceFileName;
+                    RatingsEngineStore.setDisplayFileName(vm.configFilters.sourceFileName);
 
                     vm.checkboxModel = {
                         datacloud: (vm.filters.dataStores.indexOf('DataCloud') > -1) ? true : false,
                         cdl: (vm.filters.dataStores.indexOf('CDL') > -1) ? true : false,
                         deduplicationType: vm.filters.deduplicationType ? true : false,
-                        excludePublicDomains: (vm.filters.excludePublicDomains == true) ? true : false,
-                        transformationGroup: (vm.filters.transformationGroup == 'NONE') ? true : false
-                        // oneRecordPerAccount: false,
-                        // includePersonalEmailDomains: false,
-                        // useCuratedAttributes: false,
+                        excludePublicDomains: (vm.filters.excludePublicDomains == true) ? false : true,
+                        transformationGroup: vm.filters.transformationGroup ? false : true
                     }
 
                     vm.configFilters.dataStores = [];
                     if(vm.checkboxModel.datacloud) {
-                        console.log("PUSH");
                         vm.configFilters.dataStores.push('DataCloud');
                     }
                     if(vm.checkboxModel.cdl) {
-                        console.log("PUSH");
                         vm.configFilters.dataStores.push('CDL');
                     }
 
+                    vm.checkForDisable();
                     vm.validateCustomEventForm();
                 }
             }
@@ -349,6 +346,14 @@ angular.module('lp.ratingsengine.wizard.training', [
         // ============================================================================================
         // ============================================================================================
         // ============================================================================================
+        
+        vm.checkForDisable = function(){
+            if(vm.checkboxModel.datacloud == false && vm.checkboxModel.cdl == false){
+                RatingsEngineStore.setValidation("training", false);
+            } else {
+                RatingsEngineStore.setValidation("training", true);
+            }
+        }
 
         vm.validateCustomEventForm = function(){
 
@@ -358,16 +363,8 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
 
             if(valid == true){
-                RatingsEngineStore.validation.training = true;
-                RatingsEngineStore.validation.refine = true;
-
                 RatingsEngineStore.setConfigFilters(vm.configFilters);
-
                 vm.dataStores = vm.configFilters.dataStores;
-
-
-                vm.disableCDL = (!vm.checkboxModel.datacloud && vm.checkboxModel.cdl) ? true : false;
-                vm.disableDataCloud = (vm.checkboxModel.datacloud && !vm.checkboxModel.cdl) ? true : false;
 
                 if (vm.checkboxModel.datacloud){
                     if(vm.dataStores.indexOf('DataCloud') == -1){
@@ -393,12 +390,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                     delete vm.configFilters.deduplicationType;
                 }
 
-                vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains ? true : false;
-                if(vm.checkboxModel.transformationGroup) {
-                    vm.configFilters.transformationGroup = 'NONE';
-                } else {
-                    delete vm.configFilters.transformationGroup;
-                }
+                vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains ? false : true;
 
                 if(vm.checkboxModel.transformationGroup) {
                     vm.configFilters.transformationGroup = 'NONE';
@@ -416,6 +408,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         RatingsEngineStore.setConfigFilters(vm.configFilters);
                         vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
                     }
+
                 }, 250);
 
             } else {

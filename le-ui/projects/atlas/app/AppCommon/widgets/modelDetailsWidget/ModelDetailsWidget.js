@@ -66,8 +66,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
             $scope.viewingIteration = $stateParams.viewingIteration ? true : false;
 
-            console.log(ratingEngine);
-            console.log($scope.model);
+            // console.log(ratingEngine);
+            // console.log($scope.model);
 
             var engineId = $stateParams.rating_id,
                 ratingModelId = $scope.model.id;
@@ -90,6 +90,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
         $scope.$on('statusChange', function(event, args) {
             $scope.activeStatus = args.activeStatus;
+            $scope.activeIteration = args.activeIteration;
         });
 
     } else {
@@ -111,6 +112,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
             $scope.$on('statusChange', function(event, args) {
                 $scope.activeStatus = args.activeStatus;
+                $scope.activeIteration = args.activeIteration;
             });
 
             $scope.totalIterations = dashboard.iterations.length;

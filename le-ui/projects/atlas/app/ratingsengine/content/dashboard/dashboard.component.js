@@ -79,8 +79,6 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     });
 
-    console.log(vm.dashboard);
-
     vm.initModalWindow = function() {
         vm.config = {
             'name': "rating_engine_deactivate",
@@ -288,6 +286,9 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.ratingEngineType = 'Repeat Purchase Cross-Sell'
                 }
             } else {
+
+                console.log(vm.model);
+
                 vm.modelingStrategy = 'CUSTOM_EVENT';
                 vm.ratingEngineType = 'Custom Event';
             }
@@ -306,7 +307,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.init = function() {
 
-        console.log(vm.ratingEngine);
+        // console.log(vm.ratingEngine);
         // console.log(vm.dashboard);
 
         vm.initModalWindow();

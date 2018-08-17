@@ -18,7 +18,7 @@
                                 type="checkbox"
                                 class="form-control"
                                 ng-model="$ctrl.checkboxModel.datacloud"
-                                ng-disabled="$ctrl.disableDataCloud" />
+                                ng-change="$ctrl.checkForDisable()" />
                             <div>Your matched 3rd-Party Attributes provided through Lattice</div>
                         </li>
                         <li class="form-group">
@@ -26,7 +26,7 @@
                                 type="checkbox"
                                 class="form-control"
                                 ng-model="$ctrl.checkboxModel.cdl"
-                                ng-disabled="$ctrl.disableCDL" />
+                                ng-change="$ctrl.checkForDisable()" />
                             <div>Your Imported 1st-Party Attributes (My Data Attributes)</div>
                         </li>
                     </ul>

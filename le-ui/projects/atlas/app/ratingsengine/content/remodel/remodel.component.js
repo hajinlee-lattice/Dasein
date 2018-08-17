@@ -49,7 +49,8 @@ angular.module('lp.ratingsengine.remodel', [
                             nextFn: function(nextState) {
                                 AtlasRemodelStore.saveIteration(nextState);
                             }, 
-                            progressDisabled: false 
+                            progressDisabled: false,
+                            showNextSpinner: true
                         },
                         { 
                             label: 'Creation', 
@@ -75,13 +76,16 @@ angular.module('lp.ratingsengine.remodel', [
                         
                     return title;
                 },
-                WizardControlsOptions: function ($stateParams) {
+                WizardControlsOptions: function ($stateParams, AtlasRemodelStore) {
+
+                    var iteration = AtlasRemodelStore.getRemodelIteration();
+
                     return {
                         backState: {
                             route: 'home.ratingsengine.dashboard', 
                             params: {
                                 rating_id: $stateParams.engineId,
-                                modelId: $stateParams.modelId
+                                modelId: iteration.AI.modelSummaryId
                             }
                         },
                         nextState: 'home.ratingsengine.dashboard',

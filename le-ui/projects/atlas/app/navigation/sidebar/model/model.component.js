@@ -22,8 +22,6 @@ angular
 
     vm.init = function() {
 
-        console.log($stateParams);
-
         vm.IsPmml = IsPmml,
         vm.IsRatingEngine = IsRatingEngine,
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;

@@ -120,11 +120,13 @@
         margin-bottom: 0;
         th:last-of-type, td:last-of-type {
             text-align: right;
-        }
-        td:last-of-type {
+            width: 90px;
             button:last-of-type {
-                margin-left: 8px;
+                margin-left: 3px;
             }
+        }
+        td:nth-child(3){
+            max-width: 114px;
         }
         .tooltip_ {
             width: auto;

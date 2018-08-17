@@ -107,8 +107,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
             } else if (vm.type == 'custom_event') {
 
-                console.log();
-
                 vm.hasSettingsInfo = true;
                 vm.ratingEngineType = 'Custom Event'
                 vm.prioritizeBy = 'Likely to Buy';

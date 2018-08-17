@@ -3,9 +3,6 @@ angular.module('lp.ratingsengine.remodel')
     var store = this;
 
     this.init = function(){
-
-        console.log("init remodel store");
-
         this.remodelIteration = null;
 
         this.filters = {
@@ -87,13 +84,13 @@ angular.module('lp.ratingsengine.remodel')
         delete iteration.AI.modelingJobStatus;
         delete iteration.AI.modelSummaryId;
 
-        console.log(iteration);
+        // console.log(iteration);
         
 
         // Save iteration
         AtlasRemodelService.saveIteration(engineId, iteration).then(function(result){
             
-            console.log(result);
+            // console.log(result);
 
             var modelId = result.AI.id,
                 attributes = store.getRemodelAttributes();
@@ -120,7 +117,7 @@ angular.module('lp.ratingsengine.remodel')
 
             // Launch Model
             AtlasRemodelService.launchModeling(engineId, modelId, attributes).then(function(applicationid){
-                console.log(applicationid);
+                // console.log(applicationid);
 
                 RatingsEngineStore.setApplicationId(applicationid);
                 JobsStore.inProgressModelJobs[engineId] = null;

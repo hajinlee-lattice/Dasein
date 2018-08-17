@@ -55,8 +55,6 @@ angular.module('common.wizard.controls', [])
         if (vm.next && !isPrev) {
             vm.go(vm.next, isPrev);
         } else if (isPrev && vm.prev) {
-
-            console.log(vm.prev);
             var hasParams = vm.prev.route ? true : false;
 
             if (hasParams){
