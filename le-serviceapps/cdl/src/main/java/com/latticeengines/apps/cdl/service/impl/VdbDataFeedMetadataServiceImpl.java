@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema.Type;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -346,14 +347,18 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         if (cdlExternalSystemService == null || table == null) {
             return;
         }
-        List<String> crmAttr = table.getAttributes().stream()
+        Map<String, String> crmAttrMap = table.getAttributes().stream()
                 .filter(attr -> attr.getName().equalsIgnoreCase("CRMAccount_External_ID")
                         || attr.getName().equalsIgnoreCase("SalesforceAccountId"))
-                .map(Attribute::getName)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(crmAttr)) {
+                .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
+
+        if (MapUtils.isNotEmpty(crmAttrMap)) {
+            List<Pair<String, String>> idMappings = new ArrayList<>();
             CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-            cdlExternalSystem.setCRMIdList(crmAttr);
+            cdlExternalSystem.setCRMIdList(crmAttrMap.keySet().stream().collect(Collectors.toList()));
+            crmAttrMap.forEach((attrName, displayName) ->
+                    idMappings.add(Pair.of(attrName, StringUtils.isBlank(displayName) ? attrName : displayName)));
+            cdlExternalSystem.setIdMapping(idMappings);
             cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
         }
     }
