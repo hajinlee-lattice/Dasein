@@ -1,8 +1,10 @@
 package com.latticeengines.workflowapi.yarn.runtime;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -50,6 +52,9 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
     @Autowired
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
+
+    @Autowired
+    private JobCacheService jobCacheService;
 
     public WorkflowProcessor() {
         super();
@@ -105,6 +110,9 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         } catch (Exception exc) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            if (workflowJob.getWorkflowId() != null) {
+                jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+            }
 
             ErrorDetails details;
             if (exc instanceof LedpException) {

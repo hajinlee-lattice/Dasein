@@ -69,7 +69,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private WorkflowContainerService workflowContainerService;
 
     private static final long HEARTBEAT_FAILURE_THRESHOLD =
-            TimeUnit.MILLISECONDS.convert(5L, TimeUnit.MINUTES);
+            TimeUnit.MILLISECONDS.convert(10L, TimeUnit.MINUTES);
 
     private static final long SPRING_BATCH_FAILURE_THRESHOLD =
             TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
@@ -383,6 +383,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     && workflowJob.getWorkflowId() == null) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                if (workflowJob.getWorkflowId() != null) {
+                    // invalidate cache entry
+                    jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+                }
             }
         }
 
@@ -410,6 +414,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     && (System.currentTimeMillis() - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                if (workflowJob.getWorkflowId() != null) {
+                    // invalidate cache entry
+                    jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+                }
             }
         }
 

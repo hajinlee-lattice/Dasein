@@ -2,6 +2,7 @@ package com.latticeengines.workflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -361,6 +362,9 @@ public class WorkflowServiceImpl implements WorkflowService {
                 } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
                     workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
                     workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                    if (workflowJob.getWorkflowId() != null) {
+                        jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+                    }
                     break;
                 }
             } catch (Exception e) {

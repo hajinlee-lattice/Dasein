@@ -69,4 +69,11 @@ public interface JobCacheService {
      * @param tenant target tenant
      */
     void evict(Tenant tenant);
+
+    /**
+     * Delete job cache entries associated with the given list of workflow IDs. Noop if the list is {@literal null}.
+     * Also, any {@literal null} workflow ID in the list will be skipped.
+     * @param workflowIds target list of workflow IDs
+     */
+    void evictByWorkflowIds(@NotNull List<Long> workflowIds);
 }

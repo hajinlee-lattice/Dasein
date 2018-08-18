@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionException;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -209,6 +210,27 @@ public class JobCacheServiceImpl implements JobCacheService {
 
         log.info("Evict JobIdListCache for tenant (PID={})", tenant.getPid());
         jobIdListCacheWriter.clear(tenant);
+    }
+
+    @Override
+    public void evictByWorkflowIds(List<Long> workflowIds) {
+        if (workflowIds == null) {
+            return;
+        }
+        log.info("Evict job cache entries, size={}, jobIds={}", workflowIds.size(), getWorkflowIdsStr(workflowIds));
+        workflowIds.forEach((workflowId) -> {
+            if (workflowId == null) {
+                return;
+            }
+            Job job = new Job();
+            job.setId(workflowId);
+            try {
+                cacheWriter.clear(job, true);
+                cacheWriter.clear(job, false);
+            } catch (Exception e) {
+                log.error("Failed to evict job cache entry, workflowID = {}", workflowId);
+            }
+        });
     }
 
     /*
@@ -456,6 +478,14 @@ public class JobCacheServiceImpl implements JobCacheService {
                 cacheWriter.put(jobs, false);
                 cacheWriter.put(detailJobs, true);
             } catch (Exception e) {
+                // clear cache just to be safe
+                evictByWorkflowIds(workflowIds);
+                if (e instanceof TransactionException) {
+                    // something wrong transaction manager, probably main thread terminated
+                    log.error("Failed to refresh job caches caused by transaction manager, updateTime={}, size={}, IDs={}",
+                            updateTime, workflowIds.size(), getWorkflowIdsStr(workflowIds));
+                    return;
+                }
                 log.error(String.format("Fail to refresh job caches, updateTime=%d, size=%d, IDs=%s",
                         updateTime, workflowIds.size(), getWorkflowIdsStr(workflowIds)), e);
             } finally {

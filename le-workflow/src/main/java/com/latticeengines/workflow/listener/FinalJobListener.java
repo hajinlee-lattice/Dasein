@@ -15,8 +15,14 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
+import java.util.Collections;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 @Component("finalJobListener")
 public class FinalJobListener extends LEJobListener implements LEJobCallerRegister {
+
+    private static final long UPDATE_CACHE_TIMEOUT_IN_SECONDS = 15L;
 
     private static final Logger log = LoggerFactory.getLogger(FinalJobListener.class);
 
@@ -46,14 +52,28 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
             if (!updateStatus(executionId, jobExecution)) {
                 throw new RuntimeException("Can not update workflow job status, Id=" + executionId);
             }
-            if (executionId != null) {
-                jobCacheService.putAsync(executionId);
-            }
+
+            updateJobCache(executionId);
         } finally {
             if (caller != null) {
                 caller.callDone();
                 callerThread.interrupt();
             }
+        }
+    }
+
+    private void updateJobCache(Long workflowId) {
+        if (workflowId == null) {
+            return;
+        }
+
+        jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowId));
+        Future<?> refreshFuture = jobCacheService.putAsync(workflowId);
+        try {
+            // wait for the cache to be refreshed
+            refreshFuture.get(UPDATE_CACHE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            // do nothing
         }
     }
 

@@ -1,6 +1,7 @@
 package com.latticeengines.workflowapi.service.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -110,6 +111,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         } catch (Exception exc) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            if (workflowJob.getWorkflowId() != null) {
+                jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+            }
 
             ErrorDetails details;
             if (exc instanceof LedpException) {
@@ -164,6 +168,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         } catch (Exception exc) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            if (workflowJob.getWorkflowId() != null) {
+                jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
+            }
 
             ErrorDetails details;
             if (exc instanceof LedpException) {

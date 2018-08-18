@@ -110,7 +110,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
 
     @PostConstruct
     public void init() {
-        heartbeatThreshold = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES);
+        heartbeatThreshold = TimeUnit.MILLISECONDS.convert(4L, TimeUnit.MINUTES);
         currentTime = System.currentTimeMillis();
         successTime = currentTime - heartbeatThreshold;
         failedTime = currentTime - 3 * heartbeatThreshold;
