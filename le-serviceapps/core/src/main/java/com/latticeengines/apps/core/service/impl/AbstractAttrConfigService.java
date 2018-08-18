@@ -603,7 +603,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             map.put(metadata.getAttrName(), mergeConfig);
         }
         // make sure the system metadata include the customer config
-        if (!CollectionUtils.isEmpty(renderedAttrNames)) {
+        if (CollectionUtils.isNotEmpty(renderedAttrNames)) {
             throw new LedpException(LedpCode.LEDP_40023, new String[] { renderedAttrNames.toString() });
         }
         return new ArrayList<>(map.values());
