@@ -93,6 +93,11 @@
             <artifactId>kafka-connect-avro-converter</artifactId>
             <version>${confluent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>${libthrift.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.latticeengines</groupId>
