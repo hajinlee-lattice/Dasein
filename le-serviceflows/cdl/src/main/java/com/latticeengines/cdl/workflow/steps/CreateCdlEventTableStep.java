@@ -26,9 +26,11 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
+import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 
 @Component("createCdlEventTableStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -45,7 +47,11 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     @Value("${dataplatform.queue.scheme}")
     private String queueScheme;
 
+    @Inject
+    private MatchDataCloudWorkflow matchDataCloud;
+
     private DataCollection.Version version;
+    private String accountFeatureTable;
 
     @Override
     public void onConfigurationInitialized() {
@@ -81,16 +87,22 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     }
 
     private Table getAndSetAccountTable() {
+        TableRoleInCollection roleInCollection = TableRoleInCollection.ConsolidatedAccount;
+        accountFeatureTable = getAccountFeatureTable();
+        if (StringUtils.isNotEmpty(accountFeatureTable)) {
+            roleInCollection = TableRoleInCollection.AccountFeatures;
+            log.info("Use account feature table instead.");
+        }
         Table accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
-                TableRoleInCollection.ConsolidatedAccount, version);
+                roleInCollection, version);
         if (accountTable == null) {
             accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
-                    TableRoleInCollection.ConsolidatedAccount, version.complement());
+                    roleInCollection, version.complement());
             if (accountTable != null) {
-                log.info("Found ConsolidatedAccount table in version " + version.complement());
+                log.info("Found Account table in version " + version.complement());
             }
         } else {
-            log.info("Found ConsolidatedAccount table in version " + version);
+            log.info("Found Account table in version " + version);
         }
         if (accountTable == null) {
             throw new RuntimeException("There's no Account table!");
@@ -106,14 +118,11 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         }
         if (changedCount > 0) {
             String customerSpace = configuration.getCustomerSpace().toString();
-            TableRoleInCollection roleInCollection = TableRoleInCollection.ConsolidatedAccount;
-
             boolean updateVersion = false;
             String tableName = dataCollectionProxy.getTableName(customerSpace, roleInCollection, version);
             if (accountTable.getName().equals(tableName)) {
                 updateVersion = true;
             }
-
             boolean updateComplementVersion = false;
             tableName = dataCollectionProxy.getTableName(customerSpace, roleInCollection, version.complement());
             if (accountTable.getName().equals(tableName)) {
@@ -122,19 +131,29 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
             metadataProxy.updateTable(configuration.getCustomerSpace().toString(), accountTable.getName(),
                     accountTable);
-
             if (updateVersion) {
                 dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
-                        TableRoleInCollection.ConsolidatedAccount, version);
+                        roleInCollection, version);
             }
             if (updateComplementVersion) {
                 dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
-                        TableRoleInCollection.ConsolidatedAccount, version.complement());
+                        roleInCollection, version.complement());
             }
 
         }
         log.info("The number of attributes having no Tags is=" + changedCount);
         return accountTable;
+    }
+
+    private String getAccountFeatureTable() {
+        String customerSpace = getConfiguration().getCustomerSpace().toString();
+        Table featureTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AccountFeatures,
+                version);
+        if (featureTable == null) {
+            featureTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AccountFeatures,
+                    version.complement());
+        }
+        return featureTable != null ? featureTable.getName() : null;
     }
 
     private Table getAndSetApsTable() {
@@ -202,7 +221,15 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     public void onExecutionCompleted() {
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
-        putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, eventTable);
+        if (StringUtils.isNotEmpty(accountFeatureTable)) {
+            putObjectInContext(EVENT_TABLE, eventTable);
+            putObjectInContext(MATCH_RESULT_TABLE, eventTable);
+            skipEmbeddedWorkflow(getParentNamespace(), matchDataCloud.name(),
+                    MatchDataCloudWorkflowConfiguration.class);
+        } else {
+            putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, eventTable);
+
+        }
     }
 
 }
