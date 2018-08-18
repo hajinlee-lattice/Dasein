@@ -1,9 +1,3 @@
-<le-modal-window 
-    config="vm.config" 
-    callback-function="vm.modalCallback(args)">
-    <div ng-include="vm.viewUrl()"></div>
-</le-modal-window>
-
 <section 
     class="rating-engine dashboard {{ vm.modelingStrategy }}"
     ng-class="{noRatings: (vm.dashboard.summary.bucketMetadata === undefined || vm.dashboard.summary.bucketMetadata === null || vm.dashboard.summary.bucketMetadata.length === 0)}">

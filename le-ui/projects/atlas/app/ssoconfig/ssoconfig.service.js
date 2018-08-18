@@ -123,7 +123,11 @@ angular.module('lp.ssoconfig')
         $http({
             method: 'POST',
             url: '/pls/saml-config',
-            data: metadataObject
+            data: metadataObject,
+            headers: {
+                ErrorDisplayMethod: 'banner',
+                ErrorDisplayOptions: '{"title": "", "message":"Failed! Your metadata has unexpected errors"}'
+            }
         }).success(function(result, status) {
             deferred.resolve(result);
         }).error(function(error, status) {

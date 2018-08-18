@@ -2,7 +2,7 @@ angular.module('lp.ratingsengine.dashboard', [
     'mainApp.appCommon.directives.barchart'
 ])
 .controller('RatingsEngineDashboard', function(
-    $q, $stateParams, $state, $rootScope, $scope, 
+    $q, $stateParams, $state, $rootScope, $scope, $sce,
     RatingsEngineStore, RatingsEngineService, AtlasRemodelStore, Modal,
     Dashboard, RatingEngine, Model, IsRatingEngine, IsPmml, Products, AuthorizationUtility, FeatureFlagService
 ) {
@@ -76,54 +76,37 @@ angular.module('lp.ratingsengine.dashboard', [
                     'chart': true
                 }
             ]
+        },
+        modalConfig: {
+            'name': "rating_engine_deactivate",
+            'dischargeaction' :'cancel',
+            'confirmaction' : 'ok',
         }
     });
 
-    vm.initModalWindow = function() {
-        vm.config = {
-            'name': "rating_engine_deactivate",
-            'type': 'sm',
-            'title': 'Deactivate Model',
-            'titlelength': 100,
-            'dischargetext': 'CANCEL',
-            'dischargeaction' :'cancel',
-            'confirmtext': 'DEACTIVATE',
-            'confirmaction' : 'deactivate',
-            'icon': 'ico ico-model ico-black',
-            'showclose': false
-        };
-    
-        vm.modalCallback = function (args) {
-            if('closedForced' === args.action) {
-            }else if(vm.config.dischargeaction === args.action){
-                vm.toggleModal();
-            } else if(vm.config.confirmaction === args.action){
 
-                var modal = Modal.get(vm.config.name);
-                modal.waiting(true);
-                modal.disableDischargeButton(true);
-                vm.deactivateRating().then(function(result){
-                    if(result.success === true) {
-                        vm.toggleModal();
-                    }
-                });
-            
-            }
-        }
-        vm.toggleModal = function () {
-            var modal = Modal.get(vm.config.name);
-            if(modal){
-                modal.toggle();
-            }
-        }
-        vm.viewUrl = function () {
-            return 'app/ratingsengine/content/dashboard/deactive-message.component.html';
-        }
+    vm.modalCallback = function (args) {
+        var modal = Modal.get(vm.modalConfig.name);
 
-        $scope.$on("$destroy", function() {
-            Modal.remove(vm.config.name);
-        });
+        if('closedForced' === args.action) {
+        }else if(vm.modalConfig.dischargeaction === args.action){
+            Modal.modalRemoveFromDOM(modal, args);
+        } else if(vm.modalConfig.confirmaction === args.action){
+            modal.waiting(true);
+            modal.disableDischargeButton(true);
+            vm.deactivateRating().then(function(result){
+                if(result.success === true) {
+                    Modal.modalRemoveFromDOM(modal, args);
+                }
+            });
+        
+        }
     }
+
+    vm.viewUrl = function () {
+        return 'app/ratingsengine/content/dashboard/deactive-message.component.html';
+    }
+
 
     vm.isActive = function(status) {
         return (status === 'ACTIVE' ? true : false);
@@ -131,10 +114,29 @@ angular.module('lp.ratingsengine.dashboard', [
     
     vm.deactivate = function(){
         if(vm.dashboard.plays && vm.dashboard.plays.length > 0 && vm.ratingEngine.status === 'ACTIVE'){
-            vm.toggleModal();
+            // vm.toggleModal();
+
+            var plays = vm.generateHtmlFromPlays();
+            Modal.warning({
+                name: "rating_engine_deactivate",
+                icon: 'ico ico-model ico-black',
+                title: "Deactivate Model",
+                message: $sce.trustAsHtml('<section class=rating-engine-deactivate style=margin-top:0><p>Deactivating a model will prevent all of the plays which use it from launching. This model is currently being used by the following plays:<ul class=plays-used-list>' + plays + '</ul></section>'),
+                confirmtext: "Deactivate",
+                confirmcolor: "blue-button",
+                headerconfig: { "background-color":"white", "color":"black" },
+            }, vm.modalCallback);
         }else{
             vm.deactivateRating();
         }
+    }
+
+    vm.generateHtmlFromPlays = function() {
+        var html = "";
+        vm.dashboard.plays.forEach(function(play) {
+            html += "<li>" + play.displayName + "</li>"
+        });
+        return html;
     }
 
     vm.disableScoringButton = function(){
@@ -187,7 +189,7 @@ angular.module('lp.ratingsengine.dashboard', [
     vm.toggleActive = function() {
         var active = vm.isActive(vm.ratingEngine.status);
         if(active && vm.dashboard.plays.length > 0){
-            var modal = Modal.get(vm.config.name);
+            var modal = Modal.get(vm.modalConfig.name);
             modal.toggle();
         } else {
             var newStatus = (vm.isActive(vm.ratingEngine.status) ? 'INACTIVE' : 'ACTIVE'),
@@ -310,7 +312,6 @@ angular.module('lp.ratingsengine.dashboard', [
         // console.log(vm.ratingEngine);
         // console.log(vm.dashboard);
 
-        vm.initModalWindow();
         vm.initDataModel();
     }
 
@@ -418,6 +419,10 @@ angular.module('lp.ratingsengine.dashboard', [
         },{ reload:true });   
 
     }
+
+    $scope.$on("$destroy", function() {
+        Modal.modalRemoveFromDOM(Modal.get(vm.modalConfig.name), {name: 'rating_engine_deactivate'});
+    });
 
     vm.init();
 });
