@@ -11,10 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Semaphore;
 
+import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
+import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
@@ -57,14 +59,9 @@ public class BatonServiceImpl implements BatonService {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private static final long WAIT_TIMEOUT = 5000;
     private static final int MAX_RETRY_TIMES = 3;
 
-    private static TreeCache cache = getTreeCache();
-
-    // boolean will work, just need an object to wait on
-    private static final AtomicBoolean cacheLoaded = new AtomicBoolean(false);
-
+    private static TreeCache cache = null;
     @Override
     public boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
             CustomerSpaceInfo spaceInfo) {
@@ -194,7 +191,7 @@ public class BatonServiceImpl implements BatonService {
     @Override
     public Collection<TenantDocument> getTenantsInCache(String contractId) {
         PerformanceTimer timer1 = new PerformanceTimer("cache initalized", log);
-        TreeCache cache = getLoadedTreeCache();
+        TreeCache cache = getTreeCache();
         timer1.close();
         if (contractId != null) {
             try {
@@ -417,7 +414,9 @@ public class BatonServiceImpl implements BatonService {
     @Override
     public BootstrapState getTenantServiceBootstrapStateInCache(String contractId, String tenantId,
             String serviceName, TreeCache cache) {
-        cache = getLoadedTreeCache();
+        if (cache == null) {
+            cache = getTreeCache();
+        }
         return getTenantServiceBootstrapStateInCache(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
                 serviceName, cache);
     }
@@ -616,44 +615,54 @@ public class BatonServiceImpl implements BatonService {
         return products.stream().anyMatch(product -> hasProduct(customerSpace, product));
     }
 
-    private static TreeCache getTreeCache() {
-        cache = new TreeCache(CamilleEnvironment.getCamille().getCuratorClient(),
-                PathBuilder.buildPodPath(CamilleEnvironment.getPodId()).toString());
-        try {
-            // preload the cache
-            cache.start();
-        } catch (Exception e) {
-            log.error(String.format("TreeCache don't start normally because of %s",
-                    e.getMessage()));
-        }
-        cache.getListenable().addListener((client, event) -> {
-            if (event.getType() != TreeCacheEvent.Type.INITIALIZED) {
-                return;
-            }
-
-            // cache has been loaded
-            synchronized (cacheLoaded) {
-                cacheLoaded.set(true);
-                cacheLoaded.notifyAll();
-            }
-        });
-        return cache;
-    }
-
-    /*
-     * wait for TreeCache to finish loading before returning the cache object
+    /**
+     * Lazily instantiate a {@link TreeCache} and wait for the initial data being loaded.
+     *
+     * Note:
+     * NEVER eagerly load {@link TreeCache} by default because this class will be used in
+     * yarn containers. This will overload zookeeper if many workflow jobs are being run
+     * at the same time.
+     *
+     * @return fully instantiated (all node loaded) {@link TreeCache} object
      */
-    private static TreeCache getLoadedTreeCache() {
-        try {
-            synchronized (cacheLoaded) {
-                while (!cacheLoaded.get()) {
-                    cacheLoaded.wait(WAIT_TIMEOUT);
+    private static TreeCache getTreeCache() {
+        if (cache == null) {
+            synchronized (BatonServiceImpl.class) {
+                if (cache == null) {
+                    final long startTime = System.currentTimeMillis();
+                    log.info("Initializing tree cache, startTime = {}", startTime);
+                    cache = new TreeCache(CamilleEnvironment.getCamille().getCuratorClient(),
+                            PathBuilder.buildPodPath(CamilleEnvironment.getPodId()).toString());
+                    Semaphore sem = new Semaphore(0);
+                    try {
+                        cache.start();
+                    } catch (Exception e1) {
+                        log.error(String.format("TreeCache don't start normally because of %s",
+                                e1.getMessage()));
+                    }
+                    TreeCacheListener listener = new TreeCacheListener() {
+
+                        @Override
+                        public void childEvent(CuratorFramework client, TreeCacheEvent event)
+                                throws Exception {
+                            switch (event.getType()) {
+                                case INITIALIZED: {
+                                    long endTime = System.currentTimeMillis();
+                                    log.info("Tree cache is initialized, duration = {} ms", (endTime - startTime));
+                                    sem.release();
+                                }
+                            }
+                        }
+                    };
+                    cache.getListenable().addListener(listener);
+                    try {
+                        sem.acquire();
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
-        } catch (InterruptedException e) {
-            log.error("Failed to wait for treeCache finish loading", e);
-            throw new RuntimeException(e);
         }
         return cache;
     }
 }
+
