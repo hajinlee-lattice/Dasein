@@ -156,60 +156,15 @@ angular.module('lp.import.calendar', [])
         vm.calendar.longerMonth = vm.selectedQuarter;
         ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
             if(!result.errorCode) {
-                vm.toggleModal();
+                Modal.warning({
+                    name: 'calendar_Warning',
+                    title: "Business Calendar",
+                    message: 'The Business Calendar will be updated throughout the tenant.',
+                    confirmtext: "Yes, Update"
+                }, vm.modalCallback);
             }
         });
     }
-
-    vm.initModalWindow = function () {
-        vm.modalConfig = {
-            'name': "import_calendar",
-            'type': 'sm',
-            'title': 'Warning',
-            'titlelength': 100,
-            'dischargetext': 'Cancel',
-            'dischargeaction': 'cancel',
-            'confirmtext': 'Yes, Update',
-            'confirmaction': 'proceed',
-            'icon': 'fa fa-exclamation-triangle',
-            'iconstyle': {'color': 'white'},
-            'confirmcolor': 'blue-button',
-            'showclose': true,
-            'headerconfig': {'background-color':'#FDC151', 'color':'white'},
-            'confirmstyle' : {'background-color':'#FDC151'}
-        };
-
-        vm.modalCallback = function (args) {
-            if (vm.modalConfig.dischargeaction === args.action) {
-                vm.toggleModal();
-            } else if (vm.modalConfig.confirmaction === args.action) {
-                vm.toggleModal();
-            }
-            if(args.action === 'proceed') {
-                if(debug) {
-                    console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
-                } else {
-                    vm.saving = true;
-                    ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
-                        $state.go(vm.lastFrom.name);
-                    });
-                }
-            }
-        }
-
-        vm.toggleModal = function () {
-            var modal = Modal.get(vm.modalConfig.name);
-            if (modal) {
-                modal.toggle();
-            }
-        }
-
-        $scope.$on("$destroy", function () {
-            Modal.remove(vm.modalConfig.name);
-        });
-    }
-
-    vm.initModalWindow();
 
     var parseCalendar = function(calendar) {
         if(!calendar) {
@@ -230,6 +185,27 @@ angular.module('lp.import.calendar', [])
         }
         vm.calendarOptions = options;
     }
+
+    vm.modalCallback = function (args) {
+        console.log('AAAA');
+        var modal = Modal.get('calendar_Warning');
+        if ('cancel' === args.action) {
+            Modal.modalRemoveFromDOM(modal, {name: 'calendar_Warning'});
+            // vm.toggleModal();
+        } else if ('ok' === args.action) {
+            modal.waiting(true);
+            if(debug) {
+                console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
+            } else {
+                vm.saving = true;
+                ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
+                    Modal.modalRemoveFromDOM(modal, {name: 'calendar_Warning'});
+                    $state.go(vm.lastFrom.name);
+                });
+            }
+        }
+    }
+
 
     vm.init = function() {
         //parseCalendar(vm.calendar); // uncomment this to create a non-null state for existing calendars PLS-8479
