@@ -1,7 +1,7 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
-    $state, $stateParams, $scope, $timeout, $transitions, ResourceUtility, WizardProgressItems,
-    WizardProgressContext, WizardControlsOptions, WizardValidationStore/*, ImportWizardService, ImportWizardStore*/
+    $state, $stateParams, $scope, $timeout, $transitions, $rootScope,
+    ResourceUtility, WizardProgressItems, WizardProgressContext, WizardControlsOptions, WizardValidationStore/*, ImportWizardService, ImportWizardStore*/
 ) {
     var vm = this;
 

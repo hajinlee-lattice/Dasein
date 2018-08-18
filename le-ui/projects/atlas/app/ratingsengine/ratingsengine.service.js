@@ -1,6 +1,6 @@
 angular.module('lp.ratingsengine')
 .service('RatingsEngineStore', function(
-    $q, $state, $stateParams,  $rootScope,  $timeout,
+    $q, $state, $stateParams,  $rootScope, $timeout,
     RatingsEngineService, DataCloudStore, BrowserStorageUtility, SegmentStore, ImportWizardService, JobsStore, Banner
 ){
     var RatingsEngineStore = this;
@@ -912,19 +912,27 @@ angular.module('lp.ratingsengine')
         var ratingId = $stateParams.rating_id,
             modelId = $stateParams.modelId; // no model id here
 
+        RatingsEngineStore.setValidation('training', false); 
+
         RatingsEngineStore.getRating(ratingId).then(function(rating) {
             var modelAIId = rating.activeModel.AI.id; // use this instead of model id
             
             RatingsEngineService.validateModel(ratingId, modelAIId).then(function(result) {
                 var success = !result.data.errorCode;
                 if(success) {
-                    RatingsEngineStore.nextSaveAIRatingModel(nextState, true);
+                    RatingsEngineStore.nextSaveAIRatingModel(nextState, 'training');
                 }
+                RatingsEngineStore.setValidation('training', !success);
             });
         });
 
     }
 
+    /**
+     * [nextSaveAIRatingModel 
+     * @param  {[string]} nextState [the next state]
+     * @param  {[sting]} validate  [what you want to setValidation for, not a boolean]
+     */
     this.nextSaveAIRatingModel = function(nextState, validate){
         var ratingId = $stateParams.rating_id;
 
@@ -978,6 +986,7 @@ angular.module('lp.ratingsengine')
                                 }
                             }
                         }
+                        RatingsEngineStore.setValidation(validate, !success);
                     });
                 } else {
                     if (lastRoute[lastRoute.length-1] === 'creation') {
