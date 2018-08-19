@@ -84,6 +84,8 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     });
 
+    // console.log(vm.dashboard);
+
 
     vm.modalCallback = function (args) {
         var modal = Modal.get(vm.modalConfig.name);

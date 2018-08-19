@@ -402,8 +402,8 @@ angular.module('lp.models.ratings', [
 
 })
 .controller('ModelRatingsHistoryController', function (
-    $scope, $rootScope, $stateParams, $window,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, HistoricalABCDBuckets, FeatureFlags) {
+    $scope, $rootScope, $state, $stateParams, $window,
+    ResourceUtility, Model, ModelStore, ModelRatingsService, Iterations, FeatureFlags) {
 
     var vm = this;
     angular.extend(vm, {
@@ -413,40 +413,60 @@ angular.module('lp.models.ratings', [
         data: ModelStore,
         bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
         ResourceUtility: ResourceUtility,
-        historicalBuckets: HistoricalABCDBuckets
+        cdlIsEnabled: FeatureFlags.EnableCdl,
+        iterations: Iterations,
+        scoringHistory: [],
+        math: window.Math
     });
 
     vm.init = function() {
-        vm.Math = window.Math;
 
-        vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
+        if(vm.cdlIsEnabled){
+            // Create published history list from all created iterations
+            angular.forEach(vm.iterations, function(iteration){
+                if(iteration.publishedHistory){
+                    vm.scoringHistory.push(iteration);
+                }
+            });
 
-        if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
-            vm.modelType = "Leads";
+            if(vm.scoringHistory.length == 1){
+                vm.activeIteration = vm.scoringHistory[0];
+            } else {
+                // Set correct iteration as default for select menu
+                for(var i = 0; i < vm.scoringHistory.length; i++) {
+                    if (vm.scoringHistory[i].modelSummaryId === $stateParams.modelId) {
+                        vm.activeIteration = vm.scoringHistory[i];
+                    }
+                }
+            }
+
+            vm.publishedHistory = vm.activeIteration.publishedHistory;
+
         } else {
-            vm.modelType = "Accounts";
+
+            vm.publishedHistory = vm.iterations;
+
+            if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
+                vm.modelType = "Leads";
+            } else {
+                vm.modelType = "Accounts";
+            }
         }
 
-        angular.forEach(vm.historicalBuckets, function(value, key) {
-            if (value.length === 6) {
-                vm.bucketNames = ['A', 'B', 'C', 'D', 'E', 'F'];
-            } else if (value.length < 6) {
-                vm.bucketNames = ['A', 'B', 'C', 'D', 'E'];
-            };
-        });
+        // vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
 
-        const ordered = {};
-        Object.keys(vm.historicalBuckets).sort().reverse().forEach(function(key) {
-            ordered[key] = vm.historicalBuckets[key];
-        });
+        // const ordered = {};
+        // Object.keys(vm.activeIteration.publishedHistory).sort().reverse().forEach(function(key) {
+        //     ordered[key] = vm.publishedHistory[key];
+        // });
 
-        vm.historicalBuckets = ordered;
+        // vm.activeIteration.publishedHistory = ordered;
 
          // Set value for total leads in set
         // This will need to get changed when we're saving configurations
-        vm.historyTotalLeads = pluckDeepKey("num_leads", vm.historicalBuckets);
+        vm.historyTotalLeads = pluckDeepKey("num_leads", vm.publishedHistory);
 
-        // Add values for a specific key in object
+        // Add values for a specific key in object  
         function pluckDeepKey(key, obj) {
             if (_.has(obj, key)) {
                 return obj[key];
@@ -456,9 +476,15 @@ angular.module('lp.models.ratings', [
             }), false), function(a,b) { return a + b });
         }
 
-        vm.cdlIsEnabled = FeatureFlags.EnableCdl;
-
     };
+
+    vm.changeIterationData = function(){
+        $state.go('home.model.ratings.history', {
+            modelId: vm.activeIteration.modelSummaryId,
+            rating_id: $stateParams.rating_id,
+            viewingIteration: false
+        }, { reload: true });
+    }
 
     // $window.addEventListener('scroll', handleWindowScroll);
 

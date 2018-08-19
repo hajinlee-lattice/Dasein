@@ -456,13 +456,24 @@ angular
 
                     return deferred.promise;
                 },
-                HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
-                    var deferred = $q.defer(),
-                        id = $stateParams.modelId;
+                Iterations: function($q, $stateParams, FeatureFlags, ModelRatingsService) {
 
-                    ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
-                        deferred.resolve(result);
-                    });
+                    var cdlIsEnabled = FeatureFlags.EnableCdl,
+                        deferred = $q.defer();
+
+                    if(cdlIsEnabled){
+                        var id = $stateParams.rating_id;
+
+                        ModelRatingsService.ScoringHistory(id).then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    } else {
+                        var id = $stateParams.modelId;
+                        
+                        ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    }
 
                     return deferred.promise;
                 }

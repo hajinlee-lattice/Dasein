@@ -13,8 +13,23 @@
             	<span>Published on:</span>
             </div> -->
 
+            <div
+            	ng-if="vm.cdlIsEnabled"
+            	class="iteration-selection-header">
+                <h2>
+                    Iteration:
+                    <select
+                        ng-model="vm.activeIteration"
+                        ng-options="iteration.iteration for iteration in vm.scoringHistory"
+                        ng-change="vm.changeIterationData()"
+                        class="iteration-selection"
+                        ng-disabled="vm.scoringHistory.length == 1"
+                    ></select>
+                </h2>
+            </div>
+
             <ul class="history-list">
-            	<li ng-repeat="configuration in vm.historicalBuckets">
+            	<li ng-repeat="configuration in vm.publishedHistory">
 		            <div class="chart-header clearfix">
 		                <div class="list-data pull-left"><span ng-if="configuration[0].last_modified_by_user">Created by: {{configuration[0].last_modified_by_user}}</span></div>
 		                <div class="list-data pull-right">Published on: {{configuration[0].creation_timestamp | date : 'MMM d, y h:mm:ss a'}}</div>
@@ -24,16 +39,14 @@
 		                    <div class="bucket-label">{{bucket.bucket_name}}</div>
 		                    <dl>
 		                        <dt>Lift</dt>
-		                        <dd class="lift">{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
+		                        <dd class="lift">{{vm.math.max(bucket.lift).toFixed(1);}}x</dd>
 		                        <dt>Score Range</dt>
 		                        <dd>{{bucket.left_bound_score}}-{{bucket.right_bound_score}}</dd>
 		                    </dl>
 		                </li>
 		            </ul><!-- End .bucket-tiles -->
 		        </li>
-
 		        <h4 ng-if="!vm.cdlIsEnabled">Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
-
 		    </ul><!-- End .history -->
 
         </div><!-- End .twelve.columns -->

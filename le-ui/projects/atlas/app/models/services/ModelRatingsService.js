@@ -60,6 +60,34 @@ angular
         return deferred.promise;
     }
 
+    this.ScoringHistory = function(engineId) {
+        var deferred = $q.defer(),
+            engineId = engineId || '',
+            url = '/pls/ratingengines/' + engineId + '/publishedhistory';
+
+        $http({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
     this.HistoricalABCDBuckets = function(id) {
         var deferred = $q.defer(),
             result,

@@ -24,7 +24,7 @@
     	font-size: 20px;
     }
 }
-.iteration-selection {
+.iteration-selection-header {
 	margin: 30px 0;
 	h2 {
 		text-align: left;
@@ -34,13 +34,18 @@
 	.more-info {
 		padding: 0 5px;
 	}
-	select { 
-		height: 35px;
-	    width: 59px;
-	    font-size: 15px;
-	    color: #467dba;
-	    border-color: #d8d8d8;
-	}
+}
+.iteration-selection {
+	height: 35px;
+    width: 59px;
+    font-size: 15px;
+    color: #467dba;
+    border-color: #d8d8d8;
+    &[disabled] {
+    	color: #b1b1b1;
+    	background: #fefefe;
+    	pointer: default;
+    }
 }
 .chart-header {
 	&:after {

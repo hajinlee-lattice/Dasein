@@ -8,13 +8,14 @@
                 <li ui-sref="home.model.ratings.history({ modelId: '{{ vm.modelId | escape }}' })"  ui-sref-opts="{reload: true}">History</li>
             </ul>
 
-            <div ng-if="vm.section === 'dashboard.ratings'" class="iteration-selection">
+            <div ng-if="vm.section === 'dashboard.ratings'" class="iteration-selection-header">
                 <h2>
                     Which model iteration do you want to activate?
                     <select
                         ng-model="vm.activeIteration"
                         ng-options="iteration.iteration for iteration in vm.activeIterations"
                         ng-change="vm.changeIterationData()"
+                        class="iteration-selection"
                     ></select>
                 </h2>
                 <h2>
