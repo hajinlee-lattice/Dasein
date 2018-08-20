@@ -30,7 +30,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
                 tgtKey);
         s3Service.changeKeyRecursive("latticeengines-test-dev",
                 "test_kms/distcp_encrypted",
-                "test_kms/distcp_unencrypted", 
+                "test_kms/distcp_unencrypted",
                 "");
     }
 

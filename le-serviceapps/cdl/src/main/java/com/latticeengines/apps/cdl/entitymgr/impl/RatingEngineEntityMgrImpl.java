@@ -32,14 +32,13 @@ import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.repository.RatingEngineRepository;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
-import com.latticeengines.common.exposed.util.DBConnectionContext;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteEntityMgrRepositoryImpl;
-import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -76,13 +75,15 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.apps.core.service.ActionService;
 
 @Component("ratingEngineEntityMgr")
-public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<RatingEngine, Long>
+public class RatingEngineEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<RatingEngineRepository, RatingEngine, Long>
         implements RatingEngineEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImpl.class);
+
+    @Inject
+    private RatingEngineEntityMgrImpl _self;
 
     @Inject
     private RatingEngineDao ratingEngineDao;
@@ -114,25 +115,45 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
     }
 
     @Override
-    public BaseJpaRepository<RatingEngine, Long> getRepositoryByContext() {
-        if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
-            log.info("Use reader repository for RatingEngineEntityMgr.");
-            return ratingEngineReaderRepository;
+    protected RatingEngineRepository getReaderRepo() {
+        return ratingEngineReaderRepository;
+    }
+
+    @Override
+    protected RatingEngineRepository getWriterRepo() {
+        return ratingEngineWriterRepository;
+    }
+
+    @Override
+    protected RatingEngineEntityMgrImpl getSelf() {
+        return _self;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<RatingEngine> findAllByTypeAndStatus(String type, String status) {
+        if (isReaderConnection()) {
+            return findAllByTypeAndStatusFromReader(type, status);
         } else {
-            return ratingEngineWriterRepository;
+            return getAllByTypeAndStatusFromRepo(getWriterRepo(), type, status);
         }
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<RatingEngine> findAll() {
-        return ratingEngineDao.findAll();
+    @Transactional(transactionManager = "transactionManagerReader", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<RatingEngine> findAllByTypeAndStatusFromReader(String type, String status) {
+        return getAllByTypeAndStatusFromRepo(getReaderRepo(), type, status);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<RatingEngine> findAllByTypeAndStatus(String type, String status) {
-        return ratingEngineDao.findAllByTypeAndStatus(type, status);
+    private List<RatingEngine> getAllByTypeAndStatusFromRepo(RatingEngineRepository repo, String type, String status) {
+        if (type == null && status == null) {
+            return repo.findAll();
+        } else if (type == null) {
+            return repo.findByStatus(RatingEngineStatus.valueOf(status));
+        } else if (status == null) {
+            return repo.findByType(RatingEngineType.valueOf(type));
+        } else {
+            return repo.findByTypeAndStatus(RatingEngineType.valueOf(type), RatingEngineStatus.valueOf(status));
+        }
     }
 
     @Override

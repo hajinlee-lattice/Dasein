@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.util;
+package com.latticeengines.db.exposed.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

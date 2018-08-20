@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.util;
+package com.latticeengines.db.exposed.util;
 
 public class ThreadLocalDBConnectionStrategy implements DBConnectionStrategy {
 

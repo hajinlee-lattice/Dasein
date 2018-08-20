@@ -17,10 +17,8 @@ import com.latticeengines.apps.cdl.dao.PlayDao;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayRepository;
-import com.latticeengines.common.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteEntityMgrRepositoryImpl;
-import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.graph.VertexType;
@@ -30,10 +28,13 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("playEntityMgr")
-public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play, Long> implements PlayEntityMgr {
+public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayRepository, Play, Long> implements PlayEntityMgr {
 
     @Inject
     private PlayDao playDao;
+
+    @Inject
+    private PlayEntityMgrImpl _self;
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -45,12 +46,18 @@ public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play
     private PlayRepository playReaderRepository;
 
     @Override
-    public BaseJpaRepository<Play, Long> getRepositoryByContext() {
-        if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
-            return playReaderRepository;
-        } else {
-            return playWriterRepository;
-        }
+    protected PlayRepository getReaderRepo() {
+        return playReaderRepository;
+    }
+
+    @Override
+    protected PlayRepository getWriterRepo() {
+        return playWriterRepository;
+    }
+
+    @Override
+    protected PlayEntityMgrImpl getSelf() {
+        return _self;
     }
 
     @Override
@@ -114,12 +121,6 @@ public class PlayEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<Play
         if (play.getIsCleanupDone() != null) {
             existingPlay.setIsCleanupDone(play.getIsCleanupDone());
         }
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Play> findAll() {
-        return super.findAll();
     }
 
     @Override

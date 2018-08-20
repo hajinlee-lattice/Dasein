@@ -104,6 +104,10 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected MetadataSegment createMetadataSegment(String segmentName) {
+        return createMetadataSegment(segmentName, CustomerSpace.parse(mainTestTenant.getId()).toString());
+    }
+
+    protected MetadataSegment createMetadataSegment(String segmentName, String customerSpace) {
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();
 
@@ -115,10 +119,8 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         metadataSegment.setAccountRestriction(accountRestriction);
         metadataSegment.setContactRestriction(contactRestriction);
 
-        metadataSegment = segmentService.createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                metadataSegment);
-        MetadataSegment retrievedSegment = segmentService
-                .findByName(CustomerSpace.parse(mainTestTenant.getId()).toString(), metadataSegment.getName());
+        metadataSegment = segmentService.createOrUpdateSegment(customerSpace, metadataSegment);
+        MetadataSegment retrievedSegment = segmentService.findByName(customerSpace, metadataSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         return retrievedSegment;
     }

@@ -5,10 +5,10 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,23 +16,24 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.cdl.dao.CDLJobDetailDao;
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.repository.CDLJobDetailRepository;
-import com.latticeengines.common.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteEntityMgrRepositoryImpl;
-import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 
 @Component("cdlJobDetailEntityMgr")
-public class CDLJobDetailEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryImpl<CDLJobDetail, Long> implements
+public class CDLJobDetailEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<CDLJobDetailRepository, CDLJobDetail, Long> implements
         CDLJobDetailEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(CDLJobDetailEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private CDLJobDetailDao cdlJobDetailDao;
+
+    @Inject
+    private CDLJobDetailEntityMgrImpl _self;
 
     @Resource(name = "CDLJobDetailReaderRepository")
     private CDLJobDetailRepository cdlJobDetailReaderRepository;
@@ -43,6 +44,21 @@ public class CDLJobDetailEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
     @Override
     public BaseDao<CDLJobDetail> getDao() {
         return cdlJobDetailDao;
+    }
+
+    @Override
+    protected CDLJobDetailRepository getReaderRepo() {
+        return cdlJobDetailReaderRepository;
+    }
+
+    @Override
+    protected CDLJobDetailRepository getWriterRepo() {
+        return cdlJobDetailWriterRepository;
+    }
+
+    @Override
+    protected CDLJobDetailEntityMgrImpl getSelf() {
+        return _self;
     }
 
     @Override
@@ -77,15 +93,5 @@ public class CDLJobDetailEntityMgrImpl extends BaseReadWriteEntityMgrRepositoryI
         log.debug(String.format("update cdl job detail %d", cdlJobDetail.getPid()));
         cdlJobDetail.setLastUpdateDate(Date.from(Instant.now()));
         cdlJobDetailDao.update(cdlJobDetail);
-    }
-
-    @Override
-    public BaseJpaRepository<CDLJobDetail, Long> getRepositoryByContext() {
-        if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
-            log.info("Use reader repository for CDLJobDetailEntityMgr.");
-            return cdlJobDetailReaderRepository;
-        } else {
-            return cdlJobDetailWriterRepository;
-        }
     }
 }
