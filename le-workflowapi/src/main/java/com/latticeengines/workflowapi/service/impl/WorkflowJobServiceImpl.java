@@ -7,10 +7,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.workflow.exposed.service.JobCacheService;
-import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +17,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -33,7 +31,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 
@@ -379,10 +379,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 continue;
             }
 
-            if ((System.currentTimeMillis() - workflowJob.getStartTimeInMillis()) > SPRING_BATCH_FAILURE_THRESHOLD
+            long currentTimeMillis = System.currentTimeMillis();
+            if ((currentTimeMillis - workflowJob.getStartTimeInMillis()) > SPRING_BATCH_FAILURE_THRESHOLD
                     && workflowJob.getWorkflowId() == null) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                log.warn(String.format("Spring-batch has failed to start job. WorkflowPId=%s. Job started at %s. " +
+                                "Current timestamp=%s. Spring-batch failure threshold=%s. " +
+                                "DiffBetweenCurrentAndStartTime=%s",
+                        workflowJob.getPid(), workflowJob.getStartTimeInMillis(),
+                        currentTimeMillis, SPRING_BATCH_FAILURE_THRESHOLD,
+                        currentTimeMillis - workflowJob.getStartTimeInMillis()));
                 if (workflowJob.getWorkflowId() != null) {
                     // invalidate cache entry
                     jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
@@ -408,12 +415,20 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 continue;
             }
 
+            long currentTimeMillis = System.currentTimeMillis();
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
             if (jobUpdate != null
-                    && (jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime() >= 1000 * 120)
-                    && (System.currentTimeMillis() - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
+                    && (jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime() >= HEARTBEAT_FAILURE_THRESHOLD)
+                    && (currentTimeMillis - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+                log.warn(String.format("First heartbeat failed. WorkflowId=%s. Heartbeat created time=%s. " +
+                                "Heartbeat update time=%s. Heartbeat failure threshold=%s. Current time=%s. " +
+                                "DiffBetweenLastUpdateAndCreate=%s. DiffBetweenCurrentAndLastUpdate=%s",
+                        workflowJob.getWorkflowId(), jobUpdate.getCreateTime(), jobUpdate.getLastUpdateTime(),
+                        HEARTBEAT_FAILURE_THRESHOLD, currentTimeMillis,
+                        jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime(),
+                        currentTimeMillis - jobUpdate.getLastUpdateTime()));
                 if (workflowJob.getWorkflowId() != null) {
                     // invalidate cache entry
                     jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));

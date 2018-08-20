@@ -71,6 +71,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private static final String INTERNAL_RESOURCE_HOST_PORT = "Internal_Resource_Host_Port";
     private static final String USER_ID = "User_Id";
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 24;
+    public static final long HEARTBEAT_MILLIS = 1000 * 120;
 
     @Autowired
     private LEJobExecutionRetriever leJobExecutionRetriever;
@@ -234,6 +235,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         Long jobExecutionId = 0L;
 
         try {
+//            JobExecution execution = leJobExecutionRetriever.getJobExecution(workflowExecutionId.getId(), Boolean.TRUE);
+//
+
             jobExecutionId = jobOperator.restart(workflowExecutionId.getId());
             workflowJob.setWorkflowId(jobExecutionId);
             workflowJobEntityMgr.registerWorkflowId(workflowJob);
@@ -335,7 +339,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception {
-        return waitForCompletion(workflowId, maxWaitTime, 1000 * 120);
+        return waitForCompletion(workflowId, maxWaitTime, HEARTBEAT_MILLIS);
     }
 
     @Override
