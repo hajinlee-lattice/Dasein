@@ -192,8 +192,8 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
     private FieldList findFieldsToDiscard(Node joined) {
         List<String> toDiscard = joined.getFieldNames().stream() //
-                .filter(f -> f.contains(idCol) && !f.equals(idCol)) //
-                .filter(f -> f.contains(RatingEngine.RATING_ENGINE_PREFIX) && !f.startsWith(RatingEngine.RATING_ENGINE_PREFIX)) //
+                .filter(f -> (f.contains(idCol) && !f.equals(idCol)) || (f.contains(RatingEngine.RATING_ENGINE_PREFIX)
+                        && !f.startsWith(RatingEngine.RATING_ENGINE_PREFIX))) //
                 .collect(Collectors.toList());
         return new FieldList(toDiscard);
     }

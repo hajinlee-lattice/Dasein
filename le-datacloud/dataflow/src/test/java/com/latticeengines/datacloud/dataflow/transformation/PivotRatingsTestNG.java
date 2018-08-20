@@ -1,10 +1,12 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -12,6 +14,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class PivotRatingsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
@@ -54,8 +57,14 @@ public class PivotRatingsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
+        Table table = getOutputSchema();
+        List<String> attrs = Arrays.asList(table.getAttributeNames());
+        // the following three names are always generated in Join operation
+        Assert.assertFalse(attrs.contains("ai_score__AccountId"));
+        Assert.assertFalse(attrs.contains("ai_ev__AccountId"));
+        Assert.assertFalse(attrs.contains("ai_rating__ai_score__ai_ev__AccountId"));
         for (GenericRecord record : records) {
-           // System.out.println(record);
+            // System.out.println(record);
         }
     }
 
