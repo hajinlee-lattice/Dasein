@@ -58,14 +58,14 @@ public class CDLImpactValidator extends AttrValidator {
             }
             String customerSpace = MultiTenantContext.getCustomerSpace().toString();
             AttrState attrState = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
-            if (!AttrState.Inactive.equals(attrState)) { // skip impact checking for inactive attributes
+            if (!AttrState.Inactive.equals(attrState)) { // skip impact checking
+                                                         // for inactive
+                                                         // attributes
                 if (isToBeDisabledForSegment(attrConfig)) {
                     List<MetadataSegment> impactSegments = cdlDependenciesProxy.getDependingSegments(customerSpace,
                             attributes);
                     List<RatingEngine> impactRatingEngines = cdlDependenciesProxy
                             .getDependingRatingEngines(customerSpace, attributes);
-                    List<RatingModel> impactRatingModels = cdlDependenciesProxy.getDependingRatingModels(customerSpace,
-                            attributes);
                     if (CollectionUtils.isNotEmpty(impactSegments)) {
                         List<String> names = getImpactSegmentNames(impactSegments);
                         names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS, name, attrConfig));
@@ -74,11 +74,6 @@ public class CDLImpactValidator extends AttrValidator {
                         List<String> names = getImpactRatingEngineNames(impactRatingEngines);
                         names.forEach(
                                 name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
-                    }
-                    if (CollectionUtils.isNotEmpty(impactRatingModels)) {
-                        List<String> names = getImpactRatingModleNames(impactRatingModels);
-                        names.forEach(
-                                name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_MODELS, name, attrConfig));
                     }
                 }
                 if (isToBeDisabledForTalkingPoint(attrConfig)) {
