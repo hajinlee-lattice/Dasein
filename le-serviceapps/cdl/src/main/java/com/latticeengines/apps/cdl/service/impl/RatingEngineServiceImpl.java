@@ -680,10 +680,22 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
         validateAIRatingEngine(ratingEngine);
 
+        if (ratingEngine.getPublishedIteration() == null
+                || StringUtils.isEmpty(((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId())
+                || ((AIModel) ratingEngine.getPublishedIteration()).getModelingJobStatus() != JobStatus.COMPLETED) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Cannot retrieve PublishedHistory since Model either has no published Iteration or the Published iteration is in an incorrect state" });
+        }
+
+        List<BucketMetadata> publishedBuckets = bucketedScoreProxy
+                .getAllPublishedBucketsByEngineId(CustomerSpace.shortenCustomerSpace(customerSpace), ratingEngineId);
+
+        if (CollectionUtils.isEmpty(publishedBuckets)) {
+            publishedBuckets = setAndRetrievePublishedBucketsIfMissing(customerSpace, ratingEngine);
+        }
+
         Map<String, HashMap<Long, List<BucketMetadata>>> publishedBucketsGroupedByCreationTime = Flux
-                .fromIterable(bucketedScoreProxy.getAllPublishedBucketsByEngineId(
-                        CustomerSpace.shortenCustomerSpace(customerSpace), ratingEngineId))
-                .filter(bucket -> bucket.getPublishedVersion() != null)
+                .fromIterable(publishedBuckets).filter(bucket -> bucket.getPublishedVersion() != null)
                 .collect(HashMap<String, HashMap<Long, List<BucketMetadata>>>::new, (returnMap, bucket) -> {
                     if (!returnMap.containsKey(bucket.getModelSummaryId())) {
                         returnMap.put(bucket.getModelSummaryId(), new HashMap<>());
@@ -702,8 +714,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 .filter(iteration -> StringUtils.isNotEmpty(iteration.getModelSummaryId()))
                 .map(iteration -> new RatingModelWithPublishedHistoryDTO(iteration,
                         publishedBucketsGroupedByCreationTime.get(iteration.getModelSummaryId())))
+                .filter(iteration -> MapUtils.isNotEmpty(iteration.getPublishedHistory())) //
                 .collectList().block();
-
     }
 
     @VisibleForTesting
@@ -970,13 +982,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         return replicaName;
-    }
-
-    private void validateAIRatingEngine(RatingEngine ratingEngine) {
-        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
-            throw new LedpException(LedpCode.LEDP_31107,
-                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
-        }
     }
 
     @VisibleForTesting

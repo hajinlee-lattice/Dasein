@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -7,10 +8,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -19,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -82,10 +88,15 @@ public abstract class RatingEngineTemplate {
                             .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
                             .collect(Collectors.toList()));
             } else {
-                if (ratingEngine.getPublishedIteration() != null && ((AIModel) ratingEngine.getPublishedIteration())
-                        .getModelingJobStatus() == JobStatus.COMPLETED) {
+                if (ratingEngine.getPublishedIteration() != null
+                        && StringUtils.isNotEmpty(((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId())
+                        && ((AIModel) ratingEngine.getPublishedIteration())
+                                .getModelingJobStatus() == JobStatus.COMPLETED) {
                     List<BucketMetadata> bucketMetadataList = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(
                             tenantId, ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId());
+                    if (CollectionUtils.isEmpty(bucketMetadataList)) {
+                        bucketMetadataList = setAndRetrievePublishedBucketsIfMissing(tenantId, ratingEngine);
+                    }
                     bucketMetadataList = BucketedScoreSummaryUtils.sortBucketMetadata(bucketMetadataList, false);
                     ratingEngineSummary.setBucketMetadata(bucketMetadataList);
                 }
@@ -95,6 +106,37 @@ public abstract class RatingEngineTemplate {
         }
         ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);
         return ratingEngineSummary;
+    }
+
+    protected boolean isPublishedMetadataMissing(String tenantId, RatingEngine ratingEngine) {
+        return ratingEngine.getType() != RatingEngineType.RULE_BASED && ratingEngine.getPublishedIteration() != null
+                && ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId() != null
+                && ((AIModel) ratingEngine.getPublishedIteration()).getModelingJobStatus() == JobStatus.COMPLETED
+                && CollectionUtils.isEmpty(bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(tenantId,
+                        ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId()));
+
+    }
+
+    protected List<BucketMetadata> setAndRetrievePublishedBucketsIfMissing(String tenantId, RatingEngine ratingEngine) {
+        validateAIRatingEngine(ratingEngine);
+        if (isPublishedMetadataMissing(tenantId, ratingEngine)) {
+            String modelSummaryId = ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId();
+            List<BucketMetadata> latestBuckets = bucketedScoreProxy.getLatestABCDBucketsByModelGuid(tenantId,
+                    modelSummaryId);
+            UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
+            request.setBucketMetadataList(latestBuckets);
+            request.setModelGuid(modelSummaryId);
+            request.setPublished(true);
+            return bucketedScoreProxy.updateABCDBuckets(tenantId, request);
+        }
+        return new ArrayList<>();
+    }
+
+    protected void validateAIRatingEngine(RatingEngine ratingEngine) {
+        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
+            throw new LedpException(LedpCode.LEDP_31107,
+                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
+        }
     }
 
     Date findLastRefreshedDate(String tenantId) {
