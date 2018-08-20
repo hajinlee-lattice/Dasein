@@ -350,20 +350,12 @@ angular.module('lp.ratingsengine.ratingslist', [
     };
 
     vm.canBeActivated = function(rating){
-        var metadata = rating.bucketMetadata;
-        var type = rating.type;
 
-        var ret = false;
         if(rating.status !== 'INACTIVE'){
-            return ret;
-        }
-
-        if(type === 'RULE_BASED'){
-            ret = true;//vm.hasRules(rating);
+            return false;
         }else{
-            ret = metadata && metadata.length > 0;
-        }   
-        return ret;
+            return true;
+        }
     }
 
     vm.enableDelete = function(ratingId) {

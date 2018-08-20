@@ -45,7 +45,7 @@
                             </div>
                         </span>
                     </h3>
-                    <h4>{{ activeStatus }} <span ng-if="!IsRuleBased">( Iteration {{ activeIteration }} )</span></h4>
+                    <h4>{{ activeStatus }} <span ng-if="!IsRuleBased && activeStatus == 'ACTIVE' ">( Iteration {{ activeIteration }} )</span></h4>
                     <p>Last data refresh {{ lastRefreshedDate | date }}</p>
                 </div>
             </div>

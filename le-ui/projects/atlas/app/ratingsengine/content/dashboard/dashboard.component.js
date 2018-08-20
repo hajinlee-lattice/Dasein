@@ -4,7 +4,7 @@ angular.module('lp.ratingsengine.dashboard', [
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, $sce,
     RatingsEngineStore, RatingsEngineService, AtlasRemodelStore, Modal,
-    Dashboard, RatingEngine, Model, IsRatingEngine, IsPmml, Products, AuthorizationUtility, FeatureFlagService
+    Dashboard, RatingEngine, Model, Notice, IsRatingEngine, IsPmml, Products, AuthorizationUtility, FeatureFlagService
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -162,6 +162,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 id: vm.ratingEngine.id,
                 status: newStatus
             }
+        var msgStatus = newStatus == 'ACTIVE' ? 'activated' : 'deactivated';    
         var model = vm.ratingEngine.scoring_iteration;
         RatingsEngineService.saveRating(newRating).then(function(data){
 
@@ -172,6 +173,11 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.ratingEngine = dataUpdated;
                     $rootScope.$broadcast('statusChange', { 
                         activeStatus: data.status
+                    });
+                    Notice.success({
+                        delay: 3000,
+                        title: 'Deactivate Scoring', 
+                        message: 'Your scoring has been '+msgStatus+'.'
                     });
                     RatingsEngineService.getRatingDashboard(newRating.id).then(function(data){
                         vm.dashboard.plays = data.plays;
@@ -351,8 +357,7 @@ angular.module('lp.ratingsengine.dashboard', [
     vm.disableButtonScoring = function(){
         if(!vm.isRulesBased){
             // return vm.dashboard.summary.bucketMetadata ? false : true ;
-            var deactivate = (vm.ratingEngine.status === 'INACTIVE' || (!vm.dashboard.summary.bucketMetadata) || vm.deactivateInProgress === true);
-        
+            var deactivate = (vm.ratingEngine.status === 'INACTIVE' || vm.deactivateInProgress === true);
             return deactivate;
         }else{
             return vm.deactivateInProgress; 
