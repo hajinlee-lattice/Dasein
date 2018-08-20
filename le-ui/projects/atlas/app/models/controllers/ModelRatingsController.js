@@ -67,10 +67,12 @@ angular.module('lp.models.ratings', [
             // use only iterations that have active modelSummaryId by creating new array
             vm.activeIterations = [];
             angular.forEach(dashboardIterations, function(iteration){
-                if (iteration.modelSummaryId && (iteration.modelingJobStatus != 'Failed')) {
+                if (iteration.modelSummaryId && (iteration.modelingJobStatus != 'Failed' || iteration.modelingJobStatus != 'Pending' || iteration.modelingJobStatus != 'Running')) {
                     vm.activeIterations.push(iteration);
                 }
             });
+
+            console.log(dashboardIterations, vm.activeIterations);
 
             // Set correct iteration as default for select menu
             for(var i = 0; i < vm.activeIterations.length; i++) {

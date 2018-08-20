@@ -43,6 +43,15 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
 
             vm.store = AtlasRemodelStore;
 
+            // Move Lead Information attributes to My Attributes and delete Lead Information Category
+            if(vm.attributes['Lead Information']){
+                angular.forEach(vm.attributes['Lead Information'], function(attribute){
+                    attribute.Category = 'My Attributes';
+                    vm.attributes['My Attributes'].push(attribute);
+                });
+                delete vm.attributes['Lead Information'];
+            }
+
             // Set attributes data
             vm.store.setRemodelAttributes(vm.attributes);
 

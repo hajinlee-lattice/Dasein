@@ -37,7 +37,7 @@
                         class="button orange-button"
                         ui-sref="home.model.ratings({ 
                             rating_id: vm.ratingEngine.id,
-                            modelId: vm.ratingEngine.latest_iteration.AI.modelSummaryId,
+                            modelId: vm.ratingEngine.scoring_iteration.AI.modelSummaryId,
                             section: 'dashboard.ratings',
                             ratingEngine: vm.ratingEngine
                         })"
@@ -58,8 +58,15 @@
             <div class="content">
                 <div ng-if="!vm.isRulesBased">
                     <h3>
-                        Creation Settings
-                        <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
+                        Creation Settings                        
+                        <span ng-if="vm.isPublished">
+                            ( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )
+                            <span class="published-header">Published</span>
+                        </span>
+                        <span ng-if="!vm.isPublished">
+                            ( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )
+                            <span class="published-header">Scored</span>
+                        </span>
                     </h3>
 
                     <!-- <dl>
@@ -128,7 +135,14 @@
                     <h3>
                         Ratings 
                         <span ng-if="!vm.isRulesBased">
-                            <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
+                            <span ng-if="vm.isPublished">
+                                ( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )
+                                <span class="published-header">Published</span>
+                            </span>
+                            <span ng-if="!vm.isPublished">
+                                ( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )
+                                <span class="published-header">Scored</span>
+                            </span>
                             <span class="more-info show-tooltip top delay">
                                 i
                                 <div class="tooltip_ small">

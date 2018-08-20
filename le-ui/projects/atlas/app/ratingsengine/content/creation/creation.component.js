@@ -38,6 +38,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         vm.$onInit = function() {
 
+            console.log(vm.ratingEngine);
+
             vm.setValidation('creation', true);
 
             var model = vm.ratingEngine.latest_iteration.AI;
@@ -120,6 +122,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
             var appId = vm.ratingEngine.latest_iteration.AI.modelingJobId ? vm.ratingEngine.latest_iteration.AI.modelingJobId : RatingsEngineStore.getApplicationId(); // update once backend sets modelingjobId for CE
             if (appId) {
+
+                console.log(RatingsEngineStore.getApplicationId());
+                console.log(appId);
+
                 JobsStore.getJobFromApplicationId(appId).then(function(result) {
 
                     if(result.id) {
