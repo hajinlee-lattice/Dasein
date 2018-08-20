@@ -234,6 +234,14 @@ public class TestPlayCreationHelper {
         return play;
     }
 
+    public List<Play> getPlays() {
+        return playProxy.getPlays(tenantIdentifier, false, null);
+    }
+
+    public Play updatePlay(Play play) {
+        return playProxy.createOrUpdatePlay(tenantIdentifier, play, false);
+    }
+
     public void createPlayLaunch() {
         playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, createDefaultPlayLaunch(), false);
         assertPlayLaunch(playLaunch, false);

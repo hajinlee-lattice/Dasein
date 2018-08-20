@@ -3,6 +3,7 @@ package com.latticeengines.playmaker.entitymgr.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.String;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,10 +11,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 
 @Component("playmakerRecommendationEntityMgr")
 public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommendationEntityMgr {
 
+    static final int MAXIMUM_DESCRIPTION_LENGTH = 255;
     @Autowired
     private PlaymakerDaoFactory daoFactory;
 
@@ -24,6 +27,9 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
         List<Map<String, Object>> recommendations = dao.getRecommendations(start, offset, maximum, syncDestination,
                 playIds, orgInfo);
+
+        truncateDescriptionLength(recommendations);
+
         Map<String, Object> result = wrapResult(recommendations);
         return result;
     }
@@ -43,8 +49,26 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
         List<Map<String, Object>> plays = dao.getPlays(start, offset, maximum, playgroupIds);
+
+        truncateDescriptionLength(plays);
+
         Map<String, Object> result = wrapResult(plays);
         return result;
+    }
+
+    public void truncateDescriptionLength(List<Map<String, Object>> maps) {
+        String postfix = "...";
+        for (int i = 0; i < maps.size(); i++) {
+            Map<String, Object> map = maps.get(i);
+            String description = (String) map.get(PlaymakerConstants.Description);
+            if (description != null) {
+                if (description.length() > MAXIMUM_DESCRIPTION_LENGTH) {
+                    String sub_description = new String(
+                            description.substring(0, MAXIMUM_DESCRIPTION_LENGTH - postfix.length()) + postfix);
+                    map.put(PlaymakerConstants.Description, sub_description);
+                }
+            }
+        }
     }
 
     @Override
