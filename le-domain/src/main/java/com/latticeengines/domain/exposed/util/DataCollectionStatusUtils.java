@@ -39,7 +39,6 @@ public class DataCollectionStatusUtils {
         dateMap.put(Category.TECHNOLOGY_PROFILE, timestamp);
         dateMap.put(Category.WEBSITE_KEYWORDS, timestamp);
         dateMap.put(Category.WEBSITE_PROFILE, timestamp);
-        dateMap.put(Category.ACCOUNT_ATTRIBUTES, timestamp);
         return status;
     }
 
