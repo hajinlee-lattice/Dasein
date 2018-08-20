@@ -350,11 +350,13 @@ angular.module('lp.ratingsengine.ratingslist', [
     };
 
     vm.canBeActivated = function(rating){
+        var type = rating.type;
 
-        if(rating.status !== 'INACTIVE'){
-            return false;
-        }else{
+        // var ret = false;
+        if(rating.status !== 'ACTIVE' && type === 'RULE_BASED'){
             return true;
+        }else{
+            return false;
         }
     }
 
