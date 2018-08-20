@@ -177,7 +177,7 @@ public class SqlServerHelper implements DbHelper {
     public MatchContext fetchSync(MatchContext context) {
         init();
         if (context.getDomains().isEmpty() && context.getNameLocations().isEmpty()) {
-            log.info("Noting to fetch.");
+            log.info("Nothing to fetch.");
             context.setResultSet(Collections.emptyList());
             return context;
         }
