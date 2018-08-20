@@ -423,7 +423,10 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     $scope.$on("$destroy", function() {
-        Modal.modalRemoveFromDOM(Modal.get(vm.modalConfig.name), {name: 'rating_engine_deactivate'});
+        var modal = Modal.get(vm.modalConfig.name);
+        if (modal) {
+            Modal.modalRemoveFromDOM(modal, {name: 'rating_engine_deactivate'});
+        }
     });
 
     vm.init();
