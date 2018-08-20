@@ -79,6 +79,11 @@
             <artifactId>commons-text</artifactId>
             <version>${commons.text.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datacloud-collection</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

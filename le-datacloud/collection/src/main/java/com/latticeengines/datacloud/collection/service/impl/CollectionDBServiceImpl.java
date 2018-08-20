@@ -92,6 +92,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         return rawCollectionRequestService.addNewDomains(domains, vendor, reqId);
     }
 
+    public void addNewDomains(List<String> domains, String reqId)
+    {
+        List<String> vendors = vendorConfigService.getVendors();
+        for (int i = 0; i < vendors.size(); ++i)
+            addNewDomains(domains, vendors.get(i), reqId);
+    }
+
     public int transferRawRequests(boolean deleteFilteredReqs) {
         List<RawCollectionRequest> rawReqs = rawCollectionRequestService.getNonTransferred();
         BitSet filter = collectionRequestService.addNonTransferred(rawReqs);
@@ -442,15 +449,22 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             CollectionWorker worker = activeWorkers.get(i);
             Task task = activeTasks.get(worker.getTaskArn());
 
-            if (worker.getStatus().equals(CollectionWorker.STATUS_NEW) &&
-                    (task.getLastStatus().equals("RUNNING") || task.getLastStatus().equals("STOPPED"))) {
-                log.info("task " + worker.getWorkerId() + " starts running");
-                worker.setStatus(CollectionWorker.STATUS_RUNNING);
-                collectionWorkerService.getEntityMgr().update(worker);
-            }
+            if (task != null) {
+                if (worker.getStatus().equals(CollectionWorker.STATUS_NEW) &&
+                        (task.getLastStatus().equals("RUNNING") || task.getLastStatus().equals("STOPPED"))) {
+                    log.info("task " + worker.getWorkerId() + " starts running");
+                    worker.setStatus(CollectionWorker.STATUS_RUNNING);
+                    collectionWorkerService.getEntityMgr().update(worker);
+                }
 
-            if (!task.getLastStatus().equals("STOPPED"))
-                continue;
+                if (!task.getLastStatus().equals("STOPPED"))
+                    continue;
+            }
+            else if (!worker.getStatus().equals(CollectionWorker.STATUS_FINISHED))
+            {
+                log.info("task " + worker.getWorkerId() + " loses traces, mark it as finished now...");
+                worker.setStatus(CollectionWorker.STATUS_FINISHED);
+            }
 
             //transfer state to finished
             if (worker.getStatus().equals(CollectionWorker.STATUS_RUNNING)) {
@@ -469,7 +483,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 boolean succ = handleFinishedTask(worker);
 
                 //status => consumed/failed
-                worker.setTerminationTime(new Timestamp(task.getStoppedAt().getTime()));
+                worker.setTerminationTime(task != null ? new Timestamp(task.getStoppedAt().getTime()) : new Timestamp
+                        (System.currentTimeMillis()));
                 worker.setStatus(succ ? CollectionWorker.STATUS_CONSUMED : CollectionWorker.STATUS_FAILED);
                 collectionWorkerService.getEntityMgr().update(worker);
 

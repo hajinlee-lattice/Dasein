@@ -26,6 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.collection.service.CollectionDBService;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
@@ -64,6 +65,8 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     @Value("${datacloud.collector.enabled}")
     private boolean domainCollectEnabled;
 
+    private CollectionDBService collectionDBService = null;
+
     private boolean drainMode = false;
 
     @PostConstruct
@@ -71,6 +74,12 @@ public class DomainCollectServiceImpl implements DomainCollectService {
         if (domainCollectEnabled) {
             scheduler.scheduleWithFixedDelay(this::dumpQueue, TimeUnit.MINUTES.toMillis(10));
         }
+    }
+
+    @Override
+    public void setCollectionService(CollectionDBService service)
+    {
+        collectionDBService = service;
     }
 
     @Override
@@ -109,7 +118,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                     if (domainBuffer.size() >= BUFFER_SIZE) {
                         log.info(
                                 "Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
-                        putDomainsInAccountTransferTable(transferId, domainBuffer);
+                        dumpDomains(transferId, domainBuffer);
                         domainBuffer = new HashSet<>();
                         dumpCnt += domainBuffer.size();
                     }
@@ -119,12 +128,22 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                 }
                 if (!domainBuffer.isEmpty() && !(drainMode && System.currentTimeMillis() - timestamp > 2 * MS_IN_MIN)) {
                     log.info("Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
-                    putDomainsInAccountTransferTable(transferId, domainBuffer);
+                    dumpDomains(transferId, domainBuffer);
                     dumpCnt += domainBuffer.size();
                 }
                 // executeDomainCollectionTransfer(transferId);
                 log.info("Finished dumping " + dumpCnt + " domains to collector's url stream.");
             }
+        }
+    }
+
+    private void dumpDomains(String transferId, Collection<String> domains) {
+
+        putDomainsInAccountTransferTable(transferId, domains);
+
+        if (collectionDBService != null) {
+            List<String> domain_list = new ArrayList<String>(domains);
+            collectionDBService.addNewDomains(domain_list, transferId);
         }
     }
 

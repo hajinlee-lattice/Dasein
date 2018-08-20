@@ -9,17 +9,8 @@
 
     <context:component-scan base-package="com.latticeengines.datacloud.collection" />
 
-    <import resource="classpath:db-context.xml" />
-    <import resource="classpath:hadoop-config-context.xml"/>
-    <import resource="classpath:camille-runtime-context.xml"/>
-    <import resource="classpath:proxy-context.xml"/>
-    <import resource="classpath:security-no-controller-context.xml"/>
-    <import resource="common-threadpool-context.xml"/>
-
-    <import resource="classpath:ldc-collectiondb-persistence-context.xml" />
-
     <import resource="classpath:datacloud-core-context.xml" />
-    <import resource="classpath:datacloud-core-persistence-context.xml" />
+    <import resource="classpath:ldc-collectiondb-persistence-context.xml" />
 
     <jpa:auditing/>
     <jpa:repositories base-package="com.latticeengines.datacloud.collection.repository"
@@ -34,9 +25,5 @@
 
     <import resource="classpath:aws-context.xml"/>
     <context:component-scan base-package="com.latticeengines.aws" annotation-config="true"/>
-
-    <import resource="hadoop-config-context.xml"/>
-    <context:property-placeholder location="classpath*:hadoop.properties"/>
-    <import resource="classpath:hadoop-config-context.xml" />
 
 </beans>
