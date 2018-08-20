@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.dataflow.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,8 @@ public class FileParser {
 
     public static final String[] AM_PROFILE_CONFIG_HEADER = { "AMColumnID", "IsSegment", "DecodeStrategy",
             "EncodeBitUnit", "BucketAlgorithm" };
+
+    public static final String[] EMP_RANGE_HEADER = {"EmpRangeOrigin", "EmpRangeStandard" };
 
     @SuppressWarnings("resource")
     public static Map<String, List<NameLocation>> parseBomboraMetroCodes() {
@@ -81,6 +84,28 @@ public class FileParser {
             throw new RuntimeException("Fail to parse AllUniqueMetroCodes.csv", e);
         }
         return intentMap;
+    }
+
+    public static Map<Serializable,Serializable> parseEmpRange(){
+        Map<Serializable,Serializable> EmpRangeMap = new HashMap<>();
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("EmpRangeMap.csv");
+        if (is == null){
+            throw new RuntimeException("Cannot find resource EmpRangeMap.csv");
+        }
+        CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(EMP_RANGE_HEADER).withRecordSeparator("\n");
+        try{
+            CSVParser csvFileParser = new CSVParser(new InputStreamReader(is), csvFileFormat);
+            List<CSVRecord> csvRecords = csvFileParser.getRecords();
+            for (int i = 1; i < csvRecords.size(); i++){
+                CSVRecord record = csvRecords.get(i);
+                String empRangeOrigin = record.get(EMP_RANGE_HEADER[0]);
+                String empRangeStandard = record.get(EMP_RANGE_HEADER[1]);
+                EmpRangeMap.put(empRangeOrigin,empRangeStandard);
+            }
+        }catch (IOException e){
+            throw new RuntimeException("Fail to parse EmpRangeMap.csv", e);
+        }
+        return EmpRangeMap;
     }
 
     private static String standardizeBomboraMetroArea(String metroArea) {

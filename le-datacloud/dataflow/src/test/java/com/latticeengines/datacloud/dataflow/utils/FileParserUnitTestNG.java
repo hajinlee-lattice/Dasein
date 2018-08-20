@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.dataflow.utils;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -38,5 +39,12 @@ public class FileParserUnitTestNG {
             log.info(String.format("CompoScore range=(%d,%d), Intent=%s", range.getMinimum(), range.getMaximum(),
                     intentMap.get(range)));
         }
+    }
+
+    @Test(groups = "unit")
+    public void testParseEmpRange(){
+        Map<Serializable,Serializable> empRangeMap = FileParser.parseEmpRange();
+        Assert.assertNotNull(empRangeMap);
+        Assert.assertEquals(empRangeMap.size(),11);
     }
 }

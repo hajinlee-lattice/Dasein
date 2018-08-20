@@ -1,9 +1,14 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.datacloud.dataflow.utils.FileParser;
+import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -88,7 +93,14 @@ public class AMSeedDeriveAttrs extends AccountMasterBase<AMSeedDeriveAttrsConfig
             resultNode = amSeedWithTgtDuns //
                     .merge(amSeedWithNoTgtDuns);
         }
+        resultNode = mapEmpRange(resultNode);
         return resultNode;
+    }
+
+    public Node mapEmpRange(Node ams){
+        Map<Serializable,Serializable> empRangeMap = FileParser.parseEmpRange();
+        return ams.apply(new MappingFunction(DataCloudConstants.ATTR_NUM_EMP_RANGE, DataCloudConstants.ATTR_NUM_EMP_RANGE_LABEL, empRangeMap),
+                new FieldList(DataCloudConstants.ATTR_NUM_EMP_RANGE), new FieldMetadata(DataCloudConstants.ATTR_NUM_EMP_RANGE_LABEL, String.class));
     }
 
 }
