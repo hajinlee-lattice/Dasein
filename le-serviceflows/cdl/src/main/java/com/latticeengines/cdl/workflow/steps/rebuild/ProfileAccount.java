@@ -378,7 +378,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         step.setTargetTable(targetTable);
 
         SorterConfig conf = new SorterConfig();
-        conf.setPartitions(500);
+        conf.setPartitions(100);
         conf.setSplittingThreads(maxSplitThreads);
         conf.setSplittingChunkSize(5000L);
         conf.setCompressResult(true);
