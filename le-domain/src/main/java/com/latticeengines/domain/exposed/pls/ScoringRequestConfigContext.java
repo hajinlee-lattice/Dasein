@@ -23,7 +23,7 @@ public class ScoringRequestConfigContext {
             this.modelUuid = scoringRequestConfig.getModelUuid();
         }
         if (marketoCredential != null) {
-            this.externalSystem = ExternalSystem.Marketo;
+            this.externalSystem = ExternalSystem.MARKETO;
             this.externalProfileId = marketoCredential.getPid().toString();
             this.secretKey = marketoCredential.getLatticeSecretKey();
             this.tenantId = marketoCredential.getTenant().getId();
@@ -76,7 +76,7 @@ public class ScoringRequestConfigContext {
     }
     
     public enum ExternalSystem {
-        Marketo
+        MARKETO
     }
 
     @JsonProperty("externalProfileId")

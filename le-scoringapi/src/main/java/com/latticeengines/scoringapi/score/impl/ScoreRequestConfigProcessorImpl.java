@@ -2,6 +2,7 @@ package com.latticeengines.scoringapi.score.impl;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -53,8 +54,9 @@ public class ScoreRequestConfigProcessorImpl implements ScoreRequestConfigProces
         scoreRequest.setModelId(srcContext.getModelUuid());
         scoreRequest.setSource(srcContext.getExternalSystem().name());
         scoreRequest.setPerformEnrichment(false);
-        scoreRequest.setRule("Known to Customer");
-        
+        if (StringUtils.isBlank(scoreRequest.getRule())) {
+            scoreRequest.setRule("Not set");
+        }
         return scoreRequest;
     }
 
