@@ -384,7 +384,22 @@ public class JobCacheServiceImpl implements JobCacheService {
     }
 
     private boolean isCacheValid(JobCache cache) {
-        return cache != null && cache.getJob() != null && cache.getJob().getId() != null;
+        if (cache == null || cache.getJob() == null || cache.getJob().getId() == null) {
+            return false;
+        }
+
+        Job job = cache.getJob();
+        if (job.getJobStatus() != null && job.getJobStatus().isTerminated() && job.getEndTimestamp() == null) {
+            // job terminated and has no end timestamp
+            log.info("Job cache entry in terminal state but missing end timestamp found, considered a cache miss, ID={}",
+                    job.getId());
+            return false;
+        }
+        if (job.getTenantPid() == null && job.getTenantId() == null) {
+            // old version of cache entries that does not have tenant info
+            return false;
+        }
+        return true;
     }
 
     private void check(List<Long> ids) {

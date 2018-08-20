@@ -15,6 +15,8 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.mockito.Mockito;
@@ -29,6 +31,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,8 +69,8 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
         reportService = Mockito.mock(ReportService.class);
         leJobExecutionRetriever = Mockito.mock(LEJobExecutionRetriever.class);
         configureReportService(reportService);
-        Mockito.when(leJobExecutionRetriever.getJobExecution(Mockito.anyLong())).thenReturn(null);
-        Mockito.when(leJobExecutionRetriever.getJobExecution(Mockito.any(), Mockito.anyBoolean())).thenReturn(null);
+        Mockito.when(leJobExecutionRetriever.getJobExecution(Mockito.anyLong())).thenReturn(newJobExecution(123L));
+        Mockito.when(leJobExecutionRetriever.getJobExecution(Mockito.any(), Mockito.anyBoolean())).thenReturn(newJobExecution(123L));
         FieldUtils.writeField(service, "reportService", reportService, true);
         FieldUtils.writeField(service, "leJobExecutionRetriever", leJobExecutionRetriever, true);
     }
@@ -341,7 +344,20 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
         Job job = new Job();
         job.setId(workflowid);
         job.setJobStatus(status);
+        // dummy field to keep the cache entry valid
+        job.setEndTimestamp(new Date());
+        job.setTenantId("tenant");
+        job.setTenantPid(123L);
         return job;
+    }
+
+    private JobExecution newJobExecution(long executionId) {
+        JobExecution execution = new JobExecution(executionId);
+        execution.setCreateTime(new Date());
+        execution.setEndTime(new Date());
+        JobInstance instance = new JobInstance(123L, "dummy_job_instance");
+        execution.setJobInstance(instance);
+        return execution;
     }
 
     private WorkflowJob newWorkflowJob(long workflowId, JobStatus status) {

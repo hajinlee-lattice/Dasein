@@ -53,7 +53,7 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
                 throw new RuntimeException("Can not update workflow job status, Id=" + executionId);
             }
 
-            updateJobCache(executionId);
+            clearJobCache(executionId);
         } finally {
             if (caller != null) {
                 caller.callDone();
@@ -62,19 +62,12 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         }
     }
 
-    private void updateJobCache(Long workflowId) {
+    private void clearJobCache(Long workflowId) {
         if (workflowId == null) {
             return;
         }
 
         jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowId));
-        Future<?> refreshFuture = jobCacheService.putAsync(workflowId);
-        try {
-            // wait for the cache to be refreshed
-            refreshFuture.get(UPDATE_CACHE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            // do nothing
-        }
     }
 
     private boolean updateStatus(Long executionId, JobExecution jobExecution) {
