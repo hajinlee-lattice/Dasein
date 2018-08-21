@@ -62,7 +62,11 @@ public class GlobalAuthCleanupTestListener implements ITestListener {
                 log.info("There are failed test, so skip cleaning up PLS and HDFS.");
             } else {
                 log.info("Cleanup PLS and HDFS.");
-                testBed.cleanupPlsHdfs();
+                try {
+                    testBed.cleanupPlsHdfs();
+                } catch (IllegalStateException e) {
+                    log.error("Timeout when cleanup test tenants!");
+                }
                 log.info("Cleanup Redshift.");
                 testBed.cleanupRedshift();
             }
