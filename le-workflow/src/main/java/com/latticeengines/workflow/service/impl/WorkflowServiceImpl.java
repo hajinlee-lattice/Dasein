@@ -3,6 +3,7 @@ package com.latticeengines.workflow.service.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,11 +14,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.TransformerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.support.ReferenceJobFactory;
@@ -30,6 +33,8 @@ import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.core.repository.dao.JobExecutionDao;
+import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -235,8 +240,23 @@ public class WorkflowServiceImpl implements WorkflowService {
         Long jobExecutionId = 0L;
 
         try {
-//            JobExecution execution = leJobExecutionRetriever.getJobExecution(workflowExecutionId.getId(), Boolean.TRUE);
-//
+            JobExecutionDao jobExecutionDao = leJobExecutionRetriever.getJobExecutionDao();
+            StepExecutionDao stepExecutionDao = leJobExecutionRetriever.getStepExecutionDao();
+            JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(
+                    workflowExecutionId.getId(), Boolean.TRUE);
+            BatchStatus jobStatus = jobExecution.getStatus();
+            if (jobStatus.isRunning() || jobStatus == BatchStatus.STOPPING) {
+                log.info(String.format("Spring-batch status=%s, will set it to failed.", jobStatus.name()));
+                for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
+                    if (stepExecution.getStatus().isRunning()) {
+                        stepExecution.setStatus(BatchStatus.STOPPED);
+                        stepExecution.setEndTime(new Date());
+                        stepExecutionDao.updateStepExecution(stepExecution);
+                    }
+                }
+                jobExecution.setStatus(BatchStatus.FAILED);
+                jobExecutionDao.updateJobExecution(jobExecution);
+            }
 
             jobExecutionId = jobOperator.restart(workflowExecutionId.getId());
             workflowJob.setWorkflowId(jobExecutionId);
