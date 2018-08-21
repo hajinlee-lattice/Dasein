@@ -27,7 +27,7 @@ public class FabricDataServiceImpl implements FabricDataService {
     RedisDataServiceProvider redisService;
 
     public FabricDataServiceImpl() {
-        log.info("Initing fabric data service");
+        log.debug("Initing fabric data service");
     }
 
     public FabricDataStore constructDataStore(String store, String repository, String recordType, Schema schema) {
@@ -36,10 +36,12 @@ public class FabricDataServiceImpl implements FabricDataService {
 
         FabricDataServiceProvider dsp = getServiceProvider(store);
         if (dsp != null) {
-            log.info("Initialize data store " + store + " repo " + repository);
+            if (log.isDebugEnabled()) {
+                log.debug("Initialize data store " + store + " repo " + repository);
+            }
             dataStore = dsp.constructDataStore(repository, recordType, schema);
         } else {
-            log.error("Cannot find service provider for store " + store);
+            log.warn("Cannot find service provider for store " + store);
         }
 
         return dataStore;
