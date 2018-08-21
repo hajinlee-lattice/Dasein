@@ -4,52 +4,60 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DnBCleanConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component(DnBCleanFlow.DATAFLOW_BEAN_NAME)
-public class DnBCleanFlow extends ConfigurableFlowBase<DnBCleanConfig> {
+public class DnBCleanFlow extends ConfigurableFlowBase<TransformerConfig> {
     public static final String DATAFLOW_BEAN_NAME = "DnBCleanFLow";
 
     public static final String TRANSFORMER_NAME = "DnBCleanTransformer";
-
-    private DnBCleanConfig config;
 
     private static final String NEW = "NEW_";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        config = getTransformerConfig(parameters);
         Node source = addSource(parameters.getBaseTables().get(0));
-        FieldMetadata salesFm = source.getSchema(config.getSalesVolumeUSField());
-        source = source.apply(String.format("(%s == 0 && (%s == null || %s.equals(\"2\"))) ? null : %s",
-                config.getSalesVolumeUSField(), config.getSalesVolumeCodeField(), config.getSalesVolumeCodeField(),
-                config.getSalesVolumeUSField()),
-                new FieldList(config.getSalesVolumeUSField(), config.getSalesVolumeCodeField()),
-                new FieldMetadata(NEW + config.getSalesVolumeUSField(), salesFm.getJavaType()))
-                .discard(new FieldList(config.getSalesVolumeUSField()))
-                .rename(new FieldList(NEW + config.getSalesVolumeUSField()),
-                        new FieldList(config.getSalesVolumeUSField()));
-        FieldMetadata empHereFm = source.getSchema(config.getEmployeeHereField());
-        source = source.apply(String.format("(%s == 0 && (%s == null || %s.equals(\"2\"))) ? null : %s",
-                config.getEmployeeHereField(), config.getEmployeeHereCodeField(), config.getEmployeeHereCodeField(),
-                config.getEmployeeHereField()),
-                new FieldList(config.getEmployeeHereField(), config.getEmployeeHereCodeField()),
-                new FieldMetadata(NEW + config.getEmployeeHereField(), empHereFm.getJavaType()))
-                .discard(new FieldList(config.getEmployeeHereField()))
-                .rename(new FieldList(NEW + config.getEmployeeHereField()),
-                        new FieldList(config.getEmployeeHereField()));
-        FieldMetadata empTotalFm = source.getSchema(config.getEmployeeTotalField());
-        source = source.apply(String.format("(%s == 0 && (%s == null || %s.equals(\"2\"))) ? null : %s",
-                config.getEmployeeTotalField(), config.getEmployeeTotalCodeField(), config.getEmployeeTotalCodeField(),
-                config.getEmployeeTotalField()),
-                new FieldList(config.getEmployeeTotalField(), config.getEmployeeTotalCodeField()),
-                new FieldMetadata(NEW + config.getEmployeeTotalField(), empTotalFm.getJavaType()))
-                .discard(new FieldList(config.getEmployeeTotalField()))
-                .rename(new FieldList(NEW + config.getEmployeeTotalField()),
-                        new FieldList(config.getEmployeeTotalField()));
+        FieldMetadata salesFm = source.getSchema(DataCloudConstants.ATTR_SALES_VOL_US);
+        String expr = String.format("(%s == null || (%s == 0 && (%s == null || \"2\".equals(%s)))) ? null : %s",
+                DataCloudConstants.ATTR_SALES_VOL_US, DataCloudConstants.ATTR_SALES_VOL_US, //
+                DataCloudConstants.ATTR_SALES_VOL_US_CODE, DataCloudConstants.ATTR_SALES_VOL_US_CODE, //
+                DataCloudConstants.ATTR_SALES_VOL_US);
+        source = source
+                .apply(expr,
+                        new FieldList(DataCloudConstants.ATTR_SALES_VOL_US, DataCloudConstants.ATTR_SALES_VOL_US_CODE),
+                        new FieldMetadata(NEW + DataCloudConstants.ATTR_SALES_VOL_US, salesFm.getJavaType()))
+                .discard(new FieldList(DataCloudConstants.ATTR_SALES_VOL_US))
+                .rename(new FieldList(NEW + DataCloudConstants.ATTR_SALES_VOL_US),
+                        new FieldList(DataCloudConstants.ATTR_SALES_VOL_US));
+
+        FieldMetadata empHereFm = source.getSchema(DataCloudConstants.ATTR_EMPLOYEE_HERE);
+        expr = String.format("(%s == null || (%s == 0 && (%s == null || \"2\".equals(%s)))) ? null : %s",
+                DataCloudConstants.ATTR_EMPLOYEE_HERE, DataCloudConstants.ATTR_EMPLOYEE_HERE, //
+                DataCloudConstants.ATTR_EMPLOYEE_HERE_CODE, DataCloudConstants.ATTR_EMPLOYEE_HERE_CODE, //
+                DataCloudConstants.ATTR_EMPLOYEE_HERE);
+        source = source
+                .apply(expr, //
+                        new FieldList(DataCloudConstants.ATTR_EMPLOYEE_HERE,
+                                DataCloudConstants.ATTR_EMPLOYEE_HERE_CODE),
+                        new FieldMetadata(NEW + DataCloudConstants.ATTR_EMPLOYEE_HERE, empHereFm.getJavaType()))
+                .discard(new FieldList(DataCloudConstants.ATTR_EMPLOYEE_HERE))
+                .rename(new FieldList(NEW + DataCloudConstants.ATTR_EMPLOYEE_HERE),
+                        new FieldList(DataCloudConstants.ATTR_EMPLOYEE_HERE));
+
+        FieldMetadata empTotalFm = source.getSchema(DataCloudConstants.ATTR_EMPLOYEE_TOTAL);
+        expr = String.format("(%s == null || (%s == 0 && (%s == null || \"2\".equals(%s)))) ? null : %s",
+                DataCloudConstants.ATTR_EMPLOYEE_TOTAL, DataCloudConstants.ATTR_EMPLOYEE_TOTAL, //
+                DataCloudConstants.ATTR_EMPLOYEE_TOTAL_CODE, DataCloudConstants.ATTR_EMPLOYEE_TOTAL_CODE, //
+                DataCloudConstants.ATTR_EMPLOYEE_TOTAL);
+        source = source.apply(expr, //
+                new FieldList(DataCloudConstants.ATTR_EMPLOYEE_TOTAL, DataCloudConstants.ATTR_EMPLOYEE_TOTAL_CODE),
+                new FieldMetadata(NEW + DataCloudConstants.ATTR_EMPLOYEE_TOTAL, empTotalFm.getJavaType()))
+                .discard(new FieldList(DataCloudConstants.ATTR_EMPLOYEE_TOTAL))
+                .rename(new FieldList(NEW + DataCloudConstants.ATTR_EMPLOYEE_TOTAL),
+                        new FieldList(DataCloudConstants.ATTR_EMPLOYEE_TOTAL));
         return source;
     }
 
@@ -65,6 +73,6 @@ public class DnBCleanFlow extends ConfigurableFlowBase<DnBCleanConfig> {
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return DnBCleanConfig.class;
+        return TransformerConfig.class;
     }
 }
