@@ -22,11 +22,7 @@ public abstract class BaseReadWriteRepoEntityMgrImpl<R extends BaseJpaRepository
 
     @Override
     public BaseJpaRepository<T, ID> getRepository() {
-        if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
-            return getReaderRepo();
-        } else {
-            return getWriterRepo();
-        }
+        return getWriterRepo();
     }
 
     @Override
