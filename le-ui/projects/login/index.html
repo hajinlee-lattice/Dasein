@@ -17,22 +17,15 @@
 
         <!-- Aptrinsic Env Prod Codes-->
         <script type="text/javascript">
-            var product_code = "",
+            var product_code = "AP-PDCNS0SWT1ZP-2",
                 disable_zendesk = false,
                 disable_aptrinsic = false;
-            switch(window.location.host) {
-                case "app.lattice-engines.com": // Production
-                    product_code = "AP-RR8EQLTW2VP9-2";
-                    break;
-                case "localhost:3000":
-                case "localhost:3001":
-                    disable_zendesk = true;
-                    disable_aptrinsic = true;
-                    product_code = "AP-PDCNS0SWT1ZP-2";
-                    break;
-                default: // QA, local, etc
-                    product_code = "AP-PDCNS0SWT1ZP-2";
-                    break;
+
+            if(['app.lattice-engines.com'].indexOf(window.location.host) >= 0) { // production
+                product_code = "AP-RR8EQLTW2VP9-2";
+            } else if(['localhost:3000','localhost:3001'].indexOf(window.location.host) >= 0) { // dev
+                disable_zendesk = true;
+                disable_aptrinsic = true;
             }
             console.log('Aptrinsic:', window.location.host, product_code);
         </script>
