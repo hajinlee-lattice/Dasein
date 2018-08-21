@@ -2,8 +2,6 @@ package com.latticeengines.db.exposed.entitymgr.impl;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,24 +13,12 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 public abstract class BaseReadWriteRepoEntityMgrImpl<R extends BaseJpaRepository<T, ID>, T extends HasPid, ID> extends
         BaseEntityMgrRepositoryImpl<T, ID> implements BaseEntityMgrRepository<T, ID> {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseReadWriteRepoEntityMgrImpl.class);
-
     public BaseReadWriteRepoEntityMgrImpl() {
     }
 
     protected abstract R getReaderRepo();
     protected abstract R getWriterRepo();
     protected abstract BaseReadWriteRepoEntityMgrImpl<R, T, ID> getSelf();
-
-    @Override
-    public R getRepository() {
-        if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
-            log.info("Use reader repository for " + getClass().getSimpleName());
-            return getReaderRepo();
-        } else {
-            return getWriterRepo();
-        }
-    }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
