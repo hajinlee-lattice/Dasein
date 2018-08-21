@@ -1,4 +1,4 @@
-FROM latticeengines/jre:1.8
+FROM latticeengines/jre:1.8.181
 RUN groupadd -r tomcat && useradd -r -g tomcat tomcat
 WORKDIR /opt
 
