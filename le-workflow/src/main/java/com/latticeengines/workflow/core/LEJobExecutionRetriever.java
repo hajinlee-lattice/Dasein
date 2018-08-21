@@ -30,8 +30,16 @@ public class LEJobExecutionRetriever {
         this.jobInstanceDao = jobInstanceDao;
     }
 
+    public JobExecutionDao getJobExecutionDao() {
+        return this.jobExecutionDao;
+    }
+
     public void setJobExecutionDao(JobExecutionDao jobExecutionDao){
         this.jobExecutionDao = jobExecutionDao;
+    }
+
+    public StepExecutionDao getStepExecutionDao() {
+        return this.stepExecutionDao;
     }
 
     public void setStepExecutionDao(StepExecutionDao stepExecutionDao){
