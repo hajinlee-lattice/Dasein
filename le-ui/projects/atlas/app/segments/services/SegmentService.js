@@ -1,10 +1,9 @@
 angular
 .module('lp.segments.segments')
-.service('SegmentStore', function($q, $rootScope, SegmentService) {
+.service('SegmentStore', function($q, $rootScope, $state, SegmentService) {
     var SegmentStore = this;
 
     this.segments = [];
-    this.tileEditSegment = false;
 
 
     this.setSegments = function(segments) {
@@ -15,18 +14,16 @@ angular
         return this.segments;
     }
 
-    this.modalSetTileEditSegment = function(config) {
-        SegmentStore.setTileEditSegment((config.action === 'ok'));
-        $rootScope.$broadcast('tileEditSegment:'+config.action);
+    this.modalEditSegment = function(config) {
+        if(config.action === 'cancel') {
+            $state.go('home.segments');
+        }
         return true;
     }
 
-    this.setTileEditSegment = function(bool) {
-        this.tileEditSegment = bool;
-    }
-
-    this.getTileEditSegment = function() {
-        return this.tileEditSegment;
+    this.modalSetTileEditSegment = function(config) {
+        $rootScope.$broadcast('tileEditSegment:'+config.action);
+        return true; // modal will hide itself
     }
 
     this.flattenSegmentRestrictions = function(segment) {
@@ -533,5 +530,4 @@ angular
         );
         return deferred.promise;
     }
-
 });

@@ -90,7 +90,7 @@ angular.module('common.datacloud.query')
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Query Builder'
             },
-            onEnter: ['$stateParams', 'SegmentStore', 'BackStore', function($stateParams, SegmentStore, BackStore) {
+            onEnter: ['$stateParams', 'SegmentService', 'SegmentStore', 'BackStore', function($stateParams, SegmentService, SegmentStore, BackStore) {
                 var name = $stateParams.segment;
 
                 BackStore.setBackState('home.segments');
@@ -104,6 +104,7 @@ angular.module('common.datacloud.query')
                     });
                     
                 }
+                SegmentService.GetSegmentDependenciesModelView(name);
             }],
             resolve: {
                 Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){

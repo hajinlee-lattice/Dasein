@@ -439,9 +439,11 @@ angular
                         return RatingsEngineModels;
                     }
                 },
-                onEnter: function(QueryStore){
+                onEnter: ['$stateParams', 'RatingsEngineService', 'QueryStore', function($stateParams, RatingsEngineService, QueryStore) {
                     QueryStore.clear();
-                },
+                    var id = $stateParams.rating_id;
+                    RatingsEngineService.GetRatingEnginesDependenciesModelView(id);
+                }],
                 views: {
                     "navigation@home": {
                         controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine, JobStatus) {
@@ -893,6 +895,10 @@ angular
                     pageIcon: 'ico-model',
                     pageTitle: 'Models - Create Rules'
                 },
+                onEnter: ['$stateParams', 'RatingsEngineService', function($stateParams, RatingsEngineService) {
+                    var id = $stateParams.rating_id;
+                    RatingsEngineService.GetRatingEnginesDependenciesModelView(id);
+                }],
                 resolve: {
                     Cube: function ($q, DataCloudStore) {
                         var deferred = $q.defer();

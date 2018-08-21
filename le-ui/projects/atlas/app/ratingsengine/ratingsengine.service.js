@@ -1467,4 +1467,33 @@ angular.module('lp.ratingsengine')
     
         return deferred.promise;
     }
+    
+    this.GetRatingEnginesDependenciesModelView = function(id, errorDisplayCallback) {
+        var deferred = $q.defer(),
+            result,
+            url = '/pls/ratingengines/' + id + '/dependencies/modelAndView';
+
+        $http({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Accept': 'application/json',
+                'ErrorDisplayCallback': errorDisplayCallback
+            }
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+                
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
 });

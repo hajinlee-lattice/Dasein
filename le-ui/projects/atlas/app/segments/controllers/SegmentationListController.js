@@ -175,36 +175,13 @@ angular.module('lp.segments.segments', [
         DataCloudStore.setEnrichmentsMap(vm.enrichmentsMap);
     }
 
-
-    $rootScope.$on('tileEditSegment:ok', function(e) {
-        var tileState = vm.tileStates[vm.lastClickedSegment.name];
-        tileState.showCustomMenu = false;
-        tileState.editSegment = true;
-        tileState.loading = false;
-    });
-
-    $rootScope.$on('tileEditSegment:cancel', function(e) {
-        var tileState = vm.tileStates[vm.lastClickedSegment.name];
-        tileState.showCustomMenu = false;
-        tileState.editSegment = false;
-        tileState.loading = false;
-    });
-
     vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
         var tileState = vm.tileStates[segment.name];
-        tileState.loading = true;
-        SegmentService.GetSegmentDependenciesModelView(segment.name, 'SegmentStore.modalSetTileEditSegment').then(function(result) {
-            vm.lastClickedSegment = segment;
-            tileState.loading = false;
-            var config = result.UIAction;
-            if(config.view === 'Notice' && config.status === 'Success') {
-                tileState.showCustomMenu = !tileState.showCustomMenu;
-                tileState.editSegment = !tileState.editSegment;
-            }
-        });
-    };
-
+        tileState.showCustomMenu = !tileState.showCustomMenu;
+        tileState.editSegment = !tileState.editSegment;
+    }
+    
     vm.nameChanged = function(segment) {
         var tileState = vm.tileStates[segment.name];
         if(!segment.display_name || segment.display_name.trim().length == 0){
