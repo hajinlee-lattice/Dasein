@@ -1,5 +1,5 @@
 # leave the comments for now until we are sure the services will not be put back in
-FROM centos:centos7.4.1708
+FROM centos:7.5.1804
 RUN yum update -y && yum clean all && rm -rf /var/cache/yum
 RUN yum install -y epel-release initscripts && yum clean all
 #RUN yum install -y git passwd wget which && yum clean all
