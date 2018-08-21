@@ -256,7 +256,7 @@ angular.module('lp.ratingsengine.dashboard', [
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
-                if ((Object.keys(vm.model.advancedModelingConfig[type].filters).length === 0 || (vm.model.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(vm.model.advancedModelingConfig[type].filters).length === 1)) && vm.model.trainingSegment == null && vm.model.advancedModelingConfig[type].filters.targetProducts == null) {
+                if (typeof vm.model.advancedModelingConfig[type].filters != 'undefined' && (Object.keys(vm.model.advancedModelingConfig[type].filters).length === 0 || (vm.model.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(vm.model.advancedModelingConfig[type].filters).length === 1)) && vm.model.trainingSegment == null && vm.model.advancedModelingConfig[type].filters.targetProducts == null) {
                     vm.hasSettingsInfo = false;
                 } else {
                     vm.hasSettingsInfo = true;
@@ -267,7 +267,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.configFilters = vm.model.advancedModelingConfig[type].filters;
                 vm.trainingProducts = vm.model.advancedModelingConfig[type].trainingProducts;
 
-                if (vm.configFilters['SPEND_IN_PERIOD']) {
+                if (vm.configFilters && vm.configFilters['SPEND_IN_PERIOD']) {
                     if (vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
                         vm.spendCriteria = 'at least';
                     } else {
@@ -275,7 +275,7 @@ angular.module('lp.ratingsengine.dashboard', [
                     }
                 }
 
-                if (vm.configFilters['QUANTITY_IN_PERIOD']) {
+                if (vm.configFilters && vm.configFilters['QUANTITY_IN_PERIOD']) {
                     if (vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
                         vm.quantityCriteria = 'at least';
                     } else {
@@ -283,10 +283,10 @@ angular.module('lp.ratingsengine.dashboard', [
                     }
                 }
 
-                if (vm.targetProducts !== null) {
+                if (vm.targetProducts && vm.targetProducts.length != 0) {
                     vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
                 }
-                if (vm.trainingProducts !== null && vm.trainingProducts != undefined) {
+                if (vm.trainingProducts && vm.trainingProducts.length != 0) {
                     vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
                 }
 
