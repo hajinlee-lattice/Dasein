@@ -255,6 +255,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                     }
                 }
                 jobExecution.setStatus(BatchStatus.FAILED);
+                jobExecution.setEndTime(new Date());
                 jobExecutionDao.updateJobExecution(jobExecution);
             }
 
