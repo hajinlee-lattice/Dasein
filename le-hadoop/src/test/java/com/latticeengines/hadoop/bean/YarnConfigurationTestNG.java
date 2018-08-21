@@ -107,7 +107,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         HdfsUtils.distcp(configuration, srcDir, s3Uri, "default");
 
         // move to encrypted folder with kms key
-        String kmsKey = "0e9daa04-1400-4e55-88c5-b238a9d01721";
+        String kmsKey = "test/ysong";
         s3Service.changeKeyRecursive(s3Bucket, tgtDirUnenctyped, tgtDir, kmsKey);
         s3Service.cleanupPrefix(s3Bucket, tgtDirUnenctyped);
 
