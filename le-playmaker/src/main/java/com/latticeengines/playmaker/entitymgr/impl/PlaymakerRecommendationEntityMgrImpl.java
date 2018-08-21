@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 @Component("playmakerRecommendationEntityMgr")
 public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommendationEntityMgr {
 
-    static final int MAXIMUM_DESCRIPTION_LENGTH = 255;
+    static final int MAXIMUM_DESCRIPTION_LENGTH = 254;
     @Autowired
     private PlaymakerDaoFactory daoFactory;
 
