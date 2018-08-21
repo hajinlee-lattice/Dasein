@@ -21,6 +21,15 @@ public abstract class BaseReadWriteRepoEntityMgrImpl<R extends BaseJpaRepository
     protected abstract BaseReadWriteRepoEntityMgrImpl<R, T, ID> getSelf();
 
     @Override
+    public BaseJpaRepository<T, ID> getRepository() {
+        if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
+            return getReaderRepo();
+        } else {
+            return getWriterRepo();
+        }
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<T> findAll() {
         if (Boolean.TRUE.equals(DBConnectionContext.isReaderConnection())) {
