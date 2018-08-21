@@ -7,10 +7,22 @@ angular
     'mainApp.core.services.FeatureFlagService',
     'common.datacloud'
 ])
-.controller('SidebarController', function($rootScope, $stateParams) {
+.controller('SidebarController', function($rootScope, $stateParams, $transitions) {
     var vm = this;
 
-    angular.extend(vm, {});
+    angular.extend(vm, {
+        disableNavigation: false
+    });
+
+    $transitions.onBefore({}, function(trans) {
+        vm.disableNavigation = true;
+    });
+    $transitions.onError({}, function(trans) {
+        vm.disableNavigation = false;
+    });
+    $transitions.onSuccess({}, function(trans) {
+        vm.disableNavigation = false;
+    });
 
     vm.init = function() {
         if (typeof(sessionStorage) !== 'undefined') {
