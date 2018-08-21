@@ -49,14 +49,17 @@ public class HDFSProcessorAdapter extends AbstractProcessorAdapter {
         schema = AvroUtils.extractSimpleSchema(schema);
         for (Map.Entry<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>> entry : pairs.entrySet()) {
             String fileName = getFileName(entry.getKey());
-            FabricDataStore dataStore = dataService.constructDataStore(hdfsProvider.getName(), fileName, pair.getKey()
-                    .getRecordType(), schema);
+            FabricDataStore dataStore = dataService.constructDataStore(hdfsProvider.getName(), fileName,
+                    pair.getKey().getRecordType(), schema);
             Map<String, Pair<GenericRecord, Map<String, Object>>> pairMap = getPairMap(entry.getValue());
             count += entry.getValue().size();
             dataStore.createRecords(pairMap);
         }
-        log.info("Wrote generic connector records, count=" + count + " store=" + hdfsProvider.getName()
-                + " repository=" + repository);
+        if (log.isDebugEnabled()) {
+            log.debug("Wrote generic connector records, count=" + count + " store=" + hdfsProvider.getName()
+                    + " repository=" + repository);
+        }
+
         return count;
     }
 
@@ -71,7 +74,8 @@ public class HDFSProcessorAdapter extends AbstractProcessorAdapter {
                 hadoopConfDir = hadoopHome + "/etc/hadoop";
             }
         }
-        log.info("Hadoop config Dir=" + hadoopConfDir);
+        if (log.isDebugEnabled())
+            log.debug("Hadoop config Dir=" + hadoopConfDir);
 
         conf.addResource(new Path(hadoopConfDir + "/core-site.xml"));
         conf.addResource(new Path(hadoopConfDir + "/hdfs-site.xml"));

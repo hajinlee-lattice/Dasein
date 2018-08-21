@@ -9,9 +9,9 @@ import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.kafka.common.TopicPartition;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
@@ -104,7 +104,9 @@ public class GenericRecordProcessor {
             TopicPartition topicPartition = allTopicPartitions.get(i);
             populateRecordPerRecord(recordMap, keyRecord, valueRecord, topicPartition);
         }
-        log.info("Populated generic connector records, count=" + allKeyRecords.size());
+        if (log.isDebugEnabled()) {
+            log.debug("Populated generic connector records, count=" + allKeyRecords.size());
+        }
         return recordMap;
     }
 

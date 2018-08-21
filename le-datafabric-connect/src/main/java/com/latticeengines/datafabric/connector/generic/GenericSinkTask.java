@@ -53,7 +53,10 @@ public class GenericSinkTask extends SinkTask {
             messageManager.setMessageService(messageService);
 
         } catch (Exception e) {
-            throw new ConnectException("Couldn't start GenericConnector!", e);
+            if (log.isDebugEnabled()) {
+                log.warn("Cannot bootstrap camille environment.", e);
+            }
+            throw new ConnectException("Couldn't start GenericConnector! error=" + e.getMessage());
         }
     }
 
@@ -68,7 +71,7 @@ public class GenericSinkTask extends SinkTask {
             throw new RuntimeException("Cannot bootstrap camille environment.", e);
         }
     }
-    
+
     @Override
     public void stop() throws ConnectException {
     }
@@ -107,7 +110,10 @@ public class GenericSinkTask extends SinkTask {
             processor.process();
 
         } catch (Exception e) {
-            log.error("Failed to execute connector tasks", e);
+            if (log.isDebugEnabled()) {
+                log.warn("Failed to execute connector tasks!", e);
+            }
+            log.error("Failed to execute connector tasks, error=" + e.getMessage());
         }
 
     }
