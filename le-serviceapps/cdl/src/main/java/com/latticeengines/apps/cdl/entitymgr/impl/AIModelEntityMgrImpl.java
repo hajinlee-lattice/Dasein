@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.AIModelDao;
 import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
+import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.repository.writer.AIModelRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
@@ -27,7 +29,8 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 
 @Component("aiModelEntityMgr")
-public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, Long> implements AIModelEntityMgr {
+public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, Long> //
+        implements AIModelEntityMgr, GraphVisitable {
 
     private static final Logger log = LoggerFactory.getLogger(AIModelEntityMgrImpl.class);
 
@@ -125,5 +128,12 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
     @Override
     public boolean shouldSkipTenantDependency() {
         return true;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public void accept(GraphVisitor visitor, String entityId) throws Exception {
+        AIModel entity = findById(entityId);
+        visitor.visit(entity, parse(entity, null));
     }
 }

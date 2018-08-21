@@ -71,6 +71,10 @@ public class RatingEngineResource {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineResource.class);
 
+    private static final String RATING_DELETE_FAILED_TITLE = "Cannot delete Model";
+    private static final String RATING_DELETE_FAILED_MODEL_IN_USE_TITLE = "Model In Use";
+    private static final String RATING_DELETE_FAILED_MODEL_IN_USE = "This model is in use and cannot be deleted until the dependency has been removed.";
+
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
@@ -206,9 +210,25 @@ public class RatingEngineResource {
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         Tenant tenant = MultiTenantContext.getTenant();
         try {
-            ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete, MultiTenantContext.getEmailAddress());
+            ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete,
+                    MultiTenantContext.getEmailAddress());
         } catch (Exception ex) {
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40042);
+            if (ex instanceof LedpException) {
+                LedpException exp = (LedpException) ex;
+                if (exp.getCode() == LedpCode.LEDP_40042) {
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40042,
+                            View.Modal, RATING_DELETE_FAILED_MODEL_IN_USE_TITLE, RATING_DELETE_FAILED_MODEL_IN_USE);
+                } else if (exp.getCode() == LedpCode.LEDP_18181) {
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_18181,
+                            View.Modal, RATING_DELETE_FAILED_TITLE, null);
+                } else {
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, exp.getCode(), View.Banner,
+                            RATING_DELETE_FAILED_TITLE, null);
+                }
+            } else {
+                throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, null, View.Banner,
+                        RATING_DELETE_FAILED_TITLE, null);
+            }
         }
 
         return true;
@@ -338,9 +358,9 @@ public class RatingEngineResource {
         Map<String, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
                 ratingEngineId);
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies);
-        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Dependencies on the model", View.Modal,
-                Status.Info, message);
+        String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies, "This model is in use.", null);
+        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Modal, Status.Info,
+                message);
         return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }
 

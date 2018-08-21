@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.PlayDao;
+import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
+import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayRepository;
@@ -28,7 +30,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("playEntityMgr")
-public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayRepository, Play, Long> implements PlayEntityMgr {
+public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayRepository, Play, Long> //
+        implements PlayEntityMgr, GraphVisitable {
 
     @Inject
     private PlayDao playDao;
@@ -171,5 +174,12 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         attrDepSet.add(ParsedDependencies.tuple(BusinessEntity.Rating + "." + ratingId, //
                 VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
         return attrDepSet;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public void accept(GraphVisitor visitor, String entityId) throws Exception {
+        Play entity = getPlayByName(entityId, false);
+        visitor.visit(entity, parse(entity, null));
     }
 }

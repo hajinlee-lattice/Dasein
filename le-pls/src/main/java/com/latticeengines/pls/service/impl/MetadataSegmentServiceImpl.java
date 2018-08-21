@@ -33,6 +33,12 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 
 @Service("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {
+    private static final String SEGMENT_IN_USE_TITLE = "Segment In Use";
+
+    private static final String SEGMENT_DELETION_FAILED_GENERIC = "Segment deletion failed";
+
+    private static final String SEGMENT_DELETE_FAILED_DEPENDENCY = "This segment is in use and cannot be deleted until the dependency has been removed.";
+
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentServiceImpl.class);
 
     private final SegmentProxy segmentProxy;
@@ -113,7 +119,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegmentAndAction.getMetadataSegment());
         String segmentName = createdOrUpdatedSegment.getName();
         try {
-            Thread.sleep(500);
+            Thread.sleep(100);
             log.info("Updating entity counts for segment " + segmentName);
             Map<BusinessEntity, Long> counts = segmentProxy.updateSegmentCounts(customerSpace, segmentName);
             counts.forEach(createdOrUpdatedSegment::setEntityCount);
@@ -139,7 +145,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     @Override
     public UIAction getDependenciesModelAndView(String segmentName) {
         Map<String, List<String>> dependencies = getDependencies(segmentName);
-        UIAction uiAction = graphDependencyToUIActionUtil.processUpdateResponse(dependencies);
+        UIAction uiAction = graphDependencyToUIActionUtil.processUpdateSegmentResponse(dependencies);
         return uiAction;
     }
 
@@ -151,15 +157,9 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             uiAction = graphDependencyToUIActionUtil.generateUIAction("Segment is deleted successfully", View.Notice,
                     Status.Success, null);
         } catch (LedpException ex) {
-            if (ex instanceof LedpException && ((LedpException) ex).getCode() == LedpCode.LEDP_40042) {
-                uiAction = graphDependencyToUIActionUtil.generateUIAction(
-                        "Segment cannot be deleted as it is being used in following: ", View.Modal, Status.Error,
-                        graphDependencyToUIActionUtil.generateHtmlMsg(graphDependencyToUIActionUtil
-                                .extractDependencies(ex.getMessage(), LedpCode.LEDP_40042)));
-            } else {
-                uiAction = graphDependencyToUIActionUtil.generateUIAction("Segment deletion failed", View.Banner,
-                        Status.Error, ex.getMessage());
-            }
+            uiAction = graphDependencyToUIActionUtil.handleDeleteFailedDueToDependency(ex, LedpCode.LEDP_40042,
+                    SEGMENT_IN_USE_TITLE, SEGMENT_DELETE_FAILED_DEPENDENCY, View.Modal, SEGMENT_DELETION_FAILED_GENERIC,
+                    View.Banner);
         }
         return uiAction;
     }

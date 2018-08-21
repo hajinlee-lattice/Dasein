@@ -15,9 +15,6 @@ import com.latticeengines.domain.exposed.graph.NameSpaceUtil;
 @Component
 public class GraphUtil {
 
-    private static final String GREMLIN_DRIVER_SERIALIZER //
-            = Serializers.GRAPHSON_V2D0.name();
-
     @Value("${graph.ns.env}")
     private String defaultEnv;
 
@@ -29,12 +26,6 @@ public class GraphUtil {
 
     @Value("${graph.exception.ignore}")
     private Boolean ignoreException;
-
-    @Value("${graph.contact.url}")
-    private String graphContactPoint;
-
-    @Value("${graph.contact.port}")
-    private Integer graphContactPort;
 
     private NameSpaceUtil nameSpaceUtil;
 
@@ -81,17 +72,5 @@ public class GraphUtil {
 
     public void setIgnoreException(Boolean ignoreException) {
         this.ignoreException = ignoreException;
-    }
-
-    public Cluster initCluster() {
-        Cluster.Builder builder = Cluster.build();
-        builder.addContactPoint(graphContactPoint);
-        builder.port(graphContactPort);
-        builder.serializer(GREMLIN_DRIVER_SERIALIZER);
-        return builder.create();
-    }
-
-    public GraphTraversalSource initTraversalSource(Cluster cluster) {
-        return EmptyGraph.instance().traversal().withRemote(DriverRemoteConnection.using(cluster));
     }
 }

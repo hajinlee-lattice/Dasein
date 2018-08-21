@@ -38,80 +38,82 @@ public class GraphEntityManagerImpl extends BaseGraphEntityManagerImpl
     private GraphUtil graphUtil;
 
     @Override
-    public boolean addVertex(String customerSpace, String overrideEnv, String overrideVersion, String overrideTenant,
+    public void addVertex(String customerSpace, String overrideEnv, String overrideVersion, String overrideTenant,
             VertexCreationRequest request) throws Exception {
         if (StringUtils.isBlank(request.getObjectId()) || StringUtils.isBlank(request.getType())) {
             throw new RuntimeException("Make sure vertexId and Type is specified");
         }
 
         log.info("Received request: " + JsonUtils.serialize(request));
-        Map<String, String> propMap = new HashMap<>();
-        Map<String, String> nsMap = new HashMap<>();
-        String effectiveCustomerSpace = graphUtil.getNameSpaceUtil().populateNSMapAndCalculateEffectiveTenant( //
-                customerSpace, overrideEnv, overrideVersion, overrideTenant, //
-                request.getType().trim(), nsMap);
+        if (!checkVertexExists(customerSpace, null, null, null, request.getObjectId(), request.getType())) {
 
-        String newVertexId = graphUtil.getNameSpaceUtil().generateNSId( //
-                request.getObjectId().trim(), nsMap, graphUtil.getIsNSPostfix());
+            Map<String, String> propMap = new HashMap<>();
+            Map<String, String> nsMap = new HashMap<>();
+            String effectiveCustomerSpace = graphUtil.getNameSpaceUtil().populateNSMapAndCalculateEffectiveTenant( //
+                    customerSpace, overrideEnv, overrideVersion, overrideTenant, //
+                    request.getType().trim(), nsMap);
 
-        String tenantLabel = graphUtil.getNameSpaceUtil().generateNSLabel(customerSpace.trim(), //
-                nsMap, graphUtil.getIsNSPostfix());
-        Set<String> labels = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(request.getLabels())) {
-            labels.addAll(request.getLabels());
+            String newVertexId = graphUtil.getNameSpaceUtil().generateNSId( //
+                    request.getObjectId().trim(), nsMap, graphUtil.getIsNSPostfix());
+
+            String tenantLabel = graphUtil.getNameSpaceUtil().generateNSLabel(customerSpace.trim(), //
+                    nsMap, graphUtil.getIsNSPostfix());
+            Set<String> labels = new HashSet<>();
+            if (CollectionUtils.isNotEmpty(request.getLabels())) {
+                labels.addAll(request.getLabels());
+            }
+            labels.add(tenantLabel);
+            labels.add(request.getType());
+            labels.add(graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(), true));
+            String label = LabelUtil.concatenateLabels(new ArrayList<>(labels));
+            if (MapUtils.isNotEmpty(request.getProperties())) {
+                propMap.putAll(request.getProperties());
+            }
+            propMap.put(GraphConstants.TENANT_ID_PROP_KEY, customerSpace);
+            propMap.put(GraphConstants.OBJECT_ID_KEY, request.getObjectId());
+            propMap.put(GraphConstants.OBJECT_TYPE_KEY, request.getType());
+            propMap.put(GraphConstants.NS_KEY,
+                    graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(), true));
+
+            Map<String, Map<String, Map<String, String>>> outgoingEdgesToVertices = new HashMap<>();
+
+            if (MapUtils.isNotEmpty(request.getOutgoingEdgesToVertices())) {
+                Map<String, Map<String, Map<String, String>>> userSpecifiedMap = request.getOutgoingEdgesToVertices();
+                userSpecifiedMap.keySet().stream() //
+                        .forEach(k -> {
+                            String edgeType = userSpecifiedMap.get(k).keySet().iterator().next();
+                            nsMap.put(NameSpaceUtil.TYPE_KEY, edgeType);
+                            String edgeLabel = graphUtil.getNameSpaceUtil().generateNS(nsMap,
+                                    graphUtil.getIsNSPostfix(), false);
+                            String outVertexType = request.getOutgoingVertexTypes().get(k);
+                            nsMap.put(NameSpaceUtil.TYPE_KEY, outVertexType);
+                            String outVertexId = graphUtil.getNameSpaceUtil().generateNSId(k, nsMap,
+                                    graphUtil.getIsNSPostfix());
+
+                            Map<String, Map<String, String>> edgePropMapWrapper = new HashMap<>();
+                            Map<String, String> edgePropMap = new HashMap<>();
+                            if (MapUtils.isNotEmpty(userSpecifiedMap.get(k))
+                                    && MapUtils.isNotEmpty(userSpecifiedMap.get(k).get(edgeType))) {
+                                edgePropMap.putAll(userSpecifiedMap.get(k).get(edgeType));
+                            }
+                            edgePropMap.put(GraphConstants.TENANT_ID_PROP_KEY, effectiveCustomerSpace);
+                            edgePropMap.put(GraphConstants.EDGE_TYPE_KEY, edgeType.trim());
+                            edgePropMap.put(GraphConstants.FROM_OID_KEY, request.getObjectId());
+                            edgePropMap.put(GraphConstants.FROM_OTYPE_KEY, request.getType());
+                            edgePropMap.put(GraphConstants.TO_OID_KEY, k);
+                            edgePropMap.put(GraphConstants.TO_OTYPE_KEY, outVertexType);
+                            edgePropMap.put(GraphConstants.NS_KEY, edgeLabel);
+
+                            edgePropMapWrapper.put(edgeLabel, edgePropMap);
+                            nsMap.put(NameSpaceUtil.TYPE_KEY, edgeType);
+                            outgoingEdgesToVertices.put(//
+                                    outVertexId, //
+                                    edgePropMapWrapper);
+                        });
+            }
+            nsMap.put(NameSpaceUtil.TYPE_KEY, request.getType());
+            addVertex(newVertexId, label, propMap, outgoingEdgesToVertices);
         }
-        labels.add(tenantLabel);
-        labels.add(request.getType());
-        labels.add(graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(), true));
-        String label = LabelUtil.concatenateLabels(new ArrayList<>(labels));
-        if (MapUtils.isNotEmpty(request.getProperties())) {
-            propMap.putAll(request.getProperties());
-        }
-        propMap.put(GraphConstants.TENANT_ID_PROP_KEY, customerSpace);
-        propMap.put(GraphConstants.OBJECT_ID_KEY, request.getObjectId());
-        propMap.put(GraphConstants.OBJECT_TYPE_KEY, request.getType());
-        propMap.put(GraphConstants.NS_KEY,
-                graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(), true));
-
-        Map<String, Map<String, Map<String, String>>> outgoingEdgesToVertices = new HashMap<>();
-
-        if (MapUtils.isNotEmpty(request.getOutgoingEdgesToVertices())) {
-            Map<String, Map<String, Map<String, String>>> userSpecifiedMap = request.getOutgoingEdgesToVertices();
-            userSpecifiedMap.keySet().stream() //
-                    .forEach(k -> {
-                        String edgeType = userSpecifiedMap.get(k).keySet().iterator().next();
-                        nsMap.put(NameSpaceUtil.TYPE_KEY, edgeType);
-                        String edgeLabel = graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(),
-                                false);
-                        String outVertexType = request.getOutgoingVertexTypes().get(k);
-                        nsMap.put(NameSpaceUtil.TYPE_KEY, outVertexType);
-                        String outVertexId = graphUtil.getNameSpaceUtil().generateNSId(k, nsMap,
-                                graphUtil.getIsNSPostfix());
-
-                        Map<String, Map<String, String>> edgePropMapWrapper = new HashMap<>();
-                        Map<String, String> edgePropMap = new HashMap<>();
-                        if (MapUtils.isNotEmpty(userSpecifiedMap.get(k))
-                                && MapUtils.isNotEmpty(userSpecifiedMap.get(k).get(edgeType))) {
-                            edgePropMap.putAll(userSpecifiedMap.get(k).get(edgeType));
-                        }
-                        edgePropMap.put(GraphConstants.TENANT_ID_PROP_KEY, effectiveCustomerSpace);
-                        edgePropMap.put(GraphConstants.EDGE_TYPE_KEY, edgeType.trim());
-                        edgePropMap.put(GraphConstants.FROM_OID_KEY, request.getObjectId());
-                        edgePropMap.put(GraphConstants.FROM_OTYPE_KEY, request.getType());
-                        edgePropMap.put(GraphConstants.TO_OID_KEY, k);
-                        edgePropMap.put(GraphConstants.TO_OTYPE_KEY, outVertexType);
-                        edgePropMap.put(GraphConstants.NS_KEY, edgeLabel);
-
-                        edgePropMapWrapper.put(edgeLabel, edgePropMap);
-                        nsMap.put(NameSpaceUtil.TYPE_KEY, edgeType);
-                        outgoingEdgesToVertices.put(//
-                                outVertexId, //
-                                edgePropMapWrapper);
-                    });
-        }
-        nsMap.put(NameSpaceUtil.TYPE_KEY, request.getType());
-        return addVertex( //
-                newVertexId, label, propMap, outgoingEdgesToVertices);
     }
 
     @Override
@@ -127,35 +129,45 @@ public class GraphEntityManagerImpl extends BaseGraphEntityManagerImpl
                 throw new RuntimeException("Make sure inVertexID, outVertexID and Type is specified");
             }
 
-            Map<String, String> nsMap = new HashMap<>();
-            String effectiveCustomerSpace = graphUtil.getNameSpaceUtil().populateNSMapAndCalculateEffectiveTenant(//
-                    customerSpace, overrideEnv, overrideVersion, overrideTenant, //
-                    request.getType(), nsMap);
-
-            Map<String, String> propMap = new HashMap<>();
-            if (MapUtils.isNotEmpty(request.getProperties())) {
-                propMap.putAll(request.getProperties());
-            }
-            String edgeLabel = graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(), false);
-
-            propMap.put(GraphConstants.TENANT_ID_PROP_KEY, effectiveCustomerSpace);
-            propMap.put(GraphConstants.EDGE_TYPE_KEY, request.getType().trim());
-            propMap.put(GraphConstants.FROM_OID_KEY, request.getFromObjectID().trim());
-            propMap.put(GraphConstants.FROM_OTYPE_KEY, request.getFromObjectType().trim());
-            propMap.put(GraphConstants.TO_OID_KEY, request.getToObjectID().trim());
-            propMap.put(GraphConstants.TO_OTYPE_KEY, request.getToObjectType().trim());
-            propMap.put(GraphConstants.NS_KEY, edgeLabel);
-
-            nsMap.put(NameSpaceUtil.TYPE_KEY, request.getToObjectType());
-            String inVertexId = graphUtil.getNameSpaceUtil().generateNSId(request.getToObjectID(), nsMap,
-                    graphUtil.getIsNSPostfix());
-            nsMap.put(NameSpaceUtil.TYPE_KEY, request.getFromObjectType());
-            String outVertexId = graphUtil.getNameSpaceUtil().generateNSId(request.getFromObjectID(), nsMap,
-                    graphUtil.getIsNSPostfix());
             try {
-                addEdge(edgeLabel, propMap, inVertexId, outVertexId);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+                if (!checkEdgeExists(customerSpace, overrideEnv, overrideVersion, overrideTenant, request.getType(),
+                        request.getFromObjectID(), request.getFromObjectType(), request.getToObjectID(),
+                        request.getToObjectType())) {
+                    Map<String, String> nsMap = new HashMap<>();
+                    String effectiveCustomerSpace = graphUtil.getNameSpaceUtil()
+                            .populateNSMapAndCalculateEffectiveTenant(//
+                                    customerSpace, overrideEnv, overrideVersion, overrideTenant, //
+                                    request.getType(), nsMap);
+
+                    Map<String, String> propMap = new HashMap<>();
+                    if (MapUtils.isNotEmpty(request.getProperties())) {
+                        propMap.putAll(request.getProperties());
+                    }
+                    String edgeLabel = graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(),
+                            false);
+
+                    propMap.put(GraphConstants.TENANT_ID_PROP_KEY, effectiveCustomerSpace);
+                    propMap.put(GraphConstants.EDGE_TYPE_KEY, request.getType().trim());
+                    propMap.put(GraphConstants.FROM_OID_KEY, request.getFromObjectID().trim());
+                    propMap.put(GraphConstants.FROM_OTYPE_KEY, request.getFromObjectType().trim());
+                    propMap.put(GraphConstants.TO_OID_KEY, request.getToObjectID().trim());
+                    propMap.put(GraphConstants.TO_OTYPE_KEY, request.getToObjectType().trim());
+                    propMap.put(GraphConstants.NS_KEY, edgeLabel);
+
+                    nsMap.put(NameSpaceUtil.TYPE_KEY, request.getToObjectType());
+                    String inVertexId = graphUtil.getNameSpaceUtil().generateNSId(request.getToObjectID(), nsMap,
+                            graphUtil.getIsNSPostfix());
+                    nsMap.put(NameSpaceUtil.TYPE_KEY, request.getFromObjectType());
+                    String outVertexId = graphUtil.getNameSpaceUtil().generateNSId(request.getFromObjectID(), nsMap,
+                            graphUtil.getIsNSPostfix());
+                    try {
+                        addEdge(edgeLabel, propMap, inVertexId, outVertexId);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
         return true;
@@ -286,5 +298,57 @@ public class GraphEntityManagerImpl extends BaseGraphEntityManagerImpl
                     });
         }
         return result;
+    }
+
+    @Override
+    public boolean checkVertexExists(String customerSpace, String overrideEnv, String overrideVersion,
+            String overrideTenant, String objectId, String objectType) throws Exception {
+        if (StringUtils.isBlank(objectId) || StringUtils.isBlank(objectType)) {
+            throw new RuntimeException("Make sure vertexId and Type is specified");
+        }
+        Map<String, String> nsMap = new HashMap<>();
+        graphUtil.getNameSpaceUtil().populateNSMapAndCalculateEffectiveTenant( //
+                customerSpace, overrideEnv, overrideVersion, overrideTenant, //
+                objectType.trim(), nsMap);
+
+        String vertexId = graphUtil.getNameSpaceUtil().generateNSId( //
+                objectId.trim(), nsMap, graphUtil.getIsNSPostfix());
+        return checkVertexExists(vertexId);
+    }
+
+    @Override
+    public boolean checkEdgeExists(String customerSpace, String overrideEnv, String overrideVersion,
+            String overrideTenant, String edgeType, String fromObjectID, String fromObjectType, String toObjectID,
+            String toObjectType) throws Exception {
+        if (StringUtils.isBlank(edgeType) //
+                || StringUtils.isBlank(fromObjectID) //
+                || StringUtils.isBlank(fromObjectType) //
+                || StringUtils.isBlank(toObjectID) //
+                || StringUtils.isBlank(toObjectType)) {
+            throw new RuntimeException("Make sure required info is passed for edge existance check");
+        }
+        Map<String, String> nsMap = new HashMap<>();
+
+        graphUtil.getNameSpaceUtil().populateNSMapAndCalculateEffectiveTenant( //
+                customerSpace, overrideEnv, overrideVersion, overrideTenant, //
+                fromObjectType.trim(), nsMap);
+
+        String edgeLabel = graphUtil.getNameSpaceUtil().generateNS(nsMap, graphUtil.getIsNSPostfix(), false);
+
+        graphUtil.getNameSpaceUtil().populateNSMapAndCalculateEffectiveTenant( //
+                customerSpace, overrideEnv, overrideVersion, overrideTenant, //
+                fromObjectType.trim(), nsMap);
+
+        String outVertexID = graphUtil.getNameSpaceUtil().generateNSId( //
+                fromObjectID.trim(), nsMap, graphUtil.getIsNSPostfix());
+
+        graphUtil.getNameSpaceUtil().populateNSMapAndCalculateEffectiveTenant( //
+                customerSpace, overrideEnv, overrideVersion, overrideTenant, //
+                toObjectType.trim(), nsMap);
+
+        String inVertexID = graphUtil.getNameSpaceUtil().generateNSId( //
+                toObjectID.trim(), nsMap, graphUtil.getIsNSPostfix());
+
+        return checkEdgeExists(edgeLabel, inVertexID, outVertexID);
     }
 }

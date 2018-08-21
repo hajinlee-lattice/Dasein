@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.graph.VertexDeletionRequest;
 
 public interface GraphEntityManager {
 
-    boolean addVertex(String customerSpace, String overrideEnv, String overrideVersion, String overrideTenant,
+    void addVertex(String customerSpace, String overrideEnv, String overrideVersion, String overrideTenant,
             VertexCreationRequest request) throws Exception;
 
     boolean addEdge(String customerSpace, String overrideEnv, String overrideVersion, String overrideTenant,
@@ -33,4 +33,10 @@ public interface GraphEntityManager {
             String overrideTenant, String vertexId, Map<String, String> addOrUpdateProperties,
             List<String> removeProperties) throws Exception;
 
+    boolean checkVertexExists(String customerSpace, String overrideEnv, String overrideVersion, String overrideTenant,
+            String objectId, String objectType) throws Exception;
+
+    boolean checkEdgeExists(String customerSpace, String overrideEnv, String overrideVersion, String overrideTenant,
+            String edgeType, String fromObjectID, String fromObjectType, String toObjectID, String toObjectType)
+            throws Exception;
 }

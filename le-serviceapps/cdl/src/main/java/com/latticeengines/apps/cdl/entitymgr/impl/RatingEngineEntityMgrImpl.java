@@ -27,6 +27,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.dao.AIModelDao;
 import com.latticeengines.apps.cdl.dao.RatingEngineDao;
 import com.latticeengines.apps.cdl.dao.RuleBasedModelDao;
+import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
+import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.repository.RatingEngineRepository;
@@ -77,8 +79,9 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("ratingEngineEntityMgr")
-public class RatingEngineEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<RatingEngineRepository, RatingEngine, Long>
-        implements RatingEngineEntityMgr {
+public class RatingEngineEntityMgrImpl //
+        extends BaseReadWriteRepoEntityMgrImpl<RatingEngineRepository, RatingEngine, Long> //
+        implements RatingEngineEntityMgr, GraphVisitable {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImpl.class);
 
@@ -582,5 +585,12 @@ public class RatingEngineEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Ra
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TARGET));
         }
         return attrDepSet;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public void accept(GraphVisitor visitor, String entityId) throws Exception {
+        RatingEngine entity = findById(entityId);
+        visitor.visit(entity, parse(entity, null));
     }
 }

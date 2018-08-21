@@ -28,6 +28,17 @@ public class DependenciesToGraphAction {
     @Inject
     private GraphEntityManager graphEntityManager;
 
+    @Inject
+    private ConnectionManager connectionManager;
+
+    public void beginThreadLocalCluster() {
+        connectionManager.initThreadLocalCluster();
+    }
+
+    public void closeThreadLocalCluster() {
+        connectionManager.cleanupThreadLocalCluster();
+    }
+
     public void createVertex(String tenantId, ParsedDependencies parsedDependencies, String vertexId, String vertexType)
             throws Exception {
         createVertex(tenantId, parsedDependencies, vertexId, vertexType, null, null);
@@ -35,43 +46,45 @@ public class DependenciesToGraphAction {
 
     public void createVertex(String tenantId, ParsedDependencies parsedDependencies, String vertexId, String vertexType,
             Map<String, String> vertexProperties, List<Map<String, String>> edgeProperties) throws Exception {
-        VertexCreationRequest request = new VertexCreationRequest();
-        request.setObjectId(vertexId);
-        request.setType(vertexType);
-        if (vertexProperties == null) {
-            vertexProperties = new HashMap<>();
+        if (!graphEntityManager.checkVertexExists(tenantId, null, null, null, vertexId, vertexType)) {
+            VertexCreationRequest request = new VertexCreationRequest();
+            request.setObjectId(vertexId);
+            request.setType(vertexType);
+            if (vertexProperties == null) {
+                vertexProperties = new HashMap<>();
+            }
+            vertexProperties.put(GraphConstants.TENANT_ID_PROP_KEY, tenantId);
+            request.setProperties(vertexProperties);
+            if (parsedDependencies != null //
+                    && CollectionUtils.isNotEmpty(parsedDependencies.getAddDependencies())) {
+                Map<String, Map<String, Map<String, String>>> outgoingEdgesToVertices = new HashMap<>();
+                Map<String, String> outgoingVertexTypes = new HashMap<>();
+                final AtomicInteger idx = new AtomicInteger(0);
+
+                parsedDependencies.getAddDependencies().stream() //
+                        .forEach(a -> {
+                            Map<String, Map<String, String>> edgeInfo = new HashMap<>();
+                            int index = idx.get();
+                            idx.set(index + 1);
+                            Map<String, String> propMap = null;
+                            if (CollectionUtils.isNotEmpty(edgeProperties)
+                                    && MapUtils.isNotEmpty(edgeProperties.get(index))) {
+                                propMap = edgeProperties.get(index);
+                            } else {
+                                propMap = new HashMap<>();
+                            }
+                            propMap.put(GraphConstants.TENANT_ID_PROP_KEY, tenantId);
+                            edgeInfo.put(a.getRight(), propMap);
+                            outgoingEdgesToVertices.put(a.getLeft(), edgeInfo);
+
+                            outgoingVertexTypes.put(a.getLeft(), a.getMiddle());
+                        });
+
+                request.setOutgoingEdgesToVertices(outgoingEdgesToVertices);
+                request.setOutgoingVertexTypes(outgoingVertexTypes);
+            }
+            graphEntityManager.addVertex(tenantId, null, null, null, request);
         }
-        vertexProperties.put(GraphConstants.TENANT_ID_PROP_KEY, tenantId);
-        request.setProperties(vertexProperties);
-        if (parsedDependencies != null //
-                && CollectionUtils.isNotEmpty(parsedDependencies.getAddDependencies())) {
-            Map<String, Map<String, Map<String, String>>> outgoingEdgesToVertices = new HashMap<>();
-            Map<String, String> outgoingVertexTypes = new HashMap<>();
-            final AtomicInteger idx = new AtomicInteger(0);
-
-            parsedDependencies.getAddDependencies().stream() //
-                    .forEach(a -> {
-                        Map<String, Map<String, String>> edgeInfo = new HashMap<>();
-                        int index = idx.get();
-                        idx.set(index + 1);
-                        Map<String, String> propMap = null;
-                        if (CollectionUtils.isNotEmpty(edgeProperties)
-                                && MapUtils.isNotEmpty(edgeProperties.get(index))) {
-                            propMap = edgeProperties.get(index);
-                        } else {
-                            propMap = new HashMap<>();
-                        }
-                        propMap.put(GraphConstants.TENANT_ID_PROP_KEY, tenantId);
-                        edgeInfo.put(a.getRight(), propMap);
-                        outgoingEdgesToVertices.put(a.getLeft(), edgeInfo);
-
-                        outgoingVertexTypes.put(a.getLeft(), a.getMiddle());
-                    });
-
-            request.setOutgoingEdgesToVertices(outgoingEdgesToVertices);
-            request.setOutgoingVertexTypes(outgoingVertexTypes);
-        }
-        graphEntityManager.addVertex(tenantId, null, null, null, request);
     }
 
     public Map<Pair<Pair<String, String>, Pair<String, String>>, List<List<Map<String, String>>>> addEdges(

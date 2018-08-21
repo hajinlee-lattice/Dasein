@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
@@ -22,7 +23,6 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngine.ScoreType;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component
 public class IdToDisplayNameTranslator {
@@ -43,6 +43,9 @@ public class IdToDisplayNameTranslator {
 
     @Inject
     private RatingDisplayMetadataStore ratingDisplayMetadataStore;
+
+    @Inject
+    RatingAttributeNameParser ratingAttributeNameParser;
 
     public Map<String, List<Map<String, String>>> translate(List<Map<String, String>> inputList) {
         Map<String, List<Map<String, String>>> result = new HashMap<>();
@@ -118,31 +121,17 @@ public class IdToDisplayNameTranslator {
                 || type.equals(VertexType.RATING_SCORE_ATTRIBUTE) //
                 || type.equals(VertexType.RATING_PROB_ATTRIBUTE) //
                 || type.equals(VertexType.RATING_EV_ATTRIBUTE)) {
-            String displayNameSuffix = "";
-            String modelId = objId.substring((BusinessEntity.Rating + ".").length());
-            ScoreType scoreType = ScoreType.Rating;
-            if (type.equals(VertexType.RATING_SCORE_ATTRIBUTE)) {
-                scoreType = ScoreType.Score;
-            } else if (type.equals(VertexType.RATING_PROB_ATTRIBUTE)) {
-                scoreType = ScoreType.Probability;
-            } else if (type.equals(VertexType.RATING_EV_ATTRIBUTE)) {
-                scoreType = ScoreType.ExpectedRevenue;
-            }
+            Pair<ScoreType, String> pair = ratingAttributeNameParser.parseTypeNMoelId(type, objId);
 
-            if (scoreType != ScoreType.Rating) {
-                modelId = modelId.substring(0,
-                        modelId.lastIndexOf( //
-                                "_" + RatingEngine.SCORE_ATTR_SUFFIX //
-                                        .get(scoreType)));
-            }
-
-            RatingEngine model = ratingEngineEntityMgr.findById(modelId);
+            RatingEngine model = ratingEngineEntityMgr.findById(pair.getRight());
             if (model != null) {
                 displayName = model.getDisplayName();
             }
 
-            if (scoreType != ScoreType.Rating) {
-                displayNameSuffix = " " + ratingDisplayMetadataStore.getSecondaryDisplayName("_" + scoreType.name());
+            String displayNameSuffix = "";
+            if (pair.getLeft() != ScoreType.Rating) {
+                displayNameSuffix = " "
+                        + ratingDisplayMetadataStore.getSecondaryDisplayName("_" + pair.getLeft().name());
             }
             displayName += displayNameSuffix;
         }

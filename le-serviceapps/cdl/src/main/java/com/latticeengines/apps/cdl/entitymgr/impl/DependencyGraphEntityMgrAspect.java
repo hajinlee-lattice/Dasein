@@ -1,17 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -23,23 +13,14 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.graph.EdgeType;
-import com.latticeengines.domain.exposed.graph.GraphConstants;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngine.ScoreType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.graph.DependenciesToGraphAction;
 
 @Aspect
 public class DependencyGraphEntityMgrAspect {
@@ -60,19 +41,13 @@ public class DependencyGraphEntityMgrAspect {
     private AIModelEntityMgr aiModelEntityMgr;
 
     @Inject
-    private DependenciesToGraphAction graphAction;
-
-    @Inject
-    private IdToDisplayNameTranslator nameTranslator;
+    private CDLDependenciesToGraphAction cdlGraphAction;
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.SegmentEntityMgrImpl.createSegment(..))")
     public void createSegment(JoinPoint joinPoint) throws Exception {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof MetadataSegment) {
             MetadataSegment metadataSegment = (MetadataSegment) joinPoint.getArgs()[0];
-            ParsedDependencies parsedDependencies = segmentEntityMgr.parse(metadataSegment, null);
-
-            graphAction.createVertex(MultiTenantContext.getTenant().getId(), parsedDependencies,
-                    metadataSegment.getName(), VertexType.SEGMENT, null, null);
+            cdlGraphAction.createSegmentVertex(metadataSegment);
         }
     }
 
@@ -84,10 +59,10 @@ public class DependencyGraphEntityMgrAspect {
             String segmentId = metadataSegment.getName();
 
             if (!ignoreDependencyCheck) {
-                checkDeleteSafety(segmentId, VertexType.SEGMENT);
+                cdlGraphAction.checkDeleteSafety(segmentId, VertexType.SEGMENT);
             }
             joinPoint.proceed(joinPoint.getArgs());
-            graphAction.deleteVertex(MultiTenantContext.getTenant().getId(), segmentId, VertexType.SEGMENT);
+            cdlGraphAction.deleteVertex(MultiTenantContext.getTenant().getId(), segmentId, VertexType.SEGMENT);
         }
     }
 
@@ -99,12 +74,11 @@ public class DependencyGraphEntityMgrAspect {
             MetadataSegment existingSegment = (MetadataSegment) joinPoint.getArgs()[1];
             ParsedDependencies parsedDependencies = segmentEntityMgr.parse(segment, existingSegment);
 
-            addEdges(parsedDependencies, segment.getName(), VertexType.SEGMENT);
+            cdlGraphAction.addEdges(parsedDependencies, segment.getName(), VertexType.SEGMENT);
 
             MetadataSegment result = (MetadataSegment) joinPoint.proceed(joinPoint.getArgs());
 
-            graphAction.dropEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, segment.getName(),
-                    VertexType.SEGMENT);
+            cdlGraphAction.dropEdges(parsedDependencies, segment.getName(), VertexType.SEGMENT);
 
             return result;
         }
@@ -115,26 +89,7 @@ public class DependencyGraphEntityMgrAspect {
     public void createRating(JoinPoint joinPoint) throws Exception {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof RatingEngine) {
             RatingEngine ratingEngine = (RatingEngine) joinPoint.getArgs()[0];
-            ParsedDependencies parsedDependencies = ratingEngineEntityMgr.parse(ratingEngine, null);
-            graphAction.createVertex(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngine.getId(),
-                    VertexType.RATING_ENGINE);
-            createRatingAttributeVertices(ratingEngine);
-        }
-    }
-
-    private void createRatingAttributeVertices(RatingEngine ratingEngine) throws Exception {
-        switch (ratingEngine.getType()) {
-        case CROSS_SELL:
-        case PROSPECTING:
-            createRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE,
-                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.ExpectedRevenue));
-        case CUSTOM_EVENT:
-            createRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE,
-                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score));
-            createRatingAttr(ratingEngine, VertexType.RATING_PROB_ATTRIBUTE,
-                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Probability));
-        default:
-            createRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
+            cdlGraphAction.createRatingEngineVertex(ratingEngine);
         }
     }
 
@@ -164,24 +119,23 @@ public class DependencyGraphEntityMgrAspect {
             }
 
             if (isDelete && !alreadyDeleted) {
-                checkDeleteSafety(ratingEngine.getId(), VertexType.RATING_ENGINE);
+                cdlGraphAction.checkDeleteSafety(ratingEngine.getId(), VertexType.RATING_ENGINE);
             }
             ParsedDependencies parsedDependencies = null;
             if (!isDelete && !alreadyDeleted) {
                 parsedDependencies = ratingEngineEntityMgr.parse(ratingEngine, existingRatingEngine);
 
-                addEdges(parsedDependencies, ratingEngine.getId(), VertexType.RATING_ENGINE);
+                cdlGraphAction.addEdges(parsedDependencies, ratingEngine.getId(), VertexType.RATING_ENGINE);
             }
 
             RatingEngine result = (RatingEngine) joinPoint.proceed(joinPoint.getArgs());
 
             if (!isDelete && !alreadyDeleted) {
-                graphAction.dropEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngine.getId(),
-                        VertexType.RATING_ENGINE);
+                cdlGraphAction.dropEdges(parsedDependencies, ratingEngine.getId(), VertexType.RATING_ENGINE);
             }
             if (isDelete && !alreadyDeleted) {
-                deleteRatingAttributeVertices(ratingEngine);
-                graphAction.deleteVertex(MultiTenantContext.getTenant().getId(), ratingEngine.getId(),
+                cdlGraphAction.deleteRatingAttributeVertices(ratingEngine);
+                cdlGraphAction.deleteVertex(MultiTenantContext.getTenant().getId(), ratingEngine.getId(),
                         VertexType.RATING_ENGINE);
             }
 
@@ -195,9 +149,7 @@ public class DependencyGraphEntityMgrAspect {
         if (joinPoint.getArgs().length > 1 && joinPoint.getArgs()[0] instanceof RuleBasedModel) {
             RuleBasedModel ruleBasedModel = (RuleBasedModel) joinPoint.getArgs()[0];
             String ratingEngineId = (String) joinPoint.getArgs()[1];
-            ParsedDependencies parsedDependencies = ruleBasedModelEntityMgr.parse(ruleBasedModel, null);
-
-            addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
+            cdlGraphAction.createEdgesForRuleBasedModel(ruleBasedModel, ratingEngineId);
         }
     }
 
@@ -210,12 +162,11 @@ public class DependencyGraphEntityMgrAspect {
             ParsedDependencies parsedDependencies = ruleBasedModelEntityMgr.parse(ruleBasedModel,
                     existingRuleBasedModel);
 
-            addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
+            cdlGraphAction.addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
 
             RuleBasedModel result = (RuleBasedModel) joinPoint.proceed(joinPoint.getArgs());
 
-            graphAction.dropEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngineId,
-                    VertexType.RATING_ENGINE);
+            cdlGraphAction.dropEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
 
             return result;
         }
@@ -227,9 +178,7 @@ public class DependencyGraphEntityMgrAspect {
         if (joinPoint.getArgs().length > 1 && joinPoint.getArgs()[0] instanceof AIModel) {
             AIModel aiModel = (AIModel) joinPoint.getArgs()[0];
             String ratingEngineId = (String) joinPoint.getArgs()[1];
-            ParsedDependencies parsedDependencies = aiModelEntityMgr.parse(aiModel, null);
-
-            addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
+            cdlGraphAction.createEdgesForAIModel(aiModel, ratingEngineId);
         }
     }
 
@@ -241,12 +190,11 @@ public class DependencyGraphEntityMgrAspect {
             String ratingEngineId = (String) joinPoint.getArgs()[2];
             ParsedDependencies parsedDependencies = aiModelEntityMgr.parse(ruleBasedModel, existingRuleBasedModel);
 
-            addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
+            cdlGraphAction.addEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
 
             AIModel result = (AIModel) joinPoint.proceed(joinPoint.getArgs());
 
-            graphAction.dropEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, ratingEngineId,
-                    VertexType.RATING_ENGINE);
+            cdlGraphAction.dropEdges(parsedDependencies, ratingEngineId, VertexType.RATING_ENGINE);
 
             return result;
         }
@@ -257,13 +205,13 @@ public class DependencyGraphEntityMgrAspect {
     public void deleteRating(ProceedingJoinPoint joinPoint) throws Throwable {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof String) {
             String ratingId = (String) joinPoint.getArgs()[0];
-            checkDeleteSafety(ratingId, VertexType.RATING_ENGINE);
+            cdlGraphAction.checkDeleteSafety(ratingId, VertexType.RATING_ENGINE);
 
             RatingEngine ratingEngine = ratingEngineEntityMgr.findById(ratingId);
 
             joinPoint.proceed(joinPoint.getArgs());
-            deleteRatingAttributeVertices(ratingEngine);
-            graphAction.deleteVertex(MultiTenantContext.getTenant().getId(), ratingEngine.getId(),
+            cdlGraphAction.deleteRatingAttributeVertices(ratingEngine);
+            cdlGraphAction.deleteVertex(MultiTenantContext.getTenant().getId(), ratingEngine.getId(),
                     VertexType.RATING_ENGINE);
         }
     }
@@ -272,9 +220,7 @@ public class DependencyGraphEntityMgrAspect {
     public void createPlay(JoinPoint joinPoint) throws Exception {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof Play) {
             Play play = (Play) joinPoint.getArgs()[0];
-            ParsedDependencies parsedDependencies = playEntityMgr.parse(play, null);
-            graphAction.createVertex(MultiTenantContext.getTenant().getId(), parsedDependencies, play.getName(),
-                    VertexType.PLAY);
+            cdlGraphAction.createPlayVertex(play);
         }
     }
 
@@ -298,24 +244,23 @@ public class DependencyGraphEntityMgrAspect {
                 alreadyDeleted = true;
             }
             if (isDelete && !alreadyDeleted) {
-                checkDeleteSafety(play.getName(), VertexType.PLAY);
+                cdlGraphAction.checkDeleteSafety(play.getName(), VertexType.PLAY);
             }
             ParsedDependencies parsedDependencies = null;
             if (!isDelete && !alreadyDeleted) {
                 parsedDependencies = playEntityMgr.parse(play, existingPlay);
 
-                addEdges(parsedDependencies, play.getName(), VertexType.PLAY);
+                cdlGraphAction.addEdges(parsedDependencies, play.getName(), VertexType.PLAY);
             }
 
             Play result = (Play) joinPoint.proceed(joinPoint.getArgs());
 
             if (!isDelete && !alreadyDeleted) {
-                graphAction.dropEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, play.getName(),
-                        VertexType.PLAY);
+                cdlGraphAction.dropEdges(parsedDependencies, play.getName(), VertexType.PLAY);
             }
             if (isDelete && !alreadyDeleted) {
-                checkDeleteSafety(play.getName(), VertexType.PLAY);
-                graphAction.deleteVertex(MultiTenantContext.getTenant().getId(), play.getName(), VertexType.PLAY);
+                cdlGraphAction.checkDeleteSafety(play.getName(), VertexType.PLAY);
+                cdlGraphAction.deleteVertex(MultiTenantContext.getTenant().getId(), play.getName(), VertexType.PLAY);
             }
 
             return result;
@@ -327,139 +272,13 @@ public class DependencyGraphEntityMgrAspect {
     public void deletePlay(ProceedingJoinPoint joinPoint) throws Throwable {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof String) {
             String playId = (String) joinPoint.getArgs()[0];
-            checkDeleteSafety(playId, VertexType.PLAY);
+            cdlGraphAction.checkDeleteSafety(playId, VertexType.PLAY);
 
             if (joinPoint != null) {
                 joinPoint.proceed(joinPoint.getArgs());
             }
 
-            graphAction.deleteVertex(MultiTenantContext.getTenant().getId(), playId, VertexType.PLAY);
+            cdlGraphAction.deleteVertex(MultiTenantContext.getTenant().getId(), playId, VertexType.PLAY);
         }
     }
-
-    public String createRatingAttr(RatingEngine ratingEngine, String vertexType, String suffix) throws Exception {
-        Tenant tenant = MultiTenantContext.getTenant();
-
-        String objectId = BusinessEntity.Rating + "." + ratingEngine.getId() + suffix;
-        ParsedDependencies parsedDependencies = new ParsedDependencies();
-        List<Triple<String, String, String>> addDependencies = new ArrayList<>();
-        List<Map<String, String>> edgeProperties = new ArrayList<>();
-        addDependencies.add(ParsedDependencies //
-                .tuple(ratingEngine.getId(), VertexType.RATING_ENGINE, EdgeType.DEPENDS_ON_VIA_PA));
-        Map<String, String> edgeProps = new HashMap<>();
-        edgeProps.put(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY, GraphConstants.JUMP_DURING_DEP_CHECK);
-        edgeProps.put(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY, GraphConstants.CASCADE_ON_DELETE);
-        edgeProperties.add(edgeProps);
-        addDependencies.add(ParsedDependencies //
-                .tuple(tenant.getId(), VertexType.TENANT, EdgeType.TENANT));
-        edgeProperties.add(null);
-        parsedDependencies.setAddDependencies(addDependencies);
-
-        Map<String, String> vertexProperties = new HashMap<>();
-        vertexProperties.put(GraphConstants.BEHAVIOR_ON_DELETE_OF_IN_VERTEX_KEY, //
-                GraphConstants.CASCADE_ON_DELETE);
-        vertexProperties.put(GraphConstants.BEHAVIOR_ON_DEP_CHECK_TRAVERSAL_KEY, //
-                GraphConstants.JUMP_DURING_DEP_CHECK);
-
-        graphAction.createVertex(MultiTenantContext.getTenant().getId(), parsedDependencies, objectId, vertexType,
-                vertexProperties, edgeProperties);
-        return objectId;
-    }
-
-    public void deleteRatingAttr(RatingEngine ratingEngine, String vertexType, String suffix) throws Throwable {
-        String objectId = BusinessEntity.Rating + "." + ratingEngine.getId() + suffix;
-        checkDeleteSafety(objectId, vertexType);
-        graphAction.deleteVertex(MultiTenantContext.getTenant().getId(), objectId, vertexType);
-    }
-
-    private void checkDeleteSafety(String vertexId, String vertexType) throws Exception {
-        List<Map<String, String>> dependencies = graphAction
-                .checkDirectDependencies(MultiTenantContext.getTenant().getId(), vertexId, vertexType);
-
-        if (CollectionUtils.isNotEmpty(dependencies)) {
-            Map<String, List<Map<String, String>>> translatedDependenciesWithId = nameTranslator
-                    .translate(dependencies);
-            Map<String, List<String>> translatedDependencies = new HashMap<>();
-            translatedDependenciesWithId.keySet().stream() //
-                    .filter(type -> CollectionUtils.isNotEmpty(translatedDependenciesWithId.get(type))) //
-                    .forEach(type -> {
-                        translatedDependencies.put(type, new ArrayList<>());
-                        translatedDependenciesWithId.get(type).stream().forEach(dep -> {
-                            translatedDependencies.get(type) //
-                                    .add(dep.get(IdToDisplayNameTranslator.DISPLAY_NAME));
-                        });
-                    });
-            throw new LedpException(LedpCode.LEDP_40042, new String[] { JsonUtils.serialize(translatedDependencies) });
-        }
-    }
-
-    private void checkDeleteSafetyWithId(String vertexId, String vertexType) throws Exception {
-        List<Map<String, String>> dependencies = graphAction
-                .checkDirectDependencies(MultiTenantContext.getTenant().getId(), vertexId, vertexType);
-
-        if (CollectionUtils.isNotEmpty(dependencies)) {
-            Map<String, List<Map<String, String>>> translatedDependencies = nameTranslator.translate(dependencies);
-            throw new LedpException(LedpCode.LEDP_40042, new String[] { JsonUtils.serialize(translatedDependencies) });
-        }
-    }
-
-    private void addEdges(ParsedDependencies parsedDependencies, String vertexId, String vertexType) throws Exception {
-        Map<Pair<Pair<String, String>, Pair<String, String>>, List<List<Map<String, String>>>> potentialCircularDependencies = graphAction
-                .addEdges(MultiTenantContext.getTenant().getId(), parsedDependencies, vertexId, vertexType);
-        if (MapUtils.isNotEmpty(potentialCircularDependencies)) {
-            StringBuilder sb = new StringBuilder();
-            potentialCircularDependencies.keySet().stream() //
-                    .forEach(k -> {
-                        String fromVertexId = k.getLeft().getLeft();
-                        String fromVertexType = k.getLeft().getRight();
-                        String toVertexId = k.getRight().getLeft();
-                        String toVertexType = k.getRight().getRight();
-                        List<List<Map<String, String>>> translatedPaths = nameTranslator
-                                .translatePaths(potentialCircularDependencies.get(k));
-                        String v1 = String.format("%s '%s'", nameTranslator.translateType(fromVertexType), //
-                                nameTranslator.idToDisplayName( //
-                                        fromVertexType, fromVertexId));
-                        String v2 = String.format("%s '%s'", nameTranslator.translateType(toVertexType), //
-                                nameTranslator.idToDisplayName( //
-                                        toVertexType, toVertexId));
-                        sb.append(String.format(
-                                "%s cannot depend on %s as it will cause circular dependencies. "
-                                        + "Dependency path from %s to %s already exist: \n", //
-                                v1, v2, v2, v1));
-                        translatedPaths.stream() //
-                                .forEach(p -> {
-                                    sb.append("Path [");
-                                    AtomicInteger firstTime = new AtomicInteger(1);
-                                    p.stream() //
-                                            .forEach(v -> {
-                                                sb.append(String.format("%s%s '%s'", //
-                                                        firstTime.get() == 1 ? "" : " -> ", //
-                                                        v.get(IdToDisplayNameTranslator.TYPE), //
-                                                        v.get(IdToDisplayNameTranslator.DISPLAY_NAME)));
-                                                firstTime.incrementAndGet();
-                                            });
-                                    sb.append("]\n");
-                                });
-                    });
-
-            throw new LedpException(LedpCode.LEDP_40041, new String[] { sb.toString() });
-        }
-    }
-
-    private void deleteRatingAttributeVertices(RatingEngine ratingEngine) throws Throwable {
-        switch (ratingEngine.getType()) {
-        case CROSS_SELL:
-        case PROSPECTING:
-            deleteRatingAttr(ratingEngine, VertexType.RATING_EV_ATTRIBUTE,
-                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.ExpectedRevenue));
-        case CUSTOM_EVENT:
-            deleteRatingAttr(ratingEngine, VertexType.RATING_SCORE_ATTRIBUTE,
-                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score));
-            deleteRatingAttr(ratingEngine, VertexType.RATING_PROB_ATTRIBUTE,
-                    "_" + RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Probability));
-        default:
-            deleteRatingAttr(ratingEngine, VertexType.RATING_ATTRIBUTE, "");
-        }
-    }
-
 }

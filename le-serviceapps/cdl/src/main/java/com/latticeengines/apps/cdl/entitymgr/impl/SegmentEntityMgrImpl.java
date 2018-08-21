@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.SegmentDao;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
+import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
@@ -27,7 +30,6 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
-import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -38,7 +40,8 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("segmentEntityMgr")
-public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> implements SegmentEntityMgr {
+public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
+        implements SegmentEntityMgr, GraphVisitable {
     private static final Logger log = LoggerFactory.getLogger(SegmentEntityMgrImpl.class);
 
     @Inject
@@ -49,6 +52,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
+
+    @Inject
+    private RatingAttributeNameParser ratingAttributeNameParser;
 
     @Inject
     private SegmentDependencyUtil segmentDependencyUtil;
@@ -189,9 +195,11 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         Set<AttributeLookup> attributeLookups = segment.getSegmentAttributes();
         for (AttributeLookup attributeLookup : attributeLookups) {
             if (attributeLookup.getEntity() == BusinessEntity.Rating) {
+                Pair<String, String> pair = ratingAttributeNameParser
+                        .parseToTypeNModelId(attributeLookup.getAttribute());
                 attrDepSet.add(
                         ParsedDependencies.tuple(attributeLookup.getEntity() + "." + attributeLookup.getAttribute(), //
-                                VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
+                                pair.getLeft(), EdgeType.DEPENDS_ON));
             }
         }
         return attrDepSet;
@@ -210,4 +218,10 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         return existing;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public void accept(GraphVisitor visitor, String entityId) throws Exception {
+        MetadataSegment entity = findByName(entityId);
+        visitor.visit(entity, parse(entity, null));
+    }
 }

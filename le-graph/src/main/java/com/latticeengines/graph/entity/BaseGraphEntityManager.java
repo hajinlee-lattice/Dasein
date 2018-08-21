@@ -21,4 +21,8 @@ public interface BaseGraphEntityManager {
 
     boolean updateVertexProperty(String vertexId, Map<String, String> addOrUpdateProperties,
             List<String> removeProperties) throws Exception;
+
+    boolean checkVertexExists(String vertexId) throws Exception;
+
+    boolean checkEdgeExists(String label, String inVertexID, String outVertexID) throws Exception;
 }
