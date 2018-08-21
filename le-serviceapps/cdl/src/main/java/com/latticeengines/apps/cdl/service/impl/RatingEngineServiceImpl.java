@@ -680,22 +680,15 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
         validateAIRatingEngine(ratingEngine);
 
-        if (ratingEngine.getPublishedIteration() == null
-                || StringUtils.isEmpty(((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId())
-                || ((AIModel) ratingEngine.getPublishedIteration()).getModelingJobStatus() != JobStatus.COMPLETED) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {
-                    "Cannot retrieve PublishedHistory since Model either has no published Iteration or the Published iteration is in an incorrect state" });
+        List<BucketMetadata> allBuckets = bucketedScoreProxy
+                .getAllBucketsByEngineId(CustomerSpace.shortenCustomerSpace(customerSpace), ratingEngineId);
+
+        if (CollectionUtils.isEmpty(allBuckets)) {
+            log.warn("No Buckets found for Model: " + ratingEngineId + ", CustomerSpace: " + customerSpace);
+            return new ArrayList<>();
         }
 
-        List<BucketMetadata> publishedBuckets = bucketedScoreProxy
-                .getAllPublishedBucketsByEngineId(CustomerSpace.shortenCustomerSpace(customerSpace), ratingEngineId);
-
-        if (CollectionUtils.isEmpty(publishedBuckets)) {
-            publishedBuckets = setAndRetrievePublishedBucketsIfMissing(customerSpace, ratingEngine);
-        }
-
-        Map<String, HashMap<Long, List<BucketMetadata>>> publishedBucketsGroupedByCreationTime = Flux
-                .fromIterable(publishedBuckets).filter(bucket -> bucket.getPublishedVersion() != null)
+        Map<String, HashMap<Long, List<BucketMetadata>>> bucketsGroupedByCreationTime = Flux.fromIterable(allBuckets)
                 .collect(HashMap<String, HashMap<Long, List<BucketMetadata>>>::new, (returnMap, bucket) -> {
                     if (!returnMap.containsKey(bucket.getModelSummaryId())) {
                         returnMap.put(bucket.getModelSummaryId(), new HashMap<>());
@@ -705,7 +698,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                         returnMap.get(bucket.getModelSummaryId()).put(bucket.getCreationTimestamp(), new ArrayList<>());
                     }
                     returnMap.get(bucket.getModelSummaryId()).get(bucket.getCreationTimestamp()).add(bucket);
-
                 }).block();
 
         RatingModelService<RatingModel> ratingModelService = getRatingModelService(ratingEngine.getType());
@@ -713,7 +705,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 .map(iteration -> (AIModel) iteration)
                 .filter(iteration -> StringUtils.isNotEmpty(iteration.getModelSummaryId()))
                 .map(iteration -> new RatingModelWithPublishedHistoryDTO(iteration,
-                        publishedBucketsGroupedByCreationTime.get(iteration.getModelSummaryId())))
+                        bucketsGroupedByCreationTime.get(iteration.getModelSummaryId())))
                 .filter(iteration -> MapUtils.isNotEmpty(iteration.getPublishedHistory())) //
                 .collectList().block();
     }

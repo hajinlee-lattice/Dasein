@@ -22,6 +22,8 @@ public interface BucketedScoreProxy {
 
     List<BucketMetadata> getLatestABCDBucketsByEngineId(String customerSpace, String engineId);
 
+    List<BucketMetadata> getAllBucketsByEngineId(String customerSpace, String engineId);
+
     List<BucketMetadata> getAllPublishedBucketsByEngineId(String customerSpace, String engineId);
 
     BucketedScoreSummary getBucketedScoreSummary(String customerSpace, String modelGuid);

@@ -29,6 +29,8 @@ public interface BucketedScoreService {
 
     List<BucketMetadata> getABCDBucketsByModelGuidAcrossTenant(String modelGuid);
 
+    List<BucketMetadata> getAllBucketsByRatingEngineId(String ratingEngineId);
+
     List<BucketMetadata> getAllPublishedBucketsByRatingEngineId(String ratingEngineId);
 
     List<BucketMetadata> getPublishedBucketMetadataByModelGuid(String modelSummaryId);

@@ -57,30 +57,6 @@ public class BucketedScoreResource {
         return bucketedScoreService.getModelBucketMetadataGroupedByCreationTimes(modelGuid);
     }
 
-    @GetMapping(value = "/abcdbuckets/engine/{engineId}")
-    @ResponseBody
-    @ApiOperation(value = "Get ABCD Buckets for given rating engine Id grouped by creation times")
-    public Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(@PathVariable String customerSpace,
-            @PathVariable String engineId) {
-        return bucketedScoreService.getRatingEngineBucketMetadataGroupedByCreationTimes(engineId);
-    }
-
-    @GetMapping(value = "/publishedbuckets/ratingengines/{ratingEngineId}")
-    @ResponseBody
-    @ApiOperation(value = "Get all published ABCD Buckets created for a given rating engine Id")
-    public List<BucketMetadata> getAllPublishedBucketsByRatingEngineId(@PathVariable String customerSpace,
-            @PathVariable String ratingEngineId) {
-        return bucketedScoreService.getAllPublishedBucketsByRatingEngineId(ratingEngineId);
-    }
-
-    @GetMapping(value = "/uptodateabcdbuckets/engine/{engineId}")
-    @ResponseBody
-    @ApiOperation(value = "Get ABCD Buckets info by rating engine Id")
-    public List<BucketMetadata> getUpToDateABCDBucketsByEngineId(@PathVariable String customerSpace,
-            @PathVariable String engineId) {
-        return bucketedScoreService.getABCDBucketsByRatingEngineId(engineId);
-    }
-
     @GetMapping(value = "/uptodateabcdbuckets/model/{modelGuid}")
     @ResponseBody
     @ApiOperation(value = "Get up-to-date ABCD Buckets info by model GUID")
@@ -113,4 +89,35 @@ public class BucketedScoreResource {
         return bucketedScoreService.createOrUpdateBucketedScoreSummary(modelGuid, summary);
     }
 
+    @GetMapping(value = "/abcdbuckets/engine/{engineId}")
+    @ResponseBody
+    @ApiOperation(value = "Get ABCD Buckets for given rating engine Id grouped by creation times")
+    public Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(@PathVariable String customerSpace,
+            @PathVariable String engineId) {
+        return bucketedScoreService.getRatingEngineBucketMetadataGroupedByCreationTimes(engineId);
+    }
+
+    @GetMapping(value = "/abcdbuckets/ratingengines/{ratingEngineId}")
+    @ResponseBody
+    @ApiOperation(value = "Get all ABCD Buckets created for a given rating engine Id")
+    public List<BucketMetadata> getAllBucketsByRatingEngineId(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
+        return bucketedScoreService.getAllBucketsByRatingEngineId(ratingEngineId);
+    }
+
+    @GetMapping(value = "/publishedbuckets/ratingengines/{ratingEngineId}")
+    @ResponseBody
+    @ApiOperation(value = "Get all published ABCD Buckets created for a given rating engine Id")
+    public List<BucketMetadata> getAllPublishedBucketsByRatingEngineId(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
+        return bucketedScoreService.getAllPublishedBucketsByRatingEngineId(ratingEngineId);
+    }
+
+    @GetMapping(value = "/uptodateabcdbuckets/engine/{engineId}")
+    @ResponseBody
+    @ApiOperation(value = "Get ABCD Buckets info by rating engine Id")
+    public List<BucketMetadata> getUpToDateABCDBucketsByEngineId(@PathVariable String customerSpace,
+            @PathVariable String engineId) {
+        return bucketedScoreService.getABCDBucketsByRatingEngineId(engineId);
+    }
 }

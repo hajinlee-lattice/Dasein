@@ -88,6 +88,11 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Override
+    public List<BucketMetadata> getAllBucketsByRatingEngineId(String ratingEngineId) {
+        return bucketMetadataEntityMgr.getAllBucketMetadatasForEngineFromReader(ratingEngineId);
+    }
+
+    @Override
     public List<BucketMetadata> getAllPublishedBucketsByRatingEngineId(String ratingEngineId) {
         return bucketMetadataEntityMgr.getAllPublishedBucketMetadatasForEngineFromReader(ratingEngineId);
     }
@@ -120,8 +125,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     private Integer getPublishedVersion(boolean published, String modelSummaryId) {
         if (published) {
-            Integer maxPublishedVersion = bucketMetadataEntityMgr
-                    .getMaxPublishedVersionByModelId(modelSummaryId);
+            Integer maxPublishedVersion = bucketMetadataEntityMgr.getMaxPublishedVersionByModelId(modelSummaryId);
             if (maxPublishedVersion == null) {
                 return 0;
             } else {
@@ -173,7 +177,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid,
-                                                                   BucketedScoreSummary bucketedScoreSummary) {
+            BucketedScoreSummary bucketedScoreSummary) {
         ModelSummary modelSummary = modelSummaryRepository.findById(modelGuid);
         bucketedScoreSummary.setModelSummary(modelSummary);
         BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.getByModelGuid(modelGuid);
