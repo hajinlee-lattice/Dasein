@@ -36,7 +36,7 @@ angular
 
     vm.handleSidebarToggle = function($event) {
         var target = angular.element($event.target),
-            collapsable_click = !target.parents('.menu').length;
+            collapsable_click = !target.parents('.no-collapse-children').length;
 
         if (collapsable_click) {
             $('body').toggleClass('open-nav');

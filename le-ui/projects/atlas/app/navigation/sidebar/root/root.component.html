@@ -1,4 +1,4 @@
-<ul class="menu" ng-controller="SidebarRootController as vm">
+<ul class="menu no-collapse-children" ng-controller="SidebarRootController as vm">
     <li role="presentation" ui-sref-active="active" ng-if="vm.back">
         <a ui-sref="{{ vm.back }}" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK')}}">
