@@ -2,11 +2,13 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -48,7 +50,11 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     public void find(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
                 Arrays.asList(entityManager, entityManagerReader));
-        enableSoftDeleteFilter(joinPoint, sessionFactory, entityManager);
+    }
+
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.*.find*(..)) || execution(* com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl.find*(..))")
+    public void findWithSoftDelete(JoinPoint joinPoint) {
+        enableSoftDeleteFilter(joinPoint, sessionFactory, Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayEntityMgrImpl.get*(..))")
@@ -99,7 +105,7 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @SuppressWarnings({ "rawtypes", "deprecation" })
     private void enableSoftDeleteFilter(JoinPoint joinPoint, SessionFactory sessionFactory,
-            EntityManager entityManager) {
+            Collection<EntityManager> entityManagers) {
         Class entityClass = ((AbstractBaseDaoImpl) ((BaseEntityMgr) joinPoint.getTarget()).getDao())
                 .getEntityClassReference();
         if (SoftDeletable.class.isAssignableFrom(entityClass)) {
@@ -112,8 +118,9 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
             // annotation does not present means soft delete filter is enabled
             if (softDeleteAnnotation == null) {
                 sessionFactory.getCurrentSession().enableFilter("softDeleteFilter");
-                if (entityManager != null) {
-                    entityManager.unwrap(Session.class).enableFilter("softDeleteFilter");
+                if (CollectionUtils.isNotEmpty(entityManagers)) {
+                    entityManagers.forEach(entityManager -> //
+                            entityManager.unwrap(Session.class).enableFilter("softDeleteFilter"));
                 }
             }
         }
