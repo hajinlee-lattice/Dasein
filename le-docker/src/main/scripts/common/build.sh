@@ -30,12 +30,12 @@ popd
 
 pushd le-jdk
 build_docker latticeengines/jdk ${NO_CACHE}
-docker tag latticeengines/jdk:latest latticeengines/jdk:1.8
+docker tag latticeengines/jdk:latest latticeengines/jdk:1.8.181
 popd
 
 pushd le-jre
 build_docker latticeengines/jre ${NO_CACHE}
-docker tag latticeengines/jre:latest latticeengines/jre:1.8
+docker tag latticeengines/jre:latest latticeengines/jre:1.8.181
 popd
 
 pushd le-tomcat
