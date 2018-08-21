@@ -149,19 +149,22 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
     @Override
     public Set<Triple<String, String, String>> extractDependencies(RuleBasedModel ruleBasedModel) {
         Set<Triple<String, String, String>> attrDepSet = new HashSet<Triple<String, String, String>>();
-        Set<AttributeLookup> attributeLookups = ruleBasedModel.getRatingModelAttributes();
 
-        if (CollectionUtils.isNotEmpty(attributeLookups)) {
-            attributeLookups.stream() //
-                    .forEach(attributeLookup -> {
-                        if (attributeLookup.getEntity() == BusinessEntity.Rating) {
-                            Pair<String, String> pair = ratingAttributeNameParser
-                                    .parseToTypeNModelId(attributeLookup.getAttribute());
-                            attrDepSet.add(ParsedDependencies.tuple(
-                                    attributeLookup.getEntity() + "." + attributeLookup.getAttribute(), //
-                                    pair.getLeft(), EdgeType.DEPENDS_ON));
-                        }
-                    });
+        if (ruleBasedModel != null) {
+            Set<AttributeLookup> attributeLookups = ruleBasedModel.getRatingModelAttributes();
+
+            if (CollectionUtils.isNotEmpty(attributeLookups)) {
+                attributeLookups.stream() //
+                        .forEach(attributeLookup -> {
+                            if (attributeLookup.getEntity() == BusinessEntity.Rating) {
+                                Pair<String, String> pair = ratingAttributeNameParser
+                                        .parseToTypeNModelId(attributeLookup.getAttribute());
+                                attrDepSet.add(ParsedDependencies.tuple(
+                                        attributeLookup.getEntity() + "." + attributeLookup.getAttribute(), //
+                                        pair.getLeft(), EdgeType.DEPENDS_ON));
+                            }
+                        });
+            }
         }
         return attrDepSet;
     }
@@ -173,8 +176,7 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public void accept(GraphVisitor visitor, String entityId) throws Exception {
-        RuleBasedModel entity = findById(entityId);
-        visitor.visit(entity, parse(entity, null));
+    public void accept(GraphVisitor visitor, Object entity) throws Exception {
+        visitor.visit((RuleBasedModel) entity, parse((RuleBasedModel) entity, null));
     }
 }

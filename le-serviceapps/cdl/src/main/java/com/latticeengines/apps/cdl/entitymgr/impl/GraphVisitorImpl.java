@@ -91,13 +91,13 @@ public class GraphVisitorImpl implements GraphVisitor {
         String objectType = object.getMiddle();
         switch (objectType) {
         case VertexType.PLAY:
-            playEntityMgr.accept(this, objectId);
+            playEntityMgr.accept(this, playEntityMgr.getPlayByName(objectId, false));
             break;
         case VertexType.SEGMENT:
-            segmentEntityMgr.accept(this, objectId);
+            segmentEntityMgr.accept(this, segmentEntityMgr.findByName(objectId));
             break;
         case VertexType.RATING_ENGINE:
-            ratingEngineEntityMgr.accept(this, objectId);
+            ratingEngineEntityMgr.accept(this, ratingEngineEntityMgr.findById(objectId));
             break;
         case VertexType.TENANT:
             createTenantVertex();
@@ -109,14 +109,15 @@ public class GraphVisitorImpl implements GraphVisitor {
             Pair<ScoreType, String> ratingTypeNModelIdPair = ratingAttributeNameParser.parseTypeNMoelId(objectType,
                     objectId);
             String ratingEngineId = ratingTypeNModelIdPair.getRight();
-            ratingEngineEntityMgr.accept(this, ratingEngineId);
+            RatingEngine ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
+            ratingEngineEntityMgr.accept(this, ratingEngine);
             RatingEngine re = ratingEngineEntityMgr.findById(ratingEngineId);
             if (re.getType() == RatingEngineType.RULE_BASED) {
                 List<RuleBasedModel> ruleModels = ruleBasedModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
                 if (CollectionUtils.isNotEmpty(ruleModels)) {
                     ruleModels.stream().forEach(rm -> {
                         try {
-                            ruleBasedModelEntityMgrImpl.accept(this, rm.getId());
+                            ruleBasedModelEntityMgrImpl.accept(this, rm);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -127,7 +128,7 @@ public class GraphVisitorImpl implements GraphVisitor {
                 if (CollectionUtils.isNotEmpty(aiModels)) {
                     aiModels.stream().forEach(am -> {
                         try {
-                            ruleBasedModelEntityMgrImpl.accept(this, am.getId());
+                            aiModelEntityMgrImpl.accept(this, am);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -165,39 +166,44 @@ public class GraphVisitorImpl implements GraphVisitor {
     public void traversePlays(PlayEntityMgrImpl entityMgr) throws Exception {
         List<Play> plays = entityMgr.findAll();
         if (CollectionUtils.isNotEmpty(plays)) {
-            plays.stream().forEach(pl -> {
-                try {
-                    entityMgr.accept(this, pl.getName());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            plays.stream() //
+                    .filter(pl -> pl.getDeleted() != Boolean.TRUE) //
+                    .forEach(pl -> {
+                        try {
+                            entityMgr.accept(this, pl);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
     }
 
     public void traverseRatingEngines(RatingEngineEntityMgrImpl entityMgr) throws Exception {
         List<RatingEngine> ratingEngines = entityMgr.findAll();
         if (CollectionUtils.isNotEmpty(ratingEngines)) {
-            ratingEngines.stream().forEach(re -> {
-                try {
-                    entityMgr.accept(this, re.getId());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            ratingEngines.stream() //
+                    .filter(re -> re.getDeleted() != Boolean.TRUE) //
+                    .forEach(re -> {
+                        try {
+                            entityMgr.accept(this, re);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
     }
 
     public void traverseSegments(SegmentEntityMgrImpl entityMgr) throws Exception {
         List<MetadataSegment> segments = entityMgr.findAll();
         if (CollectionUtils.isNotEmpty(segments)) {
-            segments.stream().forEach(seg -> {
-                try {
-                    entityMgr.accept(this, seg.getName());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            segments.stream() //
+                    .forEach(seg -> {
+                        try {
+                            entityMgr.accept(this, seg);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
     }
 

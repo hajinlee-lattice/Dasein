@@ -117,7 +117,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
     @Override
     public Set<Triple<String, String, String>> extractDependencies(AIModel aiModel) {
         Set<Triple<String, String, String>> attrDepSet = null;
-        if (aiModel.getTrainingSegment() != null) {
+        if (aiModel != null && aiModel.getTrainingSegment() != null) {
             attrDepSet = new HashSet<Triple<String, String, String>>();
             attrDepSet.add(ParsedDependencies.tuple(aiModel.getTrainingSegment().getName(), //
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TRAINING));
@@ -132,8 +132,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public void accept(GraphVisitor visitor, String entityId) throws Exception {
-        AIModel entity = findById(entityId);
-        visitor.visit(entity, parse(entity, null));
+    public void accept(GraphVisitor visitor, Object entity) throws Exception {
+        visitor.visit((AIModel) entity, parse((AIModel) entity, null));
     }
 }

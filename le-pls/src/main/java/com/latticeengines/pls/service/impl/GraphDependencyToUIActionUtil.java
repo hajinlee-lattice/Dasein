@@ -31,7 +31,7 @@ public class GraphDependencyToUIActionUtil {
     public UIAction processUpdateSegmentResponse(Map<String, List<String>> dependencies) {
         UIAction uiAction;
         if (MapUtils.isNotEmpty(dependencies)) {
-            uiAction = generateUIAction("Segment In Use", View.Modal, Status.Warning,
+            uiAction = generateUIAction("Segment In Use", View.Banner, Status.Warning,
                     generateHtmlMsg(dependencies,
                             "Changing a segment that is in use may affect the scoring and rating configuration.",
                             String.format("This segment has %d dependencies", dependencies.size())));

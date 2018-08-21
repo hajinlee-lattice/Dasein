@@ -359,7 +359,7 @@ public class RatingEngineResource {
                 ratingEngineId);
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies, "This model is in use.", null);
-        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Modal, Status.Info,
+        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Banner, Status.Warning,
                 message);
         return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
     }

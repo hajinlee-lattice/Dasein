@@ -162,24 +162,26 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
 
     @Override
     public Set<Triple<String, String, String>> extractDependencies(Play play) {
-        String ratingId = play.getRatingEngine().getId();
-        RatingEngine rating = findRatingEngine(play);
-        String targetSegmentName = rating.getSegment().getName();
+        Set<Triple<String, String, String>> attrDepSet = null;
+        if (play != null && play.getRatingEngine() != null) {
+            String ratingId = play.getRatingEngine().getId();
+            RatingEngine rating = findRatingEngine(play);
+            String targetSegmentName = rating.getSegment().getName();
 
-        Set<Triple<String, String, String>> attrDepSet = new HashSet<Triple<String, String, String>>();
-        attrDepSet.add(ParsedDependencies.tuple(targetSegmentName, //
-                VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TARGET));
-        attrDepSet.add(ParsedDependencies.tuple(ratingId, //
-                VertexType.RATING_ENGINE, EdgeType.DEPENDS_ON));
-        attrDepSet.add(ParsedDependencies.tuple(BusinessEntity.Rating + "." + ratingId, //
-                VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
+            attrDepSet = new HashSet<Triple<String, String, String>>();
+            attrDepSet.add(ParsedDependencies.tuple(targetSegmentName, //
+                    VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TARGET));
+            attrDepSet.add(ParsedDependencies.tuple(ratingId, //
+                    VertexType.RATING_ENGINE, EdgeType.DEPENDS_ON));
+            attrDepSet.add(ParsedDependencies.tuple(BusinessEntity.Rating + "." + ratingId, //
+                    VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
+        }
         return attrDepSet;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public void accept(GraphVisitor visitor, String entityId) throws Exception {
-        Play entity = getPlayByName(entityId, false);
-        visitor.visit(entity, parse(entity, null));
+    public void accept(GraphVisitor visitor, Object entity) throws Exception {
+        visitor.visit((Play) entity, parse((Play) entity, null));
     }
 }

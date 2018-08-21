@@ -191,15 +191,17 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Override
     public Set<Triple<String, String, String>> extractDependencies(MetadataSegment segment) {
         Set<Triple<String, String, String>> attrDepSet = new HashSet<Triple<String, String, String>>();
-        segmentDependencyUtil.findSegmentDependingAttributes(segment);
-        Set<AttributeLookup> attributeLookups = segment.getSegmentAttributes();
-        for (AttributeLookup attributeLookup : attributeLookups) {
-            if (attributeLookup.getEntity() == BusinessEntity.Rating) {
-                Pair<String, String> pair = ratingAttributeNameParser
-                        .parseToTypeNModelId(attributeLookup.getAttribute());
-                attrDepSet.add(
-                        ParsedDependencies.tuple(attributeLookup.getEntity() + "." + attributeLookup.getAttribute(), //
-                                pair.getLeft(), EdgeType.DEPENDS_ON));
+        if (segment != null) {
+            segmentDependencyUtil.findSegmentDependingAttributes(segment);
+            Set<AttributeLookup> attributeLookups = segment.getSegmentAttributes();
+            for (AttributeLookup attributeLookup : attributeLookups) {
+                if (attributeLookup.getEntity() == BusinessEntity.Rating) {
+                    Pair<String, String> pair = ratingAttributeNameParser
+                            .parseToTypeNModelId(attributeLookup.getAttribute());
+                    attrDepSet.add(
+                            ParsedDependencies.tuple(attributeLookup.getEntity() + "." + attributeLookup.getAttribute(), //
+                                    pair.getLeft(), EdgeType.DEPENDS_ON));
+                }
             }
         }
         return attrDepSet;
@@ -220,8 +222,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public void accept(GraphVisitor visitor, String entityId) throws Exception {
-        MetadataSegment entity = findByName(entityId);
-        visitor.visit(entity, parse(entity, null));
+    public void accept(GraphVisitor visitor, Object entity) throws Exception {
+        visitor.visit((MetadataSegment) entity, parse((MetadataSegment) entity, null));
     }
 }

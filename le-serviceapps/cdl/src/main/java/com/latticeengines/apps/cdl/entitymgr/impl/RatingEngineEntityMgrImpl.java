@@ -577,7 +577,7 @@ public class RatingEngineEntityMgrImpl //
     @Override
     public Set<Triple<String, String, String>> extractDependencies(RatingEngine ratingEngine) {
         Set<Triple<String, String, String>> attrDepSet = null;
-        if (ratingEngine.getSegment() != null) {
+        if (ratingEngine != null && ratingEngine.getSegment() != null) {
             String targetSegmentName = ratingEngine.getSegment().getName();
             attrDepSet = new HashSet<Triple<String, String, String>>();
 
@@ -589,8 +589,7 @@ public class RatingEngineEntityMgrImpl //
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public void accept(GraphVisitor visitor, String entityId) throws Exception {
-        RatingEngine entity = findById(entityId);
-        visitor.visit(entity, parse(entity, null));
+    public void accept(GraphVisitor visitor, Object entity) throws Exception {
+        visitor.visit((RatingEngine) entity, parse((RatingEngine) entity, null));
     }
 }
