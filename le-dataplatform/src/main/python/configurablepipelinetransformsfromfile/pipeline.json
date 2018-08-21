@@ -1,7 +1,7 @@
 {
   "columnTransformFiles": {
     "HighNumberUniqueValuesRemovalStep": {
-      "KeyWhenSortingByAscending": 7,
+      "KeyWhenSortingByAscending": 6,
       "Name": "highnumberuniquevaluesremovalstep",
       "MainClassName": "HighNumberUniqueValuesRemovalStep",
       "UniqueColumnTransformName": "",
@@ -15,7 +15,7 @@
       "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
     },
     "CategoricalGroupingStep": {
-      "KeyWhenSortingByAscending": 6,
+      "KeyWhenSortingByAscending": 7,
       "Name": "categoricalgroupingstep",
       "MainClassName": "CategoricalGroupingStep",
       "UniqueColumnTransformName": "",
