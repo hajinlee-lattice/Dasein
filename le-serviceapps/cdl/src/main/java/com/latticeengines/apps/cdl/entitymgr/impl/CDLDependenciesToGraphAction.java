@@ -224,6 +224,8 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
         edgeProperties.add(edgeProps);
         addDependencies.add(ParsedDependencies //
                 .tuple(tenant.getId(), VertexType.TENANT, EdgeType.TENANT));
+        // this one is needed for tenant edge
+        edgeProperties.add(null);
         parsedDependencies.setAddDependencies(addDependencies);
 
         Map<String, String> vertexProperties = new HashMap<>();
