@@ -82,7 +82,11 @@ public class HdfsUtils {
     }
 
     private static FileSystem getFileSystem(Configuration configuration, String path) throws IOException {
-        return FileSystem.newInstance(URI.create(path), configuration);
+        if (path.startsWith("/")) {
+            return FileSystem.newInstance(configuration);
+        } else {
+            return FileSystem.newInstance(URI.create(path), configuration);
+        }
     }
 
     public static void mkdir(Configuration configuration, String dir) throws IOException {
