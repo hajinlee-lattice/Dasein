@@ -349,7 +349,9 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         Map<String, String> crmAttrMap = table.getAttributes().stream()
                 .filter(attr -> attr.getName().equalsIgnoreCase("CRMAccount_External_ID")
-                        || attr.getName().equalsIgnoreCase("SalesforceAccountId"))
+                        || attr.getName().equalsIgnoreCase("SalesforceAccountId")
+                        || attr.getName().equalsIgnoreCase(USER_PREFIX + "CRMAccount_External_ID")
+                        || attr.getName().equalsIgnoreCase(USER_PREFIX + "SalesforceAccountId"))
                 .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
 
         if (MapUtils.isNotEmpty(crmAttrMap)) {

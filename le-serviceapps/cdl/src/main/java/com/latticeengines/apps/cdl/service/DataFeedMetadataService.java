@@ -3,9 +3,14 @@ package com.latticeengines.apps.cdl.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema.Type;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
@@ -15,6 +20,10 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
 public abstract class DataFeedMetadataService {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFeedMetadataService.class);
+
+    protected static final String USER_PREFIX = "user_";
 
     private static Map<String, DataFeedMetadataService> services = new HashMap<>();
 
@@ -53,6 +62,23 @@ public abstract class DataFeedMetadataService {
             return false;
         }
         return true;
+    }
+
+    public void applyAttributePrefix(Table importTable, Table templateTable) {
+        if (importTable == null || CollectionUtils.isEmpty(importTable.getAttributes())) {
+            throw new IllegalArgumentException("Import table cannot be null or empty!");
+        }
+        if (templateTable == null || CollectionUtils.isEmpty(templateTable.getAttributes())) {
+            throw new IllegalArgumentException("Template table cannot be null or empty!");
+        }
+        Set<String> templateAttrs = templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
+        importTable.getAttributes().forEach(attribute -> {
+            if (!templateAttrs.contains(attribute.getName())) {
+                log.info(String.format("Reset attribute name %s -> %s", attribute.getName(),
+                        USER_PREFIX + attribute.getName()));
+                attribute.setName(USER_PREFIX + attribute.getName());
+            }
+        });
     }
 
 }
