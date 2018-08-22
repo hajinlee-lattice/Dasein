@@ -133,7 +133,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testExternalSystem() {
         SourceFile accountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
