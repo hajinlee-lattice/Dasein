@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 import reactor.core.publisher.Flux;
@@ -69,6 +70,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     private String customerSpace;
 
@@ -136,10 +140,11 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     }
 
     private RatingModelContainer getValidRatingModel(RatingEngineSummary summary) {
-        RatingModelContainer container = new RatingModelContainer(null, summary);
+        RatingModelContainer container = new RatingModelContainer(null, summary, null);
         String engineId = summary.getId();
         String engineName = summary.getDisplayName();
         RatingEngine engine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
+        List<BucketMetadata> scoringBucketMetadata = null;
         if (isValidRatingEngine(engine)) {
             RatingModel ratingModel = engine.getScoringIteration();
             boolean isValid = false;
@@ -149,6 +154,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 if (!isValid) {
                     log.warn("Cross sell rating model " + aiModel.getId() + " of " + engineId + " : " + engineName
                             + " is not ready for scoring.");
+                } else {
+                    scoringBucketMetadata = bucketedScoreProxy.getLatestABCDBucketsByModelGuid(customerSpace,
+                            aiModel.getModelSummaryId());
                 }
             } else if (RatingEngineType.CUSTOM_EVENT.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
@@ -156,20 +164,26 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 if (!isValid) {
                     log.warn("Custom event rating model " + aiModel.getId() + " of " + engineId + " : " + engineName
                             + " is not ready for scoring.");
+                } else {
+                    scoringBucketMetadata = bucketedScoreProxy.getLatestABCDBucketsByModelGuid(customerSpace,
+                            aiModel.getModelSummaryId());
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
                 isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
                 if (!isValid) {
                     log.warn("Rule based rating model " + ratingModel.getId() + " of " + engineId + " : " + engineName
                             + " is not ready for scoring.");
+                } else {
+                    scoringBucketMetadata = summary.getBucketMetadata();
                 }
             }
-            if (CollectionUtils.isEmpty(summary.getBucketMetadata())) {
-                List<BucketMetadata> bucketMetadata = BucketMetadataUtils.getDefaultMetadata();
-                summary.setBucketMetadata(bucketMetadata);
+
+            if (CollectionUtils.isEmpty(scoringBucketMetadata)) {
+                scoringBucketMetadata = BucketMetadataUtils.getDefaultMetadata();
             }
+
             if (isValid) {
-                container = new RatingModelContainer(ratingModel, summary);
+                container = new RatingModelContainer(ratingModel, summary, scoringBucketMetadata);
             }
         }
         return container;
@@ -242,8 +256,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                     log.info("Got dependency graph layers: \n" + JsonUtils.pprint(generations));
                     if (CollectionUtils.isNotEmpty(generations) && generations.size() > 1) {
                         Map<String, RatingModelContainer> containerMap = new HashMap<>();
-                        containers.forEach(container -> containerMap.put(container.getEngineSummary().getId(), container));
-                        for (List<String> generation: generations) {
+                        containers.forEach(
+                                container -> containerMap.put(container.getEngineSummary().getId(), container));
+                        for (List<String> generation : generations) {
                             List<RatingModelContainer> iteration = generation.stream() //
                                     .map(containerMap::get).collect(Collectors.toList());
                             iterations.add(iteration);
@@ -331,7 +346,8 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             StatsCube statsCube = statsContainer.getStatsCubes().get(BusinessEntity.Rating.name());
             if (statsCube != null) {
                 statsCube.getStatistics().forEach((attrName, attrStats) -> {
-                    if (attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX) && (attrStats.getBuckets() != null) && BucketType.Enum.equals(attrStats.getBuckets().getType())) {
+                    if (attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX) && (attrStats.getBuckets() != null)
+                            && BucketType.Enum.equals(attrStats.getBuckets().getType())) {
                         Map<String, Double> lifts = new HashMap<>();
                         attrStats.getBuckets().getBucketList().forEach(bucket -> {
                             if (StringUtils.isNotBlank(bucket.getLabel()) && bucket.getLift() != null) {

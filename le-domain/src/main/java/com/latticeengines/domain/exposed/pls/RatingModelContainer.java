@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,6 +18,9 @@ public class RatingModelContainer {
     @JsonProperty("engine")
     private RatingEngineSummary engineSummary;
 
+    @JsonProperty("scoringBucketMetadata")
+    private List<BucketMetadata> scoringBucketMetadata;
+
     private RatingModelContainer() {
     }
 
@@ -24,9 +28,11 @@ public class RatingModelContainer {
         this.model = ratingModel;
     }
 
-    public RatingModelContainer(RatingModel ratingModel, RatingEngineSummary engineSummary) {
+    public RatingModelContainer(RatingModel ratingModel, RatingEngineSummary engineSummary,
+            List<BucketMetadata> scoringBuckets) {
         this.model = ratingModel;
         this.engineSummary = engineSummary;
+        this.scoringBucketMetadata = scoringBuckets;
     }
 
     public RatingModel getModel() {
@@ -44,4 +50,13 @@ public class RatingModelContainer {
     public void setEngineSummary(RatingEngineSummary engineSummary) {
         this.engineSummary = engineSummary;
     }
+
+    public List<BucketMetadata> getScoringBucketMetadata() {
+        return scoringBucketMetadata;
+    }
+
+    public void setScoringBucketMetadata(List<BucketMetadata> scoringBucketMetadata) {
+        this.scoringBucketMetadata = scoringBucketMetadata;
+    }
+
 }

@@ -40,7 +40,8 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     @Override
     public void onExecutionCompleted() {
         putStringValueInContext(EXPORT_SCORE_TRAINING_FILE_TABLE_NAME, configuration.getTargetTableName());
-        // putStringValueInContext(COMPUTE_LIFT_INPUT_TABLE_NAME, configuration.getTargetTableName());
+        // putStringValueInContext(COMPUTE_LIFT_INPUT_TABLE_NAME,
+        // configuration.getTargetTableName());
         putStringValueInContext(PIVOT_SCORE_INPUT_TABLE_NAME, configuration.getTargetTableName());
         putStringValueInContext(AI_RAW_RATING_TABLE_NAME, configuration.getTargetTableName());
     }
@@ -81,7 +82,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
                 getScoreResultTableName(), getInputTableName());
         AIModel aiModel = (AIModel) container.getModel();
-        List<BucketMetadata> bucketMetadata = container.getEngineSummary().getBucketMetadata();
+        List<BucketMetadata> bucketMetadata = container.getScoringBucketMetadata();
         if (CollectionUtils.isEmpty(bucketMetadata)) {
             throw new IllegalArgumentException("AI model " + aiModel.getId() + " does not have bucket metadata.");
         }
@@ -90,7 +91,8 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS,
+                RatingModelContainer.class);
         return allContainers.stream() //
                 .filter(container -> {
                     RatingEngineType ratingEngineType = container.getEngineSummary().getType();

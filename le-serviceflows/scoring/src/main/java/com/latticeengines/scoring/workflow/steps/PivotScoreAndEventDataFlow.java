@@ -86,10 +86,9 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         }
 
         // get score derivation and fit function params for model
-        dataFlowParams.setScoreDerivationMap(
-            getScoreDerivationMap(dataFlowParams.getScoreFieldMap().keySet()));
-        dataFlowParams.setFitFunctionParametersMap(
-            getFitFunctionParametersMap(dataFlowParams.getScoreFieldMap().keySet()));
+        dataFlowParams.setScoreDerivationMap(getScoreDerivationMap(dataFlowParams.getScoreFieldMap().keySet()));
+        dataFlowParams
+                .setFitFunctionParametersMap(getFitFunctionParametersMap(dataFlowParams.getScoreFieldMap().keySet()));
 
         configuration.setDataFlowParams(dataFlowParams);
         configuration.setTargetTableName(scoreTableName + "_pivot");
@@ -97,10 +96,10 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     private Map<String, String> getScoreDerivationMap(Collection<String> modelIds) {
         String internalResourceHostPort = configuration.getInternalResourceHostPort();
-        InternalResourceRestApiProxy internalResourceRestApiProxy =
-            new InternalResourceRestApiProxy(internalResourceHostPort);
+        InternalResourceRestApiProxy internalResourceRestApiProxy = new InternalResourceRestApiProxy(
+                internalResourceHostPort);
         ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(internalResourceRestApiProxy,
-                                                                                   yarnConfiguration);
+                yarnConfiguration);
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> scoreDerivationMap = new HashMap<>();
         for (String modelId : modelIds) {
@@ -114,15 +113,14 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     private Map<String, String> getFitFunctionParametersMap(Collection<String> modelIds) {
         String internalResourceHostPort = configuration.getInternalResourceHostPort();
-        InternalResourceRestApiProxy internalResourceRestApiProxy =
-            new InternalResourceRestApiProxy(internalResourceHostPort);
+        InternalResourceRestApiProxy internalResourceRestApiProxy = new InternalResourceRestApiProxy(
+                internalResourceHostPort);
         ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(internalResourceRestApiProxy,
-                                                                                   yarnConfiguration);
+                yarnConfiguration);
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> fitFunctionParametersMap = new HashMap<>();
         for (String modelId : modelIds) {
-            String fitFunctionParameters =
-                scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId);
+            String fitFunctionParameters = scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId);
             if (fitFunctionParameters != null) {
                 fitFunctionParametersMap.put(modelId, fitFunctionParameters);
             }
@@ -227,7 +225,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             containers.forEach(container -> {
                 AIModel aiModel = (AIModel) container.getModel();
                 String modelGuid = aiModel.getModelSummaryId();
-                List<BucketMetadata> bucketMetadata = container.getEngineSummary().getBucketMetadata();
+                List<BucketMetadata> bucketMetadata = container.getScoringBucketMetadata();
                 if (CollectionUtils.isEmpty(bucketMetadata)) {
                     throw new IllegalArgumentException("Must provide bucket metadata for model " + modelGuid);
                 }
@@ -293,7 +291,8 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS,
+                RatingModelContainer.class);
         if (allContainers == null) {
             return Collections.emptyList();
         }

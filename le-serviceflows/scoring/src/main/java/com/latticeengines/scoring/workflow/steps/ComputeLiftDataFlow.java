@@ -121,7 +121,8 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     }
 
     private boolean isMultiModel() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS,
+                RatingModelContainer.class);
         return CollectionUtils.isNotEmpty(allContainers);
     }
 
@@ -175,7 +176,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
             containers.forEach(container -> {
                 AIModel aiModel = (AIModel) container.getModel();
                 String modelGuid = aiModel.getModelSummaryId();
-                List<BucketMetadata> bucketMetadata = container.getEngineSummary().getBucketMetadata();
+                List<BucketMetadata> bucketMetadata = container.getScoringBucketMetadata();
                 if (CollectionUtils.isEmpty(bucketMetadata)) {
                     throw new IllegalArgumentException("Must provide bucket metadata for model " + modelGuid);
                 }
@@ -194,7 +195,8 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     }
 
     private List<RatingModelContainer> getModelContainers() {
-        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(ITERATION_RATING_MODELS,
+                RatingModelContainer.class);
         return allContainers.stream() //
                 .filter(container -> {
                     RatingEngineType ratingEngineType = container.getEngineSummary().getType();

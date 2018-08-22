@@ -87,7 +87,8 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
                 ratingEngineSummary.setSegmentName(ratingEngine.getSegment().getName());
                 ratingEngineSummary.setBucketMetadata(BucketMetadataUtils.getDefaultMetadata());
 
-                RatingModelContainer container = new RatingModelContainer(ratingModel, ratingEngineSummary);
+                RatingModelContainer container = new RatingModelContainer(ratingModel, ratingEngineSummary,
+                        BucketMetadataUtils.getDefaultMetadata());
                 putObjectInContext(ITERATION_RATING_MODELS, Collections.singletonList(container));
 
                 putStringValueInContext(SCORING_MODEL_ID, modelGuid);
