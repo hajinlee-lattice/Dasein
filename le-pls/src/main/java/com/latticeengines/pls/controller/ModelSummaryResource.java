@@ -183,14 +183,6 @@ public class ModelSummaryResource {
         return true;
     }
 
-    public void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
-        this.modelSummaryEntityMgr = modelSummaryEntityMgr;
-    }
-
-    public ModelSummaryEntityMgr getModelSummaryEntityMgr() {
-        return modelSummaryEntityMgr;
-    }
-
     @RequestMapping(value = "/predictors/all/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all the predictors for a specific model")
@@ -239,5 +231,20 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Get required column names for the event table used for the specified model")
     public List<String> getRequiredColumns(@PathVariable String modelId) {
         return modelMetadataService.getRequiredColumnDisplayNames(modelId);
+    }
+
+    // Below are for PlsMetricAspectTest mocking.
+    // if this resource does not need them, then the test does not need to mock either
+    public void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
+        this.modelSummaryEntityMgr = modelSummaryEntityMgr;
+    }
+    public ModelSummaryEntityMgr getModelSummaryEntityMgr() {
+        return modelSummaryEntityMgr;
+    }
+    public ModelSummaryProxy getModelSummaryProxy() {
+        return modelSummaryProxy;
+    }
+    public void setModelSummaryProxy(ModelSummaryProxy modelSummaryProxy) {
+        this.modelSummaryProxy = modelSummaryProxy;
     }
 }

@@ -13,9 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -26,6 +25,8 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.controller.ModelSummaryResource;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
@@ -39,21 +40,25 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
 
     private Logger origLog;
     private ModelSummaryEntityMgr origSummaryEntityMgr;
+    private ModelSummaryService origService;
+    private ModelSummaryProxy origProxy;
 
     @BeforeClass(groups = "functional")
     public void beforeClass() {
         origLog = PlsMetricsAspectImpl.log;
         origSummaryEntityMgr = modelSummaryResource.getModelSummaryEntityMgr();
+        origProxy = modelSummaryResource.getModelSummaryProxy();
     }
 
     @AfterClass(groups = "functional")
     public void afterClass() {
         PlsMetricsAspectImpl.log = origLog;
         modelSummaryResource.setModelSummaryEntityMgr(origSummaryEntityMgr);
+        modelSummaryResource.setModelSummaryProxy(origProxy);
     }
 
     @Test(groups = "functional")
-    public void logMetrics() throws Exception {
+    public void logMetrics() {
         Logger newLog = mock(Logger.class);
         PlsMetricsAspectImpl.log = newLog;
 
@@ -61,18 +66,16 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
 
         origSummaryEntityMgr = modelSummaryResource.getModelSummaryEntityMgr();
         final List<String> logs = new ArrayList<>();
-        doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] params = invocation.getArguments();
-                logs.add((String) params[0]);
-                return logs;
-            }
+        doAnswer((Answer<Object>) invocation -> {
+            Object[] params = invocation.getArguments();
+            logs.add((String) params[0]);
+            return logs;
         }).when(newLog).info(any());
 
         setupSecurityContext(mainTestTenant, testUser);
         ModelSummaryEntityMgr summaryEntityMgr = mock(ModelSummaryEntityMgr.class);
         modelSummaryResource.setModelSummaryEntityMgr(summaryEntityMgr);
+        modelSummaryResource.setModelSummaryProxy(mock(ModelSummaryProxy.class));
 
         modelSummaryResource.delete("1");
         verify(newLog, times(1)).info(anyString());
