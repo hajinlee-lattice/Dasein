@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.entitymgr.VendorConfigMgr;
@@ -15,6 +17,8 @@ import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
 
 @Component
 public class VendorConfigServiceImpl implements VendorConfigService {
+    private static final Logger log = LoggerFactory.getLogger(VendorConfigServiceImpl.class);
+
     private static final String VENDOR_ALEXA = "ALEXA";
     private static final String VENDOR_BUILTWITH = "BUILTWITH";
     private static final String VENDOR_COMPETE = "COMPETE";
@@ -39,6 +43,9 @@ public class VendorConfigServiceImpl implements VendorConfigService {
         if (all != null && all.size() != 0)
             return all;
 
+        log.error("no vendor configurations found");
+        return null;
+        /*
         long monthInSecs = 30 * 86400;
 
         VendorConfig builtwithConfig = new VendorConfig();
@@ -97,10 +104,10 @@ public class VendorConfigServiceImpl implements VendorConfigService {
         semrushConfig.setMaxActiveTasks(1);
         vendorConfigMgr.create(semrushConfig);
 
-        return vendorConfigMgr.findAll();
+        return vendorConfigMgr.findAll();*/
     }
 
-    public void init() {
+    private void init() {
         if (ready)
             return;
 
