@@ -15,7 +15,7 @@
 
         <div class="messaging-content">
             <div class="messaging-title" ng-if="$ctrl.notice.title">{{$ctrl.notice.title}}</div>
-            <div class="messaging-message" ng-if="$ctrl.notice.message">{{$ctrl.notice.message}}</div>
+            <div class="messaging-message" ng-if="$ctrl.notice.message" ng-bind-html="$ctrl.notice.message"></div>
         </div>
     </div>
 </div>
