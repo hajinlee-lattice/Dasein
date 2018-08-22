@@ -84,13 +84,13 @@ angular.module('lp.ratingsengine.remodel')
         delete iteration.AI.modelingJobStatus;
         delete iteration.AI.modelSummaryId;
 
-        // console.log(iteration);
+        console.log(iteration.AI.advancedModelingConfig.cross_sell.filters);
         
 
         // Save iteration
         AtlasRemodelService.saveIteration(engineId, iteration).then(function(result){
             
-            // console.log(result);
+            console.log(result);
 
             var modelId = result.AI.id,
                 attributes = store.getRemodelAttributes();

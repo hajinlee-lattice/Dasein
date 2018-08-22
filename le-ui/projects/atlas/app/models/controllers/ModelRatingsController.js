@@ -67,7 +67,8 @@ angular.module('lp.models.ratings', [
             // use only iterations that have active modelSummaryId by creating new array
             vm.activeIterations = [];
             angular.forEach(dashboardIterations, function(iteration){
-                if (iteration.modelSummaryId && (iteration.modelingJobStatus != 'Failed' || iteration.modelingJobStatus != 'Pending' || iteration.modelingJobStatus != 'Running')) {
+                console.log(iteration.modelingJobStatus == "Completed");
+                if (iteration.modelSummaryId && iteration.modelingJobStatus == 'Completed') {
                     vm.activeIterations.push(iteration);
                 }
             });

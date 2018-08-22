@@ -323,14 +323,11 @@ angular.module('lp.ratingsengine.wizard.training', [
                 } else {
                     delete vm.configFilters.TRAINING_SET_PERIOD;
                 }
-
-                if(vm.checkboxModel.spend || vm.checkboxModel.quantity || vm.checkboxModel.periods) {
-                    RatingsEngineStore.setConfigFilters(vm.configFilters);
-                }
-
+                    
                 vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
 
                 $timeout(function () {
+                    RatingsEngineStore.setConfigFilters(vm.configFilters);
                     vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                     vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 }, 500);

@@ -776,12 +776,7 @@ angular.module('lp.ratingsengine')
     }
 
     this.setConfigFilters = function(configFilters) {
-        var currentConfig = this.configFilters;
-        if(currentConfig != null){
-            this.configFilters = angular.extend(currentConfig, configFilters);
-        } else {
-            this.configFilters = configFilters;
-        }
+        this.configFilters = configFilters;
     }
     this.getConfigFilters = function() {
         return this.configFilters;

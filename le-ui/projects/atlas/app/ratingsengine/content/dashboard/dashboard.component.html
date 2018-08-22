@@ -37,12 +37,12 @@
                         class="button orange-button"
                         ui-sref="home.model.ratings({ 
                             rating_id: vm.ratingEngine.id,
-                            modelId: vm.ratingEngine.scoring_iteration.AI.modelSummaryId,
+                            modelId: vm.modelSummary,
                             section: 'dashboard.ratings',
                             ratingEngine: vm.ratingEngine
                         })"
                         ng-if="!vm.isRulesBased"
-                        ng-disabled="!vm.canNewScoringConfig()">
+                        ng-disabled="vm.modelSummary == null">
                         {{ vm.publishOrActivateButtonLabel }}
                     </button>
                     <button
