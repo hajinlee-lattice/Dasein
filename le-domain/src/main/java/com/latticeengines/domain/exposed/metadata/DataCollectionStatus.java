@@ -204,12 +204,12 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
     }
 
     @JsonProperty("DateMap")
-    public Map<Category, Long> getDateMap() {
+    public Map<String, Long> getDateMap() {
         return this.detail.getDateMap();
     }
 
     @JsonProperty("DateMap")
-    public void setDateMap(Map<Category, Long> dateMap) {
+    public void setDateMap(Map<String, Long> dateMap) {
         this.detail.setDateMap(dateMap);
     }
 
@@ -232,7 +232,7 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
         @JsonProperty("ApsRollingPeriod")
         private String apsRollingPeriod;
         @JsonProperty("DateMap")
-        Map<Category, Long> dateMap;
+        Map<String, Long> dateMap;
 
         public Integer getMinTxnDate() {
             return minTxnDate;
@@ -298,11 +298,11 @@ public class DataCollectionStatus implements HasPid, HasTenant, Serializable {
             this.apsRollingPeriod = apsRollingPeriod;
         }
 
-        public Map<Category, Long> getDateMap() {
+        public Map<String, Long> getDateMap() {
             return dateMap;
         }
 
-        public void setDateMap(Map<Category, Long> dateMap) {
+        public void setDateMap(Map<String, Long> dateMap) {
             this.dateMap = dateMap;
         }
 
