@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.graph.GraphConstants;
+import com.latticeengines.graph.BootstrapContext;
 import com.latticeengines.graph.ConnectionManager;
 import com.latticeengines.graph.GraphUtil;
 import com.latticeengines.graph.entity.BaseGraphEntityManager;
@@ -39,12 +40,14 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
     @Inject
     private ConnectionManager connectionManager;
 
+    @Inject
+    private BootstrapContext bootstrapContext;
+
     @Override
     public List<String> checkDirectVertexDependencies(String vertexId) throws Exception {
         log.info(String.format("vertexID = %s", vertexId));
         Cluster cluster = connectionManager.initCluster();
-        try {
-            GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
+        try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
 
             GraphTraversal<Vertex, Vertex> traversal = g.V(vertexId);
             Set<String> dependencies = new HashSet<>();
@@ -64,6 +67,9 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             } else {
                 throw ex;
             }
+        } finally {
+            connectionManager.closeCluster(cluster);
+
         }
     }
 
@@ -72,9 +78,7 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             throws Exception {
         log.info(String.format("inVertexId = %s, outVertexId = %s", inVertexId, outVertexId));
         Cluster cluster = connectionManager.initCluster();
-        try {
-            GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
-
+        try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
             GraphTraversal<Vertex, Vertex> traversal = g.V(inVertexId);
             List<List<String>> paths = new ArrayList<>();
             traversal.repeat(__.outE().inV()) //
@@ -98,24 +102,38 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             } else {
                 throw ex;
             }
+        } finally {
+            connectionManager.closeCluster(cluster);
         }
     }
 
     @Override
     public boolean checkVertexExists(String vertexId) throws Exception {
         log.info(String.format("vertexId = %s", vertexId));
-        Cluster cluster = connectionManager.initCluster();
-        GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
-        return g.V(vertexId).hasNext();
+        if (!bootstrapContext.checkVertexExists(vertexId)) {
+            Cluster cluster = connectionManager.initCluster();
+            try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
+                boolean exists = g.V(vertexId).hasNext();
+                if (exists) {
+                    bootstrapContext.setVertexExists(vertexId);
+                }
+                return exists;
+            } finally {
+                connectionManager.closeCluster(cluster);
+
+            }
+        } else {
+            log.info(String.format("Skip checking vertex existence during bootstrap model for vertexId = %s " //
+                    + "as it already exists", vertexId));
+            return true;
+        }
     }
 
     @Override
     public boolean dropVertex(String vertexId, boolean failIfDependencyExist) throws Exception {
         log.info(String.format("vertexId = %s, failIfDependencyExist = %s", vertexId, failIfDependencyExist));
         Cluster cluster = connectionManager.initCluster();
-        try {
-            GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
-
+        try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
             GraphTraversal<Vertex, Vertex> traversal = g.V(vertexId);
 
             if (failIfDependencyExist) {
@@ -141,6 +159,9 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             } else {
                 throw ex;
             }
+        } finally {
+            connectionManager.closeCluster(cluster);
+
         }
     }
 
@@ -149,9 +170,7 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
         log.info(
                 String.format("inVertexId = %s, outVertexId = %s, edgeLabel = %s", inVertexId, outVertexId, edgeLabel));
         Cluster cluster = connectionManager.initCluster();
-        try {
-            GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
-
+        try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
             GraphTraversal<Vertex, Edge> traversal = g.V(outVertexId).outE();
             if (StringUtils.isNotBlank(edgeLabel)) {
                 traversal = traversal.hasLabel(edgeLabel);
@@ -165,6 +184,9 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             } else {
                 throw ex;
             }
+        } finally {
+            connectionManager.closeCluster(cluster);
+
         }
     }
 
@@ -173,9 +195,7 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             List<String> removeProperties) throws Exception {
         log.info(String.format("vertexID = %s", vertexId));
         Cluster cluster = connectionManager.initCluster();
-        try {
-            GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
-
+        try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
             GraphTraversal<Vertex, Vertex> traversal = g.V(vertexId).as("v");
             if (MapUtils.isNotEmpty(addOrUpdateProperties)) {
                 for (String propKey : addOrUpdateProperties.keySet()) {
@@ -200,6 +220,9 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             } else {
                 throw ex;
             }
+        } finally {
+            connectionManager.closeCluster(cluster);
+
         }
     }
 
@@ -210,9 +233,7 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
                 outgoingEdgesToVertices == null ? outgoingEdgesToVertices
                         : JsonUtils.serialize(outgoingEdgesToVertices)));
         Cluster cluster = connectionManager.initCluster();
-        try {
-            GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
-
+        try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
             GraphTraversal<Vertex, Vertex> traversal = g.addV(label).property(T.id, vertexId).as("nid");
 
             if (MapUtils.isNotEmpty(properties)) {
@@ -261,6 +282,9 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             } else {
                 throw ex;
             }
+        } finally {
+            connectionManager.closeCluster(cluster);
+
         }
     }
 
@@ -269,9 +293,7 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             throws Exception {
         log.info(String.format("inVertexID = %s, label = %s, outVertexID = %s", inVertexID, label, outVertexID));
         Cluster cluster = connectionManager.initCluster();
-        try {
-            GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
-
+        try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
             GraphTraversal<Vertex, Edge> traversal = g.V(inVertexID).as("in") //
                     .V(outVertexID).as("out") //
                     .addE(label) //
@@ -293,6 +315,9 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
             } else {
                 throw ex;
             }
+        } finally {
+            connectionManager.closeCluster(cluster);
+
         }
     }
 
@@ -300,7 +325,11 @@ public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
     public boolean checkEdgeExists(String label, String inVertexID, String outVertexID) throws Exception {
         log.info(String.format("inVertexID = %s, label = %s, outVertexID = %s", inVertexID, label, outVertexID));
         Cluster cluster = connectionManager.initCluster();
-        GraphTraversalSource g = connectionManager.initTraversalSource(cluster);
-        return g.V(outVertexID).outE(label).inV().hasId(inVertexID).hasNext();
+        try (GraphTraversalSource g = connectionManager.initTraversalSource(cluster)) {
+            return g.V(outVertexID).outE(label).inV().hasId(inVertexID).hasNext();
+        } finally {
+            connectionManager.closeCluster(cluster);
+
+        }
     }
 }

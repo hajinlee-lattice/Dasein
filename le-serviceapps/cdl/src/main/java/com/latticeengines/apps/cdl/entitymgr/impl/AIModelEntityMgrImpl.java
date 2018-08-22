@@ -133,6 +133,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public void accept(GraphVisitor visitor, Object entity) throws Exception {
+        entity = findById(((AIModel) entity).getId());
         visitor.visit((AIModel) entity, parse((AIModel) entity, null));
     }
 }

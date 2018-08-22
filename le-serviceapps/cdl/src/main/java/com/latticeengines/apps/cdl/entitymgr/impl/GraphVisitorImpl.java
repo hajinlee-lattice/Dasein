@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
@@ -22,13 +24,19 @@ import com.latticeengines.domain.exposed.pls.RatingEngine.ScoreType;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.graph.BootstrapContext;
 import com.latticeengines.graph.entity.GraphEntityManager;
 
 @Component
 public class GraphVisitorImpl implements GraphVisitor {
 
+    private static final Logger log = LoggerFactory.getLogger(GraphVisitorImpl.class);
+
     @Inject
     private GraphEntityManager graphEntityManager;
+
+    @Inject
+    private BootstrapContext bootstrapContext;
 
     @Inject
     private SegmentEntityMgrImpl segmentEntityMgr;
@@ -50,6 +58,37 @@ public class GraphVisitorImpl implements GraphVisitor {
 
     @Inject
     private CDLDependenciesToGraphAction cdlGraphAction;
+
+    @Override
+    public void populateTenantGraph(Tenant tenant) throws Exception {
+        Tenant originalTenant = MultiTenantContext.getTenant();
+        Long bootstrapId = System.currentTimeMillis();
+        try {
+            log.info(String.format("[%d] Dependency graph bootstrap for tenant '%s' - started", bootstrapId,
+                    tenant.getId()));
+            MultiTenantContext.setTenant(tenant);
+            bootstrapContext.initThreadLocalVertexExistenceSet();
+            createTenantVertex();
+            log.info(String.format("[%d] Dependency graph bootstrap for tenant '%s' - Step 1/3 - %s", bootstrapId,
+                    tenant.getId(), "traverseSegments"));
+            traverseSegments(segmentEntityMgr);
+            log.info(String.format("[%d] Dependency graph bootstrap for tenant '%s' - Step 2/3 - %s", bootstrapId,
+                    tenant.getId(), "traverseRatingEngines"));
+            traverseRatingEngines(ratingEngineEntityMgr);
+            log.info(String.format("[%d] Dependency graph bootstrap for tenant '%s' - Step 3/3 - %s", bootstrapId,
+                    tenant.getId(), "traversePlays"));
+            traversePlays(playEntityMgr);
+            log.info(String.format("[%d] Dependency graph bootstrap for tenant '%s' - completed", bootstrapId,
+                    tenant.getId()));
+        } catch (Throwable th) {
+            log.error(String.format("[%d] Dependency graph bootstrap for tenant '%s' - failed", bootstrapId,
+                    tenant.getId()), th);
+            throw th;
+        } finally {
+            bootstrapContext.cleanupThreadLocalVertexExistenceSet();
+            MultiTenantContext.setTenant(originalTenant);
+        }
+    }
 
     @Override
     public void visit(Play entity, //
@@ -86,76 +125,7 @@ public class GraphVisitorImpl implements GraphVisitor {
         cdlGraphAction.createSegmentVertex(entity);
     }
 
-    public void traverse(Triple<String, String, String> object) throws Exception {
-        String objectId = object.getLeft();
-        String objectType = object.getMiddle();
-        switch (objectType) {
-        case VertexType.PLAY:
-            playEntityMgr.accept(this, playEntityMgr.getPlayByName(objectId, false));
-            break;
-        case VertexType.SEGMENT:
-            segmentEntityMgr.accept(this, segmentEntityMgr.findByName(objectId));
-            break;
-        case VertexType.RATING_ENGINE:
-            ratingEngineEntityMgr.accept(this, ratingEngineEntityMgr.findById(objectId));
-            break;
-        case VertexType.TENANT:
-            createTenantVertex();
-            break;
-        case VertexType.RATING_ATTRIBUTE:
-        case VertexType.RATING_EV_ATTRIBUTE:
-        case VertexType.RATING_PROB_ATTRIBUTE:
-        case VertexType.RATING_SCORE_ATTRIBUTE:
-            Pair<ScoreType, String> ratingTypeNModelIdPair = ratingAttributeNameParser.parseTypeNMoelId(objectType,
-                    objectId);
-            String ratingEngineId = ratingTypeNModelIdPair.getRight();
-            RatingEngine ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
-            ratingEngineEntityMgr.accept(this, ratingEngine);
-            RatingEngine re = ratingEngineEntityMgr.findById(ratingEngineId);
-            if (re.getType() == RatingEngineType.RULE_BASED) {
-                List<RuleBasedModel> ruleModels = ruleBasedModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
-                if (CollectionUtils.isNotEmpty(ruleModels)) {
-                    ruleModels.stream().forEach(rm -> {
-                        try {
-                            ruleBasedModelEntityMgrImpl.accept(this, rm);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                }
-            } else {
-                List<AIModel> aiModels = aiModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
-                if (CollectionUtils.isNotEmpty(aiModels)) {
-                    aiModels.stream().forEach(am -> {
-                        try {
-                            aiModelEntityMgrImpl.accept(this, am);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                }
-            }
-            break;
-        default:
-            throw new RuntimeException("Not yet implemented: " + objectType);
-        }
-    }
-
-    @Override
-    public void populateTenantGraph(Tenant tenant) throws Exception {
-        Tenant originalTenant = MultiTenantContext.getTenant();
-        try {
-            MultiTenantContext.setTenant(tenant);
-            createTenantVertex();
-            traversePlays(playEntityMgr);
-            traverseRatingEngines(ratingEngineEntityMgr);
-            traverseSegments(segmentEntityMgr);
-        } finally {
-            MultiTenantContext.setTenant(originalTenant);
-        }
-    }
-
-    public void createTenantVertex() throws Exception {
+    private void createTenantVertex() throws Exception {
         Tenant tenant = MultiTenantContext.getTenant();
         VertexCreationRequest request = new VertexCreationRequest();
         request.setObjectId(tenant.getId());
@@ -163,7 +133,7 @@ public class GraphVisitorImpl implements GraphVisitor {
         graphEntityManager.addVertex(tenant.getId(), null, null, null, request);
     }
 
-    public void traversePlays(PlayEntityMgrImpl entityMgr) throws Exception {
+    private void traversePlays(PlayEntityMgrImpl entityMgr) throws Exception {
         List<Play> plays = entityMgr.findAll();
         if (CollectionUtils.isNotEmpty(plays)) {
             plays.stream() //
@@ -178,7 +148,7 @@ public class GraphVisitorImpl implements GraphVisitor {
         }
     }
 
-    public void traverseRatingEngines(RatingEngineEntityMgrImpl entityMgr) throws Exception {
+    private void traverseRatingEngines(RatingEngineEntityMgrImpl entityMgr) throws Exception {
         List<RatingEngine> ratingEngines = entityMgr.findAll();
         if (CollectionUtils.isNotEmpty(ratingEngines)) {
             ratingEngines.stream() //
@@ -193,7 +163,7 @@ public class GraphVisitorImpl implements GraphVisitor {
         }
     }
 
-    public void traverseSegments(SegmentEntityMgrImpl entityMgr) throws Exception {
+    private void traverseSegments(SegmentEntityMgrImpl entityMgr) throws Exception {
         List<MetadataSegment> segments = entityMgr.findAll();
         if (CollectionUtils.isNotEmpty(segments)) {
             segments.stream() //
@@ -217,6 +187,69 @@ public class GraphVisitorImpl implements GraphVisitor {
                             throw new RuntimeException(e);
                         }
                     });
+        }
+    }
+
+    private void traverse(Triple<String, String, String> object) throws Exception {
+        String objectId = object.getLeft();
+        String objectType = object.getMiddle();
+        switch (objectType) {
+        case VertexType.PLAY:
+            playEntityMgr.accept(this, playEntityMgr.getPlayByName(objectId, false));
+            break;
+        case VertexType.SEGMENT:
+            segmentEntityMgr.accept(this, segmentEntityMgr.findByName(objectId));
+            break;
+        case VertexType.RATING_ENGINE:
+            ratingEngineEntityMgr.accept(this, ratingEngineEntityMgr.findById(objectId));
+            break;
+        case VertexType.TENANT:
+            createTenantVertex();
+            break;
+        case VertexType.RATING_ATTRIBUTE:
+        case VertexType.RATING_EV_ATTRIBUTE:
+        case VertexType.RATING_PROB_ATTRIBUTE:
+        case VertexType.RATING_SCORE_ATTRIBUTE:
+            Pair<ScoreType, String> ratingTypeNModelIdPair = ratingAttributeNameParser.parseTypeNMoelId(objectType,
+                    objectId);
+            String ratingEngineId = ratingTypeNModelIdPair.getRight();
+            RatingEngine ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
+            if (ratingEngine == null) {
+                throw new RuntimeException(String.format(
+                        "Invalid ratingEngineId %s attribute %s has been used in segment or rule based rating engine, "
+                        + "system is already in inconsistent state. Please delete corresponding object before contibuing with bootstrap service.",
+                        ratingEngineId, objectId));
+            }
+            ratingEngineEntityMgr.accept(this, ratingEngine);
+            RatingEngine re = ratingEngineEntityMgr.findById(ratingEngineId);
+            if (re.getType() == RatingEngineType.RULE_BASED) {
+                List<RuleBasedModel> ruleModels = ruleBasedModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
+                if (CollectionUtils.isNotEmpty(ruleModels)) {
+                    ruleModels.stream().forEach(rm -> {
+                        try {
+                            rm = ruleBasedModelEntityMgrImpl.findById(rm.getId());
+                            ruleBasedModelEntityMgrImpl.accept(this, rm);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+            } else {
+                List<AIModel> aiModels = aiModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
+                if (CollectionUtils.isNotEmpty(aiModels)) {
+                    aiModels.stream().forEach(am -> {
+                        try {
+                            am = aiModelEntityMgrImpl.findById(am.getId());
+                            aiModelEntityMgrImpl.accept(this, am);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+            }
+            break;
+        default:
+            log.error(String.format("Not yet implemented: %s", objectType));
         }
     }
 }

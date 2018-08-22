@@ -177,6 +177,7 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public void accept(GraphVisitor visitor, Object entity) throws Exception {
+        entity = findById(((RuleBasedModel) entity).getId());
         visitor.visit((RuleBasedModel) entity, parse((RuleBasedModel) entity, null));
     }
 }
