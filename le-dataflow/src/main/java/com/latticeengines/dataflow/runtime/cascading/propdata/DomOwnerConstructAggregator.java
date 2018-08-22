@@ -4,25 +4,25 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTreeCountRowSelectAggregator.Context>
-        implements Aggregator<DomainTreeCountRowSelectAggregator.Context> {
+public class DomOwnerConstructAggregator extends BaseAggregator<DomOwnerConstructAggregator.Context>
+        implements Aggregator<DomOwnerConstructAggregator.Context> {
 
     private static final long serialVersionUID = -4258093110031791835L;
-    private String groupbyField;
-    private String domainField;
+    private String domainField = DataCloudConstants.AMS_ATTR_DOMAIN;
     private String rootDunsField;
     private String treeRootDunsField;
     private String dunsTypeField;
-    private String salesVolField;
-    private String totalEmpField;
-    private String numOfLocField;
-    private String primIndustryField;
+    private String salesVolField = DataCloudConstants.ATTR_SALES_VOL_US;
+    private String totalEmpField = DataCloudConstants.ATTR_EMPLOYEE_TOTAL;
+    private String numOfLocField = DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS;
+    private String primIndustryField = DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY;
     private Long multLargeCompThreshold;
     private int franchiseThreshold;
     private final static String FRANCHISE = "FRANCHISE";
@@ -39,20 +39,12 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
     public final static Long NON_PROFIT_TOTAL_SALES = 1000000L;
     public final static Integer NON_PROFIT_TOTAL_EMP = 200;
 
-    public DomainTreeCountRowSelectAggregator(Fields fieldDeclaration, String groupbyField, String domainField,
-            String rootDunsField, String treeRootDunsField, String dunsTypeField, String salesVolField,
-            String totalEmpField,
-            String numOfLocField, String primIndustryField, Long multLargeCompThreshold, int franchiseThreshold) {
+    public DomOwnerConstructAggregator(Fields fieldDeclaration, String rootDunsField, String treeRootDunsField,
+            String dunsTypeField, Long multLargeCompThreshold, int franchiseThreshold) {
         super(fieldDeclaration);
-        this.groupbyField = groupbyField;
-        this.domainField = domainField;
         this.rootDunsField = rootDunsField;
         this.treeRootDunsField = treeRootDunsField;
         this.dunsTypeField = dunsTypeField;
-        this.salesVolField = salesVolField;
-        this.totalEmpField = totalEmpField;
-        this.numOfLocField = numOfLocField;
-        this.primIndustryField = primIndustryField;
         this.multLargeCompThreshold = multLargeCompThreshold;
         this.franchiseThreshold = franchiseThreshold;
     }
@@ -65,16 +57,16 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
         String rootDuns = null;
         String dunsType = null;
         String reasonType = null;
-        Long maxSalesVolume = 0L;
-        int maxEmpTotal = 0;
-        int maxNumOfLoc = 0;
+        Long salesVol = 0L;
+        int empTotal = 0;
+        int numOfLoc = 0;
         boolean isNonProfitable = false;
         Tuple result;
     }
 
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
-        Object grpObj = group.getObject(groupbyField);
+        Object grpObj = group.getObject(domainField);
         if (grpObj == null) {
             return true;
         }
@@ -96,52 +88,51 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        Long salesVolVal = (Long) arguments.getObject(salesVolField);
+        Long salesVol = (Long) arguments.getObject(salesVolField);
         String treeRootDunsVal = arguments.getString(treeRootDunsField);
         context.numOfTrees += 1;
         if (treeRootDunsVal == null) {
             return cleanup(context, MISSING_ROOT_DUNS);
         }
-        if (salesVolVal != null && salesVolVal > multLargeCompThreshold) {
-            context.numOfLargeComp += 1;
-        }
         if (context.numOfTrees > franchiseThreshold) {
             return cleanup(context, FRANCHISE);
         }
+        if (salesVol != null && salesVol > multLargeCompThreshold) {
+            context.numOfLargeComp += 1;
+        }
         if (context.numOfLargeComp > 1) {
             return cleanup(context, MULTIPLE_LARGE_COMPANY);
+        }
+        if (context.numOfTrees == 1) {
+            return update(context, arguments, SINGLE_TREE);
         }
         Integer empTotal = null;
         if (arguments.getString(totalEmpField) != null) {
             empTotal = Integer.parseInt(arguments.getString(totalEmpField));
         }
-        Integer numOfLocVal = (Integer) arguments.getObject(numOfLocField);
-        if (context.numOfTrees == 1) {
-            return update(context, arguments, SINGLE_TREE);
-        }
+        Integer numOfLoc = (Integer) arguments.getObject(numOfLocField);
         int res = 0;
-        if (!context.isNonProfitable && !isNoProfitable(arguments, salesVolVal, empTotal)) {
-            res = checkRuleLargerLong(salesVolVal, context.maxSalesVolume);
+        if (!context.isNonProfitable && !isNoProfitable(arguments, salesVol, empTotal)) {
+            res = checkRuleLargerLong(salesVol, context.salesVol);
             if (res > 0) {
                 return update(context, arguments, HIGHER_SALES_VOLUME);
             } else if (res < 0) {
                 return update(context, HIGHER_SALES_VOLUME);
             }
         }
-        res = checkRuleLargerIntegers(empTotal, context.maxEmpTotal);
+        res = checkRuleLargerIntegers(empTotal, context.empTotal);
         if (res > 0) {
             return update(context, arguments, HIGHER_EMP_TOTAL);
         } else if (res < 0) {
             return update(context, HIGHER_EMP_TOTAL);
         }
-        res = checkRuleLargerIntegers(numOfLocVal, context.maxNumOfLoc);
+        res = checkRuleLargerIntegers(numOfLoc, context.numOfLoc);
         if (res > 0) {
             return update(context, arguments, HIGHER_NUM_OF_LOC);
         } else if (res < 0) {
             return update(context, HIGHER_NUM_OF_LOC);
-        } else {
-            return cleanup(context, OTHER);
         }
+        return cleanup(context, OTHER);
     }
 
     private boolean isNoProfitable(TupleEntry arguments, Long salesVolVal, Integer empTotalVal) {
@@ -150,9 +141,8 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
             salesVolVal = 0L;
         if (empTotalVal == null)
             empTotalVal = 0;
-        if (primaryIndustry != null
-                && (primaryIndustry.equals(GOVERNMENT) || primaryIndustry.equals(EDUCATION)
-                || primaryIndustry.equals(NON_PROFIT))
+        if (primaryIndustry != null && //
+                (primaryIndustry.equals(GOVERNMENT) || primaryIndustry.equals(EDUCATION) || primaryIndustry.equals(NON_PROFIT)) //
                 || (salesVolVal < NON_PROFIT_TOTAL_SALES && empTotalVal > NON_PROFIT_TOTAL_EMP)) {
             return true;
         }
@@ -170,13 +160,13 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
         context.rootDuns = arguments.getString(rootDunsField);
         context.dunsType = arguments.getString(dunsTypeField);
         if (arguments.getObject(salesVolField) != null)
-            context.maxSalesVolume = (Long) arguments.getObject(salesVolField);
+            context.salesVol = (Long) arguments.getObject(salesVolField);
         if (arguments.getString(totalEmpField) != null)
-            context.maxEmpTotal = Integer.parseInt(arguments.getString(totalEmpField));
+            context.empTotal = Integer.parseInt(arguments.getString(totalEmpField));
         if (arguments.getObject(numOfLocField) != null)
-            context.maxNumOfLoc = (Integer) arguments.getObject(numOfLocField);
+            context.numOfLoc = (Integer) arguments.getObject(numOfLocField);
         context.reasonType = updateReason;
-        context.isNonProfitable = isNoProfitable(arguments, context.maxSalesVolume, context.maxEmpTotal);
+        context.isNonProfitable = isNoProfitable(arguments, context.salesVol, context.empTotal);
         return context;
     }
 

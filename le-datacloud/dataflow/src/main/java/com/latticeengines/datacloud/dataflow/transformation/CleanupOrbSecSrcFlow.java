@@ -7,12 +7,12 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.FormDomOwnershipTableConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DomainOwnershipConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component(CleanupOrbSecSrcFlow.DATAFLOW_BEAN_NAME)
-public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<FormDomOwnershipTableConfig> {
+public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<DomainOwnershipConfig> {
     public final static String DATAFLOW_BEAN_NAME = "CleanupOrbSecSrcFlow";
     public final static String TRANSFORMER_NAME = "CleanupOrbSecSrcTransformer";
     private final static String ROOT_DUNS = "ROOT_DUNS";
@@ -35,7 +35,7 @@ public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return FormDomOwnershipTableConfig.class;
+        return DomainOwnershipConfig.class;
     }
 
     @Override

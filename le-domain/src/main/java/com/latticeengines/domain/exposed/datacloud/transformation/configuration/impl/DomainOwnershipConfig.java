@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FormDomOwnershipTableConfig extends TransformerConfig {
+public class DomainOwnershipConfig extends TransformerConfig {
 
     @JsonProperty("FranchiseThreshold")
     private int franchiseThreshold;

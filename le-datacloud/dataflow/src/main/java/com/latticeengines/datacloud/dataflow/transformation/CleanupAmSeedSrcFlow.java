@@ -9,18 +9,18 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CleanAmSeedWithDomOwnTabFunction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ComputeRootDunsAndTypeFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DomOwnerCalRootDunsFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.UpdatePrimDomAlexaRankFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.FormDomOwnershipTableConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DomainOwnershipConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
 @Component(CleanupAmSeedSrcFlow.DATAFLOW_BEAN_NAME)
-public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipTableConfig> {
+public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<DomainOwnershipConfig> {
     public final static String DATAFLOW_BEAN_NAME = "CleanupAmSeedSrcFlow";
     public final static String TRANSFORMER_NAME = "CleanupAmSeedSrcTransformer";
     private final static String ROOT_DUNS = "ROOT_DUNS";
@@ -44,7 +44,7 @@ public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return FormDomOwnershipTableConfig.class;
+        return DomainOwnershipConfig.class;
     }
 
     @Override
@@ -100,9 +100,7 @@ public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
 
     private static Node computeRootDunsAndCompare(Node amSeedFiltered, Node domOwnTableForCleanup) {
         // add ROOT_DUNS to amSeedFiltered
-        ComputeRootDunsAndTypeFunction computeRootDuns = new ComputeRootDunsAndTypeFunction(
-                new Fields(ROOT_DUNS, DUNS_TYPE), DataCloudConstants.ATTR_GU_DUNS,
-                DataCloudConstants.ATTR_DU_DUNS, DataCloudConstants.AMS_ATTR_DUNS);
+        DomOwnerCalRootDunsFunction computeRootDuns = new DomOwnerCalRootDunsFunction(new Fields(ROOT_DUNS, DUNS_TYPE));
         List<FieldMetadata> fms = new ArrayList<FieldMetadata>();
         fms.add(new FieldMetadata(ROOT_DUNS, String.class));
         fms.add(new FieldMetadata(DUNS_TYPE, String.class));

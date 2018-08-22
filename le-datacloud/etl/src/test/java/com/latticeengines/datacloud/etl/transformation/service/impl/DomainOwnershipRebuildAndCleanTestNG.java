@@ -22,22 +22,24 @@ import com.latticeengines.datacloud.dataflow.transformation.CleanupOrbSecSrcFlow
 import com.latticeengines.datacloud.dataflow.transformation.DomainOwnershipRebuildFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.FormDomOwnershipTableConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DomainOwnershipConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class DomainOwnershipForDomCleanupTestNG
+public class DomainOwnershipRebuildAndCleanTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(DomainOwnershipRebuildAndCleanTestNG.class);
 
-    GeneralSource domOwnTable = new GeneralSource("DomainOwnershipTable");
-    GeneralSource orbSeedCleanedup = new GeneralSource("OrbSecSrcCleanedUp");
-    GeneralSource source = new GeneralSource("AmSeedCleanedup");
-    GeneralSource baseSource1 = new GeneralSource("AccountMasterSeed");
-    GeneralSource baseSource2 = new GeneralSource("OrbCacheSeedSecondaryDomain");
-    GeneralSource baseSource3 = new GeneralSource("AlexaMostRecent");
     private static final String DOM_OWNERSHIP_TABLE = "DomainOwnershipTable";
-    private static final String ORB_SEC_SRC_CLEANED_UP = "OrbSecSrcCleanedUp";
-    private static final Logger log = LoggerFactory.getLogger(DomainOwnershipForDomCleanupTestNG.class);
+    private static final String ORB_SEC_CLEANED = "OrbSecCleaned";
+    private static final String AMS_CLEANED = "AmsCleaned";
+    GeneralSource domOwnTable = new GeneralSource(DOM_OWNERSHIP_TABLE);
+    GeneralSource orbSecClean = new GeneralSource(ORB_SEC_CLEANED);
+    GeneralSource amsClean = new GeneralSource(AMS_CLEANED);
+    GeneralSource ams = new GeneralSource("AccountMasterSeed");
+    GeneralSource orbSec = new GeneralSource("OrbCacheSeedSecondaryDomain");
+    GeneralSource alexa = new GeneralSource("AlexaMostRecent");
+    GeneralSource source = amsClean;
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -49,8 +51,93 @@ public class DomainOwnershipForDomCleanupTestNG
         finish(progress);
         confirmResultFile(progress);
         confirmIntermediateSource(domOwnTable, targetVersion);
-        confirmIntermediateSource(orbSeedCleanedup, targetVersion);
+        confirmIntermediateSource(orbSecClean, targetVersion);
         cleanupProgressTables();
+    }
+
+    @Override
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+        return pipelineTransformationService;
+    }
+
+    @Override
+    protected Source getSource() {
+        return source;
+    }
+
+    @Override
+    protected String getPathToUploadBaseData() {
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+    }
+
+    @Override
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
+        try {
+            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+            configuration.setName("DomainOwnershipRebuild");
+            configuration.setVersion(targetVersion);
+
+            TransformationStepConfig step1 = new TransformationStepConfig();
+            List<String> baseSources = new ArrayList<String>();
+            baseSources.add(ams.getSourceName());
+            baseSources.add(orbSec.getSourceName());
+            step1.setBaseSources(baseSources);
+            step1.setTransformer(DomainOwnershipRebuildFlow.TRANSFORMER_NAME);
+            String confParamStr1 = getDomOwnershipTableConfig();
+            step1.setConfiguration(confParamStr1);
+            step1.setTargetSource(domOwnTable.getSourceName());
+
+            // -----------------
+            TransformationStepConfig step2 = new TransformationStepConfig();
+            List<Integer> cleanupOrbSecSrcStep = new ArrayList<Integer>();
+            List<String> cleanupOrbSecSrc = new ArrayList<String>();
+            cleanupOrbSecSrcStep.add(0);
+            cleanupOrbSecSrc.add(orbSec.getSourceName());
+            step2.setInputSteps(cleanupOrbSecSrcStep);
+            step2.setBaseSources(cleanupOrbSecSrc);
+            step2.setTransformer(CleanupOrbSecSrcFlow.TRANSFORMER_NAME);
+            step2.setConfiguration(confParamStr1);
+            step2.setTargetSource(orbSecClean.getSourceName());
+
+            // -----------------
+            TransformationStepConfig step3 = new TransformationStepConfig();
+            List<String> cleanupAmSeedSrc = new ArrayList<String>();
+            List<Integer> cleanupAmSeedStep = new ArrayList<Integer>();
+            cleanupAmSeedStep.add(0);
+            cleanupAmSeedSrc.add(ams.getSourceName());
+            cleanupAmSeedSrc.add(orbSecClean.getSourceName());
+            cleanupAmSeedSrc.add(alexa.getSourceName());
+            step3.setInputSteps(cleanupAmSeedStep);
+            step3.setBaseSources(cleanupAmSeedSrc);
+            step3.setTransformer(CleanupAmSeedSrcFlow.TRANSFORMER_NAME);
+            step3.setConfiguration(confParamStr1);
+            step3.setTargetSource(amsClean.getSourceName());
+
+            // -----------
+            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            steps.add(step1);
+            steps.add(step2);
+            steps.add(step3);
+
+            configuration.setSteps(steps);
+            return configuration;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getDomOwnershipTableConfig() throws JsonProcessingException {
+        DomainOwnershipConfig conf = new DomainOwnershipConfig();
+        conf.setFranchiseThreshold(3);
+        conf.setMultLargeCompThreshold(500000000L);
+        return JsonUtils.serialize(conf);
+    }
+
+    @Override
+    protected String getPathForResult() {
+        Source targetSource = sourceService.findBySourceName(source.getSourceName());
+        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     private void prepareAlexaData() {
@@ -67,7 +154,7 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "tesla.com", 108 }, { "netappDu.com", 109 }, { "netsuite.com", 110 }, { "paypalHQ.com", 111 },
                 { "rubrik.com", 113 }, { "lyft.com", 114 }, { "intuit.com", 115 },
                 { "macys.com", 116 }, { "netappDuns3.com", 117 }, { "oldnavy.com", 118 } };
-        uploadBaseSourceData(baseSource3.getSourceName(), baseSourceVersion, schema, data);
+        uploadBaseSourceData(alexa.getSourceName(), baseSourceVersion, schema, data);
     }
 
     private void prepareAmSeed() {
@@ -134,7 +221,7 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "rubrik.com", "DUNS70", "DUNS75", null, 128312L, "2133", 22, "Legal", 240 },
                 { "rubrik.com", "DUNS89", "DUNS900", null, 126612L, "4547", 13, "Media", 241 },
         };
-        uploadBaseSourceData(baseSource1.getSourceName(), baseSourceVersion, schema, data);
+        uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, schema, data);
     }
 
     private void prepareOrbSeedSecondaryDom() {
@@ -165,92 +252,7 @@ public class DomainOwnershipForDomCleanupTestNG
                 // PriRootDuns != null, SecRootDuns == null
                 { "sbiDuns1.com", "paypal.com" },
         };
-        uploadBaseSourceData(baseSource2.getSourceName(), baseSourceVersion, schema, data);
-    }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-    @Override
-    protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("FormDomainOwnershipTable");
-            configuration.setVersion(targetVersion);
-
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSourceStep = new ArrayList<String>();
-            baseSourceStep.add(baseSource1.getSourceName());
-            baseSourceStep.add(baseSource2.getSourceName());
-            step1.setBaseSources(baseSourceStep);
-            step1.setTransformer(DomainOwnershipRebuildFlow.TRANSFORMER_NAME);
-            String confParamStr1 = getDomOwnershipTableConfig();
-            step1.setConfiguration(confParamStr1);
-            step1.setTargetSource(domOwnTable.getSourceName());
-
-            // -----------------
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            List<Integer> cleanupOrbSecSrcStep = new ArrayList<Integer>();
-            List<String> cleanupOrbSecSrc = new ArrayList<String>();
-            cleanupOrbSecSrcStep.add(0);
-            cleanupOrbSecSrc.add(baseSource2.getSourceName());
-            step2.setInputSteps(cleanupOrbSecSrcStep);
-            step2.setBaseSources(cleanupOrbSecSrc);
-            step2.setTransformer(CleanupOrbSecSrcFlow.TRANSFORMER_NAME);
-            step2.setConfiguration(confParamStr1);
-            step2.setTargetSource(orbSeedCleanedup.getSourceName());
-
-            // -----------------
-            TransformationStepConfig step3 = new TransformationStepConfig();
-            List<String> cleanupAmSeedSrc = new ArrayList<String>();
-            List<Integer> cleanupAmSeedStep = new ArrayList<Integer>();
-            cleanupAmSeedStep.add(0);
-            cleanupAmSeedSrc.add(baseSource1.getSourceName());
-            cleanupAmSeedSrc.add(orbSeedCleanedup.getSourceName());
-            cleanupAmSeedSrc.add(baseSource3.getSourceName());
-            step3.setInputSteps(cleanupAmSeedStep);
-            step3.setBaseSources(cleanupAmSeedSrc);
-            step3.setTransformer(CleanupAmSeedSrcFlow.TRANSFORMER_NAME);
-            step3.setConfiguration(confParamStr1);
-            step3.setTargetSource(source.getSourceName());
-
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            steps.add(step2);
-            steps.add(step3);
-
-            configuration.setSteps(steps);
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String getDomOwnershipTableConfig() throws JsonProcessingException {
-        FormDomOwnershipTableConfig conf = new FormDomOwnershipTableConfig();
-        conf.setFranchiseThreshold(3);
-        conf.setMultLargeCompThreshold(500000000L);
-        return JsonUtils.serialize(conf);
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+        uploadBaseSourceData(orbSec.getSourceName(), baseSourceVersion, schema, data);
     }
 
     Object[][] expectedDataValues = new Object[][] { //
@@ -381,7 +383,7 @@ public class DomainOwnershipForDomCleanupTestNG
                 }
                 Assert.assertEquals(rowCount, 29);
                 break;
-            case ORB_SEC_SRC_CLEANED_UP:
+            case ORB_SEC_CLEANED:
                 rowCount = 0;
                 expectedData = new HashMap<>();
                 for (Object[] data : orbSecSrcCleanedupValues) {

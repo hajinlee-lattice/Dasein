@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -9,21 +11,18 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class ComputeRootDunsAndTypeFunction extends BaseOperation implements Function {
+public class DomOwnerCalRootDunsFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -2167500142900212360L;
-    private String guDunsField;
-    private String duDunsField;
-    private String dunsField;
+    private String guDunsField = DataCloudConstants.ATTR_GU_DUNS;
+    private String duDunsField = DataCloudConstants.ATTR_DU_DUNS;
+    private String dunsField = DataCloudConstants.AMS_ATTR_DUNS;
     private final static String GU_TYPE_VAL = "GU";
     private final static String DU_TYPE_VAL = "DU";
     private final static String DUNS_TYPE_VAL = "DUNS";
 
-    public ComputeRootDunsAndTypeFunction(Fields fieldDeclaration, String guDuns, String duDuns, String duns) {
+    public DomOwnerCalRootDunsFunction(Fields fieldDeclaration) {
         super(fieldDeclaration);
-        this.guDunsField = guDuns;
-        this.duDunsField = duDuns;
-        this.dunsField = duns;
     }
 
     @Override
