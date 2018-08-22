@@ -389,7 +389,8 @@ public class JobCacheServiceImpl implements JobCacheService {
         }
 
         Job job = cache.getJob();
-        if (job.getJobStatus() != null && job.getJobStatus().isTerminated() && job.getEndTimestamp() == null) {
+        JobStatus status = job.getJobStatus();
+        if ((status == JobStatus.FAILED || status == JobStatus.COMPLETED) && job.getEndTimestamp() == null) {
             // job terminated and has no end timestamp
             log.info("Job cache entry in terminal state but missing end timestamp found, considered a cache miss, ID={}",
                     job.getId());
