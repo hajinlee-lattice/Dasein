@@ -154,6 +154,10 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
+        List<Play> playList = playEntityMgr.findAll();
+        Assert.assertNotNull(playList);
+        Assert.assertEquals(playList.size(), 1);
+
         retrievedPlay = playEntityMgr.getPlayByName(playName, false);
         Assert.assertNotNull(retrievedPlay);
 
@@ -161,7 +165,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(retrievedPlay);
 
         playEntityMgr.deleteByName(playName, false);
-        List<Play> playList = playEntityMgr.findAll();
+        playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 0);
 

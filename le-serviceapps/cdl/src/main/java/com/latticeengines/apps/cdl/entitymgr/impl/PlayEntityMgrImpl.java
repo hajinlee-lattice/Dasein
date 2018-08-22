@@ -128,6 +128,12 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Play> findAll() {
+        return super.findAll();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Play> findAllByRatingEnginePid(long pid) {
         return playDao.findAllByRatingEnginePid(pid);
     }

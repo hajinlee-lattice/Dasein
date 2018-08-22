@@ -133,6 +133,12 @@ public class RatingEngineEntityMgrImpl //
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<RatingEngine> findAll() {
+        return ratingEngineDao.findAll();
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RatingEngine> findAllByTypeAndStatus(String type, String status) {
         if (isReaderConnection()) {
