@@ -13,7 +13,7 @@ public class SoftwarePackageUnitTestNG {
         pkg.setGroupId("org.latticeengines");
         pkg.setArtifactId("le-serviceflows");
         
-        assertEquals(pkg.getHdfsPath(), "dataflow/le-serviceflows.jar");
+        assertEquals(pkg.getHdfsPath(), "dataflow/le-serviceflows/le-serviceflows.jar");
     }
 
     @Test(groups = "unit")
@@ -24,6 +24,6 @@ public class SoftwarePackageUnitTestNG {
         pkg.setArtifactId("le-serviceflows");
         pkg.setClassifier("shaded");
         
-        assertEquals(pkg.getHdfsPath(), "dataflow/le-serviceflows-shaded.jar");
+        assertEquals(pkg.getHdfsPath(), "dataflow/le-serviceflows/le-serviceflows-shaded.jar");
     }
 }
