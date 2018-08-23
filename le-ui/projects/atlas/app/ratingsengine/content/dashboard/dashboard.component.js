@@ -396,12 +396,10 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.canCreatePlay = function(){
-        if(vm.isRulesBased && vm.playbookEnabled){
-            return vm.ratingEngine.status === 'ACTIVE';
-        }
-        if(!vm.isRulesBased && vm.playbookEnabled){
-            // console.log(vm.dashboard.summary.isPublished);
+        if(vm.playbookEnabled){
             return (vm.dashboard.summary.isPublished && vm.ratingEngine.status === 'ACTIVE');
+        }else {
+            return false;
         }
     };
 
