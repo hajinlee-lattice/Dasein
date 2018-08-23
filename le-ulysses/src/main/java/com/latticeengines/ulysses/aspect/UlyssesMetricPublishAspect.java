@@ -126,7 +126,6 @@ public class UlyssesMetricPublishAspect {
     @Around("execution(public * com.latticeengines.ulysses.controller.RecommendationResource.*(..))")
     public Object ulyssesRecommendationMonitor(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        log.info("i'm happy?");
         Object retval = null;
         long timestamp = System.currentTimeMillis();
         retval = joinPoint.proceed();
