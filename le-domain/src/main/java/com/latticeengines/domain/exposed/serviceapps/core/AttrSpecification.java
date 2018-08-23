@@ -7,12 +7,12 @@ public class AttrSpecification {
 
     public static AttrSpecification LDC_NON_PREMIUM() {
         return new AttrSpecification("LDC Non-Premium Attributes", true, true, true, true, true, false, false, false,
-                true, false, true, false); //
+                true, false, true, true); //
     }
 
     public static AttrSpecification LDC_PREMIUM() {
         return new AttrSpecification("LDC Premium Attributes", true, true, true, true, true, false, false, false, true,
-                false, true, false);
+                false, true, true);
     }
 
     public static AttrSpecification LDC_INTERNAL() {
