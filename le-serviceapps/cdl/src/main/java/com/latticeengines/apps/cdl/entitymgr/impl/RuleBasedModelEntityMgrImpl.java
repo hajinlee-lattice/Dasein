@@ -156,7 +156,7 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
         Set<Triple<String, String, String>> attrDepSet = new HashSet<Triple<String, String, String>>();
 
         if (ruleBasedModel != null) {
-            ruleBasedModelDependencyUtil.findRatingModelAttributeLookups(ruleBasedModel);
+            ruleBasedModelDependencyUtil.findRatingModelAttributeLookups(ruleBasedModel, true);
             Set<AttributeLookup> attributeLookups = ruleBasedModel.getRatingModelAttributes();
 
             if (CollectionUtils.isNotEmpty(attributeLookups)) {

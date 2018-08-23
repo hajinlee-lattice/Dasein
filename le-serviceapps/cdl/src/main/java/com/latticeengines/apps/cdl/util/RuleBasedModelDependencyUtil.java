@@ -30,6 +30,11 @@ public class RuleBasedModelDependencyUtil {
 
     @NoCustomerSpace
     public void findRatingModelAttributeLookups(RuleBasedModel ratingModel) {
+        findRatingModelAttributeLookups(ratingModel, false);
+    }
+
+    @NoCustomerSpace
+    public void findRatingModelAttributeLookups(RuleBasedModel ratingModel, boolean ignoreSegment) {
         Set<AttributeLookup> attributes = new HashSet<>();
         if (ratingModel != null && ratingModel.getRatingRule() != null) {
             TreeMap<String, Map<String, Restriction>> rulesMap = ratingModel.getRatingRule().getBucketToRuleMap();
@@ -41,7 +46,7 @@ public class RuleBasedModelDependencyUtil {
                 }
             }
         }
-        if (ratingModel != null) {
+        if (ratingModel != null && !ignoreSegment) {
             MetadataSegment segment = ruleBasedModelEntityMgr.inflateParentSegment(ratingModel);
             if (segment != null) {
                 attributes.addAll(segmentDependencyUtil.findDependingAttributes(Collections.singletonList(segment)));
