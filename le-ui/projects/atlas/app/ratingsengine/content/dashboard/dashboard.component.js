@@ -298,7 +298,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 }
             } else {
 
-                console.log(vm.model);
+                // console.log(vm.model);
 
                 vm.modelingStrategy = 'CUSTOM_EVENT';
                 vm.ratingEngineType = 'Custom Event';
@@ -318,7 +318,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.init = function() {
 
-        console.log(vm.ratingEngine);
+        // console.log(vm.ratingEngine);
         // console.log(vm.dashboard);
 
         vm.initDataModel();
