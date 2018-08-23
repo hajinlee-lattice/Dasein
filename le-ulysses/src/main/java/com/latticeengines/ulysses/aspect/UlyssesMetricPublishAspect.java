@@ -54,8 +54,8 @@ public class UlyssesMetricPublishAspect {
     }
 
     @Around("execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountById(..))"
-            + "|| execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountsById(..))"
-            + "|| execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountByIdInDanteFormat(..))"
+            + "&& execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountsById(..))"
+            + "&& execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountByIdInDanteFormat(..))"
             + "&& args(attributeGroup, ..)")
     public Object ulyssesAccMonitor(ProceedingJoinPoint joinPoint, Predefined attributeGroup) throws Throwable {
 
@@ -123,9 +123,10 @@ public class UlyssesMetricPublishAspect {
         return metrics;
     }
 
-    @Around("execution(* com.latticeengines.ulysses.controller.RecommendationResource.*(..))")
+    @Around("execution(public * com.latticeengines.ulysses.controller.RecommendationResource.*(..))")
     public Object ulyssesRecommendationMonitor(ProceedingJoinPoint joinPoint) throws Throwable {
 
+        log.info("i'm happy?");
         Object retval = null;
         long timestamp = System.currentTimeMillis();
         retval = joinPoint.proceed();
