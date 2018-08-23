@@ -125,8 +125,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TRAINING));
         }
         if (CollectionUtils.isNotEmpty(attrDepSet)) {
-            log.info(String.format("Extracted dependencies from ai based model %s, rating engine %s: %s",
-                    aiModel.getId(), aiModel.getRatingEngine() == null ? null : aiModel.getRatingEngine().getId(),
+            log.info(String.format("Extracted dependencies from ai based model %s: %s", aiModel.getId(),
                     JsonUtils.serialize(attrDepSet)));
         }
         return attrDepSet;

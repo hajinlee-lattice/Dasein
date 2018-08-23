@@ -173,9 +173,7 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
             }
         }
         if (CollectionUtils.isNotEmpty(attrDepSet)) {
-            log.info(String.format("Extracted dependencies from rule based model %s, rating engine %s: %s",
-                    ruleBasedModel.getId(),
-                    ruleBasedModel.getRatingEngine() == null ? null : ruleBasedModel.getRatingEngine().getId(),
+            log.info(String.format("Extracted dependencies from rule based model %s: %s", ruleBasedModel.getId(),
                     JsonUtils.serialize(attrDepSet)));
         }
         return attrDepSet;
