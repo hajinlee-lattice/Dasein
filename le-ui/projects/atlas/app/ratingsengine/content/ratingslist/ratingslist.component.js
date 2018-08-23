@@ -39,7 +39,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                     { label: "Inactive", action: { status: 'INACTIVE' }, total: vm.inactiveCount },
                     { label: "Rules Based", action: { tileClass: 'RULE_BASED' }, total: vm.inactiveCount },
                     { label: "First Purchase Cross-Sell", action: { tileClass: 'CROSS_SELL_FIRST_PURCHASE' }, total: vm.inactiveCount },
-                    { label: "Returning Purchase Cross-Sell", action: { tileClass: 'CROSS_SELL_REPEAT_PURCHASE' }, total: vm.inactiveCount },
+                    { label: "Repeat Purchase Cross-Sell", action: { tileClass: 'CROSS_SELL_REPEAT_PURCHASE' }, total: vm.inactiveCount },
                     { label: "Custom Event", action: { tileClass: 'CUSTOM_EVENT' }, total: vm.inactiveCount }
                 ]
             }
