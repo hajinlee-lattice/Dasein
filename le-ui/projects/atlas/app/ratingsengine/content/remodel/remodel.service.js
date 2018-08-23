@@ -1,7 +1,7 @@
 angular.module('lp.ratingsengine.remodel')
 .service('AtlasRemodelStore', function($q, $state, $stateParams, $timeout, BrowserStorageUtility, AtlasRemodelService, RatingsEngineStore, JobsStore) {
     var store = this;
-
+    
     this.init = function(){
         this.remodelIteration = null;
 
@@ -18,6 +18,7 @@ angular.module('lp.ratingsengine.remodel')
         this.category = '';
 
         this.remodelAttributes = {};
+        this.configFilters = RatingsEngineStore.getConfigFilters();
     };
 
     this.init();
@@ -60,7 +61,9 @@ angular.module('lp.ratingsengine.remodel')
 
         return deferred.promise;
     };
-
+    this.setConfigFilters = function(filters){
+        this.configFilters = filters;
+    }
     this.saveIteration = function(nextState) {
 
         var engineId = $stateParams.engineId,
@@ -72,9 +75,9 @@ angular.module('lp.ratingsengine.remodel')
         iteration.AI.createdBy = createdBy;
 
         if(iteration.AI.advancedModelingConfig.cross_sell){
-            iteration.AI.advancedModelingConfig.cross_sell.filters = RatingsEngineStore.getConfigFilters();
+            iteration.AI.advancedModelingConfig.cross_sell.filters = store.configFilters;// RatingsEngineStore.getConfigFilters();
         } else {
-            iteration.AI.advancedModelingConfig.custom_event = RatingsEngineStore.getConfigFilters();
+            iteration.AI.advancedModelingConfig.custom_event = store.configFilters;//RatingsEngineStore.getConfigFilters();
         }
 
         // Sanitize iteration to remove data

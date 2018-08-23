@@ -19,6 +19,13 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
 
                     return deferred.promise;
 
+                }],
+                configfilters: ['$q', 'RatingsEngineStore', function($q, RatingsEngineStore){
+                    var deferred = $q.defer();
+                    var copy = angular.copy(RatingsEngineStore.getConfigFilters());
+                    deferred.resolve(copy);
+                    return deferred.promise;
+                   
                 }]
             },
             views: {
@@ -30,7 +37,8 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
     templateUrl: 'app/ratingsengine/content/remodel/attributes/attributes.component.html',
     bindings: {
         attributes: '<',
-        filters: '<'
+        filters: '<',
+        configfilters: '<'
     },
     controller: function (
         $q, $scope, $stateParams, $timeout,
@@ -40,9 +48,8 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
         var vm = this;
 
         vm.$onInit = function() {
-
             vm.store = AtlasRemodelStore;
-
+            vm.store.setConfigFilters(vm.configfilters);
             // Move Lead Information attributes to My Attributes and delete Lead Information Category
             if(vm.attributes['Lead Information']){
                 angular.forEach(vm.attributes['Lead Information'], function(attribute){

@@ -131,6 +131,11 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.modelingStrategy = vm.ratingModel.advancedModelingConfig[vm.engineType].modelingStrategy;
 
             if(vm.engineType == 'cross_sell'){
+                
+                if(angular.equals({}, vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.filters)){
+                    vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.filters =
+                    vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.filters;
+                }
                 vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
@@ -265,7 +270,8 @@ angular.module('lp.ratingsengine.wizard.training', [
         }
 
         vm.getPurchasedBeforeValue = function(value) {
-            vm.purchasedBeforePeriod = value;
+            // vm.purchasedBeforePeriod = value;
+            console.log('Value ',vm.purchasedBeforePeriod);
         }
 
         vm.validateCrossSellForm = function(){
