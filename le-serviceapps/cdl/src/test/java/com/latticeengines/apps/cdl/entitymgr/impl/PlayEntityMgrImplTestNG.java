@@ -82,7 +82,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
+    public void teardown() {
         Tenant tenant1 = tenantService.findByTenantId("testTenant1");
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);

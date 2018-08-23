@@ -119,10 +119,6 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        if (softwareLibraryService != null) {
-            softwareLibraryService.setStackName(stackName);
-        }
-
         restTemplate.setInterceptors(getAddMagicAuthHeaders());
 
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
@@ -202,7 +198,6 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
         pkg.setModule("dataflowapi");
         pkg.setGroupId("com.latticeengines");
         pkg.setArtifactId(artifactId);
-        pkg.setVersion(version);
         pkg.setInitializerClass(initializerClassName);
         File localFile = new File(jarFileName + ".jar");
         try {

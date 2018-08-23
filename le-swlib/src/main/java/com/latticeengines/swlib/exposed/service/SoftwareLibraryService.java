@@ -11,23 +11,17 @@ import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 
 public interface SoftwareLibraryService {
 
-    void setStackName(String stackName);
+    void setStackAndVersion(String stackName, String version);
 
     void installPackage(SoftwarePackage swPackage, File localFile);
 
-    @Deprecated
     List<SoftwarePackage> getInstalledPackages(String module);
-
-    List<SoftwarePackage> getLatestInstalledPackages(String module);
-
-    List<SoftwarePackage> getInstalledPackagesByVersion(String module, String version);
 
     void installPackage(String fsDefaultFS, SoftwarePackage swPackage, File localFile);
 
     String getTopLevelPath();
 
-    ApplicationContext loadSoftwarePackages(String module, ApplicationContext context, VersionManager versionManager);
+    ApplicationContext loadSoftwarePackages(String module, ApplicationContext context);
 
-    ApplicationContext loadSoftwarePackages(String module, Collection<String> names, ApplicationContext context,
-                         VersionManager versionManager);
+    ApplicationContext loadSoftwarePackages(String module, Collection<String> names, ApplicationContext context);
 }

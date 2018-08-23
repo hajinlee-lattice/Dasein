@@ -14,7 +14,6 @@ public class SoftwarePackage implements HasName {
     private String module;
     private String groupId;
     private String artifactId;
-    private String version;
     private String classifier = "";
     
     @Override
@@ -47,22 +46,12 @@ public class SoftwarePackage implements HasName {
     @JsonIgnore
     public String getHdfsPath(String extension) {
         assert(!StringUtils.isEmpty(module));
-        assert(!StringUtils.isEmpty(groupId));
         assert(!StringUtils.isEmpty(artifactId));
-        assert(!StringUtils.isEmpty(version));
-        String fileName = String.format("%s-%s-%s.%s", artifactId, version, classifier, extension);
+        String fileName = String.format("%s-%s.%s", artifactId, classifier, extension);
         if (StringUtils.isEmpty(classifier)) {
-            fileName = String.format("%s-%s.%s", artifactId, version, extension);
+            fileName = String.format("%s.%s", artifactId, extension);
         }
-        
-        String[] groupIdSplit = StringUtils.split(groupId, ".");
-        String[] sSplit = new String[groupIdSplit.length];
-        
-        for (int i = 0; i < sSplit.length; i++) {
-            sSplit[i] = "%s";
-        }
-        return String.format("%s/%s/%s/%s/%s", //
-                module, StringUtils.join(groupIdSplit, "/"), artifactId, version, fileName);
+        return String.format("%s/%s/%s", module, artifactId, fileName);
     }
 
     @JsonProperty("module")
@@ -93,16 +82,6 @@ public class SoftwarePackage implements HasName {
     @JsonProperty("artifact_id")
     public void setArtifactId(String artifactId) {
         this.artifactId = artifactId;
-    }
-
-    @JsonProperty("version")
-    public String getVersion() {
-        return version;
-    }
-
-    @JsonProperty("version")
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     @JsonProperty("classifier")

@@ -52,9 +52,6 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         this.softwareLibraryService = softwareLibraryService;
         this.hdfsJobBaseDir = hdfsJobBaseDir;
         this.webHdfs = webHdfs;
-        if (this.softwareLibraryService != null) {
-            this.softwareLibraryService.setStackName(stackName);
-        }
     }
 
     @Override

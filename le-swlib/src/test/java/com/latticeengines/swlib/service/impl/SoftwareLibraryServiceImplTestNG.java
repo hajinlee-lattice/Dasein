@@ -6,9 +6,10 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -21,15 +22,13 @@ import com.latticeengines.swlib.functionalframework.SWLibFunctionalTestNGBase;
 
 public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private SoftwareLibraryServiceImpl softwareLibraryService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private SoftwarePackage pkgVersion1;
-
-    private SoftwarePackage pkgVersion2;
 
     private String jarFile;
 
@@ -39,14 +38,12 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
         pkgVersion1 = new SoftwarePackage();
         pkgVersion1.setGroupId("com.latticeengines");
         pkgVersion1.setArtifactId("le-serviceflows");
-        pkgVersion1.setVersion("1.0.0");
         pkgVersion1.setModule("dataflow");
         pkgVersion1.setInitializerClass("xyz");
 
-        pkgVersion2 = new SoftwarePackage();
+        SoftwarePackage pkgVersion2 = new SoftwarePackage();
         pkgVersion2.setGroupId("com.latticeengines");
         pkgVersion2.setArtifactId("le-serviceflows");
-        pkgVersion2.setVersion("1.0.1");
         pkgVersion2.setModule("dataflow");
         pkgVersion2.setInitializerClass("abc");
     }
@@ -79,12 +76,11 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
 
         assertEquals(deserializedPkg.getGroupId(), pkgVersion1.getGroupId());
         assertEquals(deserializedPkg.getArtifactId(), pkgVersion1.getArtifactId());
-        assertEquals(deserializedPkg.getVersion(), pkgVersion1.getVersion());
         assertEquals(deserializedPkg.getClassifier(), pkgVersion1.getClassifier());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "installPackage" })
-    public void installPackageThatAlreadyExists() throws Exception {
+    public void installPackageThatAlreadyExists() {
         boolean exception = false;
         try {
             softwareLibraryService.installPackage(pkgVersion1, new File(jarFile));
@@ -97,7 +93,7 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
     }
 
     @Test(groups = "functional", dependsOnMethods = { "installPackage" })
-    public void getInstalledPackages() throws Exception {
+    public void getInstalledPackages() {
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackages("dataflow");
 
         assertEquals(packages.size(), 1);
@@ -105,46 +101,24 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
 
         assertEquals(deserializedPkg.getGroupId(), pkgVersion1.getGroupId());
         assertEquals(deserializedPkg.getArtifactId(), pkgVersion1.getArtifactId());
-        assertEquals(deserializedPkg.getVersion(), pkgVersion1.getVersion());
         assertEquals(deserializedPkg.getClassifier(), pkgVersion1.getClassifier());
 
     }
 
     @Test(groups = "functional")
-    public void getInstalledPackagesMissingModule() throws Exception {
+    public void getInstalledPackagesMissingModule() {
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackages("xyz");
-
         assertEquals(packages.size(), 0);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "installPackage" })
-    public void getLatestInstalledPackages() throws Exception {
-        softwareLibraryService.installPackage(pkgVersion2, new File(jarFile));
-        assertEquals(softwareLibraryService.getInstalledPackages("dataflow").size(), 2);
-
-        List<SoftwarePackage> packages = softwareLibraryService.getLatestInstalledPackages("dataflow");
-        assertEquals(packages.size(), 1);
-        assertEquals(packages.get(0).getVersion(), "1.0.1");
-    }
-
-    @Test(groups = "functional", dependsOnMethods = { "getLatestInstalledPackages" })
-    public void getInstalledPackagesByVersion() throws Exception {
-        assertEquals(softwareLibraryService.getInstalledPackages("dataflow").size(), 2);
-
-        List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion("dataflow", "1.0.0");
-        assertEquals(packages.size(), 1);
-        assertEquals(packages.get(0).getVersion(), "1.0.0");
-    }
-
-    @Test(groups = "functional", dependsOnMethods = { "getInstalledPackagesByVersion" })
+    @Test(groups = "functional", dependsOnMethods = { "getInstalledPackages" })
     public void getInstalledPackagesNonSWPackageJsonFile() throws Exception {
         String[] pkgTokens = pkgVersion1.getHdfsPath("json").split("/");
         pkgTokens[pkgTokens.length - 1] = "a.json";
         String filePath = String.format("%s/%s", softwareLibraryService.getTopLevelPath(), StringUtils.join(pkgTokens, "/"));
         HdfsUtils.writeToFile(yarnConfiguration, filePath, "xyz");
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackages("dataflow");
-
-        assertEquals(packages.size(), 2);
+        assertEquals(packages.size(), 1);
     }
 
 }

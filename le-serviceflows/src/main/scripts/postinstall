@@ -26,11 +26,14 @@ do
     module=$(echo ${sf} | cut -d \| -f 1)
     library=$(echo ${sf} | cut -d \| -f 2)
 
+    df_path="/app/${LE_STACK}/${VERSION}/swlib/dataflowapi/le-serviceflows-${library}"
+    wf_path="/app/${LE_STACK}/${VERSION}/swlib/workflowapi/le-serviceflows-${library}"
+
     echo "clean up hdfs for module=${module} library=${library}"
-    hdfs dfs -mkdir -p /app/${LE_STACK}/swlib/workflowapi/com/latticeengines/le-serviceflows-${library}/${VERSION}
-    hdfs dfs -rm -r -f /app/${LE_STACK}/swlib/workflowapi/com/latticeengines/le-serviceflows-${library}/${VERSION}/*
-    hdfs dfs -mkdir -p /app/${LE_STACK}/swlib/dataflowapi/com/latticeengines/le-serviceflows-${library}/${VERSION}
-    hdfs dfs -rm -r -f /app/${LE_STACK}/swlib/dataflowapi/com/latticeengines/le-serviceflows-${library}/${VERSION}/*
+    hdfs dfs -mkdir -p ${df_path}
+    hdfs dfs -rm -r -f ${df_path}/*
+    hdfs dfs -mkdir -p ${wf_path}
+    hdfs dfs -rm -r -f ${wf_path}/*
 
     echo "install le-serviceflows-${library} for ${module}"
     java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \

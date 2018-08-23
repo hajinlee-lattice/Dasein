@@ -48,13 +48,12 @@ public class SwlibTool {
                 File fileToInstall = null;
                 SoftwareLibraryService swlibService = appContext.getBean("softwareLibraryService",
                         SoftwareLibraryService.class);
-                swlibService.setStackName(stackName);
+                swlibService.setStackAndVersion(stackName, version);
 
                 SoftwarePackage swPackage = new SoftwarePackage();
                 swPackage.setName(name);
                 swPackage.setGroupId(groupId);
                 swPackage.setArtifactId(artifactId);
-                swPackage.setVersion(version);
                 swPackage.setClassifier(classifier);
                 swPackage.setInitializerClass(initializerClassName);
 

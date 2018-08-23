@@ -75,10 +75,10 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         if (StringUtils.isNotBlank(swlib)) {
             log.info("Enriching application context with sw package " + swlib);
             appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", Collections.singleton(swlib),
-                    appContext, versionManager);
+                    appContext);
         } else {
             log.info("Enriching application context with all sw packages available.");
-            appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", appContext, versionManager);
+            appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", appContext);
         }
         Map<String, Table> sourceTables = new HashMap<>();
 

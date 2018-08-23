@@ -5,23 +5,22 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -36,16 +35,19 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
 
     private static final String SWLIB_DISABLED = "LE_SWLIB_DISABLED";
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Value("${dataplatform.hdfs.stack:}")
-    private String stackName;
+    private String topLevelPath;
 
-    private String topLevelPath = "/app/swlib";
-
-    public SoftwareLibraryServiceImpl() {
-        setStackName(stackName);
+    @Inject
+    public SoftwareLibraryServiceImpl(VersionManager versionManager) {
+        String stack = PropertyUtils.getProperty("dataplatform.hdfs.stack");
+        if (stack == null) {
+            stack = "default";
+        }
+        topLevelPath = "/app/" + stack + "/" + versionManager.getCurrentVersion() + "/swlib";
+        log.info("Set top level path to " + topLevelPath);
     }
 
     @Override
@@ -54,11 +56,9 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     }
 
     @Override
-    public void setStackName(String stackName) {
-        if (StringUtils.isNotEmpty(stackName)) {
-            topLevelPath = "/app/" + stackName + "/swlib";
-            log.info("Set top level path to " + topLevelPath);
-        }
+    public void setStackAndVersion(String stackName, String version) {
+        topLevelPath = "/app/" + stackName + "/" + version + "/swlib";
+        log.info("Set top level path to " + topLevelPath);
     }
 
     @Override
@@ -88,8 +88,8 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        Boolean disabled = Boolean.parseBoolean(System.getenv(SWLIB_DISABLED));
+    public void afterPropertiesSet() {
+        boolean disabled = Boolean.parseBoolean(System.getenv(SWLIB_DISABLED));
         if (!disabled) {
             createSoftwareLibDir(topLevelPath);
             yarnConfiguration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
@@ -105,40 +105,6 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
             throw new LedpException(LedpCode.LEDP_27000, e);
         }
 
-    }
-
-    @Override
-    public List<SoftwarePackage> getLatestInstalledPackages(String module) {
-        List<SoftwarePackage> packages = getInstalledPackages(module);
-
-        Map<String, List<SoftwarePackage>> packagesByGroupAndArtifact = new HashMap<>();
-
-        for (SoftwarePackage pkg : packages) {
-            String key = String.format("%s.%s", pkg.getGroupId(), pkg.getArtifactId());
-            List<SoftwarePackage> list = packagesByGroupAndArtifact.computeIfAbsent(key, k -> new ArrayList<>());
-            list.add(pkg);
-        }
-
-        Collection<List<SoftwarePackage>> values = packagesByGroupAndArtifact.values();
-        packages = new ArrayList<>();
-        for (List<SoftwarePackage> value : values) {
-            value.sort((o1, o2) -> o2.getVersion().compareTo(o1.getVersion()));
-            packages.add(value.get(0));
-        }
-
-        return packages;
-    }
-
-    @Override
-    public List<SoftwarePackage> getInstalledPackagesByVersion(String module, String version) {
-        List<SoftwarePackage> packages = getInstalledPackages(module);
-        List<SoftwarePackage> versionMatchedPackages = new ArrayList<>();
-        for (SoftwarePackage pkg : packages) {
-            if (StringUtils.isNotBlank(version) && pkg.getVersion().equals(version)) {
-                versionMatchedPackages.add(pkg);
-            }
-        }
-        return versionMatchedPackages;
     }
 
     @Override
@@ -165,13 +131,10 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         return packages;
     }
 
-    private SoftwarePackage getInstalledPackageByNameVersion(String module, String name, String version) {
+    private SoftwarePackage getInstalledPackageByNameVersion(String module, String name) {
         List<SoftwarePackage> packages = getInstalledPackages(module);
         for (SoftwarePackage pkg : packages) {
-            if (StringUtils.isBlank(pkg.getName()) || !pkg.getName().equals(name)) {
-                continue;
-            }
-            if (StringUtils.isBlank(version) || version.equals(pkg.getVersion())) {
+            if (name.equals(pkg.getName())) {
                 return pkg;
             }
         }
@@ -179,33 +142,30 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     }
 
     @Override
-    public ApplicationContext loadSoftwarePackages(String module, ApplicationContext context,
-            VersionManager versionManager) {
+    public ApplicationContext loadSoftwarePackages(String module, ApplicationContext context) {
         log.info("Did not specify a pkg name, loading all libraries.");
-        return loadSoftwarePackages(module, Arrays.asList(SoftwareLibrary.values()), context, versionManager);
+        return loadSoftwarePackages(module, Arrays.asList(SoftwareLibrary.values()), context);
     }
 
-    public ApplicationContext loadSoftwarePackages(String module, Collection<String> names, ApplicationContext context,
-            VersionManager versionManager) {
+    public ApplicationContext loadSoftwarePackages(String module, Collection<String> names, ApplicationContext context) {
         return loadSoftwarePackages(module, names.stream().map(SoftwareLibrary::fromName).collect(Collectors.toList()),
-                context, versionManager);
+                context);
     }
 
     private ApplicationContext loadSoftwarePackages(String module, List<SoftwareLibrary> swlibs,
-            ApplicationContext context, VersionManager versionManager) {
+            ApplicationContext context) {
         List<SoftwareLibrary> deps = SoftwareLibrary.getLoadingSequence(SoftwareLibrary.Module.valueOf(module), swlibs);
-        return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
+        return loadSoftwarePackagesInSequence(module, deps, context);
     }
 
     private ApplicationContext loadSoftwarePackagesInSequence(String module, List<SoftwareLibrary> deps,
-            ApplicationContext context, String version) {
+            ApplicationContext context) {
         log.info("There are " + deps.size() + " libraries to load, the loading sequence is "
                 + StringUtils.join(deps.stream().map(SoftwareLibrary::getName).collect(Collectors.toList()), " -> "));
         for (SoftwareLibrary dep : deps) {
-            SoftwarePackage pkg = getInstalledPackageByNameVersion(module, dep.getName(), version);
+            SoftwarePackage pkg = getInstalledPackageByNameVersion(module, dep.getName());
             if (pkg == null) {
-                log.warn("Cannot find software package named " + dep.getName() + " for module " + module
-                        + " at version [" + version + "]. Skip");
+                log.warn("Cannot find software package named " + dep.getName() + " for module " + module + ". Skip");
             } else {
                 log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
                 log.info(String.format("Found software package %s from the software library for this module %s.",

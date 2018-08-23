@@ -89,6 +89,50 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
             s3Service.cleanupPrefix(s3Bucket, tgtDir);
         }
         Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
+        String s3Uri = "s3n://" + s3Bucket + tgtDir;
+
+        // demo overwrite aws key and secret
+        Properties properties = new Properties();
+        properties.setProperty("mapreduce.job.user.classpath.first", "true");
+        properties.setProperty("fs.s3n.awsAccessKeyId", awsKey);
+        properties.setProperty("fs.s3n.awsSecretAccessKey", awsSecret);
+        Configuration configuration = ConfigurationUtils.createFrom(yarnConfiguration, properties);
+        HdfsUtils.distcp(configuration, srcDir, s3Uri, "default");
+
+        // assert HDFS to S3 copy: reading does not need ams key
+        Assert.assertTrue(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
+        InputStream is = s3Service.readObjectAsStream(s3Bucket, tgtDir + "/test.avro");
+        AvroUtils.readFromInputStream(is).forEach(System.out::println);
+
+        // reverse copy -- also need unencrypted staging
+        HdfsUtils.rmdir(yarnConfiguration, srcDir);
+        Assert.assertFalse(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
+        HdfsUtils.distcp(yarnConfiguration, s3Uri, srcDir, "default");
+        Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
+        AvroUtils.iterator(yarnConfiguration, srcDir + "/*.avro").forEachRemaining(System.out::println);
+    }
+
+    @Test(groups = "functional", enabled = false)
+    public void testS3DistCpKms() throws Exception {
+        // from hdfs to s3
+        List<Pair<String, Class<?>>> columns = ImmutableList.of( //
+                Pair.of("Id", Integer.class), //
+                Pair.of("Value", String.class)
+        );
+        Object[][] data = new Object[][]{
+                { 1, "1" }, //
+                { 2, "2" }, //
+                { 3, "3" },
+        };
+        String srcDir = "/tmp/HdfsUtilsTest/input";
+        AvroUtils.uploadAvro(yarnConfiguration, data, columns, "test", srcDir);
+        Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
+
+        String tgtDir = "/" + leStack + "/HdfsUtilsTest/output";
+        if (s3Service.isNonEmptyDirectory(s3Bucket, tgtDir)) {
+            s3Service.cleanupPrefix(s3Bucket, tgtDir);
+        }
+        Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
 
         // copy to unencrypted folder first
         String tgtDirUnenctyped = tgtDir + "_unencrypted";

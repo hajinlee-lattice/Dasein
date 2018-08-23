@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotNull;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.SSLUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -34,6 +36,9 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
     @Autowired
     private TenantService tenantService;
 
+    @Inject
+    private VersionManager versionManager;
+
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
     protected Tenant mainTestTenant;
@@ -50,9 +55,6 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
 
     protected void setupTestEnvironment(LatticeProduct product) throws Exception {
         setupTestTenant(product);
-        if (softwareLibraryService != null) {
-            softwareLibraryService.setStackName(stackName);
-        }
         restTemplate.setInterceptors(getAddMagicAuthHeaders());
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         setupYarnPlatform();

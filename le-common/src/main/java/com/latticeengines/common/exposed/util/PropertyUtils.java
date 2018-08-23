@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -78,7 +79,11 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
     }
 
     public static String getProperty(String name) {
-        return propertiesMap.get(name);
+        if (MapUtils.isEmpty(propertiesMap)) {
+            return null;
+        } else {
+            return propertiesMap.get(name);
+        }
     }
 
 }

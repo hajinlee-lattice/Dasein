@@ -37,6 +37,9 @@ processErrors
 
 echo "" > /tmp/errors.txt
 
+hdfs dfs -mkdir /app
+hdfs dfs -rm -r -f /app/${LE_STACK}/$(leversion) || true
+
 for servicecmd in 'dataplatform|dpdplnobld' 'sqoop|sqdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&

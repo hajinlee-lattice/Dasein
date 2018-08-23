@@ -3,8 +3,6 @@ package com.latticeengines.workflowapi.yarn.runtime;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.latticeengines.domain.exposed.exception.ErrorDetails;
-import com.latticeengines.workflow.exposed.service.JobCacheService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -14,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -27,6 +26,7 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
+import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
@@ -77,11 +77,11 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         if (CollectionUtils.isEmpty(swpkgNames)) {
             log.info("Enriching application context with all sw packages available.");
             appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(),
-                    appContext, versionManager);
+                    appContext);
         } else {
             log.info("Enriching application context with sw package " + swpkgNames);
             appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(),
-                    swpkgNames, appContext, versionManager);
+                    swpkgNames, appContext);
         }
 
         WorkflowExecutionId workflowId;

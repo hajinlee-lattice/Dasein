@@ -7,8 +7,7 @@
 
     <bean id="versionManager"
         class="com.latticeengines.common.exposed.version.VersionManager">
-        <constructor-arg index="0"
-            value="${dataplatform.version:5.0.0-SNAPSHOT}" />
+        <constructor-arg index="0" value="5.0.0-SNAPSHOT" />
     </bean>
 
     <bean id="docVersionManager"

@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
@@ -113,14 +112,7 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                 String.format("/app/%s/%s/lib/*", versionManager.getCurrentVersionInStack(stackName), module), //
                 false));
         if (softwareLibraryService != null) {
-            softwareLibraryService.setStackName(stackName);
-            List<SoftwarePackage> packages;
-            if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
-                packages = softwareLibraryService.getLatestInstalledPackages(module);
-            } else {
-                packages = softwareLibraryService.getInstalledPackagesByVersion(module,
-                        versionManager.getCurrentVersion());
-            }
+            List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackages(module);
             List<SoftwarePackage> requiredPackages;
             if (CollectionUtils.isNotEmpty(swlibs)) {
                 log.info("Filter by dependencies of software library " + swlibs);

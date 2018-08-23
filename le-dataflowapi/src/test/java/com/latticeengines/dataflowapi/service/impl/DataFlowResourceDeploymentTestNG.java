@@ -55,7 +55,6 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiDeploymentTestN
         pkg.setModule("dataflowapi");
         pkg.setGroupId("com.latticeengines");
         pkg.setArtifactId("le-serviceflows-prospectdiscovery");
-        pkg.setVersion("2.0.12-SNAPSHOT");
         pkg.setInitializerClass("com.latticeengines.prospectdiscovery.Initializer");
         softwareLibraryService.installPackage(pkg, new File(jarFile));
 

@@ -12,9 +12,8 @@ public class SoftwarePackageUnitTestNG {
         pkg.setModule("dataflow");
         pkg.setGroupId("org.latticeengines");
         pkg.setArtifactId("le-serviceflows");
-        pkg.setVersion("1.0.0");
         
-        assertEquals(pkg.getHdfsPath(), "dataflow/org/latticeengines/le-serviceflows/1.0.0/le-serviceflows-1.0.0.jar");
+        assertEquals(pkg.getHdfsPath(), "dataflow/le-serviceflows.jar");
     }
 
     @Test(groups = "unit")
@@ -23,9 +22,8 @@ public class SoftwarePackageUnitTestNG {
         pkg.setModule("dataflow");
         pkg.setGroupId("org.latticeengines");
         pkg.setArtifactId("le-serviceflows");
-        pkg.setVersion("1.0.0");
         pkg.setClassifier("shaded");
         
-        assertEquals(pkg.getHdfsPath(), "dataflow/org/latticeengines/le-serviceflows/1.0.0/le-serviceflows-1.0.0-shaded.jar");
+        assertEquals(pkg.getHdfsPath(), "dataflow/le-serviceflows-shaded.jar");
     }
 }
