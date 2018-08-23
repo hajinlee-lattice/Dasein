@@ -1,12 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -16,16 +10,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.service.RuleBasedModelService;
-import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.util.RuleBasedModelDependencyUtil;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.util.RestrictionUtils;
 
 @Component("ruleBasedModelService")
 public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedModel> implements RuleBasedModelService {
@@ -37,10 +27,10 @@ public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedM
     private static final Logger log = LoggerFactory.getLogger(RuleBasedModelServiceImpl.class);
 
     @Inject
-    private RuleBasedModelEntityMgr ruleBasedModelEntityMgr;
+    private RuleBasedModelDependencyUtil ruleBasedModelDependencyUtil;
 
     @Inject
-    private SegmentService segmentService;
+    private RuleBasedModelEntityMgr ruleBasedModelEntityMgr;
 
     @Override
     public List<RuleBasedModel> getAllRatingModelsByRatingEngineId(String ratingEngineId) {
@@ -88,23 +78,6 @@ public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedM
 
     @Override
     public void findRatingModelAttributeLookups(RuleBasedModel ratingModel) {
-        Set<AttributeLookup> attributes = new HashSet<>();
-        if (ratingModel != null && ratingModel.getRatingRule() != null) {
-            TreeMap<String, Map<String, Restriction>> rulesMap = ratingModel.getRatingRule().getBucketToRuleMap();
-            Iterator<?> it = rulesMap.keySet().iterator();
-            while (it.hasNext()) {
-                Map<String, Restriction> rules = rulesMap.get(it.next());
-                for (Map.Entry<String, Restriction> entry : rules.entrySet()) {
-                    attributes.addAll(RestrictionUtils.getRestrictionDependingAttributes(entry.getValue()));
-                }
-            }
-        }
-        if (ratingModel != null) {
-            MetadataSegment segment = ruleBasedModelEntityMgr.inflateParentSegment(ratingModel);
-            if (segment != null) {
-                attributes.addAll(segmentService.findDependingAttributes(Collections.singletonList(segment)));
-            }
-        }
-        ratingModel.setRatingModelAttributes(attributes);
+        ruleBasedModelDependencyUtil.findRatingModelAttributeLookups(ratingModel);
     }
 }

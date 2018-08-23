@@ -22,6 +22,8 @@ import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.apps.cdl.util.RuleBasedModelDependencyUtil;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.graph.EdgeType;
@@ -49,6 +51,9 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
 
     @Inject
     private RatingAttributeNameParser ratingAttributeNameParser;
+
+    @Inject
+    private RuleBasedModelDependencyUtil ruleBasedModelDependencyUtil;
 
     @Override
     public BaseDao<RuleBasedModel> getDao() {
@@ -151,6 +156,7 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
         Set<Triple<String, String, String>> attrDepSet = new HashSet<Triple<String, String, String>>();
 
         if (ruleBasedModel != null) {
+            ruleBasedModelDependencyUtil.findRatingModelAttributeLookups(ruleBasedModel);
             Set<AttributeLookup> attributeLookups = ruleBasedModel.getRatingModelAttributes();
 
             if (CollectionUtils.isNotEmpty(attributeLookups)) {
@@ -165,6 +171,12 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
                             }
                         });
             }
+        }
+        if (CollectionUtils.isNotEmpty(attrDepSet)) {
+            log.info(String.format("Extracted dependencies from rule based model %s, rating engine %s: %s",
+                    ruleBasedModel.getId(),
+                    ruleBasedModel.getRatingEngine() == null ? null : ruleBasedModel.getRatingEngine().getId(),
+                    JsonUtils.serialize(attrDepSet)));
         }
         return attrDepSet;
     }

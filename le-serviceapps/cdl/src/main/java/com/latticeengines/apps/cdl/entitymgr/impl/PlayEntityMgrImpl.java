@@ -8,7 +8,10 @@ import java.util.Set;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +22,7 @@ import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayRepository;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.graph.EdgeType;
@@ -32,6 +36,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @Component("playEntityMgr")
 public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayRepository, Play, Long> //
         implements PlayEntityMgr, GraphVisitable {
+
+    private static final Logger log = LoggerFactory.getLogger(PlayEntityMgrImpl.class);
 
     @Inject
     private PlayDao playDao;
@@ -181,6 +187,10 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
                     VertexType.RATING_ENGINE, EdgeType.DEPENDS_ON));
             attrDepSet.add(ParsedDependencies.tuple(BusinessEntity.Rating + "." + ratingId, //
                     VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
+        }
+        if (CollectionUtils.isNotEmpty(attrDepSet)) {
+            log.info(String.format("Extracted dependencies from play %s: %s", play.getName(),
+                    JsonUtils.serialize(attrDepSet)));
         }
         return attrDepSet;
     }

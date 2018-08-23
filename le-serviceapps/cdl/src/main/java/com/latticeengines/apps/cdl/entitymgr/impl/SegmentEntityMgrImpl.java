@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -24,6 +25,7 @@ import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -203,6 +205,10 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
                                     pair.getLeft(), EdgeType.DEPENDS_ON));
                 }
             }
+        }
+        if (CollectionUtils.isNotEmpty(attrDepSet)) {
+            log.info(String.format("Extracted dependencies from segment %s: %s", segment.getName(),
+                    JsonUtils.serialize(attrDepSet)));
         }
         return attrDepSet;
     }

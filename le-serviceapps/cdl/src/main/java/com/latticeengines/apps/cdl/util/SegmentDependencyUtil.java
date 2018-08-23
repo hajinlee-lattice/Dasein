@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.util;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -57,5 +59,21 @@ public class SegmentDependencyUtil {
         }
 
         return restrictionSet;
+    }
+
+    @NoCustomerSpace
+    public List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments) {
+        Set<AttributeLookup> dependingAttributes = new HashSet<>();
+        if (metadataSegments != null) {
+            for (MetadataSegment metadataSegment : metadataSegments) {
+                findSegmentDependingAttributes(metadataSegment);
+                Set<AttributeLookup> attributeLookups = metadataSegment.getSegmentAttributes();
+                if (attributeLookups != null) {
+                    dependingAttributes.addAll(metadataSegment.getSegmentAttributes());
+                }
+            }
+        }
+
+        return new ArrayList<>(dependingAttributes);
     }
 }

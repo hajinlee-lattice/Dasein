@@ -590,6 +590,10 @@ public class RatingEngineEntityMgrImpl //
             attrDepSet.add(ParsedDependencies.tuple(targetSegmentName, //
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TARGET));
         }
+        if (CollectionUtils.isNotEmpty(attrDepSet)) {
+            log.info(String.format("Extracted dependencies from rating engine %s: %s", ratingEngine.getId(),
+                    JsonUtils.serialize(attrDepSet)));
+        }
         return attrDepSet;
     }
 

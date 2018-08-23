@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
@@ -59,11 +60,15 @@ public class GraphVisitorImpl implements GraphVisitor {
     @Inject
     private CDLDependenciesToGraphAction cdlGraphAction;
 
+    @Inject
+    private VisitorBook visitorBook;
+
     @Override
     public void populateTenantGraph(Tenant tenant) throws Exception {
         Tenant originalTenant = MultiTenantContext.getTenant();
         Long bootstrapId = System.currentTimeMillis();
         try {
+            visitorBook.initVisitorBook();
             log.info(String.format("[%d] Dependency graph bootstrap for tenant '%s' - started", bootstrapId,
                     tenant.getId()));
             MultiTenantContext.setTenant(tenant);
@@ -85,6 +90,7 @@ public class GraphVisitorImpl implements GraphVisitor {
                     tenant.getId()), th);
             throw th;
         } finally {
+            visitorBook.cleanupVisitorBook();
             bootstrapContext.cleanupThreadLocalVertexExistenceSet();
             MultiTenantContext.setTenant(originalTenant);
         }
@@ -93,36 +99,72 @@ public class GraphVisitorImpl implements GraphVisitor {
     @Override
     public void visit(Play entity, //
             ParsedDependencies parsedDependencies) throws Exception {
-        createPrereqVertices(parsedDependencies);
-        cdlGraphAction.createPlayVertex(entity);
+        ImmutablePair<String, String> visitorEntry = new ImmutablePair<>(entity.getName(), VertexType.PLAY);
+        if (!visitorBook.hasVisitEntry(visitorEntry)) {
+            if (entity != null && entity.getDeleted()) {
+                throw new RuntimeException(String.format(
+                        "Cannot add PLAY %s to the graph as it is already deleted. "
+                                + "System is already in inconsistent state. "
+                                + "Please delete corresponding object before contibuing with bootstrap service.",
+                        entity.getName()));
+
+            }
+            createPrereqVertices(parsedDependencies);
+            cdlGraphAction.createPlayVertex(entity);
+            visitorBook.addVisitEntry(visitorEntry);
+        }
     }
 
     @Override
     public void visit(RatingEngine entity, //
             ParsedDependencies parsedDependencies) throws Exception {
-        createPrereqVertices(parsedDependencies);
-        cdlGraphAction.createRatingEngineVertex(entity);
+        ImmutablePair<String, String> visitorEntry = new ImmutablePair<>(entity.getId(), VertexType.RATING_ENGINE);
+        if (!visitorBook.hasVisitEntry(visitorEntry)) {
+            if (entity != null && entity.getDeleted()) {
+                throw new RuntimeException(String.format(
+                        "Cannot add rating engine %s to the graph as it is already deleted. "
+                                + "System is already in inconsistent state. "
+                                + "Please delete corresponding object before contibuing with bootstrap service.",
+                        entity.getId()));
+
+            }
+            createPrereqVertices(parsedDependencies);
+            cdlGraphAction.createRatingEngineVertex(entity);
+            visitorBook.addVisitEntry(visitorEntry);
+        }
     }
 
     @Override
     public void visit(AIModel entity, //
             ParsedDependencies parsedDependencies) throws Exception {
-        createPrereqVertices(parsedDependencies);
-        cdlGraphAction.createEdgesForAIModel(entity, entity.getRatingEngine().getId());
+        ImmutablePair<String, String> visitorEntry = new ImmutablePair<>(entity.getId(), "AIModel");
+        if (!visitorBook.hasVisitEntry(visitorEntry)) {
+            createPrereqVertices(parsedDependencies);
+            cdlGraphAction.createEdgesForAIModel(entity, entity.getRatingEngine().getId());
+            visitorBook.addVisitEntry(visitorEntry);
+        }
     }
 
     @Override
     public void visit(RuleBasedModel entity, //
             ParsedDependencies parsedDependencies) throws Exception {
-        createPrereqVertices(parsedDependencies);
-        cdlGraphAction.createEdgesForRuleBasedModel(entity, entity.getRatingEngine().getId());
+        ImmutablePair<String, String> visitorEntry = new ImmutablePair<>(entity.getId(), "RuleBasedModel");
+        if (!visitorBook.hasVisitEntry(visitorEntry)) {
+            createPrereqVertices(parsedDependencies);
+            cdlGraphAction.createEdgesForRuleBasedModel(entity, entity.getRatingEngine().getId());
+            visitorBook.addVisitEntry(visitorEntry);
+        }
     }
 
     @Override
     public void visit(MetadataSegment entity, //
             ParsedDependencies parsedDependencies) throws Exception {
-        createPrereqVertices(parsedDependencies);
-        cdlGraphAction.createSegmentVertex(entity);
+        ImmutablePair<String, String> visitorEntry = new ImmutablePair<>(entity.getName(), VertexType.SEGMENT);
+        if (!visitorBook.hasVisitEntry(visitorEntry)) {
+            createPrereqVertices(parsedDependencies);
+            cdlGraphAction.createSegmentVertex(entity);
+            visitorBook.addVisitEntry(visitorEntry);
+        }
     }
 
     private void createTenantVertex() throws Exception {
@@ -156,6 +198,7 @@ public class GraphVisitorImpl implements GraphVisitor {
                     .forEach(re -> {
                         try {
                             entityMgr.accept(this, re);
+                            handleRatingModels(re.getId());
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -202,6 +245,7 @@ public class GraphVisitorImpl implements GraphVisitor {
             break;
         case VertexType.RATING_ENGINE:
             ratingEngineEntityMgr.accept(this, ratingEngineEntityMgr.findById(objectId));
+            handleRatingModels(objectId);
             break;
         case VertexType.TENANT:
             createTenantVertex();
@@ -217,39 +261,43 @@ public class GraphVisitorImpl implements GraphVisitor {
             if (ratingEngine == null) {
                 throw new RuntimeException(String.format(
                         "Invalid ratingEngineId %s attribute %s has been used in segment or rule based rating engine, "
-                        + "system is already in inconsistent state. Please delete corresponding object before contibuing with bootstrap service.",
+                                + "system is already in inconsistent state. Please delete corresponding object before contibuing with bootstrap service.",
                         ratingEngineId, objectId));
             }
             ratingEngineEntityMgr.accept(this, ratingEngine);
-            RatingEngine re = ratingEngineEntityMgr.findById(ratingEngineId);
-            if (re.getType() == RatingEngineType.RULE_BASED) {
-                List<RuleBasedModel> ruleModels = ruleBasedModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
-                if (CollectionUtils.isNotEmpty(ruleModels)) {
-                    ruleModels.stream().forEach(rm -> {
-                        try {
-                            rm = ruleBasedModelEntityMgrImpl.findById(rm.getId());
-                            ruleBasedModelEntityMgrImpl.accept(this, rm);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                }
-            } else {
-                List<AIModel> aiModels = aiModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
-                if (CollectionUtils.isNotEmpty(aiModels)) {
-                    aiModels.stream().forEach(am -> {
-                        try {
-                            am = aiModelEntityMgrImpl.findById(am.getId());
-                            aiModelEntityMgrImpl.accept(this, am);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                }
-            }
+            handleRatingModels(ratingEngineId);
             break;
         default:
             log.error(String.format("Not yet implemented: %s", objectType));
+        }
+    }
+
+    private void handleRatingModels(String ratingEngineId) {
+        RatingEngine re = ratingEngineEntityMgr.findById(ratingEngineId);
+        if (re.getType() == RatingEngineType.RULE_BASED) {
+            List<RuleBasedModel> ruleModels = ruleBasedModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
+            if (CollectionUtils.isNotEmpty(ruleModels)) {
+                ruleModels.stream().forEach(rm -> {
+                    try {
+                        rm = ruleBasedModelEntityMgrImpl.findById(rm.getId());
+                        ruleBasedModelEntityMgrImpl.accept(this, rm);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        } else {
+            List<AIModel> aiModels = aiModelEntityMgrImpl.findAllByRatingEngineId(ratingEngineId);
+            if (CollectionUtils.isNotEmpty(aiModels)) {
+                aiModels.stream().forEach(am -> {
+                    try {
+                        am = aiModelEntityMgrImpl.findById(am.getId());
+                        aiModelEntityMgrImpl.accept(this, am);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
         }
     }
 }

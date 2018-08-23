@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.repository.writer.AIModelRepository;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -121,6 +123,11 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
             attrDepSet = new HashSet<Triple<String, String, String>>();
             attrDepSet.add(ParsedDependencies.tuple(aiModel.getTrainingSegment().getName(), //
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON_FOR_TRAINING));
+        }
+        if (CollectionUtils.isNotEmpty(attrDepSet)) {
+            log.info(String.format("Extracted dependencies from ai based model %s, rating engine %s: %s",
+                    aiModel.getId(), aiModel.getRatingEngine() == null ? null : aiModel.getRatingEngine().getId(),
+                    JsonUtils.serialize(attrDepSet)));
         }
         return attrDepSet;
     }

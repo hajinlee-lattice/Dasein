@@ -10,7 +10,9 @@ import static j2html.TagCreator.ul;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -31,10 +33,14 @@ public class GraphDependencyToUIActionUtil {
     public UIAction processUpdateSegmentResponse(Map<String, List<String>> dependencies) {
         UIAction uiAction;
         if (MapUtils.isNotEmpty(dependencies)) {
+            AtomicInteger count = new AtomicInteger(0);
+            dependencies.keySet().stream() //
+                    .filter(k -> CollectionUtils.isNotEmpty(dependencies.get(k))) //
+                    .forEach(k -> count.set(count.get() + dependencies.get(k).size()));
             uiAction = generateUIAction("Segment In Use", View.Banner, Status.Warning,
                     generateHtmlMsg(dependencies,
                             "Changing a segment that is in use may affect the scoring and rating configuration.",
-                            String.format("This segment has %d dependencies", dependencies.size())));
+                            String.format("This segment has %d dependencies", count.get())));
         } else {
             uiAction = generateUIAction("Segment is safe to edit", View.Notice, Status.Success, null);
         }
