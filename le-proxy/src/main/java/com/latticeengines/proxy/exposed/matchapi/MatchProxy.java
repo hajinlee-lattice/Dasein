@@ -1,7 +1,10 @@
 package com.latticeengines.proxy.exposed.matchapi;
 
+import java.util.Set;
+
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -15,8 +18,11 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 @Component("matchProxy")
 public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
 
+    private static final Set<String> MATCHAPI_RETRY_MESSAGES = ImmutableSet.of("Connection reset", "502 Bad Gateway");
+
     public MatchProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/matches");
+        this.setRetryMessages(MATCHAPI_RETRY_MESSAGES);
     }
 
     public MatchOutput matchRealTime(MatchInput input) {

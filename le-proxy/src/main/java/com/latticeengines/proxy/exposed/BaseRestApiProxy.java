@@ -186,6 +186,10 @@ public abstract class BaseRestApiProxy {
         log.info("set " + getClass().getSimpleName() + " maxattemps to " + this.maxAttempts);
     }
 
+    protected void setRetryMessages(final Set<String> retryMessages) {
+        this.retryMessages = retryMessages;
+    }
+
     void enforceSSLNameVerification() {
         restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
         restTemplate.setErrorHandler(new GetResponseErrorHandler());
