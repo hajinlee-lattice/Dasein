@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -64,7 +66,11 @@ public abstract class DataFeedMetadataService {
         return true;
     }
 
-    public void applyAttributePrefix(Table importTable, Table templateTable) {
+    public void applyAttributePrefix(CDLExternalSystemService cdlExternalSystemService, String customerSpace,
+                                     Table importTable, Table templateTable) {
+        if (cdlExternalSystemService == null) {
+            throw new IllegalArgumentException("ExternalSystemService cannot be null when set custom prefix!");
+        }
         if (importTable == null || CollectionUtils.isEmpty(importTable.getAttributes())) {
             throw new IllegalArgumentException("Import table cannot be null or empty!");
         }
@@ -72,13 +78,74 @@ public abstract class DataFeedMetadataService {
             throw new IllegalArgumentException("Template table cannot be null or empty!");
         }
         Set<String> templateAttrs = templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
+        Map<String, String> nameMap = new HashMap<>();
         importTable.getAttributes().forEach(attribute -> {
             if (!templateAttrs.contains(attribute.getName())) {
-                log.info(String.format("Reset attribute name %s -> %s", attribute.getName(),
-                        USER_PREFIX + attribute.getName()));
-                attribute.setName(USER_PREFIX + attribute.getName());
+                String originalName = attribute.getName();
+                String userAttrName = USER_PREFIX + attribute.getName();
+                log.info(String.format("Reset attribute name %s -> %s", attribute.getName(), userAttrName));
+                attribute.setName(userAttrName);
+                nameMap.put(originalName, userAttrName);
             }
         });
+        CDLExternalSystem cdlExternalSystem = cdlExternalSystemService.getExternalSystem(customerSpace);
+        if (cdlExternalSystem != null) {
+            if (CollectionUtils.isNotEmpty(cdlExternalSystem.getCRMIdList())) {
+                List<String> newCRMIdList = new ArrayList<>();
+                cdlExternalSystem.getCRMIdList().forEach(id -> {
+                    if (nameMap.containsKey(id)) {
+                        newCRMIdList.add(nameMap.get(id));
+                    } else {
+                        newCRMIdList.add(id);
+                    }
+                });
+                cdlExternalSystem.setCRMIdList(newCRMIdList);
+            }
+            if (CollectionUtils.isNotEmpty(cdlExternalSystem.getERPIdList())) {
+                List<String> newERPIdList = new ArrayList<>();
+                cdlExternalSystem.getERPIdList().forEach(id -> {
+                    if (nameMap.containsKey(id)) {
+                        newERPIdList.add(nameMap.get(id));
+                    } else {
+                        newERPIdList.add(id);
+                    }
+                });
+                cdlExternalSystem.setERPIdList(newERPIdList);
+            }
+            if (CollectionUtils.isNotEmpty(cdlExternalSystem.getMAPIdList())) {
+                List<String> newMAPIdList = new ArrayList<>();
+                cdlExternalSystem.getMAPIdList().forEach(id -> {
+                    if (nameMap.containsKey(id)) {
+                        newMAPIdList.add(nameMap.get(id));
+                    } else {
+                        newMAPIdList.add(id);
+                    }
+                });
+                cdlExternalSystem.setMAPIdList(newMAPIdList);
+            }
+            if (CollectionUtils.isNotEmpty(cdlExternalSystem.getOtherIdList())) {
+                List<String> newOtherIdList = new ArrayList<>();
+                cdlExternalSystem.getOtherIdList().forEach(id -> {
+                    if (nameMap.containsKey(id)) {
+                        newOtherIdList.add(nameMap.get(id));
+                    } else {
+                        newOtherIdList.add(id);
+                    }
+                });
+                cdlExternalSystem.setOtherIdList(newOtherIdList);
+            }
+            List<Pair<String, String>> idMappings = cdlExternalSystem.getIdMappingList();
+            List<Pair<String, String>> userIdMapping = new ArrayList<>();
+            for (Pair<String, String> idMapping : idMappings) {
+                if (nameMap.containsKey(idMapping.getLeft())) {
+                    userIdMapping.add(Pair.of(nameMap.get(idMapping.getLeft()), idMapping.getRight()));
+                } else {
+                    userIdMapping.add(idMapping);
+                }
+            }
+            cdlExternalSystem.setIdMapping(userIdMapping);
+            cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
+        }
     }
 
 }

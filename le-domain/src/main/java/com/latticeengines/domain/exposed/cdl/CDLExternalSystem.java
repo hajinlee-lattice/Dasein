@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.cdl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -266,4 +267,22 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
             return node.get(id) == null ? StringUtils.EMPTY : node.get(id).asText();
         }
     }
+    @JsonIgnore
+    @Transient
+    public List<Pair<String, String>> getIdMappingList() {
+        if (StringUtils.isEmpty(idMapping)) {
+            return null;
+        } else {
+            List<Pair<String, String>> result = new ArrayList<>();
+            ObjectNode node = JsonUtils.deserialize(idMapping, ObjectNode.class);
+            Iterator<String> itLeft = node.fieldNames();
+            while (itLeft.hasNext()) {
+                String left = itLeft.next();
+                Pair<String, String> pair = Pair.of(left, node.get(left).asText());
+                result.add(pair);
+            }
+            return result;
+        }
+    }
+
 }

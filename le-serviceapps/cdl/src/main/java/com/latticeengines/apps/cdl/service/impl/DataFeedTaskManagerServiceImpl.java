@@ -134,7 +134,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta, customerSpace.toString());
             return dataFeedTask.getUniqueId();
         } else {
-            dataFeedMetadataService.applyAttributePrefix(newMeta, schemaTable);
+            dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(),
+                    newMeta, schemaTable);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
             if (!finalSchemaCheck(newMeta, entity)) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");

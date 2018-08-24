@@ -133,7 +133,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testExternalSystem() {
         SourceFile accountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
@@ -171,11 +171,11 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         validateJobsPage();
 
         DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_ACCOUNT);
-        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("SFDC_ID"));
+        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_SFDC_ID"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("SFDC_ID"));
-        Assert.assertEquals(system.getDisplayNameById("SFDC_ID"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains("user_SFDC_ID"));
+        Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
     }
 
     private void validateImportAction(List<Action> actions) {
