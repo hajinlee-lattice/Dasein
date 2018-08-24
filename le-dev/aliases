@@ -1,37 +1,37 @@
 alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -DskipTests clean install'
 alias leversion='cat $WSHOME/le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
 
-alias hdp-start='$WSHOME/le-dev/scripts/start-cluster.sh'
-alias hdp-stop='$WSHOME/le-dev/scripts/stop-cluster.sh'
+alias hdp-start='bash $WSHOME/le-dev/scripts/start-cluster.sh'
+alias hdp-stop='bash $WSHOME/le-dev/scripts/stop-cluster.sh'
 
 alias createpod='cd $WSHOME/le-baton && mvn -f pom-batontool.xml -DskipTests clean install && java -jar target/le-baton-tool-*-shaded.jar --podId Default --connectionString localhost:2181 createPod'
 
-alias dfdplnobld='$WSHOME/le-dev/scripts/libdpl.sh dataflow'
+alias dfdplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh dataflow'
 alias dfdpl='dirs -c && pushd $WSHOME/le-dataflow && mvn -Pshaded-yarn -DskipTests clean install && dfdplnobld && popd'
 
-alias dfapidplnobld='$WSHOME/le-dev/scripts/libdpl.sh dataflowapi'
+alias dfapidplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh dataflowapi'
 alias dfapidpl='mvn -Pshaded-yarn -DskipTests clean install && dfapidplnobld'
 
-alias wfapidplnobld='$WSHOME/le-dev/scripts/libdpl.sh workflowapi'
+alias wfapidplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh workflowapi'
 alias wfapidpl='dirs -c && pushd $WSHOME/le-workflowapi && mvn -Pshaded-yarn -DskipTests clean install && wfapidplnobld && popd'
 
-alias scoringdplnobld='$WSHOME/le-dev/scripts/libdpl.sh scoring && hdfs dfs -mkdir -p /app/${LE_STACK}/$(leversion)/scoring/scripts && hdfs dfs -copyFromLocal $WSHOME/le-scoring/src/main/python/scoring.py /app/${LE_STACK}/$(leversion)/scoring/scripts'
+alias scoringdplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh scoring && hdfs dfs -mkdir -p /app/${LE_STACK}/$(leversion)/scoring/scripts && hdfs dfs -copyFromLocal $WSHOME/le-scoring/src/main/python/scoring.py /app/${LE_STACK}/$(leversion)/scoring/scripts'
 alias scoringdpl='mvn -Pshaded-yarn -DskipTests clean install && scoringdplnobld'
 
 alias dcbld='dirs -c && pushd $WSHOME/le-datacloud && mvn -T4 -DskipTests clean install && popd'
 alias dcdplnobld='hdfs dfs -mkdir -p /app/${LE_STACK}/$(leversion)/datacloud/lib && hdfs dfs -put -f $WSHOME/le-datacloud/yarn/target/le-datacloud*shaded.jar /app/${LE_STACK}/$(leversion)/datacloud/lib && hdfs dfs -rm -r -f /app/${LE_STACK}/$(leversion)/datacloud/templates && hdfs dfs -copyFromLocal $WSHOME/le-datacloud/etl/templates /app/${LE_STACK}/$(leversion)/datacloud'
 alias dcdpl='dcbld && dirs -c && pushd $WSHOME/le-datacloud/yarn && mvn -Pshaded-yarn -DskipTests clean install && popd && dcdplnobld'
 
-alias dpdplnobld='$WSHOME/le-dev/scripts/libdpl.sh dataplatform && pushd $WSHOME/le-dataplatform && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh && popd'
+alias dpdplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh dataplatform && pushd $WSHOME/le-dataplatform && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh && popd'
 alias dpdpl='mvn -Pshaded-yarn -DskipTests clean install && dpdplnobld'
 
-alias dedplnobld='$WSHOME/le-dev/scripts/libdpl.sh dellebi'
+alias dedplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh dellebi'
 alias dedpl='mvn -Pshaded-yarn -DskipTests clean install && dedplnobld'
 
-alias sqdplnobld='$WSHOME/le-dev/scripts/libdpl.sh sqoop'
+alias sqdplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh sqoop'
 alias sqdpl='mvn -Pshaded-yarn -DskipTests clean install && sqdplnobld'
 
-alias eaidplnobld='$WSHOME/le-dev/scripts/libdpl.sh eai'
+alias eaidplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh eai'
 alias eaidpl='mvn -Pshaded-yarn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -DskipTests clean install && eaidplnobld'
 
 alias msbld='dirs -c && pushd $WSHOME/le-microservice && mvn -T8 -DskipTests clean package && popd'
