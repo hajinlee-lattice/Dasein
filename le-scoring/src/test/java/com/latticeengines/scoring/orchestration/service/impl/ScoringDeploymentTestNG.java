@@ -8,9 +8,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -78,7 +78,7 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
     public ScoringDeploymentTestNG() {
     }
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         customer = getClass().getSimpleName().toString();
         tenant = CustomerSpace.parse(customer).toString();
@@ -94,13 +94,14 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         }
 
         if (CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME))) {
-            throw new Exception("Could not find the lead input base table for scoringDeploymentTest: " + LEAD_INPUT_TABLE_NAME);
+            throw new Exception(
+                    "Could not find the lead input base table for scoringDeploymentTest: " + LEAD_INPUT_TABLE_NAME);
         }
 
         path = customerBaseDir + "/" + tenant + "/scoring";
         HdfsUtils.mkdir(yarnConfiguration, path);
-        URL modelSummaryUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
+        URL modelSummaryUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/scoring/models/2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json");
         modelDirectory = customerBaseDir + "/" + tenant + "/models/" + LEAD_INPUT_TABLE_NAME
                 + "/1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3/1425511391553_3007";
         String modelPath = modelDirectory + "/" + "1_model.json";
@@ -108,7 +109,7 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), modelPath);
     }
 
-    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    @AfterMethod(enabled = false, lastTimeOnly = true, alwaysRun = true)
     public void cleanup() throws Exception {
         if (outputTable != null) {
             dbMetadataService.dropTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME);
@@ -123,7 +124,7 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         HdfsUtils.rmdir(yarnConfiguration, modelDirectory);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         // insert one row into the leadInputQueue
         scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, LEAD_INPUT_TABLE_NAME, 0, 3891,
@@ -140,11 +141,10 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         }
 
         // get the information from scoring result table
-        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr.findByScoringCommandAndStep(
-                scoringCommand, ScoringCommandStep.EXPORT_DATA);
-        Assert.assertNotNull(scoringCommandState,
-                "Could not find a command state at step " + ScoringCommandStep.EXPORT_DATA
-                        + " for scoring command id=" + scoringCommand.getId());
+        ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
+                .findByScoringCommandAndStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        Assert.assertNotNull(scoringCommandState, "Could not find a command state at step "
+                + ScoringCommandStep.EXPORT_DATA + " for scoring command id=" + scoringCommand.getId());
         scoringCommandResult = scoringCommandResultEntityMgr.findByKey(scoringCommandState.getLeadOutputQueuePid());
         if (scoringCommandResult == null || scoringCommandResult.getStatus() == ScoringCommandStatus.NEW) {
             List<ScoringCommandLog> scoringCommandLogs = scoringCommandLogEntityMgr.findAll();
