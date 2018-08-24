@@ -78,6 +78,7 @@ angular.module('lp.ratingsengine.remodel')
             iteration.AI.advancedModelingConfig.cross_sell.filters = store.configFilters;// RatingsEngineStore.getConfigFilters();
         } else {
             iteration.AI.advancedModelingConfig.custom_event = store.configFilters;//RatingsEngineStore.getConfigFilters();
+            iteration.AI.advancedModelingConfig.custom_event.customEventModelingType = "CDL";
         }
 
         // Sanitize iteration to remove data
