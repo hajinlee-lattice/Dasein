@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -40,6 +39,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -123,8 +123,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             String errorMessage;
             if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
                 errorMessage = String.format(
-                        "We can't start processAnalyze workflow for %s, need to import data first.",
-                        customerSpace);
+                        "We can't start processAnalyze workflow for %s, need to import data first.", customerSpace);
             } else {
                 errorMessage = String.format("We can't start processAnalyze workflow for %s by dataFeedStatus %s",
                         customerSpace, datafeedStatus.getName());
@@ -143,7 +142,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         try {
             Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
             if (CollectionUtils.isNotEmpty(lastFailedActions)) {
-                List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid).collect(Collectors.toList());
+                List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid)
+                        .collect(Collectors.toList());
                 log.info("Inherit actions from last failed processAnalyze workflow, actionIds={}", lastFailedActionIds);
                 // create copies of last failed actions
                 lastFailedActions.forEach(action -> {
@@ -151,7 +151,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                     action.setOwnerId(pidWrapper.getPid());
                 });
                 lastFailedActions = actionService.copy(lastFailedActions);
-                List<Long> copiedActionIds = lastFailedActions.stream().map(Action::getPid).collect(Collectors.toList());
+                List<Long> copiedActionIds = lastFailedActions.stream().map(Action::getPid)
+                        .collect(Collectors.toList());
                 // add to front
                 actionAndJobIds.getLeft().addAll(0, copiedActionIds);
             }
@@ -206,28 +207,25 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         List<Long> completedActionIds = actions.stream()
                 .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobIds))
-                .map(Action::getPid)
-                .collect(Collectors.toList());
+                .map(Action::getPid).collect(Collectors.toList());
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
 
         List<Long> attrManagementActionIds = actions.stream()
-                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
-                .map(Action::getPid)
+                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType())).map(Action::getPid)
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(attrManagementActionIds)) {
-            log.info(String.format("Actions that associated with the Attr management are: %s", attrManagementActionIds));
+            log.info(
+                    String.format("Actions that associated with the Attr management are: %s", attrManagementActionIds));
             completedActionIds.addAll(attrManagementActionIds);
         }
 
         List<Long> ratingEngineActionIds = actions.stream()
-                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE)
-                .map(Action::getPid)
+                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(Action::getPid)
                 .collect(Collectors.toList());
         log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
 
         List<Long> datacloudActionIds = actions.stream()
-                .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
-                .map(Action::getPid)
+                .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType())).map(Action::getPid)
                 .collect(Collectors.toList());
         log.info(String.format("Data cloud related Actions are: %s", datacloudActionIds));
 
@@ -235,18 +233,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     /*
-     * Retrieve all the inheritable action IDs if the last PA failed.
-     * Return an empty list otherwise.
+     * Retrieve all the inheritable action IDs if the last PA failed. Return an
+     * empty list otherwise.
      */
     @VisibleForTesting
     List<Action> getActionsFromLastFailedPA(String customerSpace) {
-        DataFeedExecution lastDataFeedExecution = dataFeedProxy.getLatestExecution(
-                customerSpace, DataFeedExecutionJobType.PA);
+        DataFeedExecution lastDataFeedExecution = dataFeedProxy.getLatestExecution(customerSpace,
+                DataFeedExecutionJobType.PA);
         if (lastDataFeedExecution == null || lastDataFeedExecution.getWorkflowId() == null) {
             return Collections.emptyList();
         }
 
-        // data feed execution does not always have workflowPid, need the workflow execution
+        // data feed execution does not always have workflowPid, need the
+        // workflow execution
         Long workflowId = lastDataFeedExecution.getWorkflowId();
         Job job = workflowProxy.getWorkflowExecution(String.valueOf(workflowId), true);
         if (job == null || job.getPid() == null || job.getJobStatus() != JobStatus.FAILED) {
@@ -254,19 +253,15 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
         Long workflowPid = job.getPid();
 
-        return actionService
-                .findByOwnerId(workflowPid)
-                .stream()
-                .filter(action -> {
-                    if (action == null || action.getPid() == null || action.getType() == null) {
-                        return false;
-                    }
+        return actionService.findByOwnerId(workflowPid).stream().filter(action -> {
+            if (action == null || action.getPid() == null || action.getType() == null) {
+                return false;
+            }
 
-                    // not inherit import and system actions
-                    return !ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()) &&
-                            !ActionType.getDataCloudRelatedTypes().contains(action.getType());
-                })
-                .collect(Collectors.toList());
+            // not inherit import and system actions
+            return !ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
+                    && !ActionType.getDataCloudRelatedTypes().contains(action.getType());
+        }).collect(Collectors.toList());
     }
 
     private void updateActions(List<Long> actionIds, Long workflowPid) {
@@ -286,7 +281,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             if (completedImportAndDeleteJobIds.contains(action.getTrackingId())) {
                 isComplete = true;
             } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
-                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
+                        .getActionConfiguration();
                 if (importActionConfiguration == null) {
                     log.error("Import action configuration is null!");
                     return false;
@@ -310,7 +306,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
-        int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations() : defaultMaxIteration;
+        int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations()
+                : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService.getRollingPeriod(CustomerSpace.parse(customerSpace)).getPeriodName();
 
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
@@ -345,6 +342,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     public ApplicationId retryLatestFailed(String customerSpace, Integer memory) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
+        checkWorkflowId(customerSpace, datafeed, workflowId);
         try {
             log.info(String.format("restarted execution with pid: %s", workflowId));
             return workflowJobService.restart(workflowId, customerSpace, memory);
@@ -352,6 +350,17 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.error(ExceptionUtils.getStackTrace(e));
             dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());
             throw new RuntimeException(String.format("Failed to retry %s's P&A workflow", customerSpace));
+        }
+    }
+
+    private void checkWorkflowId(String customerSpace, DataFeed datafeed, Long workflowId) {
+        if (workflowId == null) {
+            dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());
+            String msg = String.format(
+                    "Failed to retry %s's P&A workflow because there's no workflow Id, run the new P&A workflow instead.",
+                    customerSpace);
+            log.warn(msg);
+            throw new RuntimeException(msg);
         }
     }
 
