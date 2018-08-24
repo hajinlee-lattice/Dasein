@@ -186,6 +186,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         grapherContext.setHasContactAttrLifeCycleChange(CollectionUtils.isNotEmpty(contactAttrActions));
         List<Action> purchaseMetricsActions = getPurchaseMetricsActions(actions);
         grapherContext.setPurchaseMetricsChanged(CollectionUtils.isNotEmpty(purchaseMetricsActions));
+        List<Action> businessCalenderChangedActions = getBusinessCalendarChangedActions(actions);
+        grapherContext.setRebuildPeriodTrxOnly(CollectionUtils.isNotEmpty(businessCalenderChangedActions));
 
         List<Action> ratingActions = getRatingRelatedActions(actions);
         List<String> segments = getActionImpactedSegmentNames(ratingActions);
@@ -307,6 +309,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private List<Action> getPurchaseMetricsActions(List<Action> actions) {
         return actions.stream().filter(action -> action.getType() == ActionType.ACTIVITY_METRICS_CHANGE)
+                .collect(Collectors.toList());
+    }
+
+    private List<Action> getBusinessCalendarChangedActions(List<Action> actions) {
+        return actions.stream().filter(action -> action.getType() == ActionType.BUSINESS_CALENDAR_CHANGE)
                 .collect(Collectors.toList());
     }
 

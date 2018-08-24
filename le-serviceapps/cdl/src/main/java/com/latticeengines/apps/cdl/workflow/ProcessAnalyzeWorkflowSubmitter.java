@@ -219,6 +219,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             completedActionIds.addAll(attrManagementActionIds);
         }
 
+        List<Long> businessCalendarChangeActionIds = actions.stream()
+                .filter(action -> action.getType().equals(ActionType.BUSINESS_CALENDAR_CHANGE))
+                .map(Action::getPid)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(businessCalendarChangeActionIds)) {
+            log.info(String.format("Actions that associated with business calendar change are: %s",
+                    businessCalendarChangeActionIds));
+            completedActionIds.addAll(businessCalendarChangeActionIds);
+        }
+
         List<Long> ratingEngineActionIds = actions.stream()
                 .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(Action::getPid)
                 .collect(Collectors.toList());

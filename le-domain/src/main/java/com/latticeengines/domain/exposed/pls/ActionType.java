@@ -14,6 +14,7 @@ public enum ActionType {
     METADATA_SEGMENT_CHANGE("segmentChange", "Segment Edited"), //
     METADATA_CHANGE("metadataChange", "Metadata Change"), //
     ACTIVITY_METRICS_CHANGE("purchaseMetricsChange", "Curated Attributes Activated"), //
+    BUSINESS_CALENDAR_CHANGE("businessCalendarChange", "Business Calendar Changed"), //
     // Attribute Management related types
     ATTRIBUTE_MANAGEMENT_ACTIVATION("attributeManagementActivation", "Attributes Activated"), //
     ATTRIBUTE_MANAGEMENT_DEACTIVATION("attributeManagementDeactivation", "Attributes Deactivated"),

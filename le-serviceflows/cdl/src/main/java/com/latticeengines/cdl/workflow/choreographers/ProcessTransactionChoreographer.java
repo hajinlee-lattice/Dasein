@@ -22,6 +22,7 @@ import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistory;
+import com.latticeengines.cdl.workflow.steps.rebuild.ProfileTransaction;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -166,6 +167,10 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             skip = isCommonSkip(step, seq);
         }
 
+        if (isProfileTransaction(step)) {
+            skip = !shouldProfileTransaction(step, skip);
+        }
+
         return skip;
     }
 
@@ -247,8 +252,31 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         return should;
     }
 
+    private boolean isProfileTransaction(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().contains(ProfileTransaction.BEAN_NAME);
+    }
+
     private boolean isProfilePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step) {
         return step.name().contains(ProfilePurchaseHistory.BEAN_NAME);
+    }
+
+    private boolean shouldProfileTransaction(AbstractStep<? extends BaseStepConfiguration> step, boolean commonSkip) {
+        boolean shouldProfileTransaction = false;
+
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        boolean shouldRebuildPeriodTransactions = grapherContext.isRebuildPeriodTrxOnly();
+        if (commonSkip) {
+            shouldProfileTransaction = shouldRebuildPeriodTransactions;
+            if (shouldRebuildPeriodTransactions) {
+                rebuild = true;
+            }
+        } else {
+            grapherContext.setRebuildPeriodTrxOnly(false);
+            shouldProfileTransaction = true;
+        }
+
+        return shouldProfileTransaction;
     }
 
     private boolean shouldCalculatePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step, int seq) {

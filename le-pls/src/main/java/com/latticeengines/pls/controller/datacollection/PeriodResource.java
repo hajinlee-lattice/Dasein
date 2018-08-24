@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.BusinessCalendarValidation;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
 import io.swagger.annotations.Api;
@@ -30,10 +34,12 @@ import io.swagger.annotations.ApiOperation;
 public class PeriodResource {
 
     private final PeriodProxy periodProxy;
+    private final ActionService actionService;
 
     @Inject
-    public PeriodResource(PeriodProxy periodProxy) {
+    public PeriodResource(PeriodProxy periodProxy, ActionService actionService) {
         this.periodProxy = periodProxy;
+        this.actionService = actionService;
     }
 
     @RequestMapping(value = "/names", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -67,7 +73,9 @@ public class PeriodResource {
             String customerSpace = MultiTenantContext.getCustomerSpace().toString();
             String email = MultiTenantContext.getEmailAddress();
             businessCalendar.setUpdatedBy(email);
-            return periodProxy.saveBusinessCalendar(customerSpace, businessCalendar);
+            businessCalendar = periodProxy.saveBusinessCalendar(customerSpace, businessCalendar);
+            createAction(MultiTenantContext.getTenant());
+            return businessCalendar;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -92,4 +100,15 @@ public class PeriodResource {
         }
     }
 
+    private void createAction(Tenant tenant) {
+        Action action = new Action();
+        action.setType(ActionType.BUSINESS_CALENDAR_CHANGE);
+        action.setTenant(tenant);
+        action.setActionInitiator(MultiTenantContext.getEmailAddress());
+//        ActionConfiguration actionConfig = action.getActionConfiguration();
+//        if (actionConfig != null) {
+//            action.setDescription(actionConfig.serialize());
+//        }
+        actionService.create(action);
+    }
 }
