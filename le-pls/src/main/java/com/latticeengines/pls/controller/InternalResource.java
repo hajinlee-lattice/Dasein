@@ -803,13 +803,13 @@ public class InternalResource extends InternalResourceBase {
         Tenant tenant = tenantService.findByTenantId(tenantId);
         for (User user : users) {
             if (result.equals("COMPLETED")) {
-                if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
+                if (AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) {
                     emailService.sendCDLProcessAnalyzeCompletionEmail(user, tenant, appPublicUrl);
                 } else if (user.getEmail().equals(emailInfo.getUserId())) {
                     emailService.sendCDLProcessAnalyzeCompletionEmail(user, tenant, appPublicUrl);
                 }
             } else if (result.equals("FAILED")) {
-                if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
+                if (AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) {
                     emailService.sendCDLProcessAnalyzeErrorEmail(user, tenant, appPublicUrl);
                 } else if (user.getEmail().equals(emailInfo.getUserId())) {
                     emailService.sendCDLProcessAnalyzeErrorEmail(user, tenant, appPublicUrl);

@@ -715,6 +715,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 if (userData.getIsActive()) {
                     user.setActive(userData.getIsActive());
                 }
+
+                if (StringUtils.isNotEmpty(userRightData.getOperationName())) {
+                    user.setAccessLevel(userRightData.getOperationName());
+                }
+
                 AbstractMap.SimpleEntry<User, HashSet<String>> uRights = new AbstractMap.SimpleEntry<>(user,
                         new HashSet<String>());
                 uRights.getValue().add(userRightData.getOperationName());
