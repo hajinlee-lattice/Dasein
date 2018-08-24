@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
@@ -42,6 +44,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     private void verifyProcess() {
+        clearCache();
         runCommonPAVerifications();
 
         Map<String, Object> accountReport = new HashMap<>();
@@ -81,23 +84,26 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         verifyProcessAnalyzeReport(processAnalyzeAppId, expectedReport);
 
-//        long numAccounts = 1000;
-//        long numContacts = 500;
+        createTestSegment3();
+        verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
+
+        long numAccounts = 1000;
+        long numContacts = 500;
 //        long numProducts = 99;
 //        long numTransactions = ???;
 //
-//        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-//        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
+        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
+        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
 //        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), numProducts);
 //        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedRawTransaction), numTransactions);
 //
-//        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-//        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 //
-//        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-//                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
-//                BusinessEntity.Contact, SEGMENT_1_CONTACT_2);
-//        verifyTestSegment1Counts(segment1Counts);
+        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_3_ACCOUNT_1,
+                BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
+        verifyTestSegment3Counts(segment3Counts);
     }
 
 }

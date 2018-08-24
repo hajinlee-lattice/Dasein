@@ -49,6 +49,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     }
 
     private void verifyProcess() {
+        clearCache();
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
 
@@ -89,13 +90,22 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
                 BusinessEntity.Product, BATCH_STORE_PRODUCTS);
         verifyBatchStore(batchStoreCounts);
 
+        Map<BusinessEntity, Long> redshiftCounts = ImmutableMap.of( //
+                BusinessEntity.Account, ACCOUNT_1, //
+                BusinessEntity.Contact, CONTACT_1);
+        verifyRedshift(redshiftCounts);
+
         Map<BusinessEntity, Long> servingStoreCounts = ImmutableMap.of( //
                 BusinessEntity.Product, SERVING_STORE_PRODUCTS, //
                 BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
         verifyServingStore(servingStoreCounts);
 
-        createTestSegment2();
-        verifySegmentCountsNonNegative(SEGMENT_NAME_2, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
+        createTestSegment3();
+        verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
+        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_3_ACCOUNT_1,
+                BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
+        verifyTestSegment3Counts(segment3Counts);
         verifyUpdateActions();
     }
 

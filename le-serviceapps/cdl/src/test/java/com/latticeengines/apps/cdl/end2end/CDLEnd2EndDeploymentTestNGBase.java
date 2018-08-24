@@ -43,6 +43,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -51,6 +53,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -183,6 +186,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final long SEGMENT_2_ACCOUNT_2_REBUILD = 44;
     static final long SEGMENT_2_CONTACT_2_REBUILD = 49;
 
+    static final String SEGMENT_NAME_3 = NamingUtils.timestamp("E2ESegment3");
+    static final long SEGMENT_3_ACCOUNT_1 = 25;
+    static final long SEGMENT_3_CONTACT_1 = 25;
+    static final long SEGMENT_3_ACCOUNT_2 = 60;
+    static final long SEGMENT_3_CONTACT_2 = 60;
+
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
     static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentTraining");
 
@@ -246,6 +255,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
+    @javax.annotation.Resource(name = "localCacheService")
+    private CacheService localCacheService;
+
     protected String processAnalyzeAppId;
     protected DataCollection.Version initialVersion;
 
@@ -286,6 +298,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         log.info("Start reset collection data ...");
         boolean resetStatus = cdlProxy.reset(mainTestTenant.getId());
         Assert.assertTrue(resetStatus);
+    }
+
+    protected void clearCache() {
+        String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        cacheService.refreshKeysByPattern(tenantId, CacheName.getCdlCacheGroup());
+        localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
     }
 
     void processAnalyze() {
@@ -905,6 +924,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(segment2);
     }
 
+    void createTestSegment3() {
+        testMetadataSegmentProxy.createOrUpdate(constructTestSegment3());
+        MetadataSegment segment3 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_3);
+        Assert.assertNotNull(segment3);
+    }
+
     void createModelingSegment() {
         testMetadataSegmentProxy.createOrUpdate(constructTargetSegment());
         MetadataSegment segment = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_MODELING);
@@ -962,6 +987,31 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return segment;
     }
 
+    protected MetadataSegment constructTestSegment3() {
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.IN_COLLECTION,
+                Arrays.asList("CALIFORNIA", "TEXAS", "MICHIGAN", "NEW YORK"));
+        BucketRestriction stateRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "State"),
+                stateBkt);
+        Bucket techBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("General Practice"));
+        BucketRestriction techRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "SpendAnalyticsSegment"), techBkt);
+        Restriction accountRestriction = Restriction.builder().or(stateRestriction, techRestriction).build();
+
+        Bucket titleBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
+        BucketRestriction titleRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
+        Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_3);
+        segment.setDisplayName("End2End Segment 3");
+        segment.setDescription("A test segment for CDL end2end tests.");
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+        segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
+
+        return segment;
+    }
+
     MetadataSegment constructTargetSegment() {
         Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Collections.singletonList("Delaware"));
         BucketRestriction accountRestriction = new BucketRestriction(
@@ -981,6 +1031,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     void verifyTestSegment2Counts(Map<BusinessEntity, Long> expectedCounts) {
         verifySegmentCounts(SEGMENT_NAME_2, expectedCounts);
+    }
+
+    void verifyTestSegment3Counts(Map<BusinessEntity, Long> expectedCounts) {
+        verifySegmentCounts(SEGMENT_NAME_3, expectedCounts);
     }
 
     private void verifySegmentCounts(String segmentName, Map<BusinessEntity, Long> expectedCounts) {
@@ -1168,6 +1222,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void verifyBatchStore(Map<BusinessEntity, Long> expectedEntityCount) {
         expectedEntityCount.forEach((key, value) -> {
             Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value);
+        });
+    }
+
+    void verifyRedshift(Map<BusinessEntity, Long> expectedEntityCount) {
+        expectedEntityCount.forEach((key, value) -> {
+            Assert.assertEquals(Long.valueOf(countInRedshift(key)), value);
         });
     }
 
