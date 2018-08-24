@@ -57,7 +57,7 @@ public class DedupeHelperImpl implements DedupeHelper {
         boolean isPublicDomain = !processorContext.getOriginalInput().isPublicDomainAsNormalDomain()
                 && publicDomainService.isPublicDomain(domain);
         int numFeatureValue = outputRecord.getNumFeatureValue();
-        numFeatureValue = 0; // Disable it now
+        numFeatureValue = 10; // Using flow with feature
         NameLocation nameLocation = outputRecord.getPreMatchNameLocation();
         String name = nameLocation != null ? nameLocation.getName() : null;
         String country = nameLocation != null ? nameLocation.getCountry() : null;
