@@ -120,8 +120,26 @@ class Finalize(State):
         with open(os.path.join(base, "scorederivation.json"), "wb") as f:
             json.dump(self.mediator.score_derivation, f, indent=4)
 
+        if mediator.revenueColumn is not None:
+            combined_score_derivation = OrderedDict()
+            combined_score_derivation["ev"] = mediator.ev_score_derivation
+            combined_score_derivation["revenue"] = mediator.revenue_score_derivation
+            combined_score_derivation["probability"] = mediator.score_derivation
+
+            with open(os.path.join(base, "evscorederivation.json"), "wb") as f:
+                json.dump(combined_score_derivation, f, indent=4)
+
         with open(os.path.join(base, "fitfunctionparameters.json"), "wb") as f:
             json.dump(self.mediator.fit_function_parameters, f, indent=4)
+
+        if mediator.revenueColumn is not None:
+            combined_fit_function_params = OrderedDict()
+            combined_fit_function_params["ev"] = mediator.ev_fit_function_parameters
+            combined_fit_function_params["revenue"] = mediator.revenue_fit_function_parameters
+            combined_fit_function_params["probability"] = mediator.fit_function_parameters
+
+            with open(os.path.join(base, "evfitfunctionparameters.json"), "wb") as f:
+                json.dump(combined_fit_function_params, f, indent=4)
 
     def writeModelQualityFile(self, mediator):
         base = self.mediator.modelEnhancementsLocalDir

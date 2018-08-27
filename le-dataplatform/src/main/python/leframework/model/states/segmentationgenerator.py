@@ -4,6 +4,9 @@ import logging
 from leframework.codestyle import overrides
 from leframework.model.state import State
 from leframework.util.scoringutil import ScoringUtil
+from leframework.model.states.fitfunctionutil import FitFunctionUtil
+import numpy as np
+import pandas as pd
 
 class SegmentationGenerator(State):
 
@@ -56,3 +59,149 @@ class SegmentationGenerator(State):
 
         # Add Result to Mediator
         self.mediator.segmentations = self.result
+
+
+class RevenueSegmentationGenerator(State):
+
+    def __init__(self):
+        State.__init__(self, "RevenueSegmentationGenerator")
+        self.logger = logging.getLogger(name='revenuesegmentationgenerator')
+
+    @overrides(State)
+    def execute(self):
+        mediator = self.mediator
+        if mediator.revenueColumn is None:
+            return
+
+        schema = mediator.schema
+        revenueScore = self.get_revenue_score_data_frame()
+        positiveEvents = revenueScore[schema['target']] > 0
+        orderedScore = revenueScore[positiveEvents]
+        orderedScore = ScoringUtil.sortWithRandom(orderedScore, 0).copy().reset_index(drop=True)
+
+        numLeads = orderedScore.shape[0]
+        apxBlockSize = numLeads / 100.0
+
+        orderedScore['Score'] = orderedScore.index.map(lambda x: min(int(x / apxBlockSize) + 1, 100))
+
+        revRateChartDf = orderedScore.groupby('Score')[schema["reserved"]["predictedrevenue"]].agg(
+            ['min', 'max', 'mean', 'sum', 'count'])
+        revRateChartDf.columns = ['Min', 'Max', 'Mean', 'Sum', 'Count']
+
+        new_segments = []
+        for index in range(revRateChartDf.shape[0]):
+            segment = OrderedDict()
+            segment["Score"] = (100 - index)
+            segment["Count"] = revRateChartDf.iloc[index]['Count']
+            segment["Sum"] = revRateChartDf.iloc[index]['Sum']
+            segment["Mean"] = revRateChartDf.iloc[index]['Mean']
+            segment["Max"] = revRateChartDf.iloc[index]['Max']
+            segment["Min"] = revRateChartDf.iloc[index]['Min']
+            new_segments.append(segment)
+
+        # Construct Result
+        self.result = []
+        allSegments = OrderedDict()
+        allSegments["LeadSource"] = "ALL"
+        allSegments["Segments"] = new_segments
+        self.result.append(allSegments)
+
+        # Add Result to Mediator
+        self.mediator.revenuesegmentations = self.result
+
+    def get_revenue_score_data_frame(self):
+        mediator = self.mediator
+        schema = mediator.schema
+        return self.mediator.data[[schema["reserved"]["predictedrevenue"], schema["target"]]]
+
+
+class EVSegmentationGenerator(State):
+
+    def __init__(self):
+        State.__init__(self, "EVSegmentationGenerator")
+        self.logger = logging.getLogger(name='evsegmentationgenerator')
+
+    @overrides(State)
+    def execute(self):
+        mediator = self.getMediator()
+        if mediator.revenueColumn is None:
+            return
+
+        schema = mediator.schema
+        revenueScoreColumn = schema["reserved"]["predictedrevenue"]
+        probScoreColumn = schema["reserved"]["score"]
+
+        testScoreDf = self.mediator.data[[revenueScoreColumn, probScoreColumn]]
+
+        scoreDerivation = mediator.score_derivation
+        revenueScoreDerivation = mediator.revenue_score_derivation
+        bucketsProb, upperBoundsProb = self.getPercScoreBounds(scoreDerivation)
+        bucketsRev, upperBoundsRev = self.getPercScoreBounds(revenueScoreDerivation)
+
+        alphaProb, betaProb, gammaProb, maxProbRate = self.getProbFitFunctionParameters()
+        alphaRev, betaRev, gammaRev, maxRevRate = self.getRevenueFitFunctionParameters()
+        testScoreDf['mappedProbPerc'] = bucketsProb[np.digitize(testScoreDf[probScoreColumn], upperBoundsProb)]
+        testScoreDf['mappedRevPerc'] = bucketsRev[np.digitize(testScoreDf[revenueScoreColumn], upperBoundsRev)]
+
+        testScoreDf['mappedProb'] = testScoreDf['mappedProbPerc'].apply(lambda x:
+                                                                        FitFunctionUtil.getMappedRate(x, betaProb,
+                                                                                                      alphaProb,
+                                                                                                      gammaProb,
+                                                                                                      maxProbRate))
+        testScoreDf['mappedRev'] = testScoreDf['mappedRevPerc'].apply(lambda x:
+                                                                      FitFunctionUtil.getMappedRate(x, betaRev,
+                                                                                                    alphaRev,
+                                                                                                    gammaRev,
+                                                                                                    maxRevRate))
+        testScoreDf['ev'] = testScoreDf['mappedProb'] * testScoreDf['mappedRev']
+
+        orderedScore = ScoringUtil.sortWithRandom(testScoreDf[['ev']], 0).copy().reset_index(drop=True)
+
+        numLeads = orderedScore.shape[0]
+        apxBlockSize = numLeads / 100.0
+
+        orderedScore['Score'] = orderedScore.index.map(lambda x: min(int(x / apxBlockSize) + 1, 100))
+
+        revRateChartDf = orderedScore.groupby('Score')['ev'].agg(
+            ['min', 'max', 'mean', 'sum', 'count'])
+        revRateChartDf.columns = ['Min', 'Max', 'Mean', 'Sum', 'Count']
+
+        new_segments = []
+        for index in range(revRateChartDf.shape[0]):
+            segment = OrderedDict()
+            segment["Score"] = (100 - index)
+            segment["Count"] = revRateChartDf.iloc[index]['Count']
+            segment["Sum"] = revRateChartDf.iloc[index]['Sum']
+            segment["Mean"] = revRateChartDf.iloc[index]['Mean']
+            segment["Max"] = revRateChartDf.iloc[index]['Max']
+            segment["Min"] = revRateChartDf.iloc[index]['Min']
+            new_segments.append(segment)
+
+        # Construct Result
+        self.result = []
+        allSegments = OrderedDict()
+        allSegments["LeadSource"] = "ALL"
+        allSegments["Segments"] = new_segments
+        self.result.append(allSegments)
+
+        # Add Result to Mediator
+        self.mediator.evsegmentations = self.result
+
+    def getPercScoreBounds(self, scoreDerivation):
+        percentilesDf = pd.DataFrame.from_records(scoreDerivation['percentiles'])
+        percentilesDf = percentilesDf.groupby(by='name').agg('max')
+
+        percentilesDf.sort_index(inplace=True)
+        buckets = np.asarray(percentilesDf.index)
+        buckets = np.insert(buckets, -1, buckets[-1])
+        upperBounds = percentilesDf['upper'].values
+
+        return buckets, upperBounds
+
+    def getProbFitFunctionParameters(self):
+        param = self.getMediator().fit_function_parameters
+        return param["alpha"], param["beta"], param["gamma"], param["maxRate"]
+
+    def getRevenueFitFunctionParameters(self):
+        param = self.getMediator().revenue_fit_function_parameters
+        return param["alpha"], param["beta"], param["gamma"], param["maxRate"]

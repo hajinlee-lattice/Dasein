@@ -25,10 +25,13 @@ from leframework.model.states.revenuemodelqualitygenerator import RevenueModelQu
 from leframework.model.states.revenuestatistics import RevenueStatistics
 from leframework.model.states.rocgenerator import ROCGenerator
 from leframework.model.states.samplegenerator import SampleGenerator
-from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
-from leframework.model.states.segmentationgenerator import SegmentationGenerator
+from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator, \
+    RevenueScoreDerivationGenerator, EVScoreDerivationGenerator
+from leframework.model.states.segmentationgenerator import SegmentationGenerator, RevenueSegmentationGenerator, \
+    EVSegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
-from leframework.model.states.generatefitfunction import FitFunctionGenerator
+from leframework.model.states.generatefitfunction import FitFunctionGenerator, RevenueFitFunctionGenerator, \
+    EVFitFunctionGenerator
 from pandas import DataFrame
 from pandas import Series
 
@@ -77,6 +80,12 @@ class AggregationExecutor(Executor):
         stateMachine.addState(EnhancedSummaryGenerator(), 22)
         stateMachine.addState(ModelPredictorGenerator(), 23)
         stateMachine.addState(FitFunctionGenerator(), 24)
+        stateMachine.addState(RevenueSegmentationGenerator(), 33)
+        stateMachine.addState(RevenueScoreDerivationGenerator(), 34)
+        stateMachine.addState(RevenueFitFunctionGenerator(), 35)
+        stateMachine.addState(EVSegmentationGenerator(), 43)
+        stateMachine.addState(EVScoreDerivationGenerator(), 34)
+        stateMachine.addState(EVFitFunctionGenerator(), 45)
         stateMachine.addState(Finalize(), 100)
         return stateMachine
 

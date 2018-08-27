@@ -11,46 +11,12 @@ from leframework.model.state import State
 from leframework.util.pdversionutil import pd_before_17
 
 
-class FitFunctionGenerator(State):
-    def __init__(self):
-        State.__init__(self, "FitFunctionGenerator")
-        self._logger = logging.getLogger(name="FitFunctionGenerator")
-
-    @overrides(State)
-    def execute(self):
-        structure = OrderedDict()
-
-        try:
-            segments = self.get_segment_data_records()
-            rateChartDf = self.get_rate_dataframe(segments)
-            maxRate = self.get_max_rate(rateChartDf, 'Score', 'probRate')
-            avgRate = self.get_avg_rate(rateChartDf, 'Converted', 'Count')
-            decileRateDf = self.get_decile_rate(rateChartDf, 'Score', 'Converted', 'Count')
-            gamma, alpha, beta = self.rate_chart_fit((decileRateDf['rate']), decileRateDf['decile'], avgRate)
-        except Exception as exp:
-            self._logger.exception("Caught Exception while generating fit function: " + str(exp))
-            alpha, beta, gamma, maxRate = self.get_default_fit_function_params()
-
-        structure["alpha"] = alpha
-        structure["beta"] = beta
-        structure["gamma"] = gamma
-        structure["maxRate"] = maxRate
-        structure["version"] = "v2"
-
-        self.getMediator().fit_function_parameters = structure
+class FitFunctionGeneratorBase(State):
+    def __init__(self, name):
+        State.__init__(self, name)
 
     def get_default_fit_function_params(self):
         return 0.0, 0.0, 0.0, 0.0
-
-    def get_segment_data_records(self):
-        mediator = self.getMediator()
-        segmentations = mediator.segmentations
-        return segmentations[0]['Segments']
-
-    def get_rate_dataframe(self, records):
-        rateChartDf = pd.DataFrame.from_records(records)
-        rateChartDf['probRate'] = rateChartDf['Converted'] * 1.0 / rateChartDf['Count']
-        return rateChartDf
 
     def get_max_rate(self, rateChartDf, sortByColumnName, rateColName):
         if pd_before_17():
@@ -172,3 +138,126 @@ class FitFunctionGenerator(State):
         minDiff = min([x[2] for x in gridSearchResults.values()])
         minGamma = [x for x, y in gridSearchResults.items() if np.abs(y[2] - minDiff) < 1e-6][0]
         return (minGamma, gridSearchResults[minGamma][0], gridSearchResults[minGamma][1] + np.log(avgRate))
+
+
+class FitFunctionGenerator(FitFunctionGeneratorBase):
+    def __init__(self):
+        FitFunctionGeneratorBase.__init__(self, "FitFunctionGenerator")
+        self._logger = logging.getLogger(name="FitFunctionGenerator")
+
+    @overrides(State)
+    def execute(self):
+        structure = OrderedDict()
+
+        try:
+            segments = self.get_segment_data_records()
+            rateChartDf = self.get_rate_dataframe(segments)
+            maxRate = self.get_max_rate(rateChartDf, 'Score', 'probRate')
+            avgRate = self.get_avg_rate(rateChartDf, 'Converted', 'Count')
+            decileRateDf = self.get_decile_rate(rateChartDf, 'Score', 'Converted', 'Count')
+            gamma, alpha, beta = self.rate_chart_fit((decileRateDf['rate']), decileRateDf['decile'], avgRate)
+        except Exception as exp:
+            self._logger.exception("Caught Exception while generating fit function: " + str(exp))
+            alpha, beta, gamma, maxRate = self.get_default_fit_function_params()
+
+        structure["alpha"] = alpha
+        structure["beta"] = beta
+        structure["gamma"] = gamma
+        structure["maxRate"] = maxRate
+        structure["version"] = "v2"
+
+        self.getMediator().fit_function_parameters = structure
+
+    def get_segment_data_records(self):
+        mediator = self.getMediator()
+        segmentations = mediator.segmentations
+        return segmentations[0]['Segments']
+
+    def get_rate_dataframe(self, records):
+        rateChartDf = pd.DataFrame.from_records(records)
+        rateChartDf['probRate'] = rateChartDf['Converted'] * 1.0 / rateChartDf['Count']
+        return rateChartDf
+
+
+class RevenueFitFunctionGenerator(FitFunctionGeneratorBase):
+    def __init__(self):
+        FitFunctionGeneratorBase.__init__(self, "RevenueFitFunctionGenerator")
+        self._logger = logging.getLogger(name="RevenueFitFunctionGenerator")
+
+    @overrides(State)
+    def execute(self):
+        mediator = self.getMediator()
+        if mediator.revenueColumn is None:
+            return
+
+        structure = OrderedDict()
+
+        try:
+            segments = self.get_segment_data_records()
+            rateChartDf = self.get_rate_dataframe(segments)
+            maxRate = self.get_max_rate(rateChartDf, 'Score', 'Mean')
+            avgRate = self.get_avg_rate(rateChartDf, 'Sum', 'Count')
+            decileRateDf = self.get_decile_rate(rateChartDf, 'Score', 'Sum', 'Count')
+            gamma, alpha, beta = self.rate_chart_fit((decileRateDf['rate']), decileRateDf['decile'], avgRate)
+        except Exception as exp:
+            self._logger.exception("Caught Exception while generating fit function: " + str(exp))
+            alpha, beta, gamma, maxRate = self.get_default_fit_function_params()
+
+        structure["alpha"] = alpha
+        structure["beta"] = beta
+        structure["gamma"] = gamma
+        structure["maxRate"] = maxRate
+        structure["version"] = "v2"
+
+        self.getMediator().revenue_fit_function_parameters = structure
+
+    def get_segment_data_records(self):
+        mediator = self.getMediator()
+        segmentations = mediator.revenuesegmentations
+        return segmentations[0]['Segments']
+
+    def get_rate_dataframe(self, records):
+        rateChartDf = pd.DataFrame.from_records(records)
+        return rateChartDf
+
+
+class EVFitFunctionGenerator(FitFunctionGeneratorBase):
+    def __init__(self):
+        FitFunctionGeneratorBase.__init__(self, "EVFitFunctionGenerator")
+        self._logger = logging.getLogger(name="EVFitFunctionGenerator")
+
+    @overrides(State)
+    def execute(self):
+        mediator = self.getMediator()
+        if mediator.revenueColumn is None:
+            return
+
+        structure = OrderedDict()
+
+        try:
+            segments = self.get_segment_data_records()
+            rateChartDf = self.get_rate_dataframe(segments)
+            maxRate = self.get_max_rate(rateChartDf, 'Score', 'Mean')
+            avgRate = self.get_avg_rate(rateChartDf, 'Sum', 'Count')
+            decileRateDf = self.get_decile_rate(rateChartDf, 'Score', 'Sum', 'Count')
+            gamma, alpha, beta = self.rate_chart_fit((decileRateDf['rate']), decileRateDf['decile'], avgRate)
+        except Exception as exp:
+            self._logger.exception("Caught Exception while generating fit function: " + str(exp))
+            alpha, beta, gamma, maxRate = self.get_default_fit_function_params()
+
+        structure["alpha"] = alpha
+        structure["beta"] = beta
+        structure["gamma"] = gamma
+        structure["maxRate"] = maxRate
+        structure["version"] = "v2"
+
+        self.getMediator().ev_fit_function_parameters = structure
+
+    def get_segment_data_records(self):
+        mediator = self.getMediator()
+        segmentations = mediator.evsegmentations
+        return segmentations[0]['Segments']
+
+    def get_rate_dataframe(self, records):
+        rateChartDf = pd.DataFrame.from_records(records)
+        return rateChartDf
