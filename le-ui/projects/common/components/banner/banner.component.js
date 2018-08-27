@@ -1,5 +1,5 @@
 angular.module('common.banner', [])
-.service('Banner', function() {
+.service('Banner', function($sce) {
     var Banner = this;
 
     this.init = function() {
@@ -17,7 +17,7 @@ angular.module('common.banner', [])
             show: opts.show || true,
             type: opts.type || '',
             title: opts.title || '',
-            message: opts.message || ''
+            message: $sce.trustAsHtml(opts.message || '')
         };
 
         this.banners.push(banner);
