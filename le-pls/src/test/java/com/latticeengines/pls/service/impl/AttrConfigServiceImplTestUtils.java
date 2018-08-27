@@ -829,6 +829,35 @@ public class AttrConfigServiceImplTestUtils {
         return map;
     }
 
+    public static Map<String, AttrConfigCategoryOverview<?>> generateAccountAndContactCategoryAttrConfigNameOverview() {
+        Map<String, AttrConfigCategoryOverview<?>> map = new HashMap<>();
+
+        AttrConfigCategoryOverview<AttrState> accountCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
+        map.put(Category.ACCOUNT_ATTRIBUTES.getName(), accountCategoryAttrConfigOverview);
+        accountCategoryAttrConfigOverview.setLimit(accountLimit);
+        accountCategoryAttrConfigOverview.setTotalAttrs(totalAccountAttrs);
+        Map<String, Map<AttrState, Long>> propSummary = new HashMap<>();
+        accountCategoryAttrConfigOverview.setPropSummary(propSummary);
+        Map<AttrState, Long> valueCountMap = new HashMap<>();
+        valueCountMap.put(AttrState.Active, activeForAccount);
+        valueCountMap.put(AttrState.Inactive, inactiveForAccount);
+        propSummary.put(ColumnMetadataKey.State, valueCountMap);
+
+        AttrConfigCategoryOverview<AttrState> contactCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
+        map.put(Category.CONTACT_ATTRIBUTES.getName(), contactCategoryAttrConfigOverview);
+        contactCategoryAttrConfigOverview.setLimit(contactLimit);
+        contactCategoryAttrConfigOverview.setTotalAttrs(totalContactAttrs);
+        propSummary = new HashMap<>();
+        contactCategoryAttrConfigOverview.setPropSummary(propSummary);
+        valueCountMap = new HashMap<>();
+        valueCountMap.put(AttrState.Active, activeForContact);
+        valueCountMap.put(AttrState.Inactive, inactiveForContact);
+        propSummary.put(ColumnMetadataKey.State, valueCountMap);
+
+        log.info("map is " + map);
+        return map;
+    }
+
     public static AttrConfigRequest generateHappyAttrConfigRequest() {
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrValidation> validations = new ArrayList<>();

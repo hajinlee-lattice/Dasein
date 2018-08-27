@@ -54,6 +54,13 @@ public class AttrConfigResource {
         return attrConfigService.getOverallAttrConfigUsageOverview();
     }
 
+    @GetMapping(value = "/name/overview")
+    @ResponseBody
+    @ApiOperation("get activation overview")
+    public AttrConfigStateOverview getNameOverview() {
+        return attrConfigService.getOverallAttrConfigNameOverview();
+    }
+
     @PutMapping(value = "/activation/config/category/{categoryName}")
     @ApiOperation("update Activation Config")
     public ModelAndView updateActivationConfig(@PathVariable String categoryName,

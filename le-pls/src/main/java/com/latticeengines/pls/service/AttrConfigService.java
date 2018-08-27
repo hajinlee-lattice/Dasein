@@ -17,6 +17,8 @@ public interface AttrConfigService {
 
     AttrConfigUsageOverview getOverallAttrConfigUsageOverview();
 
+    AttrConfigStateOverview getOverallAttrConfigNameOverview();
+
     AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName);
 
     AttrConfigSelectionDetail getAttrConfigSelectionDetails(String categoryName, String usageName);

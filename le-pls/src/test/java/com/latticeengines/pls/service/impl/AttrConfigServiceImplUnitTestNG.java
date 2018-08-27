@@ -151,6 +151,25 @@ public class AttrConfigServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testGetOverallAttrConfigNameOverview() {
+        when(cdlAttrConfigProxy.getAttrConfigOverview(anyString(), Matchers.anyList(), Matchers.anyList(),
+                anyBoolean())).thenReturn(
+                        AttrConfigServiceImplTestUtils.generateAccountAndContactCategoryAttrConfigNameOverview());
+        AttrConfigStateOverview overview = attrConfigService.getOverallAttrConfigNameOverview();
+        List<AttrConfigSelection> result = overview.getSelections();
+        Assert.assertEquals(result.size(), 2);
+
+        AttrConfigSelection categoryOverview = result.get(0);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.activeForAccount);
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.ACCOUNT_ATTRIBUTES.getName());
+
+        categoryOverview = result.get(1);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.activeForContact);
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.CONTACT_ATTRIBUTES.getName());
+
+    }
+
+    @Test(groups = "unit")
     public void testGenerateAttrConfigRequestForUsage() {
         AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
         request.setDeselect(Arrays.asList(AttrConfigServiceImplTestUtils.deselect));

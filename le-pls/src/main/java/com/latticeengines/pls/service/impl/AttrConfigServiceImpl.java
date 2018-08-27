@@ -190,6 +190,31 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         return usageOverview;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public AttrConfigStateOverview getOverallAttrConfigNameOverview() {
+        AttrConfigStateOverview overview = new AttrConfigStateOverview();
+        List<AttrConfigSelection> selections = new ArrayList<>();
+        overview.setSelections(selections);
+        List<String> categories = Arrays.asList(Category.ACCOUNT_ATTRIBUTES.getName(),
+                Category.CONTACT_ATTRIBUTES.getName());
+        Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
+                MultiTenantContext.getShortTenantId(), categories, Collections.singletonList(ColumnMetadataKey.State),
+                false);
+        for (String category : categories) {
+            AttrConfigCategoryOverview<AttrState> activationOverview = (AttrConfigCategoryOverview<AttrState>) map
+                    .get(category);
+            AttrConfigSelection categoryOverview = new AttrConfigSelection();
+            categoryOverview.setTotalAttrs(
+                    activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active) != null
+                            ? activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active)
+                            : 0L);
+            categoryOverview.setDisplayName(category);
+            selections.add(categoryOverview);
+        }
+        return overview;
+    }
+
     @Override
     public UIAction updateActivationConfig(String categoryName, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getShortTenantId();
