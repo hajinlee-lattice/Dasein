@@ -67,7 +67,7 @@ def getSpan(newacct,
         span.append(3 / (currOffs + 3))
     return span
                 
-def createAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
+def createAnalyticPurchaseState(transactionDf, numPeriodsAdded=2, allowZeroOrNegativeValues=False):
     # build a table with pivoted unit and amount cols for each product
     # this is a skinny version of the current analytic purchase state
     # the current version has features like rolling sum and momentum added in
@@ -119,8 +119,15 @@ def createAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
         isna = apState['Revenue', prodID].isnull().tolist()
         apState['RevenueRollingSum6', prodID] = getRollingsum(newacct, amts, isna, winlen=6)
         apState['RevenueMomentum3', prodID] = getMomentum(newacct, amts, isna, winlen=4)
-        apState['Span', prodID] = getSpan(newacct, amts, isna)
-    
+        notpurchased = isna
+        if not allowZeroOrNegativeValues:
+            units = apState['Units', prodID].tolist()
+            notpurchased = [testPurchase(amts[i], units[i]) for i in range(len(amts))]
+        apState['Span', prodID] = getSpan(newacct, amts, notpurchased)
+
+    if not allowZeroOrNegativeValues:
+        apState[apState[['Revenue', 'Units']] < 0] = 0
+
     # rename columns to playmaker style
     logger.info("Starting to map column names")
     apState.columns = apState.columns.map('Product_{0[1]}_{0[0]}'.format)
@@ -132,9 +139,17 @@ def createAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
     return apState
 
 
-def createAps(transactionDf):
+def testPurchase(amount, unit):
+    return isNullOrZeroOrNegative(amount) and isNullOrZeroOrNegative(unit)
+
+
+def isNullOrZeroOrNegative(value):
+    return pd.isnull(value) or value <= 0
+
+
+def createAps(transactionDf, allowZeroOrNegativeValues=False):
     logger.info("Start to create Aps.")
-    apState = createAnalyticPurchaseState(transactionDf)
+    apState = createAnalyticPurchaseState(transactionDf, allowZeroOrNegativeValues=allowZeroOrNegativeValues)
     logger.info("Finished creating Aps.")
     return apState
 
@@ -158,12 +173,12 @@ if __name__ == '__main__':
     logger.info("aps type:" + str(type(apState)))
     logger.info("aps shape:" + str(apState.shape))
     logger.info("aps memoryn usage:" + str(apState.memory_usage().sum()))
-#     logger.info("aps density:" + str(apState.density))
+    #logger.info("aps density:" + str(apState.density))
     
     apState.insert(0, 'AnalyticPurchaseState_ID', range(len(apState)))
     shutil.rmtree("./input", ignore_errors=True)
     loader.parallelWriteDataFrameToAvro(apState)
     logger.info(apState.shape)
     #loader.uploadFromLocal()
-#     loader.parallelUploadFromLocal()
+    #loader.parallelUploadFromLocal()
     
