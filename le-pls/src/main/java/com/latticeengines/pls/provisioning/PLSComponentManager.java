@@ -127,6 +127,7 @@ public class PLSComponentManager {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
             tenant.setStatus(info.properties.status);
             tenant.setTenantType(info.properties.tenantType);
+            tenant.setContract(info.properties.contract);
             LOGGER.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is "
                     + tenant.getTenantType());
         } catch (Exception e) {

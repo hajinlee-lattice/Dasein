@@ -228,9 +228,10 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         $scope.tenantInfo = {
             properties: {
                 displayName: $scope.tenantId,
+                contract:  $scope.tenantId,
                 description: "A Lattice tenant under the contract " + $scope.contractId,
                 status: "ACTIVE",
-                tenantType: "TRAINING"
+                tenantType: "CUSTOMER"
             }
         };
 

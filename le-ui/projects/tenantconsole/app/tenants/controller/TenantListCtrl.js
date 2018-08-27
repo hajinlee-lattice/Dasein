@@ -40,7 +40,8 @@ app.controller('TenantListCtrl', function($scope, $state, _, $uibModal, TenantSe
                         CreatedDate: { type: "date" },
                         LastModifiedDate: { type: "date" },
                         Product: { type: "string" },
-                        Status: { type: "string" }
+                        Status: { type: "string" },
+                        Contract: {type: "string"}
                     }
                 }
             },
@@ -85,7 +86,8 @@ app.controller('TenantListCtrl', function($scope, $state, _, $uibModal, TenantSe
                         },
                         ui: statusFilter
                     }
-                }
+                },
+                {field: "Contract", title: "Contract"}
             ]
         };
     };

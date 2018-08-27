@@ -8,6 +8,7 @@ app.service('TenantUtility', function(_){
         var result = {
             TenantId: record.CustomerSpace.tenantId,
             ContractId: record.CustomerSpace.contractId,
+            Contract: record.TenantInfo.properties.contract,
             DisplayName: record.TenantInfo.properties.displayName,
             Product: record.SpaceConfiguration.Product,
             Status: record.BootstrapState.state,

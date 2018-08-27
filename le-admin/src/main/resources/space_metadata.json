@@ -6,6 +6,6 @@
 	{ "Node": "Product", "Data": {"Type": "options", "Options": ["Lead Prioritization"], "DynamicOptions": true } },
     { "Node": "Topology", "Data": {"Type": "options", "Options": ["Marketo"], "DynamicOptions": true } },
     { "Node": "Status", "Data": {"Type": "options", "Options": ["ACTIVE", "INACTIVE"]} },
-    { "Node": "TenantType", "Data": {"Type": "options", "Options": ["TRAINING", "QA", "DEMO", "CUSTOMER", "STAGING"]}}
+    { "Node": "TenantType", "Data": {"Type": "options", "Options": ["TRAINING", "QA", "DEMO", "CUSTOMER", "STAGING", "POC"]}}
   ]
 }

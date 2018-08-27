@@ -16,4 +16,5 @@ public class TenantProperties extends BaseProperties {
     public Long lastModified;
     public String status;
     public String tenantType;
+    public String contract;
 }
