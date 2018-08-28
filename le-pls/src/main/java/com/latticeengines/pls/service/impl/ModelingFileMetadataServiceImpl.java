@@ -196,6 +196,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<String> erpIds = new ArrayList<>();
         List<String> otherIds = new ArrayList<>();
         List<Pair<String, String>> idMappings = new ArrayList<>();
+        boolean hasExternalId = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getCdlExternalSystemType() != null) {
                 String displayName = fieldMapping.getMappedField();
@@ -209,38 +210,44 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 switch (fieldMapping.getCdlExternalSystemType()) {
                 case CRM:
                     crmIds.add(fieldMapping.getMappedField());
+                    hasExternalId = true;
                     break;
                 case MAP:
                     mapIds.add(fieldMapping.getMappedField());
+                    hasExternalId = true;
                     break;
                 case ERP:
                     erpIds.add(fieldMapping.getMappedField());
+                    hasExternalId = true;
                     break;
                 case OTHER:
                     otherIds.add(fieldMapping.getMappedField());
+                    hasExternalId = true;
                     break;
                 }
             }
         }
-        CDLExternalSystem originalSystem = cdlExternalSystemProxy.getCDLExternalSystem(
-                MultiTenantContext.getCustomerSpace().toString());
-        if (originalSystem == null) {
-            CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-            cdlExternalSystem.setCRMIdList(crmIds);
-            cdlExternalSystem.setMAPIdList(mapIds);
-            cdlExternalSystem.setERPIdList(erpIds);
-            cdlExternalSystem.setOtherIdList(otherIds);
-            cdlExternalSystem.setIdMapping(idMappings);
-            cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
-                    cdlExternalSystem);
-        } else {
-            originalSystem.setCRMIdList(mergeList(originalSystem.getCRMIdList(), crmIds));
-            originalSystem.setMAPIdList(mergeList(originalSystem.getMAPIdList(), mapIds));
-            originalSystem.setERPIdList(mergeList(originalSystem.getERPIdList(), erpIds));
-            originalSystem.setOtherIdList(mergeList(originalSystem.getOtherIdList(), otherIds));
-            originalSystem.addIdMapping(idMappings);
-            cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
-                    originalSystem);
+        if (hasExternalId) {
+            CDLExternalSystem originalSystem = cdlExternalSystemProxy.getCDLExternalSystem(
+                    MultiTenantContext.getCustomerSpace().toString());
+            if (originalSystem == null) {
+                CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+                cdlExternalSystem.setCRMIdList(crmIds);
+                cdlExternalSystem.setMAPIdList(mapIds);
+                cdlExternalSystem.setERPIdList(erpIds);
+                cdlExternalSystem.setOtherIdList(otherIds);
+                cdlExternalSystem.setIdMapping(idMappings);
+                cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
+                        cdlExternalSystem);
+            } else {
+                originalSystem.setCRMIdList(mergeList(originalSystem.getCRMIdList(), crmIds));
+                originalSystem.setMAPIdList(mergeList(originalSystem.getMAPIdList(), mapIds));
+                originalSystem.setERPIdList(mergeList(originalSystem.getERPIdList(), erpIds));
+                originalSystem.setOtherIdList(mergeList(originalSystem.getOtherIdList(), otherIds));
+                originalSystem.addIdMapping(idMappings);
+                cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
+                        originalSystem);
+            }
         }
     }
 
