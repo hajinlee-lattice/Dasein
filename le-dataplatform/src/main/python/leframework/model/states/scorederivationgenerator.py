@@ -48,7 +48,7 @@ class ScoreDerivationGenerator(ScoreDerivationGeneratorBase):
 class RevenueScoreDerivationGenerator(ScoreDerivationGeneratorBase):
     def __init__(self):
         ScoreDerivationGeneratorBase.__init__(self, "RevenueScoreDerivationGenerator")
-        self._logger = logging.getLogger(name="RevenueScoreDerivationGenerator")
+        self.logger = logging.getLogger(name="RevenueScoreDerivationGenerator")
 
     @overrides(State)
     def execute(self):
@@ -56,9 +56,18 @@ class RevenueScoreDerivationGenerator(ScoreDerivationGeneratorBase):
         if mediator.revenueColumn is None:
             return
 
+        try:
+            structure = self.calculateScoreDerivation(mediator)
+            self.getMediator().revenue_score_derivation = structure
+        except Exception as exp:
+            self.logger.exception("Caught exception while calculating revenue score derivation = " + str(exp))
+            self.getMediator().revenue_score_derivation = None
+
+        self.logger.info("Revenue score derivation = " + str(self.getMediator().revenue_score_derivation))
+
+    def calculateScoreDerivation(self, mediator):
         structure = OrderedDict()
         structure["target"] = None
-
         structure["percentiles"] = list()
         maxValue = 0.0
         for entry in mediator.revenuesegmentations[0]['Segments'][::-1]:
@@ -71,14 +80,13 @@ class RevenueScoreDerivationGenerator(ScoreDerivationGeneratorBase):
                 structure["percentiles"].append(self._make_bucket(99, minValue, maxValue))
             else:
                 structure["percentiles"].append(self._make_bucket(entry['Score'], minValue, maxValue))
-
-        self.getMediator().revenue_score_derivation = structure
+        return structure
 
 
 class EVScoreDerivationGenerator(ScoreDerivationGeneratorBase):
     def __init__(self):
         ScoreDerivationGeneratorBase.__init__(self, "EVScoreDerivationGenerator")
-        self._logger = logging.getLogger(name="EVScoreDerivationGenerator")
+        self.logger = logging.getLogger(name="EVScoreDerivationGenerator")
 
     @overrides(State)
     def execute(self):
@@ -86,9 +94,18 @@ class EVScoreDerivationGenerator(ScoreDerivationGeneratorBase):
         if mediator.revenueColumn is None:
             return
 
+        try:
+            structure = self.calculateScoreDerivation(mediator)
+            self.getMediator().ev_score_derivation = structure
+        except Exception as exp:
+            self.logger.exception("Caught exception while calculating EV score derivation = " + str(exp))
+            self.getMediator().ev_score_derivation = None
+
+        self.logger.info("EV score derivation = " + str(self.getMediator().ev_score_derivation))
+
+    def calculateScoreDerivation(self, mediator):
         structure = OrderedDict()
         structure["target"] = None
-
         structure["percentiles"] = list()
         maxValue = 0.0
         for entry in mediator.evsegmentations[0]['Segments'][::-1]:
@@ -101,5 +118,4 @@ class EVScoreDerivationGenerator(ScoreDerivationGeneratorBase):
                 structure["percentiles"].append(self._make_bucket(99, minValue, maxValue))
             else:
                 structure["percentiles"].append(self._make_bucket(entry['Score'], minValue, maxValue))
-
-        self.getMediator().ev_score_derivation = structure
+        return structure

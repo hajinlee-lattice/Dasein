@@ -94,6 +94,20 @@ class FitFunctionGeneratorTest(TestBase):
         self.assertAlmostEquals(fit_function_parameters['gamma'], 1.5625, delta=1e-4)
         self.assertAlmostEquals(fit_function_parameters['maxRate'], 1758.5505459430826, delta=1e-4)
 
+    def testBadEVExecute(self):
+        mediator = Mediator()
+        mediator.revenueColumn = "revScore"
+        mediator.evsegmentations = None
+        self.evfit.mediator = mediator
+        self.assertEquals(self.evfit.getName(), "EVFitFunctionGenerator")
+        self.evfit.execute()
+        fit_function_parameters = self.evfit.getMediator().ev_fit_function_parameters
+        print(fit_function_parameters)
+        self.assertAlmostEquals(fit_function_parameters['alpha'], 0.0, delta=1e-4)
+        self.assertAlmostEquals(fit_function_parameters['beta'], 0.0, delta=1e-4)
+        self.assertAlmostEquals(fit_function_parameters['gamma'], 0.0, delta=1e-4)
+        self.assertAlmostEquals(fit_function_parameters['maxRate'], 0.0, delta=1e-4)
+
     def _loadRevenueModel(self):
         jsonStr = '''
         {
