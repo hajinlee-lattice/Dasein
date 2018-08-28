@@ -251,7 +251,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             throw new LedpException(LedpCode.LEDP_40035,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
-        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryByModelId(customerSpace, aiModel.getModelSummaryId());
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryByModelId(customerSpace,
+                aiModel.getModelSummaryId());
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_40036,
                     new String[] { "ModelSummary", aiModel.getId(), ratingEngine.getId(), customerSpace });
@@ -270,18 +271,23 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         Map<String, Integer> importanceOrdering = getFeatureImportance(customerSpace, modelSummary);
 
-        return metadataStoreProxy.getMetadata(MetadataStoreName.Table,
+        Map<String, List<ColumnMetadata>> toReturn = metadataStoreProxy.getMetadata(MetadataStoreName.Table,
                 CustomerSpace.shortenCustomerSpace(customerSpace), table.getName())
                 .collect(HashMap<String, List<ColumnMetadata>>::new, (returnMap, cm) -> {
                     if (importanceOrdering.containsKey(cm.getAttrName())) {
                         // could move this into le-metadata as a decorator
                         cm.setImportanceOrdering(importanceOrdering.get(cm.getAttrName()));
+                        importanceOrdering.remove(cm.getAttrName());
                     }
                     if (!returnMap.containsKey(cm.getCategory().getName())) {
                         returnMap.put(cm.getCategory().getName(), new ArrayList<>());
                     }
                     returnMap.get(cm.getCategory().getName()).add(cm);
                 }).block();
+
+        log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
+
+        return toReturn;
     }
 
     private Map<String, Integer> getFeatureImportance(String customerSpace, ModelSummary modelSummary) {
@@ -299,6 +305,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
                 throw new LedpException(LedpCode.LEDP_10011, new String[] { featureImportanceFilePath });
             }
+            log.info("Attempting to get feature importance from the file: " + featureImportanceFilePath);
             String featureImportanceRaw = HdfsUtils.getHdfsFileContents(yarnConfiguration, featureImportanceFilePath);
             if (StringUtils.isEmpty(featureImportanceRaw)) {
                 log.error("Failed to find the feature importance file: " + featureImportanceFilePath);

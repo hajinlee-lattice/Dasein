@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -559,29 +560,45 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public boolean validateForModeling(String customerSpace, RatingEngine ratingEngine, AIModel aiModel) {
         validateAIRatingEngine(ratingEngine);
+        List<String> errors = new ArrayList<>();
         switch (ratingEngine.getType()) {
         case RULE_BASED:
-            throw new LedpException(LedpCode.LEDP_31107,
-                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
+            errors.add(LedpException.buildMessage(LedpCode.LEDP_31107,
+                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() }));
         case CROSS_SELL:
             if (CollectionUtils
                     .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts())) {
-                throw new LedpException(LedpCode.LEDP_40012,
-                        new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() });
+                errors.add(LedpException.buildMessage(LedpCode.LEDP_40012,
+                        new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() }));
             }
             Long noOfEvents = getModelingQueryCount(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT,
                     null);
             if (noOfEvents < minimumEvents) {
-                throw new LedpException(LedpCode.LEDP_40033,
+                errors.add(LedpException.buildMessage(LedpCode.LEDP_40033,
                         new String[] { aiModel.getId(), ratingEngine.getId(), noOfEvents.toString(),
-                                minimumEvents.toString(), CustomerSpace.parse(customerSpace).toString() });
+                                minimumEvents.toString(), CustomerSpace.parse(customerSpace).toString() }));
             }
             break;
         case CUSTOM_EVENT:
+            if (CollectionUtils.isEmpty(CustomEventModelingConfig.getAdvancedModelingConfig(aiModel).getDataStores())) {
+                errors.add("No datastore selected, atleast one attribute set needed for modeling");
+            }
+            if (CustomEventModelingConfig.getAdvancedModelingConfig(aiModel).getCustomEventModelingType() == null) {
+                errors.add("No CustomEventModelingType selected");
+            }
+            if (StringUtils.isEmpty(CustomEventModelingConfig.getAdvancedModelingConfig(aiModel).getSourceFileName())) {
+                errors.add("SourceFileName cannot be empty for custom event model's iteration");
+            }
         case PROSPECTING:
         default:
         }
-        return true;
+        if (CollectionUtils.isEmpty(errors)) {
+            return true;
+        } else {
+            AtomicInteger i = new AtomicInteger(1);
+            throw new LedpException(LedpCode.LEDP_32000,
+                    errors.stream().map(err -> "\n" + i.getAndIncrement() + ". " + err).toArray());
+        }
     }
 
     @Override
