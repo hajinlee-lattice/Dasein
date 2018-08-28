@@ -326,6 +326,7 @@ public enum LedpCode {
     LEDP_18201("Could not process Scoring Request as record body is empty"), //
     LEDP_18202("Could not process Scoring Request as ConfigID is empty."), //
     LEDP_18203("Validation fails and there are errors."), //
+    LEDP_18204("User {0} does not have the right to update name/description of attribute"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

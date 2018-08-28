@@ -21,6 +21,7 @@ public class AttrValidationServiceImpl implements AttrValidationService {
 
     private List<String> activationValidatorList = new ArrayList<>();
     private List<String> usageValidatorList = new ArrayList<>();
+    private List<String> nameValidatorList = new ArrayList<>();
     private List<String> allValidatorList = new ArrayList<>();
 
     @PostConstruct
@@ -35,6 +36,8 @@ public class AttrValidationServiceImpl implements AttrValidationService {
         usageValidatorList.add(GenericValidator.VALIDATOR_NAME);
         usageValidatorList.add(UsageLimitValidator.VALIDATOR_NAME);
 
+        nameValidatorList.add(GenericValidator.VALIDATOR_NAME);
+
         allValidatorList.add(GenericValidator.VALIDATOR_NAME);
         allValidatorList.add(LifecycleValidator.VALIDATOR_NAME);
         allValidatorList.add(ActivationLimitValidator.VALIDATOR_NAME);
@@ -46,12 +49,23 @@ public class AttrValidationServiceImpl implements AttrValidationService {
     @Override
     public ValidationDetails validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
             AttrConfigUpdateMode mode) {
-        List<String> validatorList = activationValidatorList;
-        if (AttrConfigUpdateMode.Usage.equals(mode)) {
+        List<String> validatorList = null;
+
+        switch (mode) {
+        case Activation:
+            validatorList = activationValidatorList;
+            break;
+        case Usage:
             validatorList = usageValidatorList;
-        } else if (AttrConfigUpdateMode.Both.equals(mode)) {
+            break;
+        case Name:
+            validatorList = nameValidatorList;
+            break;
+        case ALL:
+        default:
             validatorList = allValidatorList;
         }
+
         for (String validatorName : validatorList) {
             AttrValidator validator = AttrValidator.getValidator(validatorName);
             try (PerformanceTimer timer = new PerformanceTimer()) {

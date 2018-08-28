@@ -46,7 +46,8 @@ public class ActivationLimitValidator extends AttrValidator {
 
     @Override
     public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
-        log.info("start to validate limit activation");
+        log.info(String.format("start to validate limit activation for tenant %s",
+                MultiTenantContext.getShortTenantId()));
         // make sure user selected attr don't have two same attribute
         LimitValidatorUtils.checkAmbiguityInFieldNames(userProvidedAttrConfigs);
         // split user selected configs into active and inactive, props always

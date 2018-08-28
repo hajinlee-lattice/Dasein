@@ -20,6 +20,7 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
@@ -78,6 +79,13 @@ public class AttrConfigResource {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         UIAction uiAction = attrConfigService.updateUsageConfig(categoryName, usageName, request);
         return new ModelAndView(jsonView, ImmutableMap.of(UIAction.class.getSimpleName(), uiAction));
+    }
+
+    @PutMapping(value = "/name/config/category/{categoryName}")
+    @ApiOperation("update Name or Description for Account/Contract attributes")
+    public void updateNameConfig(@PathVariable String categoryName,
+            @RequestBody Map<String, AttrConfigNameAndDescription> request, HttpServletResponse response) {
+        attrConfigService.updateNameConfig(categoryName, request);
     }
 
     @GetMapping(value = "/activation/config/category/{categoryName}")

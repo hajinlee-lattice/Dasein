@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
@@ -222,6 +224,36 @@ public class AttrConfigServiceImplUnitTestNG {
                     .generateAttrConfigRequestForActivation(Category.CONTACT_ATTRIBUTES.getName(), request);
         } catch (Exception e) {
             Assert.fail("Should not throw any exception");
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testGenerateAttrConfigRequestForName() {
+        AttrConfigNameAndDescription attr1Change = new AttrConfigNameAndDescription();
+        attr1Change.setDisplayName("att1-name-update");
+        AttrConfigNameAndDescription attr2Change = new AttrConfigNameAndDescription();
+        attr2Change.setDisplayName("att2-name-update");
+        attr2Change.setDescription("att2-description-update");
+        Map<String, AttrConfigNameAndDescription> request = new HashMap<>();
+        request.put("attr1", attr1Change);
+        request.put("attr2", attr2Change);
+        AttrConfigRequest attrConfigRequest = attrConfigService
+                .generateAttrConfigRequestForName(Category.CONTACT_ATTRIBUTES.getName(), request);
+        List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
+        Assert.assertEquals(attrConfigs.size(), 2);
+        for (AttrConfig attrConfig : attrConfigs) {
+            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
+            if (attrConfig.getAttrName().equals("attr1")) {
+                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(),
+                        "att1-name-update");
+            } else if (attrConfig.getAttrName().equals("attr2")) {
+                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(),
+                        "att2-name-update");
+                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Description).getCustomValue(),
+                        "att2-description-update");
+            } else {
+                Assert.fail("Does not expect the attribute" + attrConfig.getAttrName());
+            }
         }
     }
 

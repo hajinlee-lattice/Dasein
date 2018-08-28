@@ -34,7 +34,6 @@ public class UsageLimitValidator extends AttrValidator {
 
     @Override
     public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
-        log.info("start to validate usgae limitation");
         String tenantId = MultiTenantContext.getShortTenantId();
         log.info("validate usage limit for tenant " + tenantId);
         LimitValidatorUtils.checkAmbiguityInFieldNames(userProvidedAttrConfigs);

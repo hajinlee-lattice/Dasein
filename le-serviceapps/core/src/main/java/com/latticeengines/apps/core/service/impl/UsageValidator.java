@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.service.AttrValidator;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -30,7 +31,7 @@ public class UsageValidator extends AttrValidator {
 
     @Override
     public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
-        log.info("start to validate usage");
+        log.info(String.format("start to validate usage for tenant %s", MultiTenantContext.getShortTenantId()));
         for (AttrConfig attrConfig : userProvidedAttrConfigs) {
             checkUsage(attrConfig);
         }

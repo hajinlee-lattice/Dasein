@@ -42,7 +42,7 @@ public class CDLImpactValidator extends AttrValidator {
 
     @Override
     public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
-        log.info("start to validate CDL impact");
+        log.info(String.format("start to validate CDL impact for tenant %s", MultiTenantContext.getShortTenantId()));
         for (AttrConfig attrConfig : userProvidedAttrConfigs) {
             checkImpact(attrConfig);
         }

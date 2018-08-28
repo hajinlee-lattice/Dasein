@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
+import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.AttrDetail;
@@ -334,7 +335,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         }
         if (CollectionUtils.isNotEmpty(request.getDeselect())) {
-            verifyAccessLevel();
+            verifyDeactivateAccessLevel();
             for (String attr : request.getDeselect()) {
                 updateAttrConfigsForState(category, attrConfigs, attr, ColumnMetadataKey.State, AttrState.Inactive);
             }
@@ -342,11 +343,20 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         return attrConfigRequest;
     }
 
-    private void verifyAccessLevel() {
+    private void verifyDeactivateAccessLevel() {
         AccessLevel accessLevel = userService.getAccessLevel(MultiTenantContext.getPLSTenantId(),
                 MultiTenantContext.getEmailAddress());
         if (AccessLevel.SUPER_ADMIN != accessLevel && AccessLevel.INTERNAL_ADMIN != accessLevel) {
             throw new LedpException(LedpCode.LEDP_18185, new String[] { MultiTenantContext.getEmailAddress() });
+        }
+    }
+
+    private void verifyNameUpdateAccessLevel() {
+        AccessLevel accessLevel = userService.getAccessLevel(MultiTenantContext.getPLSTenantId(),
+                MultiTenantContext.getEmailAddress());
+        if (AccessLevel.SUPER_ADMIN != accessLevel && AccessLevel.INTERNAL_ADMIN != accessLevel
+                && AccessLevel.EXTERNAL_ADMIN != accessLevel) {
+            throw new LedpException(LedpCode.LEDP_18204, new String[] { MultiTenantContext.getEmailAddress() });
         }
     }
 
@@ -373,6 +383,26 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         attrConfigs.add(config);
     }
 
+    private void updateAttrConfigsForNameAndDescription(Category category, List<AttrConfig> attrConfigs,
+            String attrName, AttrConfigNameAndDescription request) {
+        AttrConfig config = new AttrConfig();
+        config.setAttrName(attrName);
+        config.setEntity(CategoryUtils.getEntity(category));
+        config.setAttrProps(new HashMap<>());
+        if (request.getDisplayName() != null) {
+            AttrConfigProp<String> nameProp = new AttrConfigProp<>();
+            nameProp.setCustomValue(request.getDisplayName());
+            config.getAttrProps().put(ColumnMetadataKey.DisplayName, nameProp);
+        }
+        if (request.getDescription() != null) {
+            AttrConfigProp<String> desProp = new AttrConfigProp<>();
+            desProp.setCustomValue(request.getDescription());
+            config.getAttrProps().put(ColumnMetadataKey.Description, desProp);
+        }
+
+        attrConfigs.add(config);
+    }
+
     @Override
     public UIAction updateUsageConfig(String categoryName, String usageName, AttrConfigSelectionRequest request) {
         String tenantId = MultiTenantContext.getShortTenantId();
@@ -381,6 +411,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest,
                 AttrConfigUpdateMode.Usage);
         return processUpdateResponse(saveResponse, request, true);
+    }
+
+    @Override
+    public void updateNameConfig(String categoryName, Map<String, AttrConfigNameAndDescription> request) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        verifyNameUpdateAccessLevel();
+        AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForName(categoryName, request);
+        cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest, AttrConfigUpdateMode.Name);
     }
 
     @VisibleForTesting
@@ -513,6 +551,21 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         if (CollectionUtils.isNotEmpty(request.getDeselect())) {
             for (String attr : request.getDeselect()) {
                 updateAttrConfigs(category, attrConfigs, attr, property, Boolean.FALSE);
+            }
+        }
+        return attrConfigRequest;
+    }
+
+    @VisibleForTesting
+    AttrConfigRequest generateAttrConfigRequestForName(String categoryName,
+            Map<String, AttrConfigNameAndDescription> request) {
+        Category category = resolveCategory(categoryName);
+        AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
+        List<AttrConfig> attrConfigs = new ArrayList<>();
+        attrConfigRequest.setAttrConfigs(attrConfigs);
+        if (MapUtils.isNotEmpty(request)) {
+            for (String attr : request.keySet()) {
+                updateAttrConfigsForNameAndDescription(category, attrConfigs, attr, request.get(attr));
             }
         }
         return attrConfigRequest;
@@ -752,5 +805,4 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         });
         return attrs;
     }
-
 }
