@@ -139,6 +139,9 @@ public class AttrConfigSelectionDetail {
         @JsonProperty("DisplayName")
         private String displayName;
 
+        @JsonProperty("DefaultName")
+        private String defaultName;
+
         @JsonProperty("Description")
         private String description;
 
@@ -164,6 +167,14 @@ public class AttrConfigSelectionDetail {
             displayName = displayNameValue;
         }
 
+        public String getDefaultName() {
+            return defaultName;
+        }
+
+        public void setDefaultName(String defaultNameVal) {
+            defaultName = defaultNameVal;
+        }
+
         public String getDescription() {
             return description;
         }
@@ -186,6 +197,11 @@ public class AttrConfigSelectionDetail {
 
         public void setIsFrozen(Boolean isFrozenValue) {
             isFrozen = isFrozenValue;
+        }
+
+        @Override
+        public String toString() {
+            return JsonUtils.serialize(this);
         }
     }
 

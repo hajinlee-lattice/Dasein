@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.AttrDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
@@ -312,8 +313,8 @@ public class AttrConfigServiceImplUnitTestNG {
                 AttrConfigServiceImplTestUtils.getAttr9(Category.FIRMOGRAPHICS, false)));
         when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.FIRMOGRAPHICS.getName()))
                 .thenReturn(request);
-        AttrConfigSelectionDetail selectionDetail = attrConfigService.getAttrConfigSelectionDetails("Firmographics",
-                "Segmentation");
+        AttrConfigSelectionDetail selectionDetail = attrConfigService
+                .getAttrConfigSelectionDetailForUsage("Firmographics", "Segmentation");
         log.info("testGetDetailAttrForUsageWithNonPremiumCategory selectionDetail is " + selectionDetail);
         Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
         Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
@@ -336,13 +337,36 @@ public class AttrConfigServiceImplUnitTestNG {
                 AttrConfigServiceImplTestUtils.getAttr9(Category.INTENT, false, false)));
         when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.INTENT.getName())).thenReturn(request);
         AttrConfigSelectionDetail selectionDetail = attrConfigService
-                .getAttrConfigSelectionDetails(Category.INTENT.getName(), "Segmentation");
+                .getAttrConfigSelectionDetailForUsage(Category.INTENT.getName(), "Segmentation");
         log.info("testGetDetailAttrForUsageWithPremiumCategory selectionDetail is " + selectionDetail);
         Assert.assertEquals(selectionDetail.getSelected() - 1L, 0);
         Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
         Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
         Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
                 .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 4);
+    }
+
+    @Test(groups = "unit")
+    public void testGetAttrConfigSelectionDetailForName() {
+        AttrConfigRequest request = new AttrConfigRequest();
+        request.setAttrConfigs(
+                Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.ACCOUNT_ATTRIBUTES, true, true),
+                        AttrConfigServiceImplTestUtils.getAttr2(Category.ACCOUNT_ATTRIBUTES, true, true), //
+                        AttrConfigServiceImplTestUtils.getAttr3(Category.ACCOUNT_ATTRIBUTES, true, true), //
+                        AttrConfigServiceImplTestUtils.getAttr4(Category.ACCOUNT_ATTRIBUTES, true, false), //
+                        AttrConfigServiceImplTestUtils.getAttr5(Category.ACCOUNT_ATTRIBUTES, false, true), //
+                        AttrConfigServiceImplTestUtils.getAttr6(Category.ACCOUNT_ATTRIBUTES, false, false), //
+                        AttrConfigServiceImplTestUtils.getAttr7(Category.ACCOUNT_ATTRIBUTES, false, false), //
+                        AttrConfigServiceImplTestUtils.getAttr8(Category.ACCOUNT_ATTRIBUTES, false, false), //
+                        AttrConfigServiceImplTestUtils.getAttr9(Category.ACCOUNT_ATTRIBUTES, false, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.ACCOUNT_ATTRIBUTES.getName()))
+                .thenReturn(request);
+        List<AttrDetail> selectionDetail = attrConfigService
+                .getAttrConfigSelectionDetailForName(Category.ACCOUNT_ATTRIBUTES.getName()).getAttributes();
+        log.info("testGetAttrConfigSelectionDetailForName selectionDetail is " + selectionDetail);
+        Assert.assertEquals(selectionDetail.size(), 4);
+        Assert.assertTrue(selectionDetail.stream().allMatch(detail -> detail.getDefaultName() != null
+                && detail.getAttribute() != null && detail.getDescription() != null));
     }
 
     @Test(groups = "unit")

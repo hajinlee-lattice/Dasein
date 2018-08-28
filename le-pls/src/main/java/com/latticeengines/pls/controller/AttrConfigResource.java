@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.SubcategoryDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
@@ -100,7 +101,14 @@ public class AttrConfigResource {
     @ApiOperation("get usage configuration detail for a specific category")
     public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usageName) {
-        return attrConfigService.getAttrConfigSelectionDetails(categoryName, usageName);
+        return attrConfigService.getAttrConfigSelectionDetailForUsage(categoryName, usageName);
+    }
+
+    @GetMapping(value = "/name/config/category/{categoryName}")
+    @ResponseBody
+    @ApiOperation("get name configuration detail for a specific category")
+    public SubcategoryDetail getNameConfiguration(@PathVariable String categoryName) {
+        return attrConfigService.getAttrConfigSelectionDetailForName(categoryName);
     }
 
     @GetMapping(value = "/stats/category/{categoryName}")

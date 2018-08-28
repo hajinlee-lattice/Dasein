@@ -579,7 +579,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public AttrConfigSelectionDetail getAttrConfigSelectionDetails(String categoryName, String usageName) {
+    public AttrConfigSelectionDetail getAttrConfigSelectionDetailForUsage(String categoryName, String usageName) {
         String property = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getShortTenantId(), categoryName);
@@ -721,12 +721,56 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
+    public SubcategoryDetail getAttrConfigSelectionDetailForName(String categoryName) {
+        SubcategoryDetail result = new SubcategoryDetail();
+        List<AttrDetail> list = new ArrayList<>();
+        result.setAttributes(list);
+        AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
+                .getAttrConfigByCategory(MultiTenantContext.getShortTenantId(), categoryName);
+        if (attrConfigRequest.getAttrConfigs() != null) {
+            for (AttrConfig attrConfig : attrConfigRequest.getAttrConfigs()) {
+                Map<String, AttrConfigProp<?>> attrProps = attrConfig.getAttrProps();
+                if (attrProps != null) {
+                    boolean includeCurrentAttr = true;
+                    AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
+                            .get(ColumnMetadataKey.State);
+                    if (AttrState.Inactive.equals(getActualValue(attrConfigProp))) {
+                        includeCurrentAttr = false;
+                    }
+                    if (includeCurrentAttr) {
+                        AttrDetail attrDetail = new AttrDetail();
+                        attrDetail.setAttribute(attrConfig.getAttrName());
+                        attrDetail.setDefaultName(getDefaultName(attrProps));
+                        attrDetail.setDisplayName(getDisplayName(attrProps));
+                        attrDetail.setDescription(getDescription(attrProps));
+                        list.add(attrDetail);
+                    }
+                } else {
+                    log.warn(String.format("%s does not have attrProps", attrConfig.getAttrName()));
+                }
+            }
+        }
+        return result;
+
+    }
+
+    @SuppressWarnings("unchecked")
     private String getDisplayName(Map<String, AttrConfigProp<?>> attrProps) {
         AttrConfigProp<String> displayProp = (AttrConfigProp<String>) attrProps.get(ColumnMetadataKey.DisplayName);
         if (displayProp != null) {
             return (String) getActualValue(displayProp);
         }
         return defaultDisplayName;
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private String getDefaultName(Map<String, AttrConfigProp<?>> attrProps) {
+        AttrConfigProp<String> displayProp = (AttrConfigProp<String>) attrProps.get(ColumnMetadataKey.DisplayName);
+        if (displayProp != null) {
+            return displayProp.getSystemValue();
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -805,4 +849,5 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         });
         return attrs;
     }
+
 }

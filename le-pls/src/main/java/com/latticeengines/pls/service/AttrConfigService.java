@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.SubcategoryDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
@@ -22,7 +23,9 @@ public interface AttrConfigService {
 
     AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName);
 
-    AttrConfigSelectionDetail getAttrConfigSelectionDetails(String categoryName, String usageName);
+    AttrConfigSelectionDetail getAttrConfigSelectionDetailForUsage(String categoryName, String usageName);
+
+    SubcategoryDetail getAttrConfigSelectionDetailForName(String categoryName);
 
     UIAction updateActivationConfig(String categoryName, AttrConfigSelectionRequest request);
 
