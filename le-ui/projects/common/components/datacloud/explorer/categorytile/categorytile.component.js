@@ -217,7 +217,7 @@ angular
             }
 
             vm.getDateMap = function(category) {
-                var categoryKey = category.toUpperCase().replace(' ','_'),
+                var categoryKey = category, //.toUpperCase().replace(' ','_'),
                     timestamp = (vm.collectionStatus && vm.collectionStatus.DateMap ? vm.collectionStatus.DateMap[categoryKey] : ''),
                     lastDataRefresh = '';
                 if(timestamp) {
