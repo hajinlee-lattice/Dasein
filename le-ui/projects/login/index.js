@@ -41,4 +41,6 @@ import '../common/components/exceptions/exceptions.component';
 import "./app/app.component";
 import "./app/app.routes";
 
+import '../atlas/help.index';
+
 export default angular.module("com.le.login", ["templates-main", "loginApp"]);
