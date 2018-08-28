@@ -58,8 +58,8 @@ angular.module('login')
 
             LoginService.GetSessionDocument(tenant, username).then(function(data) {
                 if (data != null && data.Success === true) {
-                    LoginStore.redirectToLP(tenant);
                     vm.aptrinsic(vm.login, tenant);
+                    LoginStore.redirectToLP(tenant);
                 } else {
                     vm.loginInProgress[tenant.DisplayName] = false;
                     
