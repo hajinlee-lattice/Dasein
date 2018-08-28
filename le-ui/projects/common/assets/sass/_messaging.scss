@@ -49,6 +49,12 @@
         }
     }
 
+    i.badge {
+        position: absolute;
+        top: -.5em;
+        left: -1.2em;
+    }
+
     .messaging-icon {
         display: flex;
         align-items: center;

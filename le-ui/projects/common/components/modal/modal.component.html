@@ -1,6 +1,6 @@
 <div class="le_modal" ng-class="opened ? 'opened' : 'closed'">
 
-    <div class="le-modal-content" ng-class="modalConfig.type">
+    <div class="le-modal-content" id="{{modalConfig.name}}" ng-class="modalConfig.type">
         <div class="le-modal-header" ng-style="modalConfig.headerconfig">
             <span class="close" ng-if="modalConfig.showclose" ng-click="forceDischarge()">&times;</span>
             <div class="le-title-container">

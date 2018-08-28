@@ -53,16 +53,11 @@ angular.module('common.attributes.activate', [])
         overview: '<',
         config: '<'
     },
-    controller: function ($q, AttrConfigStore, Modal) {
+    controller: function ($q, AttrConfigStore) {
         var vm = this;
 
         vm.store = AttrConfigStore;
         vm.filters = vm.store.get('filters');
-            
-        vm.$onInit = function() {
-            //xkhjdfl();
-        };
-        
         vm.uiCanExit = vm.store.uiCanExit;
     }
 });

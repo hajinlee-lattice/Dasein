@@ -33,7 +33,7 @@
             <div class="attr-result-label" ng-click="$ctrl.toggleAll()">
                 <label for="check_all">
                     Attribute
-                    <span>({{$ctrl.getCount()|number}})</span>
+                    <span>({{($ctrl.getAttributes(filteredList) | filter: $ctrl.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})</span>
                 </label>
             </div>
         </li>
@@ -109,7 +109,7 @@
                             {{item.DisplayName}}
                         </span>
 
-                        <span ng-if="item.TotalAttrs">({{item.TotalAttrs|number}})</span>
+                        <span ng-if="item.Attributes">({{(item.Attributes | filter: $ctrl.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})</span>
                     </label>
                 </div>
 

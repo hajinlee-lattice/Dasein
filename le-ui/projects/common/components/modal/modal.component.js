@@ -162,7 +162,7 @@ angular.module('common.modal', [])
 
     this.modalRemoveFromDOM = function(modal, args) {
         modal.toggle();
-        angular.element('#leModalContainer').empty();
+        angular.element('#'+args.name).remove();
         Modal.remove(args.name);
     };
 

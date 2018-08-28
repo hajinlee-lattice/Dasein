@@ -36,7 +36,7 @@ angular.module('common.attributes.categories', [])
             });
 
             return catmap;
-        }
+        };
 
         vm.click = function(category) {
             if (!vm.params.section) {

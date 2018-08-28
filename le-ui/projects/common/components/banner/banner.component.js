@@ -6,21 +6,41 @@ angular.module('common.banner', [])
         this.banners = [];
     };
 
-    this.get = function() {
-        return this.banners;
+    this.get = function(name) {
+        if (name) {
+            return this.banners.filter(function(banner) {
+                return banner.name === name;
+            });
+        } else {
+            return this.banners;
+        }
     };
 
     this.set = function(opts) {
         opts = opts || {};
 
         var banner = {
+            badge: 1,
+            name: opts.name || "",
             show: opts.show || true,
             type: opts.type || '',
             title: opts.title || '',
             message: $sce.trustAsHtml(opts.message || '')
         };
 
-        this.banners.push(banner);
+        var old = opts.name ? this.get(opts.name) : [];
+        
+        old = old.filter(function(item) {
+            return (item.type == banner.type && item.title == banner.title && item.message == banner.message);
+        });
+
+        if (old.length > 0) {
+            old.forEach(function(item) {
+                item.badge++;
+            });
+        } else {
+            this.banners.push(banner);
+        }
     };
 
     this.reset = function() {

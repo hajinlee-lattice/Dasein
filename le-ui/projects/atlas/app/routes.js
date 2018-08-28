@@ -54,7 +54,8 @@ angular
         StateHistory.setFrom(from, trans.params('from'));
         StateHistory.setTo(to, trans.params('to'));
 
-        Banner.reset();
+        // maybe we shouldn't be clearing banners anymore on state change?
+        //Banner.reset();
     });
 
     // when user hits browser Back button after app instantiate, send back to login
@@ -1631,7 +1632,7 @@ angular
                         //                     JSON.stringify(settings);
 
                         var host = '/dante?sin=806262c0-3053-458e-8fb8-0128416e7c82&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=00561000002sfm8AAA&Recommendation=76b4a228-ba12-4c47-801d-dc8aeb3365fd&HasSalesprism=false&CustomSettings=%7B"SupportEmail"%3A"pliu%40lattice-engines.com"%2C"ShowScore"%3A%20false%2C"ShowLift"%3A%20false%2C"ShowPurchaseHistory"%3A%20true%2C"NoPlaysMessage"%3A"No%20Plays%20Found."%2C"NoDataMessage"%3A"No%20Data%20Found."%2C"hideNavigation"%3A%20false%2C"HideTabs"%3A%20false%2C"HideHeader"%3A%20true%2C"DefaultTab"%3A"TalkingPoints"%7D&PurchaseHistoryAccount=0016100001RU35QAAT';
-                        var host = '/dante?sin=806262c0-3053-458e-8fb8-0128416e7c82&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=00561000002sfm8AAA&Recommendation=cf5132a2-6212-4f81-ba43-1783be7f695c&HasSalesprism=false&CustomSettings=%7B%22SupportEmail%22%3A%22pliu%40lattice-engines.com%22%2C%22ShowScore%22%3A%20false%2C%22ShowLift%22%3A%20false%2C%22ShowPurchaseHistory%22%3A%20true%2C%22NoPlaysMessage%22%3A%22No%20Plays%20Found.%22%2C%22NoDataMessage%22%3A%22No%20Data%20Found.%22%2C%22hideNavigation%22%3A%20false%2C%22HideTabs%22%3A%20false%2C%22HideHeader%22%3A%20false%2C%22DefaultTab%22%3A%22TalkingPoints%22%7D&PurchaseHistoryAccount=0016100001RU35QAAT';
+                        //var host = '/dante?sin=806262c0-3053-458e-8fb8-0128416e7c82&serverurl=https://testapi.lattice-engines.com&Directory=salesforce&userlink=00561000002sfm8AAA&Recommendation=cf5132a2-6212-4f81-ba43-1783be7f695c&HasSalesprism=false&CustomSettings=%7B%22SupportEmail%22%3A%22pliu%40lattice-engines.com%22%2C%22ShowScore%22%3A%20false%2C%22ShowLift%22%3A%20false%2C%22ShowPurchaseHistory%22%3A%20true%2C%22NoPlaysMessage%22%3A%22No%20Plays%20Found.%22%2C%22NoDataMessage%22%3A%22No%20Data%20Found.%22%2C%22hideNavigation%22%3A%20false%2C%22HideTabs%22%3A%20false%2C%22HideHeader%22%3A%20false%2C%22DefaultTab%22%3A%22TalkingPoints%22%7D&PurchaseHistoryAccount=0016100001RU35QAAT';
 
                         $('#sureshot_iframe_container')
                             .html("<iframe id='dante_iframe' src='" + host + "'></iframe>");

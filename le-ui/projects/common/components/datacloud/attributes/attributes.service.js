@@ -81,7 +81,8 @@ angular.module('common.attributes')
                 modal.disableDischargeButton(true);
             
                 store.saveConfig().then(function(result) {
-                    console.log(modal.name, modal, result, args);
+                    var uiAction = result.data.uiAction;
+
                     if (args.name == 'AttrAdmin_Warning') {
                         Modal.modalRemoveFromDOM(modal, args);
                     }
@@ -239,7 +240,7 @@ angular.module('common.attributes')
                     store.set('saving', false);
                 }
 
-                deferred.resolve({});
+                deferred.resolve(result);
             }, 500);
         });
 

@@ -337,11 +337,26 @@ angular.module('common.attributes.list', [])
 
             return false;
         };
+
+        vm.getAttributes = function(filtered) {
+            if (vm.subcategory) {
+                return filtered;
+            }
+
+            var list = [];
+
+            filtered.forEach(function(item) {
+                list = item.Attributes.concat(list);
+            });
+
+            return list;
+        };
+
         vm.getPageSize = function() {
             return vm.filters.pagesize;
         };
 
-        vm.getFiltering = function() {
+        vm.getFiltering = function(root) {
             var obj = {};
 
             Object.keys(vm.filters.show).forEach(function(property) {
@@ -356,7 +371,7 @@ angular.module('common.attributes.list', [])
                 }
             });
 
-            return vm.subcategory ? obj : { Attributes: obj };
+            return root || vm.subcategory ? obj : { Attributes: obj };
         };
 
         vm.go = function(subcategory) {

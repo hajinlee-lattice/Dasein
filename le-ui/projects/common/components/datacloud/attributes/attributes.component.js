@@ -51,6 +51,5 @@ angular.module('common.attributes', [
 })
 .component('adminAttributes', {
     templateUrl: '',
-    controller: function() {
-    }
+    controller: function() {}
 });
