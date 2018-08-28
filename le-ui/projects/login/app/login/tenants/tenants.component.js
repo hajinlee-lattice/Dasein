@@ -72,8 +72,8 @@ angular.module('login.tenants', [
             
             LoginService.GetSessionDocument(tenant, LoginStore.login.username).then(function(data) {
                 if (data != null && data.Success === true) {
-                    LoginStore.redirectToLP(tenant);
                     vm.aptrinsic(LoginStore.login, tenant);
+                    LoginStore.redirectToLP(tenant);
                 } else {
                     vm.deactivated = false;
                     vm.selected = null;
