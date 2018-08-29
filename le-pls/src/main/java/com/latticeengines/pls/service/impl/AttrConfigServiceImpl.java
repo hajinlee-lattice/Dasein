@@ -724,6 +724,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Override
     public SubcategoryDetail getAttrConfigSelectionDetailForName(String categoryName) {
         SubcategoryDetail result = new SubcategoryDetail();
+        result.setHasFrozenAttrs(null);
+        result.setSelected(null);
+        result.setTotalAttrs(null);
         List<AttrDetail> list = new ArrayList<>();
         result.setAttributes(list);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
@@ -752,7 +755,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         }
         return result;
-
     }
 
     @SuppressWarnings("unchecked")
