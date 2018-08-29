@@ -89,7 +89,11 @@ public abstract class DataFeedMetadataService {
             }
         });
         CDLExternalSystem cdlExternalSystem = cdlExternalSystemService.getExternalSystem(customerSpace);
-        if (cdlExternalSystem != null) {
+        if (cdlExternalSystem != null &&
+                (CollectionUtils.isNotEmpty(cdlExternalSystem.getCRMIdList())
+                || CollectionUtils.isNotEmpty(cdlExternalSystem.getERPIdList())
+                || CollectionUtils.isNotEmpty(cdlExternalSystem.getMAPIdList())
+                || CollectionUtils.isNotEmpty(cdlExternalSystem.getOtherIdList()))) {
             if (CollectionUtils.isNotEmpty(cdlExternalSystem.getCRMIdList())) {
                 List<String> newCRMIdList = new ArrayList<>();
                 cdlExternalSystem.getCRMIdList().forEach(id -> {
