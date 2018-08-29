@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -34,9 +33,6 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private ActionService actionService;
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
 
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
             CSVImportFileInfo csvImportFileInfo) {

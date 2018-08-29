@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 public interface DataEncryptionService {
     boolean isEncrypted(CustomerSpace space);
 
+    @Deprecated
     void encrypt(CustomerSpace space);
 
     List<String> getEncryptedPaths(CustomerSpace space);

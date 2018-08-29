@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -66,9 +65,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private PlayLaunch playLaunch;
 
     private Tenant tenant;
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
 
     @Inject
     private SegmentProxy segmentProxy;

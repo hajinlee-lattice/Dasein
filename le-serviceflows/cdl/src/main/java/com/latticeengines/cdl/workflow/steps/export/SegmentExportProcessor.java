@@ -79,7 +79,7 @@ public abstract class SegmentExportProcessor {
     @Value("${playmaker.workflow.segment.pagesize:100}")
     protected long pageSize;
 
-    @Value("${common.pls.url}")
+    @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
     private String avroFilePath;

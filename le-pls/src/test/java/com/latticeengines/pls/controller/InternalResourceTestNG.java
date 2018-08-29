@@ -33,7 +33,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
-    @Value("${common.pls.url}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;

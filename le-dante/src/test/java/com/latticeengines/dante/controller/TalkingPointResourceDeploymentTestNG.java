@@ -31,7 +31,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteDeploymentTestNGB
     @Autowired
     private PublishedTalkingPointEntityMgr publishedTalkingPointEntityMgr;
 
-    @Value("${common.pls.url}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     @BeforeClass(groups = "deployment")

@@ -34,7 +34,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static boolean USE_EXISTING_TENANT = false;
     private static String EXISTING_TENANT = "JLM1526244443808";
 
-    @Value("${common.pls.url}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     @Inject

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,9 +15,6 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
 
     private String orgId = "Org_" + System.currentTimeMillis();
     private String orgName = "Dummy name";

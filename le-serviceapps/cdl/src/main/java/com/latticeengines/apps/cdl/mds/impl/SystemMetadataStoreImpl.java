@@ -132,6 +132,7 @@ public class SystemMetadataStoreImpl extends
 
                                 // Enrichment
                                 cm.setCanEnrich(true);
+
                                 // enable a list of default attributes for Export
                                 if (exportAttributes.contains(cm.getAttrName())) {
                                     cm.enableGroup(Enrichment);

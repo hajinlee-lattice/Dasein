@@ -115,7 +115,7 @@ public class PlayLaunchProcessor {
     @Value("${playmaker.workflow.segment.pagesize:150}")
     private long pageSize;
 
-    @Value("${common.pls.url}")
+    @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
     @Inject

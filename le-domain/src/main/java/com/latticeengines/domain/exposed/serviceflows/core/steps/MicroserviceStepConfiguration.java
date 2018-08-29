@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
@@ -64,14 +63,12 @@ public class MicroserviceStepConfiguration extends BaseStepConfiguration {
     @NotNull
     private CustomerSpace customerSpace;
 
-    @NotEmptyString
-    @NotNull
     private String microServiceHostPort;
 
     @JsonIgnore
     public void microserviceStepConfiguration(MicroserviceStepConfiguration config) {
         this.customerSpace = config.getCustomerSpace();
-        this.microServiceHostPort = config.getMicroServiceHostPort();
+        // this.microServiceHostPort = config.getMicroServiceHostPort();
     }
 
     @JsonProperty("customerSpace")
@@ -91,7 +88,7 @@ public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 
     @JsonProperty("microServiceHostPort")
     public void setMicroServiceHostPort(String microServiceHostPort) {
-        this.microServiceHostPort = microServiceHostPort;
+        // this.microServiceHostPort = microServiceHostPort;
     }
 
     @JsonProperty("podId")

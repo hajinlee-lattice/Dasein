@@ -120,11 +120,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         firstTenant = testBed.getMainTestTenant();
 
-        if (EncryptionGlobalState.isEnabled()) {
-            ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
-                    .construct(new CustomerSpaceScope(CustomerSpace.parse(firstTenant.getId())));
-            assertTrue(controller.exists(new Path("/EncryptionKey")));
-        }
+//        if (EncryptionGlobalState.isEnabled()) {
+//            ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
+//                    .construct(new CustomerSpaceScope(CustomerSpace.parse(firstTenant.getId())));
+//            assertTrue(controller.exists(new Path("/EncryptionKey")));
+//        }
 
         // Create second tenant for copy model use case
         testBed.bootstrapForProduct(LatticeProduct.LPA3);

@@ -7,6 +7,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -21,6 +22,9 @@ import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 public abstract class RegisterReport {
     private static final Logger log = LoggerFactory.getLogger(RegisterReport.class);
+
+    @Value("${common.microservice.url}")
+    private String microserviceHostPort;
 
     private Configuration yarnConfiguration = new Configuration();
     private TargetMarketStepConfiguration configuration;
@@ -50,7 +54,7 @@ public abstract class RegisterReport {
     protected List<GenericRecord> retrieveStats(String reportName) {
         log.info(String.format("fs.defaultFS: %s", yarnConfiguration.get("fs.defaultFS")));
         log.info(String.format("HADOOP_CONF_DIR: %s", System.getenv("HADOOP_CONF_DIR")));
-        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
+        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", microserviceHostPort,
                 configuration.getCustomerSpace(), reportName);
         Table table = restTemplate.getForObject(url, Table.class);
 

@@ -60,7 +60,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
     @Inject
     private TestMetadataSegmentProxy testMetadataSegmentProxy;
 
-    @Value("${common.pls.url}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     @Autowired

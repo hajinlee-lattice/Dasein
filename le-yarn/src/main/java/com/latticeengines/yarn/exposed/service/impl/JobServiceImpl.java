@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
@@ -20,6 +18,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,9 +73,6 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
-
-    @Value("${hadoop.mapreduce.jobhistory.webapp.api.address}")
-    private String mrJobHistoryServerUrl;
 
     @Value("${dataplatform.queue.scheme:legacy}")
     private String queueScheme;
@@ -311,7 +308,11 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     public Counters getMRJobCounters(String applicationId) {
         JobID jobId = TypeConverter.fromYarn(ConverterUtils.toApplicationId(applicationId));
         RestTemplate rt = new RestTemplate();
-        String response = rt.getForObject(mrJobHistoryServerUrl + "/" + jobId.toString() + "/counters", String.class);
+        String mrJobHistoryServerUrl = yarnConfiguration.get("mapreduce.jobhistory.webapp.address");
+        mrJobHistoryServerUrl = String.format("http://%s/ws/v1/history/mapreduce/jobs", mrJobHistoryServerUrl);
+        String jobUrl = mrJobHistoryServerUrl + "/" + jobId.toString() + "/counters";
+        log.info("Requesting counters info from " + jobUrl);
+        String response = rt.getForObject(jobUrl, String.class);
         JobCounters jobCounters = JsonUtils.deserialize(response, JobCounters.class);
         return jobCounters.getCounters();
     }

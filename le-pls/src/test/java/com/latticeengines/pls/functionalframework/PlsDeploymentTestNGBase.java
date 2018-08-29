@@ -28,6 +28,9 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     @Value("${common.test.pls.url}")
     private String deployedHostPort;
 
+    @Value("${common.test.pls.url}")
+    protected String internalResourceHostPort;
+
     @PostConstruct
     private void postConstruct() {
         setTestBed(deploymentTestBed);

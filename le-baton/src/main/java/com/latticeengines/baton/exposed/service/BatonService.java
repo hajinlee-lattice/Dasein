@@ -66,6 +66,8 @@ public interface BatonService {
 
     boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag);
 
+    void setFeatureFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag, boolean value);
+
     boolean hasProduct(CustomerSpace customerSpace, LatticeProduct product);
 
     FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace);

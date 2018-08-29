@@ -83,7 +83,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @Inject
     private ActionProxy actionProxy;
 
-    @Value("${common.pls.url}")
+    @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
     private CustomerSpace customerSpace;

@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -69,6 +70,20 @@ public class S3ServiceImpl implements S3Service {
         }
         log.info("Deleting s3 object " + prefix + " from " + bucket);
         s3Client.deleteObject(bucket, prefix);
+    }
+
+    @Override
+    public void cleanupPrefixByPattern(String bucket, String prefix, String pattern) {
+        prefix = sanitizePathToKey(prefix);
+        List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();
+        Pattern ptn = Pattern.compile(pattern);
+        for (S3ObjectSummary summary : objects) {
+            String objKey = summary.getKey();
+            if (ptn.matcher(objKey).matches()) {
+                log.info("Deleting s3 object " + objKey + " from " + bucket);
+                s3Client.deleteObject(bucket, objKey);
+            }
+        }
     }
 
     @Override

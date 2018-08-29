@@ -47,7 +47,8 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
         }
         String fs = configuration.get("fs.defaultFS");
         log.info(String.format("Created a %s (%d): %s",
-                               getObjectType().getSimpleName(), System.identityHashCode(configuration), fs));
+                getObjectType() == null ? "null" : getObjectType().getSimpleName(),
+                System.identityHashCode(configuration), fs));
         return configuration;
     }
 
@@ -57,7 +58,7 @@ public abstract class HadoopConfigurationBeanFactory<T extends Configuration> im
     }
 
     protected Properties getYarnProperties(String masterIp) {
-         return HadoopConfigurationUtils.loadPropsFromResource("emr.properties", masterIp, awsKey, awsSecret);
+        return HadoopConfigurationUtils.loadPropsFromResource("emr.properties", masterIp, awsKey, awsSecret);
     }
 
     private boolean shouldUseEmr() {

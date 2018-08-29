@@ -81,7 +81,6 @@ public class SegmentExportWorkflowConfiguration extends BaseCDLWorkflowConfigura
             avroToCsvExportStepConf.setExportFormat(ExportFormat.CSV);
             avroToCsvExportStepConf.setExportDestination(ExportDestination.FILE);
             avroToCsvExportStepConf.setUsingDisplayName(true);
-
             configuration.add(initStepConf);
             configuration.add(avroToCsvExportStepConf);
             return configuration;

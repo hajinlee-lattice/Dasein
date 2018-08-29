@@ -44,7 +44,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 @Component
 public class FrontEndQueryCreator {
 
-    @Value("${common.pls.url}")
+    @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
     private Map<BusinessEntity, List<String>> accountLookupFields;

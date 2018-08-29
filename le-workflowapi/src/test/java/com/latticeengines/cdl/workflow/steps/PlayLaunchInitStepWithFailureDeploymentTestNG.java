@@ -15,6 +15,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -28,9 +29,8 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 // TODO - enable when we have a way to simulate full/partial failure
 //
@@ -47,7 +47,7 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     @Mock
     PlayLaunchInitStepConfiguration configuration;
 
-    @Value("${common.pls.url}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     @Autowired

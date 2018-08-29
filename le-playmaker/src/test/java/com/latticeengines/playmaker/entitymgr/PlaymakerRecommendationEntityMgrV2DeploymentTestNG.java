@@ -47,7 +47,7 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
         "classpath:test-testframework-cleanup-context.xml" })
 public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends AbstractTestNGSpringContextTests {
 
-    @Value("${common.pls.url}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     @Inject

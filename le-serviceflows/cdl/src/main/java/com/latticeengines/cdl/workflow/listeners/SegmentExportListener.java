@@ -27,7 +27,7 @@ public class SegmentExportListener extends LEJobListener {
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Value("${common.pls.url}")
+    @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;

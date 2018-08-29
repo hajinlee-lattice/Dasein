@@ -38,7 +38,7 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
     @Autowired
     private SegmentExportProcessorFactory segmentExportProcessorFactory;
 
-    @Value("${common.pls.url}")
+    @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;

@@ -46,7 +46,7 @@ public class MaintenanceOperationListener extends LEJobListener {
     @Autowired
     private DataFeedProxy dataFeedProxy;
 
-    @Value("${common.pls.url}")
+    @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;

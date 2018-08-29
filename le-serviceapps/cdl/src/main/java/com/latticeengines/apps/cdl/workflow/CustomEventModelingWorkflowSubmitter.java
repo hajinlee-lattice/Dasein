@@ -76,9 +76,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${pls..modeling.validation.min.negativerows:250}")
     private long minNegativeEvents;
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 

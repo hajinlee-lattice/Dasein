@@ -2,8 +2,9 @@ package com.latticeengines.pls.workflow;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,19 +29,19 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 @Component
 public abstract class WorkflowSubmitter {
 
-    @Autowired
+    @Inject
     protected WorkflowJobService workflowJobService;
 
-    @Autowired
+    @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
 
-    @Autowired
+    @Inject
     protected PlsFeatureFlagService plsFeatureFlagService;
 
-    @Value("${common.test.pls.url}")
+    @Value("${yarn.pls.url}")
     protected String internalResourceHostPort;
 
-    @Value("${common.test.microservice.url}")
+    @Value("${common.microservice.url}")
     protected String microserviceHostPort;
 
     protected CustomerSpace getCustomerSpace() {

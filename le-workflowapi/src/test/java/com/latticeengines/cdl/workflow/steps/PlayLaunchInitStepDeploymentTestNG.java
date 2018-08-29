@@ -66,7 +66,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     @Mock
     PlayLaunchInitStepConfiguration configuration;
 
-    @Value("${common.pls.url}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     @Autowired

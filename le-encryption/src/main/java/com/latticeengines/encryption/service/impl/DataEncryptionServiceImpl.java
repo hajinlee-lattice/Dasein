@@ -49,6 +49,7 @@ public class DataEncryptionServiceImpl implements DataEncryptionService {
 
     @Override
     public void encrypt(CustomerSpace space) {
+        log.warn("Should not be encrypting any HDFS data anymore! CustomerSpace=" + space);
         log.info(String.format("Setting up customer %s's data as encrypted", space));
         try {
             if (!EncryptionGlobalState.isEnabled()) {

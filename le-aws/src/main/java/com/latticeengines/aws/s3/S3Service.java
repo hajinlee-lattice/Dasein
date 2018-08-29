@@ -12,6 +12,8 @@ public interface S3Service {
 
     void cleanupPrefix(String bucket, String prefix);
 
+    void cleanupPrefixByPattern(String bucket, String prefix, String pattern);
+
     List<S3ObjectSummary> listObjects(String bucket, String prefix);
 
     MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync);

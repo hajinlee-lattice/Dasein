@@ -35,7 +35,7 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Inject
     private ActionProxy actionProxy;
 
-    @Value("${common.pls.url}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;

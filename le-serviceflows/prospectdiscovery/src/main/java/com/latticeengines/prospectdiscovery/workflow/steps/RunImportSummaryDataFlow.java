@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,9 @@ public class RunImportSummaryDataFlow extends RunDataFlow<RunImportSummaryDataFl
 
     private static final Logger log = LoggerFactory.getLogger(RunImportSummaryDataFlow.class);
 
+    @Value("${common.microservice.url}")
+    private String microServiceHostPort;
+
     private Table getEventTable() {
         String eventTableJson = getStringValueFromContext(EVENT_TABLE);
         Table eventTable = JsonUtils.deserialize(eventTableJson, Table.class);
@@ -32,7 +36,7 @@ public class RunImportSummaryDataFlow extends RunDataFlow<RunImportSummaryDataFl
 
         Table eventTable = getEventTable();
 
-        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
+        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", microServiceHostPort,
                 configuration.getCustomerSpace(), "EventTable");
         restTemplate.delete(url);
 

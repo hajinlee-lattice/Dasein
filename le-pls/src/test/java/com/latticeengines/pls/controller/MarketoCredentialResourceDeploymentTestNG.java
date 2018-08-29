@@ -45,9 +45,6 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
     @Value("${pls.marketo.scoring.webhook.resource}")
     private String scoringWebhookResource;
     
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-    
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
     
     private static final String CREDENTIAL_NAME = "TEST-DP-MARKETO-SCORING-CONFIG-";

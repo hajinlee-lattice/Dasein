@@ -589,6 +589,10 @@ public class BatonServiceImpl implements BatonService {
         return canHaveFlag(customerSpace, flag) && FeatureFlagClient.isEnabled(customerSpace, flag.getName());
     }
 
+    public void setFeatureFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag, boolean value) {
+        FeatureFlagClient.setEnabled(customerSpace, flag.getName(), value);
+    }
+
     @SuppressWarnings("deprecation")
     public FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace) {
         FeatureFlagValueMap valueMapInCamille = FeatureFlagClient.getFlags(customerSpace);

@@ -40,10 +40,10 @@ public abstract class WorkflowSubmitter {
     @Inject
     protected Configuration yarnConfiguration;
 
-    @Value("${common.test.pls.url}")
+    @Value("${yarn.pls.url}")
     protected String internalResourceHostPort;
 
-    @Value("${common.test.microservice.url}")
+    @Value("${common.microservice.url}")
     protected String microserviceHostPort;
 
     protected CustomerSpace getCustomerSpace() {

@@ -6,7 +6,6 @@ import java.util.Map;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -20,12 +19,6 @@ public class SegmentExportWorkflowSubmitter extends WorkflowSubmitter {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SegmentExportWorkflowSubmitter.class);
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    @Value("${common.microservice.url}")
-    private String microServiceHostPort;
 
     public ApplicationId submit(MetadataSegmentExport metadataSegmentExport) {
         Map<String, String> inputProperties = new HashMap<>();
@@ -57,7 +50,7 @@ public class SegmentExportWorkflowSubmitter extends WorkflowSubmitter {
                 .podId(podId) //
                 .tableName(metadataSegmentExport.getTableName()) //
                 .internalResourceHostPort(internalResourceHostPort) //
-                .microServiceHostPort(microServiceHostPort) //
+                .microServiceHostPort(microserviceHostPort) //
                 .build();
         return workflowJobService.submit(configuration);
     }
