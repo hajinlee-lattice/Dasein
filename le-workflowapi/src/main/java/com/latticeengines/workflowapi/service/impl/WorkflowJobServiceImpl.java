@@ -147,7 +147,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return getJobByWorkflowId(customerSpace, workflowId, includeDetails);
         }
         Job job =  jobCacheService.getByWorkflowId(workflowId, includeDetails);
-        checkExecutionId(Collections.singletonList(toWorkflowJob(job)));
         checkLastUpdateTime(Collections.singletonList(toWorkflowJob(job)));
         if (!currentTenantHasAccess(job)) {
             return null;
@@ -247,7 +246,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return getJobsByWorkflowIds(customerSpace, workflowIds, null, includeDetails, false, -1L);
         }
         List<Job> jobs = jobCacheService.getByWorkflowIds(workflowIds, includeDetails);
-        checkExecutionId(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
         checkLastUpdateTime(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
         return jobs.stream().filter(this::currentTenantHasAccess).collect(Collectors.toList());
     }
@@ -476,6 +474,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private WorkflowJob toWorkflowJob(@NotNull Job job) {
         WorkflowJob workflowJob = new WorkflowJob();
         workflowJob.setPid(job.getPid());
+        workflowJob.setWorkflowId(job.getId());
+        workflowJob.setApplicationId(job.getApplicationId());
         if (job.getStartTimestamp() != null) {
             workflowJob.setStartTimeInMillis(job.getStartTimestamp().getTime());
         }
