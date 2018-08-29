@@ -51,6 +51,7 @@
   },
   "scripts": {
     "build": "webpack -p --progress --config=webpack.prod.js --mode production",
+    "builddev":"webpack -p --progress --config=webpack.dev.js --mode development",
     "watch": "webpack -p --progress --config=webpack.dev.js --mode development --watch"
   }
 }
