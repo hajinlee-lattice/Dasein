@@ -21,22 +21,22 @@ public class AttrSpecification {
     }
 
     public static AttrSpecification CDL_STD() {
-        return new AttrSpecification("CDL Standard Attributes", true, true, true, true, true, false, false, false,
-                false, false, false, false);
+        return new AttrSpecification("CDL Standard Attributes", true, true, true, true, true, false, true, true, false,
+                false, false, false);
     }
 
     public static AttrSpecification CDL_LOOKUP_ID() {
-        return new AttrSpecification("CDL Lookup Ids", true, true, true, true, false, false, false, true, true, false,
+        return new AttrSpecification("CDL Lookup Ids", true, true, true, true, false, false, true, true, true, false,
                 false, false);
     }
 
     public static AttrSpecification CDL_ACCOUNT_EXTENSION() {
-        return new AttrSpecification("CDL Account Extensions", true, true, true, true, true, false, false, true, true,
+        return new AttrSpecification("CDL Account Extensions", true, true, true, true, true, false, true, true, true,
                 false, true, true);
     }
 
     public static AttrSpecification CDL_CONTACT_EXTENSION() {
-        return new AttrSpecification("CDL Contact Extensions", true, true, true, true, true, false, false, true, true,
+        return new AttrSpecification("CDL Contact Extensions", true, true, true, true, true, false, true, true, true,
                 false, true, false);
     }
 
