@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CleanupAllDeploymentTestNG.class);
@@ -31,6 +34,9 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private RedshiftService redshiftService;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -41,6 +47,7 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         verifyCleanup(BusinessEntity.Transaction);
         processAnalyze();
         verifyProcess();
+        verifyCleanupAll();
     }
 
     private void verifyCleanup(BusinessEntity entity) {
@@ -70,6 +77,23 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
             assertEquals(dfTasks.size(), 0);
         }
         verifyActionRegistration();
+    }
+
+    private void verifyCleanupAll() {
+        String tableA = dataCollectionProxy.getTable(customerSpace, BusinessEntity.Account.getBatchStore()).getName();
+
+        log.info("cleaning up all for all entities...");
+        ApplicationId appId = cdlProxy.cleanupAll(customerSpace, null, MultiTenantContext.getEmailAddress());
+        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
+        assertEquals(status, JobStatus.COMPLETED);
+
+        log.info("assert the DataCollectionTable is deleted.");
+        assertNull(dataCollectionProxy.getTable(customerSpace, BusinessEntity.Account.getBatchStore()));
+        assertNull(dataCollectionProxy.getTable(customerSpace, BusinessEntity.Contact.getBatchStore()));
+
+        List<String> redshiftTables = redshiftService.getTables(tableA);
+        Assert.assertTrue(CollectionUtils.isEmpty(redshiftTables),
+                String.format("Table %s is still in redshift", tableA));
     }
 
     private void verifyProcess() {

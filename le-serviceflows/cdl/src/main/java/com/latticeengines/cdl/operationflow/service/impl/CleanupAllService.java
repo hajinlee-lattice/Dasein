@@ -1,11 +1,14 @@
 package com.latticeengines.cdl.operationflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.conf.Configuration;
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import com.latticeengines.cdl.operationflow.service.MaintenanceOperationService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -25,6 +29,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("cleanupAllService")
 @Lazy(value = false)
@@ -41,6 +46,9 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Inject
+    private RedshiftService redshiftService;
+
     @Override
     public Map<String, Long> invoke(CleanupAllConfiguration config) {
         Map<String, Long> report;
@@ -54,6 +62,16 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
         BusinessEntity entity = config.getEntity();
         log.info(String.format("begin clean up cdl data of CustomerSpace %s", customerSpace));
         if (entity == null) {
+            cleanupRedshift(config.getCustomerSpace(),
+                    Arrays.asList(BusinessEntity.Account.getBatchStore(),
+                        BusinessEntity.Contact.getBatchStore(),
+                        BusinessEntity.Product.getBatchStore(),
+                        TableRoleInCollection.ConsolidatedRawTransaction,
+                        TableRoleInCollection.ConsolidatedDailyTransaction,
+                        TableRoleInCollection.ConsolidatedPeriodTransaction),
+                    Arrays.asList(DataCollection.Version.Blue,
+                        DataCollection.Version.Green));
+
             dataCollectionProxy.resetTable(config.getCustomerSpace(), BusinessEntity.Account.getBatchStore());
             dataCollectionProxy.resetTable(config.getCustomerSpace(), BusinessEntity.Contact.getBatchStore());
             dataCollectionProxy.resetTable(config.getCustomerSpace(), BusinessEntity.Product.getBatchStore());
@@ -64,6 +82,12 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
                     TableRoleInCollection.ConsolidatedPeriodTransaction);
             dataFeedProxy.resetImport(customerSpace);
         } else if (entity == BusinessEntity.Transaction) {
+            cleanupRedshift(config.getCustomerSpace(),
+                    Arrays.asList(TableRoleInCollection.ConsolidatedRawTransaction,
+                            TableRoleInCollection.ConsolidatedDailyTransaction,
+                            TableRoleInCollection.ConsolidatedPeriodTransaction),
+                    Arrays.asList(DataCollection.Version.Blue,
+                            DataCollection.Version.Green));
             dataCollectionProxy.resetTable(config.getCustomerSpace(), TableRoleInCollection.ConsolidatedRawTransaction);
             dataCollectionProxy.resetTable(config.getCustomerSpace(),
                     TableRoleInCollection.ConsolidatedDailyTransaction);
@@ -72,6 +96,10 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
             dataFeedProxy.resetImportByEntity(customerSpace, entity.name());
         } else if (entity == BusinessEntity.Account || entity == BusinessEntity.Contact
                 || entity == BusinessEntity.Product) {
+            cleanupRedshift(config.getCustomerSpace(),
+                    Arrays.asList(config.getEntity().getBatchStore()),
+                    Arrays.asList(DataCollection.Version.Blue,
+                            DataCollection.Version.Green));
             dataCollectionProxy.resetTable(config.getCustomerSpace(), config.getEntity().getBatchStore());
             dataFeedProxy.resetImportByEntity(customerSpace, entity.name());
         } else {
@@ -154,4 +182,24 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
         }
         return lines;
     }
+
+    private void cleanupRedshift(String customSpace, List<TableRoleInCollection> roles,
+                                 List<DataCollection.Version> versions) {
+        try {
+            versions.forEach(version -> {
+                roles.forEach(role -> {
+                    Table table = dataCollectionProxy.getTable(customSpace, role, version);
+                    if (table != null) {
+                        List<String> redshiftTables = redshiftService.getTables(table.getName());
+                        if (CollectionUtils.isNotEmpty(redshiftTables)) {
+                            redshiftTables.forEach(redshiftTable -> redshiftService.dropTable(redshiftTable));
+                        }
+                    }
+                });
+            });
+        } catch (Exception e) {
+            log.error(String.format("Cannot cleanup redshift tables for %s", customSpace));
+        }
+    }
+
 }
