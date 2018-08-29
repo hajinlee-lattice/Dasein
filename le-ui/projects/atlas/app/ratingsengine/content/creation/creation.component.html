@@ -80,55 +80,19 @@
                 </dl>
             </div>
 
+
             <h3>Job Status</h3>
             <dl class="step-progression">
-                <dt ng-class="{ 'started': (!$ctrl.jobStarted || $ctrl.startTimestamp)}">Job Started</dt>
-                <dd>
+                <dt 
+                    ng-repeat-start="step in $ctrl.steps"
+                    ng-class="{'started': step.hasStarted}">{{step.label}}</dt>
+                <dd ng-repeat-end>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
-                        ng-if="!$ctrl.jobStarted"></i>
-                    <span ng-if="$ctrl.startTimestamp">
-                        <i 
-                        class="fa fa-check"></i>
-                        {{$ctrl.startTimestamp | date:"MM/dd/yyyy 'at' h:mma"}}
-                    </span>
-                </dd>
-                <dt ng-class="{ 'started': ($ctrl.loadingData || $ctrl.completedSteps.load_data) }">Processing File</dt>
-                <dd>
-                    <i 
-                        class="fa fa-spinner fa-pulse fw"
-                        ng-if="$ctrl.loadingData"></i>
-                    <span ng-if="$ctrl.completedSteps.load_data">
-                        <i 
-                        class="fa fa-check"></i>
-                        {{$ctrl.completedSteps.load_data | date:"MM/dd/yyyy 'at' h:mma"}}
-                    </span>
-                </dd>
-                <dt ng-class="{ 'started': ($ctrl.matchingToDataCloud || $ctrl.completedSteps.create_global_target_market || $ctrl.completedSteps.create_global_model) }">Matching to Data Cloud</dt>
-                <dd>
-                    <i 
-                        class="fa fa-spinner fa-pulse fw"
-                        ng-if="$ctrl.matchingToDataCloud"></i>
-                    <span ng-if="$ctrl.type == 'cross_sell' && $ctrl.completedSteps.create_global_target_market">
-                        <i 
-                        class="fa fa-check"></i>
-                        {{$ctrl.completedSteps.create_global_target_market | date:"MM/dd/yyyy 'at' h:mma"}}
-                    </span>
-                    <span ng-if="$ctrl.type == 'custom_event' && $ctrl.completedSteps.create_global_model">
-                        <i 
-                        class="fa fa-check"></i>
-                        {{$ctrl.completedSteps.create_global_model | date:"MM/dd/yyyy 'at' h:mma"}}
-                    </span>
-                </dd>
-                <dt ng-class="{ 'started': ($ctrl.scoringTrainingSet || $ctrl.completedSteps.score_training_set) }">Scoring Training Set</dt>
-                <dd>
-                    <i 
-                        class="fa fa-spinner fa-pulse fw"
-                        ng-if="$ctrl.scoringTrainingSet"></i>
-                    <span ng-if="$ctrl.completedSteps.score_training_set">
-                        <i 
-                        class="fa fa-check"></i>
-                        {{$ctrl.completedSteps.score_training_set | date:"MM/dd/yyyy 'at' h:mma"}}
+                        ng-if="step.showSpinner"></i>
+                    <span ng-if="step.startTimestamp">
+                        <i class="fa fa-check"></i>
+                        {{step.startTimestamp | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
             </dl>

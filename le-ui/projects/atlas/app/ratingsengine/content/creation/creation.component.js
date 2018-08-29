@@ -38,8 +38,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         vm.$onInit = function() {
 
-            // console.log(vm.ratingEngine);
-
             vm.setValidation('creation', true);
 
             var model = vm.ratingEngine.latest_iteration.AI;
@@ -107,6 +105,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                     vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
                 }
 
+                vm.updateSteps();
+
             } else if (vm.type == 'custom_event') {
 
                 vm.hasSettingsInfo = true;
@@ -115,34 +115,97 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
                 var dataStore = model.advancedModelingConfig.custom_event.dataStores;
                 vm.availableAttributes = dataStore.length == 1 ? RatingsEngineStore.formatTrainingAttributes(dataStore[0]) : RatingsEngineStore.formatTrainingAttributes(dataStore[0]) + ' + ' + RatingsEngineStore.formatTrainingAttributes(dataStore[1]);
+
+                vm.updateSteps();
+
             }
         };
 
-        vm.checkJobStatus = function() {
+        vm.updateSteps = function(){
+            vm.jobStarted = false;
+            vm.completedSteps = {};
+            if (vm.type === 'cross_sell') {
+                vm.steps = [
+                    {
+                        label: 'Gathering Data',
+                        hasStarted: vm.startTimestamp || !vm.jobStarted,
+                        showSpinner: !vm.jobStarted && !vm.loadingData,
+                        startTimestamp: vm.startTimestamp
+                    },
+                    {
+                        label: 'Profiling',
+                        hasStarted: vm.loadingData || vm.completedSteps.load_data,
+                        showSpinner: vm.loadingData,
+                        startTimestamp: vm.completedSteps.load_data
+                    },
+                    {
+                        label: 'Modeling',
+                        hasStarted: vm.matchingToDataCloud || vm.completedSteps.create_global_target_market,
+                        showSpinner: vm.matchingToDataCloud,
+                        startTimestamp: vm.completedSteps.create_global_target_market
+                    },
+                    {
+                        label: 'Scoring',
+                        hasStarted: vm.scoringTrainingSet || vm.completedSteps.score_training_set,
+                        showSpinner: vm.scoringTrainingSet,
+                        startTimestamp: vm.completedSteps.score_training_set
+                    }
+                ];
+            } else {
+                vm.steps = [
+                    {
+                        label: 'Processing File',
+                        hasStarted: vm.processingFile || !vm.jobStarted,
+                        showSpinner: vm.processingFile || !vm.jobStarted,
+                        startTimestamp: vm.completedSteps.load_data
+                    },
+                    {
+                        label: 'Matching to Data Cloud',
+                        hasStarted: vm.matchingToDataCloud,
+                        showSpinner: vm.matchingToDataCloud,
+                        startTimestamp: vm.completedSteps.match_data
+                    },
+                    {
+                        label: 'Modeling and Scoring',
+                        hasStarted: vm.modelingAndScoring,
+                        showSpinner: vm.modelingAndScoring,
+                        startTimestamp: vm.completedSteps.create_global_model
+                    }
+                ];
+            }
+        }
 
+        vm.checkJobStatus = function() {
             var appId = vm.ratingEngine.latest_iteration.AI.modelingJobId ? vm.ratingEngine.latest_iteration.AI.modelingJobId : RatingsEngineStore.getApplicationId(); // update once backend sets modelingjobId for CE
             if (appId) {
 
-                // console.log(RatingsEngineStore.getApplicationId());
-                // console.log(appId);
-
                 JobsStore.getJobFromApplicationId(appId).then(function(result) {
-
                     if(result.id) {
                         vm.status = result.jobStatus;
-
                         vm.jobStarted = true;
                         vm.startTimestamp = result.startTimestamp;
-                    
                         vm.completedSteps = result.completedTimes;
+                        vm.globalStep = vm.type == 'cross_sell' ? vm.completedSteps.create_global_target_market : vm.completedSteps.create_global_model;
 
-                        var globalStep = vm.type == 'cross_sell' ? vm.completedSteps.create_global_target_market : vm.completedSteps.create_global_model;
-                        vm.loadingData = vm.startTimestamp && !vm.completedSteps.load_data;
-                        vm.matchingToDataCloud = vm.completedSteps.load_data && !globalStep;
-                        vm.scoringTrainingSet = globalStep && !vm.completedSteps.score_training_set;
+                        vm.steps = [];
+
+                        if(vm.type == 'cross_sell'){
+                            vm.stepMultiplier = 5.5;
+                            vm.loadingData = vm.startTimestamp && !vm.completedSteps.load_data;
+                            vm.matchingToDataCloud = vm.completedSteps.load_data && !vm.globalStep;
+                            vm.scoringTrainingSet = vm.globalStep && !vm.completedSteps.score_training_set;
+                        } else {
+                            vm.stepMultiplier = 5.5;
+                            vm.processingFile = result.stepRunning == 'load_data';
+                            vm.matchingToDataCloud = result.stepRunning == 'match_data';
+                            vm.modelingAndScoring = result.stepRunning == 'create_global_model';
+                        }
+
+                        vm.updateSteps();
+
                         // Green status bar
                         if(result.stepsCompleted.length > 0){
-                            var tmp = ((result.stepsCompleted.length / 2) * 5.5);
+                            var tmp = ((result.stepsCompleted.length / 2) * vm.stepMultiplier);
                             if(tmp > 100 && vm.status !== 'Completed'){
                                 tmp = 99;
                             }

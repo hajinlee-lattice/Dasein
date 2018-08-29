@@ -44,21 +44,9 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         vm.$onInit = function() {
 
-            // RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-            //     AtlasRemodelStore.setRemodelIteration(result);
-            //     RatingsEngineStore.setRatingEngine(ratingEngine);
-
-            //     deferred.resolve(result);
-            // });
-
-            // console.log(vm.ratingEngine);
-            // console.log(vm.iteration);
-            // console.log(AtlasRemodelStore.getRemodelIteration());
-
             // Data variables
             vm.ratingModel = vm.iteration ? vm.iteration.AI : vm.ratingEngine.latest_iteration.AI;
             vm.engineType = vm.ratingEngine.type.toLowerCase();
-
 
             if($stateParams.section != "wizard.ratingsengine_segment"){
                 if(vm.engineType == 'cross_sell'){
@@ -72,8 +60,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                     }
 
                     // Setup form for Cross Sell Models
-                    RatingsEngineStore.setConfigFilters(vm.filters);
-
                     vm.checkboxModel = {
                         spend: vm.filters.SPEND_IN_PERIOD ? true : false,
                         quantity: vm.filters.QUANTITY_IN_PERIOD ? true : false,
@@ -92,24 +78,21 @@ angular.module('lp.ratingsengine.wizard.training', [
 
                     vm.validateCrossSellForm();
 
-                    // $timeout(function () {
-                    
-                    // });
-
                 } else {
                     // Setup form for Custom Event Models
                     vm.filters = vm.iteration.AI.advancedModelingConfig.custom_event;
-                    RatingsEngineStore.setConfigFilters(vm.filters);
 
-                    vm.configFilters.sourceFileName = vm.filters.sourceFileName;
+                    vm.configFilters = angular.copy(vm.filters);
                     RatingsEngineStore.setDisplayFileName(vm.configFilters.sourceFileName);
 
+                    console.log(vm.configFilters);
+
                     vm.checkboxModel = {
-                        datacloud: (vm.filters.dataStores.indexOf('DataCloud') > -1) ? true : false,
-                        cdl: (vm.filters.dataStores.indexOf('CDL') > -1) ? true : false,
-                        deduplicationType: vm.filters.deduplicationType ? true : false,
-                        excludePublicDomains: (vm.filters.excludePublicDomains == true) ? false : true,
-                        transformationGroup: vm.filters.transformationGroup ? false : true
+                        datacloud: (vm.configFilters.dataStores.indexOf('DataCloud') > -1) ? true : false,
+                        cdl: (vm.configFilters.dataStores.indexOf('CDL') > -1) ? true : false,
+                        deduplicationType: vm.configFilters.deduplicationType ? true : false,
+                        excludePublicDomains: (vm.configFilters.excludePublicDomains == true) ? false : true,
+                        transformationGroup: (vm.configFilters.transformationGroup == 'NONE') ? true : false
                     }
 
                     vm.configFilters.dataStores = [];
@@ -140,22 +123,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
                 vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
             }
-
-            $scope.$on("$destroy", function() {
-                if(vm.engineType == 'cross_sell'){
-                    delete vm.configFilters.PURCHASED_BEFORE_PERIOD;
-                    delete vm.configFilters.SPEND_IN_PERIOD;
-                    delete vm.configFilters.QUANTITY_IN_PERIOD;
-                    delete vm.configFilters.TRAINING_SET_PERIOD;
-                    
-                    RatingsEngineStore.setTrainingProducts(null);
-                    vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts = null;
-
-                    RatingsEngineStore.setTrainingSegment(null);
-                    vm.ratingModel.trainingSegment = null;
-                }
-            });
-
         }
 
 
@@ -194,6 +161,12 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.updateSegmentSelected(vm.trainingSegment);
             vm.autcompleteChange();
         }
+        vm.updateSegmentSelected = function(trainingSegment) {
+            if(vm.ratingEngine.activeModel.AI){
+                vm.ratingEngine.latest_iteration.AI.trainingSegment = (trainingSegment ? trainingSegment : null);
+                vm.ratingEngine.activeModel.AI.trainingSegment = (trainingSegment ? trainingSegment : null);
+            }
+        }
 
         vm.productsCallback = function(selectedProducts) {
             vm.trainingProducts = [];
@@ -205,6 +178,12 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.ratingModel.advancedModelingConfig.cross_sell.trainingProducts = vm.trainingProducts;
 
             vm.autcompleteChange();        
+        }
+        vm.updateProductsSelected = function(listProducts) {
+            if(vm.ratingEngine.activeModel.AI){
+                vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.trainingProducts = listProducts;
+                vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingProducts = listProducts;
+            }
         }
 
         vm.autcompleteChange = function(){
@@ -295,8 +274,6 @@ angular.module('lp.ratingsengine.wizard.training', [
                         "criteria": "PRIOR_ONLY",
                         "value": vm.purchasedBeforePeriodNum
                     };
-
-                    RatingsEngineStore.setConfigFilters(vm.configFilters);
                     vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
                 }
 
@@ -344,7 +321,6 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
         }
 
-
         // Functions for Custom Event Models
         // ============================================================================================
         // ============================================================================================
@@ -366,7 +342,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
 
             if(valid == true){
-                RatingsEngineStore.setConfigFilters(vm.configFilters);
+                // RatingsEngineStore.setConfigFilters(vm.configFilters);
                 vm.dataStores = vm.configFilters.dataStores;
 
                 if (vm.checkboxModel.datacloud){
@@ -402,36 +378,18 @@ angular.module('lp.ratingsengine.wizard.training', [
                 }
 
                 $timeout(function () {
-                    // console.log(vm.checkboxModel);
-                    // console.log(vm.configFilters);
-
-                    RatingsEngineStore.setConfigFilters(vm.configFilters);
-
                     if(vm.checkboxModel.datacloud || vm.checkboxModel.cdl || vm.checkboxModel.deduplicationType || vm.checkboxModel.excludePublicDomains || vm.checkboxModel.transformationGroup) {
+                        console.log(vm.configFilters);
                         RatingsEngineStore.setConfigFilters(vm.configFilters);
                         vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
                     }
-
-                }, 250);
+                }, 500);
 
             } else {
                 RatingsEngineStore.validation.training = false;
                 RatingsEngineStore.validation.refine = false;
             }
 
-        }
-
-        vm.updateSegmentSelected = function(trainingSegment) {
-            if(vm.ratingEngine.activeModel.AI){
-                vm.ratingEngine.latest_iteration.AI.trainingSegment = (trainingSegment ? trainingSegment : null);
-                vm.ratingEngine.activeModel.AI.trainingSegment = (trainingSegment ? trainingSegment : null);
-            }
-        }
-        vm.updateProductsSelected = function(listProducts) {
-            if(vm.ratingEngine.activeModel.AI){
-                vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.trainingProducts = listProducts;
-                vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingProducts = listProducts;
-            }
         }
 
         vm.formOnChange = function(){

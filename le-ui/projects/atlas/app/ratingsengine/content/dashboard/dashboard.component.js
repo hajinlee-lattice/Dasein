@@ -84,9 +84,6 @@ angular.module('lp.ratingsengine.dashboard', [
         }
     });
 
-    // console.log(vm.dashboard);
-
-
     vm.modalCallback = function (args) {
         var modal = Modal.get(vm.modalConfig.name);
 
@@ -251,8 +248,19 @@ angular.module('lp.ratingsengine.dashboard', [
         } else {
             if(vm.ratingEngine.published_iteration || vm.ratingEngine.scoring_iteration) {
                 vm.model = vm.ratingEngine.published_iteration ? vm.ratingEngine.published_iteration.AI : vm.ratingEngine.scoring_iteration.AI;
+                vm.modelSummary = vm.model.modelSummaryId;
             } else {
                 vm.model = vm.ratingEngine.latest_iteration.AI;
+
+                var dashboardIterations = vm.dashboard.iterations;
+                vm.activeIterations = [];
+                angular.forEach(dashboardIterations, function(iteration){
+                    if (iteration.modelSummaryId && iteration.modelingJobStatus == "Completed") {
+                        vm.activeIterations.push(iteration);
+                    }
+                });
+                vm.modelSummary = vm.activeIterations.length > 0 ? vm.activeIterations[vm.activeIterations.length - 1].modelSummaryId : null;
+                
             }
             var type = vm.ratingEngine.type.toLowerCase();
 
@@ -304,7 +312,9 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.ratingEngineType = 'Custom Event';
             }
 
-            vm.modelSummary = vm.model.modelSummaryId;
+            console.log(vm.ratingEngine);
+            // console.log(vm.model);
+
             vm.predictionType = vm.model.predictionType;
             vm.trainingSegment = vm.model.trainingSegment;
 
@@ -317,10 +327,6 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.init = function() {
-
-        // console.log(vm.ratingEngine);
-        // console.log(vm.dashboard);
-
         vm.initDataModel();
     }
 

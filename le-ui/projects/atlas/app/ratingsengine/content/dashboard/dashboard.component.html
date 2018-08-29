@@ -42,7 +42,7 @@
                             ratingEngine: vm.ratingEngine
                         })"
                         ng-if="!vm.isRulesBased"
-                        ng-disabled="vm.modelSummary == null">
+                        ng-disabled="vm.activeIterations.length == 0">
                         {{ vm.publishOrActivateButtonLabel }}
                     </button>
                     <button

@@ -19,6 +19,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         orgId: '',
         externalSystemType: '',
         playName: '',
+        allPlaysHistory: false,
         sortBy: 'created',
         sortDesc: true,
         header: {
@@ -31,6 +32,9 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     });
 
     vm.init = function() {
+
+        vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
+
         vm.noData = (vm.launchesCount === 0 && vm.orgId === '' && vm.externalSystemType === '' && vm.playName === '') ? true : false;
         vm.offset = (vm.currentPage - 1) * vm.pagesize;
 
@@ -104,8 +108,6 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
         vm.header.filter.filtered = vm.defaultPlayLaunchList;
         vm.header.filter.unfiltered = vm.defaultPlayLaunchList;
-
-        vm.allPlaysHistory = ($state.current.name === 'home.playbook.plays.launchhistory') ? true : false;
 
         var launchSummaries = vm.launches.launchSummaries;
         for(var i = 0; i < launchSummaries.length; i++) {

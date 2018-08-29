@@ -18,13 +18,13 @@
                     file-load="vm.fileLoad(headers)"
                     file-done="vm.fileDone(result)"
                     file-cancel="vm.fileCancel()"
-                    tooltip-side="bottom"
+                    info-template="vm.params.infoTemplate"
+                    tooltip-config="{{vm.params.tooltipConfiguration}}"
                     class="form-group file-upload" 
                     ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
                 </div>
 
                 <h3>Account Model Training Options</h3>
-
                 <div class="advanced-options">
                     <label id="oneLeadPerDomainCheckbox">
                         <input type="checkbox" id="cbox1" data-ng-checked="vm.modelTrainingOptions.deduplicationType == 'ONELEADPERDOMAIN'" ng-click="vm.setTrainingOptions('deduplicationType')"> One record per account

@@ -28,14 +28,13 @@ angular.module('lp.ratingsengine.remodel', [
                             nextFn: function(nextState) {
                                 var ratingId = $state.params.engineId,
                                     modelId = $state.params.modelId;
-                                var filters = RatingsEngineStore.getConfigFilters();
+
                                 RatingsEngineService.validateModel(ratingId, modelId).then(function(result) {
                                     var success = !result.data.errorCode;
                                     if(success) {
                                         RatingsEngineService.validateModel(ratingId, modelId).then(function(result) {
                                             var success = !result.data.errorCode;
                                             if(success) {
-                                                // AtlasRemodelStore.setConfigFilters(filters);
                                                 $state.go(nextState);
                                             }
                                         });
@@ -48,7 +47,6 @@ angular.module('lp.ratingsengine.remodel', [
                             label: 'Attributes Enablement', 
                             state: 'training.attributes', 
                             nextFn: function(nextState) {
-                                // var filters = RatingsEngineStore.getConfigFilters();
                                 AtlasRemodelStore.saveIteration(nextState);
                             }, 
                             progressDisabled: false,
@@ -64,8 +62,6 @@ angular.module('lp.ratingsengine.remodel', [
                             lastRoute: true,
                             nextLabel: 'Create another Model',
                             nextFn: function(nextState) {
-                                var filters = RatingsEngineStore.getConfigFilters();
-                                AtlasRemodelStore.setConfigFilters(filters);
                                 $state.go('home.ratingsengine.ratingsenginetype');
                             }
                         }
