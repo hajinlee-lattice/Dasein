@@ -139,16 +139,20 @@ public abstract class DataFeedMetadataService {
                 cdlExternalSystem.setOtherIdList(newOtherIdList);
             }
             List<Pair<String, String>> idMappings = cdlExternalSystem.getIdMappingList();
-            List<Pair<String, String>> userIdMapping = new ArrayList<>();
-            for (Pair<String, String> idMapping : idMappings) {
-                if (nameMap.containsKey(idMapping.getLeft())) {
-                    userIdMapping.add(Pair.of(nameMap.get(idMapping.getLeft()), idMapping.getRight()));
-                } else {
-                    userIdMapping.add(idMapping);
+            // This set should not be null
+            // There's some backward compatible issue, will delete the error records later
+            if (CollectionUtils.isNotEmpty(idMappings)) {
+                List<Pair<String, String>> userIdMapping = new ArrayList<>();
+                for (Pair<String, String> idMapping : idMappings) {
+                    if (nameMap.containsKey(idMapping.getLeft())) {
+                        userIdMapping.add(Pair.of(nameMap.get(idMapping.getLeft()), idMapping.getRight()));
+                    } else {
+                        userIdMapping.add(idMapping);
+                    }
                 }
+                cdlExternalSystem.setIdMapping(userIdMapping);
+                cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
             }
-            cdlExternalSystem.setIdMapping(userIdMapping);
-            cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
         }
     }
 
