@@ -1,6 +1,6 @@
 angular.module('common.attributes.edit.list', [])
 .component('attrEditList', {
-    templateUrl: '/components/datacloud/attributes/edit/list/list.component.html',
+    templateUrl: '/components/datacloud/attributes/edit/list/edit-list.component.html',
     bindings: {
         filters: '<'
     },

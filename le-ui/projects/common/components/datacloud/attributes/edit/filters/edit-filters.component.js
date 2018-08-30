@@ -1,6 +1,6 @@
 angular.module('common.attributes.edit.filters', [])
 .component('attrEditFilters', {
-    templateUrl: '/components/datacloud/attributes/edit/filters/filters.component.html',
+    templateUrl: '/components/datacloud/attributes/edit/filters/edit-filters.component.html',
     bindings: {
         filters: '<'
     },
