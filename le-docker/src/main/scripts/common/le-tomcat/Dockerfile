@@ -7,7 +7,7 @@ RUN yum install -y openssl jq && yum clean all
 # install APR
 ENV APR_VERSION=1.6.3
 ENV APR_UTIL_VERSION=1.6.1
-ENV TCNATIVE_VERSION=1.2.16
+ENV TCNATIVE_VERSION=1.2.17
 ENV TOMCAT_TAR_URL_PREFIX=http://10.41.1.10/tars
 
 RUN wget -q ${TOMCAT_TAR_URL_PREFIX}/apr-${APR_VERSION}-1.x86_64.rpm -O /root/chefcache/apr-${APR_VERSION}-1.x86_64.rpm \
@@ -17,7 +17,7 @@ RUN wget -q ${TOMCAT_TAR_URL_PREFIX}/apr-${APR_VERSION}-1.x86_64.rpm -O /root/ch
 
 
 
-ENV TOMCAT_VERSION=9.0.5
+ENV TOMCAT_VERSION=9.0.11
 ENV CATALINA_HOME /opt/apache-tomcat-${TOMCAT_VERSION}
 RUN wget -q ${TOMCAT_TAR_URL_PREFIX}/apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /root/chefcache/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
     && tar xfz  /root/chefcache/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
