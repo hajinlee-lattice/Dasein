@@ -14,4 +14,3 @@ ADMIN_HTTPS_PORT=3002
 HTTPS_KEY=./server/certs/privatekey.key
 HTTPS_CRT=./server/certs/certificate.crt
 HTTPS_PASS=false
-LEUI_BUNDLER=wp

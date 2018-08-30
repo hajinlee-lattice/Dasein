@@ -11,4 +11,3 @@ HTTPS_PORT=3000
 HTTPS_KEY=./server/certs/privatekey.key
 HTTPS_CRT=./server/certs/certificate.crt
 HTTPS_PASS=false
-LEUI_BUNDLER=wp

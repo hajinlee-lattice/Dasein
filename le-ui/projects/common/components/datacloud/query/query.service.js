@@ -162,7 +162,6 @@ angular.module('common.datacloud.query')
 
             var accountRestrictions = [], contactRestrictions = [];
             var filteredAccounts = [], filteredContacts = [];
-
             buckets.forEach(function(bucket, index) {
                 accountRestrictions = QueryStore.getAllBuckets(bucket['account_restriction'].logicalRestriction.restrictions);
                 contactRestrictions = QueryStore.getAllBuckets(bucket['contact_restriction'].logicalRestriction.restrictions);
