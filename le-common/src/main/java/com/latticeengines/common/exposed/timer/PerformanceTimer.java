@@ -42,9 +42,9 @@ public class PerformanceTimer implements Closeable {
 
     @Override
     public void close() {
-        if (new Date().getTime() - start.getTime() > TIME_THRESHOLD) {
+        if (System.currentTimeMillis() - start.getTime() > TIME_THRESHOLD) {
             logger.info(String.format("[Metric] %s ElapsedTime=%d ms", timerMessage,
-                    new Date().getTime() - start.getTime()));
+                    System.currentTimeMillis() - start.getTime()));
         }
     }
 }
