@@ -10,7 +10,6 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
@@ -23,6 +22,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTa
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.MergeUserRefinedAttributesConfiguration;
@@ -61,6 +61,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
 
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
+        private ExportToS3StepConfiguration modelExportToS3 = new ExportToS3StepConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             cdlModelWorkflowBuilder.microServiceHostPort(microServiceHostPort);
@@ -75,6 +76,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             generateAIRating.microServiceHostPort(microServiceHostPort);
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
+            modelExportToS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -92,6 +94,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             generateAIRating.customer(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
+            modelExportToS3.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -107,6 +110,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             generateAIRating.internalResourceHostPort(internalResourceHostPort);
             mergeUserRefinedAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            modelExportToS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -398,6 +402,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             configuration.add(cdlTargetTableTupleFilter);
             configuration.add(generateAIRating.build());
             configuration.add(mergeUserRefinedAttributes);
+            configuration.add(modelExportToS3);
             return configuration;
         }
 

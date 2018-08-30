@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DynamoDataUnit.class, name = "Dynamo"),
         @JsonSubTypes.Type(value = RedshiftDataUnit.class, name = "Redshift"),
+        @JsonSubTypes.Type(value = S3DataUnit.class, name = "S3"),
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -43,7 +44,7 @@ public abstract class DataUnit {
     }
 
     public enum StorageType {
-        Dynamo, Hdfs, Redshift
+        Dynamo, Hdfs, Redshift, S3
     }
 
 }

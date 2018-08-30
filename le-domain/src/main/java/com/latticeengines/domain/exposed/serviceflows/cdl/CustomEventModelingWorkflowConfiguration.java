@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWor
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.MergeUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidationWorkflowConfiguration;
@@ -66,6 +67,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private GenerateAIRatingWorkflowConfiguration.Builder generateAIRating = new GenerateAIRatingWorkflowConfiguration.Builder();
 
         private MergeUserRefinedAttributesConfiguration mergeUserRefinedAttributes = new MergeUserRefinedAttributesConfiguration();
+        private ExportToS3StepConfiguration modelExportToS3 = new ExportToS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -82,7 +84,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             setConfigForScoring.setCustomerSpace(customerSpace);
             generateAIRating.customer(customerSpace);
             mergeUserRefinedAttributes.setCustomerSpace(customerSpace);
-
+            modelExportToS3.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -103,6 +105,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             generateAIRating.microServiceHostPort(microServiceHostPort);
 
             mergeUserRefinedAttributes.setMicroServiceHostPort(microServiceHostPort);
+            modelExportToS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -149,6 +152,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             generateAIRating.internalResourceHostPort(internalResourceHostPort);
             mergeUserRefinedAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            modelExportToS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -438,7 +442,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(generateAIRating.build());
             configuration.add(exportBucketTool);
             configuration.add(exportScoreTrainingFile);
-
+            configuration.add(modelExportToS3);
             configuration.add(mergeUserRefinedAttributes);
 
             return configuration;

@@ -17,6 +17,7 @@ import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
 import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
 import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.serviceflows.workflow.export.ExportModelToS3;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
@@ -69,6 +70,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private ExportBucketTool exportBucketTool;
 
     @Inject
+    private ExportModelToS3 modelExportToS3;
+
+    @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
@@ -87,6 +91,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(generateRating) //
                 .next(exportScoreTrainingFile) //
                 .next(exportBucketTool) //
+                .next(modelExportToS3) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
-import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -13,10 +12,11 @@ import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
-import com.latticeengines.modeling.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
+import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
 import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
 import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.serviceflows.workflow.export.ExportModelToS3;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -60,6 +60,9 @@ public class CrossSellImportMatchAndModelWorkflow
     private ExportBucketTool exportBucketTool;
 
     @Inject
+    private ExportModelToS3 modelExportToS3;
+
+    @Inject
     private ExportScoreTrainingFile exportScoreTrainingFile;
 
     @Inject
@@ -79,6 +82,7 @@ public class CrossSellImportMatchAndModelWorkflow
                 .next(generateRating) //
                 .next(exportScoreTrainingFile) //
                 .next(exportBucketTool) //
+                .next(modelExportToS3) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }
