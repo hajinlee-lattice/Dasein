@@ -47,7 +47,6 @@ angular.module('common.datacloud.query.results', [
     });
 
     vm.init = function() {
-
         // Set Counts for Segment and PLay Targets
         if (vm.section === 'segment.analysis') {
             vm.counts = QueryStore.getCounts();
@@ -87,9 +86,7 @@ angular.module('common.datacloud.query.results', [
                 });
 
             }
-
         }
-
     }
 
     function updatePage() {
@@ -208,6 +205,7 @@ angular.module('common.datacloud.query.results', [
                     selectedBuckets: vm.selectedBuckets
                 };
 
+            PlaybookWizardStore.setValidation('targets', false);
             PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
             
                 // Get play rating engine and create array object literal for getting the counts.
@@ -286,7 +284,7 @@ angular.module('common.datacloud.query.results', [
                         }
 
                         vm.topNCount = vm.counts.accounts.value;
-
+                        PlaybookWizardStore.setValidation('targets', (vm.topNCount > 0));
                     });
                 } else if (vm.search) { 
                     var countsQuery = { 
@@ -319,13 +317,11 @@ angular.module('common.datacloud.query.results', [
         }
 
         vm.checkSaveButtonState();
-
     };
 
     vm.updateTopNCount = function() {
-
         vm.maxTargetValue = vm.counts.accounts.value;
-
+        
         if (vm.topNCount <= vm.maxTargetValue) {
             vm.showError = false;
             PlaybookWizardStore.setValidation('targets', true);
@@ -335,6 +331,7 @@ angular.module('common.datacloud.query.results', [
             PlaybookWizardStore.setValidation('targets', false);
         }
     }
+
     vm.topNInputClick = function($event) {
         $scope.topNCount = true;
         $event.target.select();

@@ -22,8 +22,9 @@
             <input 
                 type="checkbox"
                 ng-model="topNCount"
+                id="topNCount"
                 ng-change="topNCount && vm.updateTopNCount()" />
-            <label>Limit to only </label>
+            <label for="topNCount">Limit to only </label>
             <input 
                 type="number" 
                 ng-model="vm.topNCount"

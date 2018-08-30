@@ -48,7 +48,7 @@ angular.module('lp.playbook')
         this.validation = {
             settings: false,
             rating: true,
-            targets: true,
+            targets: false,
             crmselection: false,
             insights: false,
             preview: true,
