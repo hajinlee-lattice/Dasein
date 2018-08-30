@@ -1,0 +1,63 @@
+@import '../colors.scss';
+.le-menu {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    padding: 0em .8em;
+}
+
+.menu-content {
+    display: none;
+    position: absolute;
+    // background-color: $pearl-white;
+    background-color: $dark-gray;
+    color: $pearl-white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px $dark-gray;
+    // padding: 12px 6px;
+    margin-top: 0.5rem; // margin-left: -8px;
+    z-index: 1;
+    .le-menu-item {
+        cursor: pointer;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        // padding-bottom: 3px;
+        justify-content: space-between; // border: 1px solid white;
+        &>div {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 160px;
+        }
+        .place-holder{
+            margin-right: 16px;
+            margin-left: 0.5em;
+        }
+        .item-img {
+            margin-left: 0.5em;
+            min-width: 16px;
+        }
+        .label {
+            margin-left: 0.2rem;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 100px;
+        }
+    }
+    .le-menu-item:hover{
+        background-color: $onyx;
+    }
+}
+
+.le-menu-show {
+    display: block;
+    .menu-content {
+        display: block;
+    }
+}
+
+.submenu {
+    padding-right: 0px;
+    margin-right: -8px; 
+}

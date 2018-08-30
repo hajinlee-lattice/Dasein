@@ -164,4 +164,15 @@ module.exports = [{
         '/widgets/sass': '/sass',
         '/widgets/tests': '/tests'
     }
+},{    
+    path: '/projects/widgetsdemo',
+    html5mode: true,
+    pages: {
+        '/widgetsdemo/': '/dist/index.html',
+        '/widgetsdemo/index': '/dist/indexwp.html'
+    },
+    folders: {
+        '/widgetsdemo' : '/dist',
+        '/dist': '/dist',
+    }
 }];

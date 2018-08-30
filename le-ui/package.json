@@ -106,6 +106,8 @@
     "wp-insightsdev": "cd projects/insights/ && npm run watch",
     "wpdeva": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"npm run wp-insightsdev\" \"node bin/devsetup env=a\"",
     "wpdevb": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"node bin/devsetup env=b\"",
+    "widgets": "cd projects/widgetsdemo/ && npm run watch",
+    "devwidgets": "concurrently \"npm run widgets\" \"node bin/devsetup env=a\"",
     "wpdevlocal": "concurrently \"npm run wp-logindev\" \"npm run wp-atlasdev\" \"node bin/devsetup env=local\"",
     "wpproduction": "npm run wpbuild && npm run nodeproduction",
     "wpproddev": "npm run wpbuilddev && npm run nodeproductiondev",

@@ -23,3 +23,7 @@ WebFont.load({
     families: ['Droid Sans', 'Droid Serif']
   }
 });
+
+// window['d3'] = require("d3");
+
+console.log('Vendor loaded');
