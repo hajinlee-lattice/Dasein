@@ -10,9 +10,9 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,19 +57,19 @@ public class DataEncryptionServiceImplWebHdfsDeploymentTestNG extends Encryption
     protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product, boolean encryptTenant)
             throws NoSuchAlgorithmException, KeyManagementException, IOException {
         Map<String, Boolean> encryptionFeatureFlagMap = new HashMap<String, Boolean>();
-        encryptionFeatureFlagMap.put(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), new Boolean(encryptTenant));
+        encryptionFeatureFlagMap.put(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), encryptTenant);
         mainTestTenant = testBed.bootstrapForProduct(product, encryptionFeatureFlagMap);
         log.info("Tenant id is " + mainTestTenant.getId());
         switchToSuperAdmin();
     }
 
-    @Test(groups = "deployment", dataProvider = "provider", enabled = true)
+    @Test(groups = "deployment", dataProvider = "provider", enabled = false)
     public void testCrud(Boolean enableEncryptionTenant) {
         log.info("Bootstrapping test tenants using tenant console with enableEncryptionTenant: "
                 + enableEncryptionTenant.toString());
         try {
-            setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, enableEncryptionTenant.booleanValue());
-            if (enableEncryptionTenant.booleanValue()) {
+            setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, enableEncryptionTenant);
+            if (enableEncryptionTenant) {
                 Assert.assertTrue(dataEncryptionService.isEncrypted(CustomerSpace.parse(mainTestTenant.getId())));
             } else {
                 Assert.assertFalse(dataEncryptionService.isEncrypted(CustomerSpace.parse(mainTestTenant.getId())));
