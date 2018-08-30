@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
@@ -55,7 +56,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportBucketToolStepConfiguration export = new ExportBucketToolStepConfiguration();
-
+        private ExportToS3StepConfiguration modelExportToS3 = new ExportToS3StepConfiguration();
         public Builder microServiceHostPort(String microServiceHostPort) {
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
@@ -67,6 +68,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
+            modelExportToS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -81,6 +83,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             rtsBulkScoreWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             export.setInternalResourceHostPort(internalResourceHostPort);
+            modelExportToS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -96,6 +99,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
             computeLift.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
+            modelExportToS3.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -355,6 +359,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             configuration.add(computeLift);
             configuration.add(pivotScoreAndEvent);
             configuration.add(export);
+            configuration.add(modelExportToS3);
             return configuration;
         }
 

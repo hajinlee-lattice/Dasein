@@ -16,6 +16,7 @@ import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.serviceflows.workflow.export.ExportModelToS3;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -55,6 +56,9 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private ExportBucketTool exportBucketTool;
 
     @Inject
+    private ExportModelToS3 modelExportToS3;
+
+    @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
@@ -69,6 +73,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
                 .next(rtsBulkScoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportBucketTool) //
+                .next(modelExportToS3) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }
