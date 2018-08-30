@@ -16,11 +16,15 @@ public interface S3Service {
 
     List<S3ObjectSummary> listObjects(String bucket, String prefix);
 
+    List<String> listSubFolders(String bucket, String parentDir);
+
     MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync);
 
     Upload uploadLocalFile(String bucket, String key, File file, Boolean sync);
 
     Upload uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync);
+
+    void createFolder(String bucketName, String folderName);
 
     void downloadS3File(S3ObjectSummary itemDesc, File file) throws Exception;
 

@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
@@ -38,6 +40,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
+    @Inject
+    private DropBoxService dropBoxService;
+
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
         String camilleTenantId = space.getTenantId();
@@ -50,12 +55,21 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         dataCollectionEntityMgr.createDefaultCollection();
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
+        provisionDropBox(space);
     }
 
     public void discardTenant(String customerSpace) {
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         attrConfigEntityMgr.cleanupTenant(tenantId);
         dataUnitEntityMgr.cleanupTenant(tenantId);
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        MultiTenantContext.setTenant(tenant);
+        dropBoxService.delete();
+    }
+
+    private void provisionDropBox(CustomerSpace customerSpace) {
+        DropBox dropBox = dropBoxService.create();
+        log.info("Created dropbox " + dropBox.getDropBox() + " for " + customerSpace.getTenantId());
     }
 
 }

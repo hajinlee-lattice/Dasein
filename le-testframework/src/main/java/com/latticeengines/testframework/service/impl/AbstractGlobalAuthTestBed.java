@@ -8,16 +8,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -60,6 +63,12 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     @Autowired
     private RedshiftService redshiftService;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customerBucket;
 
     @PostConstruct
     private void postConstruct() {
@@ -168,6 +177,18 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     @Override
+    public void cleanupS3() {
+        for (Tenant tenant : testTenants) {
+            if (excludedCleanupTenantIds.contains(tenant.getId())) {
+                log.info("Skip cleaning up S3 for" + tenant.getId());
+            } else {
+                log.info("Clean up S3 for test tenant " + tenant.getId());
+                s3Service.cleanupPrefix(customerBucket, CustomerSpace.parse(tenant.getId()).getTenantId());
+            }
+        }
+    }
+
+    @Override
     public void cleanupDlZk() {
     }
 
@@ -201,9 +222,9 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     public void cleanupRedshift() {
         for (Tenant tenant : testTenants) {
             if (excludedCleanupTenantIds.contains(tenant.getId())) {
-                log.info("Skip cleaning up " + tenant.getId());
+                log.info("Skip cleaning up redshift for" + tenant.getId());
             } else {
-                log.info("Clean up test tenant " + tenant.getId());
+                log.info("Clean up redshift test tenant " + tenant.getId());
                 List<String> tables = redshiftService.getTables(CustomerSpace.parse(tenant.getId()).getTenantId());
                 tables.forEach(redshiftService::dropTable);
             }

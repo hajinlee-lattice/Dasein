@@ -70,6 +70,8 @@ public interface GlobalAuthTestBed {
 
     void deleteTenant(Tenant tenant);
 
+    void cleanupS3();
+
     void cleanupDlZk();
 
     void cleanupPlsHdfs();

@@ -55,6 +55,9 @@ public class GlobalAuthCleanupTestListener implements ITestListener {
         GlobalAuthTestBed testBed = getTestBedFromContext(context);
 
         if (testBed != null) {
+            log.info("Cleanup S3.");
+            testBed.cleanupS3();
+
             log.info("Cleanup DL and ZK.");
             testBed.cleanupDlZk();
 

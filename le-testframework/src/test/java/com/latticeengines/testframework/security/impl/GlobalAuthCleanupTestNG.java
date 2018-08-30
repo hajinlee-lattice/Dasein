@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -24,7 +25,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -75,20 +76,26 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     private static final Long redshiftCleanupThreshold = TimeUnit.DAYS.toMillis(1);
     private static final String customerBase = "/user/s-analytics/customers";
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private DataLoaderService dataLoaderService;
 
-    @Autowired
+    @Inject
     private RedshiftService redshiftService;
+
+    @Inject
+    private S3Service s3Service;
 
     @Resource(name = "docJdbcTemplate")
     private JdbcTemplate docJdbcTemplate;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customerBucket;
 
     @Value("${admin.test.deployment.api:http://localhost:8085}")
     private String adminApiHostPort;
@@ -130,6 +137,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         }
 
         cleanupRedshift();
+        cleanupS3();
         cleanupTenantsInDocumentStores();
         cleanupTenantsInHdfs();
         cleanupZK();
@@ -330,6 +338,28 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
             }
         } catch (Exception e) {
             log.error("Failed to clean up test tenants in redshift.", e);
+        }
+    }
+
+    private void cleanupS3() {
+        try {
+            log.info("Start cleaning up S3");
+            List<String> folders = s3Service.listSubFolders(customerBucket, "/");
+            folders.forEach(folder -> {
+                if (TestFrameworkUtils.isTestTenant(folder)) {
+                    long testTime = TestFrameworkUtils.getTestTimestamp(folder);
+                    if (testTime > 0 && (System.currentTimeMillis() - testTime) > redshiftCleanupThreshold) {
+                        log.info("Removing S3 folder " + folder);
+                        try {
+                            s3Service.cleanupPrefix(customerBucket, folder);
+                        } catch (Exception e) {
+                            log.error("Failed to remove S3 folder " + folder, e);
+                        }
+                    }
+                }
+            });
+        } catch (Exception e) {
+            log.error("Failed to clean up test tenants in S3.", e);
         }
     }
 

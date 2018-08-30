@@ -68,7 +68,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream("test.txt");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testS3DistCp() throws Exception {
         // from hdfs to s3
         List<Pair<String, Class<?>>> columns = ImmutableList.of( //

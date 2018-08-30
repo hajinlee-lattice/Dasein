@@ -1,6 +1,8 @@
 package com.latticeengines.aws.s3.impl;
 
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.test.annotation.DirtiesContext;
@@ -42,6 +44,14 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
                 "test_kms/distcp_encrypted",
                 "test_kms/distcp_unencrypted",
                 "");
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testListObject() {
+        List<String> subDirs = s3Service.listSubFolders("latticeengines-dev", "/");
+        subDirs.forEach(obj -> {
+            System.out.println(obj);
+        });
     }
 
     @Test(groups = "functional", enabled = false)

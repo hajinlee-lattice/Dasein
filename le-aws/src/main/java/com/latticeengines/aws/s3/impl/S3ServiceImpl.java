@@ -1,5 +1,6 @@
 package com.latticeengines.aws.s3.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -10,6 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -24,9 +26,10 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -89,8 +92,28 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public List<S3ObjectSummary> listObjects(String bucket, String prefix) {
         prefix = sanitizePathToKey(prefix);
-        ListObjectsRequest request = new ListObjectsRequest(bucket, prefix, null, null, Integer.MAX_VALUE);
-        return s3Client.listObjects(request).getObjectSummaries();
+        ListObjectsV2Request request = new ListObjectsV2Request() //
+                .withBucketName(bucket) //
+                .withPrefix(prefix) //
+                .withMaxKeys(Integer.MAX_VALUE);
+        // ListObjectsRequest request = new ListObjectsRequest(bucket, prefix,
+        // null, null, Integer.MAX_VALUE);
+        return s3Client.listObjectsV2(request).getObjectSummaries();
+    }
+
+    @Override
+    public List<String> listSubFolders(String bucket, String parentDir) {
+        List<S3ObjectSummary> summaries = listObjects(bucket, parentDir);
+        return summaries.stream() //
+                .map(obj -> {
+                    String absolutePath = obj.getKey();
+                    return absolutePath.replace(parentDir + "/", "");
+                }) //
+                .filter(path -> StringUtils.isNotBlank(path) //
+                        && path.endsWith("/") //
+                        && path.indexOf("/") == path.lastIndexOf("/")) //
+                .map(path -> path.substring(0, path.lastIndexOf("/"))) //
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -168,9 +191,20 @@ public class S3ServiceImpl implements S3Service {
         return upload;
     }
 
+    @Override
+    public void createFolder(String bucketName, String folderName) {
+        folderName = sanitizePathToKey(folderName);
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(0);
+        InputStream emptyContent = new ByteArrayInputStream(new byte[0]);
+        // create a PutObjectRequest passing the folder name suffixed by /
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, folderName + "/", emptyContent, metadata);
+        s3Client.putObject(putObjectRequest);
+    }
+
     private void setAclRecursive(String bucket, String prefix) {
         prefix = sanitizePathToKey(prefix);
-        for (S3ObjectSummary summary: listObjects(bucket, prefix)) {
+        for (S3ObjectSummary summary : listObjects(bucket, prefix)) {
             s3Client.setObjectAcl(summary.getBucketName(), summary.getKey(), CannedAccessControlList.AuthenticatedRead);
         }
     }
@@ -180,16 +214,17 @@ public class S3ServiceImpl implements S3Service {
         srcFolder = sanitizePathToKey(srcFolder);
         tgtFolder = sanitizePathToKey(tgtFolder);
         List<Runnable> runnables = new ArrayList<>();
-        for (S3ObjectSummary summary: listObjects(bucket, srcFolder)) {
+        for (S3ObjectSummary summary : listObjects(bucket, srcFolder)) {
             final String srcKey = summary.getKey();
             if (!srcKey.endsWith("_$folder$")) {
                 String subKey = srcKey.substring(srcFolder.length() + 1);
                 final String destKey = tgtFolder + "/" + subKey;
-                // Make a copy of the object and use server-side encryption when storing the copy.
+                // Make a copy of the object and use server-side encryption when
+                // storing the copy.
                 CopyObjectRequest request;
                 if (StringUtils.isNotBlank(keyId)) {
-                    request = new CopyObjectRequest(bucket, srcKey, bucket, destKey)
-                            .withSSEAwsKeyManagementParams(new SSEAwsKeyManagementParams("0e9daa04-1400-4e55-88c5-b238a9d01721"));
+                    request = new CopyObjectRequest(bucket, srcKey, bucket, destKey).withSSEAwsKeyManagementParams(
+                            new SSEAwsKeyManagementParams("0e9daa04-1400-4e55-88c5-b238a9d01721"));
                 } else {
                     request = new CopyObjectRequest(bucket, srcKey, bucket, destKey);
                 }
@@ -203,16 +238,15 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public void downloadS3File(S3ObjectSummary itemDesc, File file) throws Exception
-    {
+    public void downloadS3File(S3ObjectSummary itemDesc, File file) throws Exception {
         byte[] buf = new byte[16384];
-        try (S3ObjectInputStream stream = s3Client.getObject(itemDesc.getBucketName(), itemDesc.getKey()).getObjectContent()) {
+        try (S3ObjectInputStream stream = s3Client.getObject(itemDesc.getBucketName(), itemDesc.getKey())
+                .getObjectContent()) {
             try (FileOutputStream writer = new FileOutputStream(file)) {
                 while (stream.available() > 0) {
                     int bytes = stream.read(buf);
                     if (bytes <= 0)
                         break;
-
                     writer.write(buf, 0, bytes);
                 }
             }
