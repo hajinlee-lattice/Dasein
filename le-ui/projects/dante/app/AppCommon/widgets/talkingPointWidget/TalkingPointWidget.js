@@ -151,8 +151,13 @@ angular.module('mainApp.appCommon.widgets.TalkingPointWidget', [
 
             }
 
-            if (result === undefined) {
-                self.logError("Could not evaluate lookup path " + token);
+            switch (result) {
+                case undefined:
+                    self.logError("Could not evaluate lookup path " + token);
+                    break;
+                case null:
+                    result = "";
+                    break;
             }
 
             return result;

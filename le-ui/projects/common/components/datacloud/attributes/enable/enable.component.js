@@ -41,9 +41,6 @@ angular.module('common.attributes.enable', [])
                                 return category = key;
                             }
                         });
-                        
-                        //$state.go('.', { category: category });
-                        //$stateParams.category = category;
                     }
 
                     AttrConfigStore.set('category', category);
@@ -75,14 +72,10 @@ angular.module('common.attributes.enable', [])
 
         vm.store = AttrConfigStore;
         vm.filters = vm.store.get('filters');
+        vm.uiCanExit = vm.store.uiCanExit;
 
         vm.$onInit = function() {
             vm.categories = vm.overview.AttrNums;
-
-            // var category = vm.store.get('category');
-            // $state.go('.', { category: category }, { reload: false, notify: false });
         };
-        
-        vm.uiCanExit = vm.store.uiCanExit;
     }
 });

@@ -1,0 +1,43 @@
+.attr-list-results.attr-edit-list {
+    li {
+        min-height: 47px;
+        height: unset;
+        
+        div {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            line-height: 1em;
+            vertical-align: middle;
+            padding: .33em 1em;
+
+            label {
+            }
+
+            textarea {
+                height: 1.2em;
+                width: 100%;
+            } 
+            
+            &.edit-attribute-name {
+                max-width: 25%;
+                
+                label {
+                    padding-left: 0;
+                    width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+            }    
+        
+            &.edit-attribute-displayname {
+                max-width: 25%;            
+            }
+
+            &.edit-attribute-description {
+                max-width: 50%;            
+            }
+        }
+    }
+}

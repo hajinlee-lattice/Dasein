@@ -6,7 +6,7 @@
             <div class="tab-container">
                 <h2>{{tab.DisplayName}}</h2>
                 <div class="enrichmentCounts">
-                    <span class="count">{{tab.Selected|number}}{{tab.Limit != undefined ? ' of ' : ''}}{{tab.Limit | number}}</span> {{$ctrl.supplemental}}
+                    <span class="count">{{tab.Selected|number}}{{tab.Limit != undefined ? ' of ' : ''}}{{tab.Limit || tab.TotalAttrs | number}}</span> {{$ctrl.supplemental}}
                 </div>
             </div>
         </li>

@@ -12,9 +12,14 @@ angular.module('common.attributes.subheader', [])
         vm.$onInit = function() {
             vm.section = vm.store.getSection();
             vm.params = $stateParams;
-            vm.supplemental = vm.section == 'enable' ? 'ENABLED' : 'ACTIVE';
             vm.tabs = vm.overview.Selections;
             
+            switch(vm.section) {
+                case "enable": vm.supplemental = "ENABLED"; break;
+                case "enable": vm.supplemental = "ACTIVE"; break;
+                default: vm.supplemental = ""; break;
+            }
+
             vm.store.setData('overview', vm.overview);
         };
 
@@ -53,7 +58,7 @@ angular.module('common.attributes.subheader', [])
             var t_l = tab.DisplayName;
             var p_c = vm.params.category;
             var p_s = vm.params.section;
-            var act = vm.section == 'activate';
+            var act = vm.section == 'activate' || vm.section == 'edit';
             var key = act ? 'category' : 'section';
             var val = act ? t_c : t_l;
 

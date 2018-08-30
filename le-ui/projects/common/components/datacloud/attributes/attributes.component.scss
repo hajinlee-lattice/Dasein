@@ -7,6 +7,8 @@
 @import "./activate/activate.component.scss";
 @import "./enable/enable.component.scss";
 @import "./edit/edit.component.scss";
+@import "./edit/filters/edit-filters.component.scss";
+@import "./edit/list/edit-list.component.scss";
 
 .attr-list {
     margin-top: 1.5em;
@@ -46,4 +48,4 @@
             }
         }
     }
-}
+} 

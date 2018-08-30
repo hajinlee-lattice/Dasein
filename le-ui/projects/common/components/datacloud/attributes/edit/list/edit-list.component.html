@@ -1,0 +1,64 @@
+<div class="attr-results-container">
+    <ul class="attr-pagination-top" ng-if="filteredList.length > $ctrl.filters.pagesize">
+        <li class="attr-pagination">
+            <pd-pagination-controls
+                    current="$ctrl.filters.page"
+                    max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize">
+            </pd-pagination-controls>
+        </li>
+    </ul>
+
+    <div class="attr-list-noresults" ng-if="!filteredList || filteredList.length === 0">
+        No Results.
+    </div>
+
+    <ul class="attr-list-results attr-edit-list noselect-children">
+        <li ng-if="filteredList && filteredList.length > 0">
+            <div class="attr-result-label edit-attribute-name" ng-click="$ctrl.toggleAll()">
+                <label>
+                    Attribute Name
+                </label>
+            </div>
+
+            <div class="attr-result-label edit-attribute-displayname" ng-click="$ctrl.toggleAll()">
+                <label>
+                    Display Name
+                </label>
+            </div>
+
+            <div class="attr-result-label edit-attribute-description" ng-click="$ctrl.toggleAll()">
+                <label>
+                    Description
+                </label>
+            </div>
+        </li>
+
+        <li ng-repeat="item in (filteredList = ($ctrl.getResults()
+                        | filter: $ctrl.searchFilter
+                        | filter: $ctrl.getFiltering()))
+                        | orderBy: [ $ctrl.filters.sortPrefix + 'DisplayName' ]
+                        | startFrom: ($ctrl.filters.page - 1) * $ctrl.getPageSize()
+                        | limitTo: $ctrl.getPageSize()">
+
+            <div class="edit-attribute-name">
+                <label for="attrDisplayName">{{ item.Attribute }}</label>
+            </div>
+            <div class="edit-attribute-displayname">
+                <input name="attrDisplayName" type="text" value="{{ item.DisplayName }}" class="form-control"></input>
+            </div>
+            <div class="edit-attribute-description">
+                <textarea name="attrDescription" id="attrDescription" rows="1" class="form-control">{{ item.Description }}</textarea>
+            </div>
+
+        </li>
+    </ul>
+
+    <ul class="attr-pagination-bottom" ng-if="filteredList.length > $ctrl.filters.pagesize">
+        <li class="attr-pagination pull-right">
+            <pd-pagination-controls
+                    current="$ctrl.filters.page"
+                    max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize">
+            </pd-pagination-controls>
+        </li>
+    </ul>
+</div>

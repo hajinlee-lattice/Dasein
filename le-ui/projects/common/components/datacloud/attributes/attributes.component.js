@@ -37,9 +37,9 @@ angular.module('common.attributes', [
                     },{
                         sref: "home.attributes.enable",
                         label: "Enable & Disable Attributes"
-                    // },{
-                    //     sref: "home.attributes.edit",
-                    //     label: "Edit Name & Description"
+                    },{
+                        sref: "home.attributes.edit",
+                        label: "Edit Name & Description"
                     }];
                 }]
             },

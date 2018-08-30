@@ -2,6 +2,8 @@ import './activate/activate.component';
 import './categories/categories.component';
 import './controls/controls.component';
 import './edit/edit.component';
+import './edit/filters/edit-filters.component';
+import './edit/list/edit-list.component';
 import './enable/enable.component';
 import './filters/filters.component';
 import './header/header.component';
