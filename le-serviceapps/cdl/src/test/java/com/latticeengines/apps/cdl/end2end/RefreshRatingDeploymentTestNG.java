@@ -289,7 +289,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
                 .getABCDBucketsByEngineId(mainTestTenant.getId(), engineId);
         Assert.assertNotNull(bucketMetadataHistory);
-        Assert.assertEquals(bucketMetadataHistory.size(), 3);
+        Assert.assertEquals(bucketMetadataHistory.size(), 2);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
         List<BucketMetadata> latestBucketedMetadata = bucketedScoreProxy
                 .getLatestABCDBucketsByEngineId(mainTestTenant.getId(), engineId);
