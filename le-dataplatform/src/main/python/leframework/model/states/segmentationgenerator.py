@@ -5,8 +5,10 @@ from leframework.codestyle import overrides
 from leframework.model.state import State
 from leframework.util.scoringutil import ScoringUtil
 from leframework.model.states.fitfunctionutil import FitFunctionUtil
+from leframework.util.pdversionutil import pd_before_17
 import numpy as np
 import pandas as pd
+import math
 
 class SegmentationGenerator(State):
 
@@ -82,12 +84,29 @@ class RevenueSegmentationGenerator(State):
 
         self.logger.info("revenue segmentations = " + str(self.mediator.revenuesegmentations))
 
+    def padData(self, data):
+        size = data.shape[0]
+        num_of_extra_copies = int(math.ceil(100. / size)) - 1
+        copy = data.copy()
+        for i in range(num_of_extra_copies):
+            data = pd.concat([data, copy], ignore_index=True)
+        return data
+
     def calculateRevenueSegments(self, mediator):
         schema = mediator.schema
+        revColName = schema["reserved"]["predictedrevenue"]
         revenueScore = self.get_revenue_score_data_frame()
         positiveEvents = revenueScore[schema['target']] > 0
-        orderedScore = revenueScore[positiveEvents]
-        orderedScore = ScoringUtil.sortWithRandom(orderedScore, 0).copy().reset_index(drop=True)
+        positiveEventRevenueScore = revenueScore[positiveEvents].copy()
+        if positiveEventRevenueScore.shape[0] < 100:
+            positiveEventRevenueScore = self.padData(positiveEventRevenueScore)
+        positiveEventRevenueScore[revColName] = positiveEventRevenueScore[revColName] + \
+                                                np.random.uniform(-1, 1, size=positiveEventRevenueScore.shape[0]) * 1e-4
+        if pd_before_17():
+            orderedScore = positiveEventRevenueScore.sort(revColName, ascending=False).reset_index(drop=True)
+        else:
+            orderedScore = positiveEventRevenueScore.sort_values(by=revColName, ascending=False).reset_index(drop=True)
+
         numLeads = orderedScore.shape[0]
         apxBlockSize = numLeads / 100.0
         orderedScore['Score'] = orderedScore.index.map(lambda x: min(int(x / apxBlockSize) + 1, 100))

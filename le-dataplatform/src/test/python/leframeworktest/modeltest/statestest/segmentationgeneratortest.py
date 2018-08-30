@@ -50,7 +50,7 @@ class SegmentationGeneratorTest(TestBase):
 
     def load_revenue_data_frame(self):
         buffer = self.load_revenue_score_data()
-        df = pd.read_csv(BytesIO(buffer), header=True)
+        df = pd.read_csv(BytesIO(buffer), header=0)
         return df
 
     def load_revenue_fit_function_parameter(self):
@@ -605,8 +605,7 @@ class SegmentationGeneratorTest(TestBase):
         return json.loads(jsonStr)
 
     def load_revenue_score_data(self):
-        data = '''
-accountID,probScore,revScore,Event
+        data = '''accountID,probScore,revScore,Event
 496039.0,0.007755,990.346388,0.0
 484796.0,0.014278,802.244413,0.0
 487893.0,0.028107,579.8432809999998,0.0
