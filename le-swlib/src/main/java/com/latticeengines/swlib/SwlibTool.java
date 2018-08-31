@@ -7,8 +7,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.commons.io.FileUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
@@ -21,7 +23,7 @@ public class SwlibTool {
 
         CommandLineParser parser = new DefaultParser();
         Options options = new Options();
-        options.addOption("o", "operation", true, " -<operation> (install or uninstall)"). //
+        options.addOption("o", "operation", true, " -<operation> (install or uninstall or config)"). //
                 addOption("n", "name", true, " -<name> (package name - cdl, leadprioritization or datacloud)"). //
                 addOption("g", "groupId", true, " -<groupId> (group id Maven-style)"). //
                 addOption("a", "artifactId", true, " -<artifactId> (artifact id Maven-style)"). //
@@ -57,15 +59,30 @@ public class SwlibTool {
                 swPackage.setClassifier(classifier);
                 swPackage.setInitializerClass(initializerClassName);
 
-                if (operation.equals("install")) {
-                    String fileName = cmd.getOptionValue("localFileName");
-                    fileToInstall = new File(fileName);
-
-                    if (!fileToInstall.exists()) {
-                        throw new Exception(String.format("File %s does not exist.", fileName));
-                    }
-                    installForAllModules(swlibService, fsDefaultFS, swPackage, fileToInstall);
-                } else if (operation.equals("uninstall")) {
+                switch (operation) {
+                    case "config":
+                        ObjectMapper om = new ObjectMapper();
+                        SoftwareLibrary swLib = SoftwareLibrary.fromName(swPackage.getName());
+                        if (swLib == null) {
+                            throw new RuntimeException("Cannot find software library for name " + swPackage.getName());
+                        }
+                        Set<SoftwareLibrary.Module> modules = swLib.getModules();
+                        for (SoftwareLibrary.Module module : modules) {
+                            String outputJson = String.format("target/swlib/%s/%s/%s.json", module, artifactId, artifactId);
+                            FileUtils.forceMkdirParent(new File(outputJson));
+                            om.writeValue(new File(outputJson), swPackage);
+                        }
+                        break;
+                    case "install":
+                        String fileName = cmd.getOptionValue("localFileName");
+                        fileToInstall = new File(fileName);
+                        if (!fileToInstall.exists()) {
+                            throw new Exception(String.format("File %s does not exist.", fileName));
+                        }
+                        installForAllModules(swlibService, fsDefaultFS, swPackage, fileToInstall);
+                        break;
+                    case "uninstall":
+                        break;
                 }
             }
         } catch (Exception e) {
