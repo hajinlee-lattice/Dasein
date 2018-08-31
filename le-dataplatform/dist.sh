@@ -34,6 +34,7 @@ cp jacocoagent.jar ${dist}/lib
 mkdir -p ${dist}/conf
 cp ../le-config/conf/env/${LE_ENVIRONMENT}/latticeengines.properties ${dist}/conf
 if [ ! -z "${STACK_PROFILE}" ]; then
-    python replace_token.py ${dist}/conf ${STACK_PROFILE}
+    cp ../le-config/src/main/python/replace_token.py .
+    python2.7 replace_token.py ${dist}/conf ${STACK_PROFILE}
 fi
 cp ../le-config/conf/env/${LE_ENVIRONMENT}/log4j.properties ${dist}/conf
