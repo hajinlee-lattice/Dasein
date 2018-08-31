@@ -36,7 +36,7 @@ public class AttrSpecification {
     }
 
     public static AttrSpecification CDL_CONTACT_EXTENSION() {
-        return new AttrSpecification("CDL Contact Extensions", true, true, true, true, true, false, true, true, true,
+        return new AttrSpecification("CDL Contact Extensions", true, true, true, true, false, false, true, true, true,
                 false, true, false);
     }
 
@@ -216,6 +216,10 @@ public class AttrSpecification {
 
     public void setTalkingPointChange(boolean talkingPointChange) {
         this.talkingPointChange = talkingPointChange;
+    }
+
+    public void setModelChange(boolean modelChange) {
+        this.modelChange = modelChange;
     }
 
     public boolean allowChange(ColumnSelection.Predefined group) {

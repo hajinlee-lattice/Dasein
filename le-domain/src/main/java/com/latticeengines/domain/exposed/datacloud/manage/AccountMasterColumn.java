@@ -382,7 +382,8 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setCanInternalEnrich(isInternalEnrichment());
         metadata.setGroups(getPredefinedGroups());
 
-        if (StringUtils.isNotBlank(metadata.getDataLicense()) || Category.WEBSITE_KEYWORDS.equals(metadata.getCategory())) {
+        if (StringUtils.isNotBlank(metadata.getDataLicense())
+                || Category.WEBSITE_KEYWORDS.equals(metadata.getCategory())) {
             metadata.setAttrState(AttrState.Inactive);
         }
 
@@ -401,6 +402,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         }
 
         if (metadata.getApprovedUsageString().contains("Model")) {
+            metadata.setCanModel(true);
             metadata.enableGroup(ColumnSelection.Predefined.Model);
         }
 

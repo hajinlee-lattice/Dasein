@@ -531,7 +531,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             mergeConfig.setAttrSubType(subType);
             mergeConfig.setEntity(metadata.getEntity());
             mergeConfig.setDataLicense(metadata.getDataLicense());
-            modifyAccordingToFlags(attrSpec, metadata);
+            overwriteAttrSpecsByColMetadata(attrSpec, metadata);
 
             Map<String, AttrConfigProp<?>> attrProps = mergeConfig.getAttrProps();
             if (attrProps == null) {
@@ -609,7 +609,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return new ArrayList<>(map.values());
     }
 
-    private void modifyAccordingToFlags(AttrSpecification attrSpec, ColumnMetadata cm) {
+    private void overwriteAttrSpecsByColMetadata(AttrSpecification attrSpec, ColumnMetadata cm) {
         if (!Boolean.TRUE.equals(cm.getCanEnrich())) {
             attrSpec.setEnrichmentChange(false);
             attrSpec.setTalkingPointChange(false);
@@ -620,6 +620,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         }
         if (!Boolean.TRUE.equals(cm.getCanEnrich()) && !Boolean.TRUE.equals(cm.getCanSegment())) {
             attrSpec.disableStateChange();
+        }
+        if (!Boolean.TRUE.equals(cm.getCanModel())) {
+            attrSpec.setModelChange(false);
         }
     }
 

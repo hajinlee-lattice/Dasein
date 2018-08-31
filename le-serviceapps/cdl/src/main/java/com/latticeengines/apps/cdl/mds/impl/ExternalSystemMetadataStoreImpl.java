@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import reactor.core.publisher.Flux;
 
-
 @Component
 public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataStore {
 
@@ -26,7 +25,8 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
     private final CDLNamespaceService cdlNamespaceService;
 
     @Inject
-    public ExternalSystemMetadataStoreImpl(CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr, CDLNamespaceService cdlNamespaceService) {
+    public ExternalSystemMetadataStoreImpl(CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr,
+            CDLNamespaceService cdlNamespaceService) {
         this.cdlExternalSystemEntityMgr = cdlExternalSystemEntityMgr;
         this.cdlNamespaceService = cdlNamespaceService;
     }
@@ -41,16 +41,20 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
 
             if (externalSystem != null) {
                 if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {
-                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getCRMIdList()).map(id -> toColumnMetadata(id, "CRM", externalSystem.getDisplayNameById(id))));
+                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getCRMIdList())
+                            .map(id -> toColumnMetadata(id, "CRM", externalSystem.getDisplayNameById(id))));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getMAPIdList())) {
-                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getMAPIdList()).map(id -> toColumnMetadata(id, "MAP", externalSystem.getDisplayNameById(id))));
+                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getMAPIdList())
+                            .map(id -> toColumnMetadata(id, "MAP", externalSystem.getDisplayNameById(id))));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getERPIdList())) {
-                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getERPIdList()).map(id -> toColumnMetadata(id, "ERP", externalSystem.getDisplayNameById(id))));
+                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getERPIdList())
+                            .map(id -> toColumnMetadata(id, "ERP", externalSystem.getDisplayNameById(id))));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getOtherIdList())) {
-                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getOtherIdList()).map(id -> toColumnMetadata(id, null, externalSystem.getDisplayNameById(id))));
+                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getOtherIdList())
+                            .map(id -> toColumnMetadata(id, null, externalSystem.getDisplayNameById(id))));
                 }
             }
         }
@@ -68,6 +72,7 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         if (StringUtils.isNotBlank(displayName)) {
             cm.setDisplayName(displayName);
         }
+        cm.setCanModel(false);
         return cm;
     }
 

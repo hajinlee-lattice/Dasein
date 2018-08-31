@@ -110,7 +110,7 @@ public class SystemMetadataStoreImpl extends
                         servingStore = servingStore.filter(cm -> Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()));
                     }
 
-                    Set<String> internalAttributes = SchemaRepository.getSystemAttributes(entity).stream()
+                    Set<String> systemAttributes = SchemaRepository.getSystemAttributes(entity).stream()
                             .map(InterfaceName::name).collect(Collectors.toSet());
 
                     Set<String> exportAttributes = SchemaRepository.getDefaultExportAttributes(entity).stream()
@@ -121,7 +121,7 @@ public class SystemMetadataStoreImpl extends
                                 cm.setEntity(entity);
                                 cm.setCategory(category);
 
-                                if (internalAttributes.contains(cm.getAttrName())) {
+                                if (systemAttributes.contains(cm.getAttrName())) {
                                     cm.setGroups(null);
                                     return cm;
                                 }
@@ -133,7 +133,8 @@ public class SystemMetadataStoreImpl extends
                                 // Enrichment
                                 cm.setCanEnrich(true);
 
-                                // enable a list of default attributes for Export
+                                // enable a list of default attributes for
+                                // Export
                                 if (exportAttributes.contains(cm.getAttrName())) {
                                     cm.enableGroup(Enrichment);
                                 } else {
@@ -141,15 +142,20 @@ public class SystemMetadataStoreImpl extends
                                 }
                                 cm.enableGroup(TalkingPoint);
                                 cm.disableGroup(CompanyProfile);
+                                cm.disableGroup(Model);
 
                                 if (BusinessEntity.Account.equals(entity)) {
-                                    cm.enableGroup(Model);
                                     if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
                                         cm.setSubcategory("Account IDs");
                                     }
                                 }
 
-                                // TODO: YSong (M22) to be moved to a specific metadata store for curated attrs
+                                if (BusinessEntity.Contact.equals(entity)) {
+                                    cm.setCanModel(false);
+                                }
+
+                                // TODO: YSong (M22) to be moved to a specific
+                                // metadata store for curated attrs
                                 if (BusinessEntity.PurchaseHistory.equals(entity)) {
                                     cm.disableGroup(Enrichment);
                                 }
@@ -178,13 +184,15 @@ public class SystemMetadataStoreImpl extends
                 if (BusinessEntity.Account.equals(entity)) {
                     // merge serving store and AM, for Account
                     Namespace1<String> amNs = cdlNamespaceService.resolveDataCloudVersion();
-                    boolean internalEnrichEnabled = zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(customerSpace));
+                    boolean internalEnrichEnabled = zkConfigService
+                            .isInternalEnrichmentEnabled(CustomerSpace.parse(customerSpace));
                     ParallelFlux<ColumnMetadata> amFlux = amMetadataStore.getMetadataInParallel(amNs) //
                             .filter(cm -> !InterfaceName.LatticeAccountId.name().equals(cm.getAttrName())) //
                             .map(cm -> {
                                 cm.setEntity(BusinessEntity.Account);
 
-                                // Initial status for Export: enabled for Firmographics and premium
+                                // Initial status for Export: enabled for
+                                // Firmographics and premium
                                 if (!internalEnrichEnabled && Boolean.TRUE.equals(cm.getCanInternalEnrich())) {
                                     cm.disableGroup(Enrichment);
                                     cm.disableGroup(TalkingPoint);

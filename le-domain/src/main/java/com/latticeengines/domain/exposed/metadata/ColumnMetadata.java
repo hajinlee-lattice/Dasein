@@ -83,6 +83,8 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private Boolean canEnrich;
     @JsonProperty("CanSegment")
     private Boolean canSegment;
+    @JsonProperty("CanModel")
+    private Boolean canModel;
     @JsonProperty("CanInternalEnrich")
     private Boolean canInternalEnrich;
     @JsonProperty("ShouldDeprecate")
@@ -281,6 +283,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setCanSegment(Boolean canSegment) {
         this.canSegment = canSegment;
+    }
+
+    public Boolean getCanModel() {
+        return canModel;
+    }
+
+    public void setCanModel(Boolean canModel) {
+        this.canModel = canModel;
     }
 
     public Boolean getShouldDeprecate() {
