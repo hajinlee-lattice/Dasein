@@ -198,7 +198,7 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         BulkMatchMergerTransformerConfig conf = new BulkMatchMergerTransformerConfig();
         conf.setJoinField(InterfaceName.AccountId.name());
         conf.setReverse(true);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        String confStr = appendEngineConf(conf, heavyEngineConfig2());
         step.setConfiguration(confStr);
         return step;
     }

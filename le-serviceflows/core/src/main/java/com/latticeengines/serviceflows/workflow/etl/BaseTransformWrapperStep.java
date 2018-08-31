@@ -90,6 +90,17 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         return engineConf;
     }
 
+    protected TransformationFlowParameters.EngineConfiguration heavyEngineConfig2() {
+        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
+        engineConf.setEngine("TEZ");
+        Map<String, String> jobProperties = new HashMap<>();
+        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * 2));
+        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions / 2));
+        engineConf.setJobProperties(jobProperties);
+        engineConf.setPartitions(cascadingPartitions);
+        return engineConf;
+    }
+
     protected TransformationFlowParameters.EngineConfiguration lightEngineConfig() {
         if ("FLINK".equalsIgnoreCase(defaultEngine)) {
             TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
