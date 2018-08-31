@@ -190,7 +190,7 @@
         <property name="queryApi" value="${quartz.admin.predefined.job.query.api:}" />
         <property name="checkJobBeanUrl" value="${quartz.admin.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;adminRecycleTenantJob&quot;}" />
-        <property name="jobTimeout" value="${quartz.admin.recycletenant.job.timeout}" />
+        <property name="jobTimeout" value="${quartz.admin.recycletenant.job.timeout:3000}" />
     </bean>
 
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
