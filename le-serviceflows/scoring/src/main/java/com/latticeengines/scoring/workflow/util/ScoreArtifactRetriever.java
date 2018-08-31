@@ -17,6 +17,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
+import static com.latticeengines.domain.exposed.scoringapi.Model.EV_FIT_FUNCTION_PARAMETERS_FILENAME;
+import static com.latticeengines.domain.exposed.scoringapi.Model.EV_SCORE_DERIVATION_FILENAME;
 import static com.latticeengines.domain.exposed.scoringapi.Model.FIT_FUNCTION_PARAMETERS_FILENAME;
 import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_ENHANCEMENTS_DIR;
 import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_SCORE_ARTIFACT_APPID_DIR;
@@ -109,11 +111,33 @@ public class ScoreArtifactRetriever {
         }
     }
 
+    private String retrieveEVScoreDerivationFromHdfs(String hdfsScoreArtifactBaseDir) {
+        String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + EV_SCORE_DERIVATION_FILENAME;
+        String content = null;
+        try {
+            content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
+            return content;
+        } catch (IOException e) {
+            log.warn("Cannot find ev score derivation file at " + path + ", model may be old");
+            return null;
+        }
+    }
+
+    private String retrieveEVFitFunctionParametersFromHdfs(String hdfsScoreArtifactBaseDir) {
+        String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + EV_FIT_FUNCTION_PARAMETERS_FILENAME;
+        try {
+            String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
+            return content;
+        } catch (IOException e) {
+            log.warn("Cannot find ev fit function parameters file at " + path + ", model may be old");
+            return null;
+        }
+    }
+
     private String retrieveFitFunctionParametersFromHdfs(String hdfsScoreArtifactBaseDir) {
         String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + FIT_FUNCTION_PARAMETERS_FILENAME;
         try {
             String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            //return JsonUtils.deserialize(content, FitFunctionParameters.class);
             return content;
         } catch (IOException e) {
             log.warn("Cannot find fit function parameters file at " + path + ", model may be old");
@@ -135,6 +159,28 @@ public class ScoreArtifactRetriever {
     public String getFitFunctionParameters(CustomerSpace customerSpace, //
                                            String modelId) {
         log.info(String.format("Retrieving fit function parameters from HDFS for model:%s", modelId));
+        ModelSummary modelSummary = getModelSummary(internalResourceRestApiProxy, customerSpace, modelId);
+
+
+        String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
+
+        return retrieveFitFunctionParametersFromHdfs(hdfsScoreArtifactBaseDir);
+    }
+
+    public String getEVScoreDerivation(CustomerSpace customerSpace, //
+                                       String modelId) {
+        log.info(String.format("Retrieving ev model score derivation from HDFS for model:%s", modelId));
+        ModelSummary modelSummary = getModelSummary(internalResourceRestApiProxy, customerSpace, modelId);
+
+
+        String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
+
+        return retrieveScoreDerivationFromHdfs(hdfsScoreArtifactBaseDir);
+    }
+
+    public String getEVFitFunctionParameters(CustomerSpace customerSpace, //
+                                             String modelId) {
+        log.info(String.format("Retrieving ev model fit function parameters from HDFS for model:%s", modelId));
         ModelSummary modelSummary = getModelSummary(internalResourceRestApiProxy, customerSpace, modelId);
 
 

@@ -13,6 +13,8 @@ public class Model {
     public static final String PMML_FILENAME = "rfpmml.xml";
     public static final String SCORE_DERIVATION_FILENAME = "scorederivation.json";
     public static final String FIT_FUNCTION_PARAMETERS_FILENAME = "fitfunctionparameters.json";
+    public static final String EV_SCORE_DERIVATION_FILENAME = "evscorederivation.json";
+    public static final String EV_FIT_FUNCTION_PARAMETERS_FILENAME = "evfitfunctionparameters.json";
     public static final String DATA_COMPOSITION_FILENAME = "datacomposition.json";
     public static final String MODEL_JSON = "model.json";
     public static final String DATA_EXPORT_CSV = "_dataexport.csv";
