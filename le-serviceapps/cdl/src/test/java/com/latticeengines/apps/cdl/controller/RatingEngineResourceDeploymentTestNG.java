@@ -64,7 +64,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         MetadataSegment segment = constructSegment(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
         Assert.assertNotNull(createdSegment);

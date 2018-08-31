@@ -76,7 +76,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         attachProtectedProxy(testSegmentProxy);
         attachProtectedProxy(testRatingEngineProxy);
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         MultiTenantContext.setTenant(mainTestTenant);
     }
 

@@ -46,7 +46,7 @@ public class DataCollectionResourceDeploymentTestNG extends CDLDeploymentTestNGB
         super.setupTestEnvironment();
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
     }
 
     @Test(groups = "deployment")

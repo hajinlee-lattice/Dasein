@@ -90,7 +90,7 @@ public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
     }
 
     private void setupRedshiftData() {
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(BusinessEntity.Account);

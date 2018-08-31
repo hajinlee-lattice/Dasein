@@ -143,7 +143,7 @@ public class TestPlayCreationHelper {
         destinationOrgId = "O_" + System.currentTimeMillis();
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
         tenantIdentifier = tenant.getId();
-        cdlTestDataService.populateData(tenantIdentifier);
+        cdlTestDataService.populateData(tenantIdentifier, 3);
         tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
         MultiTenantContext.setTenant(tenant);
         log.info("Tenant = " + tenant.getId());

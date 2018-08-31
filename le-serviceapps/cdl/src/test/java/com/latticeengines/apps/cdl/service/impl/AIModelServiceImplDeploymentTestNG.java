@@ -76,7 +76,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironment();
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
                 constructSegment(SEGMENT_NAME));
         Assert.assertNotNull(createdSegment);

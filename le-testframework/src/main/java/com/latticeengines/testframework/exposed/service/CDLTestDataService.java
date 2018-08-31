@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 
 public interface CDLTestDataService {
 
-    void populateData(String tenantId);
+    void populateData(String tenantId, int version);
 
     void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
             List<BucketMetadata> coverage);

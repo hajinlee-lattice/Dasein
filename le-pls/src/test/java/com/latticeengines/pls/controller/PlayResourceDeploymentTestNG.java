@@ -108,7 +108,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         switchToSuperAdmin();
 
         if (!shouldSkipCdlTestDataPopulation) {
-            cdlTestDataService.populateData(tenant.getId());
+            cdlTestDataService.populateData(tenant.getId(), 3);
         }
     }
 

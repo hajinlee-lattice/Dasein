@@ -42,7 +42,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @BeforeClass(groups = "deployment")
     public void setup() {
         super.setupTestEnvironment();
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         List<ColumnMetadata> cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue)
                 .collectList().block();
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));

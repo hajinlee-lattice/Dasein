@@ -89,7 +89,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         segment = constructSegment(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
         Assert.assertNotNull(createdSegment);

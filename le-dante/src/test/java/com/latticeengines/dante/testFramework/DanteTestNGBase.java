@@ -78,7 +78,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
 
     // should only be used in deployment tests
     protected void createDependences() throws Exception {
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         testMetadataSegment = createTestSegment();
         testRatingEngine = createTestRatingEngine();
         cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), testRatingEngine.getId(), null);

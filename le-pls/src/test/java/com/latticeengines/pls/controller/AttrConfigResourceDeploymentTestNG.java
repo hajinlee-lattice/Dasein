@@ -32,7 +32,7 @@ public class AttrConfigResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
     }
 
     @SuppressWarnings("rawtypes")

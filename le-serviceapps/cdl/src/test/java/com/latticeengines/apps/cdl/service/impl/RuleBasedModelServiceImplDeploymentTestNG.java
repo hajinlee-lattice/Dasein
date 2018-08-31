@@ -57,7 +57,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     @BeforeClass(groups = "deployment")
     public void setup() {
         setupTestEnvironment();
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
 
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
                 constructSegment(SEGMENT_NAME));

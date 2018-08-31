@@ -39,7 +39,7 @@ public class DataCollectionResourceDeploymentTestNG extends PlsDeploymentTestNGB
         Assert.assertTrue(prechecks.getDisableMargin());
         Assert.assertTrue(prechecks.getDisableCrossSellModeling());
 
-        cdlTestDataService.populateData(mainTestTenant.getId());
+        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         prechecks = restTemplate.getForObject(
                 getRestAPIHostPort() + "/pls/datacollection/precheck", DataCollectionPrechecks.class);
         Assert.assertNotNull(prechecks);

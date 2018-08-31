@@ -56,7 +56,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
             setupTestEnvironment(EXISTING_TENANT);
         } else {
             setupTestEnvironment();
-            cdlTestDataService.populateData(mainTestTenant.getId());
+            cdlTestDataService.populateData(mainTestTenant.getId(), 3);
         }
 
         playCreationHelper.setTenant(mainTestTenant);
