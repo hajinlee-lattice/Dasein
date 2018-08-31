@@ -11,6 +11,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -72,13 +74,15 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Column(name = "EXTERNAL_USER_EMAIL_SENT")
     private Boolean emailSent = false;
 
+    @Enumerated(EnumType.STRING)
     @JsonProperty("Status")
     @Column(name = "STATUS")
-    private String status;
+    private TenantStatus status;
 
+    @Enumerated(EnumType.STRING)
     @JsonProperty("TenantType")
     @Column(name = "TENANT_TYPE")
-    private String tenantType;
+    private TenantType tenantType;
 
     @JsonProperty("Contract")
     @Column(name = "CONTRACT")
@@ -159,19 +163,19 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
         this.emailSent = emailSent;
     }
 
-    public String getStatus() {
+    public TenantStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TenantStatus status) {
         this.status = status;
     }
 
-    public String getTenantType() {
+    public TenantType getTenantType() {
         return tenantType;
     }
 
-    public void setTenantType(String tenantType) {
+    public void setTenantType(TenantType tenantType) {
         this.tenantType = tenantType;
     }
 

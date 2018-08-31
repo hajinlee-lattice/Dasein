@@ -48,6 +48,9 @@ public class TenantServiceImpl implements TenantService {
         Tenant oldTenant = tenantEntityMgr.findByTenantId(tenant.getId());
         oldTenant.setName(tenant.getName());
         oldTenant.setUiVersion(tenant.getUiVersion());
+        oldTenant.setTenantType(tenant.getTenantType());
+        oldTenant.setStatus(tenant.getStatus());
+        oldTenant.setContract(tenant.getContract());
         if (tenant.getRegisteredTime() == null) {
             oldTenant.setRegisteredTime(new Date().getTime());
         } else {

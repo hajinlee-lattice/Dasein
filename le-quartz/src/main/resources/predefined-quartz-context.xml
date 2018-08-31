@@ -182,6 +182,17 @@
         <property name="jobTimeout" value="${quartz.datacloudcollection.job.timeout}" />
     </bean>
 
+ 	<bean name="adminRecycleTenantJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="adminRecycleTenantJob" />
+        <property name="cronTrigger" value="${quartz.admin.recycletenant.job.cron:0 0 12 * * ?}" />
+        <property name="destUrl" value="${quartz.admin.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.admin.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.admin.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.admin.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;adminRecycleTenantJob&quot;}" />
+        <property name="jobTimeout" value="${quartz.admin.recycletenant.job.timeout}" />
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="lpModelSummaryFullDownload"/>
         <ref bean="lpModelSummaryDownload"/>
@@ -199,6 +210,7 @@
         <ref bean="cdlImportJob"/>
         <ref bean="cdlOrchestrationJob"/>
         <ref bean="cdlDateFeedExecutionCleanupJob"/>
+        <ref bean="adminRecycleTenantJob"/>
     </util:list>
 
 </beans>

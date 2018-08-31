@@ -762,4 +762,29 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    public void sendPOCTenantStateNoticeEmail(User user, Tenant tenant, String state, int days) {
+        try {
+            log.info("Sending POC tenant state notice email to " + user.getEmail() + " on " + tenant.getName()
+                    + " started.");
+            EmailTemplateBuilder builder;
+            builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.POC_STATE_NOTICE);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
+            builder.replaceToken("{{state}}", state);
+            builder.replaceToken("{{days}}", String.valueOf(days));
+
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(EmailSettings.POC_STATE_NOTICE_EMAIL_SUBJECT, mp,
+                    Collections.singleton(user.getEmail()));
+            log.info(
+                    "Sending POC tenant state email to " + user.getEmail() + " on " + tenant.getName()
+                    + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send POC tenant state notice email to " + user.getEmail() + " on " + tenant.getName()
+                    + " " + e.getMessage());
+        }
+    }
+
 }

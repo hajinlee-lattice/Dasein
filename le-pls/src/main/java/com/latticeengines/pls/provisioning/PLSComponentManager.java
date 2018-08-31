@@ -23,6 +23,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -125,8 +127,8 @@ public class PLSComponentManager {
 
         try {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
-            tenant.setStatus(info.properties.status);
-            tenant.setTenantType(info.properties.tenantType);
+            tenant.setStatus(TenantStatus.valueOf(info.properties.status));
+            tenant.setTenantType(TenantType.valueOf(info.properties.tenantType));
             tenant.setContract(info.properties.contract);
             LOGGER.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is "
                     + tenant.getTenantType());
