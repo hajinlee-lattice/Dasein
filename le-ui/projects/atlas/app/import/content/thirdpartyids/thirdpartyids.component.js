@@ -84,13 +84,15 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     };
 
     vm.checkValid = function(form) {
-        if(!validateMapping(vm.fieldMapping)) {
-            ImportWizardStore.setValidation('thirdpartyids', false);
-        } else if (!vm.fieldMapping.length) {
-            ImportWizardStore.setValidation('thirdpartyids', true);
-        } else {
-            ImportWizardStore.setValidation('thirdpartyids', form.$valid);
-        }
+        $timeout(function() {
+            if(!validateMapping(vm.fieldMapping)) {
+                ImportWizardStore.setValidation('thirdpartyids', false);
+            } else if (!vm.fieldMapping.length) {
+                ImportWizardStore.setValidation('thirdpartyids', true);
+            } else {
+                ImportWizardStore.setValidation('thirdpartyids', form.$valid);
+            }
+        }, 0);
     }
 
     vm.init();

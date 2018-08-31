@@ -648,7 +648,7 @@ angular.module('lp.import')
                     var result = response.data;
 
                     if (result != null && result !== "" && result.Success == true) {
-                        console.log("!!!!!!!!!!!!!!!!!!!", result);
+                        //console.log("!!!!!!!!!!!!!!!!!!!", result);
 
                         ImportUtils.setLatticeSchema(result.Result);
                         deferred.resolve(result.Result);
