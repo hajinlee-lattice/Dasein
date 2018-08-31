@@ -21,6 +21,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.datacloud.core.datasource.DataSourceConnection;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -39,9 +40,9 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     private String podId;
     private static final String PROPDATA_SERVICE = "PropData";
     private static final String DATASOURCES = "DataSources";
-    private static final String STACKS = "Stacks";
     private static final String MATCH_SERVICE = "Match";
     private static final String USE_REMOTE_DNB_GLOBAL = "UseRemoteDnB";
+    private static final String RELAX_PUBLIC_DOMAIN_CHECK = "RelaxPublicDomainCheck";
 
     @Value("${datacloud.source.db.json}")
     private String sourceDbsJson;
@@ -104,7 +105,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     private Path dbPoolPath(DataSourcePool pool) {
         Path propDataPath = PathBuilder.buildServicePath(podId, PROPDATA_SERVICE);
         if (StringUtils.isNotEmpty(leStack)) {
-            propDataPath = propDataPath.append(STACKS).append(leStack);
+            propDataPath = propDataPath.append(PathConstants.STACKS).append(leStack);
         }
         return propDataPath.append(DATASOURCES).append(pool.name());
     }
@@ -153,4 +154,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         return matchServicePath().append(USE_REMOTE_DNB_GLOBAL);
     }
 
+    private Path relaxPublicDomainCheckPath() {
+        return PathBuilder.buildServicePath(podId, PROPDATA_SERVICE, leStack).append(RELAX_PUBLIC_DOMAIN_CHECK);
+    }
 }

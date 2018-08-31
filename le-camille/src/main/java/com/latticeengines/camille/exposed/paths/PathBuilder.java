@@ -29,6 +29,10 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.SERVICES, serviceName);
     }
 
+    public static Path buildServicePath(String podId, String serviceName, String stack) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SERVICES, serviceName, PathConstants.STACKS, stack);
+    }
+
     public static Path buildServiceDefaultConfigPath(String podId, String serviceName) {
         return new Path(PathConstants.PODS, podId, PathConstants.DEFAULTCONFIG_NODE, serviceName);
     }
