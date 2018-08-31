@@ -8,7 +8,6 @@
     "url": "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
   },
   "dependencies": {
-    "@uirouter/react": "^0.8.7",
     "angular": "~1.5.8",
     "angulartics": "^1.6.0",
     "angulartics-mixpanel": "^0.1.4",
@@ -30,8 +29,6 @@
     "nodemon": "^1.9.1",
     "pako": "^1.0.6",
     "raw-loader": "^0.5.1",
-    "react": "^16.4.2",
-    "react-dom": "^16.4.2",
     "sass-loader": "^7.0.3",
     "style-loader": "^0.21.0",
     "underscore": "^1.9.1",

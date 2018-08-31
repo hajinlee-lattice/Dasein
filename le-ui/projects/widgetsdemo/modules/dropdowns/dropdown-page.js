@@ -1,4 +1,4 @@
-import React , {Component} from 'react';
+import React, { Component } from '../../../common/react-vendor';
 
 export default class DropdownPage extends Component{
     constructor(props){

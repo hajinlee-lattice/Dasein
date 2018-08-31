@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from '../../../common/react-vendor';
 import LeMenu from '../../../common/widgets/menu/le-menu';
 import LeMenuItem from '../../../common/widgets/menu/le-menu-item';
 import LeToolbar, { HORIZONTAL } from '../../../common/widgets/toolbar/le-toolbar';

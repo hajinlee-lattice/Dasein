@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { UIRouter, UIView } from '@uirouter/react';
+import React, { Component } from '../common/react-vendor';
+import { UIRouter, UIView } from '../common/react-vendor';
 import './App.css'
 // import NavigationBar from './modules/navigation';
 import LeToolbar, {HORIZONTAL, VERTICAL} from '../common/widgets/toolbar/le-toolbar';

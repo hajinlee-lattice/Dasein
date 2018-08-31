@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from '../../../common/react-vendor';
 import LeButton from '../../../common/widgets/buttons/le-button';
 
 export default class ButtonsPage extends Component {

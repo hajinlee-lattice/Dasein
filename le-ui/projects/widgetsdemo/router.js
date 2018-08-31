@@ -1,4 +1,4 @@
-import { UIRouterReact, servicesPlugin, hashLocationPlugin } from '@uirouter/react';
+import { UIRouterReact, servicesPlugin, hashLocationPlugin } from '../common/react-vendor';
 
 // Module states
 import buttons from './modules/buttons/state';
