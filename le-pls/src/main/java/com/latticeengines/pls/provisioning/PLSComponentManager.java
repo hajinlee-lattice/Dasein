@@ -151,6 +151,9 @@ public class PLSComponentManager {
             }
         } else {
             try {
+                if (tenant.getStatus() == null) {
+                    tenant.setStatus(TenantStatus.ACTIVE);
+                }
                 tenantService.registerTenant(tenant);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028, String.format("Registering tenant %s error. "
