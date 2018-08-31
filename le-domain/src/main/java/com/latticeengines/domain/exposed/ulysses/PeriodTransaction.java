@@ -24,7 +24,7 @@ public class PeriodTransaction {
     private Double totalAmount;
 
     @JsonProperty("TotalQuantity")
-    private Long totalQuantity;
+    private Double totalQuantity;
 
     @JsonProperty("TransactionCount")
     private Double transactionCount;
@@ -53,11 +53,11 @@ public class PeriodTransaction {
         this.totalAmount = totalAmount;
     }
 
-    public Long getTotalQuantity() {
+    public Double getTotalQuantity() {
         return this.totalQuantity;
     }
 
-    public void setTotalQuantity(Long totalQuantity) {
+    public void setTotalQuantity(Double totalQuantity) {
         this.totalQuantity = totalQuantity;
     }
 

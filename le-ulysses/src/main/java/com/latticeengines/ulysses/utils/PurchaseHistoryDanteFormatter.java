@@ -139,7 +139,7 @@ public class PurchaseHistoryDanteFormatter {
 
         @JsonProperty(value = "TotalVolume", index = 8)
         @JsonView(DanteFormatter.DanteFormat.class)
-        public long getTotalVolume() {
+        public double getTotalVolume() {
             return periodTransaction.getTotalQuantity();
         }
 

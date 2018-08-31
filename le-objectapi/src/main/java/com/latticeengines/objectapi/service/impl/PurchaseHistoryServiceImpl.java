@@ -77,7 +77,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
             periodTransaction.setTotalAmount((Double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
-            periodTransaction.setTotalQuantity((Long) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
+            periodTransaction.setTotalQuantity((Double) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
             periodTransaction
                     .setTransactionCount((Double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
             periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
@@ -127,7 +127,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
             periodTransaction.setTotalAmount((Double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
-            periodTransaction.setTotalQuantity((Long) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
+            periodTransaction.setTotalQuantity((Double) row.get(InterfaceName.TotalQuantity.toString().toLowerCase()));
             periodTransaction
                     .setTransactionCount((Double) row.get(InterfaceName.TransactionCount.toString().toLowerCase()));
             periodTransaction.setProductId((String) row.get(InterfaceName.ProductId.toString().toLowerCase()));
@@ -164,7 +164,6 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         return resultList;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public DataPage getAllSpendAnalyticsSegments() {
         Tenant tenant = MultiTenantContext.getTenant();
