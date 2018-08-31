@@ -12,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -24,7 +25,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "GlobalUser")
+@Table(name = "GlobalUser", indexes = { @Index(name = "IX_EMAIL", columnList = "Email") })
 public class GlobalAuthUser extends BaseGlobalAuthObject implements HasPid {
 
     @Id
