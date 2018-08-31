@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,10 +31,10 @@ import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.AttrDetail;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.SubcategoryDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
@@ -230,14 +229,15 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGenerateAttrConfigRequestForName() {
-        AttrConfigNameAndDescription attr1Change = new AttrConfigNameAndDescription();
+        AttrDetail attr1Change = new AttrDetail();
+        attr1Change.setAttribute("attr1");
         attr1Change.setDisplayName("att1-name-update");
-        AttrConfigNameAndDescription attr2Change = new AttrConfigNameAndDescription();
+        AttrDetail attr2Change = new AttrDetail();
+        attr2Change.setAttribute("attr2");
         attr2Change.setDisplayName("att2-name-update");
         attr2Change.setDescription("att2-description-update");
-        Map<String, AttrConfigNameAndDescription> request = new HashMap<>();
-        request.put("attr1", attr1Change);
-        request.put("attr2", attr2Change);
+        SubcategoryDetail request = new SubcategoryDetail();
+        request.setAttributes(Arrays.asList(attr1Change, attr2Change));
         AttrConfigRequest attrConfigRequest = attrConfigService
                 .generateAttrConfigRequestForName(Category.CONTACT_ATTRIBUTES.getName(), request);
         List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();

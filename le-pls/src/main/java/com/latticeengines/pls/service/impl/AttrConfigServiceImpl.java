@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
-import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelection;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.AttrDetail;
@@ -384,9 +384,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     private void updateAttrConfigsForNameAndDescription(Category category, List<AttrConfig> attrConfigs,
-            String attrName, AttrConfigNameAndDescription request) {
+            AttrDetail request) {
         AttrConfig config = new AttrConfig();
-        config.setAttrName(attrName);
+        config.setAttrName(request.getAttribute());
         config.setEntity(CategoryUtils.getEntity(category));
         config.setAttrProps(new HashMap<>());
         if (request.getDisplayName() != null) {
@@ -414,7 +414,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public void updateNameConfig(String categoryName, Map<String, AttrConfigNameAndDescription> request) {
+    public void updateNameConfig(String categoryName, SubcategoryDetail request) {
         String tenantId = MultiTenantContext.getShortTenantId();
         verifyNameUpdateAccessLevel();
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForName(categoryName, request);
@@ -557,15 +557,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @VisibleForTesting
-    AttrConfigRequest generateAttrConfigRequestForName(String categoryName,
-            Map<String, AttrConfigNameAndDescription> request) {
+    AttrConfigRequest generateAttrConfigRequestForName(String categoryName, SubcategoryDetail request) {
         Category category = resolveCategory(categoryName);
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
-        if (MapUtils.isNotEmpty(request)) {
-            for (String attr : request.keySet()) {
-                updateAttrConfigsForNameAndDescription(category, attrConfigs, attr, request.get(attr));
+        if (request != null && CollectionUtils.isNotEmpty(request.getAttributes())) {
+            for (AttrDetail attr : request.getAttributes()) {
+                updateAttrConfigsForNameAndDescription(category, attrConfigs, attr);
             }
         }
         return attrConfigRequest;
@@ -746,7 +745,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                         attrDetail.setAttribute(attrConfig.getAttrName());
                         attrDetail.setDefaultName(getDefaultName(attrProps));
                         attrDetail.setDisplayName(getDisplayName(attrProps));
-                        attrDetail.setDescription(getDescription(attrProps));
+                        attrDetail.setDescription(
+                                getDescription(attrProps) == null ? StringUtils.EMPTY : getDescription(attrProps));
                         list.add(attrDetail);
                     }
                 } else {

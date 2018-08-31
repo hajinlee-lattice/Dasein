@@ -20,7 +20,6 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.pls.AttrConfigNameAndDescription;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.SubcategoryDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
@@ -84,8 +83,8 @@ public class AttrConfigResource {
 
     @PutMapping(value = "/name/config/category/{categoryName}")
     @ApiOperation("update Name or Description for Account/Contract attributes")
-    public void updateNameConfig(@PathVariable String categoryName,
-            @RequestBody Map<String, AttrConfigNameAndDescription> request, HttpServletResponse response) {
+    public void updateNameConfig(@PathVariable String categoryName, @RequestBody SubcategoryDetail request,
+            HttpServletResponse response) {
         attrConfigService.updateNameConfig(categoryName, request);
     }
 
