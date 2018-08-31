@@ -16,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -173,6 +174,14 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(renderList.size(), dataList.size());
         List<AttrConfig> expectedList = Arrays
                 .asList(AttrConfigTestUtils.getLDCNonPremiumAttr(Category.FIRMOGRAPHICS, false));
+        log.info("renderList: ");
+        for (AttrConfig x : renderList) {
+            log.info(JsonUtils.serialize(x));
+        }
+        log.info("expectedList: ");
+        for (AttrConfig x : expectedList) {
+            log.info(JsonUtils.serialize(x));
+        }
         Assert.assertEquals(renderList, expectedList);
         // transfer empty customer config
         renderList = cdlAttrConfigServiceImpl.render(dataList, new ArrayList<>());
