@@ -31,7 +31,7 @@ public class UlyssesMetricPublishAspect {
     @Autowired
     protected MetricService metricService;
 
-    @Around("execution(* com.latticeengines.ulysses.controller.AttributeResource.*(..))")
+    @Around("execution(* com.latticeengines.app.exposed.controller.PrimaryAttributeResource.*(..))")
     public Object ulyssesAttributeMonitor(ProceedingJoinPoint joinPoint) throws Throwable {
 
         Object retval = null;

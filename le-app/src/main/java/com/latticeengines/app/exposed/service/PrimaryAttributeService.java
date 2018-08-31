@@ -1,14 +1,14 @@
-package com.latticeengines.ulysses.service;
+package com.latticeengines.app.exposed.service;
 
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.attribute.PrimaryField;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.ulysses.PrimaryFieldValidationExpression;
 
-public interface AttributeService {
-
+public interface PrimaryAttributeService {
+    
     List<PrimaryField> getPrimaryFields();
 
     PrimaryFieldValidationExpression getPrimaryFieldValidationExpression(CustomerSpace customerSpace);
@@ -16,5 +16,4 @@ public interface AttributeService {
     List<PrimaryField> getPrimaryFieldsFromExternalSystem(CustomerSpace customerSpace, String type);
 
     Map<String, List<PrimaryField>> getPrimaryFieldsFromExternalSystem(CustomerSpace customerSpace);
-
 }

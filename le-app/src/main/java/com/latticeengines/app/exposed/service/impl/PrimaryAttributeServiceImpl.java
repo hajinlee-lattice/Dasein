@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.service.impl;
+package com.latticeengines.app.exposed.service.impl;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -13,22 +13,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.app.exposed.service.PrimaryAttributeService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
-import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.ulysses.PrimaryFieldValidationExpression;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.ulysses.service.AttributeService;
 
-@Component("attributeService")
-public class AttributeServiceImpl implements AttributeService {
-
-    private static final Logger log = LoggerFactory.getLogger(AttributeServiceImpl.class);
+@Component("primaryAttributeService")
+public class PrimaryAttributeServiceImpl implements PrimaryAttributeService {
+    
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private BatonService batonService;
@@ -86,5 +86,4 @@ public class AttributeServiceImpl implements AttributeService {
         }
         return primaryFieldsMap;
     }
-
 }
