@@ -54,7 +54,8 @@
   "TenantInfo": {
     "properties": {
       "displayName": "${TENANT}_LPI",
-      "description": "A LPI tenant under the contract ${TENANT}"
+      "description": "A LPI tenant under the contract ${TENANT}",
+      "status": "ACTIVE"
     }
   },
   "ContractInfo": {

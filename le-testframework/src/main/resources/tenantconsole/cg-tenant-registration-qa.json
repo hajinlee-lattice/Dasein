@@ -70,7 +70,8 @@
   "TenantInfo": {
     "properties": {
       "displayName": "${TENANT}_CG",
-      "description": "A CG tenant under the contract ${TENANT}"
+      "description": "A CG tenant under the contract ${TENANT}",
+      "status": "ACTIVE"
     }
   },
   "ContractInfo": {

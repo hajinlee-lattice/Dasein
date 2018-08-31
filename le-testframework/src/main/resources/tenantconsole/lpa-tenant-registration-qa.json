@@ -225,7 +225,8 @@
   "TenantInfo": {
     "properties": {
       "displayName": "${TENANT}_LP",
-      "description": "A Lattice tenant under the contract test"
+      "description": "A Lattice tenant under the contract test",
+      "status": "ACTIVE"
     }
   },
   "ContractInfo": {

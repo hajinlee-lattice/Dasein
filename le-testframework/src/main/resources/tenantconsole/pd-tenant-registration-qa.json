@@ -72,7 +72,9 @@
   "TenantInfo": {
     "properties": {
       "displayName": "${TENANT}_PD",
-      "description": "A PD tenant under the contract ${TENANT}"
+      "description": "A PD tenant under the contract ${TENANT}",
+      "tenantType": "",
+      "status": "ACTIVE"
     }
   },
   "ContractInfo": {

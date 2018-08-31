@@ -5,17 +5,17 @@ import java.util.List;
 
 import javax.persistence.Table;
 
-import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.hibernate.query.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.auth.exposed.dao.GlobalAuthUserTenantRightDao;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 
 @Component("globalAuthUserTenantRightDao")
 public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUserTenantRight>
@@ -120,6 +120,18 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         SQLQuery query = session.createSQLQuery(sqlStr);
         query.executeUpdate();
         return true;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<GlobalAuthUserTenantRight> findByEmail(String email) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
+        String queryPattern = "from %s where globalAuthUser.email = :email";
+        String queryStr = String.format(queryPattern, entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("email", email);
+        return query.list();
     }
 
 }

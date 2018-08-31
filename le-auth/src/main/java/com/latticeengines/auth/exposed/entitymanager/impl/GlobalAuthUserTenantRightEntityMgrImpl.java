@@ -1,6 +1,5 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,12 +65,7 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<GlobalAuthUserTenantRight> findByEmail(String email) {
-        GlobalAuthUser user = gaUserDao.findByField("Email", email);
-        if (user == null) {
-            return Collections.emptyList();
-        }
-        Long userId = user.getPid();
-        return gaUserTenantRightDao.findAllByField("User_ID", userId);
+        return gaUserTenantRightDao.findByEmail(email);
     }
 
     @Override

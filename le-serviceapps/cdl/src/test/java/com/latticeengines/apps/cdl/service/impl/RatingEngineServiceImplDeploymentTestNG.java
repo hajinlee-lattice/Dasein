@@ -156,14 +156,14 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         TreeMap<String, Map<String, Restriction>> bucketRuleMap = model.getRatingRule().getBucketToRuleMap();
         Assert.assertNotNull(bucketRuleMap);
         Assert.assertFalse(bucketRuleMap.isEmpty());
-        Arrays.asList(RatingBucketName.values()).stream() //
+        Arrays.asList(RatingBucketName.values()) //
                 .forEach(b -> {
                     Assert.assertTrue(bucketRuleMap.containsKey(b.name()));
                     Map<String, Restriction> rulesMap = bucketRuleMap.get(b.name());
                     Assert.assertNotNull(rulesMap);
                     Assert.assertFalse(rulesMap.isEmpty());
                     List<Boolean> hasNonEmptyPrepopulatedRules = new ArrayList<>();
-                    rulesMap.keySet().stream() //
+                    rulesMap.keySet() //
                             .forEach(t -> {
                                 Assert.assertTrue(FrontEndQueryConstants.ACCOUNT_RESTRICTION.equals(t) //
                                         || FrontEndQueryConstants.CONTACT_RESTRICTION.equals(t));

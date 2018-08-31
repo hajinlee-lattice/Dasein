@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -128,10 +129,12 @@ public class PLSComponentManager {
         try {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
             tenant.setStatus(TenantStatus.valueOf(info.properties.status));
-            tenant.setTenantType(TenantType.valueOf(info.properties.tenantType));
+            if (StringUtils.isNotBlank(info.properties.tenantType)) {
+                tenant.setTenantType(TenantType.valueOf(info.properties.tenantType));
+            }
             tenant.setContract(info.properties.contract);
-            LOGGER.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is "
-                    + tenant.getTenantType());
+            LOGGER.info("registered tenant's status is " + String.valueOf(tenant.getStatus()) + ", tenant type is "
+                    + String.valueOf(tenant.getTenantType()));
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18028, "Failed to retrieve tenants properties", e);
         }
@@ -151,9 +154,6 @@ public class PLSComponentManager {
             }
         } else {
             try {
-                if (tenant.getStatus() == null) {
-                    tenant.setStatus(TenantStatus.ACTIVE);
-                }
                 tenantService.registerTenant(tenant);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028, String.format("Registering tenant %s error. "
