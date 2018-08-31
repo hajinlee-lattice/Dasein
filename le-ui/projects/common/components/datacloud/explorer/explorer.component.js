@@ -161,9 +161,11 @@ angular.module('common.datacloud.explorer', [
 
         DataCloudStore.setFeedbackModal(false);
 
-        QueryStore.getCollectionStatus().then(function(result) {
-            vm.collectionStatus = result;
-        });
+        if (vm.section == 'segment.analysis') {
+            QueryStore.getCollectionStatus().then(function(result) {
+                vm.collectionStatus = result;
+            });
+        }
     }
 
     /* some rules that might hide the page */
