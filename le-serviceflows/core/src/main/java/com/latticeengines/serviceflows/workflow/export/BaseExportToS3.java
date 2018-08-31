@@ -73,19 +73,16 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
 
     @Override
     public void onConfigurationInitialized() {
-        Properties properties = new Properties();
-        properties.setProperty("mapreduce.job.user.classpath.first", "true");
-        properties.setProperty("fs.s3n.awsAccessKeyId", awsAccessKey);
-        properties.setProperty("fs.s3n.awsSecretAccessKey", awsSecretKey);
-        hadoopConfiguration = ConfigurationUtils.createFrom(yarnConfiguration, properties);
-
         String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
         queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
 
         customer = configuration.getCustomerSpace().toString();
         tenantId = configuration.getCustomerSpace().getTenantId();
-
         pathBuilder = new HdfsToS3PathBuilder();
+
+        Properties properties = new Properties();
+        hadoopConfiguration = ConfigurationUtils.createFrom(yarnConfiguration, properties);
+        hadoopConfiguration.set(JobContext.JOB_NAME, tenantId);
     }
 
     @Override
@@ -123,7 +120,6 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
         public void run() {
             try (PerformanceTimer timer = new PerformanceTimer("Copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
                 try {
-                    hadoopConfiguration.set(JobContext.JOB_NAME, tenantId);
                     HdfsUtils.distcp(hadoopConfiguration, srcDir, tgtDir, queueName);
                     // registerDataUnit(srcDir, tgtDir);
 
