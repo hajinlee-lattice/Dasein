@@ -44,9 +44,17 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             if($scope.internalCategories[i].name == 'ACCOUNT_ATTRIBUTES') {
                 $scope.internalCategories[i].name = 'My Attributes';
                 $scope.internalCategories[i].color = '#457DB9';
+                var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'ACCOUNT_ATTRIBUTES' });
+                if (myAttributesCategory) {
+                    setAttributeColor(myAttributesCategory, '#457DB9');
+                }
             }
             if($scope.internalCategories[i].name == 'Product Spend Profile') {
                 $scope.internalCategories[i].color = '#B887B6';
+                var productSpendCategory = chartData.children.find(function(category) { return category.name == 'Product Spend Profile' });
+                if (productSpendCategory) {
+                    setAttributeColor(productSpendCategory, '#B887B6');
+                }
             }
         }
 
@@ -63,6 +71,15 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     $scope.generateCategoryLabel = function(category) {
     	return $sce.trustAsHtml(category.name + '<span style="background-color:' + category.color + '">' + category.count + '</span>');
     };
+
+    function setAttributeColor(category, color) {
+        category.color = color;
+        if (category.children) {
+            category.children.forEach(function(attr) {
+                attr.color = color;
+            });
+        }
+    }
 
     // Methods used for the Sunburst chart
     // Stash the old values for transition.
