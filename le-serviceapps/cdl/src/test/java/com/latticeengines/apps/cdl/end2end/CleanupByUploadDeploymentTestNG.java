@@ -1,9 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import static com.latticeengines.apps.cdl.end2end.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.CheckpointService.CONTACT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.CheckpointService.PRODUCT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +33,10 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 public class CleanupByUploadDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupByUploadDeploymentTestNG.class);
-
+    private static final int ACCOUNT_IMPORT_SIZE_1 = 500;
+    private static final int CONTACT_IMPORT_SIZE_1 = 1100;
+    private static final int PRODUCT_IMPORT_SIZE_1 = 100;
+    private static final int TRANSACTION_IMPORT_SIZE_1 = 30000;
     private String customerSpace;
 
     int numRecordsInCsv = 0;

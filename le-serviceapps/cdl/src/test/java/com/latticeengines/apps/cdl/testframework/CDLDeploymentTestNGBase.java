@@ -30,6 +30,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Listeners;
 
+import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -107,6 +108,9 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     @Inject
     protected PeriodTransactionProxy periodTransactionProxy;
 
+    @Inject
+    protected CheckpointService checkpointService;
+
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;
 
@@ -121,7 +125,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     }
 
     protected void setupTestEnvironment(String existingTenant) {
-
         if (!StringUtils.isEmpty(existingTenant)) {
             testBed.useExistingTenantAsMain(existingTenant);
         } else {
@@ -133,6 +136,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        checkpointService.setMainTestTenant(mainTestTenant);
     }
 
     protected void attachProtectedProxy(ProtectedRestApiProxy proxy) {

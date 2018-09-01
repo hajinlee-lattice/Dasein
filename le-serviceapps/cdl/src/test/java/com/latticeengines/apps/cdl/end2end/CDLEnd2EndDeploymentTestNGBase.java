@@ -6,7 +6,6 @@ import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,19 +18,15 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
@@ -42,6 +37,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -52,7 +48,6 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -103,7 +98,6 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingC
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -114,7 +108,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
-import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -127,16 +120,18 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
-public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
+public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
+
+    private static final int S3_CHECKPOINTS_VERSION = 18;
+    private static final int S3_CROSS_SELL_CHECKPOINTS_VERSION = 18;
 
     private static final String INITIATOR = "test@lattice-engines.com";
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";
@@ -217,9 +212,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     CDLProxy cdlProxy;
 
     @Inject
-    private ColumnMetadataProxy columnMetadataProxy;
-
-    @Inject
     protected ModelingFileUploadProxy fileUploadProxy;
 
     @Inject
@@ -278,7 +270,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
         setupTestEnvironment();
         mainTestTenant = testBed.getMainTestTenant();
-        checkpointService.setMainTestTenant(mainTestTenant);
 
         log.info("Test environment setup finished.");
         createDataFeed();
@@ -321,81 +312,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
     }
 
-    void uploadAccountCSV() {
-        Resource csvResrouce = new ClassPathResource("end2end/csv/Account1.csv",
-                Thread.currentThread().getContextClassLoader());
-        SourceFile sourceFile = fileUploadProxy.uploadFile("Account1.csv", false, "Account1.csv",
-                SchemaInterpretation.Account, "Account", csvResrouce);
-        log.info("Uploaded file " + sourceFile.getName() + " to " + sourceFile.getPath());
-    }
-
     SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type,
             Resource source) {
         log.info("Upload file " + fileName + ", operation type is " + type.name() + ", Schema is " + schema.name());
         return fileUploadProxy.uploadDeleteFile(false, fileName, schema.name(), type.name(), source);
-    }
-
-    void mockVdbImport(BusinessEntity entity, int offset, int limit) throws IOException {
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.VISIDB.getName(),
-                "Query", entity.name());
-        Table importTemplate;
-        if (dataFeedTask == null) {
-            Schema schema = getVdbImportSchema(entity);
-            importTemplate = MetadataConverter.getTable(schema, new ArrayList<>(), null, null, false);
-            importTemplate.setTableType(TableType.IMPORTTABLE);
-            switch (entity) {
-            case Account:
-                importTemplate.getAttributes().forEach(attr -> {
-                    attr.setGroupsViaList(Arrays.asList( //
-                            ColumnSelection.Predefined.TalkingPoint, //
-                            ColumnSelection.Predefined.CompanyProfile));
-                    if (attr.getName().equals("Id") || attr.getName().equals("AccountId")) {
-                        attr.setInterfaceName(InterfaceName.AccountId);
-                    }
-                });
-                importTemplate.setName(SchemaInterpretation.Account.name());
-                break;
-            case Contact:
-                importTemplate.setName(SchemaInterpretation.Contact.name());
-                importTemplate.getAttributes().forEach(attr -> {
-                    if (attr.getName().equals("Id") || attr.getName().equals("ContactId")) {
-                        attr.setInterfaceName(InterfaceName.ContactId);
-                    }
-                });
-                break;
-            case Product:
-                importTemplate.setName(SchemaInterpretation.Product.name());
-                break;
-            default:
-                importTemplate.setName(SchemaInterpretation.Transaction.name());
-            }
-            dataFeedTask = new DataFeedTask();
-            dataFeedTask.setImportTemplate(importTemplate);
-            dataFeedTask.setStatus(DataFeedTask.Status.Active);
-            dataFeedTask.setEntity(entity.name());
-            dataFeedTask.setFeedType("Query");
-            dataFeedTask.setSource("VisiDB");
-            dataFeedTask.setActiveJob("Not specified");
-            dataFeedTask.setSourceConfig("Not specified");
-            dataFeedTask.setStartTime(new Date());
-            dataFeedTask.setLastImported(new Date(0L));
-            dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
-            dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
-        } else {
-            importTemplate = dataFeedTask.getImportTemplate();
-        }
-
-        String targetPath = uploadMockDataWithModifiedSchema(entity, offset, limit);
-        String defaultFS = yarnConfiguration.get(FileSystem.FS_DEFAULT_NAME_KEY);
-        String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
-        Extract e = createExtract(hdfsUri, (long) limit);
-        dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity.name());
-        List<String> tables = dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(),
-                importTemplate.getName(), e);
-        registerMetadataChangeAction(dataFeedTask);
-        dataFeedProxy.addTablesToQueue(customerSpace.toString(), dataFeedTask.getUniqueId(), tables);
     }
 
     void mockCSVImport(BusinessEntity entity, int fileIdx, String feedType) {
@@ -485,11 +405,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         action.setTrackingId(null);
         action.setActionConfiguration(configuration);
         actionProxy.createAction(mainCustomerSpace, action);
-    }
-
-    void importData(BusinessEntity entity, int offset, int limit) {
-        String templateName = String.format("%s_%d_%d.csv", entity.name(), offset, limit);
-        importData(entity, templateName, null);
     }
 
     void importData(BusinessEntity entity, String s3FileName, String feedType) {
@@ -607,129 +522,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
-    private void registerMetadataChangeAction(DataFeedTask dataFeedTask) {
-        log.info(String.format("Registering action for dataFeedTask=%s", dataFeedTask));
-        Action action = new Action();
-        action.setType(ActionType.METADATA_CHANGE);
-        action.setActionInitiator(INITIATOR);
-        action.setDescription(dataFeedTask.getUniqueId());
-        action.setTrackingId(null);
-        actionProxy.createAction(mainCustomerSpace, action);
-    }
-
-    private String uploadMockDataWithModifiedSchema(BusinessEntity entity, int offset, int limit) {
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-" + entity + "/Extracts/%s",
-                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
-        String entityName = entity.name();
-        List<GenericRecord> records;
-        Schema schema;
-        try {
-            schema = AvroUtils.readSchemaFromInputStream(readInputStreamFromS3(entityName));
-            records = AvroUtils.readFromInputStream(readInputStreamFromS3(entityName), offset, limit);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read generic records from input stream for entity " + entityName);
-        }
-        try {
-            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro", records, true);
-            log.info("Uploaded " + records.size() + " records to " + targetPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload avro for " + entityName);
-        }
-        return targetPath;
-    }
-
-    private InputStream readInputStreamFromS3(String entityName) {
-        return testArtifactService.readTestArtifactAsStream(S3_VDB_DIR, S3_VDB_VERSION, entityName + ".avro");
-    }
-
-    long importCsv(BusinessEntity entity, int fileId) throws Exception {
-        String csvPath = String.format("end2end/csv/%s%d.csv", entity.name(), fileId);
-        Resource csvResource = new ClassPathResource(csvPath, Thread.currentThread().getContextClassLoader());
-        String templateName = String.format("%s%d_template.csv", entity, fileId);
-        String dataName = String.format("%s%d_data.csv", entity, fileId);
-        SourceFile template = fileUploadProxy.uploadFile(templateName, false, templateName, entity.name(), csvResource);
-        SourceFile data = fileUploadProxy.uploadFile(dataName, false, dataName, entity.name(), csvResource);
-        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(true);
-            }
-        }
-        fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
-        long startTime = System.currentTimeMillis();
-        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), "e2etest", template, data,
-                INITIATOR);
-        com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(
-                applicationId.toString(), false);
-        long endTime = System.currentTimeMillis();
-        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
-        verifyActionRegistration();
-        return tryGetAvroFileRows(startTime, endTime, entity);
-    }
-
-    protected void verifyActionRegistration() {
+    void verifyActionRegistration() {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         List<Action> actions = actionProxy.getActionsByOwnerId(customerSpace.toString(), null);
         // Assert.assertEquals(actions.size(), ++actionsNumber);
-    }
-
-    private long tryGetAvroFileRows(long startMillis, long endMillis, BusinessEntity entity) throws Exception {
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-%s/Extracts",
-                PathBuilder
-                        .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
-                        .toString(),
-                SourceType.FILE.getName(), entity.name());
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, targetPath);
-        for (String file : files) {
-            String filename = file.substring(file.lastIndexOf("/") + 1);
-            Date folderTime = new SimpleDateFormat(COLLECTION_DATE_FORMAT).parse(filename);
-            if (folderTime.getTime() > startMillis && folderTime.getTime() < endMillis) {
-                log.info("Find matched file: " + filename);
-                HdfsUtils.HdfsFileFilter filter = file1 -> {
-                    if (file1 == null) {
-                        return false;
-                    }
-
-                    String name = file1.getPath().getName();
-                    return name.endsWith(".avro");
-                };
-                List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, file, filter);
-                Assert.assertTrue(avroFiles.size() > 0);
-                String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
-
-                return AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
-            }
-        }
-        Assert.fail("No data collection folder was created!");
-        return 0L;
-    }
-
-    private Schema getVdbImportSchema(BusinessEntity entity) {
-        InputStream avroIs = readInputStreamFromS3(entity.name());
-        try {
-            return AvroUtils.readSchemaFromInputStream(avroIs);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to prepare avro schema for " + entity);
-        }
-    }
-
-    private Extract createExtract(String path, long processedRecords) {
-        Extract e = new Extract();
-        e.setName(StringUtils.substringAfterLast(path, "/"));
-        e.setPath(PathUtils.stripoutProtocol(path));
-        e.setProcessedRecords(processedRecords);
-        String dateTime = StringUtils.substringBetween(path, "/Extracts/", "/");
-        SimpleDateFormat f = new SimpleDateFormat(COLLECTION_DATE_FORMAT);
-        try {
-            e.setExtractionTimestamp(f.parse(dateTime).getTime());
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-        return e;
     }
 
     private void createDataFeed() {
@@ -743,16 +539,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(mainTestTenant);
 
-    }
-
-    protected void updateDataCloudBuildNumber() {
-        String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
-        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(mainCustomerSpace,
-                initialVersion);
-        status.setDataCloudBuildNumber(currentDataCloudBuildNumber);
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainCustomerSpace, status, initialVersion);
-        log.info(String.format("Update datacloud rebuild number as %s for tenant %s with version %s",
-                currentDataCloudBuildNumber, mainCustomerSpace, initialVersion));
     }
 
     long countTableRole(TableRoleInCollection role) {
@@ -773,14 +559,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void resumeCrossSellCheckpoint(String checkpoint) throws IOException {
-        checkpointService.resumeCrossSellCheckpoint(checkpoint);
+        checkpointService.resumeCheckpoint(checkpoint, S3_CROSS_SELL_CHECKPOINTS_VERSION);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
     }
 
     void resumeCheckpoint(String checkpoint) throws IOException {
-        checkpointService.resumeCheckpoint(checkpoint);
+        checkpointService.resumeCheckpoint(checkpoint, S3_CHECKPOINTS_VERSION);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
-        updateDataCloudBuildNumber();
     }
 
     void saveCheckpoint(String checkpoint) throws IOException {

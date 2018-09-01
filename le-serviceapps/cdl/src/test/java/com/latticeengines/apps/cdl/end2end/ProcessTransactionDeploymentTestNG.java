@@ -22,7 +22,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 
     private static final Logger log = LoggerFactory.getLogger(ProcessTransactionDeploymentTestNG.class);
 
-    static final String CHECK_POINT = "process2";
+    public static final String CHECK_POINT = "process2";
 
     private RatingEngine ratingEngine;
 

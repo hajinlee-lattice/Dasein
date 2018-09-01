@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import static com.latticeengines.apps.cdl.end2end.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -18,7 +16,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -30,6 +27,9 @@ import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CleanupAllDeploymentTestNG.class);
+
+    private static final int ACCOUNT_IMPORT_SIZE_1 = 500;
+
     private String customerSpace;
 
     @Inject
