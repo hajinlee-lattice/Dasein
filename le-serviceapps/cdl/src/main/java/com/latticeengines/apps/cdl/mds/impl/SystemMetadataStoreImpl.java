@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -197,8 +199,10 @@ public class SystemMetadataStoreImpl extends
                                     cm.disableGroup(Enrichment);
                                     cm.disableGroup(TalkingPoint);
                                     cm.setCanEnrich(false);
-                                } else if (Category.FIRMOGRAPHICS.equals(cm.getCategory())
-                                        || StringUtils.isNotBlank(cm.getDataLicense())) {
+                                    cm.setAttrState(AttrState.Inactive);
+                                } else if (Boolean.TRUE.equals(cm.getCanEnrich()) &&
+                                        (Category.FIRMOGRAPHICS.equals(cm.getCategory())
+                                        || StringUtils.isNotBlank(cm.getDataLicense()))) {
                                     cm.enableGroup(Enrichment);
                                 } else {
                                     cm.disableGroup(Enrichment);

@@ -16,7 +16,7 @@ public class AttrSpecification {
     }
 
     public static AttrSpecification LDC_INTERNAL() {
-        return new AttrSpecification("LDC Internal Attributes", false, true, true, false, true, false, false, false,
+        return new AttrSpecification("LDC Internal Attributes", true , true, true, false, true, false, false, false,
                 true, false, true, false);
     }
 

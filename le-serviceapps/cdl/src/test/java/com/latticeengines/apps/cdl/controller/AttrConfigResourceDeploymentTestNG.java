@@ -8,22 +8,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.AttrConfigService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -56,6 +62,12 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
+    @Inject
+    private BatonService batonService;
+
+    @Inject
+    private ZKConfigService zkConfigService;
+
     private Set<String> accountStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Account).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
     private Set<String> accountSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Account).stream() //
@@ -71,8 +83,11 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
     private Set<String> contactExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Contact) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
-    private List<ColumnMetadata> amCols;
-    private Set<String> internalEnrichAttrs;
+    private final Set<String> internalEnrichAttrs = new HashSet<>();
+    private final Set<String> cannotSegmentAttrs = new HashSet<>();
+    private final Set<String> cannotEnrichmentAttrs = new HashSet<>();
+    private final Set<String> cannotModelAttrs = new HashSet<>();
+    private final Set<String> deprecatedAttrs = new HashSet<>();
     private Scheduler scheduler = Schedulers.newParallel("verification");
 
     @BeforeClass(groups = "deployment")
@@ -80,14 +95,27 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(() -> {
             setupTestEnvironment();
+            batonService.setFeatureFlag(CustomerSpace.parse(mainTestTenant.getId()), //
+                    LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
             cdlTestDataService.populateMetadata(mainTestTenant.getId(), 3);
         });
         runnables.add(() -> {
-            amCols = columnMetadataProxy.getAllColumns();
-            internalEnrichAttrs = new HashSet<>();
+            List<ColumnMetadata> amCols = columnMetadataProxy.getAllColumns();
             amCols.forEach(cm -> {
                 if (Boolean.TRUE.equals(cm.getCanInternalEnrich())) {
                     internalEnrichAttrs.add(cm.getAttrName());
+                }
+                if (!cm.isEnabledFor(ColumnSelection.Predefined.Segment)) {
+                    cannotSegmentAttrs.add(cm.getAttrName());
+                }
+                if (!cm.isEnabledFor(ColumnSelection.Predefined.Enrichment)) {
+                    cannotEnrichmentAttrs.add(cm.getAttrName());
+                }
+                if (!cm.isEnabledFor(ColumnSelection.Predefined.Model)) {
+                    cannotModelAttrs.add(cm.getAttrName());
+                }
+                if (Boolean.TRUE.equals(cm.getShouldDeprecate())) {
+                    deprecatedAttrs.add(cm.getAttrName());
                 }
             });
         });
@@ -95,6 +123,7 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
         ThreadPoolUtils.runRunnablesInParallel(tp, runnables, 30, 1);
         tp.shutdown();
         MultiTenantContext.setTenant(mainTestTenant);
+        Assert.assertFalse(zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(mainCustomerSpace)));
 
         // TODO: setup some customer account attributes
         // TODO: to be external system ids
@@ -106,46 +135,42 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment")
     public void test() {
+        testLDCAttrs();
         testContactAttributes();
         testMyAttributes();
     }
 
     private void testMyAttributes() {
-        Category cat = Category.ACCOUNT_ATTRIBUTES;
-        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(cat);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
-        Long count = Flux.fromIterable(attrConfigs).parallel().runOn(scheduler) //
-                .map(config -> {
-                    String attrName = config.getAttrName();
-                    Assert.assertNotNull(attrName, JsonUtils.pprint(config));
-                    String partition = getMyAttributesPartition(attrName);
-                    switch (partition) {
-                    case Partition.SYSTEM:
-                        verifySystemAttr(config, cat);
-                        break;
-                    case Partition.STD_ATTRS:
-                        boolean exportByDefault = accountExportAttrs.contains(attrName);
-                        verifyFlags(config, cat, partition, //
-                                Active, false, //
-                                true, true, //
-                                exportByDefault, true, //
-                                true, true, //
-                                false, true, //
-                                false, true);
-                        break;
-                    case Partition.OTHERS:
-                        verifyFlags(config, cat, partition, //
-                                Active, true, //
-                                true, true, //
-                                false, true, //
-                                true, true, //
-                                false, true, //
-                                false, true);
-                    }
-                    return true;
-                }) //
-                .sequential().count().block();
-        log.info("Verified " + count + " attr configs.");
+        final Category cat = Category.ACCOUNT_ATTRIBUTES;
+        checkAndVerifyCategory(cat, (config) -> {
+            String attrName = config.getAttrName();
+            Assert.assertNotNull(attrName, JsonUtils.pprint(config));
+            String partition = getMyAttributesPartition(attrName);
+            switch (partition) {
+            case Partition.SYSTEM:
+                verifySystemAttr(config, cat);
+                break;
+            case Partition.STD_ATTRS:
+                boolean exportByDefault = accountExportAttrs.contains(attrName);
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        true, true, //
+                        exportByDefault, true, //
+                        true, true, //
+                        false, true, //
+                        false, true);
+                break;
+            case Partition.OTHERS:
+                verifyFlags(config, cat, partition, //
+                        Active, true, //
+                        true, true, //
+                        false, true, //
+                        true, true, //
+                        false, true, //
+                        false, true);
+            }
+            return true;
+        });
     }
 
     private String getMyAttributesPartition(String attrName) {
@@ -161,42 +186,36 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
     }
 
     private void testContactAttributes() {
-        Category cat = Category.CONTACT_ATTRIBUTES;
-        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(cat);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
-
-        Long count = Flux.fromIterable(attrConfigs).parallel().runOn(scheduler) //
-                .map(config -> {
-                    String attrName = config.getAttrName();
-                    Assert.assertNotNull(attrName, JsonUtils.pprint(config));
-                    String partition = getContactAttributesPartition(attrName);
-                    switch (partition) {
-                    case Partition.SYSTEM:
-                        verifySystemAttr(config, cat);
-                        break;
-                    case Partition.STD_ATTRS:
-                        boolean exportByDefault = contactExportAttrs.contains(attrName);
-                        verifyFlags(config, cat, partition, //
-                                Active, false, //
-                                true, true, //
-                                exportByDefault, true, //
-                                true, true, //
-                                false, true, //
-                                false, true);
-                        break;
-                    case Partition.OTHERS:
-                        verifyFlags(config, cat, partition, //
-                                Active, true, //
-                                true, true, //
-                                false, true, //
-                                true, true, //
-                                false, true, //
-                                false, false);
-                    }
-                    return true;
-                }) //
-                .sequential().count().block();
-        log.info("Verified " + count + " attr configs.");
+        final Category cat = Category.CONTACT_ATTRIBUTES;
+        checkAndVerifyCategory(cat, (config) -> {
+            String attrName = config.getAttrName();
+            Assert.assertNotNull(attrName, JsonUtils.pprint(config));
+            String partition = getContactAttributesPartition(attrName);
+            switch (partition) {
+            case Partition.SYSTEM:
+                verifySystemAttr(config, cat);
+                break;
+            case Partition.STD_ATTRS:
+                boolean exportByDefault = contactExportAttrs.contains(attrName);
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        true, true, //
+                        exportByDefault, true, //
+                        true, true, //
+                        false, true, //
+                        false, true);
+                break;
+            case Partition.OTHERS:
+                verifyFlags(config, cat, partition, //
+                        Active, true, //
+                        true, true, //
+                        false, true, //
+                        true, true, //
+                        false, true, //
+                        false, false);
+            }
+            return true;
+        });
     }
 
     private String getContactAttributesPartition(String attrName) {
@@ -211,6 +230,185 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
         return partiion;
     }
 
+    private void testLDCAttrs() {
+        checkAndVerifyCategory(Category.FIRMOGRAPHICS, (config) -> {
+            AttrState initialState = AttrState.Active;
+            boolean[] flags = new boolean[] { true, // life cycle change
+                    true, true, // segment
+                    true, true, // export
+                    true, true, // tp
+                    false, true, // cp
+                    true, true // model
+            };
+            initialState = overwrite11Flags(flags, initialState, config.getAttrName());
+            String partition = getLDCPartition(config.getAttrName());
+            verifyFlags(config, Category.FIRMOGRAPHICS, partition, initialState, flags);
+            return true;
+        });
+
+        checkAndVerifyCategory(Category.GROWTH_TRENDS, (config) -> {
+            AttrState initialState = AttrState.Active;
+            boolean[] flags = new boolean[] { true, // life cycle change
+                    true, true, // segment
+                    false, true, // export
+                    true, true, // tp
+                    false, true, // cp
+                    true, true // model
+            };
+            initialState = overwrite11Flags(flags, initialState, config.getAttrName());
+            String partition = getLDCPartition(config.getAttrName());
+            verifyFlags(config, Category.GROWTH_TRENDS, partition, initialState, flags);
+            return true;
+        });
+
+        checkAndVerifyCategory(Category.ONLINE_PRESENCE, (config) -> {
+            AttrState initialState = AttrState.Active;
+            boolean[] flags = new boolean[] { true, // life cycle change
+                    true, true, // segment
+                    false, true, // export
+                    true, true, // tp
+                    false, true, // cp
+                    true, true // model
+            };
+            initialState = overwrite11Flags(flags, initialState, config.getAttrName());
+            String partition = getLDCPartition(config.getAttrName());
+            verifyFlags(config, Category.ONLINE_PRESENCE, partition, initialState, flags);
+            return true;
+        });
+
+        checkAndVerifyCategory(Category.WEBSITE_PROFILE, (config) -> {
+            AttrState initialState = AttrState.Active;
+            boolean[] flags = new boolean[] { true, // life cycle change
+                    true, true, // segment
+                    false, true, // export
+                    true, true, // tp
+                    false, true, // cp
+                    true, true // model
+            };
+            initialState = overwrite11Flags(flags, initialState, config.getAttrName());
+            String partition = getLDCPartition(config.getAttrName());
+            verifyFlags(config, Category.WEBSITE_PROFILE, partition, initialState, flags);
+            return true;
+        });
+
+        checkAndVerifyCategory(Category.INTENT, (config) -> {
+            AttrState initialState = AttrState.Inactive;
+            boolean[] flags = new boolean[] { true, // life cycle change
+                    true, true, // segment
+                    true, true, // export
+                    true, true, // tp
+                    false, true, // cp
+                    true, true // model
+            };
+            initialState = overwrite11Flags(flags, initialState, config.getAttrName());
+            String partition = getLDCPartition(config.getAttrName());
+            verifyFlags(config, Category.INTENT, partition, initialState, flags);
+            return true;
+        });
+
+        checkAndVerifyCategory(Category.TECHNOLOGY_PROFILE, (config) -> {
+            AttrState initialState = AttrState.Inactive;
+            boolean[] flags = new boolean[] { true, // life cycle change
+                    true, true, // segment
+                    true, true, // export
+                    true, true, // tp
+                    false, true, // cp
+                    true, true // model
+            };
+            initialState = overwrite11Flags(flags, initialState, config.getAttrName());
+            String partition = getLDCPartition(config.getAttrName());
+            verifyFlags(config, Category.TECHNOLOGY_PROFILE, partition, initialState, flags);
+            return true;
+        });
+
+        checkAndVerifyCategory(Category.WEBSITE_KEYWORDS, (config) -> {
+            AttrState initialState = AttrState.Inactive;
+            boolean[] flags = new boolean[] { true, // life cycle change
+                    true, true, // segment
+                    true, true, // export
+                    true, true, // tp
+                    false, true, // cp
+                    true, true // model
+            };
+            initialState = overwrite11Flags(flags, initialState, config.getAttrName());
+            String partition = getLDCPartition(config.getAttrName());
+            verifyFlags(config, Category.WEBSITE_KEYWORDS, partition, initialState, flags);
+            return true;
+        });
+    }
+
+    private AttrState overwrite11Flags(boolean[] flags, AttrState initialState, String attrName) {
+        AttrState state = initialState;
+        if (cannotSegmentAttrs.contains(attrName)) {
+            flags[1] = false;
+            flags[2] = false;
+        }
+        if (cannotEnrichmentAttrs.contains(attrName) || internalEnrichAttrs.contains(attrName)) {
+            flags[3] = false;
+            flags[4] = false;
+            flags[5] = false;
+            flags[6] = false;
+            flags[7] = false;
+            flags[8] = false;
+        }
+        if (cannotModelAttrs.contains(attrName)) {
+            flags[9] = false;
+            flags[10] = false;
+        }
+        if (internalEnrichAttrs.contains(attrName)) {
+            // internal attrs should be inactive
+            state = AttrState.Inactive;
+        }
+        if (!flags[2] && !flags[4] && !flags[10]) {
+            // if cannot enable for segment, enrichment or model
+            // the cannot be activated
+            flags[0] = false;
+        }
+        if (deprecatedAttrs.contains(attrName)) {
+            // deprecated attrs are inactive and cannot chage
+            state = AttrState.Inactive;
+            flags[0] = false;
+        }
+        if (AttrState.Inactive.equals(state)) {
+            // cannot change usage for inactive attributes
+            flags[2] = false;
+            flags[4] = false;
+            flags[6] = false;
+            flags[8] = false;
+            flags[10] = false;
+        }
+        return state;
+    }
+
+    private String getLDCPartition(String attrName) {
+        List<String> partitions = new ArrayList<>();
+        if (cannotSegmentAttrs.contains(attrName)) {
+            partitions.add("CannotSegment");
+        }
+        if (cannotEnrichmentAttrs.contains(attrName)) {
+            partitions.add("CannotEnrich");
+        }
+        if (internalEnrichAttrs.contains(attrName)) {
+            partitions.add("InternalEnrich");
+        }
+        if (cannotModelAttrs.contains(attrName)) {
+            partitions.add("CannotModel");
+        }
+        if (CollectionUtils.isNotEmpty(partitions)) {
+            return StringUtils.join(partitions, " & ");
+        } else {
+            return Partition.OTHERS;
+        }
+    }
+
+    private void checkAndVerifyCategory(Category category, Function<AttrConfig, Boolean> verifier) {
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
+        Long count = Flux.fromIterable(attrConfigs).parallel().runOn(scheduler) //
+                .map(verifier).sequential().count().block();
+        log.info("Verified " + count + " attr configs in the category " + category);
+    }
+
     private void verifySystemAttr(AttrConfig attrConfig, Category category) {
         verifyFlags(attrConfig, category, Partition.SYSTEM, //
                 Inactive, false, //
@@ -221,7 +419,13 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
                 false, false);
     }
 
-    private void verifyFlags(AttrConfig attrConfig, Category category, String partition,//
+    private void verifyFlags(AttrConfig attrConfig, Category category, String partition, AttrState initState,
+            boolean[] flags) {
+        verifyFlags(attrConfig, category, partition, initState, flags[0], flags[1], flags[2], flags[3], flags[4],
+                flags[5], flags[6], flags[7], flags[8], flags[9], flags[10]);
+    }
+
+    private void verifyFlags(AttrConfig attrConfig, Category category, String partition, //
             AttrState initState, boolean lcChg, //
             boolean segment, boolean segChg, //
             boolean export, boolean exportChg, //
@@ -232,7 +436,6 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
         String attrName = attrConfig.getAttrName();
         String displayName = attrConfig.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class);
         String logPrefix = String.format("%s (%s) [%s - %s]", attrName, displayName, category.getName(), partition);
-
         String property = ColumnMetadataKey.State;
         AttrState state = attrConfig.getPropertyFinalValue(property, AttrState.class);
         Assert.assertEquals(state, initState, //
@@ -249,9 +452,9 @@ public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
         property = ColumnSelection.Predefined.CompanyProfile.name();
         verifyUsage(logPrefix, attrConfig, property, companyProfile, cpChg);
 
-        //TODO: Cannot make model part pass for Contact and Account attrs.
-//        property = ColumnSelection.Predefined.Model.name();
-//        verifyUsage(logPrefix, attrConfig, property, model, modelChg);
+        // TODO: Cannot make model part pass for Contact and Account attrs.
+        // property = ColumnSelection.Predefined.Model.name();
+        // verifyUsage(logPrefix, attrConfig, property, model, modelChg);
     }
 
     private void verifyUsage(String logPrefix, AttrConfig attrConfig, String property, boolean expectedValue,
