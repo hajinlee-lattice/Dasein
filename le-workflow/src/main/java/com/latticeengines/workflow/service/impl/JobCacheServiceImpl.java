@@ -463,9 +463,9 @@ public class JobCacheServiceImpl implements JobCacheService {
 
                 MultiTenantContext.setTenant(tenant);
                 if (tenant == null) {
-                    log.info("Set tenant to null in MultiTenantContext");
+                    log.debug("Set tenant to null in MultiTenantContext");
                 } else {
-                    log.info("Set tenant to Tenant(PID={}, ID={})", tenant.getPid(), tenant.getId());
+                    log.debug("Set tenant to Tenant(PID={}, ID={})", tenant.getPid(), tenant.getId());
                 }
                 // merge IDs and dedup
                 List<Long> jobIds = Stream.concat(ids.stream(), detailIds.stream()).distinct().collect(Collectors.toList());
