@@ -9,6 +9,8 @@ public interface CDLTestDataService {
 
     void populateData(String tenantId, int version);
 
+    void populateMetadata(String tenantId, int version);
+
     void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
             List<BucketMetadata> coverage);
 

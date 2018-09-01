@@ -1410,6 +1410,7 @@ public class SchemaRepository {
                 stdAttrs.add(InterfaceName.IsMatched);
                 break;
             case Contact:
+                stdAttrs.add(InterfaceName.ContactName);
                 stdAttrs.add(InterfaceName.ContactId);
                 stdAttrs.add(InterfaceName.Email);
                 break;

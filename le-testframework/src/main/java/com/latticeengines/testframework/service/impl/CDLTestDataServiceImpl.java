@@ -108,6 +108,24 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     }
 
     @Override
+    public void populateMetadata(String tenantId, int version) {
+        final String shortTenantId = CustomerSpace.parse(tenantId).getTenantId();
+        dataCollectionProxy.getDefaultDataCollection(shortTenantId);
+        if (dataCollectionProxy.getTableName(shortTenantId, TableRoleInCollection.BucketedAccount) != null) {
+            DataCollection.Version active = dataCollectionProxy.getActiveVersion(shortTenantId);
+            log.info("DataCollection version " + active + " is already populated, switch to " + active.complement());
+            dataCollectionProxy.switchVersion(shortTenantId, active.complement());
+        }
+        ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("cdl-test-data", 4);
+        List<Runnable> tasks = new ArrayList<>();
+        tasks.add(() -> populateStats(shortTenantId, String.valueOf(version)));
+        for (BusinessEntity entity : BusinessEntity.values()) {
+            tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version)));
+        }
+        ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
+    }
+
+    @Override
     public void populateData(String tenantId, int version) {
         final String shortTenantId = CustomerSpace.parse(tenantId).getTenantId();
         dataCollectionProxy.getDefaultDataCollection(shortTenantId);
