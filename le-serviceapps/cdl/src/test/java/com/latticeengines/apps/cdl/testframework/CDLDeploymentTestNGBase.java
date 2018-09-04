@@ -67,10 +67,11 @@ import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
+import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
+@Listeners({ GlobalAuthCleanupTestListener.class, ContextResetTestListener.class})
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceapps-cdl-context.xml" })
 public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
