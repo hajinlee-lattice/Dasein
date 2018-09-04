@@ -1,6 +1,5 @@
 package com.latticeengines.apps.core.service.impl;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,14 +26,14 @@ public class GenericAndUsageValidatorUnitTestNG {
     private void setup() throws IOException {
         MockitoAnnotations.initMocks(this);
     }
+
     @Test(groups = "unit")
     public void testGeneric() throws Exception {
         AttrConfig lDCInternal = AttrConfigTestUtils.getLDCInternalAttr(Category.GROWTH_TRENDS, false, true, false,
-                false,
-                false);
+                false, false);
         List<AttrConfig> attrList = Arrays.asList(lDCInternal);
         genericValidator.validate(new ArrayList<>(), attrList);
-        Assert.assertNotNull(lDCInternal.getValidationErrors());
+        Assert.assertNull(lDCInternal.getValidationErrors());
         lDCInternal = AttrConfigTestUtils.getLDCInternalAttr(Category.GROWTH_TRENDS, false, false, false, false, true);
         genericValidator.validate(new ArrayList<>(), Arrays.asList(lDCInternal));
         Assert.assertNotNull(lDCInternal.getValidationErrors());

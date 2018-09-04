@@ -104,7 +104,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.TalkingPoint.getName()));
         Assert.assertTrue(propSummary.containsKey(ColumnSelection.Predefined.CompanyProfile.getName()));
         map = propSummary.get(ColumnSelection.Predefined.Segment.getName());
-        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 2, 0L);
+        Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 3, 0L);
         // For Enable/Disable page, hide hide attributes that are: disabled and
         // AllowCustomization=FALSE.
         Assert.assertEquals(map.get(Boolean.FALSE).longValue() - 3, 0L);
