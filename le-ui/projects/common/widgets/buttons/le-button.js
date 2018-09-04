@@ -27,7 +27,7 @@ export default class LeButton extends Component {
     }
     getLabel() {
         if(this.props.config.lable && this.props.config.lable !== ''){
-            return this.props.config.lable;
+            return <span className="le-button-title">{this.props.config.lable}</span>;
         }else{
             return '';
         }

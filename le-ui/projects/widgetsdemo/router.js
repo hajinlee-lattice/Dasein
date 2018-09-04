@@ -5,6 +5,7 @@ import buttons from './modules/buttons/state';
 import dropdowns from './modules/dropdowns/state';
 import menus from './modules/menus/state';
 import panels from './modules/panels/state';
+import grid from './modules/grid/state';
 
 // Create instance + router setup
 const router = new UIRouterReact();
@@ -16,7 +17,8 @@ const states = [
     buttons,
     dropdowns,
     menus,
-    panels
+    panels,
+    grid
 ];
 states.forEach(state => router.stateRegistry.register(state));
 
@@ -25,6 +27,7 @@ router.urlService.rules.initial({ state: 'buttons' });
 router.urlService.rules.initial({ state: 'dropdowns' });
 router.urlService.rules.initial({ state: 'menus' });
 router.urlService.rules.initial({ state: 'panels' });
+router.urlService.rules.initial({ state: 'grid' });
 
 router.transitionService.onBefore(true, function(trans) {
     console.log('Nav Start');

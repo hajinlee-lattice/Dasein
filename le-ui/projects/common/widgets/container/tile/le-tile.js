@@ -10,7 +10,7 @@ class LeTile extends Component {
 
         return (
             <Aux>
-                <div className="le-flex-v-panel le-tile">
+                <div className="le-tile">
                     {this.props.children}
                 </div>
             </Aux>

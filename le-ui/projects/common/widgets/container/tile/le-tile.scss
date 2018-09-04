@@ -3,12 +3,13 @@
 
 
 .le-tile{
-    max-width: 350px;
-    min-width: 100px;
+    
+    display: flex;
+    flex-direction: column;
     padding: 0;
     border: 1px solid $silver;
     border-radius: 5px;
-
+    max-width: 450px;
     .le-header{
         border-bottom: 1px solid $silver;
         align-items: center;
