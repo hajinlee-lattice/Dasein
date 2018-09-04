@@ -5,15 +5,12 @@ import java.io.Serializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
 public class RawScoreToPercentileMapper implements Serializable {
     private static final int MIN_PERCENTILE = 5;
     private static final int MAX_PERCENTILE = 99;
-
-    private static final Logger log = LoggerFactory.getLogger(RawScoreToPercentileMapper.class);
 
     private ScoreDerivation derivation;
 
@@ -31,10 +28,18 @@ public class RawScoreToPercentileMapper implements Serializable {
         return scoreDerivation;
     }
 
+    protected double getLowerBoundValue() {
+        return 0.0;
+    }
+
+    protected double getUpperBoundValue() {
+        return 1.0;
+    }
+
     public int map(double rawScore) {
 
-        double lowest = 1.0;
-        double highest = 0.0;
+        double lowest = getUpperBoundValue();
+        double highest = getLowerBoundValue();
         Integer percentile = null;
 
         for (int index = 0; index < derivation.percentiles.size(); index++) {
