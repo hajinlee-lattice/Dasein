@@ -43,7 +43,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>swlib</id>
+                                <id>java</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>exec</goal>
@@ -53,6 +53,20 @@
                                     <workingDirectory>${project.basedir}</workingDirectory>
                                     <arguments>
                                         <argument>dist.sh</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>python</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <arguments>
+                                        <argument>dist_python.sh</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
