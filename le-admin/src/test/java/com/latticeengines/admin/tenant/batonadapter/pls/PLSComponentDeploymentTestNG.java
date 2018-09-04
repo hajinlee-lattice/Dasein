@@ -3,6 +3,8 @@ package com.latticeengines.admin.tenant.batonadapter.pls;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -23,10 +26,18 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
@@ -37,6 +48,9 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     public RestTemplate plsRestTemplate = HttpClientUtils.newRestTemplate();
 
@@ -77,10 +91,18 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     }
 
     @Test(groups = "deployment")
-    public void testInstallation() throws InterruptedException {
-
+    public void testInstallation() {
         String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+
+        // try to set status and tenantType in tenant properties znode
+        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
+        TenantInfo tenantInfo = new TenantInfo(new TenantProperties());
+        CustomerSpaceInfo customerSpaceInfo = new CustomerSpaceInfo(new CustomerSpaceProperties(), "");
+        tenantInfo.properties.status = TenantStatus.ACTIVE.name();
+        tenantInfo.properties.tenantType = TenantType.CUSTOMER.name();
+        tenantInfo.properties.displayName = tenantId;
+        tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo, customerSpaceInfo);
 
         // send to bootstrapper message queue
         bootstrap(getPLSDocumentDirectory());
