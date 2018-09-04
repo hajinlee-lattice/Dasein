@@ -41,6 +41,11 @@ public final class MultiTenantContext {
         strategy.setTenant(tenant);
     }
 
+    public static void clearTenant() {
+        log.info("Clearing MultiTenantContext.");
+        strategy.clear();
+    }
+
     public static boolean isContextSet() {
         return getTenant() != null;
     }

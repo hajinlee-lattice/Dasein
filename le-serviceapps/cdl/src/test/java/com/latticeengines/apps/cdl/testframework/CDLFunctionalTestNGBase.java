@@ -37,10 +37,11 @@ import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
+import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
+@Listeners({ GlobalAuthCleanupTestListener.class, ContextResetTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceapps-cdl-context.xml" })
 public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {

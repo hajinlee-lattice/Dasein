@@ -29,6 +29,11 @@ public class OAuth2MultiTenantContextStrategy implements MultiTenantContextStrat
 
     @Override
     public void setTenant(Tenant tenant) {
-        throw new RuntimeException("Not supported");
+        throw new UnsupportedOperationException("Not supported");
+    }
+
+    @Override
+    public void clear() {
+        SecurityContextHolder.getContext().setAuthentication(null);
     }
 }

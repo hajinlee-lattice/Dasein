@@ -53,4 +53,9 @@ public class GlobalAuthMultiTenantContextStrategy implements MultiTenantContextS
         Authentication auth = new TenantToken(tenant);
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
+
+    @Override
+    public void clear() {
+        SecurityContextHolder.getContext().setAuthentication(null);
+    }
 }

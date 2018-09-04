@@ -22,4 +22,9 @@ public class ThreadLocalMultiTenantContextStrategy implements MultiTenantContext
         tenantInContext.set(tenant);
     }
 
+    @Override
+    public void clear() {
+        tenantInContext.set(null);
+    }
+
 }

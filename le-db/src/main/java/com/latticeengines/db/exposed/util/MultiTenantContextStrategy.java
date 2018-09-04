@@ -10,4 +10,6 @@ public interface MultiTenantContextStrategy {
     Session getSession();
 
     void setTenant(Tenant tenant);
+
+    void clear();
 }
