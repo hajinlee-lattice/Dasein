@@ -21,23 +21,74 @@ export default class PanelsPage extends Component {
         }
         return (
             <Aux>
-                <div className="le-flex-v-panel center-h main-p">
+                <div className="le-flex-v-panel main-p">
+                <h1>Layouts</h1>
                     <div className="le-flex-h-panel center-v">
-                        <div className="test">Test1 </div>
-                        <div className="test">Test2 </div>
+                        <div className="test border-container">Test1 </div>
+                        <div className="test border-container">Test2 </div>
                     </div>
-                    <div className="le-flex-h-panel main-panel" >
+                    <div className="le-flex-h-panel border-container" >
 
                         <ul className="le-flex-h-panel flex-content center">
-                            <li>This is OK</li>
-                            <li>This ia a button</li>
-                            <li>This ia a nother button</li>
-                            <li>Test1</li>
+                            <li className="test border-container">This is OK</li>
+                            <li className="test border-container">This is a li</li>
+                            <li className="test border-container">This ia a nother li</li>
+                            <li className="test border-container">Test1</li>
                         </ul>
 
-                        <div className="le-flex-h-panel center test"><div><button>Test1</button></div></div>
+                        <div className="le-flex-h-panel center test border-container">
+                            <span><button>Test1</button></span>
+                            <span><button>Test1</button></span>
+                        </div>
+
                     </div>
+                    <LeTile>
+                        <LeTileHeader>
+                            <span className="le-tile-title">Test 1234</span>
+                            <LeMenu classNames="personalMenu" image="fa fa-ellipsis-v" name="main">
+                                <LeMenuItem
+                                    name="edit"
+                                    label="Edit"
+                                    image="fa fa-pencil-square-o"
+                                    callback={(name) => {
+                                        console.log('NAME ', name);
+                                    }} >
+                                </LeMenuItem>
+
+                                <LeMenuItem
+                                    name="duplicate"
+                                    label="Duplicate"
+                                    image="fa fa-files-o"
+                                    callback={(name) => {
+                                        console.log('NAME ', name);
+                                    }} />
+
+                                <LeMenuItem
+                                    name="delete"
+                                    label="Delete"
+                                    image="fa fa-trash-o"
+                                    callback={(name) => {
+                                        console.log('NAME ', name);
+                                    }} />
+                            </LeMenu>
+                        </LeTileHeader>
+                        <LeTileBody>
+                            <p>The description here</p>
+                            <span>The body</span>
+                        </LeTileBody>
+                        <LeTileFooter>
+                            <div className="le-flex-v-panel fill-space">
+                                <span>Account</span>
+                                <span>123</span>
+                            </div>
+                            <div className="le-flex-v-panel fill-space">
+                                <span>Contacts</span>
+                                <span>3</span>
+                            </div>
+                        </LeTileFooter>
+                    </LeTile>
                 </div>
+
 
             </Aux>
         );

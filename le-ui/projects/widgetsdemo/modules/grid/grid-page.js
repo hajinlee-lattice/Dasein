@@ -30,7 +30,8 @@ export default class GridPage extends Component {
         }
         return (
             <Aux>
-                <div className="le-flex-h-panel container-grid">
+                <div className="le-flex-h-panel container-grid border-container">
+                    <h1>Grid layout</h1>
                     <div className="le-flex-grid">
                         <LeTile>
                             <LeTileHeader>

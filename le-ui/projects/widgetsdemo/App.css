@@ -28,3 +28,6 @@ ul {
     list-style: none;
     padding: 0;
 }
+.border-container {
+    border: 1px solid rgb(206, 206, 206);
+}
