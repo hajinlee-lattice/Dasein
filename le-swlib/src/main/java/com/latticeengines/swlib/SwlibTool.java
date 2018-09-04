@@ -68,6 +68,7 @@ public class SwlibTool {
                         }
                         Set<SoftwareLibrary.Module> modules = swLib.getModules();
                         for (SoftwareLibrary.Module module : modules) {
+                            swPackage.setModule(module.name());
                             String outputJson = String.format("target/swlib/%s/%s/%s.json", module, artifactId, artifactId);
                             FileUtils.forceMkdirParent(new File(outputJson));
                             om.writeValue(new File(outputJson), swPackage);
