@@ -7,6 +7,10 @@ body{
     overflow: auto;
     background: rgba(241, 239, 239, 0.5);
 }
+ul{
+    list-style-type: none;
+
+}
 
 .nav-bar{
     min-width: 45px;

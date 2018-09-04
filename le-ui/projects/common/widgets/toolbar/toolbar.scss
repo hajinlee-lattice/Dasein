@@ -14,12 +14,12 @@
         }
         &.horizontal {
             max-height: 30px;
-            min-height: 30px;
-            // border: 1px solid gray;
+            min-height: 30px; // border: 1px solid gray;
             flex-direction: row;
             align-items: center;
         }
         .le-toolbar-item {
+            
             cursor: pointer;
             height: 30px;
             display: flex;
@@ -36,5 +36,17 @@
         .le-toolbar-item:hover {
             background-color: $palladium;
         }
+    }
+}
+
+.le-flex-h-panel {
+    &.tool-bar {
+        height: 3em;
+        border: 1px solid red;
+        flex-wrap: nowrap;
+        
+    }
+    &.push-left, &.push-right{
+        padding: 0em;
     }
 }

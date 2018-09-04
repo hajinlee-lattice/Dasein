@@ -17,6 +17,21 @@ export default class LeButton extends Component {
     clickHandler(){
         this.props.callback(this.state);
     }
+    getIcon() {
+        console.log('this.props.config.image', this.props.config.image);
+        if(this.props.config.image){
+            return <span className={this.props.config.image}></span>
+        }else{
+            return null;
+        }
+    }
+    getLabel() {
+        if(this.props.config.lable && this.props.config.lable !== ''){
+            return this.props.config.lable;
+        }else{
+            return '';
+        }
+    }
 
     render() {
         const enabled = !this.state.disabled;
@@ -25,7 +40,8 @@ export default class LeButton extends Component {
                 onClick={this.clickHandler}
                 disabled={this.props.disabled}
                 className={this.config.classNames.join(' ')}>
-                {this.props.lable}
+                {this.getLabel()}
+                {this.getIcon()}
             </button>
         );
     }

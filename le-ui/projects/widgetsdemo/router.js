@@ -4,6 +4,7 @@ import { UIRouterReact, servicesPlugin, hashLocationPlugin } from '../common/rea
 import buttons from './modules/buttons/state';
 import dropdowns from './modules/dropdowns/state';
 import menus from './modules/menus/state';
+import panels from './modules/panels/state';
 
 // Create instance + router setup
 const router = new UIRouterReact();
@@ -14,7 +15,8 @@ router.plugin(hashLocationPlugin);
 const states = [
     buttons,
     dropdowns,
-    menus
+    menus,
+    panels
 ];
 states.forEach(state => router.stateRegistry.register(state));
 
@@ -22,6 +24,7 @@ states.forEach(state => router.stateRegistry.register(state));
 router.urlService.rules.initial({ state: 'buttons' });
 router.urlService.rules.initial({ state: 'dropdowns' });
 router.urlService.rules.initial({ state: 'menus' });
+router.urlService.rules.initial({ state: 'panels' });
 
 router.transitionService.onBefore(true, function(trans) {
     console.log('Nav Start');

@@ -2,8 +2,6 @@
 var $ = require('jquery');
 window["$"] = $;
 window["jQuery"] = $;
-
-/** JLint  */
 window["window.jQuery"] = $;
 
 /** Angular js library */
@@ -21,3 +19,4 @@ require('./lib/bower/momentangular-moment.js');
 require('angulartics');
 require('angulartics-mixpanel');
 require('./lib/bower/min/angular-animate.min.js');
+require('ngreact');

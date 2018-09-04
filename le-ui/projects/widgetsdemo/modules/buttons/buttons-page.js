@@ -2,7 +2,7 @@ import React, { Component } from '../../../common/react-vendor';
 import LeButton from '../../../common/widgets/buttons/le-button';
 
 export default class ButtonsPage extends Component {
-    
+
     constructor(props) {
         super(props);
         this.callbackHandler = this.callbackHandler.bind(this);
@@ -20,7 +20,7 @@ export default class ButtonsPage extends Component {
         }, 3000);
     }
 
-    
+
     /** React lifecicles methods */
 
     componentWillUnmount() {
@@ -30,13 +30,15 @@ export default class ButtonsPage extends Component {
     render() {
 
         const config = {
-            lable: "",
+            lable: "Click",
             classNames: ['button', 'orange-button']
         }
         return (
-            <div>
+            <div className="le-flex-v-panel">
                 <h1>Buttons</h1>
-                <LeButton lable="Click" callback={this.callbackHandler} disabled={this.state.disabled} config={config} />
+                <div className="le-flex-h-panel">
+                    <LeButton callback={this.callbackHandler} disabled={this.state.disabled} config={config} />
+                </div>
             </div>
 
 

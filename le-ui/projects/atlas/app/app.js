@@ -1,4 +1,5 @@
 //Initial load of the application
+
 var mainApp = angular.module('mainApp', [
     'templates-main',
     //'ngAnimate',
@@ -8,7 +9,7 @@ var mainApp = angular.module('mainApp', [
     'oc.lazyLoad',
     'angulartics',
     'angulartics.mixpanel',
-
+    'react',
     'mainApp.appCommon.Widgets',
 
     'common.modules',

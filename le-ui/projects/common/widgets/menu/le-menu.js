@@ -82,7 +82,7 @@ export default class LeMenu extends Component {
         }
     }
     showMenu(show) {
-        console.log('show');
+        // console.log('show');
         if (show) {
             this.menuClass = `le-menu le-menu-show ${this.props.menuClass ? this.props.menuClass : ''}`;
         } else {
@@ -92,7 +92,7 @@ export default class LeMenu extends Component {
     }
 
     updateShowClass() {
-        console.log('up', this.state);
+        // console.log('up', this.state);
         if (this.state.opened && (!this.state.outmain || !this.state.outmenu)) {
             this.showMenu(true);
             this.setState({ opened: true });
