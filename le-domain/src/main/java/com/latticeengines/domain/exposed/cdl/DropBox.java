@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "ATLAS_DROPBOX",
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "DROPBOX" }) })
+        uniqueConstraints = { @UniqueConstraint(name = "UX_DROPBOX", columnNames = { "DROPBOX" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class DropBox implements HasPid, HasTenant {
 
