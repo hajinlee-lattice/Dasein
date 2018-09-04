@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -96,7 +97,7 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
                 throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
             }
             try {
-                camille.upsert(contractPath, DocumentUtils.toRawDocument(defaultPremiumLeadEnrichmentAttributes),
+                camille.upsert(contractPath, new Document(defaultPremiumLeadEnrichmentAttributes.replaceAll("\"", "")),
                         ZooDefs.Ids.OPEN_ACL_UNSAFE);
             } catch (Exception e) {
                 throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
@@ -143,7 +144,7 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
                 throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
             }
             try {
-                camille.upsert(path, DocumentUtils.toRawDocument(defaultPremiumLeadEnrichmentAttributes),
+                camille.upsert(path, new Document(defaultPremiumLeadEnrichmentAttributes.replaceAll("\"", "")),
                         ZooDefs.Ids.OPEN_ACL_UNSAFE);
             } catch (Exception e) {
                 throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");

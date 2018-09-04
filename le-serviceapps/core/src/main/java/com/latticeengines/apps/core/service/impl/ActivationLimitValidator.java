@@ -17,6 +17,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -138,7 +139,7 @@ public class ActivationLimitValidator extends AttrValidator {
             } else {
                 path = contractPath.append(DATA_CLOUD_LICENSE).append("/" + dataLicense);
             }
-            maxPremiumLeadEnrichmentAttributes = camille.get(path).getData();
+            maxPremiumLeadEnrichmentAttributes = camille.get(path).getData().replaceAll("\"", "");
         } catch (KeeperException.NoNodeException ex) {
             Path defaultConfigPath = null;
             if (dataLicense == null) {
@@ -150,19 +151,18 @@ public class ActivationLimitValidator extends AttrValidator {
             }
 
             try {
-                maxPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
+                maxPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData().replaceAll("\"", "");
             } catch (Exception e) {
                 throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
             }
             try {
-                camille.upsert(path, DocumentUtils.toRawDocument(maxPremiumLeadEnrichmentAttributes),
-                        ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                camille.upsert(path, new Document(maxPremiumLeadEnrichmentAttributes), ZooDefs.Ids.OPEN_ACL_UNSAFE);
             } catch (Exception e) {
                 throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
             }
         } catch (Exception e) {
             throw new RuntimeException("Cannot get maximum premium lead enrichment attributes ", e);
         }
-        return Integer.parseInt(maxPremiumLeadEnrichmentAttributes.replaceAll("\"", ""));
+        return Integer.parseInt(maxPremiumLeadEnrichmentAttributes);
     }
 }
