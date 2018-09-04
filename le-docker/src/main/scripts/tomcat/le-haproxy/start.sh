@@ -20,7 +20,7 @@ function replace_token() {
 
             fi
         done
-        sed -i "s/#{{${SERVER}}}/${HOSTPORTS}/" /usr/local/etc/haproxy/haproxy.cfg
+        sed -i "s/#{{${SERVER}}}/${HOSTPORTS}/" /etc/haproxy/haproxy.cfg
     fi
 
 }
@@ -108,7 +108,7 @@ replace_token cdl ${CDL_HOSTPORTS} true
 replace_token lp ${LP_HOSTPORTS} true
 replace_token dante ${DANTE_HOSTPORTS} true
 
-cat /usr/local/etc/haproxy/haproxy.cfg
+cat /etc/haproxy/haproxy.cfg
 
 if [ -f "/etc/ledp/lattice.pem" ]; then
     echo 'copying /etc/ledp/lattice.pem to /etc/ssl/private/server.pem'
@@ -117,4 +117,4 @@ if [ -f "/etc/ledp/lattice.pem" ]; then
     ls -l /etc/ssl/private/
 fi
 
-/docker-entrypoint.sh haproxy -f /usr/local/etc/haproxy/haproxy.cfg
+/docker-entrypoint.sh haproxy -f /etc/haproxy/haproxy.cfg
