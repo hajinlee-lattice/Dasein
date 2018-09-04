@@ -6,6 +6,8 @@ public enum ProvenancePropertyName {
     ExcludePublicDomains("Exclude_Public_Domains", Boolean.class), //
     TransformationGroupName("Transformation_Group_Name", String.class), //
     TrainingFilePath("Training_File_Path", String.class), //
+    PmmlFilePath("PMML_File", String.class), //
+    PivotFilePath("Pivot_Artifact_Path", String.class), //
     WorkflowJobId("Workflow_Job_Id", Long.class), //
     IsV2ProfilingEnabled("Is_V2_Profiling_Enabled", Boolean.class), //
     ConflictWithOptionalRules("Conflict_With_Optional_Rules", Boolean.class), //

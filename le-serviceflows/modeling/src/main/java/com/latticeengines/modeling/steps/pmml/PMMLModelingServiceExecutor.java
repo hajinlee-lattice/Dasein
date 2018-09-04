@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.algorithm.PMMLAlgorithm;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.modeling.workflow.steps.modeling.ModelingServiceExecutor;
 
 public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
@@ -83,10 +84,10 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
         List<String> props = new ArrayList<>();
         if (builder.getMetadataArtifacts() != null) {
             String path = builder.getMetadataArtifacts().get(ArtifactType.PMML);
-            props.add("PMML_File=" + path);
+            props.add(ProvenancePropertyName.PmmlFilePath.getName() + "=" + path);
         }
         if (builder.getPivotArtifactPath() != null) {
-            props.add("Pivot_Artifact_Path=" + builder.getPivotArtifactPath());
+            props.add(ProvenancePropertyName.PivotFilePath.getName() + "=" + builder.getPivotArtifactPath());
         }
         if (builder.getSourceSchemaInterpretation() != null) {
             props.add("Source_Schema_Interpretation=" + builder.getSourceSchemaInterpretation());

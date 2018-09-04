@@ -43,20 +43,33 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
 
     }
 
-    private void addSourceFiles(List<String> srcDirs, List<String> tgtDirs, ModelSummary modelSummary) {
+    protected void addSourceFiles(List<String> srcDirs, List<String> tgtDirs, ModelSummary modelSummary) {
         String trainingFilePath = modelSummary.getModelSummaryConfiguration()
                 .getString(ProvenancePropertyName.TrainingFilePath, "");
-        try {
-            if (StringUtils.isNotBlank(trainingFilePath) && HdfsUtils.fileExists(yarnConfiguration, trainingFilePath)) {
-                srcDirs.add(trainingFilePath);
-                tgtDirs.add(pathBuilder.convertAtlasFile(trainingFilePath, podId, tenantId, s3Bucket));
-            }
-        } catch (Exception ex) {
-            log.warn("Failed to copy file=" + trainingFilePath + " for tenantId=" + tenantId);
-        }
+        addAtlasFile(srcDirs, tgtDirs, trainingFilePath);
+        addSourceFile(srcDirs, tgtDirs, modelSummary, trainingFilePath);
 
-        SourceFile sourceFile = sourceFileProxy.findByTableName(customer, modelSummary.getTrainingTableName());
+        String pmmlFilePath = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.PmmlFilePath,
+                "");
+        addAtlasMetadataFile(srcDirs, tgtDirs, pmmlFilePath);
+        if (StringUtils.isNotBlank(pmmlFilePath) && pmmlFilePath.endsWith(".fixed.xml")) {
+            String pmmlOrigFilePath = StringUtils.substringBeforeLast(pmmlFilePath, ".fixed.xml");
+            addAtlasMetadataFile(srcDirs, tgtDirs, pmmlOrigFilePath);
+        } else if (StringUtils.isNotBlank(pmmlFilePath)) {
+            String pmmlFixedFilePath = pmmlFilePath + ".fixed.xml";
+            addAtlasMetadataFile(srcDirs, tgtDirs, pmmlFixedFilePath);
+        }
+        String pivotFilePath = modelSummary.getPivotArtifactPath();
+        addAtlasMetadataFile(srcDirs, tgtDirs, pivotFilePath);
+    }
+
+    private void addSourceFile(List<String> srcDirs, List<String> tgtDirs, ModelSummary modelSummary,
+            String trainingFilePath) {
+        if (StringUtils.isBlank(modelSummary.getTrainingTableName())) {
+            return;
+        }
         try {
+            SourceFile sourceFile = sourceFileProxy.findByTableName(customer, modelSummary.getTrainingTableName());
             if (sourceFile != null && StringUtils.isNotBlank(sourceFile.getPath())
                     && !sourceFile.getPath().equals(trainingFilePath)
                     && HdfsUtils.fileExists(yarnConfiguration, sourceFile.getPath())) {
@@ -64,7 +77,30 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
                 tgtDirs.add(pathBuilder.convertAtlasFile(sourceFile.getPath(), podId, tenantId, s3Bucket));
             }
         } catch (Exception ex) {
-            log.warn("Failed to copy file=" + sourceFile.getPath() + " for tenantId=" + tenantId);
+            log.warn("Failed to copy file for taining table =" + modelSummary.getTrainingTableName() + " for tenantId="
+                    + tenantId);
+        }
+    }
+
+    protected void addAtlasMetadataFile(List<String> srcDirs, List<String> tgtDirs, String filePath) {
+        try {
+            if (StringUtils.isNotBlank(filePath) && HdfsUtils.fileExists(yarnConfiguration, filePath)) {
+                srcDirs.add(filePath);
+                tgtDirs.add(pathBuilder.convertAtlasMetadata(filePath, podId, tenantId, s3Bucket));
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to copy file=" + filePath + " for tenantId=" + tenantId, " cause=" + ex.getMessage());
+        }
+    }
+
+    protected void addAtlasFile(List<String> srcDirs, List<String> tgtDirs, String filePath) {
+        try {
+            if (StringUtils.isNotBlank(filePath) && HdfsUtils.fileExists(yarnConfiguration, filePath)) {
+                srcDirs.add(filePath);
+                tgtDirs.add(pathBuilder.convertAtlasFile(filePath, podId, tenantId, s3Bucket));
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to copy file=" + filePath + " for tenantId=" + tenantId, " cause=" + ex.getMessage());
         }
     }
 

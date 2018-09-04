@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.modeling.factory.PipelineFactory;
 import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
@@ -345,7 +346,7 @@ public class ModelingServiceExecutor {
             props.add("Customized_ColumnSelection=" + JsonUtils.serialize(builder.getCustomizedColumnSelection()));
         }
         if (builder.getPivotArtifactPath() != null) {
-            props.add("Pivot_Artifact_Path=" + builder.getPivotArtifactPath());
+            props.add(ProvenancePropertyName.PivotFilePath.getName() + "=" + builder.getPivotArtifactPath());
         }
         if (builder.getModuleName() != null) {
             props.add("Module_Name=" + builder.getModuleName());

@@ -10,23 +10,29 @@ public class HdfsToS3PathBuilder {
     private String analyticsBaseHdfsDir = "/user/s-analytics/customers";
     private String eventTableModelHdfsDir = analyticsBaseHdfsDir + "/%s/models";
     private String eventTableDataHdfsDir = analyticsBaseHdfsDir + "/%s/data";
-    private String hdfsAtlasBaseDir = "/Pods/%s/Contracts/%s/Tenants/%s/Spaces/Production/Data";
+    private String hdfsAtlasDataDir = "/Pods/%s/Contracts/%s/Tenants/%s/Spaces/Production/Data";
+    private String hdfsAtlasMetadataDir = "/Pods/%s/Contracts/%s/Tenants/%s/Spaces/Production/Metadata";
 
     private String eventTableModelS3Dir = "s3n://%s/%s/analytics/models";
     private String eventTableDataS3Dir = "s3n://%s/%s/analytics/data";
-    private String s3AtlasBaseDir = "s3n://%s/%s/atlas";
+    private String s3AtlasDataDir = "s3n://%s/%s/atlas/Data";
+    private String s3AtlasMetadataDir = "s3n://%s/%s/atlas/Metadata";
 
     // Hdfs Atlas
-    public String getHdfsAtlasBaseDir(String pod, String tenantId) {
-        return String.format(hdfsAtlasBaseDir, pod, tenantId, tenantId);
+    public String getHdfsAtlasDataDir(String pod, String tenantId) {
+        return String.format(hdfsAtlasDataDir, pod, tenantId, tenantId);
+    }
+
+    public String getHdfsAtlasMetadataDir(String pod, String tenantId) {
+        return String.format(hdfsAtlasMetadataDir, pod, tenantId, tenantId);
     }
 
     public String getHdfsAtlasTablesDir(String pod, String tenantId) {
-        return getHdfsAtlasBaseDir(pod, tenantId) + PATH_SEPARATOR + "Tables";
+        return getHdfsAtlasDataDir(pod, tenantId) + PATH_SEPARATOR + "Tables";
     }
 
     public String getHdfsAtlasFilesDir(String pod, String tenantId) {
-        return getHdfsAtlasBaseDir(pod, tenantId) + PATH_SEPARATOR + "Files";
+        return getHdfsAtlasDataDir(pod, tenantId) + PATH_SEPARATOR + "Files";
     }
 
     public String getHdfsAtlasForTableDir(String pod, String tenantId, String tableName) {
@@ -59,16 +65,20 @@ public class HdfsToS3PathBuilder {
     }
 
     // S3 Atlas
-    public String getS3AtlasBaseDir(String s3Bucket, String tenantId) {
-        return String.format(s3AtlasBaseDir, s3Bucket, tenantId);
+    public String getS3AtlasDataDir(String s3Bucket, String tenantId) {
+        return String.format(s3AtlasDataDir, s3Bucket, tenantId);
+    }
+
+    public String getS3AtlasMetadataDir(String s3Bucket, String tenantId) {
+        return String.format(s3AtlasMetadataDir, s3Bucket, tenantId);
     }
 
     public String getS3AtlasTablesDir(String s3Bucket, String tenantId) {
-        return getS3AtlasBaseDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Tables";
+        return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Tables";
     }
 
     public String getS3AtlasFilesDir(String s3Bucket, String tenantId) {
-        return getS3AtlasBaseDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Files";
+        return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Files";
     }
 
     public String getS3AtlasForTableDir(String s3Bucket, String tenantId, String tableName) {
@@ -134,6 +144,18 @@ public class HdfsToS3PathBuilder {
         }
         String fileName = FilenameUtils.getName(inputFileDir);
         return builder.append(getS3AtlasFilesDir(s3Bucket, tenantId)).append(PATH_SEPARATOR).append(fileName)
+                .toString();
+    }
+
+    public String convertAtlasMetadata(String inputFileDir, String pod, String tenantId, String s3Bucket) {
+        StringBuilder builder = new StringBuilder();
+        String hdfsMetadataDir = getHdfsAtlasMetadataDir(pod, tenantId);
+        if (inputFileDir.startsWith(hdfsMetadataDir)) {
+            return builder.append(getS3AtlasMetadataDir(s3Bucket, tenantId))
+                    .append(inputFileDir.substring(hdfsMetadataDir.length())).toString();
+        }
+        String fileName = FilenameUtils.getName(inputFileDir);
+        return builder.append(getS3AtlasMetadataDir(s3Bucket, tenantId)).append(PATH_SEPARATOR).append(fileName)
                 .toString();
     }
 

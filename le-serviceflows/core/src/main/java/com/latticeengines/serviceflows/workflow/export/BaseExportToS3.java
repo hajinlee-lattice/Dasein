@@ -94,12 +94,12 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
             log.info("There's no source dir found.");
             return;
         }
-        log.info("Starting to export from hdfs to s3.");
+        log.info("Starting to export from hdfs to s3. size=" + srcDirs.size());
         List<HdfsS3Exporter> exporters = new ArrayList<>();
         for (int i = 0; i < srcDirs.size(); i++) {
             exporters.add(new HdfsS3Exporter(srcDirs.get(i), tgtDirs.get(i)));
         }
-        int threadPoolSize = Math.min(4, srcDirs.size());
+        int threadPoolSize = Math.min(5, srcDirs.size());
         ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-export", threadPoolSize);
         ThreadPoolUtils.runRunnablesInParallel(executorService, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
         log.info("Finished to export from hdfs to s3.");

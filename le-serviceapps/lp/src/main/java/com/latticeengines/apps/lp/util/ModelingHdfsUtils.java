@@ -150,7 +150,8 @@ public class ModelingHdfsUtils {
         }
         if (!artifactsMap.isEmpty()) {
             if (artifactsMap.containsKey(ArtifactType.PivotMapping.getCode())) {
-                provenance.put("Pivot_Artifact_Path", artifactsMap.get(ArtifactType.PivotMapping.getCode()).getPath());
+                provenance.put(ProvenancePropertyName.PivotFilePath.getName(),
+                        artifactsMap.get(ArtifactType.PivotMapping.getCode()).getPath());
             }
             provenance.put("Module_Name", newModuleName);
         }

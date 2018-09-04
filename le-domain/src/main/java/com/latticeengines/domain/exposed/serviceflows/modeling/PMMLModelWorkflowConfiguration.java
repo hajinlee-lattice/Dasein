@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.modeling;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 
@@ -12,16 +13,19 @@ public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfigur
         private PMMLModelWorkflowConfiguration configuration = new PMMLModelWorkflowConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
         private CreatePMMLModelConfiguration pmml = new CreatePMMLModelConfiguration();
+        private ExportToS3StepConfiguration exportModelToS3 = new ExportToS3StepConfiguration();
 
         public Builder podId(String podId) {
             pmml.setPodId(podId);
             model.setPodId(podId);
+            exportModelToS3.setPodId(podId);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             pmml.setMicroServiceHostPort(microServiceHostPort);
             model.setMicroServiceHostPort(microServiceHostPort);
+            exportModelToS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -29,6 +33,7 @@ public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfigur
             configuration.setCustomerSpace(customerSpace);
             model.setCustomerSpace(customerSpace);
             pmml.setCustomerSpace(customerSpace);
+            exportModelToS3.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -76,6 +81,7 @@ public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfigur
             pmml.setInternalResourceHostPort(internalResourceHostPort);
             model.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
+            exportModelToS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -96,6 +102,7 @@ public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfigur
                     configuration.getClass().getSimpleName());
             configuration.add(pmml);
             configuration.add(model);
+            configuration.add(exportModelToS3);
             return configuration;
         }
 

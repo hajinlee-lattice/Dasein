@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -28,7 +29,6 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 public class ModelingHdfsUtils {
 
@@ -149,7 +149,8 @@ public class ModelingHdfsUtils {
         }
         if (!artifactsMap.isEmpty()) {
             if (artifactsMap.containsKey(ArtifactType.PivotMapping.getCode())) {
-                provenance.put("Pivot_Artifact_Path", artifactsMap.get(ArtifactType.PivotMapping.getCode()).getPath());
+                provenance.put(ProvenancePropertyName.PivotFilePath.getName(),
+                        artifactsMap.get(ArtifactType.PivotMapping.getCode()).getPath());
             }
             provenance.put("Module_Name", newModuleName);
         }
