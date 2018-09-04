@@ -164,7 +164,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         config3.setEntity(BusinessEntity.Contact);
         AttrConfigProp<Boolean> modelProp = new AttrConfigProp<>();
         modelProp.setCustomValue(Boolean.TRUE);
-        config3.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Model.name(), modelProp));
+        config3.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.TalkingPoint.name(), modelProp));
 
         AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, true);
         Assert.assertTrue(request.getAttrConfigs().size() > 0);
