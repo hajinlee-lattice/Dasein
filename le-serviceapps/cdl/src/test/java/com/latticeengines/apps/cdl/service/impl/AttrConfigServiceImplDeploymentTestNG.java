@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.controller;
+package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Active;
 import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Inactive;
@@ -49,9 +49,9 @@ import reactor.core.scheduler.Schedulers;
 /**
  * $ dpltc deploy -a admin,matchapi,microservice,pls -m metadata,cdl,lp
  */
-public class AttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
+public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(AttrConfigResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImplDeploymentTestNG.class);
 
     @Inject
     private CDLTestDataService cdlTestDataService;
