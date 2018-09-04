@@ -25,14 +25,14 @@ def generate_options(options):
 def replace_options(options):
     print options
     new_content = []
-    with open("/usr/local/apache2/htdocs/index.html.tpl", 'r') as f:
+    with open("/var/www/html/index.html.tpl", 'r') as f:
         for line in f:
             if "{{apis}}" in line:
                 new_content += "  var apis = " + json.dumps(generate_options(options)) + "\n"
             else:
                 new_content.append(line)
 
-    with open("/usr/local/apache2/htdocs/index.html", 'w') as f:
+    with open("/var/www/html/index.html", 'w') as f:
         for line in new_content:
             f.write(line)
 

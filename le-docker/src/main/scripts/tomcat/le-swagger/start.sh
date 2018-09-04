@@ -1,15 +1,17 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -xv
+
+ls -la /etc/ledp
 
 if [ -f "/etc/ledp/lattice.crt" ]; then
-    cp -f /etc/ledp/lattice.crt /usr/local/apache2/conf/server.crt
+    cp -f /etc/ledp/lattice.crt /etc/pki/tls/server.crt
 fi
 
 if [ -f "/etc/ledp/lattice.key" ]; then
-    cp -f /etc/ledp/lattice.key /usr/local/apache2/conf/server.key
+    cp -f /etc/ledp/lattice.key /etc/pki/tls/private/server.key
 fi
 
-python /index.py ${SWAGGER_APPS}
+python /index.py ${SWAGGER_APPS} 
 
-cat /usr/local/apache2/htdocs/index.html
+cat /var/www/html/index.html
 
-/usr/local/bin/httpd-foreground
+/usr/sbin/httpd -DNO_DETACH
