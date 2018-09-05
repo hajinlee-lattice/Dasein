@@ -346,18 +346,22 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.dataStores = vm.configFilters.dataStores;
 
                 if (vm.checkboxModel.datacloud){
-                    if(vm.dataStores.indexOf('DataCloud') == -1){
-                        vm.configFilters.dataStores.push('DataCloud');
-                    }
+                    $timeout(function () {
+                        if(vm.dataStores.indexOf('DataCloud') == -1){
+                            vm.configFilters.dataStores.push('DataCloud');
+                        }
+                    }, 100);
                 } else {
                     var index = vm.dataStores.indexOf('DataCloud');
                     vm.dataStores.splice(index, 1);
                 }
 
                 if(vm.checkboxModel.cdl) {
-                    if(vm.dataStores.indexOf('CDL') == -1){
-                        vm.configFilters.dataStores.push('CDL');
-                    }
+                    $timeout(function () {
+                        if(vm.dataStores.indexOf('CDL') == -1){
+                            vm.configFilters.dataStores.push('CDL');
+                        }
+                    }, 100);
                 } else {
                     var index = vm.dataStores.indexOf('CDL');
                     vm.dataStores.splice(index, 1);
@@ -378,11 +382,11 @@ angular.module('lp.ratingsengine.wizard.training', [
                 }
 
                 $timeout(function () {
-                    if(vm.checkboxModel.datacloud || vm.checkboxModel.cdl || vm.checkboxModel.deduplicationType || vm.checkboxModel.excludePublicDomains || vm.checkboxModel.transformationGroup) {
-                        console.log(vm.configFilters);
-                        RatingsEngineStore.setConfigFilters(vm.configFilters);
-                        vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
-                    }
+                    console.log(vm.dataStores);
+                    console.log(vm.configFilters);
+
+                    RatingsEngineStore.setConfigFilters(vm.configFilters);
+                    vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
                 }, 500);
 
             } else {

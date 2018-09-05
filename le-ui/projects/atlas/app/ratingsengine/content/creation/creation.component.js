@@ -33,7 +33,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                     'prioritizeBy': false,
                     'modelSettingsTitle': false
                 }
-            }
+            },
+            jobStarted: false,
+            completedTimes: {},
+            completedSteps: {}
         });
 
         vm.$onInit = function() {
@@ -122,33 +125,31 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         };
 
         vm.updateSteps = function(){
-            vm.jobStarted = false;
-            vm.completedSteps = {};
             if (vm.type === 'cross_sell') {
                 vm.steps = [
                     {
                         label: 'Gathering Data',
-                        hasStarted: vm.startTimestamp || !vm.jobStarted,
-                        showSpinner: !vm.jobStarted && !vm.loadingData,
+                        hasStarted: !vm.startTimestamp || !vm.jobStarted,
+                        showSpinner: !vm.startTimestamp || !vm.jobStarted,
                         startTimestamp: vm.startTimestamp
                     },
                     {
                         label: 'Profiling',
-                        hasStarted: vm.loadingData || vm.completedSteps.load_data,
-                        showSpinner: vm.loadingData,
-                        startTimestamp: vm.completedSteps.load_data
+                        hasStarted: vm.processingFile || vm.completedTimes.load_data,
+                        showSpinner: vm.processingFile,
+                        startTimestamp: vm.completedTimes.load_data
                     },
                     {
                         label: 'Modeling',
-                        hasStarted: vm.matchingToDataCloud || vm.completedSteps.create_global_target_market,
+                        hasStarted: vm.matchingToDataCloud || vm.completedTimes.create_global_target_market,
                         showSpinner: vm.matchingToDataCloud,
-                        startTimestamp: vm.completedSteps.create_global_target_market
+                        startTimestamp: vm.completedTimes.create_global_target_market
                     },
                     {
                         label: 'Scoring',
-                        hasStarted: vm.scoringTrainingSet || vm.completedSteps.score_training_set,
+                        hasStarted: vm.scoringTrainingSet || vm.completedTimes.score_training_set,
                         showSpinner: vm.scoringTrainingSet,
-                        startTimestamp: vm.completedSteps.score_training_set
+                        startTimestamp: vm.completedTimes.score_training_set
                     }
                 ];
             } else {
@@ -157,21 +158,23 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                         label: 'Processing File',
                         hasStarted: vm.processingFile || !vm.jobStarted,
                         showSpinner: vm.processingFile || !vm.jobStarted,
-                        startTimestamp: vm.completedSteps.load_data
+                        startTimestamp: vm.completedTimes.load_data
                     },
                     {
                         label: 'Matching to Data Cloud',
                         hasStarted: vm.matchingToDataCloud,
                         showSpinner: vm.matchingToDataCloud,
-                        startTimestamp: vm.completedSteps.match_data
+                        startTimestamp: vm.completedTimes.match_data
                     },
                     {
                         label: 'Modeling and Scoring',
                         hasStarted: vm.modelingAndScoring,
                         showSpinner: vm.modelingAndScoring,
-                        startTimestamp: vm.completedSteps.create_global_model
+                        startTimestamp: vm.completedTimes.create_global_model
                     }
                 ];
+
+                console.log(vm.steps);
             }
         }
 
@@ -181,19 +184,23 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
                 JobsStore.getJobFromApplicationId(appId).then(function(result) {
                     if(result.id) {
-                        vm.status = result.jobStatus;
+
+                        console.log(result);
+
                         vm.jobStarted = true;
+                        vm.status = result.jobStatus;
                         vm.startTimestamp = result.startTimestamp;
-                        vm.completedSteps = result.completedTimes;
-                        vm.globalStep = vm.type == 'cross_sell' ? vm.completedSteps.create_global_target_market : vm.completedSteps.create_global_model;
+                        vm.completedSteps = result.completedSteps;
+                        vm.completedTimes = result.completedTimes;
+                        vm.globalStep = vm.type == 'cross_sell' ? vm.completedTimes.create_global_target_market : vm.completedTimes.create_global_model;
 
                         vm.steps = [];
 
                         if(vm.type == 'cross_sell'){
                             vm.stepMultiplier = 5.5;
-                            vm.loadingData = vm.startTimestamp && !vm.completedSteps.load_data;
-                            vm.matchingToDataCloud = vm.completedSteps.load_data && !vm.globalStep;
-                            vm.scoringTrainingSet = vm.globalStep && !vm.completedSteps.score_training_set;
+                            vm.processingFile = result.stepRunning == 'load_data';
+                            vm.matchingToDataCloud = vm.completedTimes.load_data && !vm.globalStep;
+                            vm.scoringTrainingSet = vm.globalStep && !vm.completedTimes.score_training_set;
                         } else {
                             vm.stepMultiplier = 5.5;
                             vm.processingFile = result.stepRunning == 'load_data';
