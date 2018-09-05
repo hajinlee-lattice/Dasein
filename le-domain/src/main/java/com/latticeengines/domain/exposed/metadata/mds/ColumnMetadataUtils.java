@@ -65,6 +65,9 @@ public final class ColumnMetadataUtils {
         if (overwriter.getCanInternalEnrich() != null) {
             overwritee.setCanInternalEnrich(overwriter.getCanInternalEnrich());
         }
+        if (overwriter.getCanModel() != null) {
+            overwritee.setCanModel(overwriter.getCanModel());
+        }
 
         // usage groups
         if (overwriter.getShouldDeprecate() != null) {

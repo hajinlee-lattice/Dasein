@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,8 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -30,7 +33,7 @@ import reactor.core.publisher.Flux;
 
 @Api(value = "serving store", description = "REST resource for serving stores")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/servingstore/{entity}")
+@RequestMapping("/customerspaces/{customerSpace}/servingstore")
 public class ServingStoreResource {
 
     private static final Logger log = LoggerFactory.getLogger(ServingStoreResource.class);
@@ -41,14 +44,13 @@ public class ServingStoreResource {
     @Inject
     private DataCollectionService dataCollectionService;
 
-    @GetMapping(value = "/decoratedmetadata")
+    @GetMapping(value = "/{entity}/decoratedmetadata")
     @ResponseBody
     @ApiOperation(value = "Get decorated serving store metadata")
     public Flux<ColumnMetadata> getDecoratedMetadata( //
             @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
             @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
-            @RequestParam(name = "version", required = false) DataCollection.Version version
-    ) {
+            @RequestParam(name = "version", required = false) DataCollection.Version version) {
         return getFlux(customerSpace, entity, version, groups);
     }
 
@@ -58,8 +60,9 @@ public class ServingStoreResource {
         AtomicLong counter = new AtomicLong();
         Flux<ColumnMetadata> flux;
         if (version == null) {
-            flux = servingStoreService.getFullyDecoratedMetadata(entity,
-                    dataCollectionService.getActiveVersion(customerSpace)).sequential();
+            flux = servingStoreService
+                    .getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace))
+                    .sequential();
         } else {
             flux = servingStoreService.getFullyDecoratedMetadata(entity, version).sequential();
         }
@@ -81,6 +84,24 @@ public class ServingStoreResource {
         if (CollectionUtils.isNotEmpty(filterGroups)) {
             flux = flux.filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor));
         }
+        return flux;
+    }
+
+    @GetMapping(value = "/new-modeling")
+    @ResponseBody
+    @ApiOperation(value = "Get attributes that are enabled for first iteration modeling")
+    public Flux<ColumnMetadata> getNewModelingAttrs( //
+            @PathVariable String customerSpace,
+            @RequestParam(name = "version", required = false) DataCollection.Version version) {
+        Flux<ColumnMetadata> flux = getFlux(customerSpace, BusinessEntity.Account, version,
+                Collections.singletonList(ColumnSelection.Predefined.Model));
+        flux = flux.map(cm -> {
+            cm.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_ALLINSIGHTS));
+            if (cm.getTagList() == null || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
+                cm.setTagList(Collections.singletonList(Tag.INTERNAL));
+            }
+            return cm;
+        });
         return flux;
     }
 
