@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
@@ -157,8 +158,8 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     @Transient
     public Map<String, String> getInputContext() {
-        if (inputContextString == null) {
-            log.info("input context is empty.");
+        if (StringUtils.isEmpty(inputContextString)) {
+            log.debug("input context is empty.");
             setInputContext(new HashMap<>());
         }
         Map<?, ?> raw = JsonUtils.deserialize(inputContextString, Map.class);
@@ -187,13 +188,9 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         return inputContextString;
     }
 
-    public void setInputContextString(String inputContextString) {
-        this.inputContextString = inputContextString;
-    }
-
     @Transient
     public Map<String, String> getReportContext() {
-        if (reportContextString == null) {
+        if (StringUtils.isEmpty(reportContextString)) {
             log.debug("report context is empty.");
             setReportContext(new HashMap<>());
         }
@@ -229,7 +226,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     @Transient
     public Map<String, String> getOutputContext() {
-        if (outputContextString == null) {
+        if (StringUtils.isEmpty(outputContextString)) {
             log.debug("output context is empty.");
             setOutputContext(new HashMap<>());
         }
@@ -271,14 +268,6 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         this.status = status;
     }
 
-    // public FinalApplicationStatus getStatus() {
-    // return status;
-    // }
-    //
-    // public void setStatus(FinalApplicationStatus status) {
-    // this.status = status;
-    // }
-
     public Long getStartTimeInMillis() {
         return startTimeInMillis;
     }
@@ -294,7 +283,8 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     @Transient
     public ErrorDetails getErrorDetails() {
-        if (errorDetailsString == null) {
+        if (StringUtils.isEmpty(errorDetailsString)) {
+            log.debug("error details is empty.");
             return null;
         }
         return JsonUtils.deserialize(errorDetailsString, ErrorDetails.class);
