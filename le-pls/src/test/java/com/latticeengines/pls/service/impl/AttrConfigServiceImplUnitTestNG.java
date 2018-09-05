@@ -139,17 +139,15 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - 10960L, 0);
         List<AttrConfigSelection> selections = usageOverview.getSelections();
         Assert.assertEquals(selections.size(), AttrConfigServiceImpl.usageProperties.length);
-        Assert.assertEquals(selections.get(0).getDisplayName(),
-                AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[0]));
-        Assert.assertEquals(selections.get(0).getSelected() - 3677, 0);
-        Assert.assertEquals(selections.get(1).getDisplayName(),
-                AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[1]));
-        Assert.assertEquals(selections.get(2).getDisplayName(),
-                AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[2]));
-        Assert.assertEquals(selections.get(3).getDisplayName(),
-                AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[3]));
+        for (int i = 0; i < AttrConfigServiceImpl.usageProperties.length; i++) {
+            Assert.assertEquals(selections.get(i).getDisplayName(),
+                    AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[i]));
+            Assert.assertEquals(selections.get(i).getSelected() - 3677, 0);
+        }
+        // Export
         Assert.assertNotNull(selections.get(1).getLimit());
-        Assert.assertNotNull(selections.get(3).getLimit());
+        // Company Profile
+        Assert.assertNotNull(selections.get(4).getLimit());
     }
 
     @Test(groups = "unit")

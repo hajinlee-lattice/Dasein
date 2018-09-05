@@ -79,8 +79,8 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     // The order matters as it maps with the mock up
     public static final String[] usageProperties = { ColumnSelection.Predefined.Segment.getName(),
-            ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.TalkingPoint.getName(),
-            ColumnSelection.Predefined.CompanyProfile.getName() };
+            ColumnSelection.Predefined.Enrichment.getName(), ColumnSelection.Predefined.Model.getName(),
+            ColumnSelection.Predefined.TalkingPoint.getName(), ColumnSelection.Predefined.CompanyProfile.getName() };
     private static final List<String> usagePropertyList = Arrays.asList(usageProperties);
     private static final HashMap<String, String> usageToDisplayName = new HashMap<>();
     private static final HashMap<String, String> displayNameToUsage = new HashMap<>();
@@ -103,11 +103,13 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     static {
         usageToDisplayName.put(ColumnSelection.Predefined.Segment.getName(), "Segmentation");
         usageToDisplayName.put(ColumnSelection.Predefined.Enrichment.getName(), "Export");
+        usageToDisplayName.put(ColumnSelection.Predefined.Model.getName(), "Modeling");
         usageToDisplayName.put(ColumnSelection.Predefined.TalkingPoint.getName(), "Talking Points");
         usageToDisplayName.put(ColumnSelection.Predefined.CompanyProfile.getName(), "Company Profile");
 
         displayNameToUsage.put("Segmentation", ColumnSelection.Predefined.Segment.getName());
         displayNameToUsage.put("Export", ColumnSelection.Predefined.Enrichment.getName());
+        displayNameToUsage.put("Modeling", ColumnSelection.Predefined.Model.getName());
         displayNameToUsage.put("Talking Points", ColumnSelection.Predefined.TalkingPoint.getName());
         displayNameToUsage.put("Company Profile", ColumnSelection.Predefined.CompanyProfile.getName());
     }
