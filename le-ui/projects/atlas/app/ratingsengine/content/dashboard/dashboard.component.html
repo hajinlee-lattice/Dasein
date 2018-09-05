@@ -60,7 +60,8 @@
                     <h3>
                         Creation Settings                        
                         <span ng-if="vm.isPublishedOrScored">
-                            ( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )
+                            <span ng-if="vm.isPublished">( Iteration {{ vm.ratingEngine.published_iteration.AI.iteration }} )</span>
+                            <span ng-if="!vm.isPublished">( Iteration {{ vm.ratingEngine.scoring_iteration.AI.iteration }} )</span>
                             <span
                                 ng-if="vm.isPublished" 
                                 class="published-header">Published</span>
@@ -105,7 +106,7 @@
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Include personal email domains:</dt>
                         <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Use curated attributes:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.transformationGroup ? 'Yes' : 'No'}}</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.model.advancedModelingConfig.custom_event.transformationGroup ? 'No' : 'Yes'}}</dd>
 
                         <dt ng-if="vm.hasSettingsInfo">Training:</dt>
                         <dd ng-if="vm.hasSettingsInfo">

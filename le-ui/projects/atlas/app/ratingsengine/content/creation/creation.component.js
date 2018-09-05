@@ -173,8 +173,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                         startTimestamp: vm.completedTimes.create_global_model
                     }
                 ];
-
-                console.log(vm.steps);
             }
         }
 

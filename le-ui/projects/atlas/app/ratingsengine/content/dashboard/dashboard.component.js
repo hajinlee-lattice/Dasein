@@ -235,6 +235,8 @@ angular.module('lp.ratingsengine.dashboard', [
         
         RatingsEngineStore.setRatingEngine(vm.ratingEngine);
 
+        // console.log(vm.ratingEngine);
+
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
             vm.publishOrActivateButtonLabel = 'New Scoring Configuration';//vm.dashboard.summary.bucketMetadata.length > 0 ? 'New Scoring Configuration' : 'Activate Scoring';

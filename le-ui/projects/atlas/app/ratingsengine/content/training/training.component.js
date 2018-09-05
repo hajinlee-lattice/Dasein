@@ -82,6 +82,8 @@ angular.module('lp.ratingsengine.wizard.training', [
                     // Setup form for Custom Event Models
                     vm.filters = vm.iteration.AI.advancedModelingConfig.custom_event;
 
+                    console.log(vm.iteration);
+
                     vm.configFilters = angular.copy(vm.filters);
                     RatingsEngineStore.setDisplayFileName(vm.configFilters.sourceFileName);
 
@@ -92,7 +94,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         cdl: (vm.configFilters.dataStores.indexOf('CDL') > -1) ? true : false,
                         deduplicationType: vm.configFilters.deduplicationType ? true : false,
                         excludePublicDomains: (vm.configFilters.excludePublicDomains == true) ? false : true,
-                        transformationGroup: (vm.configFilters.transformationGroup == 'NONE') ? true : false
+                        transformationGroup: (vm.configFilters.transformationGroup == 'NONE') ? false : true
                     }
 
                     vm.configFilters.dataStores = [];
@@ -350,7 +352,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         if(vm.dataStores.indexOf('DataCloud') == -1){
                             vm.configFilters.dataStores.push('DataCloud');
                         }
-                    }, 100);
+                    }, 200);
                 } else {
                     var index = vm.dataStores.indexOf('DataCloud');
                     vm.dataStores.splice(index, 1);
@@ -361,7 +363,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         if(vm.dataStores.indexOf('CDL') == -1){
                             vm.configFilters.dataStores.push('CDL');
                         }
-                    }, 100);
+                    }, 200);
                 } else {
                     var index = vm.dataStores.indexOf('CDL');
                     vm.dataStores.splice(index, 1);
@@ -375,16 +377,13 @@ angular.module('lp.ratingsengine.wizard.training', [
 
                 vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains ? false : true;
 
-                if(vm.checkboxModel.transformationGroup) {
+                if(!vm.checkboxModel.transformationGroup) {
                     vm.configFilters.transformationGroup = 'NONE';
                 } else {
                     delete vm.configFilters.transformationGroup;
                 }
 
                 $timeout(function () {
-                    console.log(vm.dataStores);
-                    console.log(vm.configFilters);
-
                     RatingsEngineStore.setConfigFilters(vm.configFilters);
                     vm.ratingModel.advancedModelingConfig.custom_event = vm.configFilters;
                 }, 500);
