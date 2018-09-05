@@ -117,4 +117,4 @@ if [ -f "/etc/ledp/lattice.pem" ]; then
     ls -l /etc/ssl/private/
 fi
 
-/docker-entrypoint.sh haproxy -f /etc/haproxy/haproxy.cfg
+/sbin/haproxy  -db -f /etc/haproxy/haproxy.cfg
