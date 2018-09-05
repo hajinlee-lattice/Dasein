@@ -49,6 +49,7 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
 
+        console.log(vm.ratingsSummary);
         // console.log(vm.currentConfiguration);
         // console.log(vm.workingBuckets);
 
@@ -72,12 +73,21 @@ angular.module('lp.models.ratings', [
                 }
             });
 
-            console.log(dashboardIterations, vm.activeIterations);
-
-            // Set correct iteration as default for select menu
-            for(var i = 0; i < vm.activeIterations.length; i++) {
-                if (vm.activeIterations[i].modelSummaryId === $stateParams.modelId) {
-                    vm.activeIteration = vm.activeIterations[i];
+            if ($stateParams.toggleRatings){
+                for(var i = 0; i < vm.activeIterations.length; i++) {
+                    if (vm.activeIterations[i].modelSummaryId === $stateParams.modelId) {
+                        vm.activeIteration = vm.activeIterations[i];
+                    }
+                }
+            } else {
+                if (dashboard.summary.publishedIterationId){
+                    for(var i = 0; i < vm.activeIterations.length; i++) {
+                        if (vm.activeIterations[i].id === dashboard.summary.publishedIterationId) {
+                            vm.activeIteration = vm.activeIterations[i];
+                        }
+                    }
+                } else {
+                    vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
                 }
             }
 
@@ -97,7 +107,8 @@ angular.module('lp.models.ratings', [
         $state.go('home.model.ratings', {
             modelId: vm.activeIteration.modelSummaryId,
             rating_id: $stateParams.rating_id,
-            viewingIteration: false
+            viewingIteration: false,
+            toggleRatings: true
         }, { reload: true });
     }
 
@@ -484,7 +495,8 @@ angular.module('lp.models.ratings', [
         $state.go('home.model.ratings.history', {
             modelId: vm.activeIteration.modelSummaryId,
             rating_id: $stateParams.rating_id,
-            viewingIteration: false
+            viewingIteration: false,
+            toggleRatings: true
         }, { reload: true });
     }
 
