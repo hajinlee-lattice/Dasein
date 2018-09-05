@@ -107,7 +107,7 @@ public class DataCollectionEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "create")
     public void checkMasterSegment() {
         DataCollection.Version version = dataCollectionEntityMgr.findActiveVersion();
-        MetadataSegment masterSegment = segmentService.findMaster(mainCustomerSpace, collectionName);
+        MetadataSegment masterSegment = segmentService.findMaster(collectionName);
         Assert.assertNotNull(masterSegment);
 
         StatisticsContainer statisticsContainer = new StatisticsContainer();

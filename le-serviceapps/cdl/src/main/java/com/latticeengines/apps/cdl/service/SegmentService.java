@@ -13,29 +13,23 @@ public interface SegmentService {
 
     MetadataSegment findByName(String name);
 
-    MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment);
+    MetadataSegment createOrUpdateSegment(MetadataSegment segment);
 
-    Boolean deleteSegmentByName(String customerSpace, String segmentName, boolean ignoreDependencyCheck);
+    Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck);
 
-    List<MetadataSegment> getSegments(String customerSpace);
+    List<MetadataSegment> getSegments();
 
-    List<MetadataSegment> getSegments(String customerSpace, String collectionName);
+    MetadataSegment findMaster(String collectionName);
 
-    MetadataSegment findByName(String customerSpace, String name);
+    StatisticsContainer getStats(String segmentName, DataCollection.Version version);
 
-    MetadataSegment findMaster(String customerSpace, String collectionName);
-
-    StatisticsContainer getStats(String customerSpace, String segmentName, DataCollection.Version version);
-
-    void upsertStats(String customerSpace, String segmentName, StatisticsContainer statisticsContainer);
-
-    void deleteAllSegments(String customerSpace, boolean ignoreDependencyCheck);
+    void upsertStats(String segmentName, StatisticsContainer statisticsContainer);
 
     Map<BusinessEntity, Long> updateSegmentCounts(String segmentName);
 
     List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments);
 
-    List<MetadataSegment> findDependingSegments(String customerSpace, List<String> attributes);
+    List<MetadataSegment> findDependingSegments(List<String> attributes);
 
-    Map<String, List<String>> getDependencies(String customerSpace, String segmentName) throws Exception;
+    Map<String, List<String>> getDependencies(String segmentName) throws Exception;
 }

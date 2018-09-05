@@ -1,5 +1,8 @@
 package com.latticeengines.dante.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +17,6 @@ import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
 import com.latticeengines.domain.exposed.multitenant.TalkingPoint;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 public class TalkingPointServiceImplUnitTestNG {
 

@@ -3,8 +3,6 @@ package com.latticeengines.dante.controller;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -12,7 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dante.testFramework.DanteTestNGBase;
+import com.latticeengines.dante.testframework.DanteTestNGBase;
 import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
 import com.latticeengines.proxy.exposed.dante.TalkingPointsAttributesProxy;

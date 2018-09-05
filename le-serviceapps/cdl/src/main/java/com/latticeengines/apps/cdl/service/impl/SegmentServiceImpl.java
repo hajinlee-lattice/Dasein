@@ -1,13 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -63,7 +61,7 @@ public class SegmentServiceImpl implements SegmentService {
     private DependencyChecker dependencyChecker;
 
     @Override
-    public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
+    public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
         MetadataSegment segment1 = null;
 
         if (segment.getName() != null) {
@@ -82,7 +80,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public Boolean deleteSegmentByName(String customerSpace, String segmentName, boolean ignoreDependencyCheck) {
+    public Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck) {
         MetadataSegment segment = segmentEntityMgr.findByName(segmentName);
         if (segment == null) {
             return false;
@@ -93,20 +91,9 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public List<MetadataSegment> getSegments(String customerSpace) {
+    public List<MetadataSegment> getSegments() {
         String collectionName = dataCollectionEntityMgr.findDefaultCollection().getName();
         return segmentEntityMgr.findAllInCollection(collectionName);
-    }
-
-    @Override
-    public List<MetadataSegment> getSegments(String customerSpace, String collectionName) {
-        List<MetadataSegment> segments = segmentEntityMgr.findAll();
-        if (segments == null || segments.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return segments.stream() //
-                .filter(segment -> collectionName.equals(segment.getDataCollection().getName())) //
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -116,17 +103,12 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public MetadataSegment findByName(String customerSpace, String name) {
-        return segmentEntityMgr.findByName(name);
-    }
-
-    @Override
-    public MetadataSegment findMaster(String customerSpace, String collectionName) {
+    public MetadataSegment findMaster(String collectionName) {
         return segmentEntityMgr.findMasterSegment(collectionName);
     }
 
     @Override
-    public StatisticsContainer getStats(String customerSpace, String segmentName, DataCollection.Version version) {
+    public StatisticsContainer getStats(String segmentName, DataCollection.Version version) {
         if (version == null) {
             // by default get from active version
             version = dataCollectionEntityMgr.findActiveVersion();
@@ -135,16 +117,8 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public void upsertStats(String customerSpace, String segmentName, StatisticsContainer statisticsContainer) {
+    public void upsertStats(String segmentName, StatisticsContainer statisticsContainer) {
         segmentEntityMgr.upsertStats(segmentName, statisticsContainer);
-    }
-
-    @Override
-    public void deleteAllSegments(String customerSpace, boolean ignoreDependencyCheck) {
-        List<MetadataSegment> segments = getSegments(customerSpace);
-        for (MetadataSegment segment : segments) {
-            deleteSegmentByName(customerSpace, segment.getName(), ignoreDependencyCheck);
-        }
     }
 
     @Override
@@ -209,7 +183,8 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public Map<String, List<String>> getDependencies(String customerSpace, String segmentName) throws Exception {
+    public Map<String, List<String>> getDependencies(String segmentName) throws Exception {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         return dependencyChecker.getDependencies(customerSpace, segmentName, CDLObjectTypes.Segment.name());
     }
 
@@ -238,10 +213,10 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public List<MetadataSegment> findDependingSegments(String customerSpace, List<String> attributes) {
+    public List<MetadataSegment> findDependingSegments(List<String> attributes) {
         List<MetadataSegment> dependingMetadataSegments = new ArrayList<>();
         if (attributes != null) {
-            List<MetadataSegment> metadataSegments = getSegments(customerSpace);
+            List<MetadataSegment> metadataSegments = getSegments();
             if (metadataSegments != null) {
                 for (MetadataSegment metadataSegment : metadataSegments) {
                     segmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);

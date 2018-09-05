@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.hadoop.hdfs.server.namenode.UnsupportedActionException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -150,9 +149,7 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get the all segments in the default collection.")
     public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        DataCollection collection = dataCollectionService.getDataCollection(customerSpace, null);
-        return segmentService.getSegments(customerSpace, collection.getName());
+        return segmentService.getSegments();
     }
 
     @GetMapping(value = "/stats")

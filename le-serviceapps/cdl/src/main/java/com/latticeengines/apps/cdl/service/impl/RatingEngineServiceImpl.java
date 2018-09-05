@@ -268,7 +268,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingEngine.getSegment() != null) {
             String segmentName = ratingEngine.getSegment().getName();
-            MetadataSegment segment = segmentService.findByName(tenant.getId(), segmentName);
+            MetadataSegment segment = segmentService.findByName(segmentName);
             ratingEngine.setSegment(segment);
         }
 

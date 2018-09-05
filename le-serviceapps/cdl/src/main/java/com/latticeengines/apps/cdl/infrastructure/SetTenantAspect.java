@@ -34,13 +34,6 @@ public class SetTenantAspect {
     // ===================================
     // BEGIN: legacy aspects to be removed
     // ===================================
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.SegmentServiceImpl.*(..)) "
-            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
-    public void allMethodsSegmentService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        setMultiTenantContext(customerSpace.toString());
-    }
-
     @Before("execution(* com.latticeengines.apps.cdl.service.impl.StatisticsContainerServiceImpl.*(..))"
             + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsStatisticsContainerService(JoinPoint joinPoint) {

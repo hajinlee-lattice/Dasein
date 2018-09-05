@@ -38,7 +38,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         setupTestEnvironmentWithDummySegment();
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testFindDependingAttributes() {
         List<MetadataSegment> segments = new ArrayList<>();
         segments.add(testSegment);
@@ -53,7 +53,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         List<String> attributes = new ArrayList<>();
         attributes.add("Contact.CompanyName");
 
-        List<MetadataSegment> segments = segmentService.findDependingSegments(mainCustomerSpace, attributes);
+        List<MetadataSegment> segments = segmentService.findDependingSegments(attributes);
         assertNotNull(segments);
         assertEquals(segments.size(), 1);
         assertEquals(segments.get(0).getDisplayName(), SEGMENT_NAME);
@@ -89,14 +89,14 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
     protected MetadataSegment createSegment(String segmentName) {
         MetadataSegment segment = new MetadataSegment();
         segment.setDisplayName(segmentName);
-        MetadataSegment createdSegment = segmentService.createOrUpdateSegment(mainTestTenant.getId(), segment);
+        MetadataSegment createdSegment = segmentService.createOrUpdateSegment(segment);
 
         try {
             Thread.sleep(2 * 1000);
         } catch (InterruptedException e) {
         }
 
-        return segmentService.findByName(mainTestTenant.getId(), createdSegment.getName());
+        return segmentService.findByName(createdSegment.getName());
     }
 
     protected RatingEngine createRatingEngine(MetadataSegment segment) {
@@ -113,6 +113,6 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         Restriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Rating, ratingEngine.getId()), Bucket.notNullBkt());
         segment.setAccountRestriction(accountRestriction);
-        segmentService.createOrUpdateSegment(mainTestTenant.getId(), segment);
+        segmentService.createOrUpdateSegment(segment);
     }
 }

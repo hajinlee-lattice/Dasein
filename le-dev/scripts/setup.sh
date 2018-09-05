@@ -37,50 +37,56 @@ processErrors
 
 echo "" > /tmp/errors.txt
 
-hdfs dfs -mkdir /app || true
 hdfs dfs -rm -r -f /app/${LE_STACK}/$(leversion) || true
+hdfs dfs -mkdir -p /app/${LE_STACK} || true
+pushd ${WSHOME}/le-dataplatform
+mvn -Ppkg-shaded -DskipTests package &&
+echo "Deploying artifacts to hdfs ..."
+hdfs dfs -copyFromLocal target/dist /app/${LE_STACK}/$(leversion) &&
+hdfs dfs -copyFromLocal target/dist_python/* /app/${LE_STACK}/$(leversion)
+popd
 
-for servicecmd in 'dataplatform|dpdplnobld' 'sqoop|sqdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld'
-do
-    service=`echo $servicecmd | cut -d \| -f 1` &&
-    cmd=`echo $servicecmd | cut -d \| -f 2` &&
-    echo "Deploying ${service} to local Hadoop using ${cmd}" &&
-    pushd $WSHOME/le-${service} &&
-    eval $cmd 2>> /tmp/errors.txt &&
-    popd &
-done
-wait
-
-for servicecmd in 'datacloud|dcdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'dellebi|dedplnobld'
-do
-    service=`echo $servicecmd | cut -d \| -f 1` &&
-    cmd=`echo $servicecmd | cut -d \| -f 2` &&
-    echo "Deploying ${service} to local Hadoop using ${cmd}" &&
-    pushd $WSHOME/le-${service} &&
-    eval $cmd 2>> /tmp/errors.txt &&
-    popd &
-done
-wait
-
-UNAME=`uname`
-if [[ "${UNAME}" == 'Darwin' ]]; then
-    echo "You are on Mac"
-    sed -i '' "/INFO /d" /tmp/errors.txt
-    sed -i '' "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
-    sed -i '' "/\/app\/swlib/d" /tmp/errors.txt
-else
-    echo "You are on ${UNAME}"
-    sed -i "/INFO /d" /tmp/errors.txt
-    sed -i "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
-    sed -i "/\/app\/swlib/d" /tmp/errors.txt
-fi
-
-if [ ! -z "$(cat /tmp/errors.txt)" ]
-then
-    echo "Error!"
-    cat /tmp/errors.txt
-    exit -1
-fi
+#for servicecmd in 'dataplatform|dpdplnobld' 'sqoop|sqdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld'
+#do
+#    service=`echo $servicecmd | cut -d \| -f 1` &&
+#    cmd=`echo $servicecmd | cut -d \| -f 2` &&
+#    echo "Deploying ${service} to local Hadoop using ${cmd}" &&
+#    pushd $WSHOME/le-${service} &&
+#    eval $cmd 2>> /tmp/errors.txt &&
+#    popd &
+#done
+#wait
+#
+#for servicecmd in 'datacloud|dcdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'dellebi|dedplnobld'
+#do
+#    service=`echo $servicecmd | cut -d \| -f 1` &&
+#    cmd=`echo $servicecmd | cut -d \| -f 2` &&
+#    echo "Deploying ${service} to local Hadoop using ${cmd}" &&
+#    pushd $WSHOME/le-${service} &&
+#    eval $cmd 2>> /tmp/errors.txt &&
+#    popd &
+#done
+#wait
+#
+#UNAME=`uname`
+#if [[ "${UNAME}" == 'Darwin' ]]; then
+#    echo "You are on Mac"
+#    sed -i '' "/INFO /d" /tmp/errors.txt
+#    sed -i '' "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
+#    sed -i '' "/\/app\/swlib/d" /tmp/errors.txt
+#else
+#    echo "You are on ${UNAME}"
+#    sed -i "/INFO /d" /tmp/errors.txt
+#    sed -i "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
+#    sed -i "/\/app\/swlib/d" /tmp/errors.txt
+#fi
+#
+#if [ ! -z "$(cat /tmp/errors.txt)" ]
+#then
+#    echo "Error!"
+#    cat /tmp/errors.txt
+#    exit -1
+#fi
 
 echo "deploy properties file"
 cfgdpl 2> /tmp/errors.txt
@@ -90,15 +96,6 @@ if [ "${USE_QA_RTS}" == "true" ]; then
     ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py --qa-source-dbs
 else
     ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py
-fi
-
-if [ "${LE_ENVIRONMENT}" = "devcluster" ]; then
-    VERSION=`leversion`
-    echo "copying ${VERSION} artifacts from local hadoop to devcluster"
-    hdfs dfs -rm -r -f hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK} || true
-    hdfs dfs -mkdir -p hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK}
-    hdfs dfs -cp /app hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK}/${VERSION}
-    hdfs dfs -ls hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK}
 fi
 
 echo "Clean up old test tenants"

@@ -48,16 +48,14 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.getSegments(customerSpace);
+        return segmentService.getSegments();
     }
 
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
     public MetadataSegment getSegment(@PathVariable String customerSpace, @PathVariable String segmentName) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.findByName(customerSpace, segmentName);
+        return segmentService.findByName(segmentName);
     }
 
     @GetMapping(value = "/{segmentName}/dependencies")
@@ -66,16 +64,15 @@ public class SegmentResource {
     public Map<String, List<String>> getDependencies(@PathVariable String customerSpace,
             @PathVariable String segmentName) throws Exception {
         log.info(String.format("get all dependencies for segmentName=%s", segmentName));
-        return segmentService.getDependencies(customerSpace, segmentName);
+        return segmentService.getDependencies(segmentName);
     }
 
     @RequestMapping(value = "/pid/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get segment with pid by name")
     public MetadataSegmentDTO getSegmentWithPid(@PathVariable String customerSpace, @PathVariable String segmentName) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
         MetadataSegmentDTO metadataSegmentDTO = new MetadataSegmentDTO();
-        MetadataSegment segment = segmentService.findByName(customerSpace, segmentName);
+        MetadataSegment segment = segmentService.findByName(segmentName);
         metadataSegmentDTO.setMetadataSegment(segment);
         metadataSegmentDTO.setPrimaryKey(segment.getPid());
         return metadataSegmentDTO;
@@ -87,7 +84,7 @@ public class SegmentResource {
     public MetadataSegment createOrUpdateSegment(@PathVariable String customerSpace,
             @RequestBody MetadataSegment segment) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.createOrUpdateSegment(customerSpace, segment);
+        return segmentService.createOrUpdateSegment(segment);
     }
 
     @PostMapping(value = "/with-action")
@@ -104,7 +101,7 @@ public class SegmentResource {
     @ApiOperation(value = "Delete a segment by name")
     public Boolean deleteSegmentByName(@PathVariable String customerSpace, @PathVariable String segmentName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.deleteSegmentByName(customerSpace, segmentName, false);
+        return segmentService.deleteSegmentByName(segmentName, false);
     }
 
     @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -112,8 +109,7 @@ public class SegmentResource {
     @ApiOperation(value = "Get segment by name")
     public StatisticsContainer getSegmentStats(@PathVariable String customerSpace, @PathVariable String segmentName,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.getStats(customerSpace, segmentName, version);
+        return segmentService.getStats(segmentName, version);
     }
 
     @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -121,8 +117,7 @@ public class SegmentResource {
     @ApiOperation(value = "Upsert stats to a segment")
     public SimpleBooleanResponse upsertStatsToSegment(@PathVariable String customerSpace,
             @PathVariable String segmentName, @RequestBody StatisticsContainer statisticsContainer) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        segmentService.upsertStats(customerSpace, segmentName, statisticsContainer);
+        segmentService.upsertStats(segmentName, statisticsContainer);
         return SimpleBooleanResponse.successResponse();
     }
 

@@ -42,11 +42,13 @@ public class MultiTenantRatingEngineEntityMgrImplTestNG extends CDLFunctionalTes
         tenant2 = testBed.getTestTenants().get(1);
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(tenant1.getId()));
         dataCollection = dataCollectionEntityMgr.createDefaultCollection();
-        segment1 = createMetadataSegment(SEGMENT_NAME, CustomerSpace.parse(tenant1.getId()).toString());
+        segment1 = createMetadataSegment(SEGMENT_NAME);
+        //segment1 = createMetadataSegment(SEGMENT_NAME, CustomerSpace.parse(tenant1.getId()).toString());
 
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(tenant2.getId()));
         dataCollection = dataCollectionEntityMgr.createDefaultCollection();
-        segment2 = createMetadataSegment(SEGMENT_NAME, CustomerSpace.parse(tenant1.getId()).toString());
+        segment2 = createMetadataSegment(SEGMENT_NAME);
+        // segment2 = createMetadataSegment(SEGMENT_NAME, CustomerSpace.parse(tenant1.getId()).toString());
     }
 
     @Test(groups = "functional")

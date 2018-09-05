@@ -41,7 +41,7 @@ public class CDLDependenciesResource {
     @ApiOperation(value = "Get impacted segments")
     public List<MetadataSegment> getDependingSegments(@PathVariable String customerSpace,
                                                       @RequestBody List<String> attributes) {
-        return segmentService.findDependingSegments(customerSpace, attributes);
+        return segmentService.findDependingSegments(attributes);
     }
 
     @RequestMapping(value = "/ratingengines", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -10,14 +10,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dante.entitymgr.PublishedTalkingPointEntityMgr;
-import com.latticeengines.dante.testFramework.DanteDeploymentTestNGBase;
+import com.latticeengines.dante.testframework.DanteDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
@@ -25,6 +24,7 @@ import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 
 public class TalkingPointResourceDeploymentTestNG extends DanteDeploymentTestNGBase {
+
     @Autowired
     private TalkingPointProxy talkingPointProxy;
 
@@ -174,11 +174,6 @@ public class TalkingPointResourceDeploymentTestNG extends DanteDeploymentTestNGB
 
         DantePreviewResources previewResources1 = talkingPointProxy.getPreviewResources(mainTestTenant.getId());
         Assert.assertEquals(previewResources.getoAuthToken(), previewResources1.getoAuthToken());
-    }
-
-    @AfterClass(groups = "deployment")
-    public void cleanup() {
-        super.deleteTestMetadataSegment();
     }
 
 }

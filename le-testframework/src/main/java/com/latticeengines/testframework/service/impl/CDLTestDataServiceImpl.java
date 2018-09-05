@@ -80,11 +80,11 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private static final Date DATE = new Date();
 
     private static final ImmutableMap<BusinessEntity, String> srcTables = ImmutableMap.of( //
-            BusinessEntity.Account, "cdl_test_account_2", //
-            BusinessEntity.Contact, "cdl_test_contact_2", //
-            BusinessEntity.Product, "cdl_test_product_2", //
-            BusinessEntity.Transaction, "cdl_test_transaction_2", //
-            BusinessEntity.PeriodTransaction, "cdl_test_period_transaction_2" //
+            BusinessEntity.Account, "cdl_test_account_%d", //
+            BusinessEntity.Contact, "cdl_test_contact_%d", //
+            BusinessEntity.Product, "cdl_test_product_%d", //
+            BusinessEntity.Transaction, "cdl_test_transaction_%d", //
+            BusinessEntity.PeriodTransaction, "cdl_test_period_transaction_%d" //
     );
 
     private final TestArtifactService testArtifactService;
@@ -140,7 +140,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         for (BusinessEntity entity : BusinessEntity.values()) {
             tasks.add(() -> {
                 try (PerformanceTimer timer = new PerformanceTimer("Clone redshift table for " + entity)) {
-                    cloneRedshiftTables(shortTenantId, entity);
+                    cloneRedshiftTables(shortTenantId, entity, version);
                 }
             });
             tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version)));
@@ -225,7 +225,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             retry = getRedshiftRetryTemplate();
             retry.execute(context -> {
                 log.info(String.format("(Attempt=%d) insert %d rows into rating table %s", context.getRetryCount() + 1,
-                        data.size(), ratingTableName));
+                        CollectionUtils.size(data), ratingTableName));
                 redshiftJdbcTemplate.execute("DELETE FROM " + ratingTableName + ";");
                 redshiftService.insertValuesIntoTable(ratingTableName, columns, data);
                 return null;
@@ -431,9 +431,9 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         dataCollectionProxy.upsertStats(customerSpace, container);
     }
 
-    private void cloneRedshiftTables(String tenantId, BusinessEntity entity) {
+    private void cloneRedshiftTables(String tenantId, BusinessEntity entity, int version) {
         if (srcTables.containsKey(entity)) {
-            String srcTable = srcTables.get(entity);
+            String srcTable = String.format(srcTables.get(entity), version);
             String tgtTable = servingStoreName(tenantId, entity);
             RetryTemplate retry = getRedshiftRetryTemplate();
             retry.execute((RetryCallback<Void, RuntimeException>) context -> {

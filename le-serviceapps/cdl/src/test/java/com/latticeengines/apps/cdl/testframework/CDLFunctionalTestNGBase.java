@@ -22,7 +22,6 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -105,10 +104,6 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected MetadataSegment createMetadataSegment(String segmentName) {
-        return createMetadataSegment(segmentName, CustomerSpace.parse(mainTestTenant.getId()).toString());
-    }
-
-    protected MetadataSegment createMetadataSegment(String segmentName, String customerSpace) {
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();
 
@@ -120,8 +115,8 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         metadataSegment.setAccountRestriction(accountRestriction);
         metadataSegment.setContactRestriction(contactRestriction);
 
-        metadataSegment = segmentService.createOrUpdateSegment(customerSpace, metadataSegment);
-        MetadataSegment retrievedSegment = segmentService.findByName(customerSpace, metadataSegment.getName());
+        metadataSegment = segmentService.createOrUpdateSegment(metadataSegment);
+        MetadataSegment retrievedSegment = segmentService.findByName(metadataSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         return retrievedSegment;
     }
