@@ -54,7 +54,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(segment.getDescription(), UTF8_STRING);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testFindDependingAttributes() {
         List<MetadataSegment> segments = new ArrayList<>();
         segments.add(testSegment);

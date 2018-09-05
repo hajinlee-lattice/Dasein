@@ -21,6 +21,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.AttrConfigService;
@@ -30,6 +31,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -68,6 +70,11 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
     @Inject
     private ZKConfigService zkConfigService;
 
+    @Inject
+    private CDLExternalSystemService externalSystemService;
+
+    private String CRM_ID = "CrmAccount_External_ID";
+
     private Set<String> accountStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Account).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
     private Set<String> accountSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Account).stream() //
@@ -97,7 +104,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
             setupTestEnvironment();
             batonService.setFeatureFlag(CustomerSpace.parse(mainTestTenant.getId()), //
                     LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
-            cdlTestDataService.populateMetadata(mainTestTenant.getId(), 3);
+            cdlTestDataService.populateMetadata(mainTestTenant.getId(), 4);
         });
         runnables.add(() -> {
             List<ColumnMetadata> amCols = columnMetadataProxy.getAllColumns();
@@ -125,12 +132,10 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         MultiTenantContext.setTenant(mainTestTenant);
         Assert.assertFalse(zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(mainCustomerSpace)));
 
-        // TODO: setup some customer account attributes
-        // TODO: to be external system ids
+        // setup external id attrs
+        createExternalSystem();
 
         // TODO: setup rating engines and rating attrs
-
-        // TODO: setup curated attrs
     }
 
     @Test(groups = "deployment")
@@ -138,6 +143,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         testLDCAttrs();
         testContactAttributes();
         testMyAttributes();
+        testProductSpendAttributes();
     }
 
     private void testMyAttributes() {
@@ -160,6 +166,15 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
                         false, true, //
                         false, true);
                 break;
+            case Partition.EXTERNAL_ID:
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        true, true, //
+                        false, true, //
+                        true, true, //
+                        false, true, //
+                        false, false);
+                    break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //
                         Active, true, //
@@ -179,6 +194,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
             partiion = Partition.SYSTEM;
         } else if (accountStandardAttrs.contains(attrName)) {
             partiion = Partition.STD_ATTRS;
+        } else if (CRM_ID.equals(attrName)) {
+            partiion = Partition.EXTERNAL_ID;
         } else {
             partiion = Partition.OTHERS;
         }
@@ -228,6 +245,23 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
             partiion = Partition.OTHERS;
         }
         return partiion;
+    }
+
+    private void testProductSpendAttributes() {
+        final Category cat = Category.PRODUCT_SPEND;
+        checkAndVerifyCategory(cat, (config) -> {
+            String attrName = config.getAttrName();
+            Assert.assertNotNull(attrName, JsonUtils.pprint(config));
+            verifyFlags(config, cat, null, //
+                    // FIXME: YSong - M23, lcChg should be false for curated attrs
+                    Active, true, //
+                    true, true, //
+                    false, true, //
+                    true, true, //
+                    false, false, //
+                    false, false);
+            return true;
+        });
     }
 
     private void testLDCAttrs() {
@@ -435,7 +469,12 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
     ) {
         String attrName = attrConfig.getAttrName();
         String displayName = attrConfig.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class);
-        String logPrefix = String.format("%s (%s) [%s - %s]", attrName, displayName, category.getName(), partition);
+        String logPrefix;
+        if (StringUtils.isNotBlank(partition)) {
+            logPrefix = String.format("%s (%s) [%s - %s]", attrName, displayName, category.getName(), partition);
+        } else {
+            logPrefix = String.format("%s (%s) [%s]", attrName, displayName, category.getName());
+        }
         String property = ColumnMetadataKey.State;
         AttrState state = attrConfig.getPropertyFinalValue(property, AttrState.class);
         Assert.assertEquals(state, initState, //
@@ -467,12 +506,21 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
     private static final class Partition {
         static final String SYSTEM = "System";
         static final String STD_ATTRS = "StdAttrs";
+        static final String EXTERNAL_ID = "ExternalID";
         static final String OTHERS = "Others";
 
         // skip verification on these attributes
         // may because cannot tell the partition
         // or just want to sample fewer attrs
         static final String SKIP = "Skip";
+    }
+
+    private void createExternalSystem() {
+        CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+        List<String> crmIds = new ArrayList<>();
+        crmIds.add(CRM_ID);
+        cdlExternalSystem.setCRMIdList(crmIds);
+        externalSystemService.createOrUpdateExternalSystem(mainCustomerSpace, cdlExternalSystem);
     }
 
 }

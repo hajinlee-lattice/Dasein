@@ -52,6 +52,7 @@ public class TestArtifactServiceImpl implements TestArtifactService {
         log.info("Acceleration status of bucket " + S3_BUCKET + " is " + accelerateStatus);
     }
 
+    @Override
     public InputStream readTestArtifactAsStream(String objectDir, String version, String fileName) {
         String objectKey = objectKey(objectDir, version, fileName);
         if (S3.doesObjectExist(S3_BUCKET, objectKey)) {
@@ -70,6 +71,13 @@ public class TestArtifactServiceImpl implements TestArtifactService {
         }
     }
 
+    @Override
+    public boolean testArtifactExists(String objectDir, String version, String fileName) {
+        String objectKey = objectKey(objectDir, version, fileName);
+        return S3.doesObjectExist(S3_BUCKET, objectKey);
+    }
+
+    @Override
     public File downloadTestArtifact(String objectDir, String version, String fileName) {
         String objectKey = objectKey(objectDir, version, fileName);
         GetObjectRequest getObjectRequest = new GetObjectRequest(S3_BUCKET, objectKey);

@@ -79,13 +79,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private static final String S3_DIR = "le-testframework/cdl";
     private static final Date DATE = new Date();
 
-    private static final ImmutableMap<BusinessEntity, String> srcTables = ImmutableMap.of( //
-            BusinessEntity.Account, "cdl_test_account_%d", //
-            BusinessEntity.Contact, "cdl_test_contact_%d", //
-            BusinessEntity.Product, "cdl_test_product_%d", //
-            BusinessEntity.Transaction, "cdl_test_transaction_%d", //
-            BusinessEntity.PeriodTransaction, "cdl_test_period_transaction_%d" //
-    );
+    private static final Map<BusinessEntity, String> srcTables = new HashMap<>();
 
     private final TestArtifactService testArtifactService;
     private final MetadataProxy metadataProxy;
@@ -105,6 +99,12 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         this.dataCollectionProxy = dataCollectionProxy;
         this.redshiftService = redshiftService;
         this.ratingEngineProxy = ratingEngineProxy;
+        srcTables.put(BusinessEntity.Account, "cdl_test_account_%d");
+        srcTables.put(BusinessEntity.Contact, "cdl_test_contact_%d");
+        srcTables.put(BusinessEntity.Product, "cdl_test_product_%d");
+        srcTables.put(BusinessEntity.Transaction, "cdl_test_transaction_%d");
+        srcTables.put(BusinessEntity.PeriodTransaction, "cdl_test_period_transaction_%d");
+        srcTables.put(BusinessEntity.DepivotedPurchaseHistory, "cdl_test_purchase_history_%d");
     }
 
     @Override
@@ -434,30 +434,27 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private void cloneRedshiftTables(String tenantId, BusinessEntity entity, int version) {
         if (srcTables.containsKey(entity)) {
             String srcTable = String.format(srcTables.get(entity), version);
-            String tgtTable = servingStoreName(tenantId, entity);
-            RetryTemplate retry = getRedshiftRetryTemplate();
-            retry.execute((RetryCallback<Void, RuntimeException>) context -> {
-                log.info(String.format("(Attempt=%d) copying %s to %s", context.getRetryCount() + 1, srcTable,
-                        tgtTable));
-                if (!redshiftService.hasTable(tgtTable)) {
-                    redshiftService.cloneTable(srcTable, tgtTable);
-                } else {
-                    log.info("Seems table " + tgtTable + " already exists.");
-                }
-                return null;
-            });
+            if (redshiftService.hasTable(srcTable)) {
+                String tgtTable = servingStoreName(tenantId, entity);
+                RetryTemplate retry = getRedshiftRetryTemplate();
+                retry.execute((RetryCallback<Void, RuntimeException>) context -> {
+                    log.info(String.format("(Attempt=%d) copying %s to %s", context.getRetryCount() + 1, srcTable,
+                            tgtTable));
+                    if (!redshiftService.hasTable(tgtTable)) {
+                        redshiftService.cloneTable(srcTable, tgtTable);
+                    } else {
+                        log.info("Seems table " + tgtTable + " already exists.");
+                    }
+                    return null;
+                });
+            }
         }
     }
 
     private void populateServingStore(String tenantId, BusinessEntity entity, String s3Version) {
-        if (Arrays.asList( //
-                BusinessEntity.Account, //
-                BusinessEntity.Contact, //
-                BusinessEntity.Product, //
-                BusinessEntity.Transaction, //
-                BusinessEntity.PeriodTransaction).contains(entity)) {
-            String customerSpace = CustomerSpace.parse(tenantId).toString();
-            Table table = readTableFromS3(entity.getServingStore(), s3Version);
+        String customerSpace = CustomerSpace.parse(tenantId).toString();
+        Table table = readTableFromS3(entity.getServingStore(), s3Version);
+        if (table != null) {
             String tableName = servingStoreName(tenantId, entity);
             table.setName(tableName);
             table.setDisplayName(entity.getServingStore().name());
@@ -469,18 +466,22 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     }
 
     private Table readTableFromS3(TableRoleInCollection role, String version) {
-        InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, version, role.name() + ".json.gz");
-        Table table;
-        try {
-            GZIPInputStream gis = new GZIPInputStream(is);
-            String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
-            ObjectMapper om = new ObjectMapper();
-            table = om.readValue(content, Table.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse the table json", e);
+        if (testArtifactService.testArtifactExists(S3_DIR, version, role.name() + ".json.gz")) {
+            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, version, role.name() + ".json.gz");
+            Table table;
+            try {
+                GZIPInputStream gis = new GZIPInputStream(is);
+                String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
+                ObjectMapper om = new ObjectMapper();
+                table = om.readValue(content, Table.class);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to parse the table json", e);
+            }
+            table.setTableType(TableType.DATATABLE);
+            return table;
+        } else {
+            return null;
         }
-        table.setTableType(TableType.DATATABLE);
-        return table;
     }
 
     private String servingStoreName(String tenantId, BusinessEntity entity) {
