@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -21,6 +22,7 @@ public class CDLJobDetailEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
 
     private int countBeforeTest;
+    private CDLJobDetail jobDetail;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -29,9 +31,16 @@ public class CDLJobDetailEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         countBeforeTest = CollectionUtils.size(cdlJobDetails);
     }
 
+    @AfterClass(groups = "functional")
+    public void teardown() {
+        if (jobDetail != null) {
+            cdlJobDetailEntityMgr.delete(jobDetail);
+        }
+    }
+
     @Test(groups = "functional")
     public void testCreateAndGet() {
-        cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, mainTestTenant);
+        jobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, mainTestTenant);
         List<CDLJobDetail> cdlJobDetails = cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE);
         Assert.assertEquals(CollectionUtils.size(cdlJobDetails), countBeforeTest + 1);
         cdlJobDetails.get(0).setCdlJobStatus(CDLJobStatus.COMPLETE);
@@ -40,6 +49,5 @@ public class CDLJobDetailEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         CDLJobDetail cdlJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
         Assert.assertNotNull(cdlJobDetail);
         Assert.assertEquals(cdlJobDetail.getApplicationId(), "Fake_AppId");
-
     }
 }
