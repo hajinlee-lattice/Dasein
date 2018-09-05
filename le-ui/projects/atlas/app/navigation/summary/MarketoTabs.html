@@ -7,8 +7,15 @@
             <a ui-sref="home.marketosettings.enrichment({id:id})"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_ENRICHMENT')}}</span></a>
 
 	    </li>
-		<li ui-sref-active="active">
-            <a ui-sref="home.marketosettings.models({id:id})"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_SCORING')}}</span></a>
+		<li ui-sref-active="active" ng-if="!useMarketoLatticeIntegration">
+            <a ui-sref="home.marketosettings.models({id:id})" >
+            	<span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_SCORING')}}</span>
+            </a>
+	    </li>
+		<li ng-class="{'active': useMarketoLatticeIntegration}" ng-if="useMarketoLatticeIntegration">
+            <a ui-sref="home.marketosettings.scoring({credentialId:id})">
+            	<span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_SCORING')}}</span>
+            </a>
 	    </li>
 	</ul>
 

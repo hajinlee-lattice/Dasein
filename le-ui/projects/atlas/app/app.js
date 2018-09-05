@@ -40,6 +40,7 @@ var mainApp = angular.module('mainApp', [
     'lp.sfdc.credentials',
     'lp.marketo',
     'lp.marketo.enrichment',
+    'lp.marketo.models',
     'lp.apiconsole',
     'lp.managefields',
     'lp.configureattributes'

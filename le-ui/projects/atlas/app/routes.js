@@ -909,7 +909,7 @@ angular
                     var deferred = $q.defer();
 
                     MarketoService.GetMarketoMatchFields(MarketoCredential).then(function(result) {
-                        deferred.resolve(result);
+                        deferred.resolve(result.data);
                     });
 
                     return deferred.promise;
@@ -940,14 +940,32 @@ angular
             resolve: {
                 ResourceString: function() {
                     return 'SUMMARY_MARKETO_MODELS';
+                },
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             },
+            onEnter: ['FeatureFlags', '$state', '$stateParams', function(FeatureFlags, $state, $stateParams) {
+                console.log(FeatureFlags)
+                var useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
+                if (useMarketoLatticeIntegration){
+                    console.log('credential', $stateParams.id);
+                    $state.go('home.marketosettings.scoring', {credentialId: $stateParams.id});
+                }
+            }],
             views: {
                 "summary@": {
-                    controller: function($scope, $stateParams, $state, ResourceUtility) {
+                    controller: function($scope, $stateParams, $state, ResourceUtility, FeatureFlags) {
                         $scope.state = $state.current.name;
                         $scope.id = $stateParams.id;
                         $scope.ResourceUtility = ResourceUtility;
+                        $scope.useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -988,28 +1006,227 @@ angular
                 }
             }
         })
-        .state('home.marketosettings.credentials', {
-            url: '/credentials',
+        .state('home.marketosettings.scoring', {
+            url: '/{credentialId}/scoring',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Profiles'
+            },
+            resolve: {
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                ModelList: function($q, MarketoStore, ModelStore) {
+                    var deferred = $q.defer();
+
+                    var storedActiveModels = MarketoStore.getActiveModels();
+                    if (!storedActiveModels || storedActiveModels.length == 0) {
+                        ModelStore.getModels(true).then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    } else {
+                        deferred.resolve(storedActiveModels);
+                    }
+
+                    return deferred.promise;
+                },
+                ScoringRequestSummaries: function($q, $stateParams, MarketoStore) {
+                    var deferred = $q.defer();
+
+                    MarketoStore.getScoringRequestList($stateParams.credentialId, false).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                "summary@": {
+                    controller: function($scope, $stateParams, $state, ResourceUtility, FeatureFlags) {
+                        $scope.state = $state.current.name;
+                        $scope.id = $stateParams.credentialId;
+                        $scope.ResourceUtility = ResourceUtility;
+                        $scope.useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
+                    },
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
+                },
+                "main@": "marketoActiveModels"
+            }
+        })
+        .state('home.marketosettings.setup', {
+            url: '/{credentialId}/setup/{modelId}',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Profiles'
+            },
+            resolve: {
+                MarketoCredentials: function($q, $stateParams, MarketoStore, MarketoService) {
+                    var deferred = $q.defer();
+
+                    MarketoStore.getMarketoCredential($stateParams.credentialId).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                ScoringRequestSummaries: function($q, $stateParams, MarketoStore) {
+                    var deferred = $q.defer();
+
+                    MarketoStore.getScoringRequestList($stateParams.credentialId, false).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                PrimaryAttributeFields: function($q, MarketoStore, MarketoService) {
+                    var deferred = $q.defer();
+
+                    MarketoStore.getPrimaryAttributeFields().then(function(result) {
+                        deferred.resolve(result);
+                    })
+
+                    return deferred.promise;
+                },
+                MarketoFields: function($q, MarketoService, MarketoCredentials) {
+                    var deferred = $q.defer();
+
+                    var params = {
+                        soap_endpoint: MarketoCredentials.soap_endpoint,
+                        soap_user_id: MarketoCredentials.soap_user_id,
+                        soap_encryption_key: MarketoCredentials.soap_encryption_key
+                    };
+
+                    MarketoService.GetMarketoMatchFields(params).then(function(result) {
+                        deferred.resolve(result);
+                    })
+
+                    return deferred.promise;
+                },
+                ScoringFields: function($q, $stateParams, MarketoService) {
+                    var deferred = $q.defer();
+
+                    MarketoService.GetScoringFields($stateParams.modelId).then(function(result) {
+                        deferred.resolve(result);
+                    })
+
+                    return deferred.promise;
+                },
+                ExistingScoringRequest: function($q, $stateParams, MarketoService, ScoringRequestSummaries) {
+                    var deferred = $q.defer();
+
+                    var existingScoringRequest = ScoringRequestSummaries ? ScoringRequestSummaries.find(function(x) {
+                            return x.modelUuid === $stateParams.modelId;
+                        }) : null;
+
+                    if (existingScoringRequest) {
+                        MarketoService.GetScoringRequest($stateParams.credentialId, existingScoringRequest.configId).then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    } else {
+                        deferred.resolve(null);
+                    }
+
+                    return deferred.promise;
+                },
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                "summary@": {
+                    controller: function($scope, $stateParams, $state, ResourceUtility, FeatureFlags) {
+                        $scope.state = $state.current.name;
+                        $scope.id = $stateParams.credentialId;
+                        $scope.ResourceUtility = ResourceUtility;
+                        $scope.useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
+                    },
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
+                },
+                "main@": "marketoSetupModel"
+            }
+        })
+        .state('home.marketosettings.webhook', {
+            url: '/{credentialId}/webhook/{configId}',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Profiles'
+            },
+            resolve: {
+                ScoringRequest: function($q, $stateParams, MarketoService) {
+                    var deferred = $q.defer();
+
+                    MarketoService.GetScoringRequest($stateParams.credentialId, $stateParams.configId).then(function(result) {
+                        deferred.resolve(result);
+                    })
+
+                    return deferred.promise;
+                },
+                Model: function($q, $stateParams, ScoringRequest, ModelStore, ) {
+                    var deferred = $q.defer();
+
+                    ModelStore.getModel(ScoringRequest.modelUuid).then(function(result) {
+                        deferred.resolve(result);
+                    })
+
+                    return deferred.promise;
+                },
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                "summary@": {
+                    controller: function($scope, $stateParams, $state, ResourceUtility, FeatureFlags) {
+                        $scope.state = $state.current.name;
+                        $scope.id = $stateParams.credentialId;
+                        $scope.ResourceUtility = ResourceUtility;
+                        $scope.useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
+                    },
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
+                },
+                "main@": "marketoWebhookSummary"
+            }
+        })
+        .state('home.marketosettings.activemodels', {
+            url: '/activemodels',
             params: {
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
                 ResourceString: function() {
-                    return 'SUMMARY_MARKETO_APIKEY';
+                    return 'SUMMARY_MARKETO_MODELS';
                 }
             },
             views: {
                 "summary@": {
-                    controller: function($scope, $state) {
-                        $scope.state = 'home.marketosettings.edit';
+                    controller: function($scope, $stateParams, $state) {
+                        $scope.state = $state.current.name;
                     },
                     templateUrl: 'app/navigation/summary/SureShotTabs.html'
                 },
                 "main@": {
                     controller: function(urls) {
                         $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
+                            .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
 
                         changeIframeHeight();
 
@@ -1041,28 +1258,28 @@ angular
                 }
             }
         })
-        .state('home.marketosettings.activemodels', {
-            url: '/activemodels',
+        .state('home.marketosettings.credentials', {
+            url: '/credentials',
             params: {
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
                 ResourceString: function() {
-                    return 'SUMMARY_MARKETO_MODELS';
+                    return 'SUMMARY_MARKETO_APIKEY';
                 }
             },
             views: {
                 "summary@": {
-                    controller: function($scope, $stateParams, $state) {
-                        $scope.state = $state.current.name;
+                    controller: function($scope, $state) {
+                        $scope.state = 'home.marketosettings.edit';
                     },
                     templateUrl: 'app/navigation/summary/SureShotTabs.html'
                 },
                 "main@": {
                     controller: function(urls) {
                         $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
+                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
 
                         changeIframeHeight();
 
