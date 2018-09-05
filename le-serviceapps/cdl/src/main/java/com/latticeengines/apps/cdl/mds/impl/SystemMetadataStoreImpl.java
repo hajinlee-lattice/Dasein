@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -49,6 +47,7 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 import reactor.core.publisher.Flux;
@@ -145,15 +144,13 @@ public class SystemMetadataStoreImpl extends
                                 cm.enableGroup(TalkingPoint);
                                 cm.disableGroup(CompanyProfile);
                                 cm.disableGroup(Model);
+                                cm.setCanModel(false);
 
                                 if (BusinessEntity.Account.equals(entity)) {
                                     if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
                                         cm.setSubcategory("Account IDs");
                                     }
-                                }
-
-                                if (BusinessEntity.Contact.equals(entity)) {
-                                    cm.setCanModel(false);
+                                    cm.setCanModel(true);
                                 }
 
                                 // TODO: YSong (M22) to be moved to a specific
@@ -200,9 +197,9 @@ public class SystemMetadataStoreImpl extends
                                     cm.disableGroup(TalkingPoint);
                                     cm.setCanEnrich(false);
                                     cm.setAttrState(AttrState.Inactive);
-                                } else if (Boolean.TRUE.equals(cm.getCanEnrich()) &&
-                                        (Category.FIRMOGRAPHICS.equals(cm.getCategory())
-                                        || StringUtils.isNotBlank(cm.getDataLicense()))) {
+                                } else if (Boolean.TRUE.equals(cm.getCanEnrich())
+                                        && (Category.FIRMOGRAPHICS.equals(cm.getCategory())
+                                                || StringUtils.isNotBlank(cm.getDataLicense()))) {
                                     cm.enableGroup(Enrichment);
                                 } else {
                                     cm.disableGroup(Enrichment);

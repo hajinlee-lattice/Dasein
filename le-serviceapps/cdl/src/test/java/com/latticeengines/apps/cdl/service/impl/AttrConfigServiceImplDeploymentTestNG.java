@@ -203,7 +203,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
                         exportByDefault, true, //
                         true, true, //
                         false, true, //
-                        false, true);
+                        false, false);
                 break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //
@@ -365,7 +365,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
             flags[0] = false;
         }
         if (deprecatedAttrs.contains(attrName)) {
-            // deprecated attrs are inactive and cannot chage
+            // deprecated attrs are inactive and cannot change
             state = AttrState.Inactive;
             flags[0] = false;
         }
@@ -451,10 +451,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         verifyUsage(logPrefix, attrConfig, property, talkingPoint, tpChg);
         property = ColumnSelection.Predefined.CompanyProfile.name();
         verifyUsage(logPrefix, attrConfig, property, companyProfile, cpChg);
-
-        // TODO: Cannot make model part pass for Contact and Account attrs.
-        // property = ColumnSelection.Predefined.Model.name();
-        // verifyUsage(logPrefix, attrConfig, property, model, modelChg);
+        property = ColumnSelection.Predefined.Model.name();
+        verifyUsage(logPrefix, attrConfig, property, model, modelChg);
     }
 
     private void verifyUsage(String logPrefix, AttrConfig attrConfig, String property, boolean expectedValue,
