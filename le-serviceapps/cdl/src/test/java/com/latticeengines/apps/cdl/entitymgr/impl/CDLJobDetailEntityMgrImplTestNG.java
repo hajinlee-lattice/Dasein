@@ -2,7 +2,9 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -15,25 +17,29 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 
 public class CDLJobDetailEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
+
+    private int countBeforeTest;
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironmentWithDataCollection();
+        List<CDLJobDetail> cdlJobDetails = cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE);
+        countBeforeTest = CollectionUtils.size(cdlJobDetails);
     }
 
     @Test(groups = "functional")
     public void testCreateAndGet() {
         cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, mainTestTenant);
         List<CDLJobDetail> cdlJobDetails = cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE);
-        Assert.assertEquals(1, cdlJobDetails.size());
+        Assert.assertEquals(CollectionUtils.size(cdlJobDetails), countBeforeTest + 1);
         cdlJobDetails.get(0).setCdlJobStatus(CDLJobStatus.COMPLETE);
         cdlJobDetails.get(0).setApplicationId("Fake_AppId");
         cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetails.get(0));
         CDLJobDetail cdlJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
         Assert.assertNotNull(cdlJobDetail);
-        Assert.assertTrue(cdlJobDetail.getApplicationId().equals("Fake_AppId"));
+        Assert.assertEquals(cdlJobDetail.getApplicationId(), "Fake_AppId");
 
     }
 }
