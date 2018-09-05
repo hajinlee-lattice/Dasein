@@ -43,12 +43,12 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testUtf8String() {
-        MetadataSegment segment = segmentService.findByName(mainCustomerSpace, testSegment.getName());
+        MetadataSegment segment = segmentService.findByName(testSegment.getName());
         assertNotNull(segment);
         assertNull(segment.getDescription());
         segment.setDescription(UTF8_STRING);
-        segmentService.createOrUpdateSegment(mainCustomerSpace, segment);
-        segment = segmentService.findByName(mainCustomerSpace, testSegment.getName());
+        segmentService.createOrUpdateSegment(segment);
+        segment = segmentService.findByName(testSegment.getName());
         assertNotNull(segment);
         assertNotNull(segment.getDescription());
         assertEquals(segment.getDescription(), UTF8_STRING);
