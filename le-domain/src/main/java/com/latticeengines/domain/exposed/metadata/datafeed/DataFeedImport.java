@@ -45,7 +45,7 @@ public class DataFeedImport implements HasPid, Serializable {
     @JoinColumn(name = "`FK_FEED_EXEC_ID`", nullable = false)
     private DataFeedExecution execution;
 
-    @Column(name = "SOURCE", nullable = false)
+    @Column(name = "SOURCE", nullable = false, length = 100)
     @JsonProperty("source")
     private String source;
 
@@ -53,7 +53,7 @@ public class DataFeedImport implements HasPid, Serializable {
     @JsonProperty("feed_type")
     private String feedType;
 
-    @Column(name = "ENTITY", nullable = false)
+    @Column(name = "ENTITY", nullable = false, length = 100)
     @JsonProperty("entity")
     private String entity;
 

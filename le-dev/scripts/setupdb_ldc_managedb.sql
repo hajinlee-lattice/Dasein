@@ -1,7 +1,7 @@
 DROP SCHEMA IF EXISTS `LDC_ManageDB`;
 CREATE SCHEMA IF NOT EXISTS `LDC_ManageDB`;
 GRANT ALL ON LDC_ManageDB.* TO root@localhost;
-ALTER DATABASE LDC_ManageDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER DATABASE LDC_ManageDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 USE `LDC_ManageDB`;
 
 SOURCE WSHOME/ddl_ldc_managedb_mysql5innodb.sql;

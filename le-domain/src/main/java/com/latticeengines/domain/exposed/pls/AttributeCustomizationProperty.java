@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -61,7 +62,7 @@ public class AttributeCustomizationProperty extends CustomizationProperty implem
 
     @JsonProperty("use_case")
     @Enumerated(EnumType.STRING)
-    @Column(name = "USE_CASE", nullable = false)
+    @Column(name = "USE_CASE", nullable = false, length = 50)
     @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE")
     private AttributeUseCase useCase;
 

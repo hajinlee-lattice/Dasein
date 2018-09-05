@@ -1,6 +1,7 @@
 DROP SCHEMA IF EXISTS `ScoringDB`;
 CREATE SCHEMA IF NOT EXISTS `ScoringDB`;
 GRANT ALL ON ScoringDB.* TO root@localhost;
+ALTER DATABASE ScoringDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 USE `ScoringDB`;
 
 source WSHOME/ddl_scoringdb_mysql5innodb.sql;

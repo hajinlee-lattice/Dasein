@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
+    private static final String UTF8_STRING = "股票/证券公司";
+
     @Inject
     private RatingEngineService ratingEngineService;
 
@@ -39,6 +42,19 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testUtf8String() {
+        MetadataSegment segment = segmentService.findByName(mainCustomerSpace, testSegment.getName());
+        assertNotNull(segment);
+        assertNull(segment.getDescription());
+        segment.setDescription(UTF8_STRING);
+        segmentService.createOrUpdateSegment(mainCustomerSpace, segment);
+        segment = segmentService.findByName(mainCustomerSpace, testSegment.getName());
+        assertNotNull(segment);
+        assertNotNull(segment.getDescription());
+        assertEquals(segment.getDescription(), UTF8_STRING);
+    }
+
+    @Test(groups = "functional", enabled = true)
     public void testFindDependingAttributes() {
         List<MetadataSegment> segments = new ArrayList<>();
         segments.add(testSegment);

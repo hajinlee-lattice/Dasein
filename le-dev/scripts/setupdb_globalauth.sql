@@ -4,6 +4,8 @@ CREATE SCHEMA IF NOT EXISTS GlobalAuthentication;
 
 GRANT ALL ON GlobalAuthentication.* TO root@localhost;
 
+ALTER DATABASE GlobalAuthentication CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 USE `GlobalAuthentication`;
 
 source WSHOME/ddl_globalauthentication_mysql5innodb.sql

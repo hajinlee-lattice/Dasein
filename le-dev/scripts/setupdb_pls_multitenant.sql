@@ -1,6 +1,7 @@
 DROP SCHEMA IF EXISTS PLS_MultiTenant;
 CREATE SCHEMA IF NOT EXISTS PLS_MultiTenant;
 GRANT ALL ON PLS_MultiTenant.* TO root@localhost;
+ALTER DATABASE PLS_MultiTenant CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 USE `PLS_MultiTenant`;
 
 SOURCE WSHOME/ddl_pls_multitenant_mysql5innodb.sql

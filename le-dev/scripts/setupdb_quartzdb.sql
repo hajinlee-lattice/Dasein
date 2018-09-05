@@ -1,6 +1,7 @@
 DROP SCHEMA IF EXISTS `QuartzDB`;
 CREATE SCHEMA IF NOT EXISTS `QuartzDB`;
 GRANT ALL ON QuartzDB.* TO root@localhost;
+ALTER DATABASE QuartzDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 USE `QuartzDB`;
 
 source WSHOME/ddl_quartzdb_mysql5innodb.sql;

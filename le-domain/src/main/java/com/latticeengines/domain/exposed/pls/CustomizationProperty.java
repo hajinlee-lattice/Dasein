@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CustomizationProperty {
 
     @JsonProperty("property_name")
-    @Column(name = "PROPERTY_NAME", nullable = false)
+    @Column(name = "PROPERTY_NAME", nullable = false, length = 50)
     private String propertyName;
 
     @JsonProperty("property_value")
