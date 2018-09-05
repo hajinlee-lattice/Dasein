@@ -842,7 +842,7 @@ public class InternalResource extends InternalResourceBase {
             for (User user : users) {
                 if (user.getEmail().equals(export.getCreatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    String url = appPublicUrl + "/lp/tenant/" + tenantName + "/export/" + exportID;
+                    String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
                     switch (result) {
                     case "COMPLETED":
                         emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType);
