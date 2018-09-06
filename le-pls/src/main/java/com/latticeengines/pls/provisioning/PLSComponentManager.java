@@ -128,7 +128,9 @@ public class PLSComponentManager {
 
         try {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
-            tenant.setStatus(TenantStatus.valueOf(info.properties.status));
+            if (StringUtils.isNotBlank(info.properties.status)) {
+                tenant.setStatus(TenantStatus.valueOf(info.properties.status));
+            }
             if (StringUtils.isNotBlank(info.properties.tenantType)) {
                 tenant.setTenantType(TenantType.valueOf(info.properties.tenantType));
             }

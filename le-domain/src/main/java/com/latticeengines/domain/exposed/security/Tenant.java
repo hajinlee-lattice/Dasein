@@ -76,13 +76,13 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
 
     @Enumerated(EnumType.STRING)
     @JsonProperty("Status")
-    @Column(name = "STATUS")
-    private TenantStatus status;
+    @Column(name = "STATUS", nullable = false)
+    private TenantStatus status = TenantStatus.ACTIVE;
 
     @Enumerated(EnumType.STRING)
     @JsonProperty("TenantType")
-    @Column(name = "TENANT_TYPE")
-    private TenantType tenantType;
+    @Column(name = "TENANT_TYPE", nullable = false)
+    private TenantType tenantType = TenantType.CUSTOMER;
 
     @JsonProperty("Contract")
     @Column(name = "CONTRACT")
