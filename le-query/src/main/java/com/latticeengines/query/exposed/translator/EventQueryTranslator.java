@@ -111,7 +111,7 @@ public class EventQueryTranslator extends TranslatorCommon {
         SQLQuery periodRangeSubQuery = factory.query() //
             .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
             .from(tablePath) //
-            .where(limitPeriodByNameAndCount(queryFactory, repository, period, periodCount, sqlUser)) //
+            .where(periodName.eq(period)) //
             .groupBy(accountId);
 
         SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
@@ -237,6 +237,32 @@ public class EventQueryTranslator extends TranslatorCommon {
                 .select(periodId.max().subtract(laggingPeriodCount));
         } else {
             return Expressions.constant(String.valueOf(evaluationPeriodId - laggingPeriodCount));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Expression translateMinPeriodId(QueryFactory queryFactory,
+                                            AttributeRepository repository,
+                                            String periodNameStr,
+                                            int evaluationPeriodId,
+                                            int laggingPeriodCount,
+                                            int periodCount,
+                                            String sqlUser) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
+        String txTableName = getPeriodTransactionTableName(repository);
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
+
+        if (periodCount <= 0) {
+            return Expressions.constant(0);
+        } else {
+            if (evaluationPeriodId < 0) {
+                return factory.query().from(tablePath) //
+                    .where(periodName.eq(periodNameStr)) //
+                    .select(periodId.max().subtract(laggingPeriodCount).subtract(periodCount));
+            } else {
+                return Expressions.constant(String.valueOf(evaluationPeriodId - laggingPeriodCount - periodCount));
+            }
         }
     }
 
@@ -538,6 +564,30 @@ public class EventQueryTranslator extends TranslatorCommon {
         return query;
     }
 
+    @SuppressWarnings("unchecked")
+    private SubQuery translateSelectAll(QueryFactory queryFactory,
+                                        AttributeRepository repository,
+                                        String tableName,
+                                        String periodNameStr,
+                                        int evaluationPeriodId,
+                                        int laggingPeriodCount,
+                                        int periodCount, String sqlUser) {
+        SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository, sqlUser);
+        EntityPath<String> tablePath = new PathBuilder<>(String.class, tableName);
+        BooleanExpression periodRestriction = periodId.gt(translateMinPeriodId(queryFactory,
+                                                                               repository,
+                                                                               periodNameStr,
+                                                                               evaluationPeriodId,
+                                                                               laggingPeriodCount,
+                                                                               periodCount,
+                                                                               sqlUser));
+        SQLQuery selectAll = factory.query().select(SQLExpressions.all).from(tablePath).where(periodRestriction);
+        SubQuery query = new SubQuery();
+        query.setSubQueryExpression(selectAll);
+        query.setAlias(tableName);
+        return query;
+    }
+
     private SubQuery translateEventRevenue(QueryFactory queryFactory,
                                            AttributeRepository repository,
                                            String eventTupleViewAlias,
@@ -816,7 +866,9 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                                 isScoring,
                                                                 builder, sqlUser);
             builder.with(subQuery);
-            SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias(), sqlUser);
+            SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias(),
+                                                    period, evaluationPeriodId, laggingPeriodCount, periodCount,
+                                                    sqlUser);
             SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
             SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
             builder.from(selectAll);
@@ -839,7 +891,9 @@ public class EventQueryTranslator extends TranslatorCommon {
             } else {
                 selectAllAlias = subQuery.getAlias();
             }
-            SubQuery selectAll = translateSelectAll(queryFactory, repository, selectAllAlias, sqlUser);
+            SubQuery selectAll = translateSelectAll(queryFactory, repository, selectAllAlias,
+                                                    period, evaluationPeriodId, laggingPeriodCount, periodCount,
+                                                    sqlUser);
             SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
             SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
             builder.from(selectAll);
@@ -914,7 +968,9 @@ public class EventQueryTranslator extends TranslatorCommon {
                         } else {
                             selectAllAlias = mergedTableAlias;
                         }
-                        SubQuery selectAll = translateSelectAll(queryFactory, repository, selectAllAlias, sqlUser);
+                        SubQuery selectAll = translateSelectAll(queryFactory, repository, selectAllAlias,
+                                                                period, evaluationPeriodId, laggingPeriodCount, periodCount,
+                                                                sqlUser);
                         SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
                         SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
                         builder.from(selectAll);

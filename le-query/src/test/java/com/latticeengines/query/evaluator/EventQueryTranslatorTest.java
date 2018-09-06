@@ -1178,14 +1178,14 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getAvgQuantityBetweenPeriods();
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
-        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getEventFrontEndQueryWithLimitedPeriodCount(),
-                                                          Query.builder(), SQL_USER).build();
+        Query query = eventTranslator.translateForTraining(queryFactory, attrRepo, txRestriction,
+                                                           getEventFrontEndQueryWithLimitedPeriodCount(),
+                                                           Query.builder(), SQL_USER).build();
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         //Assert.assertEquals(count, 57807);
-        Assert.assertEquals(count, 783);
+        Assert.assertEquals(count, 11216);
     }
 
     @Test(groups = "functional")
