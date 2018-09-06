@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -128,8 +128,7 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     private List<Action> findByOwnerId(Long ownerId) {
-        return actionProxy.getActionsByOwnerId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                ownerId);
+        return actionProxy.getActionsByOwnerId(CustomerSpace.parse(mainTestTenant.getId()).toString(), ownerId);
     }
 
     private void update(Action action) {
@@ -141,13 +140,11 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     private void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
-        actionProxy.patchOwnerIdByPids(CustomerSpace.parse(mainTestTenant.getId()).toString(), ownerId,
-                actionPids);
+        actionProxy.patchOwnerIdByPids(CustomerSpace.parse(mainTestTenant.getId()).toString(), ownerId, actionPids);
     }
 
     private List<Action> findByPidIn(List<Long> actionPids) {
-        return actionProxy.getActionsByPids(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                actionPids);
+        return actionProxy.getActionsByPids(CustomerSpace.parse(mainTestTenant.getId()).toString(), actionPids);
     }
 
     private List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType) {

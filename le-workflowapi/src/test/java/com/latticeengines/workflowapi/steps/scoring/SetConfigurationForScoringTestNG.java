@@ -85,7 +85,7 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         doNothing().when(workflowJobEntityMgr).updateWorkflowJob(any(WorkflowJob.class));
         setConfigurationForScoring.setWorkflowJobEntityMgr(workflowJobEntityMgr);
         setConfigurationForScoring
-                .setNamespace("ratingEngineImportMatchAndModelWorkflow.SetConfigurationForScoringConfiguration");
+                .setNamespace("crossSellImportMatchAndModelWorkflow.SetConfigurationForScoringConfiguration");
         Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
         JobExecution execution = runner.launchStep(
                 workflowTranslator.step(setConfigurationForScoring, choreographer, 0, null), params, executionContext);

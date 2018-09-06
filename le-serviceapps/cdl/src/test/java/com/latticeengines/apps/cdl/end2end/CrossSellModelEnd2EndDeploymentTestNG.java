@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,9 @@ import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -35,7 +40,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = true;
-    private static final String EXISTING_TENANT = "JLM1533618545277"; // LETest1528844192916-14
+    private static final String EXISTING_TENANT = "JLM1536254480756"; // LETest1528844192916-14
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
@@ -43,6 +48,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     private RatingEngine testModel;
     private AIModel testIteration1;
     private AIModel testIteration2;
+    private final Map<String, Category> refinedAttributes = new HashMap<>();
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
@@ -88,7 +94,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-        setupAndRunModeling(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.EXPECTED_VALUE);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.EXPECTED_VALUE);
     }
 
     /**
@@ -101,7 +107,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-        setupAndRunModeling(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
+        setupAndRunRemodel();
     }
 
     /**
@@ -121,11 +128,12 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
-        setupAndRunModeling(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY);
+        setupAndRunRemodel();
 
     }
 
-    private void setupAndRunModeling(ModelingStrategy strategy, PredictionType predictionType) {
+    private void setupAndRunModel(ModelingStrategy strategy, PredictionType predictionType) {
         setupTestRatingEngine(strategy, predictionType);
         verifyCounts(strategy);
         log.info("Start Cross Sell modeling ...");
@@ -142,6 +150,43 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         verifyBucketMetadataGenerated();
         Assert.assertEquals(ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
+    }
+
+    private void setupAndRunRemodel() {
+        log.info("Starting Cross sell remodeling ...");
+        testIteration2 = new AIModel();
+        testIteration2.setRatingEngine(testModel);
+        testIteration2.setAdvancedModelingConfig(testIteration1.getAdvancedModelingConfig());
+        testIteration2.setDerivedFromRatingModel(testIteration1.getId());
+        testIteration2.setPredictionType(PredictionType.EXPECTED_VALUE);
+        testIteration2 = (AIModel) ratingEngineProxy.createModelIteration(mainTestTenant.getId(), testModel.getId(),
+                testIteration2);
+
+        testModel = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId());
+        Assert.assertEquals(testModel.getLatestIteration().getId(), testIteration2.getId());
+
+        Map<String, List<ColumnMetadata>> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
+                testModel.getId(), testIteration1.getId());
+        Assert.assertNotNull(attrs);
+
+        verifyBucketMetadataGenerated();
+
+        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
+                testModel.getId(), testIteration2.getId(), refineAttributes(attrs), "some@email.com");
+        log.info(String.format("Remodel workflow application id is %s", modelingWorkflowApplicationId));
+        JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+        testIteration2 = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(), testModel.getId(),
+                testIteration2.getId());
+        Assert.assertEquals(testIteration2.getModelingJobStatus(), completedStatus);
+        Assert.assertEquals(ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
+                RatingEngineStatus.INACTIVE);
+
+        attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(), testModel.getId(),
+                testIteration2.getId());
+        Assert.assertNotNull(attrs);
+
+        verifyRefinedAttributes(attrs);
     }
 
     private void verifyBucketMetadataNotGenerated() {
@@ -216,5 +261,31 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
             Assert.assertEquals(trainingCount, 3026, errorMsg);
             Assert.assertEquals(eventCount, 68, errorMsg);
         }
+    }
+
+    private void verifyRefinedAttributes(Map<String, List<ColumnMetadata>> attrs) {
+        for (String refinedAttribute : refinedAttributes.keySet()) {
+            ColumnMetadata cm = attrs.get(refinedAttributes.get(refinedAttribute).getName()).stream()
+                    .filter(attr -> attr.getAttrName().equals(refinedAttribute)).findFirst().get();
+            Assert.assertEquals(cm.getApprovedUsageList().size(), 1);
+            Assert.assertEquals(cm.getApprovedUsageList().get(0), ApprovedUsage.NONE);
+        }
+    }
+
+    private Map<String, List<ColumnMetadata>> refineAttributes(Map<String, List<ColumnMetadata>> attrs) {
+        int noOfAttributesToRefine = 3;
+        for (List<ColumnMetadata> attrList : attrs.values()) {
+            for (ColumnMetadata attr : attrList) {
+                if (attr.getImportanceOrdering() != null) {
+                    refinedAttributes.put(attr.getAttrName(), attr.getCategory());
+                    attr.setApprovedUsageList(Arrays.asList(ApprovedUsage.NONE));
+                    noOfAttributesToRefine--;
+                }
+                if (noOfAttributesToRefine == 0) {
+                    return attrs;
+                }
+            }
+        }
+        return attrs;
     }
 }

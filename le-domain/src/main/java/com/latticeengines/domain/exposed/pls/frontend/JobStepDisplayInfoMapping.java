@@ -445,7 +445,7 @@ public final class JobStepDisplayInfoMapping {
     static {
         DISPLAY_NAME.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_NAME.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
-        DISPLAY_NAME.put("ratingEngineImportMatchAndModelWorkflow", RATING_IMPORT_MATCH_AND_MODEL_STEPS);
+        DISPLAY_NAME.put("crossSellImportMatchAndModelWorkflow", RATING_IMPORT_MATCH_AND_MODEL_STEPS);
         DISPLAY_NAME.put("ratingEngineScoreWorkflow", RATING_BULK_SCORE_STEPS);
         DISPLAY_NAME.put("ratingEngineModelAndEmailWorkflow", RATING_MODEL_AND_EMAIL_STEPS);
         DISPLAY_NAME.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
@@ -463,7 +463,7 @@ public final class JobStepDisplayInfoMapping {
 
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
-        DISPLAY_DESCRIPTION.put("ratingEngineImportMatchAndModelWorkflow", RATING_IMPORT_MATCH_AND_MODEL_STEPS);
+        DISPLAY_DESCRIPTION.put("crossSellImportMatchAndModelWorkflow", RATING_IMPORT_MATCH_AND_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("ratingEngineScoreWorkflow", RATING_BULK_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("ratingEngineModelAndEmailWorkflow", RATING_MODEL_AND_EMAIL_STEPS);
         DISPLAY_DESCRIPTION.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);

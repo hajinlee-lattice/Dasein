@@ -23,7 +23,7 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("ratingEngineImportMatchAndModelWorkflow")
+@Component("crossSellImportMatchAndModelWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CrossSellImportMatchAndModelWorkflow

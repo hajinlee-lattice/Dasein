@@ -1,7 +1,9 @@
 package com.latticeengines.modeling.workflow.steps;
 
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -45,8 +48,12 @@ public class MergeUserRefinedAttributes extends BaseWorkflowStep<MergeUserRefine
     public Table mergeUserRefinedAttributes(Map<String, ColumnMetadata> userRefinedAttributes, Table eventTable) {
         for (Attribute eventTableAttribute : eventTable.getAttributes()) {
             if (userRefinedAttributes.containsKey(eventTableAttribute.getName())) {
-                eventTableAttribute.setApprovedUsage(
-                        userRefinedAttributes.get(eventTableAttribute.getName()).getApprovedUsageList().get(0));
+                List<ApprovedUsage> approvedUsage = userRefinedAttributes.get(eventTableAttribute.getName())
+                        .getApprovedUsageList();
+                eventTableAttribute.setApprovedUsage( //
+                        CollectionUtils.isEmpty(approvedUsage) //
+                                ? ApprovedUsage.NONE //
+                                : approvedUsage.get(0));
             } else {
                 log.error(String.format("Attribute %s not found in attributes from previous Iteration's event table",
                         eventTableAttribute.getName()));

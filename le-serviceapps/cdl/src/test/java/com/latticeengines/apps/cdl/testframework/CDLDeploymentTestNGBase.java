@@ -16,9 +16,9 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
-@Listeners({ GlobalAuthCleanupTestListener.class, ContextResetTestListener.class})
+@Listeners({ GlobalAuthCleanupTestListener.class, ContextResetTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceapps-cdl-context.xml" })
 public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
@@ -194,8 +194,8 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
             if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
                 if (job.getJobStatus() == JobStatus.FAILED) {
-                    log.error(
-                            applicationId + " Failed with ErrorCode " + job.getErrorCode() + ". \n" + job.getErrorMsg());
+                    log.error(applicationId + " Failed with ErrorCode " + job.getErrorCode() + ". \n"
+                            + job.getErrorMsg());
                 }
                 return job.getJobStatus();
             }
@@ -321,7 +321,8 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(engineId);
         ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
-        RatingEngineAndActionDTO ratingEngineAndAction = ratingEngineProxy.createOrUpdateRatingEngineAndActionDTO(mainTestTenant.getId(), ratingEngine, true);
+        RatingEngineAndActionDTO ratingEngineAndAction = ratingEngineProxy
+                .createOrUpdateRatingEngineAndActionDTO(mainTestTenant.getId(), ratingEngine, true);
         Action action = ratingEngineAndAction.getAction();
         registerAction(action, tenant);
     }

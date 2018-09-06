@@ -388,7 +388,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             generateAIRating.fetchOnly(Boolean.TRUE);
             matchDataCloudWorkflowBuilder.matchType(MatchStepConfiguration.LDC);
 
-            configuration.setContainerConfiguration("ratingEngineImportMatchAndModelWorkflow",
+            configuration.setContainerConfiguration("crossSellImportMatchAndModelWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(cdlEventTableTupleFilter);
             configuration.add(cdlEventTable);

@@ -562,7 +562,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             Map<String, RatingEngineSummary> ratingIdToRatingEngineSummaries) {
         String ratingId = null;
         if (job.getJobType() != null && (job.getJobType().equals("customEventModelingWorkflow")
-                || job.getJobType().equals("ratingEngineImportMatchAndModelWorkflow"))) {
+                || job.getJobType().equals("crossSellImportMatchAndModelWorkflow"))) {
             if (job.getInputs() != null
                     && job.getInputs().containsKey(WorkflowContextConstants.Inputs.RATING_ENGINE_ID)) {
                 ratingId = job.getInputs().get(WorkflowContextConstants.Inputs.RATING_ENGINE_ID);
