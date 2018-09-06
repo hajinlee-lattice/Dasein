@@ -860,7 +860,7 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
         });
     }
 
-    MetadataSegment getSegmentByName(String segmentName) {
+    private MetadataSegment getSegmentByName(String segmentName) {
         MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
         int retries = 0;
         while (segment == null && retries++ < 3) {

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,6 @@ import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
-import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -97,7 +97,6 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    @NoCustomerSpace
     public MetadataSegment findByName(String name) {
         return segmentEntityMgr.findByName(name);
     }
@@ -122,28 +121,32 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    @NoCustomerSpace
     public Map<BusinessEntity, Long> updateSegmentCounts(String segmentName) {
         Map<BusinessEntity, Long> map = new HashMap<>();
         MetadataSegment existingSegment = findByName(segmentName);
         if (existingSegment != null) {
-            // use a deep copy to avoid changing restriction format to break UI
-            MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(existingSegment),
-                    MetadataSegment.class);
-            Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
-            counts.forEach(segmentCopy::setEntityCount);
-
-            log.info("Updating counts for segment " + segmentName + " to "
-                    + JsonUtils.serialize(segmentCopy.getEntityCounts()));
-            existingSegment = segmentEntityMgr.updateSegment(segmentCopy, existingSegment);
-            evictRatingMetadataCache();
-
-            map = existingSegment.getEntityCounts();
+            map = updateSegmentCounts(existingSegment);
         }
         return map;
     }
 
-    @NoCustomerSpace
+    @Override
+    public Map<String, Map<BusinessEntity, Long>> updateSegmentsCounts() {
+        List<MetadataSegment> segments = getSegments();
+        log.info("Updating counts for " + CollectionUtils.size(segments) + " segments.");
+        Map<String, Map<BusinessEntity, Long>> review = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(segments)) {
+            // Do not parallel, as it will be bottle-necked at objectapi
+            segments.forEach(segment -> {
+                String name = segment.getName();
+                Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
+                review.put(name, counts);
+            });
+        }
+        log.info("Finished updating counts for " + CollectionUtils.size(segments) + " segments.");
+        return review;
+    }
+
     private Map<BusinessEntity, Long> getEntityCounts(MetadataSegment segment) {
         Map<BusinessEntity, Long> map = new HashMap<>();
         FrontEndRestriction accountRestriction = segment.getAccountFrontEndRestriction();
@@ -167,7 +170,22 @@ public class SegmentServiceImpl implements SegmentService {
         return map;
     }
 
-    @NoCustomerSpace
+
+    private Map<BusinessEntity, Long> updateSegmentCounts(MetadataSegment segment) {
+        // use a deep copy to avoid changing restriction format to break UI
+        MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment),
+                MetadataSegment.class);
+        Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
+        counts.forEach(segmentCopy::setEntityCount);
+
+        log.info("Updating counts for segment " + segment + " to "
+                + JsonUtils.serialize(segmentCopy.getEntityCounts()));
+        segment = segmentEntityMgr.updateSegment(segmentCopy, segment);
+        evictRatingMetadataCache();
+
+        return segment.getEntityCounts();
+    }
+
     private Long getEntityCount(BusinessEntity entity, FrontEndRestriction accountRestriction,
             FrontEndRestriction contactRestriction) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
@@ -196,7 +214,6 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    @NoCustomerSpace
     public List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments) {
         Set<AttributeLookup> dependingAttributes = new HashSet<>();
         if (metadataSegments != null) {
@@ -236,7 +253,6 @@ public class SegmentServiceImpl implements SegmentService {
         return dependingMetadataSegments;
     }
 
-    @NoCustomerSpace
     private String sanitize(String attribute) {
         if (StringUtils.isNotBlank(attribute)) {
             attribute = attribute.trim();

@@ -86,6 +86,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         try {
             Thread.sleep(5 * 1000);
         } catch (InterruptedException e) {
+            // ignore
         }
 
         setRestriction(segment2, ratingEngine2);
@@ -102,7 +103,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertTrue(exception);
     }
 
-    protected MetadataSegment createSegment(String segmentName) {
+    private MetadataSegment createSegment(String segmentName) {
         MetadataSegment segment = new MetadataSegment();
         segment.setDisplayName(segmentName);
         MetadataSegment createdSegment = segmentService.createOrUpdateSegment(segment);
@@ -110,6 +111,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         try {
             Thread.sleep(2 * 1000);
         } catch (InterruptedException e) {
+            // ignore
         }
 
         return segmentService.findByName(createdSegment.getName());
@@ -125,7 +127,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         return ratingEngineService.createOrUpdate(ratingEngine);
     }
 
-    protected void setRestriction(MetadataSegment segment, RatingEngine ratingEngine) {
+    private void setRestriction(MetadataSegment segment, RatingEngine ratingEngine) {
         Restriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Rating, ratingEngine.getId()), Bucket.notNullBkt());
         segment.setAccountRestriction(accountRestriction);

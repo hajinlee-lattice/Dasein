@@ -27,6 +27,8 @@ public interface SegmentService {
 
     Map<BusinessEntity, Long> updateSegmentCounts(String segmentName);
 
+    Map<String, Map<BusinessEntity, Long>> updateSegmentsCounts();
+
     List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments);
 
     List<MetadataSegment> findDependingSegments(List<String> attributes);

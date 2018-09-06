@@ -69,8 +69,13 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}/counts", //
                 shortenCustomerSpace(customerSpace), segmentName);
         @SuppressWarnings("rawtypes")
-        Map map = put("deleteSegmentByName", url, null, Map.class);
+        Map map = put("updateSegmentCounts", url, null, Map.class);
         return JsonUtils.convertMap(map, BusinessEntity.class, Long.class);
+    }
+
+    public void updateSegmentsCounts(String customerSpace) {
+        String url = constructUrl("/{customerSpace}/segments/counts", shortenCustomerSpace(customerSpace));
+        put("updateAllCounts", url, null, Map.class);
     }
 
     public StatisticsContainer getSegmentStats(String customerSpace, String segmentName,

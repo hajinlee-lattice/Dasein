@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.annotation.Action;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -127,6 +129,18 @@ public class SegmentResource {
     public Map<BusinessEntity, Long> updateSegmentCount(@PathVariable String customerSpace,
             @PathVariable String segmentName) {
         return segmentService.updateSegmentCounts(segmentName);
+    }
+
+    @PutMapping(value = "/counts")
+    @ResponseBody
+    @ApiOperation(value = "Update counts for all segment")
+    public void updateAllCounts(@PathVariable String customerSpace) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        new Thread(() -> {
+            MultiTenantContext.setTenant(tenant);
+            log.info("Start updating counts for all segment for " + MultiTenantContext.getShortTenantId());
+            segmentService.updateSegmentsCounts();
+        }).run();
     }
 
     @PostMapping(value = "/attributes")
