@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
@@ -58,6 +59,16 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
             @Override
             public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
                     List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, Version version) {
                 return null;
             }
         });
