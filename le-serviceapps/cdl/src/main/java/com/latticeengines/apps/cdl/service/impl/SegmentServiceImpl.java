@@ -23,6 +23,7 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -132,19 +133,21 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public Map<String, Map<BusinessEntity, Long>> updateSegmentsCounts() {
-        List<MetadataSegment> segments = getSegments();
-        log.info("Updating counts for " + CollectionUtils.size(segments) + " segments.");
-        Map<String, Map<BusinessEntity, Long>> review = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(segments)) {
-            // Do not parallel, as it will be bottle-necked at objectapi
-            segments.forEach(segment -> {
-                String name = segment.getName();
-                Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
-                review.put(name, counts);
-            });
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            List<MetadataSegment> segments = getSegments();
+            log.info("Updating counts for " + CollectionUtils.size(segments) + " segments.");
+            Map<String, Map<BusinessEntity, Long>> review = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(segments)) {
+                // Do not parallel, as it will be bottle-necked at objectapi
+                segments.forEach(segment -> {
+                    String name = segment.getName();
+                    Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
+                    review.put(name, counts);
+                });
+            }
+            timer.setTimerMessage("Finished updating counts for " + CollectionUtils.size(segments) + " segments.");
+            return review;
         }
-        log.info("Finished updating counts for " + CollectionUtils.size(segments) + " segments.");
-        return review;
     }
 
     private Map<BusinessEntity, Long> getEntityCounts(MetadataSegment segment) {
@@ -170,16 +173,14 @@ public class SegmentServiceImpl implements SegmentService {
         return map;
     }
 
-
     private Map<BusinessEntity, Long> updateSegmentCounts(MetadataSegment segment) {
         // use a deep copy to avoid changing restriction format to break UI
-        MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment),
-                MetadataSegment.class);
+        MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
         Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
         counts.forEach(segmentCopy::setEntityCount);
 
-        log.info("Updating counts for segment " + segment + " to "
-                + JsonUtils.serialize(segmentCopy.getEntityCounts()));
+        log.info(
+                "Updating counts for segment " + segment + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
         segment = segmentEntityMgr.updateSegment(segmentCopy, segment);
         evictRatingMetadataCache();
 
