@@ -742,7 +742,7 @@ public enum LedpCode {
     LEDP_40020("Unable to find a Model Summary for the AIModel {0} of the RatingEngine {1}, Customer Space {2}"), //
     LEDP_40021("Unable to set the default model name correctly, setting it to {0}"), //
     LEDP_40022("Serving store is empty or wrong customer config leads to empty store"), //
-    LEDP_40023("Wrong customer config, system can't render these attrbutes {0} "), //
+    LEDP_40023("Wrong customer config, system can't render these attributes {0} "), //
     LEDP_40024("Dependency detection among rating engine. {0}"), //
     LEDP_40025("Dependency detection among segment. {0}"), //
     LEDP_40026("invalid attribute config {0} after render"), //
