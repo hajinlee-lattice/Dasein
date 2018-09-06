@@ -1,4 +1,4 @@
-package com.latticeengines.dante.testframework;
+package com.latticeengines.dante.testFramework;
 
 import java.util.Date;
 

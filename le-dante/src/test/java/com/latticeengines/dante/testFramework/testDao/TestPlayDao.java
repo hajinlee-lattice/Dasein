@@ -1,4 +1,4 @@
-package com.latticeengines.dante.testframework.testDao;
+package com.latticeengines.dante.testFramework.testDao;
 
 import org.springframework.stereotype.Component;
 
