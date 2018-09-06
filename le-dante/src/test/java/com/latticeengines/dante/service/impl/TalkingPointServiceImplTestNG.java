@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.dante.testframework.DanteTestNGBase;
-import com.latticeengines.dante.testframework.testDao.TestPlayDao;
+import com.latticeengines.dante.testframework.testdao.TestPlayDao;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
