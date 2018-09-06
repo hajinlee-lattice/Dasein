@@ -140,7 +140,7 @@ public class SegmentResource {
             MultiTenantContext.setTenant(tenant);
             log.info("Start updating counts for all segment for " + MultiTenantContext.getShortTenantId());
             segmentService.updateSegmentsCounts();
-        }).run();
+        }).start();
     }
 
     @PostMapping(value = "/attributes")
