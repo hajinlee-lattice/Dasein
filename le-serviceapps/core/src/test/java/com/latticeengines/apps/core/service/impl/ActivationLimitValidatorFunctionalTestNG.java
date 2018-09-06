@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.util.StringUtils;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -28,15 +30,17 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
     private static final int LIMIT = 500;
     private static final int mockHGLimit = 10;
 
-    @Spy
+    @InjectMocks
     private ActivationLimitValidator limitationValidator;
+    @Mock
+    private ZKConfigService zkConfigService;
 
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {
         MockitoAnnotations.initMocks(this);
         setupTestEnvironment();
         MultiTenantContext.setTenant(mainTestTenant);
-        Mockito.doReturn(mockHGLimit).when(limitationValidator)
+        Mockito.doReturn(mockHGLimit).when(zkConfigService)
                 .getMaxPremiumLeadEnrichmentAttributesByLicense(anyString(), anyString());
     }
 

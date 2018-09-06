@@ -15,10 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.BusinessCalendarService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PeriodService;
-import com.latticeengines.apps.cdl.service.ZKConfigService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
@@ -71,7 +72,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public String getEvaluationDate() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        String evaluationDate = zkConfigService.getFakeCurrentDate(customerSpace);
+        String evaluationDate = zkConfigService.getFakeCurrentDate(customerSpace, CDLComponent.componentName);
         if (StringUtils.isBlank(evaluationDate)) {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
             evaluationDate = LocalDate.now().format(formatter);

@@ -16,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -46,6 +47,8 @@ public class AbstractAttrConfigServiceUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(AbstractAttrConfigServiceUnitTestNG.class);
     @Mock
     private ActivationLimitValidator limitationValidator;
+    @Mock
+    private ZKConfigService zkConfigService;
 
     @BeforeTest(groups = "unit")
     public void setup() {
@@ -53,10 +56,10 @@ public class AbstractAttrConfigServiceUnitTestNG {
         tenant = new Tenant("tenantId");
         tenant.setPid(1L);
         MultiTenantContext.setTenant(tenant);
-        doReturn(intentLimit).when(limitationValidator).getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
+        doReturn(intentLimit).when(zkConfigService).getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
                 DataLicense.BOMBORA.getDataLicense());
         MultiTenantContext.setTenant(tenant);
-        doReturn(technologyLimit).when(limitationValidator)
+        doReturn(technologyLimit).when(zkConfigService)
                 .getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(), DataLicense.HG.getDataLicense());
     }
 

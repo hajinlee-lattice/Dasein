@@ -21,7 +21,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import com.latticeengines.apps.cdl.service.ZKConfigService;
+import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
@@ -318,7 +319,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations()
                 : defaultMaxIteration;
-        String apsRollingPeriod = zkConfigService.getRollingPeriod(CustomerSpace.parse(customerSpace)).getPeriodName();
+        String apsRollingPeriod = zkConfigService
+                .getRollingPeriod(CustomerSpace.parse(customerSpace), CDLComponent.componentName).getPeriodName();
 
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //

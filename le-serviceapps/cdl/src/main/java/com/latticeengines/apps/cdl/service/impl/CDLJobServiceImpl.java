@@ -21,8 +21,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
+import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.CDLJobService;
-import com.latticeengines.apps.cdl.service.ZKConfigService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -144,7 +145,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
         }
         if (allowAutoSchedule) {
-            int invokeHour = zkConfigService.getInvokeTime(customerSpace);
+            int invokeHour = zkConfigService.getInvokeTime(customerSpace, CDLComponent.componentName);
             Tenant tenantInContext = MultiTenantContext.getTenant();
             try {
                 MultiTenantContext.setTenant(tenant);

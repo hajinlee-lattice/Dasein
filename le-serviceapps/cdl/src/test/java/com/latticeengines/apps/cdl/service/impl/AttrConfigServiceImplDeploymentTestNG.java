@@ -22,7 +22,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
-import com.latticeengines.apps.cdl.service.ZKConfigService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;

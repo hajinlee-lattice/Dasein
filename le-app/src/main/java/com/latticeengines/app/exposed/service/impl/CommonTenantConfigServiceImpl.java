@@ -97,10 +97,12 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
                 throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
             }
             try {
-                camille.upsert(contractPath, new Document(defaultPremiumLeadEnrichmentAttributes.replaceAll("\"", "")),
+                Integer attrNumber = Integer.parseInt(defaultPremiumLeadEnrichmentAttributes);
+                camille.upsert(contractPath, DocumentUtils.toRawDocument(attrNumber),
                         ZooDefs.Ids.OPEN_ACL_UNSAFE);
             } catch (Exception e) {
-                throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
+                throw new RuntimeException(
+                        "Illegal data or cannot update value for maximum premium lead enrichment attributes ");
             }
             return ValidateEnrichAttributesUtils.validateEnrichAttributes(defaultPremiumLeadEnrichmentAttributes);
         } catch (Exception e) {
@@ -144,10 +146,12 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
                 throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
             }
             try {
-                camille.upsert(path, new Document(defaultPremiumLeadEnrichmentAttributes.replaceAll("\"", "")),
+                Integer attrNumber = Integer.parseInt(defaultPremiumLeadEnrichmentAttributes);
+                camille.upsert(path, DocumentUtils.toRawDocument(attrNumber),
                         ZooDefs.Ids.OPEN_ACL_UNSAFE);
             } catch (Exception e) {
-                throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
+                throw new RuntimeException(
+                        "Illegal data or cannot update value for maximum premium lead enrichment attributes ");
             }
             return ValidateEnrichAttributesUtils.validateEnrichAttributes(defaultPremiumLeadEnrichmentAttributes);
         } catch (Exception e) {

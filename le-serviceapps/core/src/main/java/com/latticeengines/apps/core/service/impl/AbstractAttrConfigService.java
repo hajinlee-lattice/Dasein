@@ -25,6 +25,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.AttrValidationService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.util.AttrTypeResolver;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -67,6 +68,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Inject
     private ActivationLimitValidator limitationValidator;
+
+    @Inject
+    private ZKConfigService zkConfigService;
 
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
 
@@ -126,11 +130,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         if (category.isPremium()) {
             switch (category) {
             case INTENT:
-                overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                overview.setLimit((long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
                         MultiTenantContext.getShortTenantId(), DataLicense.BOMBORA.getDataLicense()));
                 break;
             case TECHNOLOGY_PROFILE:
-                overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                overview.setLimit((long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
                         MultiTenantContext.getShortTenantId(), DataLicense.HG.getDataLicense()));
                 break;
             case WEBSITE_KEYWORDS:
@@ -138,7 +142,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 // updated for all tenants
                 long defaultWebsiteKeywords = 200L;
                 try {
-                    defaultWebsiteKeywords = (long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                    defaultWebsiteKeywords = (long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
                             MultiTenantContext.getShortTenantId(), DataLicense.WEBSITEKEYWORDS.getDataLicense());
                 } catch (Exception e) {
                     log.warn("Error getting the limit for website keyword " + MultiTenantContext.getTenant().getId());

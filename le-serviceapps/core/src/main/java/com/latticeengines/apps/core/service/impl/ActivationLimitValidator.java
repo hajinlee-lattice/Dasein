@@ -3,22 +3,15 @@ package com.latticeengines.apps.core.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.core.service.AttrValidator;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.camille.exposed.util.DocumentUtils;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.DataLicense;
@@ -35,11 +28,9 @@ import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 @Component("activationLimitValidator")
 public class ActivationLimitValidator extends AttrValidator {
     public static final String VALIDATOR_NAME = "ACTIVAITON_LIMIT_VALIDATOR";
-    private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
-    private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
-    private static final String PLS = "PLS";
-
     private static final Logger log = LoggerFactory.getLogger(ActivationLimitValidator.class);
+    @Inject
+    private ZKConfigService zkConfigService;
 
     protected ActivationLimitValidator() {
         super(VALIDATOR_NAME);
@@ -75,7 +66,8 @@ public class ActivationLimitValidator extends AttrValidator {
             List<AttrConfig> userSelectedActiveConfigs) {
         String tenantId = MultiTenantContext.getShortTenantId();
         for (DataLicense license : DataLicense.values()) {
-            int limit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, license.getDataLicense());
+            int limit = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId,
+                    license.getDataLicense());
             List<AttrConfig> premiumActiveConfigs = configs.stream()
                     .filter(entity -> (license.getDataLicense().equals(entity.getDataLicense())))
                     .collect(Collectors.toList());
@@ -125,44 +117,4 @@ public class ActivationLimitValidator extends AttrValidator {
         }
     }
 
-    @VisibleForTesting
-    public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense) {
-        String maxPremiumLeadEnrichmentAttributes;
-        Camille camille = CamilleEnvironment.getCamille();
-        Path contractPath = null;
-        Path path = null;
-        try {
-            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            contractPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace, PLS);
-            if (dataLicense == null) {
-                path = contractPath.append(DATA_CLOUD_LICENSE).append(MAX_ENRICH_ATTRIBUTES);
-            } else {
-                path = contractPath.append(DATA_CLOUD_LICENSE).append("/" + dataLicense);
-            }
-            maxPremiumLeadEnrichmentAttributes = camille.get(path).getData().replaceAll("\"", "");
-        } catch (KeeperException.NoNodeException ex) {
-            Path defaultConfigPath = null;
-            if (dataLicense == null) {
-                defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
-                        .append(new Path(DATA_CLOUD_LICENSE).append(new Path(MAX_ENRICH_ATTRIBUTES)));
-            } else {
-                defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
-                        .append(new Path(DATA_CLOUD_LICENSE).append(new Path("/" + dataLicense)));
-            }
-
-            try {
-                maxPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData().replaceAll("\"", "");
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
-            }
-            try {
-                camille.upsert(path, new Document(maxPremiumLeadEnrichmentAttributes), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot get maximum premium lead enrichment attributes ", e);
-        }
-        return Integer.parseInt(maxPremiumLeadEnrichmentAttributes);
-    }
 }
