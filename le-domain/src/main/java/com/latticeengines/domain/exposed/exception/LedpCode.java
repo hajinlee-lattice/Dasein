@@ -335,6 +335,13 @@ public enum LedpCode {
     LEDP_19003("Resource not found."), //
     LEDP_19004("External User is not allowed with Lattice Email ID."), //
     LEDP_19005("Could not validate current user as the requried information is missing from Identity Provider."), //
+    LEDP_19006("Sign jwt token fail."),
+    LEDP_19007("No such jwt handler {0}."),
+    LEDP_19008("URL encode fail."),
+    LEDP_19009("No User Name key/value"),
+    LEDP_19010("No User Email key/value"),
+    LEDP_19011("No return_to key/value"),
+    LEDP_19012("No source_ref key/value "),
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //
