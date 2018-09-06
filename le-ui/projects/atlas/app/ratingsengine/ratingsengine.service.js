@@ -295,6 +295,10 @@ angular.module('lp.ratingsengine')
     this.setSegment = function(segment) {
         //console.log("set segment service", segment);
         this.savedSegment = segment;
+        let currentRating = RatingsEngineStore.getCurrentRating();
+        if(currentRating && segment && segment != null){
+            currentRating.segment = segment;
+        }
     }
 
     this.getSegment = function() {
