@@ -84,7 +84,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     private String displayName;
 
     @JsonProperty("description")
-    @Column(name = "DESCRIPTION", length = 8192, nullable = true)
+    @Column(name = "DESCRIPTION", length = 255, nullable = true)
     private String description;
 
     @JsonProperty("ratings")
