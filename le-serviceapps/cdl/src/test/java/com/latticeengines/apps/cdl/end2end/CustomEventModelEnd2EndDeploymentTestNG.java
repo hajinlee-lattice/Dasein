@@ -81,7 +81,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     @Test(groups = { "end2end", "precheckin" })
     public void end2endCDLStyleCustomEventModelTest() throws Exception {
         setupEnd2EndTestEnvironment();
-        resumeCheckpoint(LOADING_CHECKPOINT);
+        resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         bootstrap(testType);
         runCustomEventModel(testType);
     }
