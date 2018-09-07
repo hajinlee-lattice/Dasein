@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
+import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("samlConfigProxy")
@@ -34,6 +35,12 @@ public class SamlConfigProxy extends BaseRestApiProxy {
         }
         return config;
     }
+    
+    public SamlConfigMetadata getSamlConfigMetadata(String tenantId) {
+        String url = constructUrl("/{tenantId}/config-metadata", tenantId);
+        SamlConfigMetadata samlConfigMetadata = get("getSamlConfigMetadata", url, SamlConfigMetadata.class);
+        return samlConfigMetadata;
+    }
 
     public IdentityProvider saveConfig(String tenantId, IdentityProvider identityProvider) {
         IdentityProvider existingConfig = getConfig(tenantId);
@@ -42,7 +49,7 @@ public class SamlConfigProxy extends BaseRestApiProxy {
         }
 
         String url = constructUrl("/{tenantId}", tenantId);
-        post("validateIdpMetadata", url, identityProvider, Void.class);
+        post("SaveIdpMetadata", url, identityProvider, Void.class);
         return getConfig(tenantId);
     }
 

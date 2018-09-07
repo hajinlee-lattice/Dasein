@@ -61,6 +61,7 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
     public void testExists() {
         IdentityProvider retrieved = identityProviderService.find(identityProvider.getEntityId());
         assertNotNull(retrieved);
+        assertNotNull(retrieved.getEntityId());
     }
 
     @Test(groups = "functional", dependsOnMethods = "testExists")

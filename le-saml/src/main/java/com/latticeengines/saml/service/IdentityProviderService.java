@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
+import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface IdentityProviderService {
     void create(IdentityProvider identityProvider);
@@ -15,4 +17,6 @@ public interface IdentityProviderService {
     List<IdentityProvider> findAll();
 
     IdpMetadataValidationResponse validate(IdentityProvider identityProvider);
+
+    SamlConfigMetadata getConfigMetadata(Tenant tenant);
 }

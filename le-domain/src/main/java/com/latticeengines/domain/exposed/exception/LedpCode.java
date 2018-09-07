@@ -644,6 +644,10 @@ public enum LedpCode {
     LEDP_33000("An identity provider with ID {0} already exists"), //
     LEDP_33001("Validation failed for Identity Provider configuration: {0}"), //
     LEDP_33002("Tenant is already has SSO/SAML configuration. Idp entity id: {0}"), //
+    LEDP_33003("Cannot find Tenant: {0}"), //
+    LEDP_33004("Could not initiate the login for Tenant: {0}"), //
+    LEDP_33005("Tenant Name cannot be empty"), //
+    LEDP_33006("Could not initiate the login for Tenant: {0}, as its SSO url is missing"), //
 
     // le-encryption
     LEDP_34000("Directory {0} already exists and is non-empty.  Encryption requires a completely new customer with "

@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
+import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.saml.service.IdentityProviderService;
@@ -49,6 +50,15 @@ public class IdentityProviderConfigResource {
         return identityProviderService.findAll();
     }
 
+    @RequestMapping(value = TENANT_ID_PATH +"/config-metadata", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve all identity providers")
+    public SamlConfigMetadata getSamlConfigMetadata(@PathVariable("tenantId") String tenantId) {
+        Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
+        log.info("Retrieving Config Metadata");
+        return identityProviderService.getConfigMetadata(tenant);
+    }
+    
     @RequestMapping(value = TENANT_ID_PATH
             + "/validate", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody

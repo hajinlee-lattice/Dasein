@@ -2,7 +2,11 @@ package com.latticeengines.saml.service.impl;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.xml.parse.ParserPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
+import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
@@ -99,13 +104,9 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
         resp.setValid(true);
 
         try {
-            if (identityProvider.getMetadata() == null) {
-                throw new LedpException(LedpCode.LEDP_33001, new String[] { "Metadata XML is empty" });
-            }
-
-            EntityDescriptor descriptor = (EntityDescriptor) SAMLUtils.deserialize(parserPool,
-                    identityProvider.getMetadata());
-            resp.setEntityId(descriptor.getEntityID());
+            SamlConfigMetadata samlConfigMetadata = extractMetadataConfig(identityProvider);
+            resp.setEntityId(samlConfigMetadata.getEntityId());
+            resp.setSingleSignOnService(samlConfigMetadata.getSingleSignOnService());
         } catch (Exception e) {
             resp.setValid(false);
             Exception ex = new LedpException(LedpCode.LEDP_33001, new String[] { e.getMessage() });
@@ -113,5 +114,47 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
             log.info(ex.getMessage(), ex);
         }
         return resp;
+    }
+
+    private SamlConfigMetadata extractMetadataConfig(IdentityProvider identityProvider) {
+        if (identityProvider.getMetadata() == null) {
+            throw new LedpException(LedpCode.LEDP_33001, new String[] { "Metadata XML is empty" });
+        }
+
+        EntityDescriptor descriptor = (EntityDescriptor) SAMLUtils.deserialize(parserPool,
+                identityProvider.getMetadata());
+        
+        // Get SingleSignonURL
+        IDPSSODescriptor ssoDescriptor = descriptor.getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
+        if (ssoDescriptor == null) {
+            throw new LedpException(LedpCode.LEDP_33001, new String[] { "Could not find SSO Descriptor" });
+        }
+        SingleSignOnService ssoPostBinding = ssoDescriptor.getSingleSignOnServices().stream()
+                .filter(sso -> sso.getBinding().equals(SAMLConstants.SAML2_POST_BINDING_URI)).findAny()
+                .orElseThrow(() -> new LedpException(LedpCode.LEDP_33001,
+                        new String[] { "Could not find SSO POST binding" }));
+        String ssoBindingUrl = ssoPostBinding.getLocation();
+        
+        SamlConfigMetadata samlConfigMetadata = new SamlConfigMetadata();
+        samlConfigMetadata.setEntityId(descriptor.getEntityID());
+        samlConfigMetadata.setSingleSignOnService(ssoBindingUrl);
+        
+        return samlConfigMetadata;
+    }
+    
+    @Override
+    public SamlConfigMetadata getConfigMetadata(Tenant tenant) {
+        GlobalAuthTenant gatenant = globalAuthTenantEntityMgr.findByTenantId(tenant.getId());
+        if (gatenant == null) {
+            throw new LedpException(LedpCode.LEDP_33003, new String[] {tenant.getId()});
+        }
+        List<IdentityProvider> identityProviders = identityProviderEntityMgr.findByTenantId(gatenant.getId());
+        if (CollectionUtils.isEmpty(identityProviders)) {
+            throw new LedpException(LedpCode.LEDP_33004, new String[] {tenant.getId()});
+        }
+        
+        IdentityProvider idp = identityProviders.get(0);
+        return extractMetadataConfig(idp);
+        
     }
 }

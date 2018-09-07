@@ -1,9 +1,10 @@
 package com.latticeengines.pls.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
@@ -18,11 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.net.HttpHeaders;
@@ -34,14 +37,16 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.domain.exposed.saml.LogoutValidationResponse;
+import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
+import com.latticeengines.domain.exposed.saml.SpSamlLoginRequest;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.proxy.exposed.saml.SPSamlProxy;
+import com.latticeengines.proxy.exposed.saml.SamlConfigProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.security.exposed.util.SamlIntegrationRole;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,6 +55,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(path = "/saml")
 public class SamlLoginResource {
+
+    private static final String RETURN_TO_PARAM = "return_to";
 
     private static final Logger log = LoggerFactory.getLogger(SamlLoginResource.class);
 
@@ -61,6 +68,9 @@ public class SamlLoginResource {
 
     @Autowired
     private SPSamlProxy samlProxy;
+    
+    @Autowired
+    private SamlConfigProxy samlConfigProxy;
 
     @Value("${security.app.public.url:https://localhost:3000}")
     private String loginUrl;
@@ -136,8 +146,11 @@ public class SamlLoginResource {
             attributeMap.put("userName", uDoc.getResult().getUser().getEmailAddress());
             attributeMap.put("samlAuthenticated", true);
             attributeMap.put("userDocument", JsonUtils.serialize(uDoc));
-
-            redirectView.setUrl(String.format("%s/login/saml/%s", baseLoginURL, tenantDeploymentId));
+            if (StringUtils.isNotBlank(relayState)) {
+                redirectView.setUrl(String.format("%s/login/saml/%s?%s", baseLoginURL, tenantDeploymentId, relayState));
+            } else {
+                redirectView.setUrl(String.format("%s/login/saml/%s", baseLoginURL, tenantDeploymentId));
+            }
             redirectView.setAttributesMap(attributeMap);
 
         } catch (LedpException e) {
@@ -206,6 +219,58 @@ public class SamlLoginResource {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @RequestMapping(value = "/splogin", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @ApiOperation(value = "Lattice initiated SAML Authentication and Login")
+    public ModelAndView spInitiateLoginRequest(@RequestBody SpSamlLoginRequest spLoginRequest) {
+        log.info("Initiating SP Login for Request: %s", JsonUtils.serialize(spLoginRequest));
+        
+        String tenantDeploymentId = spLoginRequest.getTenantDeploymentId();
+        if (StringUtils.isBlank(tenantDeploymentId)) {
+            throw new LedpException(LedpCode.LEDP_33005);
+        }
+        SamlConfigMetadata samlConfigMetadata = samlConfigProxy.getSamlConfigMetadata(tenantDeploymentId);
+        if (StringUtils.isBlank(samlConfigMetadata.getSingleSignOnService())) {
+            throw new LedpException(LedpCode.LEDP_33006);
+        }
+        String encodedRelayState = encode(constructRelayState(spLoginRequest));
+        String ssoUrl = String.format("redirect:%s?RelayState=%s", samlConfigMetadata.getSingleSignOnService(), encodedRelayState);
+        log.info("SSO Url for Sp Initiated Login: %s", ssoUrl);
+        return new ModelAndView(ssoUrl);
+    }
+
+    private String encode(String constructRelayState) {
+        if (constructRelayState == null) {
+            return null;
+        }
+        try {
+            return URLEncoder.encode(constructRelayState, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Error while encoding RelayState");
+        }
+    }
+
+    public String constructRelayState(SpSamlLoginRequest spLoginRequest) {
+        if(spLoginRequest == null || spLoginRequest.getRequestParameters() == null) {
+            return "";
+        }
+        Map<String, String> reqParams = new HashMap<>(spLoginRequest.getRequestParameters());
+        
+        // ReturnTo needs to be last parameter in RelayStateURL, Because it could contain additional query parameters
+        String returnToValue = reqParams.get(RETURN_TO_PARAM);
+        reqParams.remove(RETURN_TO_PARAM);
+        if (StringUtils.isBlank(returnToValue)) {
+            return "";
+        }
+        StringBuffer sb = new StringBuffer();
+        spLoginRequest.getRequestParameters().keySet().forEach(key -> {
+            sb.append(key).append("=").append(reqParams.get(key)).append("&");
+        });
+        sb.append(RETURN_TO_PARAM).append("=").append(returnToValue);
+        
+        return sb.toString();
     }
 
 }
