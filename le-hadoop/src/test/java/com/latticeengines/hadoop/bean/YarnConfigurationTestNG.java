@@ -16,6 +16,8 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.yarn.configuration.ConfigurationUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -50,6 +52,27 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
     @Value("${common.le.stack}")
     private String leStack;
 
+    private String hdfsKmsKey = "yarnconfigtest";
+
+    @BeforeClass(groups = "functional")
+    public void setup() throws IOException {
+        resetEnvironment();
+    }
+
+    @AfterClass(groups = "functional")
+    public void teardown() throws IOException {
+        resetEnvironment();
+    }
+
+    private void resetEnvironment() throws IOException {
+        if (HdfsUtils.keyExists(yarnConfiguration, hdfsKmsKey)) {
+            HdfsUtils.deleteKey(yarnConfiguration, hdfsKmsKey);
+        }
+        if (HdfsUtils.fileExists(yarnConfiguration, "/tmp/HdfsUtilsTest")) {
+            HdfsUtils.rmdir(yarnConfiguration, "/tmp/HdfsUtilsTest");
+        }
+    }
+
     @Test(groups = "manual", enabled = false)
     public void testEmrYarnConfiguration() throws IOException {
         Assert.assertEquals(yarnConfiguration.get("fs.defaultFS"), //
@@ -70,7 +93,21 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "functional", enabled = false)
     public void testS3DistCp() throws Exception {
+        testS3DistCp(true);
+        testS3DistCp(false);
+    }
+
+    private void testS3DistCp(boolean encrypted) throws Exception {
+        if (encrypted) {
+            if (!HdfsUtils.keyExists(yarnConfiguration, hdfsKmsKey)) {
+                HdfsUtils.createKey(yarnConfiguration, hdfsKmsKey);
+            }
+            HdfsUtils.mkdir(yarnConfiguration, "/tmp/HdfsUtilsTest");
+            HdfsUtils.createEncryptionZone(yarnConfiguration, "/tmp/HdfsUtilsTest", hdfsKmsKey);
+        }
+
         // from hdfs to s3
+        String srcDir = "/tmp/HdfsUtilsTest/input";
         List<Pair<String, Class<?>>> columns = ImmutableList.of( //
                 Pair.of("Id", Integer.class), //
                 Pair.of("Value", String.class)
@@ -80,10 +117,16 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
                 { 2, "2" }, //
                 { 3, "3" },
         };
-        String srcDir = "/tmp/HdfsUtilsTest/input";
         AvroUtils.uploadAvro(yarnConfiguration, data, columns, "test", srcDir);
         Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
 
+        if (encrypted) {
+            // check distcp between hdfs
+            String srcDir2 = "/tmp/HdfsUtilsTest/input2";
+            HdfsUtils.distcp(yarnConfiguration, srcDir, srcDir2, "default");
+        }
+
+        // clean up s3 target dir
         String tgtDir = "/" + leStack + "/HdfsUtilsTest/output";
         if (s3Service.isNonEmptyDirectory(s3Bucket, tgtDir)) {
             s3Service.cleanupPrefix(s3Bucket, tgtDir);
@@ -92,12 +135,12 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         String s3Uri = "s3n://" + s3Bucket + tgtDir;
         HdfsUtils.distcp(yarnConfiguration, srcDir, s3Uri, "default");
 
-        // assert HDFS to S3 copy: reading does not need ams key
+        // assert HDFS to S3 copy
         Assert.assertTrue(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
         InputStream is = s3Service.readObjectAsStream(s3Bucket, tgtDir + "/test.avro");
         AvroUtils.readFromInputStream(is).forEach(System.out::println);
 
-        // reverse copy -- also need unencrypted staging
+        // reverse copy
         HdfsUtils.rmdir(yarnConfiguration, srcDir);
         Assert.assertFalse(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
         HdfsUtils.distcp(yarnConfiguration, s3Uri, srcDir, "default");

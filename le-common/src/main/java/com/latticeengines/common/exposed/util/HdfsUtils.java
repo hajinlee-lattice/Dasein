@@ -157,7 +157,6 @@ public class HdfsUtils {
         EncryptionZone dstZone = getEncryptionZone(configuration, tgtPath);
         if (srcZone != null || dstZone != null) {
             log.info("Encryption zone is involved, skipping checksum check.");
-            options.setSkipCRC(true);
             args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-skipcrccheck", "-update", srcPath, tgtPath };
         }
         int exit = ToolRunner.run(new DistCp(configuration, options), args);
