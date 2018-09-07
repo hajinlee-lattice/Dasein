@@ -1,0 +1,45 @@
+@import "../layout/layout.scss";
+@import "../colors.scss";
+
+$padding: 1em;
+$height: 30px;
+.input-icon-wrap {
+  box-sizing: border-box;
+  
+  border: 1px solid $white-gold;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  height: $height;
+  .input-icon {
+    display: flex;
+    align-items: center;
+    background: $pearl-white;
+    padding-left: $padding;
+    padding-right: 0em;
+    .clear-icon {
+      cursor: pointer;
+      padding: 0em;
+      padding-right: $padding;
+    }
+  }
+
+  .input-with-icon {
+    border: none;
+    flex: 1;
+    padding-left: $padding;
+  }
+  .input-with-icon:focus {
+    outline: none;
+  }
+
+  ::-ms-input-placeholder {
+    /* Microsoft Edge */
+    color: $silver;
+  }
+
+  ::placeholder {
+    /* Most modern browsers support this now. */
+    color: $silver;
+  }
+}

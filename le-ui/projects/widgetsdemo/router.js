@@ -6,6 +6,8 @@ import dropdowns from './modules/dropdowns/state';
 import menus from './modules/menus/state';
 import panels from './modules/panels/state';
 import grid from './modules/grid/state';
+import inputs from './modules/inputs/state';
+
 
 // Create instance + router setup
 const router = new UIRouterReact();
@@ -18,7 +20,8 @@ const states = [
     dropdowns,
     menus,
     panels,
-    grid
+    grid,
+    inputs
 ];
 states.forEach(state => router.stateRegistry.register(state));
 
@@ -28,6 +31,7 @@ router.urlService.rules.initial({ state: 'dropdowns' });
 router.urlService.rules.initial({ state: 'menus' });
 router.urlService.rules.initial({ state: 'panels' });
 router.urlService.rules.initial({ state: 'grid' });
+router.urlService.rules.initial({ state: 'inputs' });
 
 router.transitionService.onBefore(true, function(trans) {
     console.log('Nav Start');

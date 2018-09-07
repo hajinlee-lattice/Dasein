@@ -51,6 +51,13 @@ class App extends Component {
                             console.log('NAME ', name);
                             router.stateService.go('grid')
                         }} />
+                        <LeToolbarItem image="fa fa-table"
+                        label="I"
+                        name="inputs"
+                        callback={(name) => {
+                            console.log('NAME ', name);
+                            router.stateService.go('inputs')
+                        }} />
                 </LeToolbar>
 
                 <UIRouter router={router}>
