@@ -64,8 +64,13 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
 
     @Override
     public List<Model> getActiveModels(ModelType type, String tenantIdentifier) {
-        String url = constructUrl("/models/{type}?tenantIdentifier={tenantIdentifier}", type, tenantIdentifier);
-        System.out.println(url);
+        String url = null;
+        if (type != null) {
+            url = constructUrl("/models?type={type}&tenantIdentifier={tenantIdentifier}", type, tenantIdentifier);
+        } else {
+            url = constructUrl("/models?tenantIdentifier={tenantIdentifier}",tenantIdentifier);
+        }
+            
         List<?> resultList = get("getActiveModels", url, List.class);
         List<Model> models = new ArrayList<>();
         if (resultList != null) {
@@ -77,7 +82,6 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
             }
         }
         return models;
-
     }
 
     @Override
@@ -101,13 +105,13 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
 
     @Override
     public List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
-            String tenantIdentifier) {
-        String url = "/modeldetails?considerAllStatus={considerAllStatus}&offset={offset}&maximum={maximum}&tenantIdentifier={tenantIdentifier}";
+            String tenantIdentifier, boolean considerDeleted) {
+        String url = "/modeldetails?considerAllStatus={considerAllStatus}&offset={offset}&maximum={maximum}&tenantIdentifier={tenantIdentifier}&considerDeleted={considerDeleted}";
         if (start != null) {
             String startStr = DateTimeUtils.convertToStringUTCISO8601(start);
-            url = constructUrl(url + "&start={start}", considerAllStatus, offset, maximum, tenantIdentifier, startStr);
+            url = constructUrl(url + "&start={start}", considerAllStatus, offset, maximum, tenantIdentifier, considerDeleted, startStr);
         } else {
-            url = constructUrl(url, considerAllStatus, offset, maximum, tenantIdentifier);
+            url = constructUrl(url, considerAllStatus, offset, maximum, tenantIdentifier, considerDeleted);
         }
         List<?> resultList = get("getPaginatedModels", url, List.class);
         List<ModelDetail> paginatedModels = new ArrayList<>();
@@ -121,6 +125,13 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
             }
         }
         return paginatedModels;
+    }
+
+
+    @Override
+    public List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
+            String tenantIdentifier) {
+        return getPaginatedModels(start, considerAllStatus, offset, maximum, tenantIdentifier, false);
     }
 
     @Override

@@ -76,6 +76,10 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.scoringapi.Fields;
+import com.latticeengines.domain.exposed.scoringapi.Model;
+import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
+import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -137,6 +141,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info("Test environment setup finished.");
     }
 
+    public String getScoringApiInternalUrl() {
+        return getRestAPIHostPort() + "/pls/scoringapi-internal";
+    }
+    
     @SuppressWarnings("rawtypes")
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true)
     public void uploadFile() {
@@ -294,7 +302,70 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), modelId), ModelSummary.class);
         assertEquals(summary.getStatus(), ModelSummaryStatus.ACTIVE);
     }
-
+    
+    @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
+    public void testScoringApiInternalModels() {
+        log.info("Retrieving Models via ScoringAPI Proxy.");
+        String url = getScoringApiInternalUrl() + "/models";
+        List<?> resultList = restTemplate.getForObject(url, List.class);
+        assertNotNull(resultList);
+        List<Model> modelList = new ArrayList<>();
+        if (resultList != null) {
+            for (Object obj : resultList) {
+                String json = JsonUtils.serialize(obj);
+                Model model = JsonUtils.deserialize(json, Model.class);
+                modelList.add(model);
+            }
+        }
+        assertEquals(modelList.size(), 1);
+        log.info("Retrieving Model Fields via ScoringAPI Proxy.");
+        
+        log.info("Retrieving Models via ScoringAPI Proxy with Type Filter.");
+        url = getScoringApiInternalUrl() + "/models?type=" + ModelType.CONTACT;
+        resultList = restTemplate.getForObject(url, List.class);
+        assertNotNull(resultList);
+        modelList = new ArrayList<>();
+        if (resultList != null) {
+            for (Object obj : resultList) {
+                String json = JsonUtils.serialize(obj);
+                Model model = JsonUtils.deserialize(json, Model.class);
+                modelList.add(model);
+            }
+        }
+        log.info("Retrieving Model Fields via ScoringAPI Proxy with Type Filter.");
+    }
+    
+    @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "testScoringApiInternalModels")
+    public void testScoringApiInternalModelDetails() {
+        log.info("Retrieving ModelDetails via ScoringAPI Proxy.");
+        String url = getScoringApiInternalUrl() + "/modeldetails?considerAllStatus=true&offset=0&maximum=10&considerDeleted=false";
+        List<?> resultList = restTemplate.getForObject(url, List.class);
+        assertNotNull(resultList);
+        List<ModelDetail> paginatedModels = new ArrayList<>();
+        if (resultList != null) {
+            for (Object obj : resultList) {
+                String json = JsonUtils.serialize(obj);
+                ModelDetail modelDetail = JsonUtils.deserialize(json, ModelDetail.class);
+                paginatedModels.add(modelDetail);
+            }
+        }
+        assertEquals(paginatedModels.size(), 1);
+        assertNotNull(paginatedModels.get(0).getModel());
+        assertEquals(paginatedModels.get(0).getModel().getName(), modelDisplayName);
+        log.info("Finished Retrieving ModelDetails via ScoringAPI Proxy.");
+        
+        /*
+        //TODO: will check and fix it.
+        log.info("Retrieving Model Fields via ScoringAPI Proxy.");
+        String fieldsUrl = getScoringApiInternalUrl() + "/models/" + paginatedModels.get(0).getModel().getModelId()+ "/fields";
+        Fields fields = restTemplate.getForObject(url, Fields.class);
+        assertNotNull(fields);
+        assertNotNull(fields.getFields());
+        assertEquals(fields.getModelId(), paginatedModels.get(0).getModel().getModelId());
+        log.info("Retrieving Model Fields via ScoringAPI Proxy.");
+        */
+    }
+    
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
     public void compareRtsScoreWithModelingForOriginalModelSummary() throws IOException, InterruptedException {
         log.info("Start compareRtsScoreWithModelingForOriginalModelSummary");

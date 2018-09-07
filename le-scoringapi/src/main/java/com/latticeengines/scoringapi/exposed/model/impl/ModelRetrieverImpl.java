@@ -154,11 +154,15 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 Map<String, String> map = (Map<String, String>) modelSummary;
                 ModelType modelType = getModelType(map.get("SourceSchemaInterpretation"));
 
-                if ((type == ModelType.ACCOUNT && modelType == ModelType.ACCOUNT)
-                        || (type == ModelType.CONTACT && modelType == ModelType.CONTACT)) {
-                    Model model = new Model(map.get("Id"), map.get("DisplayName"), type);
-                    models.add(model);
+                if (modelType == null)
+                    continue;
+
+                // Match with filter type
+                if (type != null && !modelType.equals(type)) {
+                    continue;
                 }
+                Model model = new Model(map.get("Id"), map.get("DisplayName"), modelType);
+                models.add(model);
             }
         }
     }

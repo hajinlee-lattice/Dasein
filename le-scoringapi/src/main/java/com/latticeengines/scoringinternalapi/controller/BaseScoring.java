@@ -97,7 +97,7 @@ public abstract class BaseScoring extends CommonBase {
 
     protected List<Model> getActiveModels(HttpServletRequest request, ModelType type, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            log.info(type.toString());
+            log.info("Applying Model Type Filter: " + type );
             List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
             if (log.isDebugEnabled()) {
                 log.debug(JsonUtils.serialize(models));

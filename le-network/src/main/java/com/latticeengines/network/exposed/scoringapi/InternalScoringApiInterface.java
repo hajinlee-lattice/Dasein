@@ -32,6 +32,9 @@ public interface InternalScoringApiInterface {
     List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
             String tenantIdentifier);
 
+    List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
+            String tenantIdentifier, boolean considerDeleted);
+
     List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
             String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
             boolean enableMatching);

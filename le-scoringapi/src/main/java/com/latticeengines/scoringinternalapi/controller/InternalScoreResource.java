@@ -37,6 +37,17 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("score")
 public class InternalScoreResource extends BaseScoring {
 
+    @RequestMapping(value = "/models", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get active models")
+    public List<Model> getActiveModels(HttpServletRequest request,
+            @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier,
+            @RequestParam(value = "type", required = false) ModelType type) {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        return getActiveModels(request, type, customerSpace);
+    }
+    
+    @Deprecated
     @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get active models")

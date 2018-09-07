@@ -5,6 +5,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,20 +17,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-@Deprecated
-public class ScoringApiConsoleResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class ScoringApiInternalResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
+    
+    public String getScoringApiInternalUrl() {
+        return getRestAPIHostPort() + "/pls/scoringapi-internal";
+    }
 
     @Test(groups = "deployment", enabled = true)
     public void testWithDomain() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
-        String url = getRestAPIHostPort() + "/pls/scores/apiconsole/record/debug";
+        String url = getScoringApiInternalUrl() + "/record/apiconsole/debug";
 
         ScoreRequest scoreRequest = new ScoreRequest();
         populateScoreRequest(scoreRequest, false);
@@ -50,7 +55,7 @@ public class ScoringApiConsoleResourceDeploymentTestNG extends PlsDeploymentTest
 
     @Test(groups = "deployment", enabled = true)
     public void testWithDUNS() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
-        String url = getRestAPIHostPort() + "/pls/scores/apiconsole/record/debug";
+        String url = getScoringApiInternalUrl() + "/record/apiconsole/debug";
 
         ScoreRequest scoreRequest = new ScoreRequest();
         populateScoreRequest(scoreRequest, true);
