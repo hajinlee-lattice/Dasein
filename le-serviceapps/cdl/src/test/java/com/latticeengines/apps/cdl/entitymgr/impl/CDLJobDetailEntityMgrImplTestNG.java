@@ -39,8 +39,9 @@ public class CDLJobDetailEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testCreateAndGet() {
+    public void testCreateAndGet() throws InterruptedException {
         jobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, mainTestTenant);
+        Thread.sleep(500);
         List<CDLJobDetail> cdlJobDetails = cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE);
         Assert.assertEquals(CollectionUtils.size(cdlJobDetails), countBeforeTest + 1);
         cdlJobDetails.get(0).setCdlJobStatus(CDLJobStatus.COMPLETE);
