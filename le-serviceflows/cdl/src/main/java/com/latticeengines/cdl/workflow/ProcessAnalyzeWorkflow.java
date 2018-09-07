@@ -15,6 +15,7 @@ import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
 import com.latticeengines.cdl.workflow.steps.process.GenerateProcessingReport;
 import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportProcessAnalyzeToS3;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -66,6 +67,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ExportToDynamo exportToDynamo;
 
     @Inject
+    private ExportProcessAnalyzeToS3 exportProcessAnalyzeToS3;
+
+    @Inject
     private ProcessAnalyzeChoreographer choreographer;
 
     @Override
@@ -82,6 +86,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processRatingWorkflow) //
                 .next(generateProcessingReport) //
                 .next(awsApsGeneratorStep) //
+                .next(exportProcessAnalyzeToS3) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //
                 .choreographer(choreographer) //

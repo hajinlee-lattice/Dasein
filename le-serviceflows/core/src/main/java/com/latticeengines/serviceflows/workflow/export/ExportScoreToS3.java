@@ -21,7 +21,7 @@ public class ExportScoreToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
     private static final Logger log = LoggerFactory.getLogger(ExportScoreToS3.class);
 
     @Override
-    protected void buildDirs(List<String> srcDirs, List<String> tgtDirs) {
+    protected void buildRequests(List<ExportRequest> requests) {
         String outputPath = getOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
         String hdfsDir = StringUtils.substringBeforeLast(outputPath, "/");
         String filePrefix = StringUtils.substringAfterLast(outputPath, "/");
@@ -34,8 +34,7 @@ public class ExportScoreToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
         }
         if (CollectionUtils.isNotEmpty(paths)) {
             paths.forEach(p -> {
-                srcDirs.add(p);
-                tgtDirs.add(pathBuilder.convertAtlasFile(p, podId, tenantId, s3Bucket));
+                requests.add(new ExportRequest(p, pathBuilder.convertAtlasFile(p, podId, tenantId, s3Bucket)));
             });
         } else {
             log.warn("There was no score output files.");

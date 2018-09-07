@@ -25,46 +25,45 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
     private static final Logger log = LoggerFactory.getLogger(ExportModelToS3.class);
 
     @Override
-    protected void buildDirs(List<String> srcDirs, List<String> tgtDirs) {
+    protected void buildRequests(List<ExportRequest> requests) {
 
         ModelSummary modelSummary = getModelSummary();
-        addModelingArtifactsDirs(srcDirs, tgtDirs, modelSummary);
-        addModelingSourceDirs(srcDirs, tgtDirs, modelSummary);
+        addModelingArtifactsDirs(requests, modelSummary);
+        addModelingSourceDirs(requests, modelSummary);
     }
 
-    private void addModelingSourceDirs(List<String> srcDirs, List<String> tgtDirs, ModelSummary modelSummary) {
+    private void addModelingSourceDirs(List<ExportRequest> requests, ModelSummary modelSummary) {
 
-        addSourceFiles(srcDirs, tgtDirs, modelSummary);
+        addSourceFiles(requests, modelSummary);
 
         String trainingTable = modelSummary.getTrainingTableName();
         String eventTable = modelSummary.getEventTableName();
-        addTableDirs(trainingTable, srcDirs, tgtDirs);
-        addTableDirs(eventTable, srcDirs, tgtDirs);
+        addTableDirs(trainingTable, requests);
+        addTableDirs(eventTable, requests);
 
     }
 
-    protected void addSourceFiles(List<String> srcDirs, List<String> tgtDirs, ModelSummary modelSummary) {
+    protected void addSourceFiles(List<ExportRequest> requests, ModelSummary modelSummary) {
         String trainingFilePath = modelSummary.getModelSummaryConfiguration()
                 .getString(ProvenancePropertyName.TrainingFilePath, "");
-        addAtlasFile(srcDirs, tgtDirs, trainingFilePath);
-        addSourceFile(srcDirs, tgtDirs, modelSummary, trainingFilePath);
+        addAtlasFile(requests, trainingFilePath);
+        addSourceFile(requests, modelSummary, trainingFilePath);
 
         String pmmlFilePath = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.PmmlFilePath,
                 "");
-        addAtlasMetadataFile(srcDirs, tgtDirs, pmmlFilePath);
+        addAtlasMetadataFile(requests, pmmlFilePath);
         if (StringUtils.isNotBlank(pmmlFilePath) && pmmlFilePath.endsWith(".fixed.xml")) {
             String pmmlOrigFilePath = StringUtils.substringBeforeLast(pmmlFilePath, ".fixed.xml");
-            addAtlasMetadataFile(srcDirs, tgtDirs, pmmlOrigFilePath);
+            addAtlasMetadataFile(requests, pmmlOrigFilePath);
         } else if (StringUtils.isNotBlank(pmmlFilePath)) {
             String pmmlFixedFilePath = pmmlFilePath + ".fixed.xml";
-            addAtlasMetadataFile(srcDirs, tgtDirs, pmmlFixedFilePath);
+            addAtlasMetadataFile(requests, pmmlFixedFilePath);
         }
         String pivotFilePath = modelSummary.getPivotArtifactPath();
-        addAtlasMetadataFile(srcDirs, tgtDirs, pivotFilePath);
+        addAtlasMetadataFile(requests, pivotFilePath);
     }
 
-    private void addSourceFile(List<String> srcDirs, List<String> tgtDirs, ModelSummary modelSummary,
-            String trainingFilePath) {
+    private void addSourceFile(List<ExportRequest> requests, ModelSummary modelSummary, String trainingFilePath) {
         if (StringUtils.isBlank(modelSummary.getTrainingTableName())) {
             return;
         }
@@ -73,8 +72,8 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
             if (sourceFile != null && StringUtils.isNotBlank(sourceFile.getPath())
                     && !sourceFile.getPath().equals(trainingFilePath)
                     && HdfsUtils.fileExists(yarnConfiguration, sourceFile.getPath())) {
-                srcDirs.add(sourceFile.getPath());
-                tgtDirs.add(pathBuilder.convertAtlasFile(sourceFile.getPath(), podId, tenantId, s3Bucket));
+                requests.add(new ExportRequest(sourceFile.getPath(),
+                        pathBuilder.convertAtlasFile(sourceFile.getPath(), podId, tenantId, s3Bucket)));
             }
         } catch (Exception ex) {
             log.warn("Failed to copy file for taining table =" + modelSummary.getTrainingTableName() + " for tenantId="
@@ -82,29 +81,29 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
         }
     }
 
-    protected void addAtlasMetadataFile(List<String> srcDirs, List<String> tgtDirs, String filePath) {
+    protected void addAtlasMetadataFile(List<ExportRequest> requests, String filePath) {
         try {
             if (StringUtils.isNotBlank(filePath) && HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                srcDirs.add(filePath);
-                tgtDirs.add(pathBuilder.convertAtlasMetadata(filePath, podId, tenantId, s3Bucket));
+                requests.add(new ExportRequest(filePath,
+                        pathBuilder.convertAtlasMetadata(filePath, podId, tenantId, s3Bucket)));
             }
         } catch (Exception ex) {
             log.warn("Failed to copy file=" + filePath + " for tenantId=" + tenantId, " cause=" + ex.getMessage());
         }
     }
 
-    protected void addAtlasFile(List<String> srcDirs, List<String> tgtDirs, String filePath) {
+    protected void addAtlasFile(List<ExportRequest> requests, String filePath) {
         try {
             if (StringUtils.isNotBlank(filePath) && HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                srcDirs.add(filePath);
-                tgtDirs.add(pathBuilder.convertAtlasFile(filePath, podId, tenantId, s3Bucket));
+                requests.add(
+                        new ExportRequest(filePath, pathBuilder.convertAtlasFile(filePath, podId, tenantId, s3Bucket)));
             }
         } catch (Exception ex) {
             log.warn("Failed to copy file=" + filePath + " for tenantId=" + tenantId, " cause=" + ex.getMessage());
         }
     }
 
-    private void addTableDirs(String tableName, List<String> srcDirs, List<String> tgtDirs) {
+    private void addTableDirs(String tableName, List<ExportRequest> requests) {
         if (StringUtils.isNotBlank(tableName)) {
             Table table = metadataProxy.getTable(customer, tableName);
             if (table != null) {
@@ -114,8 +113,7 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
                         if (StringUtils.isNotBlank(extract.getPath())) {
                             String srcDir = pathBuilder.getFullPath(extract.getPath());
                             String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
-                            srcDirs.add(srcDir);
-                            tgtDirs.add(tgtDir);
+                            requests.add(new ExportRequest(srcDir, tgtDir));
                         }
                     });
                 }
@@ -125,11 +123,20 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
         }
     }
 
-    private void addModelingArtifactsDirs(List<String> srcDirs, List<String> tgtDirs, ModelSummary modelSummary) {
+    private void addModelingArtifactsDirs(List<ExportRequest> requests, ModelSummary modelSummary) {
         String[] parts = modelSummary.getLookupId().split("\\|");
         String eventTable = parts[1];
-        srcDirs.add(pathBuilder.getHdfsAnalyticsModelTableDir(customer, eventTable));
-        srcDirs.add(pathBuilder.getHdfsAnalyticsDataTableDir(customer, eventTable));
+
+        ExportRequest request = new ExportRequest();
+        request.srcDir = pathBuilder.getHdfsAnalyticsModelTableDir(customer, eventTable);
+        request.tgtDir = pathBuilder.getS3AnalyticsModelTableDir(s3Bucket, tenantId, eventTable);
+        requests.add(request);
+
+        request = new ExportRequest();
+        request.srcDir = pathBuilder.getHdfsAnalyticsDataTableDir(customer, eventTable);
+        request.tgtDir = pathBuilder.getS3AnalyticsDataTableDir(s3Bucket, tenantId, eventTable);
+        requests.add(request);
+
         String hdfsMetadataDir = pathBuilder.getHdfsAnalyticsMetaDataTableDir(customer, eventTable, "Event");
         boolean isEvent = true;
         try {
@@ -141,14 +148,13 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
             log.warn("Failed to get modeling Metadata dir!");
             return;
         }
-        srcDirs.add(hdfsMetadataDir);
-
-        tgtDirs.add(pathBuilder.getS3AnalyticsModelTableDir(s3Bucket, tenantId, eventTable));
-        tgtDirs.add(pathBuilder.getS3AnalyticsDataTableDir(s3Bucket, tenantId, eventTable));
+        request = new ExportRequest();
+        request.srcDir = hdfsMetadataDir;
         String s3MetadataDir = isEvent
                 ? pathBuilder.getS3AnalyticsMetaDataTableDir(s3Bucket, tenantId, eventTable, "Event")
                 : pathBuilder.getS3AnalyticsMetaDataTableDir(s3Bucket, tenantId, eventTable, "Target");
-        tgtDirs.add(s3MetadataDir);
+        request.tgtDir = s3MetadataDir;
+        requests.add(request);
     }
 
     private ModelSummary getModelSummary() {
