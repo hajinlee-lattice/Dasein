@@ -10,27 +10,37 @@ INSERT INTO TENANT(
 TENANT_ID,
 NAME,
 REGISTERED_TIME,
-UI_VERSION
+UI_VERSION,
+STATUS,
+TENANT_TYPE
 ) VALUES (
 'LocalTest.LocalTest.Production',
 'LocalTest',
 UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR )),
-'3.0'
+'3.0',
+'ACTIVE',
+'CUSTOMER'
 ), (
 'LocalTest2.LocalTest2.Production',
 'LocalTest2',
 UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR )),
-'3.0'
+'3.0',
+'ACTIVE',
+'CUSTOMER'
 ), (
 'PropDataService.PropDataService.Production',
 'PropDataService',
 UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR )),
-'3.0'
+'3.0',
+'ACTIVE',
+'CUSTOMER'
 ), (
 'DataCloudService.DataCloudService.Production',
 'DataCloudService',
 UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR )),
-'3.0'
+'3.0',
+'ACTIVE',
+'CUSTOMER'
 );
 
 CREATE TABLE WORKFLOW_JOB_INSTANCE (
