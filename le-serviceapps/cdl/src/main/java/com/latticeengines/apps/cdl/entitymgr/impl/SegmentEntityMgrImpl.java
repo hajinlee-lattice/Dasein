@@ -102,8 +102,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         }
     }
 
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public MetadataSegment updateSegment(MetadataSegment segment, MetadataSegment existingSegment) {
         preprocessBeforeCreateOrUpdate(segment);
 
@@ -112,6 +113,21 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
             existingSegment = cloneForUpdate(existingSegment, segment);
             segmentDao.update(existingSegment);
             setMetadataSegmentActionContext(existingSegment);
+            return existingSegment;
+        } else {
+            throw new RuntimeException("Segment does not already exists");
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public MetadataSegment updateSegmentWithoutAction(MetadataSegment segment, MetadataSegment existingSegment) {
+        preprocessBeforeCreateOrUpdate(segment);
+
+        if (existingSegment != null) {
+            existingSegment = findByName(existingSegment.getName());
+            existingSegment = cloneForUpdate(existingSegment, segment);
+            segmentDao.update(existingSegment);
             return existingSegment;
         } else {
             throw new RuntimeException("Segment does not already exists");

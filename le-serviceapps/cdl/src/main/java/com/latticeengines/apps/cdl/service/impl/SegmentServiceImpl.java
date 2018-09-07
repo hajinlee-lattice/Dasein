@@ -128,6 +128,7 @@ public class SegmentServiceImpl implements SegmentService {
         if (existingSegment != null) {
             map = updateSegmentCounts(existingSegment);
         }
+        evictRatingMetadataCache();
         return map;
     }
 
@@ -147,6 +148,8 @@ public class SegmentServiceImpl implements SegmentService {
             }
             timer.setTimerMessage("Finished updating counts for " + CollectionUtils.size(segments) + " segments.");
             return review;
+        } finally {
+            evictRatingMetadataCache();
         }
     }
 
@@ -178,12 +181,9 @@ public class SegmentServiceImpl implements SegmentService {
         MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
         Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
         counts.forEach(segmentCopy::setEntityCount);
-
-        log.info(
-                "Updating counts for segment " + segment + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
-        segment = segmentEntityMgr.updateSegment(segmentCopy, segment);
-        evictRatingMetadataCache();
-
+        log.info("Updating counts for segment " + segment.getName() + " (" + segment.getDisplayName() + ")" //
+                + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
+        segment = segmentEntityMgr.updateSegmentWithoutAction(segmentCopy, segment);
         return segment.getEntityCounts();
     }
 
