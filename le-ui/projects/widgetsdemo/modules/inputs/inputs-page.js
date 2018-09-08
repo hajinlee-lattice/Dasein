@@ -23,9 +23,10 @@ export default class InputsPage extends Component {
           <div>
             <LeInputText
               config={{
-                placeholder: "Type callback with debounce",
+                placeholder: "Callback with debounce 2s",
                 classNames: ["button", "borderless-button"],
                 icon: "fa fa-search",
+                label: "First Name",
                 clearIcon: true,
                 debounce:2000
               }}
@@ -35,9 +36,20 @@ export default class InputsPage extends Component {
           <div>
             <LeInputText
               config={{
-                placeholder: "Type call back NOT debounced",
+                placeholder: "Callback NOT debounced",
                 classNames: ["button", "borderless-button"],
                 icon: "",
+                label: "Address with number and zip code",
+                clearIcon: true
+              }}
+              callback={this.callback}
+            />
+          </div>
+          <div>
+            <LeInputText
+              config={{
+                placeholder: "Callback NOT debounced",
+                classNames: ["button", "borderless-button"],
                 clearIcon: false
               }}
               callback={this.callback}

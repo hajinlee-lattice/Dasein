@@ -1,10 +1,7 @@
 import React, { Component } from "../../react-vendor";
-import Aux from "../hoc/_Aux";
-import debounce from '../utilities/debounce';
-
+import debounce from "../utilities/debounce";
 
 import "./le-input-text.scss";
-
 
 class LeInputText extends Component {
   constructor(props) {
@@ -13,27 +10,21 @@ class LeInputText extends Component {
     this.clearCallback = this.clearCallback.bind(this);
     this.typedCallback = this.typedCallback.bind(this);
     this.state = { value: "" };
-    this.timer;
   }
-
 
   getPlaceholder() {
     return this.config.placeholder ? this.config.placeholder : "";
   }
 
-  clearCallback() {
-    this.setState({ value: "" });
-    if (this.props.callback) {
-      this.props.callback('');
-    }
-  }
-  typedCallback(event) {
-    let val = event.target.value;
-    this.setState({ value: val });
-    if (this.props.callback) {
-      debounce(() => {
-        return this.props.callback(val);
-      },this.config.debounce ?this.config.debounce : 0);
+  getLabel() {
+    if(this.props.config.label){
+      return (
+        <span className="input-label">
+          <span>{this.props.config.label}</span>
+        </span>
+      );
+    }else {
+      return null;
     }
   }
   getIcon() {
@@ -49,7 +40,7 @@ class LeInputText extends Component {
   }
 
   getClearIcon() {
-    if (this.config.clearIcon) {
+    if (this.config.clearIcon && this.state.value && this.state.value != '') {
       return (
         <span className="input-icon">
           <span
@@ -63,10 +54,27 @@ class LeInputText extends Component {
     }
   }
 
+  clearCallback() {
+    this.setState({ value: "" });
+    if (this.props.callback) {
+      this.props.callback("");
+    }
+  }
+  typedCallback(event) {
+    let val = event.target.value;
+    this.setState({ value: val });
+    if (this.props.callback) {
+      debounce(() => {
+        return this.props.callback(val);
+      }, this.config.debounce ? this.config.debounce : 0);
+    }
+  }
+
   render() {
     return (
       <div className="input-icon-wrap">
         {this.getIcon()}
+        {this.getLabel()}
         <input
           type="text"
           value={this.state.value}
@@ -76,6 +84,7 @@ class LeInputText extends Component {
           className="input-with-icon"
           placeholder={this.getPlaceholder()}
         />
+
         {this.getClearIcon()}
       </div>
     );
