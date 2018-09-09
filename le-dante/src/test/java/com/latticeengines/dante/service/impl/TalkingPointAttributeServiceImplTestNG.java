@@ -71,6 +71,16 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
             public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, Version version) {
                 return null;
             }
+
+            @Override
+            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Version version) {
+                return null;
+            }
         });
         ((TalkingPointAttributeServiceImpl) talkingPointAttributeService).setServingStoreProxy(spiedServingStoreProxy);
 

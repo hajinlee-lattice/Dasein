@@ -105,4 +105,32 @@ public class ServingStoreResource {
         return flux;
     }
 
+    @GetMapping(value = "/allow-modeling")
+    @ResponseBody
+    @ApiOperation(value = "Get attributes that are allowed for modeling")
+    public Flux<ColumnMetadata> getAllowedModelingAttrs( //
+            @PathVariable String customerSpace,
+            @RequestParam(name = "version", required = false) DataCollection.Version version) {
+
+        AtomicLong timer = new AtomicLong();
+        AtomicLong counter = new AtomicLong();
+        Flux<ColumnMetadata> flux;
+        flux = servingStoreService.getSystemMetadata(BusinessEntity.Account,
+                version != null ? version : dataCollectionService.getActiveVersion(customerSpace)).sequential();
+        flux = flux //
+                .doOnSubscribe(s -> {
+                    timer.set(System.currentTimeMillis());
+                    log.info("Start serving system metadata for " + customerSpace + ":" + customerSpace);
+                }) //
+                .doOnNext(cm -> counter.getAndIncrement()) //
+                .doOnComplete(() -> {
+                    long duration = System.currentTimeMillis() - timer.get();
+                    log.info("Finished serving system metadata for " + counter.get() + " attributes from "
+                            + customerSpace + " TimeElapsed=" + duration + " msec");
+                });
+
+        flux = flux.filter(cm -> cm.getCanModel());
+        return flux;
+    }
+
 }

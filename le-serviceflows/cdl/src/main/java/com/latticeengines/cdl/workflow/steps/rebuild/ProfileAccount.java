@@ -306,9 +306,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         filterGroups.add(ColumnSelection.Predefined.Model);
 
         List<String> retainAttrNames = servingStoreProxy
-                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null,
-                        tableFromActiveVersion ? active : inactive) //
-                .filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor)) //
+                .getAllowedModelingAttrs(customerSpace.toString(), tableFromActiveVersion ? active : inactive) //
                 .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
         if (retainAttrNames == null) {

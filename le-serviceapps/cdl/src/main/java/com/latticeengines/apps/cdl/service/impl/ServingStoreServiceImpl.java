@@ -33,7 +33,8 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version) {
+    public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity,
+            DataCollection.Version version) {
         return customizedMetadataStore.getMetadataInParallel(entity, version).map(cm -> {
             cm.setBitOffset(null);
             cm.setNumBits(null);
@@ -52,16 +53,14 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 cm.disableGroup(ColumnSelection.Predefined.Enrichment);
                 cm.disableGroup(ColumnSelection.Predefined.TalkingPoint);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
-                //TODO: YSong-M22 even if inactive, we still want to use it for model
-                // cm.disableGroup(ColumnSelection.Predefined.Model);
+                cm.disableGroup(ColumnSelection.Predefined.Model);
             }
 
             if (AttrState.Deprecated.equals(cm.getAttrState())) {
                 // disable these useages if it is deprecated attribute.
                 cm.disableGroup(ColumnSelection.Predefined.Enrichment);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
-                //TODO: YSong-M22 even if deprecated, we still want to use it for model
-                // cm.disableGroup(ColumnSelection.Predefined.Model);
+                cm.disableGroup(ColumnSelection.Predefined.Model);
             }
 
             return cm;
@@ -69,7 +68,8 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity, DataCollection.Version version) {
+    public Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity,
+            DataCollection.Version version) {
         return getFullyDecoratedMetadata(entity, version).sorted(Comparator.comparing(ColumnMetadata::getAttrName));
     }
 

@@ -47,7 +47,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -215,9 +214,7 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         filterGroups.add(ColumnSelection.Predefined.ID);
         filterGroups.add(ColumnSelection.Predefined.Model);
 
-        List<String> retainAttrNames = servingStoreProxy
-                .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null, inactive) //
-                .filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor)) //
+        List<String> retainAttrNames = servingStoreProxy.getAllowedModelingAttrs(customerSpace.toString(), inactive) //
                 .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
         if (retainAttrNames == null) {

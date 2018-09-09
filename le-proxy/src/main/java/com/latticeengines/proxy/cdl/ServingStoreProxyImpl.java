@@ -102,4 +102,31 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
         }
     }
 
+    @Override
+    public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/allow-modeling",
+                shortenCustomerSpace(customerSpace));
+        List<ColumnMetadata> list = getList("serving store allowed modeling", url, ColumnMetadata.class);
+        if (CollectionUtils.isNotEmpty(list)) {
+            return Flux.fromIterable(list);
+        } else {
+            return Flux.empty();
+        }
+    }
+
+    @Override
+    public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, Version version) {
+        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/allow-modeling",
+                shortenCustomerSpace(customerSpace));
+        if (version != null) {
+            url += "?version=" + version.toString();
+        }
+        List<ColumnMetadata> list = getList("serving store allowed modeling", url, ColumnMetadata.class);
+        if (CollectionUtils.isNotEmpty(list)) {
+            return Flux.fromIterable(list);
+        } else {
+            return Flux.empty();
+        }
+    }
+
 }

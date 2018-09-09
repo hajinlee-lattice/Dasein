@@ -20,7 +20,12 @@ public interface ServingStoreProxy {
 
     Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, DataCollection.Version version);
 
+    Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace);
+
+    Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, DataCollection.Version version);
+
     // only use cache when you have performance needs.
     // otherwise using above non-cached apis gives more up-to-date info.
     List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity);
+
 }
