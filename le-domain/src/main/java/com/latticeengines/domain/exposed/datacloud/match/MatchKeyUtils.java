@@ -6,8 +6,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +22,19 @@ public class MatchKeyUtils {
 
     private static final List<String> domainFields = new ArrayList<>(Arrays.asList("domain", "website", "email", "url"));
     private static final String latticeAccountId = "latticeaccountid";
+
+    /**
+     * Match key level -> accuracy level Lower accuracy level, less information
+     * in match input
+     */
+    private static final Map<MatchKey, Integer> KEY_LEVEL = new HashMap<MatchKey, Integer>() {
+        {
+            put(MatchKey.Name, 0);
+            put(MatchKey.Country, 1);
+            put(MatchKey.State, 2);
+            put(MatchKey.City, 3);
+        }
+    };
 
     public static Map<MatchKey, List<String>> resolveKeyMap(Schema schema) {
         List<String> fieldNames = new ArrayList<>();
@@ -96,6 +112,98 @@ public class MatchKeyUtils {
         log.debug("Resolved KeyMap from fields " + fields + " : " + JsonUtils.serialize(keyMap));
 
         return keyMap;
+    }
+
+    /**
+     * Only to evaluate name/location based match key level Match key tuple
+     * without name should not be accepted by name/location based match TODO:
+     * Evaluate key level for phone number and zipcode
+     */
+    public static MatchKey evalKeyLevel(MatchKeyTuple tuple) {
+        if (StringUtils.isNotBlank(tuple.getName()) //
+                && StringUtils.isNotBlank(tuple.getCountryCode()) //
+                && StringUtils.isNotBlank(tuple.getCity())) {
+            return MatchKey.City;
+        }
+        if (StringUtils.isNotBlank(tuple.getName()) //
+                && StringUtils.isNotBlank(tuple.getCountryCode()) //
+                && StringUtils.isNotBlank(tuple.getState())) {
+            return MatchKey.State;
+        }
+        if (StringUtils.isNotBlank(tuple.getName()) //
+                && StringUtils.isNotBlank(tuple.getCountryCode())) {
+            return MatchKey.Country;
+        }
+        if (StringUtils.isNotBlank(tuple.getName())) {
+            return MatchKey.Name;
+        }
+        return null;
+    }
+
+    /**
+     * Compare accuracy of match key level Lower accuracy level, less
+     * information in match input Return 0: same key level Return -1: compared
+     * has lower accuracy than compareTo Return 1: compared has higher accuracy
+     * than compareTo
+     */
+    public static int compareKeyLevel(MatchKey compared, MatchKey compareTo) {
+        if (!KEY_LEVEL.containsKey(compared) || !KEY_LEVEL.containsKey(compareTo)) {
+            throw new UnsupportedOperationException(
+                    String.format("Not able to compare match key level between %s and %s", compared, compareTo));
+        }
+        if (KEY_LEVEL.get(compared) > KEY_LEVEL.get(compareTo)) {
+            return 1;
+        }
+        if (KEY_LEVEL.get(compared) < KEY_LEVEL.get(compareTo)) {
+            return -1;
+        }
+        return 0;
+    }
+
+    /**
+     * Evaluate key partition based on the input {@link MatchKeyTuple}.
+     * Currently, only name/location based match key partition is used.
+     * 
+     * @param tuple
+     *            input match keys
+     * @return {@literal null} if no name/location fields present. otherwise, a
+     *         string representing the partition is returned.
+     */
+    public static String evalKeyPartition(MatchKeyTuple tuple) {
+        if (tuple == null) {
+            return null;
+        }
+
+        List<String> keys = new ArrayList<>();
+        // relevant fields
+        if (StringUtils.isNotEmpty(tuple.getName())) {
+            keys.add(MatchKey.Name.name());
+        }
+        if (StringUtils.isNotEmpty(tuple.getCountryCode())) {
+            keys.add(MatchKey.Country.name());
+        }
+        if (StringUtils.isNotEmpty(tuple.getCity())) {
+            keys.add(MatchKey.City.name());
+        }
+        if (StringUtils.isNotEmpty(tuple.getState())) {
+            keys.add(MatchKey.State.name());
+        }
+
+        return buildKeyPartition(keys);
+    }
+
+    /**
+     * Sort and return comma separated key names
+     * 
+     * @param keys
+     * @return
+     */
+    public static String buildKeyPartition(List<String> keys) {
+        if (CollectionUtils.isEmpty(keys)) {
+            return null;
+        }
+        List<String> sortedKeys = keys.stream().sorted().collect(Collectors.toList());
+        return String.join(",", sortedKeys);
     }
 
 }

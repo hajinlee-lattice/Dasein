@@ -118,7 +118,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
         node = node.filter(String.format("%s != null && %s != null", config.getDomainField(), config.getCountryField()),
                 new FieldList(config.getDomainField(), config.getCountryField()));
         node = node.groupByAndLimit(new FieldList(config.getDomainField(), config.getCountryField()),
-                new FieldList(DataCloudConstants.ATTR_IS_CTY_PRIMARY_LOCATION), 1, true, true);
+                new FieldList(DataCloudConstants.ATTR_IS_CTRY_PRIMARY_LOCATION), 1, true, true);
         node = node.apply(
                 new AMLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), null, null),

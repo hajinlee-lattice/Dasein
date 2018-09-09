@@ -80,7 +80,7 @@ public class AMSeedPriActFix extends ConfigurableFlowBase<TransformerConfig> {
                         new FieldMetadata(DataCloudConstants.ATTR_IS_PRIMARY_LOCATION, String.class))
                 .apply(String.format("%s != null ? \"Y\" : \"N\"", LATTICEID_PRILOC_CTY),
                         new FieldList(LATTICEID_PRILOC_CTY),
-                        new FieldMetadata(DataCloudConstants.ATTR_IS_CTY_PRIMARY_LOCATION, String.class))
+                        new FieldMetadata(DataCloudConstants.ATTR_IS_CTRY_PRIMARY_LOCATION, String.class))
                 .apply(String.format("%s != null ? \"Y\" : \"N\"", LATTICEID_PRILOC_ST),
                         new FieldList(LATTICEID_PRILOC_ST),
                         new FieldMetadata(DataCloudConstants.ATTR_IS_ST_PRIMARY_LOCATION, String.class))

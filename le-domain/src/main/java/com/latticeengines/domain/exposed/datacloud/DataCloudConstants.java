@@ -29,6 +29,7 @@ public final class DataCloudConstants {
     public static final String ATTR_IS_PRIMARY_DOMAIN = "LE_IS_PRIMARY_DOMAIN";
     public static final String ATTR_LDC_NAME = "LDC_Name";
     public static final String ATTR_LDC_DOMAIN = "LDC_Domain";
+    public static final String ATTR_LDC_DUNS = "LDC_Duns";
     public static final String ATTR_LDC_INDUSTRY = "LDC_PrimaryIndustry";
     public static final String ATTR_IS_PRIMARY_ACCOUNT = "IsPrimaryAccount";
     public static final String ATTR_LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
@@ -40,7 +41,7 @@ public final class DataCloudConstants {
     public static final String ATTR_EMPLOYEE_HERE_CODE = "EMPLOYEES_HERE_RELIABILITY_CODE";
     public static final String ATTR_EMPLOYEE_TOTAL = "EMPLOYEES_TOTAL";
     public static final String ATTR_EMPLOYEE_TOTAL_CODE = "EMPLOYEES_TOTAL_RELIABILITY_CODE";
-    public static final String ATTR_IS_CTY_PRIMARY_LOCATION = "IsCountryPrimaryLocation";
+    public static final String ATTR_IS_CTRY_PRIMARY_LOCATION = "IsCountryPrimaryLocation";
     public static final String ATTR_IS_ST_PRIMARY_LOCATION = "IsStatePrimaryLocation";
     public static final String ATTR_IS_ZIP_PRIMARY_LOCATION = "IsZipPrimaryLocation";
     public static final String ATTR_ALEXA_RANK = "AlexaRank";
