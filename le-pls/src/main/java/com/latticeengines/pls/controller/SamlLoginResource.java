@@ -265,7 +265,7 @@ public class SamlLoginResource {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        spLoginRequest.getRequestParameters().keySet().forEach(key -> {
+        reqParams.keySet().forEach(key -> {
             sb.append(key).append("=").append(reqParams.get(key)).append("&");
         });
         sb.append(RETURN_TO_PARAM).append("=").append(returnToValue);
