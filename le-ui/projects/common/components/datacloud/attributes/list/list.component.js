@@ -29,7 +29,6 @@ angular.module('common.attributes.list', [])
             vm.countSelected();
 
             vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
-            // console.log('attrResultsList', vm);
         };
         
         vm.autoDrillDown = function() {
@@ -46,6 +45,7 @@ angular.module('common.attributes.list', [])
                     if (attr.IsPremium) {
                         vm.filters.disabled = false;
                     }
+                    
                     return attr.Selected;
                 });
 

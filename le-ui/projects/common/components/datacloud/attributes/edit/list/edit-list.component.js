@@ -4,7 +4,7 @@ angular.module('common.attributes.edit.list', [])
     bindings: {
         filters: '<'
     },
-    controller: function ($state, AttrConfigStore, BrowserStorageUtility) {
+    controller: function ($state, $timeout, AttrConfigStore, AttrConfigService) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -14,10 +14,39 @@ angular.module('common.attributes.edit.list', [])
             vm.section = vm.store.getSection();
             vm.category = vm.store.get('category');
             vm.data = vm.store.get('data');
+
+            vm.store.setData('original', JSON.parse(JSON.stringify(vm.data.config)));
         };
         
         this.getResults = function() {
             return this.data.config.Attributes;
+        };
+
+        this.onBlur = function(item, name) {
+            if (item.DisplayName === '') {
+                item.DisplayName = item.DefaultName;
+            }
+
+            var original = vm.store.getData('original')
+                            .Attributes.filter(function(attr) {
+                                return attr.Attribute == item.Attribute;
+                            });
+
+            original = original.length > 0 ? original[0] : item;
+
+            if (item.DisplayName != original.DisplayName || item.Description != original.Description) {
+                AttrConfigService.putConfig(
+                    'name', vm.category, {}, vm.data.config
+                ).then(function(result) {
+                    angular.element('#'+name).addClass('saved');
+
+                    $timeout(function() {
+                        angular.element('#'+name).removeClass('saved');
+                    }, 1250);
+
+                    vm.attr_edit_form[name].$setPristine();
+                });
+            }
         };
     }
 });

@@ -16,7 +16,7 @@ angular.module('common.attributes.subheader', [])
             
             switch(vm.section) {
                 case "enable": vm.supplemental = "ENABLED"; break;
-                case "enable": vm.supplemental = "ACTIVE"; break;
+                case "activate": vm.supplemental = "ACTIVE"; break;
                 default: vm.supplemental = ""; break;
             }
 

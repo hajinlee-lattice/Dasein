@@ -1,4 +1,5 @@
 angular.module('login.tenants', [
+    'pd.navigation.pagination',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'common.utilities.SessionTimeout'
@@ -14,6 +15,9 @@ angular.module('login.tenants', [
         LoginService, LoginStore, SessionTimeoutUtility, Banner
     ) {
         var vm = this;
+
+        vm.pagesize = 250;
+        vm.current = 1;
 
         vm.$onInit = function() {
             vm.ResourceUtility = ResourceUtility;

@@ -39,9 +39,9 @@ angular
     this.cancelledJobs = {};
 
     function isImportJob(job){
-        if(job.jobType === 'processAnalyzeWorkflow'){
+        if (job.jobType === 'processAnalyzeWorkflow') {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

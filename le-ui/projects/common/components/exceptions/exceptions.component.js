@@ -70,7 +70,8 @@ angular
             url = response.config.url,
             title = uiAction.title || (http_code + ' "' + http_err + '" ' + url),
             message = uiAction.message || payload.errorMsg || payload.error_description,
-            opts = angular.extend({ title: title, message: message }, options),
+            name = "API_Exception",
+            opts = angular.extend({ title: title, message: message, name: name }, options),
             cbSplit = callback ? callback.split('.') : [],
             cbService = callback ? $injector.get(cbSplit[0]) : null,
             cbMethod = callback ? cbSplit[1] : null;

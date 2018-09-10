@@ -1,4 +1,4 @@
-<div class="attr-results-container">
+<form action="" name="$ctrl.attr_edit_form" class="attr-results-container">
     <ul class="attr-pagination-top" ng-if="filteredList.length > $ctrl.filters.pagesize">
         <li class="attr-pagination">
             <pd-pagination-controls
@@ -34,20 +34,35 @@
         </li>
 
         <li ng-repeat="item in (filteredList = ($ctrl.getResults()
-                        | filter: $ctrl.searchFilter
+                        | filter: $ctrl.filters.queryText
                         | filter: $ctrl.getFiltering()))
-                        | orderBy: [ $ctrl.filters.sortPrefix + 'DisplayName' ]
+                        | orderBy: [ $ctrl.filters.sortPrefix + 'Attribute' ]
                         | startFrom: ($ctrl.filters.page - 1) * $ctrl.getPageSize()
                         | limitTo: $ctrl.getPageSize()">
 
             <div class="edit-attribute-name">
-                <label for="attrDisplayName">{{ item.Attribute }}</label>
+                <label for="attrDisplayName_{{$index}}">{{ item.Attribute }}</label>
             </div>
+            
             <div class="edit-attribute-displayname">
-                <input name="attrDisplayName" type="text" value="{{ item.DisplayName }}" class="form-control"></input>
+                <input 
+                        name="attrDisplayName_{{$index}}" 
+                        id="attrDisplayName_{{$index}}" 
+                        type="text" 
+                        class="form-control"
+                        ng-model="item.DisplayName"
+                        ng-blur="$ctrl.onBlur(item, 'attrDisplayName_' + $index)">
+                </input>
             </div>
+
             <div class="edit-attribute-description">
-                <textarea name="attrDescription" id="attrDescription" rows="1" class="form-control">{{ item.Description }}</textarea>
+                <textarea 
+                        name="attrDescription_{{$index}}" 
+                        id="attrDescription_{{$index}}" 
+                        class="form-control"
+                        ng-model="item.Description" 
+                        ng-blur="$ctrl.onBlur(item, 'attrDescription_' + $index)">
+                </textarea>
             </div>
 
         </li>
@@ -61,4 +76,4 @@
             </pd-pagination-controls>
         </li>
     </ul>
-</div>
+</form>

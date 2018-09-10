@@ -31,9 +31,10 @@ angular.module('common.banner', [])
         var old = opts.name ? this.get(opts.name) : [];
         
         old = old.filter(function(item) {
-            return (item.type == banner.type && item.title == banner.title && item.message == banner.message);
+            //console.log(item, banner, item.type == banner.type, item.title == banner.title, item.message.toString() == banner.message.toString());
+            return (item.type == banner.type && item.title == banner.title && item.message.toString() == banner.message.toString());
         });
-
+        //console.log('-!- banner', opts.name, old, banner);
         if (old.length > 0) {
             old.forEach(function(item) {
                 item.badge++;

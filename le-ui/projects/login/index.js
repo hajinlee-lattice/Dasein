@@ -36,6 +36,7 @@ import '../common/components/banner/banner.component';
 import '../common/components/modal/modal.component';
 import '../common/components/notice/notice.component';
 import '../common/components/exceptions/exceptions.component';
+import '../common/components/pagination/pagination.component';
 
 
 import "./app/app.component";

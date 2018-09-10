@@ -254,17 +254,34 @@ Badges
     white-space: nowrap;
     vertical-align: middle;
     background-color: #e7e7e7;
+  	color: #222;
     &.gray-badge {
-    	color: #222;
+      color: #222;
     	background-color: #e7e7e7;
     }
     &.green-badge { 
-    	background-color: #71bc51;
-    	color: #fff;
+      background-color: #71bc51;
+      color: #fff;
+    }
+    &.olive-badge { 
+      background-color: #129e4e;
+      color: #fff;
     }
     &.blue-badge {
-    	background-color: #3989c4;
-    	color: #fff;
+      background-color: #3989c4;
+      color: #fff;
+    }
+    &.orange-badge {
+      background-color: #ef6a30;
+      color: #fff;
+    }
+    &.gold-badge {
+      background-color: #ef9d18;
+      color: #fff;
+    }
+    &.purple-badge {
+      background-color: #9f6fe2;
+      color: #fff;
     }
 }
 

@@ -11,11 +11,37 @@
             vertical-align: middle;
             padding: .33em 1em;
 
+            &:first-child {
+                padding-left: 0;
+            }
+
+            &:last-child {
+                padding-right: 0;
+            }
+
             label {
+                
+            }
+
+            input,
+            textarea {
+                transition: all 0.25s ease;
+                
+                &.ng-dirty {
+                    border-color: #457eba;
+                    border-left-width: 6px;
+                    transition: none;
+                }
+                
+                &.saved {
+                    border-color: #6fbe4a;
+                    border-left-width: 6px;
+                    transition: all 0.25s ease;
+                }
             }
 
             textarea {
-                height: 1.2em;
+                min-height: 3.5em;
                 width: 100%;
             } 
             

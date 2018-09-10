@@ -47,12 +47,16 @@ angular.module('common.attributes')
         this[property] = value;
     };
 
+    this.get = function(property) {
+        return this[property];
+    };
+
     this.setData = function(type, data) {
         this.data[type] = data;
     };
 
-    this.get = function(property) {
-        return this[property];
+    this.getData = function(property) {
+        return this.data[property];
     };
     
     this.getAccessRestriction = function() {

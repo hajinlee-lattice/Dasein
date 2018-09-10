@@ -39,7 +39,7 @@
         </li>
 
         <li ng-repeat="item in (filteredList = ($ctrl.getResults()
-                        | filter: $ctrl.searchFilter
+                        | filter: $ctrl.filters.queryText
                         | filter: $ctrl.getFiltering()))
                         | orderBy: [ $ctrl.filters.sortPrefix + 'DisplayName' ]
                         | startFrom: ($ctrl.filters.page - 1) * $ctrl.getPageSize()
