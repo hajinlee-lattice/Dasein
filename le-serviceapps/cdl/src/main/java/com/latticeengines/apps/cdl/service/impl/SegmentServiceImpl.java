@@ -142,8 +142,13 @@ public class SegmentServiceImpl implements SegmentService {
                 // Do not parallel, as it will be bottle-necked at objectapi
                 segments.forEach(segment -> {
                     String name = segment.getName();
-                    Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
-                    review.put(name, counts);
+                    try {
+                        Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
+                        review.put(name, counts);
+                    } catch (Exception e) {
+                        log.warn("Failed to update counts for segment " + name + //
+                                " in tenant " + MultiTenantContext.getShortTenantId());
+                    }
                 });
             }
             timer.setTimerMessage("Finished updating counts for " + CollectionUtils.size(segments) + " segments.");

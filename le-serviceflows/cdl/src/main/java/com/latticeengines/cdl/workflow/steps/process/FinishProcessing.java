@@ -90,7 +90,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         // update segment and rating engine counts
         SegmentCountUtils.invokeMetadataApi(servingStoreProxy, customerSpace.toString());
-        SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
+        SegmentCountUtils.updateEntityCounts(segmentProxy, customerSpace.toString());
         updateActiveRuleModelCounts();
         setPublishedModels();
     }
