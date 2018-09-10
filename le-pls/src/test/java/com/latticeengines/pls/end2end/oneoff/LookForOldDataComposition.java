@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,12 +20,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.scoringapi.DataComposition;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class LookForOldDataComposition extends PlsFunctionalTestNGBase {
 
@@ -43,7 +43,7 @@ public class LookForOldDataComposition extends PlsFunctionalTestNGBase {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @BeforeClass(groups = "manual")
     public void setup() throws Exception {
@@ -68,7 +68,7 @@ public class LookForOldDataComposition extends PlsFunctionalTestNGBase {
         }
         for (MSHolder model : models) {
             MultiTenantContext.setTenant(model.tenant);
-            modelSummaryEntityMgr.deleteByModelId(model.id);
+            modelSummaryProxy.deleteByModelId(model.tenantId, model.id);
         }
         log.info(JsonUtils.serialize(models));
     }

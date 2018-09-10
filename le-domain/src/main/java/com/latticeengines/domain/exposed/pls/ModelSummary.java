@@ -188,7 +188,6 @@ public class ModelSummary
         }
     }
 
-    @JsonIgnore
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "modelSummary")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<Predictor> getPredictors() {

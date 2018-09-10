@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class ModelSummaryUtils {
 
@@ -49,9 +49,8 @@ public class ModelSummaryUtils {
         return summary;
     }
     
-    public static ModelSummary createModelSummary(InternalResourceRestApiProxy plsRestProxy, Tenant tenant,
-			ModelSummaryUtils.TestModelConfiguration modelConfiguration) throws IOException {
-	    
+    public static ModelSummary createModelSummary(ModelSummaryProxy modelSummaryProxy, Tenant tenant,
+              ModelSummaryUtils.TestModelConfiguration modelConfiguration) throws IOException {
 		CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
 		ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
@@ -65,13 +64,13 @@ public class ModelSummaryUtils {
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
 
-        ModelSummary retrievedSummary = plsRestProxy.getModelSummaryFromModelId(modelConfiguration.getModelId(),
-                customerSpace);
+        ModelSummary retrievedSummary = modelSummaryProxy.getByModelId(modelConfiguration.getModelId());
         if (retrievedSummary != null) {
-            plsRestProxy.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
+            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelConfiguration.getModelId());
         }
         modelSummary.setModelType(modelConfiguration.getModelType());
-        plsRestProxy.createModelSummary(modelSummary, customerSpace);
+        modelSummaryProxy.createModelSummary(customerSpace.toString(), modelSummary, false);
+
         return modelSummary;
     }
     
@@ -143,5 +142,4 @@ public class ModelSummaryUtils {
 			return modelType;
 		}
     }
-
 }

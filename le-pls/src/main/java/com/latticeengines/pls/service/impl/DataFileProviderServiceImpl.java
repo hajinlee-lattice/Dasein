@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
-
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,9 +17,9 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.pls.service.impl.HdfsFileHttpDownloader.DownloadRequestBuilder;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 @Component("dataFileProviderService")
@@ -37,10 +36,10 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     private Configuration yarnConfiguration;
 
     @Inject
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private SourceFileProxy sourceFileProxy;
 
     @Inject
-    private SourceFileProxy sourceFileProxy;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
@@ -52,7 +51,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Override
     public void downloadPivotFile(HttpServletRequest request, HttpServletResponse response, String modelId,
             String mimeType) {
-        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
         validateModelSummary(summary, modelId);
         String filePath = summary.getPivotArtifactPath();
         downloadFileByPath(request, response, mimeType, filePath);
@@ -61,7 +60,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Override
     public void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId,
             String mimeType) {
-        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
         validateModelSummary(summary, modelId);
         String trainingFilePath = summary.getModelSummaryConfiguration()
                 .getString(ProvenancePropertyName.TrainingFilePath, "");
@@ -71,7 +70,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Override
     public void downloadModelProfile(HttpServletRequest request, HttpServletResponse response, String modelId,
             String mimeType) throws IOException {
-        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
         validateModelSummary(summary, modelId);
         String modelProfilePath = String.format("%s%s/data/%s-Event-Metadata/%s", modelingServiceHdfsBaseDir,
                 summary.getTenant().getId(), summary.getEventTableName(), MODEL_PROFILE_AVRO);
@@ -148,9 +147,8 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
         DownloadRequestBuilder requestBuilder = new DownloadRequestBuilder();
         requestBuilder.setMimeType(mimeType).setFilter(filter).setModelId(modelId)
-                .setYarnConfiguration(yarnConfiguration);
-        requestBuilder.setModelSummaryEntityMgr(modelSummaryEntityMgr)
-                .setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+                .setYarnConfiguration(yarnConfiguration).setModelSummaryProxy(modelSummaryProxy);
+        requestBuilder.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
         return new HdfsFileHttpDownloader(requestBuilder);
     }
 
@@ -166,8 +164,8 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     }
 
     @VisibleForTesting
-    void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
-        this.modelSummaryEntityMgr = modelSummaryEntityMgr;
+    void setModelSummaryProxy(ModelSummaryProxy modelSummaryProxy) {
+        this.modelSummaryProxy = modelSummaryProxy;
     }
 
     @VisibleForTesting

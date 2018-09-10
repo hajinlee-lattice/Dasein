@@ -18,6 +18,8 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.parallel.Parallel;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -29,14 +31,12 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
 
@@ -59,9 +59,6 @@ public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
     private Configuration yarnConfiguration;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
     private MetadataProxy metadataProxy;
 
     @Autowired
@@ -75,6 +72,9 @@ public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private SourceFileService sourceFileService;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Test(groups = "manual")
     public void reconstitute() throws IOException {
@@ -670,7 +670,7 @@ public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
             @Override
             public void perform(String id) {
                 System.out.println("On model id " + id);
-                ModelSummary summary = modelSummaryEntityMgr.getByModelId(id);
+                ModelSummary summary = modelSummaryProxy.getByModelId(id);
 
                 if (!StringUtils.isEmpty(summary.getTrainingTableName())
                         && summary.getTrainingTableName().contains("Source")) {

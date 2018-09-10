@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
@@ -42,7 +43,8 @@ public class PmmlModelService extends ModelServiceBase {
 
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
-        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, true, false, true);
+        ModelSummary summary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(), modelId,
+                true, false, true);
         DataComposition datacomposition;
         try {
             datacomposition = getDataComposition(summary);
@@ -101,5 +103,4 @@ public class PmmlModelService extends ModelServiceBase {
     public Set<String> getLatticeAttributeNames(String modelId) {
         return Collections.emptySet();
     }
-
 }

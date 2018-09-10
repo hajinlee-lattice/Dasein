@@ -159,7 +159,7 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
 
     private ModelSummary getModelSummary() {
         String modelId = getStringValueFromContext(SCORING_MODEL_ID);
-        return modelSummaryProxy.getModelSummaryByModelId(getConfiguration().getCustomerSpace().toString(), modelId);
+        return modelSummaryProxy.getByModelId(modelId);
     }
 
 }

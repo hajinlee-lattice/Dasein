@@ -32,9 +32,9 @@ import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component
@@ -53,13 +53,13 @@ public abstract class ModelServiceBase implements ModelService {
     protected MetadataProxy metadataProxy;
 
     @Autowired
-    protected ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
     protected TenantEntityMgr tenantEntityMgr;
 
     @Autowired
     protected SourceFileService sourceFileService;
+
+    @Autowired
+    protected ModelSummaryProxy modelSummaryProxy;
 
     @Value("${pls.modelingservice.basedir}")
     protected String customerBaseDir;

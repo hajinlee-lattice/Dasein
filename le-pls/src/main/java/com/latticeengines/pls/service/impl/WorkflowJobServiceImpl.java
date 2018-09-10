@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,7 +53,6 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.ActionService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -82,9 +80,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private SourceFileProxy sourceFileProxy;
-
-    @Inject
-    private ModelSummaryService modelSummaryService;
 
     @Inject
     private ActionService actionService;
@@ -611,7 +606,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (useMap) {
             modelSummary = modelIdToModelSummaries.get(modelId);
         } else {
-            modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+            modelSummary = modelSummaryProxy.getByModelId(modelId);
         }
 
         if (modelSummary != null) {

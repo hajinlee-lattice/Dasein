@@ -4,7 +4,6 @@ import org.apache.directory.api.util.exception.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
@@ -15,12 +14,16 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
 import com.latticeengines.modelquality.service.DataSetService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 @Component("dataSetService")
 public class DataSetServiceImpl extends BaseServiceImpl implements DataSetService {
 
     @Autowired
     DataSetEntityMgr dataSetEntityMgr;
+
+    @Autowired
+    ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public String createDataSetFromLP2Tenant(String tenantId, String modelId) {
@@ -38,9 +41,8 @@ public class DataSetServiceImpl extends BaseServiceImpl implements DataSetServic
     }
 
     private String createDataSetFromLPTenant(String tenantId, String modelId, String version) {
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryFromModelId(tenantId, modelId);
 
-        ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId,
-                CustomerSpace.parse(tenantId));
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_35005, new String[] { tenantId, modelId });
         }

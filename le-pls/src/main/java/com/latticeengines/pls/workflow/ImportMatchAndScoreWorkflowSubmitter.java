@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
@@ -31,11 +32,10 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
@@ -52,10 +52,10 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
     private SourceFileService sourceFileService;
 
     @Autowired
-    private ModelSummaryService modelSummaryService;
+    private BucketedScoreService bucketedScoreService;
 
     @Autowired
-    private BucketedScoreService bucketedScoreService;
+    private ModelSummaryProxy modelSummaryProxy;
 
     public ApplicationId submit(ModelSummary modelSummary, String fileName, TransformationGroup transformationGroup) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
@@ -70,7 +70,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { sourceFile.getTableName() });
         }
 
-        if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
+        if (!modelSummaryProxy.modelIdinTenant(MultiTenantContext.getTenant().getId(), modelId)) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
@@ -96,7 +96,8 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             String sourceDisplayName, TransformationGroup transformationGroup) {
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, true, false);
+        ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(),
+                modelId, false, true, false);
 
         Table modelingEventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
                 modelSummary.getEventTableName());

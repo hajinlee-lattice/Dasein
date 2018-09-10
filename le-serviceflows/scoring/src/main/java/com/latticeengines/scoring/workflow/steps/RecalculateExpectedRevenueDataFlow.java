@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -21,13 +22,16 @@ import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculateExpectedRevenueParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculateExpectedRevenueDataFlowConfiguration;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("recalculateExpectedRevenue")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RecalculateExpectedRevenueDataFlow extends RunDataFlow<RecalculateExpectedRevenueDataFlowConfiguration> {
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
+
     @Override
     public void execute() {
         preDataFlow();
@@ -58,10 +62,7 @@ public class RecalculateExpectedRevenueDataFlow extends RunDataFlow<RecalculateE
     }
 
     private Map<String, String> getEVFitFunctionParametersMap(Collection<String> modelIds) {
-        String internalResourceHostPort = configuration.getInternalResourceHostPort();
-        InternalResourceRestApiProxy internalResourceRestApiProxy = new InternalResourceRestApiProxy(
-            internalResourceHostPort);
-        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(internalResourceRestApiProxy,
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
                                                                                    yarnConfiguration);
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> fitFunctionParametersMap = new HashMap<>();

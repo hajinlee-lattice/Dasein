@@ -1,6 +1,7 @@
 package com.latticeengines.apps.lp.util;
 
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -9,10 +10,10 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public final class MetadataUtils {
 
     public static Table getEventTableFromModelId(String modelId, //
-            ModelSummaryEntityMgr modelSummaryEntityMgr, //
-            MetadataProxy metadataProxy) {
+                 ModelSummaryService modelSummaryService, //
+                 MetadataProxy metadataProxy) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryService.findValidByModelId(modelId);
         if (modelSummary == null) {
             throw new RuntimeException(String.format("No such model summary with id %s", modelId));
         }

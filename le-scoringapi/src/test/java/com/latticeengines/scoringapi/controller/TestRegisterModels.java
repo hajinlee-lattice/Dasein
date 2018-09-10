@@ -23,8 +23,8 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiTestUtils;
@@ -37,11 +37,11 @@ public class TestRegisterModels {
 
     public TestModelArtifactDataComposition createModels(Configuration yarnConfiguration,
                                                          BucketedScoreProxy bucketedScoreProxy,
-                                                         InternalResourceRestApiProxy plsRest, Tenant tenant, TestModelConfiguration modelConfiguration,
-            CustomerSpace customerSpace, MetadataProxy metadataProxy, TestModelSummaryParser testModelSummaryParser,
-            String hdfsSubPathForModel) throws IOException {
-        ModelSummary modelSummary = createModel(plsRest, tenant, modelConfiguration, customerSpace,
-                testModelSummaryParser);
+                                                         Tenant tenant, TestModelConfiguration modelConfiguration,
+                                                         CustomerSpace customerSpace, MetadataProxy metadataProxy, TestModelSummaryParser testModelSummaryParser,
+                                                         String hdfsSubPathForModel, ModelSummaryProxy modelSummaryProxy) throws IOException {
+        ModelSummary modelSummary = createModel(tenant, modelConfiguration, customerSpace,
+                testModelSummaryParser, modelSummaryProxy);
         createBucketMetadata(bucketedScoreProxy, modelSummary.getId(), customerSpace.toString());
         TestModelArtifactDataComposition testModelArtifactDataComposition = setupHdfsArtifacts(yarnConfiguration,
                 tenant, modelConfiguration, hdfsSubPathForModel);
@@ -58,9 +58,9 @@ public class TestRegisterModels {
         bucketedScoreProxy.createABCDBuckets(customerSpace, request);
     }
 
-    private ModelSummary createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,
+    private ModelSummary createModel(Tenant tenant,
             TestModelConfiguration modelConfiguration, CustomerSpace customerSpace,
-            TestModelSummaryParser testModelSummaryParser) throws IOException {
+            TestModelSummaryParser testModelSummaryParser, ModelSummaryProxy modelSummaryProxy) throws IOException {
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
@@ -75,13 +75,12 @@ public class TestRegisterModels {
 
         testModelSummaryParser.setPredictors(modelSummary, modelConfiguration.getModelSummaryJsonLocalpath());
 
-        ModelSummary retrievedSummary = plsRest.getModelSummaryFromModelId(modelConfiguration.getModelId(),
-                customerSpace);
+        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(), modelConfiguration.getModelId());
         if (retrievedSummary != null) {
-            plsRest.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
+            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelConfiguration.getModelId());
         }
         modelSummary.setModelType("DUMMY_MODEL_TYPE");
-        plsRest.createModelSummary(modelSummary, customerSpace);
+        modelSummaryProxy.createModelSummary(customerSpace.toString(), modelSummary, false);
         return modelSummary;
     }
 
@@ -148,8 +147,8 @@ public class TestRegisterModels {
         return testModelArtifactDataComposition;
     }
 
-    public void deleteModel(InternalResourceRestApiProxy plsRest, CustomerSpace customerSpace, String modelId) {
-        plsRest.deleteModelSummary(modelId, customerSpace);
+    public void deleteModel(ModelSummaryProxy modelSummaryProxy, CustomerSpace customerSpace, String modelId) {
+        modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelId);
     }
 
     public static void createTableEntryForModel(String tableName, Map<String, FieldSchema> fields,
@@ -194,5 +193,4 @@ public class TestRegisterModels {
         scoreResultTable.setAttributes(attributes);
         return scoreResultTable;
     }
-
 }

@@ -222,7 +222,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             for (Predictor predictor : predictors) {
                 Hibernate.initialize(predictor.getPredictorElements());
             }
-
         }
     }
 
@@ -342,7 +341,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
                                       boolean validOnly) {
-        ModelSummary summary = null;
+        ModelSummary summary;
         if (validOnly) {
             summary = dao.findValidByModelId(modelId);
         } else {
@@ -390,7 +389,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         List<ModelSummary> modelSummaries = dao.getModelSummariesByApplicationId(applicationId);
 
         for (ModelSummary modelSummary : modelSummaries) {
-            modelSummary.setPredictors(new ArrayList<Predictor>());
+            modelSummary.setPredictors(new ArrayList<>());
             modelSummary.setDetails(null);
         }
         return modelSummaries;
@@ -457,7 +456,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             return null;
         }
         List<Predictor> allPredictors = summary.getPredictors();
-        List<Predictor> predictorForBi = new ArrayList<Predictor>();
+        List<Predictor> predictorForBi = new ArrayList<>();
         for (Predictor predictor : allPredictors) {
             if (predictor.getUsedForBuyerInsights()) {
                 predictorForBi.add(predictor);
@@ -469,7 +468,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updatePredictors(List<Predictor> predictors, AttributeMap attrMap) {
-
         if (predictors == null) {
             throw new NullPointerException("Predictors should not be null when updating the predictors");
         }
@@ -508,7 +506,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
     @VisibleForTesting
     List<String> getMissingPredictors(List<Predictor> predictors, AttributeMap attrMap) {
-
         if (predictors == null) {
             throw new NullPointerException("Predictors should not be null when updating the predictors");
         }
@@ -516,11 +513,11 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             throw new NullPointerException("Attribute Map should not be null when updating the predictors");
         }
 
-        List<String> predictorNameList = new ArrayList<String>();
+        List<String> predictorNameList = new ArrayList<>();
         for (Predictor predictor : predictors) {
             predictorNameList.add(predictor.getName());
         }
-        List<String> missingNameList = new ArrayList<String>();
+        List<String> missingNameList = new ArrayList<>();
         Set<String> updatePredictorNameSet = attrMap.keySet();
         if (!predictorNameList.containsAll(updatePredictorNameSet)) {
             for (String updatePredictorName : updatePredictorNameSet) {
@@ -556,10 +553,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateLastUpdateTime(String modelGuid) {
         ModelSummary summary = dao.findByModelId(modelGuid);
-        if (summary != null) {
-            summary.setLastUpdateTime(System.currentTimeMillis());
-            dao.merge(summary);
+        if (summary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelGuid });
         }
+
+        summary.setLastUpdateTime(System.currentTimeMillis());
+        dao.merge(summary);
     }
 
 }

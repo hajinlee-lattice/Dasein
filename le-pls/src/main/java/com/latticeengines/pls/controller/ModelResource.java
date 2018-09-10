@@ -1,9 +1,11 @@
 package com.latticeengines.pls.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -37,7 +39,6 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ModelMetadataService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
@@ -46,9 +47,6 @@ import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelOperationProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "models", description = "REST resource for interacting with modeling workflows")
 @RestController
@@ -59,9 +57,6 @@ public class ModelResource {
 
     @Inject
     private MatchAndModelWorkflowSubmitter modelWorkflowSubmitter;
-
-    @Inject
-    private ModelSummaryService modelSummaryService;
 
     @Inject
     private ModelMetadataService modelMetadataService;
@@ -146,8 +141,8 @@ public class ModelResource {
                 parameters.getDeduplicationType()));
         Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getShortTenantId(), parameters.getSourceModelSummaryId());
 
-        ModelSummary modelSummary = modelSummaryService
-                .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryEnrichedByDetails(MultiTenantContext.getTenant().getId(),
+                parameters.getSourceModelSummaryId());
 
         SourceFile sourceFile = sourceFileService.findByTableName(modelSummary.getTrainingTableName());
         if (sourceFile != null) {
@@ -230,7 +225,7 @@ public class ModelResource {
     @ResponseBody
     @ApiOperation(value = "Get customer provided attributes for model")
     public ResponseDocument<List<VdbMetadataField>> getModelAttributes(@PathVariable String modelId) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryProxy.getByModelId(modelId);
         return ResponseDocument
                 .successResponse(filterAttributesForModelReview(modelMetadataService.getMetadata(modelId),
                         SchemaInterpretation.valueOf(modelSummary.getSourceSchemaInterpretation())));

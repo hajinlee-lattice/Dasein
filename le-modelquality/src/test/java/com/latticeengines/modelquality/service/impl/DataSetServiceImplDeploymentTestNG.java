@@ -1,32 +1,38 @@
 package com.latticeengines.modelquality.service.impl;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
-import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
+import com.latticeengines.modelquality.functionalframework.ModelQualityTestNGBase;
 import com.latticeengines.modelquality.service.DataSetService;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
-public class DataSetServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
+public class DataSetServiceImplDeploymentTestNG extends ModelQualityTestNGBase {
 
     @Autowired
     private DataSetService dataSetService;
 
-    @Override
-    @BeforeClass(groups = "functional")
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
+
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
     }
 
-    @Test(groups = "functional", enabled = true)
+    @AfterClass(groups = "deployment")
+    public void tearDown() throws Exception {
+    }
+
+    @Test(groups = "deployment", enabled = true)
     public void createDataSetFromTenant() {
         String tenantId = getTestTenant();
         String modelId = getTestModelID();
@@ -37,12 +43,11 @@ public class DataSetServiceImplFunctionalTestNG extends ModelQualityFunctionalTe
                 "");
         doReturn(spiedModelSummaryProvenance).when(spiedModelSummary).getModelSummaryConfiguration();
 
-        InternalResourceRestApiProxy internalResourceRestApiProxy = spy(new InternalResourceRestApiProxy(null));
-        doReturn(spiedModelSummary).when(internalResourceRestApiProxy).getModelSummaryFromModelId(modelId,
-                CustomerSpace.parse(tenantId));
+        modelSummaryProxy = spy(modelSummaryProxy);
+        doReturn(spiedModelSummary).when(modelSummaryProxy).getModelSummaryFromModelId(tenantId, modelId);
 
         DataSetServiceImpl spiedDataSetService = spy(((DataSetServiceImpl) dataSetService));
-        spiedDataSetService.internalResourceRestApiProxy = internalResourceRestApiProxy;
+        spiedDataSetService.modelSummaryProxy = modelSummaryProxy;
         String dataSetName = spiedDataSetService.createDataSetFromLP2Tenant(tenantId, modelId);
         Assert.assertNotNull(dataSetName);
 
@@ -52,7 +57,6 @@ public class DataSetServiceImplFunctionalTestNG extends ModelQualityFunctionalTe
         if (dataSetName != null && !dataSetName.isEmpty()) {
             dataSetEntityMgr.delete(dataSetEntityMgr.findByName(dataSetName));
         }
-
     }
 
     private String getTestModelID() {

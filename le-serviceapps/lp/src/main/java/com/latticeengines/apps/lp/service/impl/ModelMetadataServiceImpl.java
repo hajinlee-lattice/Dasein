@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.ModelMetadataService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.util.MetadataUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -37,10 +37,10 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     private MetadataProxy metadataProxy;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private ModelSummaryService modelSummaryService;
 
     private ModelService getRequiredColumnsExtractor(String modelId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false, true);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
         String modelTypeStr = modelSummary != null ? modelSummary.getModelType() : ModelType.PYTHONMODEL.getModelType();
         return ModelServiceBase.getModelService(modelTypeStr);
     }
@@ -268,13 +268,13 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Override
     public Table getEventTableFromModelId(String modelId) {
-        return MetadataUtils.getEventTableFromModelId(modelId, modelSummaryEntityMgr, metadataProxy);
+        return MetadataUtils.getEventTableFromModelId(modelId, modelSummaryService, metadataProxy);
     }
 
     @Override
     public Table getTrainingTableFromModelId(String modelId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryService.findValidByModelId(modelId);
         if (modelSummary == null) {
             throw new RuntimeException(String.format("No such model summary with id %s", modelId));
         }

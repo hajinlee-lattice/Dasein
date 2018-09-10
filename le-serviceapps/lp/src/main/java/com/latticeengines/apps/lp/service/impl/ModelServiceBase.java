@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.service.SourceFileService;
 import com.latticeengines.apps.lp.util.ModelingHdfsUtils;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -53,13 +53,13 @@ public abstract class ModelServiceBase implements ModelService {
     protected MetadataProxy metadataProxy;
 
     @Autowired
-    protected ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
     protected TenantEntityMgr tenantEntityMgr;
 
     @Autowired
     protected SourceFileService sourceFileService;
+
+    @Autowired
+    protected ModelSummaryService modelSummaryService;
 
     @Value("${pls.modelingservice.basedir}")
     protected String customerBaseDir;

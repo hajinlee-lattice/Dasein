@@ -29,8 +29,8 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
@@ -48,10 +48,10 @@ public abstract class ImportMatchAndModelWorkflowDeploymentTestNGBase extends Wo
     private MetadataProxy metadataProxy;
 
     @Autowired
-    private ModelSummaryService modelSummaryService;
+    private ModelSummaryParser modelSummaryParser;
 
     @Autowired
-    private ModelSummaryParser modelSummaryParser;
+    private ModelSummaryProxy modelSummaryProxy;
 
     SourceFile uploadFile(String resourcePath, SchemaInterpretation schema) {
         try {
@@ -92,7 +92,7 @@ public abstract class ImportMatchAndModelWorkflowDeploymentTestNGBase extends Wo
     }
 
     void createModelSummary(ModelSummary model, String tenantId) {
-        modelSummaryService.createModelSummary(model, tenantId);
+        modelSummaryProxy.createModelSummary(tenantId, model, false);
     }
 
     ModelSummary locateModelSummary(String name, CustomerSpace space) {
@@ -129,5 +129,4 @@ public abstract class ImportMatchAndModelWorkflowDeploymentTestNGBase extends Wo
             }
         }
     }
-
 }

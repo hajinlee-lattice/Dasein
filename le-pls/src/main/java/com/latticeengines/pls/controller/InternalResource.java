@@ -1,8 +1,11 @@
 package com.latticeengines.pls.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,14 +13,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -40,13 +41,10 @@ import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.db.exposed.service.ReportService;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -56,19 +54,16 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
-import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
-import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
@@ -84,12 +79,10 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ModelNoteService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
@@ -105,10 +98,6 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 @Api(value = "internal", description = "REST resource for internal operations")
 @RestController
@@ -130,12 +119,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private GlobalUserManagementService globalUserManagementService;
-
-    @Inject
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Inject
-    private ModelSummaryService modelSummaryService;
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
@@ -335,175 +318,6 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
 
         sourceFileService.create(sourceFile);
-    }
-
-    @RequestMapping(value = "/modelsummaries/"
-            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create a ModelSummary")
-    public void createModelSummary(@PathVariable("tenantId") String tenantId, @RequestBody ModelSummary modelSummary,
-            HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        modelSummaryService.createModelSummary(modelSummary, tenantId);
-    }
-
-    @RequestMapping(value = "/modelsummaries/updated/{timeframe}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get a list of model summary updated within the timeframe as specified")
-    public List<ModelSummary> getModelSummariesUpdatedWithinTimeFrame(@PathVariable long timeframe,
-            HttpServletRequest request) {
-        checkHeader(request);
-        return modelSummaryService.getModelSummariesModifiedWithinTimeFrame(timeframe);
-    }
-
-    @RequestMapping(value = "/modelsummaries/{modelId}/"
-            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Delete a model summary")
-    public Boolean deleteModelSummary(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
-            HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        modelSummaryEntityMgr.deleteByModelId(modelId);
-        return true;
-    }
-
-    @RequestMapping(value = "/modelsummaries/active/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get all active model summaries")
-    public List<ModelSummary> getActiveModelSummaries(@PathVariable("tenantId") String tenantId,
-            HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return postProcessModelSummaryList(modelSummaryEntityMgr.findAllActive());
-    }
-
-    private List<ModelSummary> postProcessModelSummaryList(List<ModelSummary> summaries) {
-        return postProcessModelSummaryList(summaries, true);
-    }
-
-    private List<ModelSummary> postProcessModelSummaryList(List<ModelSummary> summaries, boolean dropPredictors) {
-        for (ModelSummary summary : summaries) {
-            if (dropPredictors) {
-                summary.setPredictors(new ArrayList<>());
-            }
-            summary.setDetails(null);
-        }
-
-        return summaries;
-    }
-
-    @RequestMapping(value = "/modelsummarydetails/count/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get all model summaries count")
-    public int getModelSummariesCount(
-            @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
-            @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus,
-            @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) throws ParseException {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        long lastUpdateTime = 0;
-        if (StringUtils.isNotEmpty(start)) {
-            log.info("getModelSummariesCount - start = " + start + ", tenant = " + tenantId);
-            lastUpdateTime = DateTimeUtils.convertToLongUTCISO8601(start);
-        }
-        return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus, considerDeleted);
-
-    }
-
-    @RequestMapping(value = "/modelsummarydetails/paginate/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get paginated model summaries")
-    public List<ModelSummary> getPaginatedModelSummaries(
-            @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
-            @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus,
-            @ApiParam(value = "Offset", required = false) @RequestParam(value = "offset", required = true) int offset,
-            @ApiParam(value = "Maximum entries in page", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Should consider deleted models as well", required = false) @RequestParam(value = "considerDeleted", required = false, defaultValue = "false") boolean considerDeleted,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) throws ParseException {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        long lastUpdateTime = 0;
-        if (StringUtils.isNotEmpty(start)) {
-            log.info("getPaginatedModelSummaries - start = " + start + ", tenant = " + tenantId);
-            lastUpdateTime = DateTimeUtils.convertToLongUTCISO8601(start);
-        }
-        return postProcessModelSummaryList(modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus,
-                offset, maximum, considerDeleted), false);
-
-    }
-
-    @RequestMapping(value = "/modelsummaries/{applicationId}/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get a model summary by applicationId")
-    public ModelSummary findModelSummaryByAppId(@PathVariable("applicationId") String applicationId,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return modelSummaryEntityMgr.findByApplicationId(applicationId);
-    }
-
-    @RequestMapping(value = "/modelsummaries/crosstenant/{applicationId}/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get a model summary by applicationId")
-    public List<ModelSummary> getModelSummariesCrossTenantByAppId(@PathVariable("applicationId") String applicationId,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return modelSummaryEntityMgr.getModelSummariesByApplicationId(applicationId);
-    }
-
-    @RequestMapping(value = "/modelsummaries/modelid/{modelId}/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get a model summary by modelId")
-    public ModelSummary findModelSummaryByModelId(@PathVariable("modelId") String modelId,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
-    }
-
-    @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Update a model summary")
-    public ResponseDocument<ModelActivationResult> update(@PathVariable String modelId,
-            @RequestBody AttributeMap attrMap, HttpServletRequest request) {
-        checkHeader(request);
-        ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
-
-        if (summary == null) {
-            ModelActivationResult result = new ModelActivationResult();
-            result.setExists(false);
-            ResponseDocument<ModelActivationResult> response = new ResponseDocument<>();
-            response.setSuccess(false);
-            response.setResult(result);
-            return response;
-        }
-
-        manufactureSecurityContextForInternalAccess(summary.getTenant());
-
-        ModelActivationResult result = new ModelActivationResult();
-        result.setExists(true);
-        ResponseDocument<ModelActivationResult> response = new ResponseDocument<>();
-        response.setResult(result);
-        if (!NameValidationUtils.validateModelName(modelId)) {
-            log.error(String.format("Not qualified modelId %s contains unsupported characters.", modelId));
-            response.setSuccess(false);
-        } else {
-            modelSummaryService.updateModelSummary(modelId, attrMap);
-            response.setSuccess(true);
-        }
-        return response;
     }
 
     @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/"
@@ -738,7 +552,7 @@ public class InternalResource extends InternalResourceBase {
             for (User user : users) {
                 if (user.getEmail().equals(emailInfo.getUserId())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
+                    ModelSummary modelSummary = modelSummaryProxy.getByModelId(modelId);
                     if (modelSummary != null) {
                         String modelName = modelSummary.getDisplayName();
                         if (result.equals("COMPLETED")) {
@@ -777,7 +591,7 @@ public class InternalResource extends InternalResourceBase {
             for (User user : users) {
                 if (user.getEmail().equals(emailInfo.getUserId())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
+                    ModelSummary modelSummary = modelSummaryProxy.getByModelId(modelId);
                     if (modelSummary != null) {
                         String modelName = modelSummary.getDisplayName();
                         if (result.equals("COMPLETED")) {

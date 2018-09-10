@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -47,11 +46,11 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 @Component
@@ -71,9 +70,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private SegmentProxy segmentProxy;
 
     @Inject
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Inject
     private PlayProxy playProxy;
 
     @Inject
@@ -86,6 +82,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private RatingEngine crossSellRatingEngine;
     private ModelSummary modelSummary;
     private MetadataSegment segment;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     private boolean shouldSkipAutoTenantCreation = false;
 
@@ -128,7 +127,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         try {
             modelSummary = BucketedScoreResourceDeploymentTestNG
                     .createModelSummary(String.format("ms__%s__LETest", UUID.randomUUID().toString()), mainTestTenant);
-            modelSummaryEntityMgr.create(modelSummary);
+            modelSummaryProxy.create(mainTestTenant.getId(), modelSummary);
         } catch (Exception e) {
             Assert.fail("Failed to create ModelSummary for the test");
         }

@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("activateModel")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -26,14 +25,9 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
     @Autowired
     private ModelSummaryProxy modelSummaryProxy;
 
-    private InternalResourceRestApiProxy proxy = null;
-
     @SuppressWarnings("unchecked")
     @Override
     public void execute() {
-        if (proxy == null) {
-            proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
-        }
         Collection<String> modelIds;
         if (executionContext.getString(ACTIVATE_MODEL_IDS) == null) {
             Map<String, String> modelApplicationIdToEventColumn = getObjectFromContext(MODEL_APP_IDS, Map.class);
@@ -52,7 +46,7 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Status", ModelSummaryStatus.ACTIVE.getStatusCode());
         for (String modelId : modelIds) {
-            proxy.updateModelSummary(modelId, attrMap);
+            modelSummaryProxy.update(configuration.getCustomerSpace().toString(), modelId, attrMap);
         }
     }
 }

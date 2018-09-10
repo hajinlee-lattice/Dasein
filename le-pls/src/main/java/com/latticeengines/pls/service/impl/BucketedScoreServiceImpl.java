@@ -2,7 +2,6 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
@@ -33,18 +32,15 @@ import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 @Component("bucketedScoreService")
 public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     private static final Logger log = LoggerFactory.getLogger(BucketedScoreServiceImpl.class);
-
-    @Inject
-    private ModelSummaryService modelSummaryService;
 
     @Inject
     private WorkflowJobService workflowJobService;
@@ -58,12 +54,16 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
+
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
         BucketedScoreSummary bucketedScoreSummary = bucketedScoreProxy
                 .getBucketedScoreSummary(MultiTenantContext.getShortTenantId(), modelId);
         if (bucketedScoreSummary == null) {
-            ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
+            ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(),
+                    modelId, false, false, false);
             bucketedScoreSummary = getBucketedScoreSummaryBasedOnModelSummary(modelSummary);
         }
         return bucketedScoreSummary;
@@ -170,7 +170,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         ModelSummary modelSummary;
         if (ratingModel != null && ratingModel instanceof AIModel) {
             AIModel aiModel = (AIModel) ratingModel;
-            modelSummary = modelSummaryService.getModelSummaryByModelId(aiModel.getModelSummaryId());
+            modelSummary = modelSummaryProxy.getByModelId(aiModel.getModelSummaryId());
         } else {
             throw new LedpException(LedpCode.LEDP_18179, new String[] { modelId });
         }
@@ -183,5 +183,4 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         ratingEngine.setId(ratingEngineId);
         ratingEngineProxy.createOrUpdateRatingEngine(MultiTenantContext.getCustomerSpace().toString(), ratingEngine);
     }
-
 }

@@ -1,7 +1,6 @@
 package com.latticeengines.modeling.workflow.steps.modeling;
 
 import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,13 +21,10 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("downloadAndProcessModelSummaries")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStepConfiguration> {
-
-    private InternalResourceRestApiProxy proxy = null;
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -39,10 +35,6 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
     @SuppressWarnings("unchecked")
     @Override
     public void execute() {
-        if (proxy == null) {
-            proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
-        }
-
         Map<String, String> modelApplicationIdToEventColumn = getObjectFromContext(MODEL_APP_IDS, Map.class);
         if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_28012);
@@ -61,7 +53,7 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         }
         for (String event : eventToModelId.keySet()) {
             String modelId = eventToModelId.get(event);
-            proxy.updateModelSummary(modelId, attrMap);
+            modelSummaryProxy.update(configuration.getCustomerSpace().toString(), modelId, attrMap);
 
             saveOutputValue(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
             putStringValueInContext(SCORING_MODEL_ID, modelId);

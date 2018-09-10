@@ -1,16 +1,11 @@
 package com.latticeengines.apps.lp.service.impl;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
@@ -26,7 +21,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.ModelCopyService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.service.SourceFileService;
@@ -52,6 +46,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ModelCopyServiceDeploymentTestNG.class);
@@ -71,9 +69,6 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
 
     @Inject
     private SourceFileService sourceFileService;
-
-    @Inject
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Inject
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
@@ -129,9 +124,9 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
                 .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2.getId())).toString());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
-        ModelSummary model = modelSummaryEntityMgr.getByModelId(ORIGINAL_MODELID);
+        ModelSummary model = modelSummaryService.getModelSummaryByModelId(ORIGINAL_MODELID);
         if (model != null) {
-            modelSummaryEntityMgr.delete(model);
+            modelSummaryService.delete(model);
         }
     }
 

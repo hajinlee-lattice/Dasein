@@ -1,14 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -53,13 +44,23 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
@@ -142,8 +143,8 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         SOURCE_FILE.setPath(SCORE_FILE_METADATA_TEST + "file2.csv");
         SOURCE_FILE.setName("file2.csv");
 
-        ModelSummaryEntityMgr modelSummaryEntityMgr = Mockito.mock(ModelSummaryEntityMgr.class);
-        when(modelSummaryEntityMgr.findValidByModelId(MODEL_SUMMARY_ID)).thenReturn(MODEL_SUMMARY);
+        ModelSummaryProxy modelSummaryProxy = Mockito.mock(ModelSummaryProxy.class);
+        when(modelSummaryProxy.findValidByModelId(anyString(), eq(MODEL_SUMMARY_ID))).thenReturn(MODEL_SUMMARY);
 
         PlsFeatureFlagService plsFeatureFlagService = Mockito.mock(PlsFeatureFlagService.class);
         when(plsFeatureFlagService.isFuzzyMatchEnabled()).thenReturn(false);
@@ -155,11 +156,16 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         when(sourceFileService.findByName("file2.csv")).thenReturn(SOURCE_FILE);
 
         Mockito.doNothing().when(sourceFileService).update(any(SourceFile.class));
+
         ReflectionTestUtils.setField(scoringFileMetadataService, "modelMetadataService", modelMetadataService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "sourceFileService", sourceFileService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "plsFeatureFlagService", plsFeatureFlagService);
-        ReflectionTestUtils.setField(scoringFileMetadataService, "modelSummaryEntityMgr", modelSummaryEntityMgr);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "modelSummaryProxy", modelSummaryProxy);
 
+        Tenant t = new Tenant();
+        t.setId("t1");
+        t.setPid(-1L);
+        MultiTenantContext.setTenant(t);
         FieldMappingDocument fieldMappingDocument = scoringFileMetadataService
                 .mapRequiredFieldsWithFileHeaders("file2.csv", MODEL_SUMMARY_ID);
         List<FieldMapping> fieldMappings = fieldMappingDocument.getFieldMappings();
@@ -220,11 +226,11 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         MetadataProxy metadataProxy = Mockito.mock(MetadataProxy.class);
         Mockito.doNothing().when(metadataProxy).createTable(anyString(), anyString(), any(Table.class));
 
-        ModelSummaryEntityMgr modelSummaryEntityMgr = Mockito.mock(ModelSummaryEntityMgr.class);
         ModelSummary summary = new ModelSummary();
         summary.setId("modelid");
         summary.setSourceSchemaInterpretation(SchemaInterpretation.Account.name());
-        when(modelSummaryEntityMgr.findValidByModelId(anyString())).thenReturn(summary);
+        ModelSummaryProxy modelSummaryProxy = Mockito.mock(ModelSummaryProxy.class);
+        when(modelSummaryProxy.findValidByModelId(anyString(), anyString())).thenReturn(summary);
 
         Configuration localFileSystemConfig = new Configuration();
         localFileSystemConfig.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
@@ -232,7 +238,7 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         ReflectionTestUtils.setField(scoringFileMetadataService, "modelMetadataService", modelMetadataService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "sourceFileService", sourceFileService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "metadataProxy", metadataProxy);
-        ReflectionTestUtils.setField(scoringFileMetadataService, "modelSummaryEntityMgr", modelSummaryEntityMgr);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "modelSummaryProxy", modelSummaryProxy);
         ReflectionTestUtils.setField(scoringFileMetadataService, "yarnConfiguration", localFileSystemConfig);
 
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();

@@ -1,11 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -33,16 +28,21 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
-public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+public class AdminResourceTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private Tenant tenant;
 
@@ -58,19 +58,19 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         deleteUserWithUsername("ron@lattice-engines.com");
-        setupDbWithMarketoSMB("T1", "T1");
+        setupDbWithMarketoSMB("T1", "T1",false, false);
         tenant = tenantService.findByTenantId("T1");
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void teardown() {
         tenantService.discardTenant(tenant);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void addTenantWithProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -82,7 +82,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertNotNull(t);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void addTenantWithoutProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue("xyz");
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -100,7 +100,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertTrue(exception);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void addExistingTenant() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -118,7 +118,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "functional", dependsOnMethods = { "addTenantWithProperMagicAuthenticationHeader" })
+    @Test(groups = "deployment", dependsOnMethods = { "addTenantWithProperMagicAuthenticationHeader" })
     public void getTenantsWithProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -126,7 +126,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertTrue(tenants.size() >= 1);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void getTenantsWithoutProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue("xyz");
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -143,7 +143,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertTrue(exception);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "addAdminUser" })
+    @Test(groups = "deployment", dependsOnMethods = { "addAdminUser" })
     public void testResetTempPassword() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -160,7 +160,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertNotNull(result.getBody());
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "addAdminUserBadArgs" })
+    @Test(groups = "deployment", dependsOnMethods = { "addAdminUserBadArgs" })
     public void addAdminUser() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -184,7 +184,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertTrue(addAdminUserSuccessful);
     }
 
-    @Test(groups = "functional", dataProvider = "userRegistrationDataProviderBadArgs")
+    @Test(groups = "deployment", dataProvider = "userRegistrationDataProviderBadArgs")
     public void addAdminUserBadArgs(UserRegistrationWithTenant userRegistrationWithTenant) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -202,7 +202,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void updateUserAccessLevels() throws URIException {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -232,7 +232,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void updateUserAccessLevelsWrongArgs() throws URIException {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));

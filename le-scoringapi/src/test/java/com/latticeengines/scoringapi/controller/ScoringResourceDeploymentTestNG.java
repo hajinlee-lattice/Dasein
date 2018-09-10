@@ -169,7 +169,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
             "getPaginatedModels" })
     public void getModelsCountAfterModelDelete() {
         TestRegisterModels modelCreator = new TestRegisterModels();
-        modelCreator.deleteModel(plsRest, customerSpace, MODEL_ID);
+        modelCreator.deleteModel(modelSummaryProxy, customerSpace, MODEL_ID);
         getModelCount(baseAllActiveModelCount + MAX_MODELS - 1, false, null, true);
         getModelCount(0, false, new Date(), true);
     }

@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
@@ -40,8 +39,8 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAn
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
@@ -56,6 +55,9 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     private boolean multiModel = false;
     private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
@@ -95,11 +97,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
     }
 
     private Map<String, String> getScoreDerivationMap(Collection<String> modelIds) {
-        String internalResourceHostPort = configuration.getInternalResourceHostPort();
-        InternalResourceRestApiProxy internalResourceRestApiProxy = new InternalResourceRestApiProxy(
-                internalResourceHostPort);
-        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(internalResourceRestApiProxy,
-                yarnConfiguration);
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy, yarnConfiguration);
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> scoreDerivationMap = new HashMap<>();
         for (String modelId : modelIds) {
@@ -112,11 +110,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
     }
 
     private Map<String, String> getFitFunctionParametersMap(Collection<String> modelIds) {
-        String internalResourceHostPort = configuration.getInternalResourceHostPort();
-        InternalResourceRestApiProxy internalResourceRestApiProxy = new InternalResourceRestApiProxy(
-                internalResourceHostPort);
-        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(internalResourceRestApiProxy,
-                yarnConfiguration);
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy, yarnConfiguration);
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> fitFunctionParametersMap = new HashMap<>();
         for (String modelId : modelIds) {
@@ -303,5 +297,4 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
                             || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
                 }).collect(Collectors.toList());
     }
-
 }

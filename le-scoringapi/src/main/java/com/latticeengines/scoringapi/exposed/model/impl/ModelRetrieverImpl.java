@@ -62,6 +62,7 @@ import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
@@ -121,6 +122,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
+
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     private String localPathToPersist = null;
@@ -140,20 +144,19 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public List<Model> getActiveModels(CustomerSpace customerSpace, ModelType type) {
         List<Model> models = new ArrayList<>();
+        List<?> modelSummaries = modelSummaryProxy.findAllActive(customerSpace.toString());
+        convertModelSummaryToModel(type, models, modelSummaries);
 
-        List<?> modelSummaries = internalResourceRestApiProxy.getActiveModelSummaries(customerSpace);
-        convertModelSummaryToModel(type, models, modelSummaries, customerSpace);
         return models;
     }
 
-    private void convertModelSummaryToModel(ModelType type, List<Model> models, List<?> modelSummaries,
-            CustomerSpace customerSpace) {
+    private void convertModelSummaryToModel(ModelType type, List<Model> models, List<?> modelSummaries) {
         if (modelSummaries != null) {
             for (Object modelSummary : modelSummaries) {
+
                 @SuppressWarnings("unchecked")
                 Map<String, String> map = (Map<String, String>) modelSummary;
                 ModelType modelType = getModelType(map.get("SourceSchemaInterpretation"));
-
                 if (modelType == null)
                     continue;
 
@@ -283,7 +286,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @VisibleForTesting
     ModelSummary getModelSummary(CustomerSpace customerSpace, String modelId) {
-        ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(), modelId);
         if (modelSummary == null) {
             throw new ScoringApiException(LedpCode.LEDP_31102, new String[] { modelId });
         } else if (StringUtils.isBlank(modelSummary.getEventTableName())) {
@@ -304,7 +307,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @VisibleForTesting
     List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame) {
-        List<ModelSummary> modelSummaryList = internalResourceRestApiProxy
+        List<ModelSummary> modelSummaryList = modelSummaryProxy
                 .getModelSummariesModifiedWithinTimeFrame(timeFrame);
         return modelSummaryList;
     }
@@ -676,7 +679,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public int getModelsCount(CustomerSpace customerSpace, //
             String start, //
             boolean considerAllStatus, boolean considerDeleted) {
-        return internalResourceRestApiProxy.getModelsCount(customerSpace, start, considerAllStatus, considerDeleted);
+        return modelSummaryProxy.findTotalCount(customerSpace.toString(), start, considerAllStatus);
     }
 
     @Override
@@ -686,8 +689,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             int maximum, //
             boolean considerAllStatus, //
             boolean considerDeleted) {
-        List<ModelSummary> modelSummaries = internalResourceRestApiProxy.getPaginatedModels(customerSpace, start,
-                offset, maximum, considerAllStatus, considerDeleted);
+        List<ModelSummary> modelSummaries = modelSummaryProxy.findPaginatedModels(customerSpace.toString(),
+                start, considerAllStatus, offset, maximum);
         List<ModelDetail> models = new ArrayList<>();
         convertModelSummaryToModelDetail(models, modelSummaries, considerDeleted, customerSpace);
         return models;

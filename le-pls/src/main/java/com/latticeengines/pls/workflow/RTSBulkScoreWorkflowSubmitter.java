@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
-import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -41,13 +41,13 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     private MetadataProxy metadataProxy;
 
     @Autowired
-    private ModelSummaryService modelSummaryService;
-
-    @Autowired
     private MatchCommandProxy matchCommandProxy;
 
     @Autowired
     private BucketedScoreService bucketedScoreService;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     public ApplicationId submit(String modelId, String tableToScore, boolean enableLeadEnrichment,
             String sourceDisplayName, boolean enableDebug) {
@@ -58,7 +58,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
         }
 
-        if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
+        if (!modelSummaryProxy.modelIdinTenant(MultiTenantContext.getTenant().getId(), modelId)) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
@@ -70,8 +70,8 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     public RTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScore,
             String sourceDisplayName, boolean enableLeadEnrichment, boolean enableDebug) {
-
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, true, false);
+        ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(),
+                modelId, false, true, false);
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);

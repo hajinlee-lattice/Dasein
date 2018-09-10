@@ -38,7 +38,7 @@ public class PythonScriptModelService extends ModelServiceBase {
 
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
-        Table eventTable = MetadataUtils.getEventTableFromModelId(modelId, modelSummaryEntityMgr, metadataProxy);
+        Table eventTable = MetadataUtils.getEventTableFromModelId(modelId, modelSummaryProxy, metadataProxy);
         if (eventTable.getAttributes() == null) {
             log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
@@ -72,7 +72,7 @@ public class PythonScriptModelService extends ModelServiceBase {
 
     @Override
     public Set<String> getLatticeAttributeNames(String modelId) {
-        Table eventTable = MetadataUtils.getEventTableFromModelId(modelId, modelSummaryEntityMgr, metadataProxy);
+        Table eventTable = MetadataUtils.getEventTableFromModelId(modelId, modelSummaryProxy, metadataProxy);
         if (eventTable.getAttributes() == null) {
             log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });

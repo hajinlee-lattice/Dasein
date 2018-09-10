@@ -60,5 +60,4 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
     void updateLastUpdateTime(String modelGuid);
 
     boolean hasBucketMetadata(String modelId);
-
 }

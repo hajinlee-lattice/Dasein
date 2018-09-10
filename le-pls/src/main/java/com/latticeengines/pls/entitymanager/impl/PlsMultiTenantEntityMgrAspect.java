@@ -32,11 +32,6 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.find*(..))")
-    public void findModelSummary(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.find*(..))")
     public void findPdSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
@@ -57,11 +52,6 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.update*(..))")
-    public void updateModelSummary(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.update*(..))")
     public void updatePdSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
@@ -79,11 +69,6 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ProspectDiscoveryOptionEntityMgrImpl.update*(..))")
     public void updateProspectDiscoveryOption(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.delete*(..))")
-    public void deleteModelSummary(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 

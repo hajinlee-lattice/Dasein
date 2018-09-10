@@ -46,13 +46,13 @@ import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.validation.ReservedField;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("scoringFileMetadataService")
@@ -62,9 +62,6 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -83,6 +80,9 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
     @Autowired
     private AttributeService attributeService;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
@@ -110,7 +110,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
     @Override
     public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
         SchemaInterpretation schemaInterpretation = getSchemaInterpretation(modelId);
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
         List<Attribute> matchingAttributes = SchemaRepository.instance()
@@ -189,7 +189,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     }
 
     private SchemaInterpretation getSchemaInterpretation(String modelId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
         if (modelSummary == null) {
             throw new RuntimeException(String.format("No such model summary with id %s", modelId));
         }
@@ -223,7 +223,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), yarnConfiguration, null);
         resolver.sortAttributesBasedOnSourceFileSequence(table);
 
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getShortTenantId(), modelId);
         if (plsFeatureFlagService.isFuzzyMatchEnabled()) {
             SchemaInterpretationFunctionalInterface function = (interfaceName) -> {
                 Attribute domainAttribute = table.getAttribute(interfaceName);
@@ -388,7 +388,5 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 }
             }
         }
-
     }
-
 }

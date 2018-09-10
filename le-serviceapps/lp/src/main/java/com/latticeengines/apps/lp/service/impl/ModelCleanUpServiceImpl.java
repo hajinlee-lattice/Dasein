@@ -103,7 +103,7 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
                 }
             }
 
-            modelSummaryService.deleteModelSummaryByModelId(modelId);
+            modelSummaryService.deleteByModelId(modelId);
             log.info(String.format("Cleanup modelSummary succeed. modelId: %s", modelId));
         }
         else {

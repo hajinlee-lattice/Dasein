@@ -24,10 +24,10 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringJobService;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("scoringJobService")
@@ -44,9 +44,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    private ModelSummaryService modelSummaryService;
-
-    @Autowired
     private RTSBulkScoreWorkflowSubmitter rtsBulkScoreWorkflowSubmitter;
 
     @Autowired
@@ -54,6 +51,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public List<Job> getJobs(String modelId) {
@@ -71,7 +71,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
                     || job.getJobType().equals("rtsBulkScoreWorkflow")
                     || job.getJobType().equals("importAndRTSBulkScoreWorkflow")) {
                 String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-                ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
+                ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(),
+                        modelId, false, false, true);
                 String jobModelName = modelSummary != null ? modelSummary.getDisplayName() : null;
                 if (jobModelId != null && jobModelId.equals(modelId)) {
                     job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, jobModelName);
@@ -162,7 +163,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public String scoreTestingData(String modelId, String fileName, Boolean performEnrichment, Boolean debug) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryProxy.getByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
@@ -174,7 +175,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public String scoreTrainingData(String modelId, Boolean performEnrichment, Boolean debug) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryProxy.getByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }

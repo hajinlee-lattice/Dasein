@@ -1,12 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,11 +40,18 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.ActionService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class WorkflowJobServiceImplUnitTestNG {
 
@@ -60,9 +60,6 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Mock
     private SourceFileProxy sourceFileProxy;
-
-    @Mock
-    private ModelSummaryService modelSummaryService;
 
     @Mock
     private TenantEntityMgr tenantEntityMgr;
@@ -82,6 +79,9 @@ public class WorkflowJobServiceImplUnitTestNG {
     @Mock
     private RatingEngineProxy ratingEngineProxy;
 
+    @Mock
+    private ModelSummaryProxy modelSummaryProxy;
+
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplUnitTestNG.class);
 
     private Long[] jobIds = { 123L, 456L };
@@ -93,10 +93,10 @@ public class WorkflowJobServiceImplUnitTestNG {
         MockitoAnnotations.initMocks(this);
         mockWorkflowProxy();
         mockSourceFileEntityManager();
-        mockModelSummaryService();
         mockTenantEntityManager();
         mockActionService();
         mockDataFeedProxy();
+        mockModelSummaryProxy();
 
         Tenant tenant = tenantEntityMgr.findByTenantId("tenant");
         MultiTenantContext.setTenant(tenant);
@@ -278,8 +278,8 @@ public class WorkflowJobServiceImplUnitTestNG {
         when(sourceFileProxy.findByApplicationId(any(), anyString())).thenReturn(new SourceFile());
     }
 
-    private void mockModelSummaryService() {
-        when(modelSummaryService.getModelSummaryByModelId(anyString())).thenReturn(new ModelSummary());
+    private void mockModelSummaryProxy() {
+        when(modelSummaryProxy.getByModelId(anyString())).thenReturn(new ModelSummary());
     }
 
     private void mockTenantEntityManager() {
@@ -400,5 +400,4 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertEquals(job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME), "newName");
         log.info("new job is " + job);
     }
-
 }

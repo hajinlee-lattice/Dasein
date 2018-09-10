@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
@@ -72,6 +73,9 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    protected ModelSummaryProxy modelSummaryProxy;
 
     protected List<Record> generateRecords(int n,
             List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isPmmlModel)
@@ -372,7 +376,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     }
 
     protected List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> createModelList(String modelId,
-            InternalResourceRestApiProxy plsRest, CustomerSpace customerSpace, Tenant tenant) throws IOException {
+            CustomerSpace customerSpace, Tenant tenant) throws IOException {
         Map<TestModelConfiguration, TestModelArtifactDataComposition> models = new HashMap<>();
         TestRegisterModels modelCreator = new TestRegisterModels();
         long timestamp = System.currentTimeMillis();
@@ -394,9 +398,9 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             if (modelId == null) {
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId, modelVersion);
                 modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration, bucketedScoreProxy,
-                        (plsRest != null ? plsRest : this.plsRest), (tenant != null ? tenant : this.tenant),
+                        (tenant != null ? tenant : this.tenant),
                         modelConfiguration, (customerSpace != null ? customerSpace : this.customerSpace), metadataProxy,
-                        getTestModelSummaryParser(), hdfsSubPathForModel);
+                        getTestModelSummaryParser(), hdfsSubPathForModel, modelSummaryProxy);
             } else {
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, modelId, applicationId,
                         modelVersion);
@@ -412,13 +416,12 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
     protected List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> createModelList()
             throws IOException {
-        return createModelList(null, null, null, null);
+        return createModelList(null, null, null);
     }
 
-    protected void runScoringTest(final String url, InternalResourceRestApiProxy plsRest, String modelId,
-            CustomerSpace customerSpace, Tenant tenant, boolean isInternalScoring, boolean isPmmlModel)
-            throws IOException, InterruptedException {
-        modelList = createModelList(modelId, plsRest, customerSpace, tenant);
+    protected void runScoringTest(final String url, String modelId, CustomerSpace customerSpace,
+          Tenant tenant, boolean isInternalScoring, boolean isPmmlModel) throws IOException, InterruptedException {
+        modelList = createModelList(modelId, customerSpace, tenant);
 
         Runnable runnable = createScoringRunnable(url, modelList, isInternalScoring, isPmmlModel, customerSpace);
 

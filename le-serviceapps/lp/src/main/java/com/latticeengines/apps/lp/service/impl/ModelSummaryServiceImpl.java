@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -103,6 +103,111 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @Override
+    public void create(ModelSummary summary) { modelSummaryEntityMgr.create(summary); }
+
+    @Override
+    public ModelSummary getModelSummaryByModelId(String modelId) { return modelSummaryEntityMgr.getByModelId(modelId); }
+
+    @Override
+    public ModelSummary findValidByModelId(String modelId) { return modelSummaryEntityMgr.findValidByModelId(modelId); }
+
+    @Override
+    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly) {
+        return modelSummaryEntityMgr.findByModelId(modelId, returnRelational, returnDocument, validOnly);
+    }
+
+    @Override
+    public ModelSummary findByApplicationId(String applicationId) {
+        return modelSummaryEntityMgr.findByApplicationId(applicationId);
+    }
+
+    @Override
+    public List<ModelSummary> getModelSummariesByApplicationId(String applicationId) {
+        return modelSummaryEntityMgr.getModelSummariesByApplicationId(applicationId);
+    }
+
+    @Override
+    public void deleteByModelId(String modelId) {
+        modelSummaryEntityMgr.deleteByModelId(modelId);
+    }
+
+    @Override
+    public void delete(ModelSummary modelSummary) { modelSummaryEntityMgr.delete(modelSummary); }
+
+    @Override
+    public List<ModelSummary> getAll() { return modelSummaryEntityMgr.getAll(); }
+
+    @Override
+    public List<String> getAllModelSummaryIds() {
+        return modelSummaryEntityMgr.getAllModelSummaryIds();
+    }
+
+    @Override
+    public List<ModelSummary> getAllByTenant(Tenant tenant) { return modelSummaryEntityMgr.getAllByTenant(tenant); }
+
+    @Override
+    public List<ModelSummary> findAllValid() { return modelSummaryEntityMgr.findAllValid(); }
+
+    @Override
+    public List<ModelSummary> findAllActive() { return modelSummaryEntityMgr.findAllActive(); }
+
+    @Override
+    public int findTotalCount(long lastUpdateTime, boolean considerAllStatus) {
+        return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus);
+    }
+
+    @Override
+    public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset, int maximum) {
+        return modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum);
+    }
+
+    @Override
+    public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
+        modelSummaryEntityMgr.updateStatusByModelId(modelId, status);
+    }
+
+    @Override
+    public void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap) {
+        modelSummaryEntityMgr.updateModelSummary(modelSummary, attrMap);
+    }
+
+    @Override
+    public ModelSummary retrieveByModelIdForInternalOperations(String modelId) {
+        return modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
+    }
+
+    @Override
+    public void updatePredictors(List<Predictor> predictors, AttributeMap attrMap) {
+        modelSummaryEntityMgr.updatePredictors(predictors, attrMap);
+    }
+
+    @Override
+    public List<Predictor> findAllPredictorsByModelId(String modelId) {
+        return modelSummaryEntityMgr.findAllPredictorsByModelId(modelId);
+    }
+
+    @Override
+    public List<Predictor> findPredictorsUsedByBuyerInsightsByModelId(String modelId) {
+        return modelSummaryEntityMgr.findPredictorsUsedByBuyerInsightsByModelId(modelId);
+    }
+
+    @Override
+    public List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame) {
+        return modelSummaryEntityMgr.getModelSummariesModifiedWithinTimeFrame(timeFrame);
+    }
+
+    @Override
+    public void updateLastUpdateTime(String modelId) {
+        modelSummaryEntityMgr.updateLastUpdateTime(modelId);
+    }
+
+    @Override
+    public boolean hasBucketMetadata(String modelId) {
+        return modelSummaryEntityMgr.hasBucketMetadata(modelId);
+    }
+
+
+    @Override
     public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
         ModelSummary modelSummary = modelSummaryParser.parse("", rawModelSummary);
         modelSummary.setUploaded(true);
@@ -128,7 +233,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Override
     public boolean modelIdinTenant(String modelId, String tenantId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false, false);
+        ModelSummary modelSummary = findByModelId(modelId, false, false, false);
         if (modelSummary == null) {
             return false;
         }
@@ -152,14 +257,14 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         String rootId = possibleId;
         String rootname = modelSummaryParser.parseOriginalName(modelSummary.getName());
 
-        ModelSummary dupModelSummary = modelSummaryEntityMgr.getByModelId(possibleId);
+        ModelSummary dupModelSummary = getModelSummaryByModelId(possibleId);
         if (dupModelSummary != null && !existingIds.contains(dupModelSummary.getId())) {
             existingIds.add(dupModelSummary.getId());
         }
         while (existingNames.contains(possibleName) || existingIds.contains(possibleId)) {
             possibleName = modelSummary.getName().replace(rootname, rootname + "-" + String.format("%03d", ++version));
             possibleId = rootId + "-" + String.format("%03d", version);
-            if (!existingIds.contains(possibleId) && modelSummaryEntityMgr.getByModelId(possibleId) != null) {
+            if (!existingIds.contains(possibleId) && getModelSummaryByModelId(possibleId) != null) {
                 existingIds.add(possibleId);
             }
         }
@@ -183,42 +288,22 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (attrMap == null) {
             throw new NullPointerException("Attribute Map should not be null when updating the predictors");
         }
-        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, true, false, true);
+        ModelSummary summary = findByModelId(modelId, true, false, true);
         if (summary == null) {
             throw new NullPointerException("ModelSummary should not be null when updating the predictors");
         }
         List<Predictor> predictors = summary.getPredictors();
-        modelSummaryEntityMgr.updatePredictors(predictors, attrMap);
-    }
-
-    @Override
-    public ModelSummary getModelSummaryByModelId(String modelId) {
-        return modelSummaryEntityMgr.getByModelId(modelId);
-    }
-
-    @Override
-    public void deleteModelSummaryByModelId(String modelId) {
-        modelSummaryEntityMgr.deleteByModelId(modelId);
+        updatePredictors(predictors, attrMap);
     }
 
     @Override
     public ModelSummary getModelSummaryEnrichedByDetails(String modelId) {
-        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        if (summary != null) {
-            summary.setPredictors(new ArrayList<>());
-            summary.setDetails(null);
-        }
-        return summary;
-    }
-
-    @Override
-    public List<ModelSummary> getAllByTenant(Tenant tenant) {
-        return modelSummaryEntityMgr.getAllByTenant(tenant);
+        return findValidByModelId(modelId);
     }
 
     @Override
     public ModelSummary getModelSummary(String modelId) {
-        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary summary = findValidByModelId(modelId);
         if (summary != null) {
             summary.setPredictors(new ArrayList<>());
             getModelSummaryTrainingFileState(summary);
@@ -233,6 +318,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 }
             }
         }
+
         return summary;
     }
 
@@ -343,18 +429,12 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
-            boolean validOnly) {
-        return modelSummaryEntityMgr.findByModelId(modelId, returnRelational, returnDocument, validOnly);
-    }
-
-    @Override
     public List<ModelSummary> getModelSummaries(String selection) {
         List<ModelSummary> summaries;
         if (selection != null && selection.equalsIgnoreCase("all")) {
-            summaries = modelSummaryEntityMgr.findAll();
+            summaries = getAll();
         } else {
-            summaries = modelSummaryEntityMgr.findAllValid();
+            summaries = findAllValid();
         }
 
         List<SourceFile> sourceFiles = sourceFileService.findAllSourceFiles();
@@ -373,6 +453,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             getModelSummaryHasRating(summary);
             getModelSummaryTrainingFileState(summary, trainingTableNames);
         }
+
         return summaries;
     }
 
@@ -398,26 +479,12 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
-    public List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame) {
-        return modelSummaryEntityMgr.getModelSummariesModifiedWithinTimeFrame(timeFrame);
-    }
-
-    @Override
     public void updateModelSummary(String modelId, AttributeMap attrMap) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
+        ModelSummary modelSummary = getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
-        modelSummaryEntityMgr.updateModelSummary(modelSummary, attrMap);
-    }
-
-    @Override
-    public void updateLastUpdateTime(String modelId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-        modelSummaryEntityMgr.updateLastUpdateTime(modelSummary);
+        updateModelSummary(modelSummary, attrMap);
     }
 
     @Override
@@ -483,7 +550,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     @Override
     public Set<String> getModelSummaryIds() {
         Set<String> modelSummaryIds = Collections.synchronizedSet(new HashSet<>());
-        List<String> summaries = modelSummaryEntityMgr.getAllModelSummaryIds();
+        List<String> summaries = getAllModelSummaryIds();
         for (String summary : summaries) {
             try {
                 modelSummaryIds.add(UuidUtils.extractUuid(summary));
@@ -509,7 +576,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         do {
             for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
                 if (!foundModels.contains(modelApplicationId)) {
-                    ModelSummary model = modelSummaryEntityMgr.findByApplicationId(modelApplicationId);
+                    ModelSummary model = findByApplicationId(modelApplicationId);
 
                     if (model != null) {
                         eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
@@ -523,13 +590,13 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             if (eventToModelSummary.size() < modelApplicationIdToEventColumn.size()) {
                 for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
                     if (!foundModels.contains(modelApplicationId)) {
-                        ModelSummary model = modelSummaryEntityMgr.findByApplicationId(modelApplicationId);
+                        ModelSummary model = findByApplicationId(modelApplicationId);
 
                         if (model != null) {
                             eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
                             foundModels.add(modelApplicationId);
                         } else {
-                            log.error("");
+                            log.error(String.format("Model summary is not found by application id: %s", modelApplicationId));
                         }
                     }
                 }
@@ -552,6 +619,6 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     private void getModelSummaryHasRating(ModelSummary summary) {
-        summary.setHasBucketMetadata(modelSummaryEntityMgr.hasBucketMetadata(summary.getId()));
+        summary.setHasBucketMetadata(hasBucketMetadata(summary.getId()));
     }
 }

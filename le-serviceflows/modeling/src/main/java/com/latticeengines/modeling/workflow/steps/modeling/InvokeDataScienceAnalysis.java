@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -23,14 +24,12 @@ import com.latticeengines.domain.exposed.pls.DataScienceInvocationInfo;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 @Component("invokeDataScienceAnalysis")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(InvokeDataScienceAnalysis.class);
-
-    private InternalResourceRestApiProxy apiProxy = null;
 
     public static final String DataScienceWorkflowPath = "/Workflow/Modeling/DataScience";
 
@@ -39,12 +38,12 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
     @Value("${hadoop.fs.web.defaultFS}")
     private String hdfsWebFS;
 
-    public DataScienceInvocationInfo findInfo() {
-        if (apiProxy == null)
-            apiProxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
-        ModelSummary summary = apiProxy.getModelSummaryFromModelId(configuration.getSourceModelSummary().getId(),
-                configuration.getCustomerSpace());
+    public DataScienceInvocationInfo findInfo() {
+        ModelSummary summary = modelSummaryProxy.getModelSummaryFromModelId(configuration.getCustomerSpace().toString(),
+                configuration.getSourceModelSummary().getId());
 
         DataScienceInvocationInfo info = new DataScienceInvocationInfo();
         info.setModelApplicationID(summary.getApplicationId());

@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequ
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
@@ -98,6 +99,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    protected ModelSummaryProxy modelSummaryProxy;
 
     protected OAuthUserEntityMgr userEntityMgr;
 
@@ -254,11 +258,11 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         testModelSummaryParser.setPredictors(modelSummary, MODELSUMMARYJSON_LOCALPATH);
 
         String modelId = modelSummary.getId();
-        ModelSummary retrievedSummary = plsRest.getModelSummaryFromModelId(modelId, customerSpace);
+        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(), modelId);
         if (retrievedSummary != null) {
-            plsRest.deleteModelSummary(modelId, customerSpace);
+            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelId);
         }
-        plsRest.createModelSummary(modelSummary, customerSpace);
+        modelSummaryProxy.createModelSummary(customerSpace.toString(), modelSummary, false);
 
         List<BucketMetadata> bucketMetadataList = ScoringApiTestUtils.generateDefaultBucketMetadataList();
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();

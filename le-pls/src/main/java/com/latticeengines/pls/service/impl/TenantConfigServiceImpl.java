@@ -2,7 +2,6 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -30,12 +29,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
 import com.latticeengines.domain.exposed.pls.TenantDeployment;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantDeploymentConstants;
 import com.latticeengines.pls.service.TenantDeploymentService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 @Component("tenantConfigService")
 public class TenantConfigServiceImpl implements TenantConfigService {
@@ -57,12 +55,6 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     private DefaultFeatureFlagProvider defaultFeatureFlagProvider;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
-    private ModelSummaryService modelSummaryService;
-
-    @Autowired
     private TenantDeploymentService tenantDeploymentService;
 
     @Autowired
@@ -70,6 +62,9 @@ public class TenantConfigServiceImpl implements TenantConfigService {
 
     @Autowired
     private BatonService batonService;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     @PostConstruct
     private void definePlsFeatureFlags() {
@@ -229,10 +224,10 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             if (tenantDeployment != null) {
                 return !tenantDeploymentService.isDeploymentCompleted(tenantDeployment);
             } else {
-                List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+                List<ModelSummary> summaries = modelSummaryProxy.findAll(tenantId);
                 if (summaries != null) {
                     for (ModelSummary summary : summaries) {
-                        if (modelSummaryService.modelIdinTenant(summary.getId(), tenantId)) {
+                        if (modelSummaryProxy.modelIdinTenant(tenantId, summary.getId())) {
                             return false;
                         }
                     }
@@ -243,5 +238,4 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             return false;
         }
     }
-
 }

@@ -1,8 +1,5 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -11,10 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -29,6 +24,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -47,11 +43,13 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNoteService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
@@ -65,9 +63,6 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private ModelSummaryService modelSummaryService;
 
     private Table accountTable;
 
@@ -136,7 +131,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
     public void modelAccountData() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
-        internalResourceProxy.createModelSummary(summary, mainTestCustomerSpace);
+        modelSummaryProxy.createModelSummary(mainTestCustomerSpace.toString(), summary, false);
         List<VdbMetadataField> metadata = modelMetadataService.getMetadata(summary.getId());
         for (VdbMetadataField field : metadata) {
             if (field.getColumnName().equals(InterfaceName.Website.name())) {
@@ -148,7 +143,8 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         }
 
         Table clone = modelCopyProxy.cloneTrainingTable(MultiTenantContext.getShortTenantId(), summary.getId());
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(summary.getId());
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryEnrichedByDetails(MultiTenantContext.getTenant().getId(),
+                summary.getId());
         cloneAndRemodel(clone, modelMetadataService.getAttributesFromFields(clone.getAttributes(), metadata),
                 modelSummary);
 

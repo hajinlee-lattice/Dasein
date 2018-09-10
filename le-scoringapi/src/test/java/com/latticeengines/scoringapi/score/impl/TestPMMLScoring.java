@@ -19,9 +19,8 @@ public class TestPMMLScoring extends InternalScoringResourceDeploymentTestNG {
     public void scoreRecords(String modelName, CustomerSpace customerSpace, Tenant pmmlTenant)
             throws IOException, InterruptedException {
         final String url = apiHostPort + "/score/records";
-        InternalResourceRestApiProxy plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(plsApiHostPort);
-        runScoringTest(url, plsRest, modelName, customerSpace, pmmlTenant, true, true);
+        runScoringTest(url, modelName, customerSpace, pmmlTenant, true, true);
     }
 
     public Model getModel(String modelName, CustomerSpace customerSpace, Tenant pmmlTenant)

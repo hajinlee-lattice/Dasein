@@ -1,8 +1,5 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -10,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +21,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
@@ -36,10 +33,12 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.PMMLModelWorkflow
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTestNGBase {
 
@@ -48,9 +47,6 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
 
     @Autowired
     private ModelSummaryProxy modelSummaryProxy;
-
-    @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
     private TestPMMLScoring testPMMLScoring;
@@ -89,7 +85,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         waitForCompletion(workflowId);
 
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
+        List<ModelSummary> summaries = modelSummaryProxy.findAllValid(mainTestTenant.getId());
         assertEquals(summaries.size(), modelCount++);
         for (ModelSummary summary : summaries) {
             if (summary.getName().startsWith(modelName)) {

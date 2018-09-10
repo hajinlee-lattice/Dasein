@@ -1,18 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
 import java.net.URL;
 import java.util.List;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,16 +30,25 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
+public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(DataFileProviderServiceTestNG.class);
-    private static final String TENANT_ID = "TENANT1";
+    private static final Logger log = LoggerFactory.getLogger(DataFileProviderServiceDeploymentTestNG.class);
 
     @Mock
     private SourceFileProxy sourceFileProxy;
@@ -60,9 +58,6 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
@@ -76,6 +71,9 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
+
     private String modelId;
 
     private String fileContents;
@@ -84,24 +82,24 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
     private static String tableFileFolder;
 
-    @BeforeClass(groups = { "functional" })
+    private String TENANT_ID;
+
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         dataFileProviderService.setConfiguration(yarnConfiguration);
-        dataFileProviderService.setModelSummaryEntityMgr(modelSummaryEntityMgr);
+        dataFileProviderService.setModelSummaryProxy(modelSummaryProxy);
         dataFileProviderService.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
-        Tenant tenant1 = new Tenant();
-        tenant1.setId(TENANT_ID);
-        tenant1.setName(TENANT_ID);
-        tenantService.discardTenant(tenant1);
-        tenantService.registerTenant(tenant1);
 
-        setupDbWithEloquaSMB(tenant1);
+        testBed.bootstrap(1);
+        Tenant tenant1 = testBed.getMainTestTenant();
+        setupDbWithEloquaSMB(tenant1, true, true);
 
+        TENANT_ID = tenant1.getId();
         Tenant tenant = tenantEntityMgr.findByTenantId(TENANT_ID);
         setupSecurityContext(tenant);
 
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
+        List<ModelSummary> summaries = modelSummaryProxy.findAllValid(TENANT_ID);
         ModelSummary summary = summaries.get(0);
         modelId = summary.getId();
         String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/ANY_TABLE/" + modelId + "/container_01/";
@@ -130,12 +128,12 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFileProvider", enabled = true)
+    @Test(groups = { "deployment" }, dataProvider = "dataFileProvider", enabled = true)
     public void downloadFile(final String mimeType, final String filter) {
 
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -153,7 +151,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFilePathProvider")
+    @Test(groups = { "deployment" }, dataProvider = "dataFilePathProvider")
     public void testDownloadSourceFileCsv(final String mimeType, final String filePath) {
 
         when(sourceFileProxy.findByName(any(), anyString())).thenReturn(sourceFile);
@@ -173,7 +171,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFilePathProvider")
+    @Test(groups = { "deployment" }, dataProvider = "dataFilePathProvider")
     public void downloadFileByPath(final String mimeType, final String filePath) {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -190,7 +188,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFilePathProviderNotFound")
+    @Test(groups = { "deployment" }, dataProvider = "dataFilePathProviderNotFound")
     public void downloadFileByPathNotFound(final String mimeType, final String filePath) {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -207,7 +205,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         Assert.fail("Should not find file to download.");
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFileProvider", enabled = true)
+    @Test(groups = { "deployment" }, dataProvider = "dataFileProvider", enabled = true)
     public void getFileContents(final String mimeType, final String filter) {
         try {
             String contents = dataFileProviderService.getFileContents(modelId, mimeType, filter);
@@ -218,7 +216,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFileProviderNotFound", enabled = true)
+    @Test(groups = { "deployment" }, dataProvider = "dataFileProviderNotFound", enabled = true)
     public void downloadFileNotFound(final String mimeType, final String filter) {
 
         HttpServletRequest request = mock(HttpServletRequest.class);

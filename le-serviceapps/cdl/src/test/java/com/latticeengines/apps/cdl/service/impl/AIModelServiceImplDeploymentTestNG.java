@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,7 +18,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -36,6 +34,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
@@ -64,6 +63,9 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Inject
     private CDLTestDataService cdlTestDataService;
+
+    @Inject
+    protected ModelSummaryProxy modelSummaryProxy;
 
     protected MetadataSegment reTestSegment;
 
@@ -200,7 +202,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
                 modelPath, modelName, applicationId, modelVersion, uuid);
         ModelSummary modelSummary = null;
         try {
-            modelSummary = ModelSummaryUtils.createModelSummary(internalResourceProxy, mainTestTenant,
+            modelSummary = ModelSummaryUtils.createModelSummary(modelSummaryProxy, mainTestTenant,
                     modelConfiguration);
         } catch (IOException e) {
             Assert.fail("Could not create ModelSummary", e);
@@ -208,8 +210,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(modelSummary);
         log.info("Created ModelSummary ID: " + modelSummary.getId());
 
-        ModelSummary retModelSummary = internalResourceProxy.getModelSummaryFromModelId(modelConfiguration.getModelId(),
-                CustomerSpace.parse(mainTestTenant.getId()));
+        ModelSummary retModelSummary = modelSummaryProxy.getModelSummaryFromModelId(mainTestTenant.getId(), modelConfiguration.getModelId());
         Assert.assertNotNull(retModelSummary);
         Assert.assertNotNull(retModelSummary.getId());
 

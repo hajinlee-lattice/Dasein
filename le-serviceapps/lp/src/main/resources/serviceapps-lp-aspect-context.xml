@@ -7,5 +7,5 @@
     <aop:aspectj-autoproxy proxy-target-class="true"/>
     <bean id="resourceAspect" class="com.latticeengines.apps.core.aspect.ResourceAspect"/>
     <bean id="saMultiTenantAspect" class="com.latticeengines.apps.core.aspect.ServiceAppsMultiTenantEntityMgrAspect"/>
-
+    <bean id="lpMultiTenantAspect" class="com.latticeengines.apps.lp.entitymgr.impl.LPMultiTenantEntityMgrAspect"/>
 </beans>

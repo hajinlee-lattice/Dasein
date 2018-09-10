@@ -1,14 +1,5 @@
 package com.latticeengines.pls.metrics.impl;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,14 +14,21 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.controller.ModelSummaryResource;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
-public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+public class PlsMetricsAspectDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private ModelSummaryResource modelSummaryResource;
@@ -39,32 +37,29 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
     private GlobalAuthenticationService globalAuthenticationService;
 
     private Logger origLog;
-    private ModelSummaryEntityMgr origSummaryEntityMgr;
-    private ModelSummaryService origService;
     private ModelSummaryProxy origProxy;
 
-    @BeforeClass(groups = "functional")
-    public void beforeClass() {
+    @BeforeClass(groups = "deployment")
+    public void beforeClass() throws Exception {
         origLog = PlsMetricsAspectImpl.log;
-        origSummaryEntityMgr = modelSummaryResource.getModelSummaryEntityMgr();
         origProxy = modelSummaryResource.getModelSummaryProxy();
+
+        super.setup();
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void afterClass() {
         PlsMetricsAspectImpl.log = origLog;
-        modelSummaryResource.setModelSummaryEntityMgr(origSummaryEntityMgr);
         modelSummaryResource.setModelSummaryProxy(origProxy);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void logMetrics() {
         Logger newLog = mock(Logger.class);
         PlsMetricsAspectImpl.log = newLog;
 
         String testUser = TestFrameworkUtils.SUPER_ADMIN_USERNAME;
 
-        origSummaryEntityMgr = modelSummaryResource.getModelSummaryEntityMgr();
         final List<String> logs = new ArrayList<>();
         doAnswer((Answer<Object>) invocation -> {
             Object[] params = invocation.getArguments();
@@ -73,8 +68,6 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
         }).when(newLog).info(any());
 
         setupSecurityContext(mainTestTenant, testUser);
-        ModelSummaryEntityMgr summaryEntityMgr = mock(ModelSummaryEntityMgr.class);
-        modelSummaryResource.setModelSummaryEntityMgr(summaryEntityMgr);
         modelSummaryResource.setModelSummaryProxy(mock(ModelSummaryProxy.class));
 
         modelSummaryResource.delete("1");
@@ -86,7 +79,6 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
         modelSummaryResource.getModelSummaries(null);
         verify(newLog, times(2)).info(anyString());
 
-        modelSummaryResource.getModelSummaryEntityMgr();
         verify(newLog, times(2)).info(anyString());
 
         String passwd = DigestUtils.sha256Hex(TestFrameworkUtils.GENERAL_PASSWORD);
@@ -95,6 +87,5 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
         assertTrue(ticket.getTenants().size() >= 2);
         boolean result = globalAuthenticationService.discard(ticket);
         assertTrue(result);
-
     }
 }

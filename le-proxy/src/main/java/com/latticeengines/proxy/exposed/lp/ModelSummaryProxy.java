@@ -3,30 +3,14 @@ package com.latticeengines.proxy.exposed.lp;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.Predictor;
 
 public interface ModelSummaryProxy {
 
     void setDownloadFlag(String customerSpace);
-
-    ModelSummary getModelSummaryByModelId(String customerSpace, String modelId);
-
-    // List<?> getActiveModelSummaries(CustomerSpace customerSpace);
-    //
-    // void createModelSummary(ModelSummary modelSummary, CustomerSpace
-    // customerSpace);
-    //
-    // void deleteModelSummary(String modelId, CustomerSpace customerSpace);
-    //
-    // List<ModelSummary> getPaginatedModels(CustomerSpace customerSpace, String
-    // start, int offset, int maximum,
-    // boolean considerAllStatus);
-    //
-    // int getModelsCount(CustomerSpace customerSpace, String start, boolean
-    // considerAllStatus);
-    //
-    // List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long
-    // timeFrame);
 
     boolean downloadModelSummary(String customerSpace);
 
@@ -35,5 +19,57 @@ public interface ModelSummaryProxy {
     Map<String, ModelSummary> getEventToModelSummary(String customerSpace,
             Map<String, String> modelApplicationIdToEventColumn);
 
+    void create(String customerSpace, ModelSummary modelSummary);
+
+    ModelSummary createModelSummary(String customerSpace, ModelSummary modelSummary, boolean usingRaw);
+
+    boolean update(String customerSpace, String modelId, AttributeMap attrMap);
+
+    boolean updateStatusByModelId(String customerSpace, String modelId, ModelSummaryStatus status);
+
+    boolean deleteByModelId(String customerSpace, String modelId);
+
+    ModelSummary getModelSummary(String customerSpace, String modelId);
+
+    ModelSummary findByModelId(String customerSpace, String modelId,
+           boolean returnRelational, boolean returnDocument, boolean validOnly);
+
+    ModelSummary findValidByModelId(String customerSpace, String modelId);
+
+    ModelSummary getModelSummaryEnrichedByDetails(String customerSpace, String modelId);
+
+    ModelSummary getModelSummaryFromModelId(String customerSpace, String modelId);
+
+    ModelSummary findByApplicationId(String customerSpace, String applicationId);
+
     List<ModelSummary> getModelSummaries(String customerSpace, String selection);
+
+    List<ModelSummary> findAll(String customerSpace);
+
+    List<ModelSummary> findAllValid(String customerSpace);
+
+    List<?> findAllActive(String customerSpace);
+
+    List<ModelSummary> findPaginatedModels(String customerSpace,
+        String start, boolean considerAllStatus, int offset, int maximum);
+
+    int findTotalCount(String customerSpace, String start, boolean considerAllStatus);
+
+    boolean modelIdinTenant(String customerSpace, String modelId);
+
+    List<Predictor> getAllPredictors(String customerSpace, String modelId);
+
+    List<Predictor> getPredictorsForBuyerInsights(String customerSpace, String modelId);
+
+    boolean updatePredictors(String customerSpace, String modelId, AttributeMap attrMap);
+
+    ModelSummary getByModelId(String modelId);
+
+    ModelSummary retrieveByModelIdForInternalOperations(String modelId);
+
+    List<ModelSummary> getAllForTenant(String tenantName);
+
+    List<ModelSummary> getModelSummariesByApplicationId(String applicationId);
+
+    List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
 }

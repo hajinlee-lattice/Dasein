@@ -32,16 +32,15 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
 import com.latticeengines.domain.exposed.pls.TenantDeployment;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantDeploymentConstants;
 import com.latticeengines.pls.service.TenantDeploymentService;
 import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
-public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class TenantConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private final static String contractId = "PLSTenantConfig";
     private final static String tenantId = contractId;
@@ -59,13 +58,10 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
     private TenantConfigService configService;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
-    private ModelSummaryService modelSummaryService;
-
-    @Autowired
     private TenantDeploymentService tenantDeploymentService;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Autowired
     @Qualifier("propertiesFileFeatureFlagProvider")
@@ -73,7 +69,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
 
     private BatonService batonService = new BatonServiceImpl();
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
@@ -96,20 +92,20 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
         PLSTenantId = String.format("%s.%s.%s", contractId, tenantId, spaceId);
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterClass(groups = { "deployment" })
     public void afterClass() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
         camille.delete(path);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void getCredential() {
         CRMTopology topology = configService.getTopology(PLSTenantId);
         Assert.assertEquals(topology, CRMTopology.SFDC);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void getFeatureFlags() {
         removeFlagDefinition(flagId);
         removeFlagDefinition(noDefaultFlagId);
@@ -126,7 +122,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
         removeFlagDefinition(noDefaultFlagId);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testOverwriteFeatureFlags() {
         removeFlagDefinition(flagId);
         removeFlagDefinition(noDefaultFlagId);
@@ -148,7 +144,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
         removeFlagDefinition(noDefaultFlagId);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testDataloaderRelatedFeatureFlags() throws Exception {
         FeatureFlagValueMap flags = configService.getFeatureFlags(PLSTenantId);
         verifyFlagBooleanAndDefault(flags, PlsFeatureFlag.ACTIVATE_MODEL_PAGE.getName(), true);
@@ -168,7 +164,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
         camille.create(topologyPath, new Document("SFDC"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testDeploymentRelatedFeatureFlags() throws Exception {
         FeatureFlagValueMap flags = configService.getFeatureFlags(PLSTenantId);
         String flagId = PlsFeatureFlag.DEPLOYMENT_WIZARD_PAGE.getName();
@@ -183,7 +179,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void getProducts() {
         List<LatticeProduct> products = configService.getProducts(PLSTenantId);
         Assert.assertNotNull(products);
@@ -199,10 +195,10 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
             if (tenantDeployment != null) {
                 return !tenantDeploymentService.isDeploymentCompleted(tenantDeployment);
             } else {
-                List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+                List<ModelSummary> summaries = modelSummaryProxy.findAll(tenantId);
                 if (summaries != null) {
                     for (ModelSummary summary : summaries) {
-                        if (modelSummaryService.modelIdinTenant(summary.getId(), tenantId)) {
+                        if (modelSummaryProxy.modelIdinTenant(tenantId, summary.getId())) {
                             return false;
                         }
                     }
@@ -214,7 +210,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testRemoveDLRestServicePart() {
         String url = "https://10.41.1.187:8081/DLRestService";
         String newUrl = configService.removeDLRestServicePart(url);
@@ -253,7 +249,7 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
         Assert.assertEquals(newUrl, null);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testGetMaxPremiumLeadEnrichmentAttributes() {
         Camille camille = CamilleEnvironment.getCamille();
         Path contractPath;
@@ -331,5 +327,4 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
             // ignore
         }
     }
-
 }

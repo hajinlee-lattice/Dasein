@@ -1,21 +1,14 @@
 package com.latticeengines.scoringapi.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
@@ -40,6 +33,11 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsMarketoCredentialProxy;
 import com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
     
@@ -81,7 +79,8 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
     
     @Test(groups="deployment")
     public void testVerifyModelSummary() {
-        List<ModelSummary> modelSummaries = plsRest.getPaginatedModels(customerSpace, null, 0, 10, true, true);
+        List<ModelSummary> modelSummaries = modelSummaryProxy.findPaginatedModels(customerSpace.toString(),
+                null, true, 0, 10);
         assertNotNull(modelSummaries, "Model Summaries were not initialized");
         assertEquals(modelSummaries.size(), 1);
         assertNotNull(modelSummaries.get(0).getId());

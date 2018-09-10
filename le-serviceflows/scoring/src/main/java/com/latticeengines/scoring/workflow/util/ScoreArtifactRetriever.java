@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 import static com.latticeengines.domain.exposed.scoringapi.Model.EV_FIT_FUNCTION_PARAMETERS_FILENAME;
 import static com.latticeengines.domain.exposed.scoringapi.Model.EV_SCORE_DERIVATION_FILENAME;
@@ -28,19 +28,16 @@ import static com.latticeengines.domain.exposed.scoringapi.Model.SCORE_DERIVATIO
 public class ScoreArtifactRetriever {
     private static final Logger log = LoggerFactory.getLogger(ScoreArtifactRetriever.class);
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    private ModelSummaryProxy modelSummaryProxy;
     private Configuration yarnConfiguration;
 
-    public ScoreArtifactRetriever(InternalResourceRestApiProxy internalResourceRestApiProxy,
-                                  Configuration yarnConfiguration) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    public ScoreArtifactRetriever(ModelSummaryProxy modelSummaryProxy, Configuration yarnConfiguration) {
+        this.modelSummaryProxy = modelSummaryProxy;
         this.yarnConfiguration = yarnConfiguration;
     }
 
-    private ModelSummary getModelSummary(InternalResourceRestApiProxy internalResourceRestApiProxy,
-                                         CustomerSpace customerSpace, String modelId) {
-
-        ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
+    private ModelSummary getModelSummary(CustomerSpace customerSpace, ModelSummaryProxy modelSummaryProxy, String modelId) {
+        ModelSummary modelSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(), modelId);
 
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_31027, new String[]{modelId});
@@ -148,7 +145,7 @@ public class ScoreArtifactRetriever {
     public String getScoreDerivation(CustomerSpace customerSpace, //
                                      String modelId) {
         log.info(String.format("Retrieving score derivation from HDFS for model:%s", modelId));
-        ModelSummary modelSummary = getModelSummary(internalResourceRestApiProxy, customerSpace, modelId);
+        ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
 
 
         String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
@@ -159,7 +156,7 @@ public class ScoreArtifactRetriever {
     public String getFitFunctionParameters(CustomerSpace customerSpace, //
                                            String modelId) {
         log.info(String.format("Retrieving fit function parameters from HDFS for model:%s", modelId));
-        ModelSummary modelSummary = getModelSummary(internalResourceRestApiProxy, customerSpace, modelId);
+        ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
 
 
         String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
@@ -170,8 +167,7 @@ public class ScoreArtifactRetriever {
     public String getEVScoreDerivation(CustomerSpace customerSpace, //
                                        String modelId) {
         log.info(String.format("Retrieving ev model score derivation from HDFS for model:%s", modelId));
-        ModelSummary modelSummary = getModelSummary(internalResourceRestApiProxy, customerSpace, modelId);
-
+        ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
 
         String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
 
@@ -181,12 +177,11 @@ public class ScoreArtifactRetriever {
     public String getEVFitFunctionParameters(CustomerSpace customerSpace, //
                                              String modelId) {
         log.info(String.format("Retrieving ev model fit function parameters from HDFS for model:%s", modelId));
-        ModelSummary modelSummary = getModelSummary(internalResourceRestApiProxy, customerSpace, modelId);
+        ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
 
 
         String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
 
         return retrieveFitFunctionParametersFromHdfs(hdfsScoreArtifactBaseDir);
     }
-
 }

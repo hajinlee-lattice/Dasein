@@ -1,7 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.testng.Assert.assertEquals;
-
 import java.io.InputStream;
 import java.util.List;
 
@@ -12,28 +10,30 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelNoteService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
-public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
-    @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+import static org.testng.Assert.assertEquals;
+
+public class ModelNoteServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private TenantService tenantService;
 
     @Autowired
     private ModelNoteService modelNoteService;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     private ModelNote note1;
     private ModelNote note2;
@@ -43,31 +43,13 @@ public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant1;
     private Tenant tenant2;
-    @Autowired
-    private GlobalAuthFunctionalTestBed globalAuthFunctionalTestBed;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        tenant1 = tenantService.findByTenantId("tenant1");
-        tenant2 = tenantService.findByTenantId("tenant2");
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
-        if (tenant2 != null) {
-            tenantService.discardTenant(tenant2);
-        }
-        tenant1 = new Tenant();
-        tenant1.setId("tenant1");
-        tenant1.setName("tenant1");
-        globalAuthFunctionalTestBed.createTenant(tenant1);
+        testBed.bootstrap(2);
+        tenant1 = testBed.getTestTenants().get(0);
+        tenant2 = testBed.getTestTenants().get(1);
 
-        tenant2 = new Tenant();
-        tenant2.setId("tenant2");
-        tenant2.setName("tenant2");
-        globalAuthFunctionalTestBed.createTenant(tenant2);
-
-        tenant1 = tenantService.findByTenantId("tenant1");
-        tenant2 = tenantService.findByTenantId("tenant2");
         createModelSummaryForTenant1(tenant1);
         createModelSummaryForTenant2(tenant2);
     }
@@ -93,9 +75,8 @@ public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
         setDetails(modelSummary1);
         modelSummary1.setModelType(ModelType.PYTHONMODEL.getModelType());
         modelSummary1.setLastUpdateTime(modelSummary1.getConstructionTime());
-        modelSummaryEntityMgr.create(modelSummary1);
-
-        modelSummary1 = modelSummaryEntityMgr.getByModelId(modelSummary1.getId());
+        modelSummaryProxy.create(tenant.getId(), modelSummary1);
+        modelSummary1 = modelSummaryProxy.getByModelId(modelSummary1.getId());
     }
 
     private void createModelSummaryForTenant2(Tenant tenant) throws Exception {
@@ -118,23 +99,19 @@ public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
         modelSummary2.setModelType(ModelType.PYTHONMODEL.getModelType());
         modelSummary2.setLastUpdateTime(modelSummary2.getConstructionTime());
         modelSummary2.setTenant(tenant);
-        modelSummaryEntityMgr.create(modelSummary2);
-
-        modelSummary2 = modelSummaryEntityMgr.getByModelId(modelSummary2.getId());
+        modelSummaryProxy.create(tenant.getId(), modelSummary2);
+        modelSummary2 = modelSummaryProxy.getByModelId(modelSummary2.getId());
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void teardown() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("tenant1");
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
 
-        Tenant tenant2 = tenantService.findByTenantId("tenant2");
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
-
     }
 
     private void setDetails(ModelSummary summary) throws Exception {
@@ -147,7 +124,7 @@ public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
         summary.setDetails(details);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void createModelNoteForSummary1() {
         MultiTenantContext.setTenant(tenant1);
         NoteParams noteParams = new NoteParams();
@@ -160,7 +137,7 @@ public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(note1.getCreatedByUser(), "penglong.liu@lattice-engines.com");
     }
 
-    @Test(groups = "functional", dependsOnMethods = "createModelNoteForSummary1")
+    @Test(groups = "deployment", dependsOnMethods = "createModelNoteForSummary1")
     public void testUpdateByNoteId() {
         NoteParams noteParams1 = new NoteParams();
         noteParams1.setContent("this is not a test case！");
@@ -171,7 +148,7 @@ public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(note1.getLastModifiedByUser(), "lpl@lattice-engines.com");
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testUpdateByNoteId")
+    @Test(groups = "deployment", dependsOnMethods = "testUpdateByNoteId")
     public void testCopyNotes() {
         MultiTenantContext.setTenant(tenant2);
         modelNoteService.copyNotes(modelSummary1.getId(), modelSummary2.getId());
@@ -182,7 +159,7 @@ public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(note2.getLastModifiedByUser(), "lpl@lattice-engines.com");
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCopyNotes")
+    @Test(groups = "deployment", dependsOnMethods = "testCopyNotes")
     public void testDeleteNotes() {
         modelNoteService.deleteById(note2.getId());
         List<ModelNote> list = modelNoteService.getAllByModelSummaryId(modelSummary2.getId());

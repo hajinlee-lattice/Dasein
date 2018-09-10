@@ -1,9 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,12 +30,16 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.mchange.io.FileUtils;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 public class ScoringFileMetadataServiceImplUnitTestNG {
 
@@ -108,11 +108,11 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         MetadataProxy metadataProxy = Mockito.mock(MetadataProxy.class);
         Mockito.doNothing().when(metadataProxy).createTable(anyString(), anyString(), any(Table.class));
 
-        ModelSummaryEntityMgr modelSummaryEntityMgr = Mockito.mock(ModelSummaryEntityMgr.class);
         ModelSummary summary = new ModelSummary();
         summary.setId("modelid");
         summary.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.name());
-        when(modelSummaryEntityMgr.findValidByModelId(anyString())).thenReturn(summary);
+        ModelSummaryProxy modelSummaryProxy = Mockito.mock(ModelSummaryProxy.class);
+        when(modelSummaryProxy.findValidByModelId(anyString(), anyString())).thenReturn(summary);
 
         PlsFeatureFlagService plsFeatureFlagService = Mockito.mock(PlsFeatureFlagService.class);
         when(plsFeatureFlagService.isFuzzyMatchEnabled()).thenReturn(Boolean.FALSE);
@@ -123,7 +123,7 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         ReflectionTestUtils.setField(scoringFileMetadataService, "modelMetadataService", modelMetadataService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "sourceFileService", sourceFileService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "metadataProxy", metadataProxy);
-        ReflectionTestUtils.setField(scoringFileMetadataService, "modelSummaryEntityMgr", modelSummaryEntityMgr);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "modelSummaryProxy", modelSummaryProxy);
         ReflectionTestUtils.setField(scoringFileMetadataService, "yarnConfiguration", localFileSystemConfig);
         ReflectionTestUtils.setField(scoringFileMetadataService, "plsFeatureFlagService", plsFeatureFlagService);
 

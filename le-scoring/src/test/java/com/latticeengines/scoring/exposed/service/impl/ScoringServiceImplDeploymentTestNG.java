@@ -1,14 +1,10 @@
 package com.latticeengines.scoring.exposed.service.impl;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -34,6 +30,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -45,13 +42,16 @@ import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.util.ScoringTestUtils;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGBase {
 
@@ -67,6 +67,9 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     private static String TEST_INPUT_DATA_DIR;
 
@@ -86,13 +89,11 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
 
+    protected Tenant tenant;
+
     private String artifactTableDir;
     private String artifactBaseDir;
     private String enhancementsDir;
-
-    protected InternalResourceRestApiProxy plsRest;
-
-    protected Tenant tenant;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws IOException {
@@ -110,8 +111,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         String modelVersion = "157342cb-a8fb-4158-b62a-699441401e9a";
         ScoringTestModelConfiguration modelConfiguration = new ScoringTestModelConfiguration(testModelFolderName,
                 applicationId, modelVersion);
-        plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
-        ModelSummary modelSummary = createModel(plsRest, tenant, modelConfiguration, customerSpace);
+        ModelSummary modelSummary = createModel(modelSummaryProxy, tenant, modelConfiguration, customerSpace);
         generateDefaultBucketMetadata(modelSummary, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
         saveAttributeSelection(customerSpace);
@@ -192,8 +192,8 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
     }
 
-    private ModelSummary createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,
-            ScoringTestModelConfiguration modelConfiguration, CustomerSpace customerSpace) throws IOException {
+    private ModelSummary createModel(ModelSummaryProxy modelSummaryProxy,
+             Tenant tenant, ScoringTestModelConfiguration modelConfiguration, CustomerSpace customerSpace) throws IOException {
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
                 modelConfiguration.getModelSummaryJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
@@ -207,14 +207,17 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         modelSummary.setModelType(ModelType.PYTHONMODEL.getModelType());
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
 
-        ModelSummary retrievedSummary = plsRest.getModelSummaryFromModelId(modelConfiguration.getModelId(),
-                customerSpace);
+        ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(), modelConfiguration.getModelId());
         if (retrievedSummary != null) {
-            plsRest.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
+            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelConfiguration.getModelId());
         }
-        plsRest.createModelSummary(modelSummary, customerSpace);
-        plsRest.activateModelSummary(modelSummary.getId());
-        retrievedSummary = plsRest.getModelSummaryFromModelId(modelConfiguration.getModelId(), customerSpace);
+        modelSummaryProxy.createModelSummary(customerSpace.toString(), modelSummary, false);
+
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put(ModelSummary.STATUS, ModelSummaryStatus.ACTIVE.getStatusCode());
+        modelSummaryProxy.update(customerSpace.toString(), modelSummary.getId(), attrMap);
+
+        retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(customerSpace.toString(), modelConfiguration.getModelId());
         assertNotNull(retrievedSummary);
         return modelSummary;
     }
@@ -361,5 +364,4 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
             return modelSummaryJsonLocalpath;
         }
     }
-
 }

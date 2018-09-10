@@ -1,13 +1,16 @@
 package com.latticeengines.pls.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -34,15 +38,11 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.pls.service.FileUploadService;
-import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "scores/fileuploads", description = "REST resource for uploading csv files for scoring")
 @RestController
@@ -62,10 +62,10 @@ public class ScoringFileUploadResource {
     private SourceFileService sourceFileService;
 
     @Autowired
-    private ModelSummaryService modelSummary;
+    private MetadataProxy metadataProxy;
 
     @Autowired
-    private MetadataProxy metadataProxy;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
@@ -91,7 +91,7 @@ public class ScoringFileUploadResource {
             }
 
             SourceFile sourceFile = null;
-            ModelSummary summary = modelSummary.getModelSummaryByModelId(modelId);
+            ModelSummary summary = modelSummaryProxy.getByModelId(modelId);
             if (summary.getModelType().equals(ModelType.PYTHONMODEL.getModelType())) {
                 stream = scoringFileMetadataService.validateHeaderFields(stream,
                         closeableResourcePool, displayName);
@@ -178,5 +178,4 @@ public class ScoringFileUploadResource {
         return ResponseDocument
                 .successResponse(scoringFileMetadataService.getHeaderFields(csvFileName));
     }
-
 }

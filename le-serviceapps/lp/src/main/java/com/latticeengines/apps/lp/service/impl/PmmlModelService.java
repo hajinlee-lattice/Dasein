@@ -47,7 +47,7 @@ public class PmmlModelService extends ModelServiceBase {
 
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
-        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, true, false, true);
+        ModelSummary summary = modelSummaryService.findByModelId(modelId, true, false, true);
         DataComposition datacomposition;
         try {
             datacomposition = getDataComposition(summary);

@@ -7,12 +7,13 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.pls.entitymanager.ModelNoteEntityMgr;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelNoteService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 @Component("modelNoteService")
 public class ModelNoteServiceImpl implements ModelNoteService {
@@ -21,7 +22,7 @@ public class ModelNoteServiceImpl implements ModelNoteService {
     private ModelNoteEntityMgr modelNotesEntityMgr;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public ModelNote findById(String id) {
@@ -38,7 +39,8 @@ public class ModelNoteServiceImpl implements ModelNoteService {
         modelNote.setCreationTimestamp(nowTimestamp);
         modelNote.setLastModificationTimestamp(nowTimestamp);
         modelNote.setNotesContents(noteParams.getContent());
-        ModelSummary summary1 = modelSummaryEntityMgr.getByModelId(modelSummaryId);
+
+        ModelSummary summary1 = modelSummaryProxy.getByModelId(modelSummaryId);
         modelNote.setModelSummary(summary1);
         modelNote.setOrigin(noteParams.getOrigin());
         modelNote.setId(UUID.randomUUID().toString());
@@ -61,15 +63,16 @@ public class ModelNoteServiceImpl implements ModelNoteService {
 
     @Override
     public List<ModelNote> getAllByModelSummaryId(String modelSummaryId) {
-        ModelSummary summary1 = modelSummaryEntityMgr.findByModelId(modelSummaryId, false, false, true);
+        ModelSummary summary1 = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(),
+                modelSummaryId, false, false, true);
         return modelNotesEntityMgr.getAllByModelSummaryId(String.valueOf(summary1.getPid()));
     }
 
     @Override
     public void copyNotes(String sourceModelSummaryId, String targetModelSummaryId) {
-        ModelSummary sourceModelSummary = modelSummaryEntityMgr.getByModelId(sourceModelSummaryId);
+        ModelSummary sourceModelSummary = modelSummaryProxy.getByModelId(sourceModelSummaryId);
         List<ModelNote> notes = modelNotesEntityMgr.getAllByModelSummaryId(String.valueOf(sourceModelSummary.getPid()));
-        ModelSummary targetModelSummary = modelSummaryEntityMgr.getByModelId(targetModelSummaryId);
+        ModelSummary targetModelSummary = modelSummaryProxy.getByModelId(targetModelSummaryId);
         for (ModelNote note : notes) {
             System.out.println("content" + note.getNotesContents());
             ModelNote copyNote = new ModelNote();
@@ -85,5 +88,4 @@ public class ModelNoteServiceImpl implements ModelNoteService {
             modelNotesEntityMgr.create(copyNote);
         }
     }
-
 }

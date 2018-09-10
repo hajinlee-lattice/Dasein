@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.ModelReplaceService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.util.ModelingHdfsUtils;
@@ -30,9 +29,6 @@ import com.latticeengines.domain.exposed.serviceapps.lp.ReplaceModelRequest;
 public class ModelReplaceServiceImpl implements ModelReplaceService {
 
     private static Logger log = LoggerFactory.getLogger(ModelReplaceServiceImpl.class);
-
-    @Inject
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -69,8 +65,8 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
             String targetModelId) {
 
         try {
-            ModelSummary sourceModelSummary = modelSummaryEntityMgr.getByModelId(sourceModelId);
-            ModelSummary targetModelSummary = modelSummaryEntityMgr.getByModelId(targetModelId);
+            ModelSummary sourceModelSummary = modelSummaryService.getModelSummaryByModelId(sourceModelId);
+            ModelSummary targetModelSummary = modelSummaryService.getModelSummaryByModelId(targetModelId);
 
             processHdfsData(sourceTenantId, targetTenantId, sourceModelSummary, targetModelSummary);
             modelSummaryService.downloadModelSummary(targetTenantId, null);

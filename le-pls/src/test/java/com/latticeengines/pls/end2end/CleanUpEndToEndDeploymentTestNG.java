@@ -1,10 +1,5 @@
 package com.latticeengines.pls.end2end;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +8,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -20,9 +16,13 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class CleanUpEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -34,9 +34,6 @@ public class CleanUpEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
 
     @Autowired
-    private ModelSummaryService modelSummaryService;
-
-    @Autowired
     private MetadataProxy metadataProxy;
 
     @Autowired
@@ -44,6 +41,9 @@ public class CleanUpEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private ModelSummaryProxy modelSummaryProxy;
 
     private String modelId;
 
@@ -56,7 +56,7 @@ public class CleanUpEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment.lp")
     public void cleanUpModel() throws Exception {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryProxy.getByModelId(modelId);
         assertNotNull(modelSummary);
 
         Tenant tenant = modelSummary.getTenant();
@@ -83,7 +83,7 @@ public class CleanUpEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertFalse(HdfsUtils.fileExists(yarnConfiguration, eventTableAvroFilePath));
         assertFalse(HdfsUtils.fileExists(yarnConfiguration, modelSummarySupportingFilePath));
 
-        modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        modelSummary = modelSummaryProxy.getByModelId(modelId);
         assertNull(modelSummary);
     }
 }

@@ -15,17 +15,18 @@ import org.apache.hadoop.fs.Path;
 import com.latticeengines.app.exposed.download.AbstractHttpFileDownLoader;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
     private String modelId;
     private Configuration yarnConfiguration;
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private ModelSummaryProxy modelSummaryProxy;
 
     private String filter;
     private String modelingServiceHdfsBaseDir;
@@ -37,8 +38,8 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         this.filter = requestBuilder.filter;
         this.modelId = requestBuilder.modelId;
         this.yarnConfiguration = requestBuilder.yarnConfiguration;
-        this.modelSummaryEntityMgr = requestBuilder.modelSummaryEntityMgr;
         this.modelingServiceHdfsBaseDir = requestBuilder.modelingServiceHdfsBaseDir;
+        this.modelSummaryProxy = requestBuilder.modelSummaryProxy;
     }
 
     @Override
@@ -59,7 +60,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     }
 
     private String getFilePath() throws Exception {
-        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
         String customer = summary.getTenant().getId();
         final String uuid = UuidUtils.extractUuid(modelId);
 
@@ -125,9 +126,9 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         private String mimeType;
         private String modelId;
         private Configuration yarnConfiguration;
-        private ModelSummaryEntityMgr modelSummaryEntityMgr;
         private String filter;
         private String modelingServiceHdfsBaseDir;
+        private ModelSummaryProxy modelSummaryProxy;
 
         public DownloadRequestBuilder setMimeType(String mimeType) {
             this.mimeType = mimeType;
@@ -149,13 +150,13 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
             return this;
         }
 
-        public DownloadRequestBuilder setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
-            this.modelSummaryEntityMgr = modelSummaryEntityMgr;
+        public DownloadRequestBuilder setModelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
+            this.modelingServiceHdfsBaseDir = modelingServiceHdfsBaseDir;
             return this;
         }
 
-        public DownloadRequestBuilder setModelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
-            this.modelingServiceHdfsBaseDir = modelingServiceHdfsBaseDir;
+        public DownloadRequestBuilder setModelSummaryProxy(ModelSummaryProxy modelSummaryProxy) {
+            this.modelSummaryProxy = modelSummaryProxy;
             return this;
         }
     }

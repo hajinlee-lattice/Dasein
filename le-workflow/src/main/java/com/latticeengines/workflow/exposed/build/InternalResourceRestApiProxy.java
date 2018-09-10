@@ -1,21 +1,15 @@
 package com.latticeengines.workflow.exposed.build;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
-import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
@@ -83,48 +77,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             restTemplate.delete(constructUrl("pls/internal/targetmarkets/", tenantId));
         } catch (Exception e) {
             throw new RuntimeException("deleteAllTargetMarkets: Remote call failure", e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public ModelSummary getModelSummaryFromApplicationId(String applicationId,
-            String tenantId) {
-        try {
-            return restTemplate
-                    .getForObject(constructUrl("pls/internal/modelsummaries",
-                            applicationId, tenantId), ModelSummary.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getModelSummaryFromApplicationId: Remote call failure", e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<ModelSummary> getModelSummariesCrossTenantFromApplicationId(String applicationId,
-            String tenantId) {
-        try {
-            List<?> modelSummaries = restTemplate
-                    .getForObject(constructUrl("pls/internal/modelsummaries/crosstenant",
-                            applicationId, tenantId), List.class);
-            return JsonUtils.convertList(modelSummaries, ModelSummary.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getModelSummaryFromApplicationId: Remote call failure", e);
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    public void updateModelSummary(String modelId, AttributeMap attrMap) {
-        try {
-            String url = constructUrl("pls/internal/modelsummaries", modelId);
-            HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
-            log.info(String.format("Putting to %s", url));
-            ResponseEntity<ResponseDocument> response = restTemplate.<ResponseDocument> exchange(
-                    url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-            ResponseDocument responseDoc = response.getBody();
-            if (!responseDoc.isSuccess()) {
-                throw new RuntimeException("updateModelSummary failed!");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("updateModelSummary: Remote call failure", e);
         }
     }
 
@@ -199,19 +151,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public ModelSummary getModelSummaryFromModelId(String modelId, CustomerSpace customerSpace) {
-        ModelSummary modelSummary = null;
-        try {
-            String url = constructUrl("pls/internal/modelsummaries/modelid", modelId,
-                    customerSpace.toString());
-            log.debug("Get from " + url);
-            modelSummary = restTemplate.getForObject(url, ModelSummary.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getModelSummaryFromModelId: Remote call failure", e);
-        }
-        return modelSummary;
-    }
-
     public void sendPlsScoreEmail(String result, String tenantId, AdditionalEmailInfo info) {
         try {
             String url = constructUrl("pls/internal/emails/score/result", result, tenantId);
@@ -251,27 +190,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             restTemplate.put(url, export);
         } catch (Exception e) {
             throw new RuntimeException("sendMetadataSegmentExportEmail: Remote call failure", e);
-        }
-    }
-
-    public void createModelSummary(ModelSummary modelSummary, CustomerSpace customerSpace) {
-        try {
-            String url = constructUrl("pls/internal/modelsummaries", customerSpace.toString());
-            log.debug(String.format("Posting to %s", url));
-            restTemplate.postForObject(url, modelSummary, Void.class);
-        } catch (Exception e) {
-            throw new RuntimeException("createModelSummary: Remote call failure", e);
-        }
-    }
-
-    public void deleteModelSummary(String modelId, CustomerSpace customerSpace) {
-        try {
-            String url = constructUrl("pls/internal/modelsummaries/", modelId,
-                    customerSpace.toString());
-            log.debug(String.format("Deleting to %s", url));
-            restTemplate.delete(url);
-        } catch (Exception e) {
-            throw new RuntimeException("deleteModelSummary: Remote call failure", e);
         }
     }
 

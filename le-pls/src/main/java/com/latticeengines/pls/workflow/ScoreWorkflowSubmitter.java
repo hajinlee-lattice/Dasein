@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
@@ -28,11 +29,10 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.ScoreWorkflowConfi
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
-import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
@@ -46,10 +46,10 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     private MetadataProxy metadataProxy;
 
     @Autowired
-    private ModelSummaryService modelSummaryService;
+    private BucketedScoreService bucketedScoreService;
 
     @Autowired
-    private BucketedScoreService bucketedScoreService;
+    private ModelSummaryProxy modelSummaryProxy;
 
     public ApplicationId submit(ModelSummary modelSummary, String sourceDisplayName,
             TransformationGroup transformationGroup) {
@@ -66,7 +66,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScoreName });
         }
 
-        if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
+        if (!modelSummaryProxy.modelIdinTenant(MultiTenantContext.getTenant().getId(), modelId)) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
@@ -91,7 +91,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "scoreWorkflow");
 
-        ModelSummary summary = modelSummaryService.findByModelId(modelId, false, true, false);
+        ModelSummary summary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(),
+                modelId, false, true, false);
         if (summary != null) {
             inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, summary.getDisplayName());
         }

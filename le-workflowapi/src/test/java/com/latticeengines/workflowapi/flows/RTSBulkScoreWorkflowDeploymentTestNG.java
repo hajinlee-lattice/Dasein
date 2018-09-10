@@ -1,5 +1,7 @@
 package com.latticeengines.workflowapi.flows;
 
+import au.com.bytecode.opencsv.CSVReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -7,10 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
@@ -25,6 +25,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -45,11 +46,10 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkfl
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-
-import au.com.bytecode.opencsv.CSVReader;
 
 public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
 
@@ -67,6 +67,9 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     private static String TEST_INPUT_DATA_DIR;
 
@@ -252,12 +255,12 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
         modelSummary.setTrainingTableName(metadataTable.getName());
 
-        ModelSummary retrievedSummary = internalResourceProxy
-                .getModelSummaryFromModelId(modelConfiguration.getModelId(), customerSpace);
+        ModelSummary retrievedSummary = modelSummaryProxy
+                .getModelSummaryFromModelId(tenant.getId(), modelConfiguration.getModelId());
         if (retrievedSummary != null) {
-            internalResourceProxy.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
+            modelSummaryProxy.deleteByModelId(customerSpace.toString(), modelConfiguration.getModelId());
         }
-        internalResourceProxy.createModelSummary(modelSummary, customerSpace);
+        modelSummaryProxy.createModelSummary(customerSpace.toString(), modelSummary, false);
         return modelSummary;
     }
 

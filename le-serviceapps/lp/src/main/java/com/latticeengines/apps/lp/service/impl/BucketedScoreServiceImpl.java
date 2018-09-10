@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.lp.entitymgr.BucketMetadataEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.BucketedScoreSummaryEntityMgr;
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
@@ -42,13 +42,13 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     private BucketedScoreSummaryEntityMgr bucketedScoreSummaryEntityMgr;
 
     @Inject
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Inject
     private ModelSummaryWriterRepository modelSummaryRepository;
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private ModelSummaryService modelSummaryService;
 
     @Override
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
@@ -116,7 +116,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         bucketMetadataEntityMgr.createBucketMetadata(bucketMetadataList, request.getModelGuid(),
                 request.getRatingEngineId());
         if (StringUtils.isNotBlank(request.getModelGuid())) {
-            modelSummaryEntityMgr.updateLastUpdateTime(request.getModelGuid());
+            modelSummaryService.updateLastUpdateTime(request.getModelGuid());
         }
         if (StringUtils.isNotBlank(request.getRatingEngineId())) {
             registerAction(request);
@@ -165,7 +165,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             }
         }
         if (StringUtils.isNotBlank(modelGuid)) {
-            modelSummaryEntityMgr.updateLastUpdateTime(request.getModelGuid());
+            modelSummaryService.updateLastUpdateTime(request.getModelGuid());
         }
         return updated;
     }

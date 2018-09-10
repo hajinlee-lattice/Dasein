@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
@@ -27,11 +26,11 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.util.BucketedMetadataTestUtils;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -47,10 +46,10 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
     private MetadataSegmentService metadataSegmentService;
 
     @Inject
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private RatingEngineProxy ratingEngineProxy;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -72,7 +71,7 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
 
         modelGuid = String.format("ms__%s__LETest", UUID.randomUUID().toString());
         ModelSummary modelSummary = createModelSummary(modelGuid, mainTestTenant);
-        modelSummaryEntityMgr.create(modelSummary);
+        modelSummaryProxy.createModelSummary(mainTestTenant.getId(), modelSummary, false);
 
         AIModel ratingModel = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(), re1.getId(),
                 re1.getLatestIteration().getId());
@@ -154,5 +153,4 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
         details.setData(data);
         summary.setDetails(details);
     }
-
 }
