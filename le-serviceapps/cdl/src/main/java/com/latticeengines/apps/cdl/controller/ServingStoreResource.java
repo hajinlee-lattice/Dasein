@@ -129,7 +129,9 @@ public class ServingStoreResource {
                             + customerSpace + " TimeElapsed=" + duration + " msec");
                 });
 
-        flux = flux.filter(cm -> cm.getCanModel());
+        flux = flux.filter(cm -> {
+            return Boolean.TRUE.equals(cm.getCanModel());
+        });
         return flux;
     }
 
