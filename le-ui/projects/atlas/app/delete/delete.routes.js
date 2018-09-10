@@ -10,6 +10,9 @@ angular
             onEnter: ['AuthorizationUtility', function(AuthorizationUtility) {
                 AuthorizationUtility.redirectIfNotAuthorized(AuthorizationUtility.excludeExternalUser, {}, 'home');
             }],
+            onExit: ['Banner', function(Banner) {
+                Banner.reset();
+            }],
             resolve: {
                 EntitiesCount: function($q, QueryStore) {
                     var deferred = $q.defer();

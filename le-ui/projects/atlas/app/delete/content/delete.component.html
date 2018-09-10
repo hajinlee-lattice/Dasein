@@ -2,27 +2,6 @@
   <ng-form name="delete_form" novalidate>
 
   <div class="row">
-    <le-modal-window config="$ctrl.modalConfig" callback-function="$ctrl.modalCallback(args)">
-        <br />
-        <p>
-            Are you sure you want to Delete these data? Once the delete job is submitted, it can’t be undone.
-        </p>
-        <br />
-    </le-modal-window>
-    <div class="warning-message" data-ng-show="$ctrl.showWarningMsg">
-        <i data-ng-click="$ctrl.showWarningMsg = false;" class="fa fa-times fa-inverse close"></i>
-        <div> Delete Operation </div>
-        <span>{{$ctrl.deleteWarningMsg}}</span>
-    </div>
-    <div class="success-message" data-ng-show="$ctrl.showSuccessMsg">
-        <i data-ng-click="$ctrl.showSuccessMsg = false;" class="fa fa-times fa-inverse close"></i>
-        <div> Success! Delete Action has been submitted. </div>
-        <span> The delete action will be scheduled to process and analyze after validation. You can track the status from the 
-              <a ui-sref="home.jobs.data">
-                Data Processing Job page.
-              </a>
-        </span>
-    </div>
     <div class="columns eight offset-two box-outline">
       <div class="section-header">
         <h4>Delete Data</h4>

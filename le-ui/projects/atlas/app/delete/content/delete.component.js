@@ -2,7 +2,7 @@ angular.module('lp.delete.entry', [])
 .component('deleteEntry', {
     templateUrl: 'app/delete/content/delete.component.html',
     controller: function( 
-        $state, $stateParams, $scope, DeleteDataStore, DeleteDataService, ImportStore, Modal, BrowserStorageUtility) 
+        $state, $stateParams, $scope, $location, DeleteDataStore, DeleteDataService, ImportStore, Banner, Modal, BrowserStorageUtility) 
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve,
@@ -32,10 +32,12 @@ angular.module('lp.delete.entry', [])
                "attr":"delete",
             },
             uploadOperations: ['BYUPLOAD_ID', 'BYUPLOAD_ACPD', 'BYUPLOAD_MINDATEANDACCOUNT'],
-            ClientSession: BrowserStorageUtility.getClientSession()
+            ClientSession: BrowserStorageUtility.getClientSession(),
+            modalConfigName: 'delete_data'
         });
 
         vm.init = function() {
+            Banner.warning({title: 'Delete Operation', message: 'Once the delete action is submitted, it can’t be undone.'});
             vm.startTime = '';
             vm.endTime = '';
             vm.cleanupOperationType = {
@@ -147,7 +149,12 @@ angular.module('lp.delete.entry', [])
         }
 
         vm.click = function() {
-            vm.toggleModal();
+            Modal.warning({
+                name: "delete_data",
+                title: "Warning",
+                message: 'Are you sure you want to Delete these data? Once the delete job is submitted, it can’t be undone.',
+                confirmtext: 'Yes, Delete'
+            }, vm.modalCallback)
         }
 
         vm.callbackChangedValue = function (type, position, value) {
@@ -198,14 +205,22 @@ angular.module('lp.delete.entry', [])
             if (url != '') {
                 DeleteDataService.cleanup(url, params).then(function(result) {
                     if (result && result.Success) {
-                        vm.setBannerMsg(false, true);
+                        Banner.reset();
+                        var href = getDataProcessingPageHref();
+                        var bannerMsg = "The delete action will be scheduled to process and analyze after validation. You can track the status from the <a href='" + href + "'> Data Processing Job page. </a>";
+                        Banner.success({title: "Success! Delete Action has been submitted.", message: bannerMsg});
+
                         setTimeout(vm.reset, 0);
-                    } else {
-                        vm.setBannerMsg(false, false); // show default error message
                     }
                     vm.submittingJob = false;                
                 });
             }
+        }
+
+        function getDataProcessingPageHref() {   
+            var url = $location.absUrl().split('/');
+            url[url.length - 1] = "jobs/status";
+            return url.join("/");   
         }
 
         vm.reset = function() {
@@ -230,51 +245,23 @@ angular.module('lp.delete.entry', [])
             }
         }
 
-        vm.initModalWindow = function () {
-            vm.modalConfig = {
-                'name': "delete_data",
-                'type': 'sm',
-                'title': 'Warning',
-                'titlelength': 100,
-                'dischargetext': 'Cancel',
-                'dischargeaction': 'cancel',
-                'confirmtext': 'Yes, Delete',
-                'confirmaction': 'proceed',
-                'icon': 'fa fa-exclamation-triangle',
-                'iconstyle': {'color': 'white'},
-                'confirmcolor': 'blue-button',
-                'showclose': true,
-                'headerconfig': {'background-color':'#FDC151', 'color':'white'},
-                'confirmstyle' : {'background-color':'#FDC151'}
-            };
-            vm.modalCallback = function (args) {
-                if (vm.modalConfig.dischargeaction === args.action) {
-                    vm.toggleModal();
-                } else if (vm.modalConfig.confirmaction === args.action) {
-                    vm.toggleModal();
-                    vm.submitCleanupJob();
+        vm.modalCallback = function (args) {
+            var modal = Modal.get(vm.modalConfigName);
+            if (args.action === 'cancel') {
+                Modal.modalRemoveFromDOM(modal, args);
+            } else if (args.action === 'ok') {
+                Modal.modalRemoveFromDOM(modal, args);
 
-                }
+                vm.submitCleanupJob();
             }
-
-            vm.toggleModal = function () {
-                var modal = Modal.get(vm.modalConfig.name);
-                if (modal) {
-                    modal.toggle();
-                }
-            }
-
-            vm.setBannerMsg = function(showWarning, showSuccess) {
-                vm.showWarningMsg= showWarning;
-                vm.showSuccessMsg = showSuccess;
-            }
-
-            $scope.$on("$destroy", function () {
-                Modal.remove(vm.modalConfig.name);
-            });
         }
 
-        vm.initModalWindow();
+        $scope.$on("$destroy", function() {
+            var modal = Modal.get(vm.modalConfigName);
+            if (modal) {
+                Modal.modalRemoveFromDOM(modal, {name: 'delete_data'});
+            }
+        });
 
         vm.init();
     }
