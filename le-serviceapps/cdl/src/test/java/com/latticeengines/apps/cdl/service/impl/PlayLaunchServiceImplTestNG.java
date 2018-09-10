@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
+import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -50,6 +52,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private TenantService tenantService;
 
+    @Inject
+    private PlayTypeService playTypeService;
+
     private Play play;
 
     private PlayLaunch playLaunch1;
@@ -62,7 +67,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private String DISPLAY_NAME = "play Harder";
     private String CREATED_BY = "lattice@lattice-engines.com";
     private Map<String, PlayLaunch> playLaunchMap;
-
+    private List<PlayType> playTypes;
     private Set<RatingBucketName> bucketsToLaunch1;
     private Set<RatingBucketName> bucketsToLaunch2;
 
@@ -75,6 +80,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         Date timestamp = new Date(System.currentTimeMillis());
 
+        playTypes = playTypeService.getAllPlayTypes(mainCustomerSpace);
+
         play = new Play();
         play.setName(NAME);
         play.setDisplayName(DISPLAY_NAME);
@@ -82,6 +89,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         play.setCreated(timestamp);
         play.setUpdated(timestamp);
         play.setCreatedBy(CREATED_BY);
+        play.setPlayType(playTypes.get(0));
 
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);

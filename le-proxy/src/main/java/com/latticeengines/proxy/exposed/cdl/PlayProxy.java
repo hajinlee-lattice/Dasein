@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -29,6 +30,8 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     private static final String DASHBOARD_URL = URL_PREFIX + "/launches/dashboard";
 
     private static final String DASHBOARD_COUNT_URL = DASHBOARD_URL + "/count";
+
+    private static final String PLAY_TYPE_URL_PREFIX = "/customerspaces/{customerSpace}/playtypes";
 
     public PlayProxy() {
         super("cdl");
@@ -221,9 +224,8 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public PlayLaunch updatePlayLaunchProgress(String customerSpace, String playName, String launchId,
-            Double launchCompletionPercent, 
-            Long accountsLaunched, Long contactsLaunched,
-            Long accountsErrored, Long accountsSuppressed) {
+            Double launchCompletionPercent, Long accountsLaunched, Long contactsLaunched, Long accountsErrored,
+            Long accountsSuppressed) {
         String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}", shortenCustomerSpace(customerSpace),
                 playName, launchId);
         List<String> params = new ArrayList<>();
@@ -270,4 +272,36 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         delete("delete PlayLaunch ", url);
     }
 
+    public List<PlayType> getPlayTypes(String customerSpace) {
+        String url = constructUrl(PLAY_TYPE_URL_PREFIX, shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
+        return getList("get all Play Types", url, PlayType.class);
+    }
+
+    public PlayType createPlayType(String customerSpace, PlayType playType) {
+        String url = constructUrl(PLAY_TYPE_URL_PREFIX, shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
+        return post("create new Play Types", url, playType, PlayType.class);
+    }
+
+    public PlayType getPlayTypeById(String customerSpace, String playTypeId) {
+        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
+                playTypeId);
+        log.info("url is " + url);
+        return get("get Play Type", url, PlayType.class);
+    }
+
+    public PlayType updatePlayType(String customerSpace, String playTypeId, PlayType playType) {
+        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
+                playTypeId);
+        log.info("url is " + url);
+        return post("create new Play Types", url, playType, PlayType.class);
+    }
+
+    public void deletePlayTypeById(String customerSpace, String playTypeId) {
+        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
+                playTypeId);
+        log.info("url is " + url);
+        delete("delete Play Type", url);
+    }
 }

@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -124,6 +126,7 @@ public class TestPlayCreationHelper {
     private RatingEngine crossSellRatingEngine;
     private Play play;
     private PlayLaunch playLaunch;
+    private List<PlayType> playTypes;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
@@ -227,7 +230,12 @@ public class TestPlayCreationHelper {
 
     private Play createDefaultPlay() {
         Play play = new Play();
+        if (CollectionUtils.isEmpty(playTypes)) {
+            playTypes = playProxy.getPlayTypes(tenant.getId());
+        }
         play.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
+        play.setPlayType(playTypes.get(0));
+        play.setDisplayName("TestPlay_" + new Date().toString());
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setId(ratingEngine.getId());
         play.setRatingEngine(ratingEngine1);

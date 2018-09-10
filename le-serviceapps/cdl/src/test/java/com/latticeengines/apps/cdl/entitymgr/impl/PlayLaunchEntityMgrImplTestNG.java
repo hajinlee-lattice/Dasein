@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
+import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -35,6 +37,9 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Autowired
     private PlayLaunchEntityMgr playLaunchEntityMgr;
+
+    @Autowired
+    private PlayTypeService playTypeService;
 
     @Autowired
     private TenantService tenantService;
@@ -49,6 +54,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private PlayLaunch playLaunch_org2_2;
 
     List<PlayLaunch> allPlayLaunches;
+    List<PlayType> types;
 
     private String org1 = "org1";
     private String destinationAccountIdColumn_1 = "SFDC_ACCOUNT_ID_COL_1";
@@ -69,10 +75,12 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         setupTestEnvironmentWithDummySegment();
         cleanupPlayLunches();
 
+        types = playTypeService.getAllPlayTypes(mainCustomerSpace);
         play = new Play();
         play.setName(NAME);
         play.setTenant(mainTestTenant);
         play.setDisplayName(DISPLAY_NAME);
+        play.setPlayType(types.get(0));
         Date timestamp = new Date(System.currentTimeMillis());
         play.setCreated(timestamp);
         play.setUpdated(timestamp);
@@ -283,7 +291,6 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCountDashboard" })
     public void testEntriesDashboard() {
-
         Long badPlayId = Long.MAX_VALUE;
         List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
         List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
@@ -341,8 +348,6 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 System.currentTimeMillis(), 0L, 0L, org1, externalSystemType.name());
 
         checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, 1L, 0L, 2L, org1, externalSystemType.name());
-
-        //
 
         checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L,
                 org2, externalSystemType.name());

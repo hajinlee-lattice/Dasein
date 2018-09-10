@@ -91,6 +91,12 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         return existingPlay;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long countByPlayTypePid(Long pid) {
+        return playReaderRepository.countByPlayType_Pid(pid);
+    }
+
     private void createNewPlay(Play play) {
         if (play.getRatingEngine() != null) {
             play.setRatingEngine(findRatingEngine(play));

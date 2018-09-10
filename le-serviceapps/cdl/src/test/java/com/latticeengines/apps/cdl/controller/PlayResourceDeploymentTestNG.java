@@ -69,12 +69,12 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void getCrud() {
+    public void testCrud() {
         playCreationHelper.testCrud();
         playName = playCreationHelper.getPlayName();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
+    @Test(groups = "deployment", dependsOnMethods = {"testCrud"})
     public void createPlayLaunch() {
         playCreationHelper.createPlayLaunch();
         play = playCreationHelper.getPlay();

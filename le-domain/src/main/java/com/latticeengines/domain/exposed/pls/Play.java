@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -133,6 +134,11 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
+
+    @JsonProperty("playType")
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_PLAY_TYPE", nullable = false)
+    private PlayType playType;
 
     @JsonProperty("lastTalkingPointPublishTime")
     @Column(name = "LAST_TALKING_POINT_PUBLISH_TIME")
@@ -266,9 +272,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
         return this.updated;
     }
 
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
+    public void setUpdated(Date updated) { this.updated = updated; }
 
     public LaunchHistory getLaunchHistory() {
         return this.launchHistory;
@@ -286,9 +290,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
         this.lastTalkingPointPublishTime = lastTalkingPointPublishTime;
     }
 
-    public List<RatingBucketCoverage> getRatings() {
-        return this.ratings;
-    }
+    public List<RatingBucketCoverage> getRatings() { return this.ratings; }
 
     public void setRatings(List<RatingBucketCoverage> ratings) {
         this.ratings = ratings;
@@ -301,6 +303,10 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     public void setIsCleanupDone(Boolean isCleanupDone) {
         this.isCleanupDone = isCleanupDone;
     }
+
+    public PlayType getPlayType() { return playType; }
+
+    public void setPlayType(PlayType playType) { this.playType = playType; }
 
     @Override
     public String toString() {

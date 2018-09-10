@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -62,8 +63,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final String MODELSUMMARY_ID = "DeploymentTestModelSummary";
     private Play play;
     private String name;
+    private List<PlayType> playTypes;
     private PlayLaunch playLaunch;
-
     private Tenant tenant;
 
     @Inject
@@ -72,10 +73,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    private RatingEngine ruleBasedRatingEngine;
-    private RatingEngine crossSellRatingEngine;
-    private ModelSummary modelSummary;
-    private MetadataSegment segment;
     @Inject
     private PlayProxy playProxy;
 
@@ -84,6 +81,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    private RatingEngine ruleBasedRatingEngine;
+    private RatingEngine crossSellRatingEngine;
+    private ModelSummary modelSummary;
+    private MetadataSegment segment;
 
     private boolean shouldSkipAutoTenantCreation = false;
 
@@ -304,8 +306,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 List.class);
         Assert.assertNotNull(createTPResponse);
 
-        Play createdPlay2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createDefaultPlay(),
-                Play.class);
+        Play createdPlay2 = createDefaultPlay();
+        createdPlay2.setPlayType(playTypes.get(1));
+        createdPlay2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createdPlay2, Play.class);
         Assert.assertNotNull(createdPlay2);
 
         List<Play> playList = (List) restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
@@ -325,6 +328,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         String jsonValue = JsonUtils.serialize(retrievedPlay);
         Assert.assertNotNull(jsonValue);
         this.play = retrievedPlay;
+
+        Assert.assertThrows(
+                () -> restTemplate.delete(getRestAPIHostPort() + "/pls/playtypes/" + playTypes.get(1).getId()));
     }
 
     public int getNoOfExistingPlays() {
@@ -562,6 +568,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         play.setCreatedBy(CREATED_BY);
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ruleBasedRatingEngine.getId());
+        if (CollectionUtils.isEmpty(playTypes)) {
+            playTypes = JsonUtils.convertList(
+                    restTemplate.getForObject(getRestAPIHostPort() + "/pls/playtypes", List.class), PlayType.class);
+        }
+        play.setPlayType(playTypes.get(0));
         play.setRatingEngine(ratingEngine);
         return play;
     }
@@ -593,14 +604,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(play.getName(), name);
         Assert.assertNotNull(play.getRatingEngine());
         Assert.assertEquals(play.getRatingEngine().getId(), ruleBasedRatingEngine.getId());
-    }
-
-    public Play getPlay() {
-        return play;
-    }
-
-    public PlayLaunch getPlayLaunch() {
-        return playLaunch;
     }
 
     private PlayLaunch createDefaultPlayLaunch() {

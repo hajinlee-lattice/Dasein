@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
@@ -49,12 +50,10 @@ import com.latticeengines.yarn.exposed.service.JobService;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { //"classpath:test-pls-context.xml",
-		"classpath:playmakercore-context.xml",
-        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml", "classpath:proxy-context.xml",
-        "classpath:test-workflowapi-context.xml", 
-        "classpath:test-testframework-cleanup-context.xml" 
-        })
+@ContextConfiguration(locations = { // "classpath:test-pls-context.xml",
+        "classpath:playmakercore-context.xml", "classpath:test-playlaunch-properties-context.xml",
+        "classpath:yarn-context.xml", "classpath:proxy-context.xml", "classpath:test-workflowapi-context.xml",
+        "classpath:test-testframework-cleanup-context.xml" })
 public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStepDeploymentTestNG.class);
@@ -138,6 +137,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     private Long topNCount;
 
+    private List<PlayType> types;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         bucketsToLaunch = new HashSet<>(Arrays.asList(RatingBucketName.values()));
@@ -152,6 +153,12 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         tenant = testPlayCreationHelper.getTenant();
         rulesBasedPlay = testPlayCreationHelper.getPlay();
         rulesBasedPlayLaunch = testPlayCreationHelper.getPlayLaunch();
+
+        // Update play types so that
+        types = playProxy.getPlayTypes(tenant.getId());
+        Assert.assertNotNull(types);
+        rulesBasedPlay.setPlayType(types.get(1));
+        playProxy.createOrUpdatePlay(tenant.getId(), rulesBasedPlay);
 
         String playId = rulesBasedPlay.getName();
         String playLaunchId = rulesBasedPlayLaunch.getId();

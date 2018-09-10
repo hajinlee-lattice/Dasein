@@ -14,15 +14,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.PlayService;
+import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -37,6 +38,9 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayServiceImplDeploymentTestNG.class);
 
+    @Value("${cdl.model.delete.propagate:false}")
+    private Boolean shouldPropagateDelete;
+
     @Inject
     private SegmentProxy segmentProxy;
 
@@ -49,21 +53,22 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Inject
     private TalkingPointProxy talkingPointProxy;
 
-    @Value("${cdl.model.delete.propagate:false}")
-    private Boolean shouldPropagateDelete;
+    @Inject
+    private PlayTypeService playTypeService;
 
     private RatingEngine ratingEngine1;
     private Play play;
     private String playName;
+    private List<PlayType> playTypes;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
 
-        MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(
-                CustomerSpace.parse(mainTestTenant.getId()).toString(), constructSegment(SEGMENT_NAME));
-        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(
-                CustomerSpace.parse(mainTestTenant.getId()).toString(), createdSegment.getName());
+        MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainCustomerSpace,
+                constructSegment(SEGMENT_NAME));
+        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(mainCustomerSpace,
+                createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         log.info(String.format("Segment is %s", retrievedSegment));
 
@@ -76,6 +81,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
         ratingEngine1.setPid(createdRatingEngine.getPid());
+        playTypes = playTypeService.getAllPlayTypes(mainCustomerSpace);
         play = createDefaultPlay();
     }
 
@@ -275,6 +281,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         ratingEngine.setId(ratingEngine1.getId());
         play.setRatingEngine(ratingEngine);
         play.setTenant(mainTestTenant);
+        play.setPlayType(playTypes.get(0));
         // cannot use other servers in a functional test
         // need to either change this test to a deployment test
         // or mock the proxy using mockit

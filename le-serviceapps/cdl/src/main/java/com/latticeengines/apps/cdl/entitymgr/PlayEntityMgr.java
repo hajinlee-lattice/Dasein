@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 
-public interface PlayEntityMgr extends BaseEntityMgrRepository<Play, Long>{
+public interface PlayEntityMgr extends BaseEntityMgrRepository<Play, Long> {
 
     List<Play> findAll();
 
@@ -25,4 +25,5 @@ public interface PlayEntityMgr extends BaseEntityMgrRepository<Play, Long>{
 
     Play updatePlay(Play play, Play existingPlay);
 
+    Long countByPlayTypePid(Long pid);
 }

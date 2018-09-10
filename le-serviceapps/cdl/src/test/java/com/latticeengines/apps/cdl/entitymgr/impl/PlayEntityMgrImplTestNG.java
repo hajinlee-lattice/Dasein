@@ -13,10 +13,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.PlayTypeEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -33,6 +36,12 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private PlayEntityMgr playEntityMgr;
 
     @Autowired
+    private PlayTypeEntityMgr playTypeEntityMgr;
+
+    @Autowired
+    private PlayTypeService playTypeService;
+
+    @Autowired
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
     @Autowired
@@ -44,6 +53,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private Play retrievedPlay;
     private String playName;
+    private List<PlayType> types;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -70,8 +80,10 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine2.setId(createdRatingEngine.getId());
         ratingEngine2.setPid(createdRatingEngine.getPid());
 
+        types = playTypeService.getAllPlayTypes(mainCustomerSpace);
         play = new Play();
         play.setDescription(DESCRIPTION);
+        play.setPlayType(types.get(0));
         play.setCreatedBy(CREATED_BY);
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngine1.getId());
@@ -79,14 +91,6 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setPlayStatus(PlayStatus.INACTIVE);
         play.setTenant(mainTestTenant);
         play.setName(UUID.randomUUID().toString());
-    }
-
-    @AfterClass(groups = "functional")
-    public void teardown() {
-        Tenant tenant1 = tenantService.findByTenantId("testTenant1");
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
     }
 
     @Test(groups = "functional")
@@ -150,10 +154,17 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(playList.size(), 1);
         playList = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine1, Arrays.asList(PlayStatus.INACTIVE));
         Assert.assertEquals(playList.size(), 0);
+
+        long playTypeCount = playEntityMgr.countByPlayTypePid(types.get(0).getPid());
+        Assert.assertEquals(playTypeCount, 1);
+        playTypeCount = playEntityMgr.countByPlayTypePid(types.get(1).getPid());
+        Assert.assertEquals(playTypeCount, 0);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
+        Assert.assertThrows(() -> playTypeEntityMgr.delete(types.get(0)));
+
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
@@ -217,5 +228,13 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(deletedPlayIds);
         Assert.assertEquals(deletedPlayIds.size(), 1);
         Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
+    }
+
+    @AfterClass(groups = "functional")
+    public void teardown() {
+        Tenant tenant1 = tenantService.findByTenantId("testTenant1");
+        if (tenant1 != null) {
+            tenantService.discardTenant(tenant1);
+        }
     }
 }

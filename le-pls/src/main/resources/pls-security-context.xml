@@ -11,7 +11,7 @@
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
         <security:csrf disabled="true"/>
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -232,8 +232,8 @@
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
-    
-   <security:http use-expressions="true"
+
+    <security:http use-expressions="true"
                    pattern="/pls/attrconfig/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
@@ -277,6 +277,16 @@
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/play/**" access="hasRole('VIEW_PLS_DATA')"/>
+    </security:http>
+
+    <security:http use-expressions="true"
+                   pattern="/pls/playtypes/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+        <security:intercept-url pattern="pls/playtypes/**" access="hasRole('VIEW_PLS_DATA')"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -408,7 +418,7 @@
         <security:intercept-url pattern="pls/cdl/**" access="hasRole('Edit_PLS_CDL_Data')"/>
     </security:http>
 
-  <security:http use-expressions="true"
+    <security:http use-expressions="true"
                    pattern="/pls/datacloud/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
@@ -416,7 +426,7 @@
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
-    
+
     <security:http use-expressions="true"
                    pattern="/pls/saml-config/**"
                    authentication-manager-ref="authenticationManager"
@@ -426,7 +436,7 @@
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/saml-config/**" access="hasRole('View_PLS_SSO_Config')"/>
     </security:http>
-    
+
     <security:http use-expressions="true"
                    pattern="/pls/primary-attributes/**"
                    authentication-manager-ref="authenticationManager"

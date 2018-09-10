@@ -9,6 +9,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 
 public interface PlayRepository extends BaseJpaRepository<Play, Long> {
 
-    public List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine, List<PlayStatus> statusList);
+    List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine, List<PlayStatus> statusList);
+
+    Long countByPlayType_Pid(Long pid);
 
 }
