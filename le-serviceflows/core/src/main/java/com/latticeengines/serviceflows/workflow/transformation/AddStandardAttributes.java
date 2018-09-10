@@ -1,6 +1,7 @@
 package com.latticeengines.serviceflows.workflow.transformation;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConfiguration> {
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Override

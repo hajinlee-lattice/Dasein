@@ -1,12 +1,21 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 
 public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfiguration {
 
+    @JsonProperty
     private String sourceSchemaInterpretation;
+
+    @JsonProperty
     private String eventColumn;
+
+    @JsonProperty
     private DataCollection.Version dataCollectionVersion;
+
+    @JsonProperty
     private boolean crossSell;
 
     public CreateCdlEventTableConfiguration() {
