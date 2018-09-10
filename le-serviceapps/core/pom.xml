@@ -31,19 +31,16 @@
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-documentdb</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
@@ -54,19 +51,11 @@
             <artifactId>le-security</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-common-web</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-transform</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>

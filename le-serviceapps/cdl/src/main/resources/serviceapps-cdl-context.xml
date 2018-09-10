@@ -17,8 +17,6 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.cdl.provision.*" />
     </context:component-scan>
 
-    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
-
 	<jpa:repositories base-package="com.latticeengines.apps.cdl.repository.writer"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactory"

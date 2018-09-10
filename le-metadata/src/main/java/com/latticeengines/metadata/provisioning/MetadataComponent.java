@@ -2,13 +2,13 @@ package com.latticeengines.metadata.provisioning;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
@@ -26,7 +26,9 @@ public class MetadataComponent {
 
     public MetadataComponent() { }
 
-    public static String getVersionString() { return versionString; }
+    public static String getVersionString() {
+        return versionString;
+    }
 
     @PostConstruct
     private void registerBootStrapper() {
@@ -39,7 +41,7 @@ public class MetadataComponent {
             ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
                     getInstaller(), //
                     new MetadataUpgrader(), //
-                    getDestroyer(),
+                    getDestroyer(), //
                     null);
             ServiceWarden.registerService(componentName, serviceInfo);
         }

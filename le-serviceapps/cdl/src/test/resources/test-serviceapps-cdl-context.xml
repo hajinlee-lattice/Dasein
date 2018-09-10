@@ -10,7 +10,7 @@
     <import resource="classpath:metadata-context.xml" />
     <import resource="classpath:db-context.xml" />
 
-    <bean id="PlayResourceDeploymentTestNG" 
+    <bean id="playResourceDeploymentTestNG"
         class="com.latticeengines.apps.cdl.controller.PlayResourceDeploymentTestNG">
     </bean>
 

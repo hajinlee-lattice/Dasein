@@ -12,4 +12,6 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.core.controller.*" />
     </context:component-scan>
 
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
+
 </beans>

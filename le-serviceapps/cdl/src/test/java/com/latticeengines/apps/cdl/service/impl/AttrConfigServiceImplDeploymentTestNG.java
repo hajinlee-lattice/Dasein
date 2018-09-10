@@ -55,6 +55,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
 
     private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImplDeploymentTestNG.class);
 
+    private static final String CRM_ID = "CrmAccount_External_ID";
+
     @Inject
     private CDLTestDataService cdlTestDataService;
 
@@ -72,8 +74,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
 
     @Inject
     private CDLExternalSystemService externalSystemService;
-
-    private String CRM_ID = "CrmAccount_External_ID";
 
     private Set<String> accountStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Account).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
@@ -136,6 +136,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         createExternalSystem();
 
         // TODO: setup rating engines and rating attrs
+
     }
 
     @Test(groups = "deployment")
@@ -148,7 +149,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
 
     private void testMyAttributes() {
         final Category cat = Category.ACCOUNT_ATTRIBUTES;
-        checkAndVerifyCategory(cat, (config) -> {
+        checkAndVerifyCategory(cat, config -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             String partition = getMyAttributesPartition(attrName);
