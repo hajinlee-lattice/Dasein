@@ -138,15 +138,6 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
 
     @Test(groups = "deployment")
     public void testPlays() {
-        List<Play> test_plays = testPlayCreationHelper.getPlays();
-        test_plays.stream().forEach(eplay -> {
-            eplay.setDescription(
-                    "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"
-                            + "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"
-                            + "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij");
-            testPlayCreationHelper.updatePlay(eplay);
-        });
-
         Map<String, Object> playCount = playmakerRecommendationMgr.getPlayCount(customerSpace.toString(),
                 PlaymakerSyncLookupSource.V2.name(), 0, null);
         Assert.assertNotNull(playCount);
@@ -179,9 +170,6 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
                     Assert.assertNotNull(playMap.get(PlaymakerConstants.ExternalId));
                     Assert.assertNotNull(playMap.get(PlaymakerConstants.DisplayName));
                     Assert.assertNotNull(playMap.get(PlaymakerConstants.RowNum));
-                    Assert.assertNotNull(playMap.get(PlaymakerConstants.Description));
-                    Assert.assertTrue(((String) playMap.get(PlaymakerConstants.Description)).length() <= 255);
-                    // ......;
                 });
     }
 
