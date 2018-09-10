@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-export PYTHONPATH=$WSHOME/le-awsenvironment/src/main/python:$PYTHONPATH
+export PYTHONPATH=${WSHOME}/le-dev/scripts:${PYTHONPATH}
 
-python -m latticeengines.ecr.docker push $@
+python -m docker push $@

@@ -196,9 +196,6 @@
             <property name="tokens" value="ASSIGN,PLUS_ASSIGN,MINUS_ASSIGN"/>
         </module>
         <module name="InnerTypeLast"/>
-        <module name="LeftCurly">
-            <property name="maxLineLength" value="120"/>
-        </module>
         <module name="MagicNumber">
             <property name="tokens" value="NUM_DOUBLE, NUM_FLOAT"/>
             <property name="ignoreNumbers" value="0, 0.5, 1"/>
@@ -212,7 +209,9 @@
         <module name="ModifiedControlVariable"/>
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
-        <module name="MultipleStringLiterals"/>
+        <module name="MultipleStringLiterals">
+            <property name="allowedDuplicates" value="3" />
+        </module>
         <module name="MultipleVariableDeclarations"/>
         <module name="NeedBraces">
             <property name="allowSingleLineStatement" value="true"/>
@@ -271,9 +270,9 @@
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
         <module name="StringLiteralEquality"/>
-        <module name="TypecastParenPad">
-            <property name="option" value="space"/>
-        </module>
+        <!--<module name="TypecastParenPad">-->
+            <!--<property name="option" value="space"/>-->
+        <!--</module>-->
         <module name="UnnecessaryParentheses"/>
         <module name="UpperEll"/>
         <module name="VariableDeclarationUsageDistance"/>

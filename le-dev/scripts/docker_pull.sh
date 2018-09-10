@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export PYTHONPATH=$WSHOME/le-awsenvironment/src/main/python:$PYTHONPATH
+export PYTHONPATH=${WSHOME}/le-dev/scripts:${PYTHONPATH}
 
 IMAGE=$1
 
@@ -9,12 +9,12 @@ if [ -z "${IMAGE}" ]; then
     for img in 'mysql' 'zookeeper' 'dynamo' 'tez-ui'
     do
         echo "pulling ${img}"
-        python -m latticeengines.ecr.docker pull ${img}
+        python -m docker pull ${img}
     done
 
 else
 
-    python -m latticeengines.ecr.docker pull ${IMAGE}
+    python -m docker pull ${IMAGE}
 
 fi
 
@@ -22,6 +22,6 @@ fi
 echo "Expanding aliases."
 shopt -s expand_aliases
 echo "Sourcing aliases file"
-source $WSHOME/le-dev/aliases
+source ${WSHOME}/le-dev/aliases
 
 dkrmi
