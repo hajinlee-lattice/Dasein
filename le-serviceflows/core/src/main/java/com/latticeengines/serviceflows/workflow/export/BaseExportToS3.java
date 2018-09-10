@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.configuration.ConfigurationUtils;
 
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -45,9 +44,6 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
 
     @Inject
     protected SourceFileProxy sourceFileProxy;
-
-    @Inject
-    private S3Service s3Service;
 
     @Value("${aws.region}")
     private String awsRegion;
@@ -123,7 +119,6 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
             try (PerformanceTimer timer = new PerformanceTimer("Copying hdfs dir=" + srcDir + " to s3 dir=" + tgtDir)) {
                 try {
                     Configuration hadoopConfiguration = createConfiguration();
-                    processTgtDir();
                     HdfsUtils.distcp(hadoopConfiguration, srcDir, tgtDir, queueName);
                     if (StringUtils.isNotBlank(tableName)) {
                         registerDataUnit();
@@ -135,24 +130,6 @@ public abstract class BaseExportToS3<T extends ExportToS3StepConfiguration> exte
                     log.error(msg, ex);
                     throw new RuntimeException(msg);
                 }
-            }
-        }
-
-        private void processTgtDir() {
-            try {
-                if (HdfsUtils.isDirectory(yarnConfiguration, srcDir)) {
-                    String lastSrcDir = StringUtils.substringAfterLast(srcDir, "/");
-                    String lastTgtDir = StringUtils.substringAfterLast(tgtDir, "/");
-                    if (!lastSrcDir.equals(lastTgtDir)) {
-                        return;
-                    }
-                    String prefix = StringUtils.substringAfter(tgtDir, "s3n://" + s3Bucket);
-                    if (s3Service.isNonEmptyDirectory(s3Bucket, prefix)) {
-                        tgtDir = StringUtils.substringBeforeLast(tgtDir, "/");
-                    }
-                }
-            } catch (Exception ex) {
-                log.warn("Can not access HDFS Dir=" + srcDir);
             }
         }
 

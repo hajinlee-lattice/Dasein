@@ -152,7 +152,7 @@ public class HdfsUtils {
             throws Exception {
         DistCpOptions options = new DistCpOptions(new Path(srcPath), new Path(tgtPath));
         log.info("Running distcp from " + srcPath + " to " + tgtPath + " using queue " + queue);
-        String[] args = new String[] { "-Dmapreduce.job.queuename=" + queue, srcPath, tgtPath };
+        String[] args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-update", srcPath, tgtPath };
         EncryptionZone srcZone = getEncryptionZone(configuration, srcPath);
         EncryptionZone dstZone = getEncryptionZone(configuration, tgtPath);
         if (srcZone != null || dstZone != null) {
