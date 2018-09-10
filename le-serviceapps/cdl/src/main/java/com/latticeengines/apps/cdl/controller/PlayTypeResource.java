@@ -23,9 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayTypeEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.PlayType;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,6 +48,9 @@ public class PlayTypeResource {
     @Inject
     private PlayTypeEntityMgr playTypeEntityMgr;
 
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
     @GetMapping(value = "", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all play types for a tenant")
@@ -58,7 +64,9 @@ public class PlayTypeResource {
     public PlayType createPlayType(@PathVariable String customerSpace, @RequestBody PlayType playType) {
         List<String> validationErrors = validatePlayTypeForCreation(playType);
         if (CollectionUtils.isEmpty(validationErrors)) {
+            Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
             playType.setId(PlayType.generateId());
+            playType.setTenant(tenant);
             playTypeEntityMgr.create(playType);
             return playTypeEntityMgr.findById(playType.getId());
         } else {
@@ -82,6 +90,8 @@ public class PlayTypeResource {
             @RequestBody PlayType playType) {
         List<String> validationErrors = validatePlayTypeForUpdate(playType);
         if (CollectionUtils.isEmpty(validationErrors)) {
+            Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+            playType.setTenant(tenant);
             playTypeEntityMgr.update(playType);
             return playTypeEntityMgr.findById(playType.getId());
         } else {
