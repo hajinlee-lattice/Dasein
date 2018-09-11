@@ -34,7 +34,6 @@ public class AttrTypeResolver {
                 && !Category.ACCOUNT_ATTRIBUTES.equals(metadata.getCategory())) {
             return AttrType.DataCloud;
         } else if (BusinessEntity.PurchaseHistory.equals(entity) || BusinessEntity.Rating.equals(entity)) {
-            //FIXME: Yintao-M22 to resolve Derived Attributes
             return AttrType.Curated;
         } else {
             return AttrType.Custom;
@@ -62,7 +61,7 @@ public class AttrTypeResolver {
                 subType = AttrSubType.Rating;
             } else if (BusinessEntity.PurchaseHistory.equals(entity)) {
                 subType = AttrSubType.ProductBundle;
-            } //FIXME: Yintao-M22 to resolve Derived Attributes
+            }
             break;
         case Custom:
             if (entity != null && standardMap.get(entity) != null

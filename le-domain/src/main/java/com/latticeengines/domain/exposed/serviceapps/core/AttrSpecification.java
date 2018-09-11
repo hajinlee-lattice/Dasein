@@ -60,23 +60,6 @@ public class AttrSpecification {
                 true, false, true, false);
     }
 
-    public static AttrSpecification CDL_DERIVED_ACC() {
-        return new AttrSpecification("CDL Derived Attributes for Account",
-                true, // segment
-                false, // export
-                false, // cp
-                false, // tp
-                false, // model
-                false, // type
-                false, // display name
-                false, // description
-                false, // category
-                false, // icon
-                false, // state
-                false // approved usage
-        );
-    }
-
     private String specification;
     private boolean segmentationChange;
     private boolean enrichmentChange;
@@ -153,8 +136,6 @@ public class AttrSpecification {
                 return AttrSpecification.CDL_DERIVED_PB();
             case Rating:
                 return AttrSpecification.CDL_RATING();
-            case DerivedAccount:
-                return AttrSpecification.CDL_DERIVED_ACC();
             default:
                 break;
             }

@@ -84,25 +84,25 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
         verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact);
 
-        Map<BusinessEntity, Long> batchStoreCounts = ImmutableMap.of(//
+        Map<BusinessEntity, Long> batchStoreCounts = ImmutableMap.of( //
                 BusinessEntity.Account, ACCOUNT_1, //
                 BusinessEntity.Contact, CONTACT_1, //
                 BusinessEntity.Product, BATCH_STORE_PRODUCTS);
         verifyBatchStore(batchStoreCounts);
 
-        Map<BusinessEntity, Long> redshiftCounts = ImmutableMap.of(//
+        Map<BusinessEntity, Long> redshiftCounts = ImmutableMap.of( //
                 BusinessEntity.Account, ACCOUNT_1, //
                 BusinessEntity.Contact, CONTACT_1);
         verifyRedshift(redshiftCounts);
 
-        Map<BusinessEntity, Long> servingStoreCounts = ImmutableMap.of(//
+        Map<BusinessEntity, Long> servingStoreCounts = ImmutableMap.of( //
                 BusinessEntity.Product, SERVING_STORE_PRODUCTS, //
                 BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
         verifyServingStore(servingStoreCounts);
 
         createTestSegment3();
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
-        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of(//
+        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_3_ACCOUNT_1,
                 BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
         verifyTestSegment3Counts(segment3Counts);
