@@ -6,7 +6,7 @@ angular.module('login')
         clientsession: '<'
     },
     controller: function(
-        $state, $timeout, ResourceUtility, LoginService, Banner,
+        $state, $location, $timeout, ResourceUtility, LoginService, Banner,
         SessionTimeoutUtility, BrowserStorageUtility, LoginStore
     ) {
         var vm = this;
@@ -29,11 +29,13 @@ angular.module('login')
                         break;
                     case 'login.tenants':
                         if (!vm.logindocument.UserName) {
-                            $state.go('login.form');
+                            var params = $location.$$search;
+                            $state.go('login.form', params);
                         }
                         break;
                     case 'login':
-                        $state.go('login.form');
+                        var params = $location.$$search;
+                        $state.go('login.form', params);
                         break;
                 }
             }

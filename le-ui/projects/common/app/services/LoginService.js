@@ -71,6 +71,38 @@ angular.module('mainApp.login.services.LoginService', [
         return deferred.promise;
     };
 
+    this.PostToJwt = function (params, token) {
+        var deferred = $q.defer();
+
+        console.log(params);
+
+        $http({
+            method: 'POST',
+            url: '/pls/jwt/handle_request',
+            data: {
+                reqParams: {
+                    requestParameters: params
+                }
+            },
+            headers: {
+                "Authorization": token
+            }
+        }).then(
+            function onSuccess(d, status, headers, config){
+                var data = d.data;
+                var result = false;
+    
+                deferred.resolve(data);
+
+            },
+            function onError(data, status, headers, config) {
+                SessionService.HandleResponseErrors(data.data, status);
+                deferred.resolve(data.data);
+            }
+        );
+        return deferred.promise;
+    };
+
 
     this.GetSessionDocument = function (tenant, username) {
         if (tenant == null) {

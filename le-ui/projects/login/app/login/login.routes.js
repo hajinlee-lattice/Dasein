@@ -29,6 +29,7 @@ angular.module('login', [
         })
         .state('login.form', {
             url: 'form',
+            params: {},
             resolve: {
                 logindocument: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getLoginDocument() || {};

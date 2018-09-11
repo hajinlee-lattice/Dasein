@@ -256,7 +256,8 @@ angular
             params: {
                 modelId: '',
                 rating_id: '',
-                viewingIteration: false
+                viewingIteration: false,
+                toggleRatings: false
             },
             onEnter: ['$stateParams', 'IsCdl', 'Model', 'RatingEngine', 'BackStore', function($stateParams, IsCdl, Model, RatingEngine, BackStore) {
                 

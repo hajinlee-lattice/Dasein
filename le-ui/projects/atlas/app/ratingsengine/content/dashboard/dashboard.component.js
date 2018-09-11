@@ -315,8 +315,8 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.ratingEngineType = 'Custom Event';
             }
 
-            console.log(vm.ratingEngine);
-            console.log(vm.dashboard);
+            // console.log(vm.ratingEngine);
+            // console.log(vm.dashboard);
             // console.log(vm.model);
 
             vm.predictionType = vm.model.predictionType;

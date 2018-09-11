@@ -11,8 +11,6 @@ angular.module('lp.ratingsengine.remodel.list', [])
             store: AtlasRemodelStore,
             params: $stateParams,
             allAttributes: AtlasRemodelStore.getRemodelAttributes(),
-            pageSize: vm.filters.pageSize,
-            queryText: vm.filters.queryText,
             sortBy: 'DisplayName'
         });
 
@@ -40,6 +38,9 @@ angular.module('lp.ratingsengine.remodel.list', [])
         }
 
         vm.searchFilter = function(attr) {
+
+            // vm.filters.currentPage = 1;
+
             var text = vm.filters.queryText;
             if (text) {
 

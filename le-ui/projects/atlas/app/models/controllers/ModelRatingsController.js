@@ -49,7 +49,7 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
 
-        console.log(vm.ratingsSummary);
+        // console.log(vm.ratingsSummary);
         // console.log(vm.currentConfiguration);
         // console.log(vm.workingBuckets);
 

@@ -38,8 +38,8 @@
             <tr ng-repeat="attribute in (filteredList = ($ctrl.getCategoryAttributes()
                         | filter: $ctrl.searchFilter
                         | orderBy: $ctrl.sortBy
-                        | startFrom: ($ctrl.filters.currentPage - 1) * $ctrl.pageSize
-                        | limitTo: $ctrl.pageSize))"
+                        | startFrom: ($ctrl.filters.currentPage - 1) * $ctrl.filters.pageSize
+                        | limitTo: $ctrl.filters.pageSize))"
                 ng-class="{'disabled': attribute.ApprovedUsage[0] == 'None'}">
                 <td>
                     <span class="ico ico-warning" ng-if="attribute.hasWarning"></span>
@@ -62,7 +62,7 @@
         <li class="attr-pagination pull-right">
             <pd-pagination-controls
                 current="$ctrl.filters.currentPage"
-                max="max = ($ctrl.getCategoryAttributes() | filter: $ctrl.queryText).length / $ctrl.pageSize">
+                max="max = ($ctrl.getCategoryAttributes() | filter: $ctrl.filters.queryText).length / $ctrl.filters.pageSize">
             </pd-pagination-controls>
         </li>
     </ul>

@@ -11,12 +11,13 @@ angular.module('login.form', [
         logindocument: '<'
     },
     controller: function (
-        $state, ResourceUtility, LoginService, BrowserStorageUtility, 
+        $state, $location, $stateParams, ResourceUtility, LoginService, BrowserStorageUtility, 
         SessionTimeoutUtility, TimestampIntervalUtility, Banner
     ) {
         var vm = this;
 
         vm.$onInit = function() {
+
             vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
             vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(vm.logindocument.PasswordLastModified);
 
@@ -54,10 +55,24 @@ angular.module('login.form', [
 
             LoginService.Login(vm.username, vm.password).then(function(result) {
                 vm.loginInProgress = false;
-                
+
                 if (result !== null && result.Success === true) {
-                    SessionTimeoutUtility.refreshSessionLastActiveTimeStamp();
-                    $state.go('login.tenants');
+
+                    var params = $location.$$search;
+                    if (Object.keys(params).length != 0 && params.constructor === Object){
+                        
+                        var unique = result.Uniqueness,
+                            random = result.Randomness,
+                            token = random.concat('.', unique);
+
+                        LoginService.PostToJwt(params, token).then(function(result){
+                            var returnUrl = result.return_to;
+                            $location.path(returnUrl).replace();
+                        });
+                    } else {
+                        SessionTimeoutUtility.refreshSessionLastActiveTimeStamp();
+                        $state.go('login.tenants');
+                    }
                 } else {
                     Banner.reset();
                     vm.showLoginHeaderMessage(result);
