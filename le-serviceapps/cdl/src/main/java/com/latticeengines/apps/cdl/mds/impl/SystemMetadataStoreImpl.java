@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.mds.DerivedAttrsMetadataStore;
 import com.latticeengines.apps.cdl.mds.ExternalSystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
 import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
@@ -61,17 +62,30 @@ public class SystemMetadataStoreImpl extends
     private static final Logger log = LoggerFactory.getLogger(SystemMetadataStoreImpl.class);
 
     @Inject
-    public SystemMetadataStoreImpl(DataCollectionService dataCollectionService, TableRoleTemplate tableRoleTemplate,
-            AMMetadataStore amMetadataStore, CDLNamespaceService cdlNamespaceService,
-            RatingDisplayMetadataStore ratingDisplayMetadataStore,
-            ExternalSystemMetadataStore externalSystemMetadataStore, ZKConfigService zkConfigService) {
-        super(getBaseMds(dataCollectionService, tableRoleTemplate, amMetadataStore, cdlNamespaceService,
-                zkConfigService), getDecoratorChain(ratingDisplayMetadataStore, externalSystemMetadataStore));
+    public SystemMetadataStoreImpl(DataCollectionService dataCollectionService, ZKConfigService zkConfigService,
+            CDLNamespaceService cdlNamespaceService, //
+            TableRoleTemplate tableRoleTemplate, //
+            AMMetadataStore amMetadataStore, //
+            RatingDisplayMetadataStore ratingDisplayMetadataStore, //
+            ExternalSystemMetadataStore externalSystemMetadataStore, //
+            DerivedAttrsMetadataStore derivedAttrsMetadataStore) {
+        super(getBaseMds(//
+                dataCollectionService, zkConfigService, //
+                tableRoleTemplate, //
+                amMetadataStore, //
+                cdlNamespaceService //
+        ), getDecoratorChain(//
+                ratingDisplayMetadataStore, //
+                externalSystemMetadataStore, //
+                derivedAttrsMetadataStore //
+        ));
     }
 
     private static MetadataStore<Namespace2<BusinessEntity, DataCollection.Version>> getBaseMds(
-            DataCollectionService dataCollectionService, TableRoleTemplate tableRoleTemplate,
-            AMMetadataStore amMetadataStore, CDLNamespaceService cdlNamespaceService, ZKConfigService zkConfigService) {
+            DataCollectionService dataCollectionService, ZKConfigService zkConfigService, //
+            TableRoleTemplate tableRoleTemplate, //
+            AMMetadataStore amMetadataStore, //
+            CDLNamespaceService cdlNamespaceService) {
 
         return new MetadataStore<Namespace2<BusinessEntity, DataCollection.Version>>() {
 
@@ -229,14 +243,19 @@ public class SystemMetadataStoreImpl extends
 
     private static ChainedDecoratorFactory<Namespace1<BusinessEntity>> getDecoratorChain(
             RatingDisplayMetadataStore ratingDisplayMetadataStore,
-            ExternalSystemMetadataStore externalSystemMetadataStore) {
-        DecoratorFactory<Namespace1<String>> ratingDisplayDecorator = getRatingDecorator(ratingDisplayMetadataStore);
-        DecoratorFactory<Namespace2<String, BusinessEntity>> lookupIdDecorator = getLookupIdDecorator(
-                externalSystemMetadataStore);
+            ExternalSystemMetadataStore externalSystemMetadataStore,
+            DerivedAttrsMetadataStore derivedAttrsMetadataStore) {
+        DecoratorFactory<Namespace1<String>> ratingDisplayDecorator = //
+                MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
+        DecoratorFactory<Namespace2<String, BusinessEntity>> lookupIdDecorator = //
+                MdsDecoratorFactory.fromMds("LookupId", externalSystemMetadataStore);
+        DecoratorFactory<Namespace2<String, DataCollection.Version>> derivedAttrsDecorator = //
+                MdsDecoratorFactory.fromMds("DerivedAttrs", derivedAttrsMetadataStore);
         Decorator postRenderDecorator = new SystemPostRenderDecorator();
         List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList( //
                 lookupIdDecorator, //
                 ratingDisplayDecorator, //
+                derivedAttrsDecorator, //
                 postRenderDecorator
 
         );
@@ -247,20 +266,13 @@ public class SystemMetadataStoreImpl extends
                 BusinessEntity entity = namespace.getCoord1();
                 String tenantId = MultiTenantContext.getShortTenantId();
                 Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
+                // FIXME: Yintao-M23 To be changed to the new business entity.
+                Namespace derivedNs = Namespace
+                        .as(BusinessEntity.DepivotedPurchaseHistory.equals(entity) ? tenantId : "");
                 Namespace lookupIdNs = Namespace.as(tenantId, entity);
-                return Arrays.asList(lookupIdNs, ratingNs, Namespace0.NS);
+                return Arrays.asList(lookupIdNs, ratingNs, derivedNs, Namespace0.NS);
             }
         };
-    }
-
-    private static DecoratorFactory<Namespace1<String>> getRatingDecorator(
-            RatingDisplayMetadataStore ratingDisplayMetadataStore) {
-        return MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
-    }
-
-    private static DecoratorFactory<Namespace2<String, BusinessEntity>> getLookupIdDecorator(
-            ExternalSystemMetadataStore externalSystemMetadataStore) {
-        return MdsDecoratorFactory.fromMds("LookupId", externalSystemMetadataStore);
     }
 
     @Override

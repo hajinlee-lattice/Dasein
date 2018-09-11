@@ -1,17 +1,17 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.auth.exposed.dao.GlobalAuthTicketDao;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
-import com.latticeengines.auth.exposed.dao.GlobalAuthTicketDao;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
-
-import java.util.Date;
 
 @Component("globalAuthTicketEntityMgr")
 public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTicket> implements

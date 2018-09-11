@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.persistence.Table;
 
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -98,8 +97,8 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         if (list.size() == 0) {
             return null;
         } else {
-            for (int i = 0; i < list.size(); i++) {
-                GlobalAuthUserTenantRight gaTenantRight = (GlobalAuthUserTenantRight) list.get(i);
+            for (Object obj : list) {
+                GlobalAuthUserTenantRight gaTenantRight = (GlobalAuthUserTenantRight) obj;
                 if (gaTenantRight.getGlobalAuthUser() != null
                         && gaTenantRight.getGlobalAuthUser().getPid().equals(userId)) {
                     if (gaTenantRight.getGlobalAuthTenant() != null
@@ -117,21 +116,21 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
         String sqlStr = String.format("delete from %s where User_ID = %d", entityClz.getAnnotation(Table.class).name(), userId);
-        SQLQuery query = session.createSQLQuery(sqlStr);
+        Query<?> query = session.createQuery(sqlStr);
         query.executeUpdate();
         return true;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
+    @Override
     public List<GlobalAuthUserTenantRight> findByEmail(String email) {
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
         String queryPattern = "from %s where globalAuthUser.email = :email";
         String queryStr = String.format(queryPattern, entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         query.setParameter("email", email);
-        return query.list();
+        return (List<GlobalAuthUserTenantRight>) query.list();
     }
 
 }

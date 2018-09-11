@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.auth.exposed.dao.GlobalAuthTenantDao;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import com.latticeengines.auth.exposed.dao.GlobalAuthTenantDao;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 
 @Component("globalAuthTenantEntityMgr")
 public class GlobalAuthTenantEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTenant> implements

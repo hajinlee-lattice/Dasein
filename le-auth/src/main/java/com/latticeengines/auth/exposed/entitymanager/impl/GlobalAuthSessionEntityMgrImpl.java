@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.auth.exposed.dao.GlobalAuthSessionDao;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSessionEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
-import com.latticeengines.auth.exposed.dao.GlobalAuthSessionDao;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSessionEntityMgr;
 
 @Component("globalAuthSessionEntityMgr")
 public class GlobalAuthSessionEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthSession> implements

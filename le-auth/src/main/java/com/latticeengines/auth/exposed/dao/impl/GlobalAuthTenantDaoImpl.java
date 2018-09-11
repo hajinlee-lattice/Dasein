@@ -2,14 +2,14 @@ package com.latticeengines.auth.exposed.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.dao.GlobalAuthTenantDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import com.latticeengines.auth.exposed.dao.GlobalAuthTenantDao;
 
 @Component("globalAuthTenantDao")
 public class GlobalAuthTenantDaoImpl extends BaseDaoImpl<GlobalAuthTenant> implements
@@ -20,7 +20,7 @@ public class GlobalAuthTenantDaoImpl extends BaseDaoImpl<GlobalAuthTenant> imple
         return GlobalAuthTenant.class;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public List<GlobalAuthTenant> findTenantNotInTenantRight(GlobalAuthUser user) {
         Session session = sessionFactory.getCurrentSession();

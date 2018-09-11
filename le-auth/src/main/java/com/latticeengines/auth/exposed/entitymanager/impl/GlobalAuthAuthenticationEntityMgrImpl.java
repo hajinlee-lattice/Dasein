@@ -1,25 +1,25 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Date;
+
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
-import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
-
-import java.util.Date;
-import java.util.HashMap;
 
 @Component("globalAuthAuthenticationEntityMgr")
 public class GlobalAuthAuthenticationEntityMgrImpl extends
         BaseEntityMgrImpl<GlobalAuthAuthentication> implements
         GlobalAuthAuthenticationEntityMgr {
 
-    @Autowired
+    @Inject
     private GlobalAuthAuthenticationDao gaAuthenticationDao;
 
     @Override

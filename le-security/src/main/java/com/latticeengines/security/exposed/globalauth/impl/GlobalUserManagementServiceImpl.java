@@ -3,17 +3,14 @@ package com.latticeengines.security.exposed.globalauth.impl;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
-import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -28,6 +25,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -39,9 +37,11 @@ import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
 @Component("globalUserManagementService")
@@ -680,7 +680,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             return userRightsList;
         }
 
-        HashMap<Long, String> userIdToUsername = gaUserEntityMgr.findUserInfoByTenantId(tenantData.getPid());
+        HashMap<Long, String> userIdToUsername = gaUserEntityMgr.findUserInfoByTenant(tenantData);
 
         HashMap<Long, AbstractMap.SimpleEntry<User, HashSet<String>>> userRights = new HashMap<>();
         for(GlobalAuthUserTenantRight userRightData : userRightDatas) {

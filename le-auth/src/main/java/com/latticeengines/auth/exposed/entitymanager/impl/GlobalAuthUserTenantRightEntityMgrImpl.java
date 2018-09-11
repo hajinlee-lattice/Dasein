@@ -2,12 +2,12 @@ package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.auth.exposed.dao.GlobalAuthUserDao;
 import com.latticeengines.auth.exposed.dao.GlobalAuthUserTenantRightDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -19,11 +19,8 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 public class GlobalAuthUserTenantRightEntityMgrImpl extends
         BaseEntityMgrImpl<GlobalAuthUserTenantRight> implements GlobalAuthUserTenantRightEntityMgr {
 
-    @Autowired
+    @Inject
     private GlobalAuthUserTenantRightDao gaUserTenantRightDao;
-
-    @Autowired
-    private GlobalAuthUserDao gaUserDao;
 
     @Override
     public BaseDao<GlobalAuthUserTenantRight> getDao() {

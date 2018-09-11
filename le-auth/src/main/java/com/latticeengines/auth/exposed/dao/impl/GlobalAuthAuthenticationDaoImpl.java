@@ -1,21 +1,14 @@
 package com.latticeengines.auth.exposed.dao.impl;
 
-import java.util.HashMap;
 import java.util.List;
 
-import javax.persistence.Table;
-
-import org.hibernate.query.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 
 @Component("globalAuthAuthenticationDao")
 public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthentication>
@@ -27,7 +20,6 @@ public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthe
         return GlobalAuthAuthentication.class;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public GlobalAuthAuthentication findByUsernameJoinUser(String username) {
         Session session = sessionFactory.getCurrentSession();
@@ -35,8 +27,8 @@ public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthe
         String queryStr = String.format("from %s where Username = '%s'",
                 entityClz.getSimpleName(),
                 username);
-        Query query = session.createQuery(queryStr);
-        List list = query.list();
+        Query<?> query = session.createQuery(queryStr);
+        List<?> list = query.list();
         if (list.size() == 0) {
             return null;
         } else {

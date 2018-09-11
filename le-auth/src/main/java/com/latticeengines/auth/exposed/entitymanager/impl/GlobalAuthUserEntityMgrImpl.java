@@ -2,7 +2,6 @@ package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import com.latticeengines.auth.exposed.dao.GlobalAuthUserDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 
 @Component("globalAuthUserEntityMgr")
@@ -40,12 +40,6 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public GlobalAuthUser findByEmailJoinAuthentication(String email) {
         return gaUserDao.findByEmailJoinAuthentication(email);
-    }
-
-    @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<GlobalAuthUser> findByEmailJoinUserTenantRight(String email) {
-        return gaUserDao.findByEmailJoinUserTenantRight(email);
     }
 
     @Override
@@ -79,11 +73,11 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     public GlobalAuthUser findByEmail(String email) {
         return gaUserDao.findByField("Email", email);
     }
-    
+
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public HashMap<Long, String> findUserInfoByTenantId(Long tenantId) {
-        return gaUserDao.findUserInfoByTenantId(tenantId);
+    public HashMap<Long, String> findUserInfoByTenant(GlobalAuthTenant tenant) {
+        return gaUserDao.findUserInfoByTenant(tenant);
     }
 
 }

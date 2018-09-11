@@ -3,13 +3,13 @@ package com.latticeengines.security.controller;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,19 +48,19 @@ public class UserResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private EmailService emailService;
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String apiPublicUrl;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -76,14 +76,12 @@ public class UserResource {
         UserFilter filter;
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
         if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
-            filter = new UserFilter() {
-                @Override
-                public boolean visible(User user) {
-                    if (StringUtils.isEmpty(user.getAccessLevel()))
-                        return false;
-                    AccessLevel level = AccessLevel.valueOf(user.getAccessLevel());
-                    return level.equals(AccessLevel.EXTERNAL_USER) || level.equals(AccessLevel.EXTERNAL_ADMIN);
+            filter = user -> {
+                if (StringUtils.isEmpty(user.getAccessLevel())) {
+                    return false;
                 }
+                AccessLevel level = AccessLevel.valueOf(user.getAccessLevel());
+                return level.equals(AccessLevel.EXTERNAL_USER) || level.equals(AccessLevel.EXTERNAL_ADMIN);
             };
         } else {
             filter = UserFilter.TRIVIAL_FILTER;
