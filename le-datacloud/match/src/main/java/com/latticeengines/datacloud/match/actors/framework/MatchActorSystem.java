@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidatorMicroEngineActor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +69,9 @@ public class MatchActorSystem {
 
     @Value("${datacloud.match.dynamoLookupActor.actor.cardinality:10}")
     private int dynamoLookupActorCardinality;
+
+    @Value("${datacloud.match.dunsGuideBookLookupActor.actor.cardinality:3}")
+    private int dunsGuideBookLookupActorCardinality;
 
     @Value("${datacloud.match.metricActor.actor.cardinality:4}")
     private int metricActorCardinality;
@@ -197,6 +202,7 @@ public class MatchActorSystem {
         initNamedActor(DynamoLookupActor.class, true, dynamoLookupActorCardinality);
         initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
         initNamedActor(DnBCacheLookupActor.class, true, dnbCacheLookupActorCardinality);
+        initNamedActor(DunsGuideBookLookupActor.class, true, dunsGuideBookLookupActorCardinality);
 
         initMicroEngines();
 
@@ -213,6 +219,7 @@ public class MatchActorSystem {
         initNamedActor(DunsBasedMicroEngineActor.class);
         initNamedActor(LocationToDunsMicroEngineActor.class);
         initNamedActor(LocationToCachedDunsMicroEngineActor.class);
+        initNamedActor(DunsValidatorMicroEngineActor.class);
         initNamedActor(DomainCountryZipCodeBasedMicroEngineActor.class);
         initNamedActor(DomainCountryStateBasedMicroEngineActor.class);
         initNamedActor(DomainCountryBasedMicroEngineActor.class);
