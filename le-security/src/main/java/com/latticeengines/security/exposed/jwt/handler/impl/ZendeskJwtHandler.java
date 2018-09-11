@@ -68,7 +68,7 @@ public class ZendeskJwtHandler implements JwtHandler {
                 throw new LedpException(LedpCode.LEDP_19008, e);
             }
         }
-        return "redirect:/" + redirectUrl;
+        return "redirect:" + redirectUrl;
     }
 
     @Override
