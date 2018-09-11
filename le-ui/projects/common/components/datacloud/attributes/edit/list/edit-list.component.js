@@ -4,7 +4,7 @@ angular.module('common.attributes.edit.list', [])
     bindings: {
         filters: '<'
     },
-    controller: function ($state, $timeout, AttrConfigStore, AttrConfigService) {
+    controller: function ($state, $timeout, AttrConfigStore, AttrConfigService, DataCloudStore) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -36,7 +36,7 @@ angular.module('common.attributes.edit.list', [])
 
             if (item.DisplayName != original.DisplayName || item.Description != original.Description) {
                 AttrConfigService.putConfig(
-                    'name', vm.category, {}, vm.data.config
+                    'name', vm.category, {}, { Attributes: [ item ] }
                 ).then(function(result) {
                     angular.element('#'+name).addClass('saved');
 
@@ -45,6 +45,11 @@ angular.module('common.attributes.edit.list', [])
                     }, 1250);
 
                     vm.attr_edit_form[name].$setPristine();
+
+                    original.DisplayName = item.DisplayName;
+                    original.Description = item.Description;
+
+                    DataCloudStore.clear();
                 });
             }
         };

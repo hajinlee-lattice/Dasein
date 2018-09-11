@@ -41,7 +41,9 @@
                         | limitTo: $ctrl.getPageSize()">
 
             <div class="edit-attribute-name">
-                <label for="attrDisplayName_{{$index}}">{{ item.Attribute }}</label>
+                <label for="attrDisplayName_{{$index}}" title="{{ item.Attribute }}">
+                    {{ item.Attribute }}
+                </label>
             </div>
             
             <div class="edit-attribute-displayname">
@@ -50,6 +52,7 @@
                         id="attrDisplayName_{{$index}}" 
                         type="text" 
                         class="form-control"
+                        maxlength="63"
                         ng-model="item.DisplayName"
                         ng-blur="$ctrl.onBlur(item, 'attrDisplayName_' + $index)">
                 </input>
