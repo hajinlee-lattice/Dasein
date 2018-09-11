@@ -22,11 +22,10 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineNoteEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
+import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -34,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
@@ -61,6 +61,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private PlayEntityMgr playEntityMgr;
+
+    @Inject
+    private PlayTypeService playTypeService;
 
     @Inject
     private RatingEngineNoteEntityMgr ratingEngineNoteEntityMgr;
@@ -106,7 +109,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    public void cleanupActionContext() {
+    public void teardown() {
         ActionContext.remove();
     }
 
@@ -475,12 +478,14 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private Play generateDefaultPlay(RatingEngine ratingEngine) {
+        List<PlayType> types = playTypeService.getAllPlayTypes(mainTestTenant.getId());
         Play play = new Play();
         play.setDescription(PLAY_NAME);
         play.setCreatedBy(CREATED_BY);
         play.setRatingEngine(ratingEngine);
         play.setPlayStatus(PlayStatus.INACTIVE);
         play.setTenant(mainTestTenant);
+        play.setPlayType(types.get(0));
         play.setName(UUID.randomUUID().toString());
         return play;
     }
