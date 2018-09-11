@@ -47,7 +47,7 @@ public class DunsGuideBookUnitTestNG {
             DunsGuideBook.Item expectedItem = book.getItems().get(i);
             Assert.assertNotNull(item);
             Assert.assertEquals(item.getDuns(), expectedItem.getDuns());
-            Assert.assertEquals(item.getKeyLevel(), expectedItem.getKeyLevel());
+            Assert.assertEquals(item.getKeyPartition(), expectedItem.getKeyPartition());
         }
     }
 
@@ -91,7 +91,7 @@ public class DunsGuideBookUnitTestNG {
     private DunsGuideBook.Item newItem(String targetDuns, MatchKey matchKey) {
         DunsGuideBook.Item item = new DunsGuideBook.Item();
         item.setDuns(targetDuns);
-        item.setKeyLevel(matchKey);
+        item.setKeyPartition(matchKey.name());
         return item;
     }
 }

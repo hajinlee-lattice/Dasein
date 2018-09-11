@@ -120,12 +120,15 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Item {
         private static final String DUNS_KEY = "TargetDuns";
-        private static final String KEYLEVEL_KEY = "KeyLevel";
+        private static final String KEYPARTITION_KEY = "KeyPartition";
+        private static final String BOOKSOURCE_KEY = "BookSource";
 
         @JsonProperty(DUNS_KEY)
         private String duns;
-        @JsonProperty(KEYLEVEL_KEY)
-        private MatchKey keyLevel;
+        @JsonProperty(KEYPARTITION_KEY)
+        private String keyPartition;
+        @JsonProperty(BOOKSOURCE_KEY)
+        private String bookSource;
 
         public String getDuns() {
             return duns;
@@ -135,12 +138,20 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
             this.duns = duns;
         }
 
-        public MatchKey getKeyLevel() {
-            return keyLevel;
+        public String getKeyPartition() {
+            return keyPartition;
         }
 
-        public void setKeyLevel(MatchKey keyLevel) {
-            this.keyLevel = keyLevel;
+        public void setKeyPartition(String keyPartition) {
+            this.keyPartition = keyPartition;
+        }
+
+        public String getBookSource() {
+            return bookSource;
+        }
+
+        public void setBookSource(String bookSource) {
+            this.bookSource = bookSource;
         }
     }
 }
