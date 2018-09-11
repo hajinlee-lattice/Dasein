@@ -21,13 +21,13 @@
 			  	<tbody>
 				  <tr ng-repeat="model in $ctrl.activeModels">
 				    <td> 
-				    	{{model.DisplayName}}
+				    	{{model.name}}
 				    </td>
 				    <td>
-				    	<a ui-sref="home.marketosettings.setup({credentialId: $ctrl.credentialId, modelId: model.Id})"> 
+				    	<a ui-sref="home.marketosettings.setup({credentialId: $ctrl.credentialId, modelId: model.modelId})"> 
 				    		<button class="button blue-button"> Setup Model </button>
 				    	</a>
-				    	<a ui-sref="home.marketosettings.webhook({credentialId: $ctrl.credentialId, configId: $ctrl.getConfigId(model.Id)})" ng-if="$ctrl.scoringRequestSummaryIds.has(model.Id)">
+				    	<a ui-sref="home.marketosettings.webhook({credentialId: $ctrl.credentialId, configId: $ctrl.getConfigId(model.modelId)})" ng-if="$ctrl.scoringRequestSummaryIds.has(model.modelId)">
 				    		<button class="button blue-button" > View Webhook </button>
 				    	</a>
 				    </td>

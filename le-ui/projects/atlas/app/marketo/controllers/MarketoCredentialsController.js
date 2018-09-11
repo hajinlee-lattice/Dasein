@@ -18,6 +18,7 @@ angular.module('lp.marketo', [
 		restIdentityEndpoint: '',
 		restClientId: '',
 		restClientSecret: '',
+		latticeSecretKey: '',
 		state: 'create',
 		saveInProgress: false,
     	addCredentialErrorMessage: "",
@@ -36,7 +37,8 @@ angular.module('lp.marketo', [
             restEndpoint: vm.restEndpoint,
             restIdentityEndpoint: vm.restIdentityEndpoint,
             restClientId: vm.restClientId,
-            restClientSecret: vm.restClientSecret
+            restClientSecret: vm.restClientSecret,
+            latticeSecretKey: vm.latticeSecretKey
 		};
 
 		MarketoService.CreateMarketoCredential(credential).then(function(result){
@@ -98,6 +100,7 @@ angular.module('lp.marketo', [
 		restIdentityEndpoint: MarketoCredential.rest_identity_endpoint,
 		restClientId: MarketoCredential.rest_client_id,
 		restClientSecret: MarketoCredential.rest_client_secret,
+		latticeSecretKey: MarketoCredential.lattice_secret_key || 'null',
 		state: 'edit',
 		saveInProgress: false,
     	addUserErrorMessage: "",
@@ -116,7 +119,8 @@ angular.module('lp.marketo', [
             restEndpoint: vm.restEndpoint,
             restIdentityEndpoint: vm.restIdentityEndpoint,
             restClientId: vm.restClientId,
-            restClientSecret: vm.restClientSecret
+            restClientSecret: vm.restClientSecret,
+            latticeSecretKey: vm.latticeSecretKey
 		};
 
 		MarketoService.UpdateMarketoCredential(vm.credentialId, credential).then(function(result) {

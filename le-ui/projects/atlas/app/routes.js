@@ -1022,12 +1022,12 @@ angular
 
                     return deferred.promise;
                 },
-                ModelList: function($q, MarketoStore, ModelStore) {
+                ActiveModels: function($q, MarketoStore, MarketoService) {
                     var deferred = $q.defer();
 
                     var storedActiveModels = MarketoStore.getActiveModels();
                     if (!storedActiveModels || storedActiveModels.length == 0) {
-                        ModelStore.getModels(true).then(function(result) {
+                        MarketoService.GetActiveModels().then(function(result) {
                             deferred.resolve(result);
                         });
                     } else {

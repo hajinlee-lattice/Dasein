@@ -6,7 +6,7 @@ angular.module('lp.marketo.models', [])
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve,
-            modelsList = resolve.ModelList,
+            activeModels = resolve.ActiveModels,
             scoringRequestSummaries = resolve.ScoringRequestSummaries;
         
         angular.extend(vm, {
@@ -15,7 +15,8 @@ angular.module('lp.marketo.models', [])
         });
 
         vm.init = function() {
-            vm.activeModels = $filter('filter')(modelsList, { Status: "Active" }, true);
+            console.log(activeModels);
+            vm.activeModels = activeModels;
             MarketoStore.setActiveModels(vm.activeModels);
             vm.scoringRequestSummaryIds = new Set(scoringRequestSummaries.map(function(scoringRequest) {return scoringRequest.modelUuid;}))
         }
@@ -24,7 +25,6 @@ angular.module('lp.marketo.models', [])
             var model = scoringRequestSummaries.find(function(scoringRequest) {
                 return scoringRequest.modelUuid === modelId;
             });
-            console.log(model);
             if (model) {
                 return model.configId;
             } else {
@@ -90,7 +90,7 @@ angular.module('lp.marketo.models', [])
                 });
             } else { // UPDATE
                 var scoringRequest = {
-                    requestConfigId: vm.currentScoringRequest.configId,
+                    configId: vm.currentScoringRequest.configId,
                     modelUuid: vm.modelId,
                     marketoScoringMatchFields: marketoScoringMatchFields
                 };
