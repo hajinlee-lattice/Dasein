@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -117,45 +116,13 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getCustomerSpace().toString(),
                 play.getRatingEngine().getId());
         playMap.put(PlaymakerConstants.TargetProducts, getTargetProducts(ratingEngine, allProducts));
-        playMap.put(PlaymakerConstants.Workflow, getPlayWorkFlowType(ratingEngine));
+        playMap.put(PlaymakerConstants.Workflow, play.getPlayType().getDisplayName());
 
         playMap.put(PlaymakerConstants.RowNum, rowNum);
         result.add(playMap);
         return playMap;
     }
 
-    private String getPlayWorkFlowType(RatingEngine ratingEngine) {
-        final String defaultValue = PlaymakerConstants.DefaultWorkflowType; // RulesBased
-        if (ratingEngine == null) {
-            return defaultValue;
-        }
-        try {
-            switch (ratingEngine.getType()) {
-            case RULE_BASED:
-                return defaultValue;
-            case CUSTOM_EVENT:
-            case PROSPECTING:
-                return "Prospecting";
-            case CROSS_SELL:
-                ModelingStrategy strategy = ((CrossSellModelingConfig) ((AIModel) ratingEngine.getPublishedIteration())
-                        .getAdvancedModelingConfig()).getModelingStrategy();
-                if (strategy == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE) {
-                    return "Cross-Sell";
-                }
-                if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
-                    return "Upsell";
-                }
-            default:
-                return defaultValue;
-            }
-        } catch (Exception e) {
-            log.error("Failed to translate the Rating Engine into the Play's WorkFlowType for RatingEngine: "
-                    + ratingEngine.getId(), e);
-            return defaultValue;
-        }
-    }
-
-    // TODO - remove following when we have products associated with plays
     private List<Map<String, String>> getTargetProducts(RatingEngine ratingEngine,
             List<Map<String, Object>> allProducts) {
         if (ratingEngine == null) {
@@ -172,7 +139,6 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         if (CollectionUtils.isNotEmpty(targetProductIds)) {
             if (CollectionUtils.isEmpty(allProducts)) {
                 // initialize allProducts only once and only when it is needed
-                // (CROSS_SELL model)
                 log.info("Loading info about all products");
                 allProducts.addAll(getAllProducts());
             }
