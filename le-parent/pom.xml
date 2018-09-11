@@ -73,7 +73,7 @@
         <scala.version>2.11.8</scala.version>
         <flink.version>1.2.0</flink.version> <!-- compatible with cascading flink 0.3 -->
         <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
-        <jackson.fasterxml.version>2.9.5</jackson.fasterxml.version>
+        <jackson.fasterxml.version>2.9.6</jackson.fasterxml.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version> <!-- spring-security-oauth2 2.1.1.RELEASE -->
         <hibnerate.types52.version>2.0.0</hibnerate.types52.version>
         <hibernate.version>5.2.12.Final</hibernate.version>
