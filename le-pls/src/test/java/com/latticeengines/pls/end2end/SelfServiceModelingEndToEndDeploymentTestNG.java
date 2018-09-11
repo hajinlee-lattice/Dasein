@@ -354,16 +354,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(paginatedModels.get(0).getModel().getName(), modelDisplayName);
         log.info("Finished Retrieving ModelDetails via ScoringAPI Proxy.");
         
-        /*
-        //TODO: will check and fix it.
         log.info("Retrieving Model Fields via ScoringAPI Proxy.");
         String fieldsUrl = getScoringApiInternalUrl() + "/models/" + paginatedModels.get(0).getModel().getModelId()+ "/fields";
-        Fields fields = restTemplate.getForObject(url, Fields.class);
+        Fields fields = restTemplate.getForObject(fieldsUrl, Fields.class);
         assertNotNull(fields);
         assertNotNull(fields.getFields());
         assertEquals(fields.getModelId(), paginatedModels.get(0).getModel().getModelId());
         log.info("Retrieving Model Fields via ScoringAPI Proxy.");
-        */
     }
     
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
