@@ -62,6 +62,11 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
             return this;
         }
 
+        public Builder containerMemoryMB(Integer memorySize) {
+            configuration.setContainerMemoryMB(memorySize);
+            return this;
+        }
+
         public Builder microserviceHostPort(String hostPort) {
             parallelExecConfig.setMicroServiceHostPort(hostPort);
             return this;

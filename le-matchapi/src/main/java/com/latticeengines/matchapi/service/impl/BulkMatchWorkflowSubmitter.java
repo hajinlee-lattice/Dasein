@@ -43,6 +43,11 @@ public class BulkMatchWorkflowSubmitter {
         return this;
     }
 
+    public BulkMatchWorkflowSubmitter containerMemoryMB(Integer memorySize) {
+        builder = builder.containerMemoryMB(memorySize);
+        return this;
+    }
+
     public BulkMatchWorkflowSubmitter inputProperties() {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "bulkMatchWorkflow");

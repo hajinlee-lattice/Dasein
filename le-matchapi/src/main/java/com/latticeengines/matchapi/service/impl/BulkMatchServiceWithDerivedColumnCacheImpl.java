@@ -58,6 +58,9 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
     @Value("${datacloud.match.average.block.size:2500}")
     private Integer averageBlockSize;
 
+    @Value("${datacloud.yarn.container.mem.mb}")
+    private int yarnContainerMemory;
+
     @Override
     public boolean accept(String version) {
         return MatchUtils.isValidForRTSBasedMatch(version);
@@ -114,6 +117,7 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
                 .workflowProxy(workflowProxy) //
                 .microserviceHostport(microserviceHostport) //
                 .averageBlockSize(averageBlockSize) //
+                .containerMemoryMB(yarnContainerMemory) //
                 .generateConfig();
     }
 
