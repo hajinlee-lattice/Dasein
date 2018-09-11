@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
@@ -41,10 +42,12 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
     private static final String SEGMENT_NAME = "testTPSegment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private Play testPlay;
+    private PlayType testPlayType;
 
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setupRunEnvironment();
+        testPlayType = createTestPlayType();
         testPlay = createTestPlay();
         playProxy = spy(new PlayProxy());
         ((TalkingPointServiceImpl) talkingPointService).setPlayProxy(playProxy);
@@ -237,6 +240,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         play.setUpdated(new Date());
         play.setCreated(new Date());
         play.setName(play.generateNameStr());
+        play.setPlayType(testPlayType);
 
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);
@@ -247,5 +251,27 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
             }
         });
         return play;
+    }
+
+    private PlayType createTestPlayType() {
+        PlayType playType = new PlayType();
+        playType.setDisplayName(PLAY_TYPE_DISPLAY_NAME);
+        playType.setCreatedBy(CREATED_BY);
+        playType.setUpdatedBy(CREATED_BY);
+        playType.setTenant(mainTestTenant);
+        playType.setTenantId(mainTestTenant.getPid());
+        playType.setUpdated(new Date());
+        playType.setCreated(new Date());
+        playType.setId(PlayType.generateId());
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
+        TransactionTemplate tx = new TransactionTemplate(ptm);
+        tx.execute(new TransactionCallbackWithoutResult() {
+            public void doInTransactionWithoutResult(TransactionStatus status) {
+                testPlayTypeDao.create(playType);
+            }
+        });
+
+        return playType;
     }
 }
