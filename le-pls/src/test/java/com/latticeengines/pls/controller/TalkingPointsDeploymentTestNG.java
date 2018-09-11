@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
@@ -28,6 +30,7 @@ import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -45,12 +48,12 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final String SEGMENT_NAME = "testTPSegment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static Play play;
+    private RatingEngine ratingEngine1;
+    private MetadataSegment segment;
+    private List<PlayType> playTypes;
 
     @Autowired
     private SegmentProxy segmentProxy;
-
-    private RatingEngine ratingEngine1;
-    private MetadataSegment segment;
 
     @Autowired
     private PlayProxy playProxy;
@@ -60,7 +63,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        setupTestEnvironmentWithExistingTenant("JLM1526244443808");
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         segment = new MetadataSegment();
         segment.setAccountFrontEndRestriction(new FrontEndRestriction());
@@ -264,6 +267,10 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngine1.getId());
         play.setRatingEngine(ratingEngine);
+        if (CollectionUtils.isEmpty(playTypes)) {
+            playTypes = playProxy.getPlayTypes(mainTestTenant.getId());
+        }
+        play.setPlayType(playTypes.get(0));
         return play;
     }
 

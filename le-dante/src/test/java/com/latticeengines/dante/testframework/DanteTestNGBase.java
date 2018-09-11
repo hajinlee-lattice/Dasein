@@ -19,6 +19,7 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.dante.testframework.testdao.TestPlayDao;
 import com.latticeengines.dante.testframework.testdao.TestPlayLaunchDao;
+import com.latticeengines.dante.testframework.testdao.TestPlayTypeDao;
 import com.latticeengines.dante.testframework.testdao.TestRatingEngineDao;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -54,6 +56,9 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
     protected TestPlayDao testPlayDao;
 
     @Inject
+    protected TestPlayTypeDao testPlayTypeDao;
+
+    @Inject
     protected TestPlayLaunchDao testPlayLaunchDao;
 
     @Inject
@@ -66,8 +71,10 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
     protected MetadataSegment testMetadataSegment;
     protected RatingEngine testRatingEngine;
     protected Play testPlay;
+    protected PlayType testPlayType;
     protected PlayLaunch testPlayLaunch;
     protected static final String PLAY_DISPLAY_NAME = "DeplTestTPPlay";
+    protected static final String PLAY_TYPE_DISPLAY_NAME = "DeplTestTPPlayType";
     protected static final String SEGMENT_NAME = "segment";
     protected static final String CREATED_BY = "lattice@lattice-engines.com";
 
@@ -84,6 +91,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         testMetadataSegment = createTestSegment();
         testRatingEngine = createTestRatingEngine();
         cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), testRatingEngine.getId(), null);
+        testPlayType = createTestPlayType();
         testPlay = createTestPlay();
         testPlayLaunch = createTestPlayLaunch(testPlay);
     }
@@ -134,6 +142,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         play.setUpdated(new Date());
         play.setCreated(new Date());
         play.setName(play.generateNameStr());
+        play.setPlayType(testPlayType);
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);
@@ -144,6 +153,28 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         });
 
         return play;
+    }
+
+    private PlayType createTestPlayType() {
+        PlayType playType = new PlayType();
+        playType.setDisplayName(PLAY_TYPE_DISPLAY_NAME);
+        playType.setCreatedBy(CREATED_BY);
+        playType.setUpdatedBy(CREATED_BY);
+        playType.setTenant(mainTestTenant);
+        playType.setTenantId(mainTestTenant.getPid());
+        playType.setUpdated(new Date());
+        playType.setCreated(new Date());
+        playType.setId(PlayType.generateId());
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
+        TransactionTemplate tx = new TransactionTemplate(ptm);
+        tx.execute(new TransactionCallbackWithoutResult() {
+            public void doInTransactionWithoutResult(TransactionStatus status) {
+                testPlayTypeDao.create(playType);
+            }
+        });
+
+        return playType;
     }
 
     private PlayLaunch createTestPlayLaunch(Play play) {
