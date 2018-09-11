@@ -32,7 +32,7 @@ public class CountryCodeServiceImplTestNG extends DataCloudCoreFunctionalTestNGB
         Assert.assertEquals(countryCode, "US");
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void bulkTest() {
         InputStream fileStream = ClassLoader.getSystemResourceAsStream("datasource/" + FILENAME);
         BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream));
@@ -52,7 +52,7 @@ public class CountryCodeServiceImplTestNG extends DataCloudCoreFunctionalTestNGB
         Assert.assertTrue(res);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testCountryStandardization() {
         InputStream fileStream = ClassLoader.getSystemResourceAsStream("datasource/" + FILENAME);
         BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream));
