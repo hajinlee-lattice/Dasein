@@ -14,7 +14,7 @@
         <spring.boot.version>1.5.10.RELEASE</spring.boot.version>
         <spring.version>5.0.1.RELEASE</spring.version>
         <hibernate.version>5.2.12.Final</hibernate.version>
-        <jackson.fasterxml.version>2.9.5</jackson.fasterxml.version>
+        <jackson.fasterxml.version>2.9.6</jackson.fasterxml.version>
         <spring.data.jpa.version>2.0.0.RELEASE</spring.data.jpa.version>
         <commons.collections.version>3.2.2</commons.collections.version>
         <commons.lang.version>2.6</commons.lang.version>
