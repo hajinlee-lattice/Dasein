@@ -82,8 +82,8 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     private static int segmentProfileStep;
     private static int segmentBucketStep;
 
-    protected String accountFeaturesTablePrefix = "AccountFeatures";
-    protected String masterSlimTableName;
+    private String accountFeaturesTablePrefix = "AccountFeatures";
+    private String masterSlimTableName;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -133,7 +133,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
             calcStatsStep = step++;
             filterStep = step++;
             segmentProfileStep = step++;
-            segmentBucketStep = step++;
+            segmentBucketStep = step;
             // -----------
             TransformationStepConfig match = match(customerSpace,
                     masterSlimTableName != null ? masterSlimTableName : masterTableName);
@@ -228,7 +228,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     private TransformationStepConfig mergeMatch(int matchStep, String masterTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer("bulkMatchMergerTransformer");
-        List<Integer> steps = Arrays.asList(matchStep);
+        List<Integer> steps = Collections.singletonList(matchStep);
         step.setInputSteps(steps);
         setBaseTables(customerSpace, masterTableName, step);
 
@@ -300,11 +300,6 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_COPIER);
 
-        CopierConfig conf = new CopierConfig();
-        Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
-        filterGroups.add(ColumnSelection.Predefined.ID);
-        filterGroups.add(ColumnSelection.Predefined.Model);
-
         List<String> retainAttrNames = servingStoreProxy
                 .getAllowedModelingAttrs(customerSpace.toString(), tableFromActiveVersion ? active : inactive) //
                 .map(ColumnMetadata::getAttrName) //
@@ -315,7 +310,11 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }
+        if (!retainAttrNames.contains(InterfaceName.LatticeAccountId.name())) {
+            retainAttrNames.add(InterfaceName.LatticeAccountId.name());
+        }
 
+        CopierConfig conf = new CopierConfig();
         conf.setRetainAttrs(retainAttrNames);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
@@ -334,7 +333,6 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_COPIER);
 
-        CopierConfig conf = new CopierConfig();
         Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
         filterGroups.add(ColumnSelection.Predefined.ID);
         filterGroups.add(ColumnSelection.Predefined.LookupId);
@@ -357,6 +355,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
             retainAttrNames.add(InterfaceName.CDLUpdatedTime.name());
         }
 
+        CopierConfig conf = new CopierConfig();
         conf.setRetainAttrs(retainAttrNames);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);

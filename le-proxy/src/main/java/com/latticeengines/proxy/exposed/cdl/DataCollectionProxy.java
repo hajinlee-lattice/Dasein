@@ -270,7 +270,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         log.info("Evicting attr repo cache for key " + key);
         attrRepoCache.getCache(CacheName.AttrRepoCache.name()).evict(key);
         try {
-            Thread.sleep(2000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             log.warn("Thread sleep interrupted.", e);
         }

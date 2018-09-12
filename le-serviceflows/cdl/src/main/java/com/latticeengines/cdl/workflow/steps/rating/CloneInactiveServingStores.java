@@ -39,7 +39,5 @@ public class CloneInactiveServingStores extends BaseWorkflowStep<GenerateRatingS
                 cloneTableService.linkInactiveTable(servingStore);
             }
         });
-        log.info("Evict attr repo cache for inactive version " + active.complement());
-        dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), active.complement());
     }
 }

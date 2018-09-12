@@ -58,6 +58,7 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
             log.info("Current iteration " + iteration + " is larger than max dependency depth "
                     + CollectionUtils.size(generations) + ", skip iteration.");
         } else {
+            String customerSpace = configuration.getCustomerSpace().toString();
             List list = generations.get(iteration - 1);
             List<RatingModelContainer> containersInIteration = JsonUtils.convertList(list, RatingModelContainer.class);
             log.info("Found " + containersInIteration.size() + " active models to process in this iteration.");
@@ -74,11 +75,11 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                 }
             }
 
+            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION,
+                    DataCollection.Version.class);
             if (CollectionUtils.isNotEmpty(inactiveEnginesInIteration)) {
                 Set<String> existingEngineIds = new HashSet<>();
-                DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION,
-                        DataCollection.Version.class);
-                Table table = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
+                Table table = dataCollectionProxy.getTable(customerSpace, //
                         BusinessEntity.Rating.getServingStore(), inactive);
                 if (table != null) {
                     table.getAttributes().forEach(attr -> {
@@ -99,6 +100,9 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
 
             putObjectInContext(ITERATION_RATING_MODELS, containersInIteration);
             putObjectInContext(ITERATION_INACTIVE_ENGINES, inactiveEnginesInIteration);
+
+            log.info("Evict attr repo cache for inactive version " + inactive);
+            dataCollectionProxy.evictAttrRepoCache(customerSpace, inactive);
         }
     }
 
