@@ -43,10 +43,18 @@ public class CDLJobDetailEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         jobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, mainTestTenant);
         Thread.sleep(500);
         List<CDLJobDetail> cdlJobDetails = cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE);
-        Assert.assertEquals(CollectionUtils.size(cdlJobDetails), countBeforeTest + 1);
-        cdlJobDetails.get(0).setCdlJobStatus(CDLJobStatus.COMPLETE);
-        cdlJobDetails.get(0).setApplicationId("Fake_AppId");
-        cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetails.get(0));
+        Assert.assertNotNull(cdlJobDetails);
+        Assert.assertTrue(cdlJobDetails.size() > 0);
+        CDLJobDetail current = null;
+        for (CDLJobDetail cdlJobDetail : cdlJobDetails) {
+            if (cdlJobDetail.getTenantId().equals(mainTestTenant.getPid())) {
+                current = cdlJobDetail;
+            }
+        }
+        Assert.assertNotNull(current);
+        current.setCdlJobStatus(CDLJobStatus.COMPLETE);
+        current.setApplicationId("Fake_AppId");
+        cdlJobDetailEntityMgr.updateJobDetail(current);
         CDLJobDetail cdlJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
         Assert.assertNotNull(cdlJobDetail);
         Assert.assertEquals(cdlJobDetail.getApplicationId(), "Fake_AppId");
