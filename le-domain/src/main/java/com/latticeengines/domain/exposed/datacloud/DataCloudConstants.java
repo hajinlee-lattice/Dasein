@@ -37,6 +37,7 @@ public final class DataCloudConstants {
     public static final String ATTR_GU_DUNS = "GLOBAL_ULTIMATE_DUNS_NUMBER";
     public static final String ATTR_SALES_VOL_US = "SALES_VOLUME_US_DOLLARS";
     public static final String ATTR_SALES_VOL_US_CODE = "SALES_VOLUME_RELIABILITY_CODE";
+    public static final String ATTR_GLOBAL_HQ_SALES_VOL = "GLOBAL_HQ_SALES_VOLUME";
     public static final String ATTR_EMPLOYEE_HERE = "EMPLOYEES_HERE";
     public static final String ATTR_EMPLOYEE_HERE_CODE = "EMPLOYEES_HERE_RELIABILITY_CODE";
     public static final String ATTR_EMPLOYEE_TOTAL = "EMPLOYEES_TOTAL";
