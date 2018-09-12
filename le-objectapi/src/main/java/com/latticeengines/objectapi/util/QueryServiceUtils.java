@@ -11,6 +11,7 @@ import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 public class QueryServiceUtils {
+
     public static AttributeRepository checkAndGetAttrRepo(CustomerSpace customerSpace,
                                                           DataCollection.Version version,
                                                           QueryEvaluatorService queryEvaluatorService) {
@@ -22,7 +23,7 @@ public class QueryServiceUtils {
         return attrRepo;
     }
 
-    static public TimeFilterTranslator getTimeFilterTranslator(TransactionService transactionService,
+    public static TimeFilterTranslator getTimeFilterTranslator(TransactionService transactionService,
                                                                FrontEndQuery frontEndQuery) {
         if (frontEndQuery != null && transactionService.hasTransactionBucket(frontEndQuery)) {
             return transactionService.getTimeFilterTranslator(frontEndQuery.getEvaluationDateStr());

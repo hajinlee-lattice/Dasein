@@ -308,9 +308,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         if (version != null) {
             url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo?version={version}",
                     shortenCustomerSpace(customerSpace), version);
-
-
-            method = "get default attribute repo at version " + version;
+            method = "get default attribute repo for customer " + customerSpace  + " at version " + version;
         }
         return getKryo(method, url, AttributeRepository.class);
     }
