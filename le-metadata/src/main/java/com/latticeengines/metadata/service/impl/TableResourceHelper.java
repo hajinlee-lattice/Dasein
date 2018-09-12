@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -19,13 +18,10 @@ import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
-import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.MetadataService;
 
 @Component("tableResourceHelper")
@@ -33,11 +29,8 @@ public class TableResourceHelper {
 
     private static final Logger log = LoggerFactory.getLogger(TableResourceHelper.class);
 
-    @Autowired
-    private MetadataService mdService;
-
     @Inject
-    private TableEntityMgr tableEntityMgr;
+    private MetadataService mdService;
 
     public List<String> getTables(String customerSpace) {
         log.info(String.format("getTables(%s)", customerSpace));
@@ -182,10 +175,6 @@ public class TableResourceHelper {
             mdService.updateTable(space, table);
         }
         return true;
-    }
-
-    public void setStorageMechanism(String customerSpace, String tableName, StorageMechanism storageMechanism) {
-        mdService.setStorageMechanism(CustomerSpace.parse(customerSpace), tableName, storageMechanism);
     }
 
     public Boolean createTableAttributes(String customerSpace, String tableName, List<Attribute> attributes) {

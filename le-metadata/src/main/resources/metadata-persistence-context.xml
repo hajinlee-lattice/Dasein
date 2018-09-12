@@ -15,12 +15,6 @@
                       entity-manager-factory-ref="entityManagerFactoryReader"
                       transaction-manager-ref="transactionManagerReader"  />
 
-
-    <jpa:repositories base-package="com.latticeengines.metadata.mds.repository"
-                      base-class="com.latticeengines.metadata.mds.repository.impl.MetadataStoreRepositoryImpl"
-                      entity-manager-factory-ref="documentEntityManagerFactoryReader"
-                      transaction-manager-ref="documentTransactionManagerReader"  />
-
     <jpa:repositories base-package="com.latticeengines.metadata.repository.document.writer"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="documentEntityManagerFactory"

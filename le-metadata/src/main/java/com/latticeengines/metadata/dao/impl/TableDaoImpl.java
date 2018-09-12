@@ -2,8 +2,8 @@ package com.latticeengines.metadata.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -25,7 +25,7 @@ public class TableDaoImpl extends BaseDaoImpl<Table> implements TableDao {
         Class<Table> entityClz = getEntityClass();
         String queryStr = String.format("from %s where name = :tableName", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("tableName", name);
+        query.setParameter("tableName", name);
         List list = query.list();
         if (list.size() == 0) {
             return null;

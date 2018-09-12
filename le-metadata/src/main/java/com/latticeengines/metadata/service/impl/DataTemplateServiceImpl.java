@@ -19,7 +19,7 @@ import com.latticeengines.metadata.service.DataTemplateService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
-
+@SuppressWarnings("rawtypes")
 @Service("dataTemplateService")
 public class DataTemplateServiceImpl implements DataTemplateService {
 

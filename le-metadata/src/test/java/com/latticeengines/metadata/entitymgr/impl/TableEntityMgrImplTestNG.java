@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -31,12 +33,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(TableEntityMgrImplTestNG.class);
-    
+
     @Autowired
     private MetadataService metadataService;
 
@@ -102,16 +103,20 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         log.info("Attribute Count for table {} - {} ", TABLE1, attributeCnt);
         assertEquals(table.getAttributes().size(), attributeCnt.intValue());
     }
-    
+
     @Test(groups = "functional")
     public void testFindAttributes() {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace1));
         Table table = tableEntityMgr.findByName(TABLE1);
-        
+
         List<Attribute> attributes = tableEntityMgr.findAttributesByTable_Pid(table.getPid(), null);
         log.info("Attribute List Size for table {} - {} ", TABLE1, attributes.size());
         assertEquals(table.getAttributes().size(), attributes.size());
-        
+
+        attributes = tableEntityMgr.findAttributesByTable_Pid(table.getPid(), PageRequest.of(0, CollectionUtils.size(attributes)));
+        log.info("Attribute List Size for table {} - {} ", TABLE1, attributes.size());
+        assertEquals(table.getAttributes().size(), attributes.size());
+
         List<Attribute> paginatedAttrs = new ArrayList<>();
         IntStream.range(0,  (int)Math.ceil(attributes.size()/5.0)).forEach(page -> {
             List<Attribute> currPage = tableEntityMgr.findAttributesByTable_Pid(table.getPid(), PageRequest.of(page, 5));

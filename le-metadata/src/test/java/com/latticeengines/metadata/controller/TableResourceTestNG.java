@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -25,7 +25,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
@@ -96,12 +95,13 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         String url = String.format("%s/metadata/customerspaces/%s/%s/%s", //
                 getRestAPIHostPort(), customerSpace1, urlType, TABLE1);
         Table table = restTemplate.getForObject(url, Table.class, new HashMap<>());
+        assertNotNull(table);
         assertEquals(table.getName(), TABLE1);
 
         assertEquals(table.getAttributes().size(), 22);
     }
 
-    @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "getTable" })
+    @Test(groups = "functional", dataProvider = "urlTypes", dependsOnMethods = { "getTable" })
     public void getTableMetadata(String urlType) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -120,8 +120,8 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrMetadata.getFundamentalType(), "numeric");
         assertEquals(attrMetadata.getTags().get(0), "External");
     }
-    
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "getTable" })
+
+    @Test(groups = "functional", dependsOnMethods = { "getTable" })
     public void getTableColumnsPageable() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -146,8 +146,8 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
             assertEquals(attributeArr.length, pageSize);
         }
     }
-    
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "getTable" })
+
+    @Test(groups = "functional", dependsOnMethods = { "getTable" })
     public void cloneTable() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -161,7 +161,7 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         assertNotNull(existing);
     }
 
-    @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "getTable" })
+    @Test(groups = "functional", dataProvider = "urlTypes", dependsOnMethods = { "getTable" })
     public void getAttributeValidators(String urlType) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -198,10 +198,10 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         String url = String.format("%s/metadata/customerspaces/%s/%s", //
                 getRestAPIHostPort(), customerSpace2, urlType);
         List<String> tables = restTemplate.getForObject(url, List.class);
-        assertEquals(tables.size(), 2);
+        assertEquals(CollectionUtils.size(tables), 2);
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "getTables" })
+    @Test(groups = "functional", dependsOnMethods = { "getTables" })
     public void validateMetadata() throws Exception {
         String metadataFile = ClassLoader.getSystemResource("com/latticeengines/metadata/controller/metadata.avsc")
                 .getPath();
@@ -210,13 +210,14 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         String url = String.format("%s/metadata/customerspaces/%s/validations", //
                 getRestAPIHostPort(), customerSpace2);
-        ModelingMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(new File(metadataFile)),
+        ModelingMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(new File(metadataFile), "utf8"),
                 ModelingMetadata.class);
         SimpleBooleanResponse response = restTemplate.postForObject(url, metadata, SimpleBooleanResponse.class);
+        assertNotNull(response);
         assertTrue(response.isSuccess());
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "validateMetadata" })
+    @Test(groups = "functional", dependsOnMethods = { "validateMetadata" })
     public void validateMetadataForInvalidPayload() throws Exception {
         String metadataFile = ClassLoader
                 .getSystemResource("com/latticeengines/metadata/controller/invalidmetadata.avsc").getPath();
@@ -225,13 +226,13 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         String url = String.format("%s/metadata/customerspaces/%s/validations", //
                 getRestAPIHostPort(), customerSpace2);
-        ModelingMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(new File(metadataFile)),
+        ModelingMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(new File(metadataFile), "utf8"),
                 ModelingMetadata.class);
         SimpleBooleanResponse response = restTemplate.postForObject(url, metadata, SimpleBooleanResponse.class);
         assertFalse(response.isSuccess());
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "validateMetadataForInvalidPayload" })
+    @Test(groups = "functional", dependsOnMethods = { "validateMetadataForInvalidPayload" })
     public void resetTables() {
         String url = String.format("%s/metadata/customerspaces/%s/%s/%s", //
                 getRestAPIHostPort(), customerSpace1, String.valueOf(getUrlTypes()[0][0]), TABLE2);

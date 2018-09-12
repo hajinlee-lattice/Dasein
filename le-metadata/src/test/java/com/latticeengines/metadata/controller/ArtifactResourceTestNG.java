@@ -28,7 +28,6 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/artifact/validation";
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ArtifactResourceTestNG.class);
 
     @Override

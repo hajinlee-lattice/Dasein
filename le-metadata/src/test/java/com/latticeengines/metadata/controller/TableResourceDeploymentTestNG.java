@@ -31,16 +31,14 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
 
     private static final Logger log = LoggerFactory.getLogger(TableResourceDeploymentTestNG.class);
 
-    @Inject
-    private TestArtifactService testArtifactService;
-    
-    protected static final String TABLE_NAME = "TestAccountTable";
-    
+    private static final String TABLE_NAME = "TestAccountTable";
     private static final String S3_DIR = "le-dev/LocalTest";
     private static final String S3_VERSION = "4";
-    
     private static String renamedTableName = TABLE_NAME;
-    
+
+    @Inject
+    private TestArtifactService testArtifactService;
+
     @Override
     @BeforeClass(groups = "deployment")
     public void setup() {
@@ -61,11 +59,11 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         if (is == null) {
             throw new RuntimeException("Could not download Account json from S3");
         }
-        
+
         Table table;
         try {
             ObjectMapper om = new ObjectMapper();
-            List list = om.readValue(is, List.class);
+            List<?> list = om.readValue(is, List.class);
             table = JsonUtils.convertList(list, Table.class).get(0);
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse table from " + BusinessEntity.Account.getServingStore().name() + ".json.", e);
@@ -93,9 +91,9 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
     private void logTableSummary(String context, Table table) {
         log.info("{}. Name: {}, Attribute Count: {} ", context, table.getName(), table.getAttributes().size());
     }
-    
+
     @Test(groups = "deployment", dependsOnMethods = "testCreateTable")
-    public void testGetTables() throws IOException {
+    public void testGetTables() {
         List<String> tables = metadataProxy.getTableNames(customerSpace1);
 
         assertNotNull(tables);
@@ -104,10 +102,10 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testGetTables")
-    public void testUpdateTable() throws IOException {
+    public void testUpdateTable() {
         Table srcTable = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertNotNull(srcTable);
-        
+
         // Update the table by adding 1 attribute
         log.info("Updating {} for {}", TABLE_NAME,  customerSpace1);
         Attribute attribute = new Attribute();
@@ -125,12 +123,12 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         assertEquals(updatedTable.getDisplayName(), tableDisplayName);
         logTableSummary("Updated Table from DB", updatedTable);
         assertEquals(updatedTable.getAttributes().size(), srcTable.getAttributes().size(), "Updated table attribute count doesn't match for add usecase");
-        
+
         attribute = updatedTable.getAttribute("Name1");
         assertNotNull(attribute);
-        assertEquals(attribute.getDisplayName(),"DisplayName1");
-        assertEquals(attribute.getPhysicalDataType(),"PhysicalDataType1");
-        
+        assertEquals(attribute.getDisplayName(), "DisplayName1");
+        assertEquals(attribute.getPhysicalDataType(), "PhysicalDataType1");
+
         // Update the table by deleting 5 attributes
         List<String> deletedAttributes = new ArrayList<>();
         IntStream.range(0 , 5).forEach(ctr -> {
@@ -158,23 +156,23 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         
         // Update all Attributes
         String updateSuffix = "-Updated";
-        updatedTable2.getAttributes().stream().forEach(attr -> {
+        updatedTable2.getAttributes().forEach(attr -> {
             attr.setDisplayName(attr.getDisplayName() + updateSuffix);
         });
         metadataProxy.updateTable(customerSpace1, TABLE_NAME, updatedTable2);
-        
+
         srcTable = updatedTable2;
         updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertNotNull(updatedTable2);
         logTableSummary("Updated Table after Attribute updates", updatedTable2);
         assertEquals(updatedTable2.getAttributes().size(), srcTable.getAttributes().size(), "Updated table attribute count doesn't match for attribute update usecase");
-        updatedTable2.getAttributes().stream().forEach(attr -> {
+        updatedTable2.getAttributes().forEach(attr -> {
             assertTrue(attr.getDisplayName().endsWith(updateSuffix));
         });
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testUpdateTable")
-    public void testRenameTable() throws IOException {
+    public void testRenameTable() {
         Table srcTable = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertNotNull(srcTable);
         String newTableName = TABLE_NAME + "-rename1";
@@ -196,9 +194,9 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         // Will be used in deleteTable method
         renamedTableName = newTableName2;
     }
-    
+
     @Test(groups = "deployment", dependsOnMethods = "testRenameTable")
-    public void testDeleteTable() throws IOException {
+    public void testDeleteTable() {
         log.info("Deleting {} for {} ", renamedTableName, customerSpace1);
         metadataProxy.deleteTable(customerSpace1, renamedTableName);
         Table table = metadataProxy.getTable(customerSpace1, renamedTableName);

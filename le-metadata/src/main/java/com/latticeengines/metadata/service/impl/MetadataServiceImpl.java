@@ -5,14 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.Closure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +21,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -33,8 +29,6 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMeta
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
-import com.latticeengines.metadata.repository.db.AttributeRepository;
-import com.latticeengines.metadata.repository.db.TableRepository;
 import com.latticeengines.metadata.service.MetadataService;
 
 @Component("mdService")
@@ -42,23 +36,17 @@ public class MetadataServiceImpl implements MetadataService {
 
     private static final Logger log = LoggerFactory.getLogger(MetadataServiceImpl.class);
 
-    @Autowired
+    @Inject
     private TableEntityMgr tableEntityMgr;
 
-    @Autowired
+    @Inject
     private TableTypeHolder tableTypeHolder;
 
-    @Inject
-    private AttributeRepository attributeRepository;
-
-    @Inject
-    private TableRepository tableRepository;
-    
     @Override
     public Table getTable(CustomerSpace customerSpace, String name) {
         return getTable(customerSpace, name, true);
     }
-    
+
     @Override
     public Table getTable(CustomerSpace customerSpace, String name, Boolean includeAttributes) {
         Table table = tableEntityMgr.findByName(name, true, includeAttributes);
@@ -106,10 +94,11 @@ public class MetadataServiceImpl implements MetadataService {
     private Long getPidByTableName(CustomerSpace customerSpace, String tableName) {
         Table table = tableEntityMgr.findByName(tableName, false);
         /*
-        // For backward compatibility, we cannot throw the exception. So, returning null.
-        if (table == null)
-            throw new LedpException(LedpCode.LEDP_11008, new String[] {tableName, customerSpace.toString()});
-        */
+         * // For backward compatibility, we cannot throw the exception. So,
+         * returning null. if (table == null) throw new
+         * LedpException(LedpCode.LEDP_11008, new String[] {tableName,
+         * customerSpace.toString()});
+         */
         return table != null ? table.getPid() : null;
     }
 
@@ -128,22 +117,14 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public void createTable(CustomerSpace customerSpace, final Table table) {
-        DatabaseUtils.retry("createTable", new Closure() {
-            @Override
-            public void execute(Object input) {
-                tableEntityMgr.create(TableUtils.clone(table, table.getName()));
-            }
-        });
+        DatabaseUtils.retry("createTable", //
+                input -> tableEntityMgr.create(TableUtils.clone(table, table.getName())));
     }
 
     @Override
     public void deleteTableAndCleanup(CustomerSpace customerSpace, final String tableName) {
-        DatabaseUtils.retry("deleteTable", new Closure() {
-            @Override
-            public void execute(Object input) {
-                tableEntityMgr.deleteTableAndCleanupByName(tableName);
-            }
-        });
+        DatabaseUtils.retry("deleteTable", //
+                input -> tableEntityMgr.deleteTableAndCleanupByName(tableName));
     }
 
     @Override
@@ -161,17 +142,14 @@ public class MetadataServiceImpl implements MetadataService {
         tableTypeHolder.setTableType(table.getTableType());
         try {
             log.info("Metadata UpdateTable: {}", table.getName());
-            DatabaseUtils.retry("updateTable", new Closure() {
-                @Override
-                public void execute(Object input) {
-                    Table found = tableEntityMgr.findByName(table.getName(), false);
-                    if (found != null) {
-                        log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
-                        tableEntityMgr.deleteByName(found.getName());
-                    }
-
-                    tableEntityMgr.create(TableUtils.clone(table, table.getName()));
+            DatabaseUtils.retry("updateTable", input -> {
+                Table found = tableEntityMgr.findByName(table.getName(), false);
+                if (found != null) {
+                    log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
+                    tableEntityMgr.deleteByName(found.getName());
                 }
+
+                tableEntityMgr.create(TableUtils.clone(table, table.getName()));
             });
         } finally {
             tableTypeHolder.setTableType(TableType.DATATABLE);
@@ -216,13 +194,10 @@ public class MetadataServiceImpl implements MetadataService {
     public void setStorageMechanism(CustomerSpace customerSpace, final String tableName,
             StorageMechanism storageMechanism) {
         tableTypeHolder.setTableType(TableType.DATATABLE);
-        DatabaseUtils.retry("addStorageMechanism", new Closure() {
-            @Override
-            public void execute(Object input) {
-                Table found = tableEntityMgr.findByName(tableName);
-                found.setStorageMechanism(storageMechanism);
-                updateTable(customerSpace, found);
-            }
+        DatabaseUtils.retry("addStorageMechanism", input -> {
+            Table found = tableEntityMgr.findByName(tableName);
+            found.setStorageMechanism(storageMechanism);
+            updateTable(customerSpace, found);
         });
     }
 

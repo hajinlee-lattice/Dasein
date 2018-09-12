@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.Closure;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -317,14 +316,11 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
         final Table copy = TableUtils.clone(existing, "copy_" + UUID.randomUUID().toString().replace('-', '_'));
 
-        DatabaseUtils.retry("createTable", new Closure() {
-            @Override
-            public void execute(Object input) {
-                Tenant t = tenantEntityMgr.findByTenantId(targetCustomerSpace.toString());
-                MultiTenantContext.setTenant(t);
-                copy.setTenant(t);
-                create(TableUtils.clone(copy, copy.getName()));
-            }
+        DatabaseUtils.retry("createTable", input -> {
+            Tenant t = tenantEntityMgr.findByTenantId(targetCustomerSpace.toString());
+            MultiTenantContext.setTenant(t);
+            copy.setTenant(t);
+            create(TableUtils.clone(copy, copy.getName()));
         });
 
         if (copy.getExtracts().size() > 0) {

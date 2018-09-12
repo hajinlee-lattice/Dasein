@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -140,6 +139,13 @@ public class FixAttribute extends MetadataFunctionalTestNGBase {
                                 }
                             }
                         }
+                        break;
+                    case DepivotedPurchaseHistory:
+                    case PeriodTransaction:
+                    case ProductHierarchy:
+                    case PurchaseHistory:
+                    case LatticeAccount:
+                    default:
                         break;
                 }
             }

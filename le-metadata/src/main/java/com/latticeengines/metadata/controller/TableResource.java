@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,13 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.rest.controller.BaseRestResource;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
 
 import io.swagger.annotations.Api;
@@ -38,9 +33,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}")
 public class TableResource extends BaseRestResource {
 
-    private static final Logger log = Logger.getLogger(BaseRestResource.class);
-    
-    @Autowired
+    @Inject
     private TableResourceHelper tableResourceHelper;
 
     @GetMapping(value = "/tables")
