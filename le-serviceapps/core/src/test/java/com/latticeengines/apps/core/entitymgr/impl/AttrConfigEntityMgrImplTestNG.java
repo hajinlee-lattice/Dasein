@@ -24,6 +24,8 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
+    private static final String DISPALY_NAME = "Display Name 1 你好";
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
@@ -54,7 +56,7 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         Assert.assertEquals(attrConfigs.size(), 3);
 
         AttrConfigProp<String> attrConfigProp = new AttrConfigProp<>();
-        attrConfigProp.setCustomValue("Display Name 1");
+        attrConfigProp.setCustomValue(DISPALY_NAME);
         attrConfig2.putProperty(ColumnMetadataKey.DisplayName, attrConfigProp);
         AttrConfig attrConfig4 = new AttrConfig();
         attrConfig4.setAttrName("Attr4");
@@ -69,7 +71,7 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
             if (attrConfig.getAttrName().equals("Attr2")) {
                 Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.DisplayName));
                 Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(),
-                        "Display Name 1");
+                        DISPALY_NAME);
             }
         });
 
