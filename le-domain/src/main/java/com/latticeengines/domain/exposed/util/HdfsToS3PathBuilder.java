@@ -115,7 +115,6 @@ public class HdfsToS3PathBuilder {
     // Converters
     public String convertAtlasTableDir(String inputTableDir, String pod, String tenantId, String s3Bucket) {
         inputTableDir = getFullPath(inputTableDir);
-
         StringBuilder builder = new StringBuilder();
         String hdfsTablesDir = getHdfsAtlasTablesDir(pod, tenantId);
         if (inputTableDir.startsWith(hdfsTablesDir)) {
@@ -164,6 +163,7 @@ public class HdfsToS3PathBuilder {
     }
 
     private String getMetadataTableFolderName(String eventTable, String eventColumn) {
-        return String.format("%s-%s-Metadata", eventTable.replaceAll("[^A-Za-z0-9_-]", "_"), eventColumn);
+        return String.format("%s-%s-Metadata", eventTable.replaceAll("[^A-Za-z0-9_-]", "_"),
+                eventColumn.replaceAll("[^A-Za-z0-9_-]", "_"));
     }
 }

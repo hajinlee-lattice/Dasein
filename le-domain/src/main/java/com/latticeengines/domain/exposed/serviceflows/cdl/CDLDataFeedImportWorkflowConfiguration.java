@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
 
 public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -14,17 +15,20 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         private CDLDataFeedImportWorkflowConfiguration configuration = new CDLDataFeedImportWorkflowConfiguration();
 
         private ImportDataFeedTaskConfiguration importDataFeedTaskConfiguration = new ImportDataFeedTaskConfiguration();
+        private ExportToS3StepConfiguration exportToS3 = new ExportToS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlDataFeedImportWorkflow", customerSpace,
                     configuration.getClass().getSimpleName());
             importDataFeedTaskConfiguration.setCustomerSpace(customerSpace);
+            exportToS3.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importDataFeedTaskConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            exportToS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -35,6 +39,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importDataFeedTaskConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            exportToS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -55,6 +60,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public CDLDataFeedImportWorkflowConfiguration build() {
             configuration.add(importDataFeedTaskConfiguration);
+            configuration.add(exportToS3);
             return configuration;
         }
 

@@ -89,6 +89,10 @@ public class HdfsToS3PathBuilderUnitTestNG {
                 "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/table2", "pod2",
                 "tenantId2", "bucket2"), "s3n://bucket2/tenantId2/atlas/Data/Tables/table2");
         Assert.assertEquals(builder.convertAtlasTableDir(
+                "hdfs://QACLUSTER2/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/table2/*.avro",
+                "pod2",
+                "tenantId2", "bucket2"), "s3n://bucket2/tenantId2/atlas/Data/Tables/table2");
+        Assert.assertEquals(builder.convertAtlasTableDir(
                 "/Pods/pod2/Contracts/tenantId2/Tenants/tenantId2/Spaces/Production/Data/Tables/table2/", "pod2",
                 "tenantId2", "bucket2"), "s3n://bucket2/tenantId2/atlas/Data/Tables/table2");
         Assert.assertEquals(builder.convertAtlasTableDir(
