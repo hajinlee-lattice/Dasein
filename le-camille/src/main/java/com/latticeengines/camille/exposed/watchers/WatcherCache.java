@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -23,7 +21,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 public class WatcherCache<K, V> {
 
     private static Logger log = LoggerFactory.getLogger(WatcherCache.class);
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+    private static final double SEC_TO_MSEC = 1000.0;
     private static final Random random = new Random(System.currentTimeMillis());
 
     private final Function<K, V> load;
@@ -37,7 +35,8 @@ public class WatcherCache<K, V> {
     private BiFunction<String, Set<K>, Collection<K>> evictKeyResolver;
     private Cache<K, V> cache;
 
-    WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity, Object... initKeys) {
+    WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity,
+            Object... initKeys) {
         this.load = load;
         this.cacheName = cacheName;
         this.watcherName = watcherName;
@@ -89,7 +88,8 @@ public class WatcherCache<K, V> {
     public synchronized void initialize() {
         if (cache == null) {
             long startTime = System.currentTimeMillis();
-            log.info("Start initializing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
+            log.info("Start initializing the WatcherCache " + cacheName + " watching " + watcherName
+                    + " ...");
             waitForCamille();
             NodeWatcher.registerWatcher(watcherName);
             NodeWatcher.registerListener(watcherName, () -> {
@@ -98,15 +98,17 @@ public class WatcherCache<K, V> {
             });
             Caffeine caffeine = Caffeine.newBuilder().maximumSize(capacity);
             if (expireUnit != null) {
-                caffeine = caffeine.expireAfterWrite(expire, expireUnit);
+                caffeine.expireAfterWrite(expire, expireUnit);
             }
             cache = caffeine.build();
             if (initKeys != null) {
                 log.info("Loading " + initKeys.length + " initial keys.");
                 Arrays.stream(initKeys).map(k -> (K) k).forEach(this::loadKey);
             }
-            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
-            log.info(String.format("Finished initializing the WatcherCache %s after %.3f secs.", cacheName, duration));
+            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue()
+                    / SEC_TO_MSEC;
+            log.info(String.format("Finished initializing the WatcherCache %s after %.3f secs.",
+                    cacheName, duration));
         }
     }
 
@@ -126,7 +128,8 @@ public class WatcherCache<K, V> {
         if (cache != null) {
             long startTime = System.currentTimeMillis();
             log.info("Received a signal " + String.valueOf(watchedData));
-            Collection<K> keysToEvict = new ArrayList<>(evictKeyResolver.apply(watchedData, cache.asMap().keySet()));
+            Collection<K> keysToEvict = new ArrayList<>(
+                    evictKeyResolver.apply(watchedData, cache.asMap().keySet()));
             if (!keysToEvict.isEmpty()) {
                 log.info("Going to evict " + keysToEvict.size() + " keys.");
                 keysToEvict.forEach(cache::invalidate);
@@ -139,8 +142,11 @@ public class WatcherCache<K, V> {
                 cache.invalidateAll(keysToRefresh);
                 keysToRefresh.forEach(this::loadKey);
             }
-            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
-            log.info(String.format("Finished refreshing the WatcherCache %s after %.3f secs.", cacheName, duration));
+            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue()
+                    / SEC_TO_MSEC;
+            log.info(String.format(
+                    "Finished refreshing the WatcherCache %s for signal %s after %.3f secs.",
+                    cacheName, watchedData, duration));
         }
     }
 
@@ -164,17 +170,19 @@ public class WatcherCache<K, V> {
             }
             V val = load.apply(key);
             if (val == null) {
-                log.info("Got null value when loading the key " + key + ". Skip adding it to the WatcherCache "
-                        + cacheName + ".");
+                log.info("Got null value when loading the key " + key
+                        + ". Skip adding it to the WatcherCache " + cacheName + ".");
             } else {
                 cache.put(key, val);
+                log.info(String.format("Loaded WatcherCache %s for key ", cacheName) + key);
             }
         } catch (Exception e) {
             log.error("Failed to load WatcherCache " + cacheName + " using key " + key, e);
         }
     }
 
-    public void setRefreshKeyResolver(BiFunction<String, Set<K>, Collection<K>> refreshKeyResolver) {
+    public void setRefreshKeyResolver(
+            BiFunction<String, Set<K>, Collection<K>> refreshKeyResolver) {
         this.refreshKeyResolver = refreshKeyResolver;
     }
 
