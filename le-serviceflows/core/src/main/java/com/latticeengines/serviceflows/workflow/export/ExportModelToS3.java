@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -125,35 +127,31 @@ public class ExportModelToS3 extends BaseExportToS3<ExportToS3StepConfiguration>
 
     private void addModelingArtifactsDirs(List<ExportRequest> requests, ModelSummary modelSummary) {
         String[] parts = modelSummary.getLookupId().split("\\|");
-        String eventTable = parts[1];
+        String eventTableName = parts[1];
 
         ExportRequest request = new ExportRequest();
-        request.srcDir = pathBuilder.getHdfsAnalyticsModelTableDir(customer, eventTable);
-        request.tgtDir = pathBuilder.getS3AnalyticsModelTableDir(s3Bucket, tenantId, eventTable);
+        request.srcDir = pathBuilder.getHdfsAnalyticsModelTableDir(customer, eventTableName);
+        request.tgtDir = pathBuilder.getS3AnalyticsModelTableDir(s3Bucket, tenantId, eventTableName);
         requests.add(request);
 
         request = new ExportRequest();
-        request.srcDir = pathBuilder.getHdfsAnalyticsDataTableDir(customer, eventTable);
-        request.tgtDir = pathBuilder.getS3AnalyticsDataTableDir(s3Bucket, tenantId, eventTable);
+        request.srcDir = pathBuilder.getHdfsAnalyticsDataTableDir(customer, eventTableName);
+        request.tgtDir = pathBuilder.getS3AnalyticsDataTableDir(s3Bucket, tenantId, eventTableName);
         requests.add(request);
 
-        String hdfsMetadataDir = pathBuilder.getHdfsAnalyticsMetaDataTableDir(customer, eventTable, "Event");
-        boolean isEvent = true;
-        try {
-            if (!HdfsUtils.fileExists(yarnConfiguration, hdfsMetadataDir)) {
-                hdfsMetadataDir = pathBuilder.getHdfsAnalyticsMetaDataTableDir(customer, eventTable, "Target");
-                isEvent = false;
+        request = new ExportRequest();
+        String eventColumn = "Event";
+        Table eventTable = metadataProxy.getTable(customer, eventTableName);
+        if (eventTable == null) {
+            log.warn("There was no event table.");
+        } else {
+            List<Attribute> events = eventTable.getAttributes(LogicalDataType.Event);
+            if (CollectionUtils.isNotEmpty(events)) {
+                eventColumn = events.get(0).getDisplayName();
             }
-        } catch (Exception ex) {
-            log.warn("Failed to get modeling Metadata dir!");
-            return;
         }
-        request = new ExportRequest();
-        request.srcDir = hdfsMetadataDir;
-        String s3MetadataDir = isEvent
-                ? pathBuilder.getS3AnalyticsMetaDataTableDir(s3Bucket, tenantId, eventTable, "Event")
-                : pathBuilder.getS3AnalyticsMetaDataTableDir(s3Bucket, tenantId, eventTable, "Target");
-        request.tgtDir = s3MetadataDir;
+        request.srcDir = pathBuilder.getHdfsAnalyticsMetaDataTableDir(customer, eventTableName, eventColumn);
+        request.tgtDir = pathBuilder.getS3AnalyticsMetaDataTableDir(s3Bucket, tenantId, eventTableName, eventColumn);
         requests.add(request);
     }
 
