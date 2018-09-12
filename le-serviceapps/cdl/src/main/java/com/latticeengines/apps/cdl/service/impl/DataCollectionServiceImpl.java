@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,11 +37,11 @@ import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace.TableSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -464,16 +463,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public CDLDataSpace createCDLDataSpace(String customerSpace){
-        CDLDataSpace CDLDataSpace = new CDLDataSpace();
-        CDLDataSpace.setActiveVersion(getActiveVersion(customerSpace));
+    public CDLDataSpace createCDLDataSpace(String customerSpace) {
+        CDLDataSpace cdlDataSpace = new CDLDataSpace();
+        cdlDataSpace.setActiveVersion(getActiveVersion(customerSpace));
         Map<BusinessEntity, Map<BusinessEntity.DataStore, List<TableSpace>>>   entities = new HashMap<>();
         Set<TableRoleInCollection> tableRolesWithEntity = new HashSet<>();
         Map<TableRoleInCollection, Map<Version, List<Table>>> tableRoleNames = getTableRoleMap(customerSpace,null);
 
-        for(BusinessEntity entity : BusinessEntity.values()) {
+        for (BusinessEntity entity : BusinessEntity.values()) {
             Map<BusinessEntity.DataStore, List<TableSpace>> dataStoreMap = new HashMap<>();
-            for(BusinessEntity.DataStore dataStore:BusinessEntity.DataStore.values()) {
+            for (BusinessEntity.DataStore dataStore:BusinessEntity.DataStore.values()) {
                 List<TableSpace> tableSpaceList = new ArrayList<TableSpace>();
                 for (DataCollection.Version version:DataCollection.Version.values()) {
                     TableRoleInCollection tableRole = getTableRoleFromStore(entity,dataStore);
@@ -485,14 +484,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                     if (CollectionUtils.isEmpty(tables))
                         continue;
                     List<String> tableNames = new ArrayList<>();
-                    for(Table table:tables){
+                    for (Table table:tables) {
                         tableNames.add(table.getName());
                     }
                     TableSpace tableSpace = createTableSpace(tableNames, tables, dataStore, version);
                     tableSpace.setTableRole(tableRole);
                     tableSpaceList.add(tableSpace);
                 }
-                if (CollectionUtils.isNotEmpty(tableSpaceList)){
+                if (CollectionUtils.isNotEmpty(tableSpaceList)) {
                     dataStoreMap.put(dataStore, tableSpaceList);
                 }
             }
@@ -500,11 +499,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 entities.put(entity,dataStoreMap);
             }
         }
-        CDLDataSpace.setEntities(entities);
+        cdlDataSpace.setEntities(entities);
         Map<String, List<TableSpace>> others = getOtherTableRoles(tableRolesWithEntity,tableRoleNames);
-        CDLDataSpace.setOthers(others);
+        cdlDataSpace.setOthers(others);
 
-        return CDLDataSpace;
+        return cdlDataSpace;
     }
     private TableRoleInCollection getTableRoleFromStore(BusinessEntity entity,BusinessEntity.DataStore dataStore) {
         switch(dataStore) {

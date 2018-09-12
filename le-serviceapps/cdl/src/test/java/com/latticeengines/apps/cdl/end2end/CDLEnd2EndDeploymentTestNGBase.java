@@ -98,6 +98,7 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingC
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -120,6 +121,7 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
@@ -210,6 +212,9 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
 
     @Inject
     CDLProxy cdlProxy;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Inject
     protected ModelingFileUploadProxy fileUploadProxy;
@@ -995,6 +1000,16 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
 
     List<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity) {
         return servingStoreProxy.getDecoratedMetadataFromCache(mainCustomerSpace, entity);
+    }
+
+    void verifyAccountFeatures() {
+        String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, TableRoleInCollection.AccountFeatures);
+        Assert.assertNotNull(tableName);
+        List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);
+        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model);
+        String msg = String.format("AccountFeatures has %d columns while AM has %d columns in the Model group.", //
+                CollectionUtils.size(cms), CollectionUtils.size(amCols));
+        Assert.assertTrue(CollectionUtils.size(cms) > CollectionUtils.size(amCols) + 1, msg);
     }
 
     void verifyUpdateActions() {

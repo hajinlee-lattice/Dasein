@@ -115,15 +115,17 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends CDLFunctionalTe
 
     private Runnable registerServingStore(BusinessEntity entity) {
         TableRoleInCollection role = entity.getServingStore();
-        InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, role.name() + ".json");
-        if (is != null) {
-            return () -> {
-                String tableName = servingStoreName(entity);
-                downloadTable(is, role, tableName);
-            };
-        } else {
-            return null;
+        Runnable runnable = null;
+        if (role != null) {
+            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, role.name() + ".json");
+            if (is != null) {
+                runnable = () -> {
+                    String tableName = servingStoreName(entity);
+                    downloadTable(is, role, tableName);
+                };
+            }
         }
+        return runnable;
     }
 
     private void downloadTable(InputStream is, TableRoleInCollection role, String tableName) {

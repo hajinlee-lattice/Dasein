@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class S3DataUnit extends DataUnit {
 
+    @JsonProperty("LinkedDir")
+    private String linkedDir;
+
     @Override
     @JsonIgnore
     public StorageType getStorageType() {
         return StorageType.S3;
     }
-
-    @JsonProperty("LinkedDir")
-    private String linkedDir;
 
     public String getLinkedDir() {
         return linkedDir;

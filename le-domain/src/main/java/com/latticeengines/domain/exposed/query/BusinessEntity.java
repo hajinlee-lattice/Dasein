@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.A
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedAccountAttribute;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedDepivotedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
@@ -43,16 +44,17 @@ public enum BusinessEntity implements GraphNode {
     PurchaseHistory, //
     DepivotedPurchaseHistory, //
 
+    CuratedAccount, //
+
     Rating, //
 
     // Lattice Data Cloud
     LatticeAccount, //
     ProductHierarchy;
 
-    public static Set<BusinessEntity> SEGMENT_ENTITIES = //
+    public static final Set<BusinessEntity> SEGMENT_ENTITIES = //
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating);
-
-    public static Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
+    public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
 
     static {
         // Storage
@@ -74,6 +76,8 @@ public enum BusinessEntity implements GraphNode {
         PurchaseHistory.setServingStore(CalculatedPurchaseHistory);
 
         DepivotedPurchaseHistory.setServingStore(CalculatedDepivotedPurchaseHistory);
+
+        CuratedAccount.setServingStore(CalculatedCuratedAccountAttribute);
 
         Rating.setServingStore(PivotedRating);
 

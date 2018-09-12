@@ -12,7 +12,7 @@ public class PerformanceTimer implements Closeable {
     private Date start;
     private String timerMessage;
     private Logger logger;
-    private static final long TIME_THRESHOLD = 500L;
+    private long threshold = 500L;
 
     public PerformanceTimer() {
         this.start = new Date();
@@ -40,9 +40,13 @@ public class PerformanceTimer implements Closeable {
         this.timerMessage = timerMessage;
     }
 
+    public void setThreshold(long threshold) {
+        this.threshold = threshold;
+    }
+
     @Override
     public void close() {
-        if (System.currentTimeMillis() - start.getTime() > TIME_THRESHOLD) {
+        if (System.currentTimeMillis() - start.getTime() > threshold) {
             logger.info(String.format("[Metric] %s ElapsedTime=%d ms", timerMessage,
                     System.currentTimeMillis() - start.getTime()));
         }

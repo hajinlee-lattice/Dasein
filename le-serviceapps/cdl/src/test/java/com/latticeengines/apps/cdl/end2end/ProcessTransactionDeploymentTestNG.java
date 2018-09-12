@@ -89,14 +89,8 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 //        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
 //                BusinessEntity.Account, SEGMENT_2_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_2_CONTACT_1);
 //        verifyTestSegment2Counts(segment2Counts);
-//        Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
-//                RatingBucketName.A, RATING_A_COUNT_1, //
-//                RatingBucketName.D, 7L, //
-//                RatingBucketName.F, RATING_F_COUNT_1);
-        // TODO: Rating engine needs to be activated
-        // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
-    
+
     private void verifyNumAttrsInAccount() {
         String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, BusinessEntity.Account.getServingStore());
         List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);

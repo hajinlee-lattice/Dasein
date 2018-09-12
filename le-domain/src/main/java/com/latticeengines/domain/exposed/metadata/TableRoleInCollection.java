@@ -29,6 +29,7 @@ public enum TableRoleInCollection {
     CalculatedPurchaseHistory, //
     CalculatedDepivotedPurchaseHistory, //
 
+    CalculatedCuratedAccountAttribute, //
     AnalyticPurchaseState, //
 
     AccountFeatures, //

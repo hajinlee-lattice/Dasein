@@ -85,7 +85,6 @@ public class SegmentResource {
     @ApiOperation(value = "Create or update a segment")
     public MetadataSegment createOrUpdateSegment(@PathVariable String customerSpace,
             @RequestBody MetadataSegment segment) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return segmentService.createOrUpdateSegment(segment);
     }
 
