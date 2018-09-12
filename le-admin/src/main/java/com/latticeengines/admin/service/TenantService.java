@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface TenantService {
 
@@ -41,4 +42,6 @@ public interface TenantService {
     boolean setupSpaceConfiguration(String contractId, String tenantId, SpaceConfiguration spaceConfig);
 
     boolean danteIsEnabled(String contracId, String tenantId);
+
+    boolean updateTenantInfo(String contractId, String tenantId, TenantInfo tenantInfo);
 }

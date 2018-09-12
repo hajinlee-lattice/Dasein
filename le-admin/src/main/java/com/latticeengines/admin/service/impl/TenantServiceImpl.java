@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,8 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -51,6 +54,7 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapPropertyConstant;
@@ -58,6 +62,9 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -86,6 +93,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private ServiceConfigService serviceConfigService;
+
+    @Autowired
+    private com.latticeengines.security.exposed.service.TenantService tenantService;
 
     @Value("${common.pls.url}")
     private String plsEndHost;
@@ -160,8 +170,16 @@ public class TenantServiceImpl implements TenantService {
         // change components in orchestrator based on selected product
         // retrieve mappings from Camille
         final Map<String, Map<String, String>> orchestratorProps = props;
-        executorService.submit(() -> orchestrator.orchestrateForInstall(contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, orchestratorProps, prodAndExternalAminInfo));
+        executorService.submit(() -> {
+            orchestrator.orchestrateForInstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                    orchestratorProps, prodAndExternalAminInfo);
+            // record tenant status after being created
+            TenantDocument tenantDoc = getTenant(contractId, tenantId);
+            if (tenantDoc != null && !BootstrapState.State.OK.equals(tenantDoc.getBootstrapState().state)) {
+                tenantInfo.properties.status = TenantStatus.INACTIVE.name();
+                updateTenantInfo(contractId, tenantId, tenantInfo);
+            }
+        });
         return true;
     }
 
@@ -415,6 +433,42 @@ public class TenantServiceImpl implements TenantService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public boolean updateTenantInfo(final String contractId, final String tenantId, TenantInfo tenantInfo) {
+        Camille camille = CamilleEnvironment.getCamille();
+        Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
+        Document properties = DocumentUtils.toRawDocument(tenantInfo.properties);
+        Path propertiesPath = tenantPath.append(PathConstants.PROPERTIES_FILE);
+
+        // updating data in zookeeper
+        try {
+            camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (Exception e) {
+            log.debug("error during updating properties @ {}", propertiesPath);
+            return false;
+        }
+
+        // updating data in DB
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
+        if (tenant == null) {
+            return false;
+        }
+        try {
+            if (StringUtils.isNotBlank(tenantInfo.properties.status)) {
+                tenant.setStatus(TenantStatus.valueOf(tenantInfo.properties.status));
+            }
+            if (StringUtils.isNotBlank(tenantInfo.properties.tenantType)) {
+                tenant.setTenantType(TenantType.valueOf(tenantInfo.properties.tenantType));
+            }
+            tenant.setContract(tenantInfo.properties.contract);
+            tenantService.updateTenant(tenant);
+        } catch (Exception e) {
+            log.debug(String.format("Failed to retrieve tenants properties or update tenant %s error.", tenantId));
+            return false;
+        }
+        return true;
     }
 
     private boolean danteIsEnabled(TenantDocument tenant) {

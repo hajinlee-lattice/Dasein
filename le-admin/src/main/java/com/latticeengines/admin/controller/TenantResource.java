@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.security.exposed.Constants;
 
 import io.swagger.annotations.Api;
@@ -176,5 +177,14 @@ public class TenantResource {
     public FeatureFlagValueMap removeFlag(@PathVariable String tenantId, @PathVariable String flagId) {
         featureFlagService.removeFlag(tenantId, flagId);
         return featureFlagService.getFlags(tenantId);
+    }
+
+    @RequestMapping(value = "/{contractId}/{tenantId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Bootstrap a Lattice tenant service")
+    public boolean updateTenantInfo(@PathVariable(value = "contractId") String contractId, //
+            @PathVariable String tenantId, //
+            @RequestBody TenantInfo tenantInfo) {
+        return tenantService.updateTenantInfo(contractId, tenantId, tenantInfo);
     }
 }
