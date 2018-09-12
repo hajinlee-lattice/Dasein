@@ -10,6 +10,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
+import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.service.IdentityProviderService;
 import com.latticeengines.saml.testframework.SamlTestBed;
@@ -57,6 +59,16 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
         identityProviderEntityMgr.create(bad);
     }
 
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
+    public void testGetSamlConfigMetadata() {
+        Tenant tenant = samlFunctionalTestBed.getGlobalAuthTestBed().getMainTestTenant();
+        assertNotNull(tenant);
+        SamlConfigMetadata samlConfigMetadata = identityProviderService.getConfigMetadata(tenant);
+        assertNotNull(samlConfigMetadata);
+        assertNotNull(samlConfigMetadata.getEntityId());
+        assertNotNull(samlConfigMetadata.getSingleSignOnService());
+    }
+    
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testExists() {
         IdentityProvider retrieved = identityProviderService.find(identityProvider.getEntityId());
