@@ -45,6 +45,8 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
     private double multiplier;
     @Value("${proxy.retry.maxattempts:5}")
     private int maxAttempts;
+    @Value("${workflow.jobs.cache.namespace:default}")
+    private String namespace;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -114,10 +116,13 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
         Preconditions.checkNotNull(tenant.getPid());
     }
 
+    /*
+     * Cache key format: {PREFIX}:{NAMESPACE}:$JOB_ID_LIST_KEY:$PID
+     */
     private String getKey(@NotNull Tenant tenant) {
         // only using pid for now
         return StringUtils.collectionToDelimitedString(
-                Arrays.asList(CACHE_KEY_PREFIX, JOB_ID_LIST_KEY, tenant.getPid()), DELIMITER);
+                Arrays.asList(CACHE_KEY_PREFIX, namespace, JOB_ID_LIST_KEY, tenant.getPid()), DELIMITER);
     }
 
     private boolean containsIdField(Job job) {
@@ -131,7 +136,7 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
     /*
      * internal objects for cache entry
      */
-
+    @SuppressWarnings("unused")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private static class JobIdCache {
         Long pid;
@@ -184,6 +189,7 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
         }
     }
 
+    @SuppressWarnings("unused")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private static class JobIdListCache {
         List<JobIdCache> caches;

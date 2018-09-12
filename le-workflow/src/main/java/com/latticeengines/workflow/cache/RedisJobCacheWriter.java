@@ -52,6 +52,8 @@ public class RedisJobCacheWriter implements JobCacheWriter {
     private double multiplier;
     @Value("${proxy.retry.maxattempts:5}")
     private int maxAttempts;
+    @Value("${workflow.jobs.cache.namespace:default}")
+    private String namespace;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -227,13 +229,13 @@ public class RedisJobCacheWriter implements JobCacheWriter {
     }
 
     /*
-     * Cache key format: {PREFIX}:{CACHE_TYPE}:{DETAIL?}:{JOB_ID}:{SUFFIX}
+     * Cache key format: {PREFIX}:{NAMESPACE}:{CACHE_TYPE}:{DETAIL?}:{JOB_ID}:{SUFFIX}
      */
     private String getCacheKey(String id, boolean includeDetails, CacheType type, String... suffixStrs) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(id);
         List<String> params = new ArrayList<>();
-        Collections.addAll(params, CACHE_KEY_PREFIX, type.name());
+        Collections.addAll(params, CACHE_KEY_PREFIX, namespace, type.name());
         if (includeDetails) {
             params.add(DETAIL_KEY);
         }
