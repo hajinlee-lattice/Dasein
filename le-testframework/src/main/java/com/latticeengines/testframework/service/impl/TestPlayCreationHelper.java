@@ -236,6 +236,7 @@ public class TestPlayCreationHelper {
         play.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         play.setPlayType(playTypes.get(0));
         play.setDisplayName("TestPlay_" + new Date().toString());
+        play.setDescription("TestPlay description");
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setId(ratingEngine.getId());
         play.setRatingEngine(ratingEngine1);
