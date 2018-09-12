@@ -1,13 +1,10 @@
 package com.latticeengines.common.exposed.util;
 
+import java.util.Map;
+
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RetryUtils {
 

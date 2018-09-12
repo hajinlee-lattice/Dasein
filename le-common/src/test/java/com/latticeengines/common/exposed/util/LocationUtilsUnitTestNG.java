@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 public class LocationUtilsUnitTestNG {
 
+    @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(LocationUtilsUnitTestNG.class);
 
     @Test(groups = "unit", dataProvider = "usaDataProvider")

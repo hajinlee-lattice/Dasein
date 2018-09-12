@@ -81,7 +81,6 @@ public class BitCodecUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testAll2Bits() {
-        Random random = new Random(System.currentTimeMillis());
         int numBits = 2;
         int value = 2;
         for (int lowestBit = 0; lowestBit < 63; lowestBit++) {

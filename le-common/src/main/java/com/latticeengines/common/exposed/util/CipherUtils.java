@@ -10,9 +10,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
@@ -149,7 +149,7 @@ public class CipherUtils {
      * encryption/decryption on strings
      */
     public static void main(String[] args) {
-        CommandLineParser parser = new PosixParser();
+        CommandLineParser parser = new DefaultParser();
         Options options = new Options();
         Option encrypt = new Option("encrypt", true, " - string to encrypt");
         Option decrypt = new Option("decrypt", true, " - string to decrypt");
@@ -158,7 +158,6 @@ public class CipherUtils {
         options.addOption(decrypt);
         options.addOption(generate);
         try {
-            byte[] bytes = generateSalt();
             CommandLine cmd = parser.parse(options, args);
             if (cmd.hasOption("encrypt")) {
                 String strToEncrypt = cmd.getOptionValue("encrypt");

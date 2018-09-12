@@ -5,10 +5,10 @@ import java.util.BitSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 
 public class BitCodecUtils {
 
@@ -89,7 +89,7 @@ public class BitCodecUtils {
         options.addOption(posOption);
         options.addOption(strOption);
 
-        CommandLineParser parser = new PosixParser();
+        CommandLineParser parser = new DefaultParser();
         CommandLine cmdLine = parser.parse(options, args);
 
         Integer bitPos = Integer.valueOf(cmdLine.getOptionValue("b"));

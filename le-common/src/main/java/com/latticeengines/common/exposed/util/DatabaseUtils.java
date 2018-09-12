@@ -9,17 +9,16 @@ public class DatabaseUtils {
 
     private static Logger log = LoggerFactory.getLogger(DatabaseUtils.class);
 
-    public static void retry(String operationName, Closure action) {
+    public static void retry(String operationName, Closure<?> action) {
         retry(operationName, 10, action);
     }
 
-    public static void retry(String operationName, int retries, Closure action) {
+    public static void retry(String operationName, int retries, Closure<?> action) {
         retry(operationName, retries, null, "Deadlock detected performing", null, action);
     }
 
-    @SuppressWarnings("unchecked")
     public static void retry(String operationName, int retries, Class<? extends Exception> customExceptionClazz,
-                             String customMessage, String customExcetionMessageSubstr, Closure action) {
+            String customMessage, String customExcetionMessageSubstr, Closure<?> action) {
         Class<? extends Exception> defaultExceptionClazz = LockAcquisitionException.class;
         String defaultMessage = "Deadlock detected performing";
 

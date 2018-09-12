@@ -2,6 +2,7 @@ package com.latticeengines.common.exposed.collection;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> {
+public class FileBackedOrderedList<T extends Comparable<?>> implements Iterable<T> {
 
     private static final Logger log = LoggerFactory.getLogger(FileBackedOrderedList.class);
     private static final int NUM_FORKS = 10;
@@ -93,7 +94,6 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
         buffer.clear();
     }
 
-    @SuppressWarnings("unchecked")
     private void dumpListToFile(List<T> sortedList, String fileName) {
         if (sortedList.isEmpty()) {
             return;
@@ -113,12 +113,12 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void insertAndSplit(List<T> list, String parent) {
         File parentFile = new File(tempDir + File.separator + parent);
         List<String> lines;
         try {
-            lines = FileUtils.readLines(parentFile);
+            Charset encoding = null;
+            lines = FileUtils.readLines(parentFile, encoding);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read lines for the parent file " + parent);
         }
@@ -157,7 +157,6 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
         }
     }
 
-    @SuppressWarnings("unchecked")
     private String findInsertingFile(T item, List<String> fileNames) {
         for (String fileName : fileNames) {
             T max = maxiums.get(fileName);
@@ -168,7 +167,6 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
         return fileNames.isEmpty() ? "0" : fileNames.get(fileNames.size() - 1);
     }
 
-    @SuppressWarnings("unchecked")
     public Iterator<T> iterator() {
         if (maxiums.isEmpty()) {
             buffer.sort(comparator);
@@ -245,7 +243,8 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
 
         private Iterator<String> getLineIterator(String file) {
             try {
-                List<String> lines = FileUtils.readLines(new File(tempDir + File.separator + file));
+                Charset encoding = null;
+                List<String> lines = FileUtils.readLines(new File(tempDir + File.separator + file), encoding);
                 return lines.listIterator();
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read lines from local file", e);

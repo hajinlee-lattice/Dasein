@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -37,7 +38,8 @@ public class GzipUtils {
         if (isCompressed(compressed)) {
             try (ByteArrayInputStream bais = new ByteArrayInputStream(compressed)) {
                 try (GzipCompressorInputStream gis = new GzipCompressorInputStream(bais)) {
-                    return IOUtils.toString(gis);
+                    Charset encoding = null;
+                    return IOUtils.toString(gis, encoding);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

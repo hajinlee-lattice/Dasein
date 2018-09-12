@@ -122,7 +122,7 @@ public class DunsRedirectFromDomDunsMap extends ConfigurableFlowBase<DunsRedirec
     }
 
     private Node buildBook(Node priDunsAttached) {
-        List<FieldMetadata> targetMetadata = new ArrayList<FieldMetadata>();
+        List<FieldMetadata> targetMetadata = new ArrayList<>();
         targetMetadata.add(new FieldMetadata(DunsRedirectBookConfig.DUNS, String.class));
         targetMetadata.add(new FieldMetadata(DunsRedirectBookConfig.TARGET_DUNS, String.class));
         targetMetadata.add(new FieldMetadata(DunsRedirectBookConfig.KEY_PARTITION, String.class));

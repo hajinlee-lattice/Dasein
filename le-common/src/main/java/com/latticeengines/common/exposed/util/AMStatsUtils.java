@@ -3,13 +3,14 @@ package com.latticeengines.common.exposed.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AMStatsUtils {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(AMStatsUtils.class);
 
     private static final ObjectMapper om = new ObjectMapper();
@@ -44,12 +46,13 @@ public class AMStatsUtils {
         options.addOption(strOption);
         options.addOption(fileOption);
 
-        CommandLineParser parser = new PosixParser();
+        CommandLineParser parser = new DefaultParser();
         CommandLine cmdLine = parser.parse(options, args);
         String str = "";
         if (options.hasOption("f")) {
             String filePath = cmdLine.getOptionValue("f");
-            str = IOUtils.toString(new FileInputStream(new File(filePath)));
+            Charset encoding = null;
+            str = IOUtils.toString(new FileInputStream(new File(filePath)), encoding);
         } else {
             str = cmdLine.getOptionValue("s");
         }

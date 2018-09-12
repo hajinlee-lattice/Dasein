@@ -221,7 +221,7 @@ public class JsonUtils {
         return output;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K, V> Map<K, List<V>> convertMapWithListValue(Map<?, List<?>> raw, Class<K> keyClazz,
             Class<V> listValueClazz) {
         if (raw == null) {

@@ -17,7 +17,7 @@ public class DatabaseUtilsUnitTestNG {
         int startCounterValue = counter;
         int maxRetry = 8;
         try {
-            DatabaseUtils.retry("failure", maxRetry, new Closure() {
+            DatabaseUtils.retry("failure", maxRetry, new Closure<Object>() {
                 @Override
                 public void execute(Object input) {
                     counter++;
@@ -38,7 +38,7 @@ public class DatabaseUtilsUnitTestNG {
         int maxRetry = 4;
         try {
             DatabaseUtils.retry("customFailure", maxRetry, ConstraintViolationException.class,
-                    "Ignore unique key violation for UQ__SELECTED__1234", "UQ__SELECTED__", new Closure() {
+                    "Ignore unique key violation for UQ__SELECTED__1234", "UQ__SELECTED__", new Closure<Object>() {
                         @Override
                         public void execute(Object input) {
                             counter++;
@@ -55,7 +55,7 @@ public class DatabaseUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testRetrySuccess() {
-        DatabaseUtils.retry("success", new Closure() {
+        DatabaseUtils.retry("success", new Closure<Object>() {
 
             @Override
             public void execute(Object input) {

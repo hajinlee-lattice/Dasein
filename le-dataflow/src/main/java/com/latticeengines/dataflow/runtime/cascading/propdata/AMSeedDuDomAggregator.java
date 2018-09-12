@@ -88,7 +88,6 @@ public class AMSeedDuDomAggregator extends BaseAggregator<AMSeedDuDomAggregator.
             Tuple result = Tuple.size(getFieldDeclaration().size());
             result.set(duDunsLoc, context.duDuns);
             result.set(duDomsLoc, context.duDomsBuilder.substring(0, context.duDomsBuilder.length() - 2));
-            log.info("DuDuns: " + context.duDuns + " DuDoms: " + context.duDomsBuilder.toString());
             return result;
         } else {
             return null;

@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 public class ThreadPoolUtilsUnitTestNG {
 
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "unit")
     private void testForkJoinPool() {
         AtomicLong counter = new AtomicLong(0L);

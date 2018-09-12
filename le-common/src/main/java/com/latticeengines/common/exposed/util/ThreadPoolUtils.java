@@ -71,7 +71,7 @@ public class ThreadPoolUtils {
                 if (System.currentTimeMillis() - startTime > timeout) {
                     throw new RuntimeException("Cannot finish all callables within timeout.");
                 }
-                List<Future> toBeRemoved = new ArrayList<>();
+                List<Future<T>> toBeRemoved = new ArrayList<>();
                 futures.forEach(future -> {
                     try {
                         T result = future.get(intervalInSeconds, TimeUnit.SECONDS);
@@ -106,7 +106,7 @@ public class ThreadPoolUtils {
                 if (System.currentTimeMillis() - startTime > timeout) {
                     throw new RuntimeException("Cannot finish all runnables within timeout.");
                 }
-                List<Future> toBeRemoved = new ArrayList<>();
+                List<Future<?>> toBeRemoved = new ArrayList<>();
                 futures.forEach(future -> {
                     try {
                         future.get(intervalInSeconds, TimeUnit.SECONDS);

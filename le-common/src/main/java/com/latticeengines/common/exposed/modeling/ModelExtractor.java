@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,9 @@ import java.util.Map;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.net.util.Base64;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -74,7 +75,8 @@ public class ModelExtractor {
                 if (filter != null && !filter.accept(null, entry.getKey())) {
                     continue;
                 } else {
-                    FileUtils.write(new File(targetDir + "/" + entry.getKey()), entry.getValue());
+                    Charset encoding = null;
+                    FileUtils.write(new File(targetDir + "/" + entry.getKey()), entry.getValue(), encoding);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

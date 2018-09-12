@@ -1,5 +1,14 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.util.Utf8;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -8,14 +17,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.avro.util.Utf8;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Used to redirect source duns to a target duns that is obtained by a more accurate match key.
@@ -129,6 +130,12 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
         private String keyPartition;
         @JsonProperty(BOOKSOURCE_KEY)
         private String bookSource;
+
+        public Item(String duns, String keyPartition, String bookSource) {
+            this.duns = duns;
+            this.keyPartition = keyPartition;
+            this.bookSource = bookSource;
+        }
 
         public String getDuns() {
             return duns;
