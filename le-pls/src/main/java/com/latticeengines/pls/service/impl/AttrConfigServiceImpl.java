@@ -87,10 +87,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private static final String defaultDisplayName = "Default Name";
     private static final String defaultDescription = "Default Description";
 
-    public static final String UPDATE_SUCCESS_TITLE = "Your changes have been saved";
+    public static final String UPDATE_ACTIVATION_SUCCESS_TITLE = "Success! Activation has been submitted.";
+    public static final String UPDATE_USAGE_SUCCESS_TITLE = "Your changes have been saved";
     public static final String UPDATE_WARNING_ATTRIBUTE_TITLE = "Attribute In Use";
     public static final String UPDATE_FAIL_TITLE = "Validation Error";
     public static final String UPDATE_FAIL_MSG = "There are validation errors";
+    public static final String UPDATE_ACTIVATION_SUCCESSE_MSG = "<p>The activation action will be scheduled to process and analyze. You can track the status from the <a ui-sref=\"home.jobs\">Data P&A</a></p>";
     public static final String UPDATE_USAGE_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be disabled until the dependency has been removed.";
     public static final String UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG = "This attribute is in use and cannot be deactivated until it is disabled from the following usecases.";
     public static final String UPDATE_WARNING_CATEGORY_TITLE = "Category In Use";
@@ -277,9 +279,16 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     return uiAction;
                 }
             } else {
-                uiAction.setTitle(UPDATE_SUCCESS_TITLE);
-                uiAction.setView(View.Notice);
-                uiAction.setStatus(Status.Success);
+                if (updateUsage) {
+                    uiAction.setTitle(UPDATE_USAGE_SUCCESS_TITLE);
+                    uiAction.setView(View.Notice);
+                    uiAction.setStatus(Status.Success);
+                } else {
+                    uiAction.setTitle(UPDATE_ACTIVATION_SUCCESS_TITLE);
+                    uiAction.setView(View.Banner);
+                    uiAction.setStatus(Status.Success);
+                    uiAction.setMessage(generateUpdateActivationSuccessMsg());
+                }
             }
         } else {
             String tenantId = MultiTenantContext.getShortTenantId();
@@ -429,6 +438,13 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         verifyNameUpdateAccessLevel();
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForName(categoryName, request);
         cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest, AttrConfigUpdateMode.Name);
+    }
+
+    @VisibleForTesting
+    String generateUpdateActivationSuccessMsg() {
+        StringBuilder html = new StringBuilder();
+        html.append(UPDATE_ACTIVATION_SUCCESSE_MSG);
+        return html.toString();
     }
 
     @VisibleForTesting

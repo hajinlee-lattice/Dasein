@@ -376,7 +376,7 @@ public class AttrConfigServiceImplUnitTestNG {
                         .thenReturn(AttrConfigServiceImplTestUtils.generateHappyAttrConfigRequest());
         UIAction uiAction = attrConfigService.updateUsageConfig(Category.INTENT.getName(), "Company Profile", request);
         Assert.assertNotNull(uiAction);
-        Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_SUCCESS_TITLE);
+        Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_USAGE_SUCCESS_TITLE);
         Assert.assertEquals(uiAction.getView(), View.Notice);
         Assert.assertEquals(uiAction.getStatus(), Status.Success);
 
@@ -444,9 +444,10 @@ public class AttrConfigServiceImplUnitTestNG {
                         .thenReturn(AttrConfigServiceImplTestUtils.generateHappyAttrConfigRequest());
         UIAction uiAction = attrConfigService.updateActivationConfig(Category.INTENT.getName(), request);
         Assert.assertNotNull(uiAction);
-        Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_SUCCESS_TITLE);
-        Assert.assertEquals(uiAction.getView(), View.Notice);
+        Assert.assertEquals(uiAction.getTitle(), AttrConfigServiceImpl.UPDATE_ACTIVATION_SUCCESS_TITLE);
+        Assert.assertEquals(uiAction.getView(), View.Banner);
         Assert.assertEquals(uiAction.getStatus(), Status.Success);
+        Assert.assertEquals(uiAction.getMessage(), AttrConfigServiceImpl.UPDATE_ACTIVATION_SUCCESSE_MSG);
 
         // attribute level
         when(cdlAttrConfigProxy.saveAttrConfig(anyString(), any(AttrConfigRequest.class),
@@ -537,6 +538,12 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertTrue(html.contains("<li>Segmentation</li>"));
         Assert.assertTrue(html.contains("<li>Company Profile</li>"));
         Assert.assertTrue(html.contains("<li>Export</li>"));
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateActivationSuccessMsg() {
+        String html = attrConfigService.generateUpdateActivationSuccessMsg();
+        log.info("html for update Activation is " + html);
     }
 
     @Test(groups = "unit")
