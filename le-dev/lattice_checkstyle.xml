@@ -163,7 +163,7 @@
             <property name="allowNonPrintableEscapes" value="true"/>
         </module>
         <module name="AvoidStaticImport">
-            <property name="excludes" value="org.testng.Assert"/>
+            <property name="excludes" value="org.testng.Assert.*,com.latticeengines.domain.exposed.metadata.TableRoleInCollection.*"/>
         </module>
         <module name="DeclarationOrder"/>
         <module name="EmptyBlock">
