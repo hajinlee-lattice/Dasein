@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
@@ -134,15 +133,14 @@ public class AttrConfigServiceImplUnitTestNG {
                                 Arrays.asList(AttrConfigServiceImpl.usageProperties)));
         AttrConfigUsageOverview usageOverview = attrConfigService.getOverallAttrConfigUsageOverview();
         log.info("overall usageOverview is " + usageOverview);
-        Map<String, Long> attrNums = usageOverview.getAttrNums();
-        Assert.assertEquals(attrNums.size(), 6);
-        Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - 10960L, 0);
         List<AttrConfigSelection> selections = usageOverview.getSelections();
         Assert.assertEquals(selections.size(), AttrConfigServiceImpl.usageProperties.length);
         for (int i = 0; i < AttrConfigServiceImpl.usageProperties.length; i++) {
             Assert.assertEquals(selections.get(i).getDisplayName(),
                     AttrConfigServiceImpl.mapUsageToDisplayName(AttrConfigServiceImpl.usageProperties[i]));
             Assert.assertEquals(selections.get(i).getSelected() - 3677, 0);
+            Assert.assertEquals(selections.get(i).getCategories().size(), 6);
+            Assert.assertNotNull(selections.get(i).getCategories().values());
         }
         // Export
         Assert.assertNotNull(selections.get(1).getLimit());

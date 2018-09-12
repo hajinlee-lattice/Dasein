@@ -1,17 +1,16 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.metadata.Category;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AttrConfigSelection {
 
-    @JsonProperty("Category")
-    private Category category;
     @JsonProperty("DisplayName")
     private String displayName;
     @JsonProperty("Selected")
@@ -20,14 +19,8 @@ public class AttrConfigSelection {
     private Long totalAttrs;
     @JsonProperty("Limit")
     private Long limit;
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public Category getCategory() {
-        return this.category;
-    }
+    @JsonProperty("Categories")
+    private Map<String, Long> categories;
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
@@ -59,6 +52,14 @@ public class AttrConfigSelection {
 
     public Long getLimit() {
         return this.limit;
+    }
+
+    public void setCategories(Map<String, Long> categories) {
+        this.categories = categories;
+    }
+
+    public Map<String, Long> getCategories() {
+        return this.categories;
     }
 
     @Override

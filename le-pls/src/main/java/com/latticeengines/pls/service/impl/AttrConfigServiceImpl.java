@@ -158,9 +158,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Override
     public AttrConfigUsageOverview getOverallAttrConfigUsageOverview() {
         AttrConfigUsageOverview usageOverview = new AttrConfigUsageOverview();
-        Map<String, Long> attrNums = new HashMap<>();
         List<AttrConfigSelection> selections = new ArrayList<>();
-        usageOverview.setAttrNums(attrNums);
         usageOverview.setSelections(selections);
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy.getAttrConfigOverview(
                 MultiTenantContext.getShortTenantId(), null, Arrays.asList(usageProperties), true);
@@ -175,18 +173,28 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
             selection.setDisplayName(mapUsageToDisplayName(property));
             selections.add(selection);
-            long num = 0L;
+            Map<String, Long> categories = new HashMap<>();
+            selection.setCategories(categories);
+            long selectedNum = 0L;
             for (String category : map.keySet()) {
+                long categoryNum = 0L;
                 // For each category, update its total attrNums
                 AttrConfigCategoryOverview<?> categoryOverview = map.get(category);
-                attrNums.put(category, categoryOverview.getTotalAttrs());
 
                 // Synthesize the properties for all the categories
                 Map<?, Long> propertyDetail = categoryOverview.getPropSummary().get(property);
-                if (propertyDetail != null && propertyDetail.get(Boolean.TRUE) != null) {
-                    num += propertyDetail.get(Boolean.TRUE);
+                if (propertyDetail != null) {
+                    if (propertyDetail.get(Boolean.TRUE) != null) {
+                        selectedNum += propertyDetail.get(Boolean.TRUE);
+                    }
+                    if (propertyDetail.values() != null) {
+                        for (Long num : propertyDetail.values()) {
+                            categoryNum += num;
+                        }
+                    }
                 }
-                selection.setSelected(num);
+                selection.setSelected(selectedNum);
+                categories.put(category, categoryNum);
             }
         }
 

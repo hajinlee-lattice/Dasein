@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,19 +13,8 @@ public class AttrConfigUsageOverview {
     public static final long defaultExportLimit = 1000L;
     public static final long defaultCompanyProfileLimit = 200L;
 
-    @JsonProperty("AttrNums")
-    private Map<String, Long> attrNums;
-
     @JsonProperty("Selections")
     private List<AttrConfigSelection> selections;
-
-    public void setAttrNums(Map<String, Long> attrNums) {
-        this.attrNums = attrNums;
-    }
-
-    public Map<String, Long> getAttrNums() {
-        return this.attrNums;
-    }
 
     public void setSelections(List<AttrConfigSelection> selections) {
         this.selections = selections;
