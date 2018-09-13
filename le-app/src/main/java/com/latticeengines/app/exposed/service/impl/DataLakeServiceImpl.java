@@ -544,27 +544,22 @@ public class DataLakeServiceImpl implements DataLakeService {
     private Flux<ColumnMetadata> getServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
         Flux<ColumnMetadata> cms = Flux.empty();
         if (entity != null) {
-            String tableName = dataCollectionProxy.getTableName(customerSpace, entity.getServingStore());
-            if (StringUtils.isBlank(tableName)) {
-                log.info("Cannot find serving table for " + entity + " in " + customerSpace);
-            } else {
-                List<ColumnMetadata> cmList = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, entity);
-                if (CollectionUtils.isNotEmpty(cmList)) {
-                    cms = Flux.fromIterable(cmList).filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()));
-                    if (BusinessEntity.Account.equals(entity)) {
-                        cms = ImportanceOrderingUtils.addImportanceOrdering(cms);
-                    }
-                    AtomicLong counter = new AtomicLong();
-                    AtomicLong timer = new AtomicLong();
-                    cms = cms.doOnSubscribe(s -> timer.set(System.currentTimeMillis())) //
-                            .doOnNext(cm -> counter.getAndIncrement()).doOnComplete(() -> {
-                                long duration = System.currentTimeMillis() - timer.get();
-                                long count = counter.get();
-                                String msg = "Retrieved " + count + " attributes from serving store proxy for " + entity
-                                        + " in " + customerSpace + " TimeElapsed=" + duration + " msec.";
-                                log.info(msg);
-                            });
+            List<ColumnMetadata> cmList = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, entity);
+            if (CollectionUtils.isNotEmpty(cmList)) {
+                cms = Flux.fromIterable(cmList).filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()));
+                if (BusinessEntity.Account.equals(entity)) {
+                    cms = ImportanceOrderingUtils.addImportanceOrdering(cms);
                 }
+                AtomicLong counter = new AtomicLong();
+                AtomicLong timer = new AtomicLong();
+                cms = cms.doOnSubscribe(s -> timer.set(System.currentTimeMillis())) //
+                        .doOnNext(cm -> counter.getAndIncrement()).doOnComplete(() -> {
+                            long duration = System.currentTimeMillis() - timer.get();
+                            long count = counter.get();
+                            String msg = "Retrieved " + count + " attributes from serving store proxy for " + entity
+                                    + " in " + customerSpace + " TimeElapsed=" + duration + " msec.";
+                            log.info(msg);
+                        });
             }
         }
         return cms;

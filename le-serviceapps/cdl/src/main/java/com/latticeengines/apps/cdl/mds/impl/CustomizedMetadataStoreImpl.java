@@ -23,7 +23,7 @@ public class CustomizedMetadataStoreImpl extends
     private final CDLNamespaceService cdlNamespaceService;
 
     @Inject
-    public CustomizedMetadataStoreImpl( //
+    public CustomizedMetadataStoreImpl(//
                                         SystemMetadataStore systemMetadataStore, //
                                         AttrConfigDecorator attrConfigDecorator, //
                                         CDLNamespaceService cdlNamespaceService) {
