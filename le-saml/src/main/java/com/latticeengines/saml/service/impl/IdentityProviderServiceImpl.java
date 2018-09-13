@@ -111,7 +111,7 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
             resp.setValid(false);
             Exception ex = new LedpException(LedpCode.LEDP_33001, new String[] { e.getMessage() });
             resp.setExceptionMessage(ex.getMessage());
-            log.info(ex.getMessage(), ex);
+            log.info("%s , Root Cause: %s", ex.getMessage(), e.getMessage());
         }
         return resp;
     }
