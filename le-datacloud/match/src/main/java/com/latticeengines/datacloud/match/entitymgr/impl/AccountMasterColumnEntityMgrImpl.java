@@ -28,8 +28,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @Component("accountMasterColumnEntityMgr")
-public class AccountMasterColumnEntityMgrImpl
-        extends BaseEntityMgrRepositoryImpl<AccountMasterColumn, Long>
+public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AccountMasterColumn, Long>
         implements MetadataColumnEntityMgr<AccountMasterColumn> {
 
     private static final int PAGE_SIZE = 10000;
@@ -69,7 +68,7 @@ public class AccountMasterColumnEntityMgrImpl
     public ParallelFlux<AccountMasterColumn> findAll(String dataCloudVersion) {
         long count;
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            count = repository.countByDataCloudVersion(dataCloudVersion);
+            count = repository.numAttrsInVersion(dataCloudVersion);
             String msg = "Got the count of AMColumns for version " + dataCloudVersion + ": " + count;
             timer.setTimerMessage(msg);
         }
@@ -78,7 +77,8 @@ public class AccountMasterColumnEntityMgrImpl
                 .map(k -> {
                     try (PerformanceTimer timer = new PerformanceTimer()) {
                         PageRequest pageRequest = PageRequest.of(k, PAGE_SIZE, Sort.by("amColumnId"));
-                        List<AccountMasterColumn> attrs = repository.findByDataCloudVersion(dataCloudVersion, pageRequest);
+                        List<AccountMasterColumn> attrs = repository.findByDataCloudVersion(dataCloudVersion,
+                                pageRequest);
                         timer.setTimerMessage("Fetched a page of " + attrs.size() + " AM attrs.");
                         return attrs;
                     }

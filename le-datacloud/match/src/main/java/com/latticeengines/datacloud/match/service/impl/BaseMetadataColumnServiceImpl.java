@@ -154,7 +154,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     private void refreshCacheForVersion(String dataCloudVersion) {
-       new Thread(() -> {
+        new Thread(() -> {
             log.info("Start loading black and white column caches for version " + dataCloudVersion);
             List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion).sequential().collectList().block();
             log.info("Read " + columns.size() + " columns from DB for version " + dataCloudVersion);

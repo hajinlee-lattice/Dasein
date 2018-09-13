@@ -24,9 +24,11 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
-    private static final String DISPALY_NAME = "Display Name 1";
+    private static final String CHN_DISPALY_NAME = "Display Name 1 你好";
+    private static final String EUR_DISPALY_NAME = "â, ê, î, ô, û";
 
     @BeforeClass(groups = "functional")
+
     public void setup() {
         setupTestEnvironment();
     }
@@ -55,12 +57,14 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Assert.assertEquals(attrConfigs.size(), 3);
 
-        AttrConfigProp<String> attrConfigProp = new AttrConfigProp<>();
-        attrConfigProp.setCustomValue(DISPALY_NAME);
-        attrConfig2.putProperty(ColumnMetadataKey.DisplayName, attrConfigProp);
+        AttrConfigProp<String> attrConfigProp2 = new AttrConfigProp<>();
+        attrConfigProp2.setCustomValue(CHN_DISPALY_NAME);
+        attrConfig2.putProperty(ColumnMetadataKey.DisplayName, attrConfigProp2);
         AttrConfig attrConfig4 = new AttrConfig();
         attrConfig4.setAttrName("Attr4");
-        attrConfig4.setAttrProps(new HashMap<>());
+        AttrConfigProp<String> attrConfigProp4 = new AttrConfigProp<>();
+        attrConfigProp4.setCustomValue(EUR_DISPALY_NAME);
+        attrConfig4.putProperty(ColumnMetadataKey.DisplayName, attrConfigProp4);
         List<AttrConfig> response = attrConfigEntityMgr.save(tenantName, entity,
                 Arrays.asList(attrConfig2, attrConfig4));
         Assert.assertEquals(response.size(), 2);
@@ -71,7 +75,12 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
             if (attrConfig.getAttrName().equals("Attr2")) {
                 Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.DisplayName));
                 Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(),
-                        DISPALY_NAME);
+                        CHN_DISPALY_NAME);
+            }
+            if (attrConfig.getAttrName().equals("Attr4")) {
+                Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.DisplayName));
+                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(),
+                        EUR_DISPALY_NAME);
             }
         });
 
