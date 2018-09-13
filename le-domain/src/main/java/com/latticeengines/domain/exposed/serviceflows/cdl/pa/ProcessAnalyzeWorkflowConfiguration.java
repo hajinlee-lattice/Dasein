@@ -43,6 +43,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ProcessContactWorkflowConfiguration.Builder processContactWorkflowBuilder = new ProcessContactWorkflowConfiguration.Builder();
         private ProcessProductWorkflowConfiguration.Builder processProductWorkflowBuilder = new ProcessProductWorkflowConfiguration.Builder();
         private ProcessTransactionWorkflowConfiguration.Builder processTransactionWorkflowBuilder = new ProcessTransactionWorkflowConfiguration.Builder();
+        private CuratedAttributesWorkflowConfiguration.Builder curatedAttributesWorkflowBuilder = new CuratedAttributesWorkflowConfiguration.Builder();
         private ProcessRatingWorkflowConfiguration.Builder processRatingWorkflowBuilder = new ProcessRatingWorkflowConfiguration.Builder();
 
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
@@ -63,6 +64,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.customer(customerSpace);
             processProductWorkflowBuilder.customer(customerSpace);
             processTransactionWorkflowBuilder.customer(customerSpace);
+            curatedAttributesWorkflowBuilder.customer(customerSpace);
             processRatingWorkflowBuilder.customer(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             exportToRedshift.setCustomerSpace(customerSpace);
@@ -79,6 +81,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processRatingWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             processTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
+            curatedAttributesWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             exportToS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
@@ -89,6 +92,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processProductWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            curatedAttributesWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processRatingWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             exportToRedshift.setInternalResourceHostPort(internalResourceHostPort);
             exportToDynamo.setInternalResourceHostPort(internalResourceHostPort);
@@ -145,6 +149,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.rebuildEntities(entities);
             processProductWorkflowBuilder.rebuildEntities(entities);
             processTransactionWorkflowBuilder.rebuildEntities(entities);
+            curatedAttributesWorkflowBuilder.rebuildEntities(entities);
             processRatingWorkflowBuilder.rebuildEntities(entities);
             return this;
         }
@@ -202,6 +207,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processContactWorkflowBuilder.build());
             configuration.add(processProductWorkflowBuilder.build());
             configuration.add(processTransactionWorkflowBuilder.build());
+            configuration.add(curatedAttributesWorkflowBuilder.build());
             configuration.add(processRatingWorkflowBuilder.build());
             configuration.add(combineStatisticsConfiguration);
             configuration.add(exportToRedshift);

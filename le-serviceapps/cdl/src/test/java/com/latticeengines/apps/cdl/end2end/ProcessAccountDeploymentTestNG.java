@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.end2end;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +85,9 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyNumAttrsInAccount();
         verifyAccountFeatures();
 
-        verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact);
+        // Check that stats cubes only exist for the entities specified below.
+        verifyStats(true, BusinessEntity.Account, BusinessEntity.Contact,
+                BusinessEntity.CuratedAccount);
 
         Map<BusinessEntity, Long> batchStoreCounts = ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_1, //
@@ -108,9 +111,12 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
                 BusinessEntity.Account, SEGMENT_3_ACCOUNT_1,
                 BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
         verifyTestSegment3Counts(segment3Counts);
+
+        // Create a test segment to verify proper behavior of the Curated Attributes step and resulting table.
+        createTestSegmentCuratedAttr();
+        verifyTestSegmentCuratedAttrCounts(Collections.singletonMap(BusinessEntity.Account, ACCOUNT_1));
         verifyUpdateActions();
     }
-
 
     private void verifyNumAttrsInAccount() {
         String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, BusinessEntity.Account.getServingStore());

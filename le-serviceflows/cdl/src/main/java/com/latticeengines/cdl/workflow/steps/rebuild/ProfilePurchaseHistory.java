@@ -156,11 +156,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     @Override
     protected void onPostTransformationCompleted() {
         String curatedMetricsTableName = TableUtils.getFullTableName(curatedMetricsTablePrefix, pipelineVersion);
-        if (metadataProxy.getTable(customerSpace.toString(), curatedMetricsTableName) == null) {
+        Table curatedMetricsTable = metadataProxy.getTable(customerSpace.toString(), curatedMetricsTableName);
+        if (curatedMetricsTable == null) {
             throw new IllegalStateException("Cannot find result curated metrics table");
         }
 
-        Table curatedMetricsTable = metadataProxy.getTable(customerSpace.toString(), curatedMetricsTableName);
         curatedMetricsTableName = renameServingStoreTable(BusinessEntity.DepivotedPurchaseHistory, curatedMetricsTable);
         exportTableRoleToRedshift(curatedMetricsTableName, BusinessEntity.DepivotedPurchaseHistory.getServingStore());
         dataCollectionProxy.upsertTable(customerSpace.toString(), curatedMetricsTableName,

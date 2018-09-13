@@ -24,12 +24,15 @@ public enum TableRoleInCollection {
     SortedContact, //
     SortedProduct, //
     SortedProductHierarchy, //
+
     AggregatedTransaction, //
     AggregatedPeriodTransaction, //
     CalculatedPurchaseHistory, //
     CalculatedDepivotedPurchaseHistory, //
 
+    // Curated Account Attribute has only requires one table for serving for now.
     CalculatedCuratedAccountAttribute, //
+
     AnalyticPurchaseState, //
 
     AccountFeatures, //
@@ -84,6 +87,9 @@ public enum TableRoleInCollection {
 
         CalculatedDepivotedPurchaseHistory.primaryKey = InterfaceName.__Composite_Key__;
         CalculatedDepivotedPurchaseHistory.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+
+        CalculatedCuratedAccountAttribute.primaryKey = InterfaceName.AccountId;
+        CalculatedCuratedAccountAttribute.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         PivotedRating.primaryKey = InterfaceName.AccountId;
         PivotedRating.foreignKeys = ImmutableList.copyOf(Collections.emptyList());

@@ -17,6 +17,9 @@ public final class CategoryUtils {
             case RATING:
                 entity = BusinessEntity.Rating;
                 break;
+            case CURATED_ACCOUNT_ATTRIBUTES:
+                entity = BusinessEntity.CuratedAccount;
+                break;
             default:
                 entity = BusinessEntity.Account;
         }
@@ -37,6 +40,9 @@ public final class CategoryUtils {
                 break;
             case Rating:
                 category = Category.RATING;
+                break;
+            case CuratedAccount:
+                category = Category.CURATED_ACCOUNT_ATTRIBUTES;
                 break;
             default:
                 category = Category.DEFAULT;

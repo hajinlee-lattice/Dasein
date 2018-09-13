@@ -44,6 +44,10 @@ public enum BusinessEntity implements GraphNode {
     PurchaseHistory, //
     DepivotedPurchaseHistory, //
 
+    // The Business Entity below stores a special class of derived attributes which are computed based on other
+    // attributes from Account, Contact, Product, and Transaction.  CuratedAccount only covers Account-level
+    // derived attributes which are indexed by Account ID, but other Business Entities can be added for curated
+    // attributes based on Contact, Product, etc.
     CuratedAccount, //
 
     Rating, //
@@ -53,7 +57,7 @@ public enum BusinessEntity implements GraphNode {
     ProductHierarchy;
 
     public static final Set<BusinessEntity> SEGMENT_ENTITIES = //
-            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating);
+            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount);
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
 
     static {
@@ -91,6 +95,7 @@ public enum BusinessEntity implements GraphNode {
         Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(Rating, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
         Account.addRelationship(DepivotedPurchaseHistory, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
+        Account.addRelationship(CuratedAccount, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
 
         Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
 
@@ -102,6 +107,8 @@ public enum BusinessEntity implements GraphNode {
         ProductHierarchy.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
         PurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         DepivotedPurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
+        DepivotedPurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
+        CuratedAccount.addRelationship(Account, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
     }
 
     // Entity Definitions

@@ -58,6 +58,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private AwsApsGeneratorStep awsApsGeneratorStep;
 
     @Inject
+    private CuratedAttributesWorkflow curatedAttributesWorkflow;
+
+    @Inject
     private CombineStatistics combineStatistics;
 
     @Inject
@@ -80,6 +83,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processContactWorkflow) //
                 .next(processProductWorkflow) //
                 .next(processTransactionWorkflow) //
+                .next(curatedAttributesWorkflow) //
                 .next(combineStatistics) //
                 .next(exportToRedshift) //
                 .next(exportToDynamo) //

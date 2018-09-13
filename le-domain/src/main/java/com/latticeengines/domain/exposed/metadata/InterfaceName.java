@@ -116,6 +116,9 @@ public enum InterfaceName {
     Cost,
     TotalCost, //
 
+    // These values are for Curated Attributes.
+    NumberOfContacts,
+
     // CDL External
     SalesforceSandboxAccountID,
     SalesforceSandboxContactID,

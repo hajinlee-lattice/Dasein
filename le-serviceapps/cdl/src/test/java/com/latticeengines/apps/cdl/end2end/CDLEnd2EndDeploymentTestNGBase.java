@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.cache.exposed.service.CacheService;
@@ -189,6 +190,7 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
     static final long SEGMENT_3_ACCOUNT_2 = 60;
     static final long SEGMENT_3_CONTACT_2 = 60;
 
+    static final String SEGMENT_NAME_CURATED_ATTR = NamingUtils.timestamp("E2ESegmentCuratedAttr");
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
     static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentTraining");
 
@@ -720,6 +722,12 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
         Assert.assertNotNull(segment3);
     }
 
+    void createTestSegmentCuratedAttr() {
+        testMetadataSegmentProxy.createOrUpdate(constructTestSegmentCuratedAttr());
+        MetadataSegment segmentCuratedAttr = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_CURATED_ATTR);
+        Assert.assertNotNull(segmentCuratedAttr);
+    }
+
     void createModelingSegment() {
         testMetadataSegmentProxy.createOrUpdate(constructTargetSegment());
         MetadataSegment segment = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_MODELING);
@@ -802,6 +810,20 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
         return segment;
     }
 
+    protected MetadataSegment constructTestSegmentCuratedAttr() {
+        Bucket numberOfContactsBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList(1));
+        BucketRestriction numberOfContactsRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.CuratedAccount, InterfaceName.NumberOfContacts.name()),
+                numberOfContactsBkt);
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_CURATED_ATTR);
+        segment.setDisplayName("End2End Segment Curated Attributes");
+        segment.setDescription("A test segment for CDL end2end tests checking the number of contacts.");
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(numberOfContactsRestriction));
+        return segment;
+    }
+
     MetadataSegment constructTargetSegment() {
         Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Collections.singletonList("Delaware"));
         BucketRestriction accountRestriction = new BucketRestriction(
@@ -825,6 +847,10 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
 
     void verifyTestSegment3Counts(Map<BusinessEntity, Long> expectedCounts) {
         verifySegmentCounts(SEGMENT_NAME_3, expectedCounts);
+    }
+
+    void verifyTestSegmentCuratedAttrCounts(Map<BusinessEntity, Long> expectedCounts) {
+        verifySegmentCounts(SEGMENT_NAME_CURATED_ATTR, expectedCounts);
     }
 
     private void verifySegmentCounts(String segmentName, Map<BusinessEntity, Long> expectedCounts) {

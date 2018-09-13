@@ -12,10 +12,13 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({ @Type(value = ProcessAccountStepConfiguration.class, name = "ProcessAccountStepConfiguration"),
+@JsonSubTypes({
+        @Type(value = ProcessAccountStepConfiguration.class, name = "ProcessAccountStepConfiguration"),
         @Type(value = ProcessContactStepConfiguration.class, name = "ProcessContactStepConfiguration"),
         @Type(value = ProcessProductStepConfiguration.class, name = "ProcessProductStepConfiguration"),
         @Type(value = ProcessTransactionStepConfiguration.class, name = "ProcessTransactionStepConfiguration"),
+        @Type(value = CuratedAccountAttributesStepConfiguration.class,
+                name = "CuratedAccountAttributesStepConfiguration"),
         @Type(value = ProcessRatingStepConfiguration.class, name = "ProcessRatingStepConfiguration"), })
 public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStepConfiguration {
 
