@@ -132,11 +132,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                             AttributeLookup attributeLookup = (AttributeLookup) lookup;
                             ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);
                             if (cm != null && cm.getBitOffset() != null) {
-                                ColumnMetadata cm2 = cm.clone(); // avoid
-                                                                 // in-place
-                                                                 // mutation of
-                                                                 // cached
-                                                                 // objects
+                                // avoid in-place mutation of cached objects
+                                ColumnMetadata cm2 = cm.clone();
                                 cm2.setAttrName(attributeLookup.getAttribute());
                                 return cm2;
                             } else {
@@ -158,8 +155,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             }
 
             return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser) //
-                    .map(row -> postProcess(frontEndQuery.getMainEntity(), row, enforceTranslation,
-                            translationMapping));
+                    .map(row -> postProcess(row, enforceTranslation, translationMapping));
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
                     + " for tenant " + MultiTenantContext.getShortTenantId();
@@ -271,28 +267,13 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return false;
     }
 
-    private Map<String, Object> postProcess(BusinessEntity entity, Map<String, Object> result,
+    private Map<String, Object> postProcess(Map<String, Object> result,
             boolean enforceTranslation, Map<String, Map<Long, String>> translationMapping) {
-        Map<String, Object> processed = result;
-        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
-            if (result.containsKey(InterfaceName.CompanyName.toString())
-                    && result.containsKey(InterfaceName.LDC_Name.toString())) {
-                processed = new HashMap<>();
-                result.forEach(processed::put);
-                String companyName = (String) processed.get(InterfaceName.CompanyName.toString());
-                String ldcName = (String) processed.get(InterfaceName.LDC_Name.toString());
-                String consolidatedName = (ldcName != null) ? ldcName : companyName;
-                if (consolidatedName != null) {
-                    processed.put(InterfaceName.CompanyName.toString(), consolidatedName);
-                }
-            }
-        }
-
         if (enforceTranslation //
                 && MapUtils.isNotEmpty(translationMapping) //
-                && MapUtils.isNotEmpty(processed)) {
-            final Map<String, Object> tempProcessed = processed;
-            processed.keySet() //
+                && MapUtils.isNotEmpty(result)) {
+            final Map<String, Object> tempProcessed = result;
+            result.keySet() //
                     .stream() //
                     .filter(translationMapping::containsKey) //
                     .forEach(key -> { //
@@ -310,7 +291,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                         }
                     });
         }
-        return processed;
+        return result;
     }
 
     private QueryDecorator getDecorator(BusinessEntity entity, boolean isDataQuery) {

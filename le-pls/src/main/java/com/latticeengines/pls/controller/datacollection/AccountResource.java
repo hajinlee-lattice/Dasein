@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller.datacollection;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -76,13 +77,18 @@ public class AccountResource extends BaseFrontEndEntityResource {
 
     @Override
     List<Lookup> getDataLookups() {
-        return Arrays.asList( //
+        return Arrays.asList(//
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
+    }
+
+    @Override
+    protected void postProcessRecord(Map<String, Object> result) {
+        overwriteCompanyName(result);
     }
 
 }

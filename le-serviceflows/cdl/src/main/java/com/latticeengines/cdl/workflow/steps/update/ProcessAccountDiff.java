@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
@@ -209,11 +207,6 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_COPIER);
 
-        CopierConfig conf = new CopierConfig();
-        Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
-        filterGroups.add(ColumnSelection.Predefined.ID);
-        filterGroups.add(ColumnSelection.Predefined.Model);
-
         List<String> retainAttrNames = servingStoreProxy.getAllowedModelingAttrs(customerSpace.toString(), inactive) //
                 .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
@@ -223,7 +216,11 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }
+        if (!retainAttrNames.contains(InterfaceName.LatticeAccountId.name())) {
+            retainAttrNames.add(InterfaceName.LatticeAccountId.name());
+        }
 
+        CopierConfig conf = new CopierConfig();
         conf.setRetainAttrs(retainAttrNames);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);

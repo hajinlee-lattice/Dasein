@@ -187,7 +187,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         Credentials creds = new Credentials();
         creds.setUsername(ADTesterUsername);
         creds.setPassword(ADTesterPassword);
-        restTemplate.setInterceptors(new ArrayList<ClientHttpRequestInterceptor>());
+        restTemplate.setInterceptors(new ArrayList<>());
         Map<String, String> map = restTemplate.postForObject(getRestHostPort() + "/admin/adlogin", creds, Map.class);
         String token = map.get("Token");
         assertNotNull(token);

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -67,11 +68,10 @@ public class S3ServiceImpl implements S3Service {
     public void cleanupPrefix(String bucket, String prefix) {
         prefix = sanitizePathToKey(prefix);
         List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();
+        log.info("Deleting " + CollectionUtils.size(objects)  + " s3 objects under " + prefix + " from " + bucket);
         for (S3ObjectSummary summary : objects) {
-            log.info("Deleting s3 object " + summary.getKey() + " from " + bucket);
             s3Client.deleteObject(bucket, summary.getKey());
         }
-        log.info("Deleting s3 object " + prefix + " from " + bucket);
         s3Client.deleteObject(bucket, prefix);
     }
 

@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller.datacollection;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -94,7 +95,11 @@ public abstract class BaseFrontEndEntityResource {
         if (CollectionUtils.isEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.setLookups(getDataLookups());
         }
-        return entityProxy.getData(tenantId, frontEndQuery);
+        DataPage data = entityProxy.getData(tenantId, frontEndQuery);
+        if (data != null && CollectionUtils.isNotEmpty(data.getData())) {
+            data.getData().forEach(this::postProcessRecord);
+        }
+        return data;
     }
 
     private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {
@@ -164,6 +169,23 @@ public abstract class BaseFrontEndEntityResource {
             return Pair.of(segment.getAccountRestriction(), segment.getContactRestriction());
         } else {
             return Pair.of(null, null);
+        }
+    }
+
+    protected void postProcessRecord(Map<String, Object> result) {
+    }
+
+    void overwriteCompanyName(Map<String, Object> result) {
+        if (result.containsKey(InterfaceName.CompanyName.toString())
+                && result.containsKey(InterfaceName.LDC_Name.toString())) {
+            String companyName = (String) result.get(InterfaceName.CompanyName.toString());
+            String ldcName = (String) result.get(InterfaceName.LDC_Name.toString());
+            String consolidatedName = (ldcName != null) ? ldcName : companyName;
+            if (consolidatedName != null && !consolidatedName.equals(companyName)) {
+                result.put(InterfaceName.CompanyName.toString(), consolidatedName);
+                //TODO: YSong-M23 temp log, to be removed
+                log.info("Overwriting company name to " + consolidatedName);
+            }
         }
     }
 

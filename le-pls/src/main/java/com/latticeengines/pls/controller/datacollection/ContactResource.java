@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller.datacollection;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -76,11 +77,16 @@ public class ContactResource extends BaseFrontEndEntityResource {
 
     @Override
     List<Lookup> getDataLookups() {
-        return Arrays.asList( //
+        return Arrays.asList(//
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name())
         );
+    }
+
+    @Override
+    protected void postProcessRecord(Map<String, Object> result) {
+        overwriteCompanyName(result);
     }
 
 }
