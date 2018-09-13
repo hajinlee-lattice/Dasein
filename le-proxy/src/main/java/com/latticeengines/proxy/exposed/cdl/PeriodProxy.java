@@ -23,13 +23,13 @@ public class PeriodProxy extends MicroserviceRestApiProxy implements ProxyInterf
 
     public List<String> getPeriodNames(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/names", shortenCustomerSpace(customerSpace));
-        List list = get("get period names", url, List.class);
+        List<?> list = get("get period names", url, List.class);
         return JsonUtils.convertList(list, String.class);
     }
 
     public List<PeriodStrategy> getPeriodStrategies(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/strategies", shortenCustomerSpace(customerSpace));
-        List list = get("get period strategies", url, List.class);
+        List<?> list = get("get period strategies", url, List.class);
         return JsonUtils.convertList(list, PeriodStrategy.class);
     }
 

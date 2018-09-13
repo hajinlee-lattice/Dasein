@@ -42,19 +42,16 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
         return get("findAllByPlayName", url, List.class);
     }
 
-    @SuppressWarnings("unchecked")
     public TalkingPointPreview getTalkingPointPreview(String playName, String customerSpace) {
         String url = constructUrl("/preview" + "?playName=" + playName + "&customerSpace=" + customerSpace);
         return get("getTalkingPointPreview", url, TalkingPointPreview.class);
     }
 
-    @SuppressWarnings("unchecked")
     public DantePreviewResources getPreviewResources(String customerSpace) {
         String url = constructUrl("/previewresources?customerSpace=" + customerSpace);
         return get("getPreviewResources", url, DantePreviewResources.class);
     }
 
-    @SuppressWarnings("unchecked")
     public void publish(String playName, String customerSpace) {
         String url = constructUrl("/publish" + "?playName=" + playName + "&customerSpace=" + customerSpace);
         post("publish", url, null, String.class);
@@ -66,13 +63,11 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
         return post("revert", url, null, List.class);
     }
 
-    @SuppressWarnings("unchecked")
     public TalkingPointDTO findByName(String name) {
         String url = constructUrl("/" + name);
         return get("findByName", url, TalkingPointDTO.class);
     }
 
-    @SuppressWarnings("unchecked")
     public List<AttributeLookup> getAttributesInTalkingPointOfPlay(String playName) {
         String url = constructUrl("/attributes/" + playName);
         List<?> list = get("getAttributesInTalkingPointOfPlay", url, List.class);

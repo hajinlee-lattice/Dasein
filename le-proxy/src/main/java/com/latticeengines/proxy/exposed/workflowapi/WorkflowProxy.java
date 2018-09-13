@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -26,7 +24,6 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 @Component
 public class WorkflowProxy extends MicroserviceRestApiProxy {
 
-    private static Logger log = LoggerFactory.getLogger(WorkflowProxy.class);
     private static final String CUSTOMER_SPACE_ERROR = "No customer space provided.";
 
     public WorkflowProxy() {

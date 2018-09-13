@@ -37,7 +37,7 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     public List<BucketMetadata> updateABCDBuckets(String customerSpace, UpdateBucketMetadataRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets",
                 shortenCustomerSpace(customerSpace));
-        List list = put("update bucket metadata", url, request, List.class);
+        List<?> list = put("update bucket metadata", url, request, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
@@ -45,7 +45,7 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     public Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String customerSpace, String modelGuid) {
         String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/model/{modelGuid}",
                 shortenCustomerSpace(customerSpace), modelGuid);
-        Map map = get("get bucket metadata history for model", url, Map.class);
+        Map<?, ?> map = get("get bucket metadata history for model", url, Map.class);
         return parseABCDBucketsHistory(map);
     }
 
@@ -53,7 +53,7 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     public Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(String customerSpace, String engineId) {
         String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/engine/{engineId}",
                 shortenCustomerSpace(customerSpace), engineId);
-        Map map = get("get bucket metadata history for engine", url, Map.class);
+        Map<?, ?> map = get("get bucket metadata history for engine", url, Map.class);
         return parseABCDBucketsHistory(map);
     }
 
@@ -61,7 +61,7 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     public List<BucketMetadata> getLatestABCDBucketsByModelGuid(String customerSpace, String modelGuid) {
         String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/uptodateabcdbuckets/model/{modelGuid}",
                 shortenCustomerSpace(customerSpace), modelGuid);
-        List list = get("get up-to-date bucket metadata history for model", url, List.class);
+        List<?> list = get("get up-to-date bucket metadata history for model", url, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
@@ -70,7 +70,7 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/bucketedscore/publishedbuckets/model/{modelSummaryId}",
                 shortenCustomerSpace(customerSpace), modelSummaryId);
-        List list = get("get up-to-date bucket metadata history for model", url, List.class);
+        List<?> list = get("get up-to-date bucket metadata history for model", url, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
@@ -112,9 +112,10 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
         return post("create bucketed score summary", url, summary, BucketedScoreSummary.class);
     }
 
-    private Map<Long, List<BucketMetadata>> parseABCDBucketsHistory(Map map) {
+    @SuppressWarnings("rawtypes")
+    private Map<Long, List<BucketMetadata>> parseABCDBucketsHistory(Map<?, ?> map) {
         if (MapUtils.isNotEmpty(map)) {
-            Map<Long, List> listMap = JsonUtils.convertMap(map, Long.class, List.class);
+			Map<Long, List> listMap = JsonUtils.convertMap(map, Long.class, List.class);
             Map<Long, List<BucketMetadata>> result = new HashMap<>();
             listMap.forEach((k, v) -> result.put(k, JsonUtils.convertList(v, BucketMetadata.class)));
             return result;

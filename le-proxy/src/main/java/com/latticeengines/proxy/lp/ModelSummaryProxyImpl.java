@@ -36,7 +36,6 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean downloadModelSummary(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/downloadmodelsummary", customerSpace);
 
@@ -44,7 +43,6 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean downloadModelSummary(String customerSpace, Map<String, String> modelApplicationIdToEventColumn) {
         String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/downloadmodelsummary", customerSpace);
 
@@ -52,13 +50,12 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, ModelSummary> getEventToModelSummary(String customerSpace,
             Map<String, String> modelApplicationIdToEventColumn) {
         String url = constructUrl("/customerspaces/{customerSpace}/modelsummaries/geteventtomodelsummary",
                 customerSpace);
 
-        Map resObj = post("get event to model summary", url, modelApplicationIdToEventColumn, Map.class);
+        Map<?, ?> resObj = post("get event to model summary", url, modelApplicationIdToEventColumn, Map.class);
         Map<String, ModelSummary> res = null;
         if (MapUtils.isNotEmpty(resObj)) {
             res = JsonUtils.convertMap(resObj, String.class, ModelSummary.class);
@@ -164,7 +161,6 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<ModelSummary> getModelSummaries(String customerSpace, String selection) {
         String baseUrl = "/customerspaces/{customerSpace}/modelsummaries";
         String url = parseOptionalParameter(baseUrl, "selection", selection);
@@ -285,7 +281,6 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<ModelSummary> getModelSummariesByApplicationId(String applicationId) {
         String url = constructUrl("/modelsummaries/internal/getmodelsummariesbyapplicationid/{applicationId}", applicationId);
 

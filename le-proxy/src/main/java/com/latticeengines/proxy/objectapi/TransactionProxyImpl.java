@@ -1,7 +1,5 @@
 package com.latticeengines.proxy.objectapi;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -18,8 +16,6 @@ public class TransactionProxyImpl extends MicroserviceRestApiProxy implements Tr
     public TransactionProxyImpl() {
         super("/objectapi");
     }
-
-    private static final Logger log = LoggerFactory.getLogger(TransactionProxyImpl.class);
 
     public String getMaxTransactionDate(String customerSpace, DataCollection.Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/transactions/maxtransactiondate?version={version}",

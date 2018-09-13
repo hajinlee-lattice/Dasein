@@ -28,7 +28,6 @@ public class TalkingPointsAttributesProxy extends MicroserviceRestApiProxy imple
         return get("getRecommendationAttributes", url, List.class);
     }
 
-    @SuppressWarnings("unchecked")
     public TalkingPointNotionAttributes getAttributesByNotions(List<String> notions, String customerSpace) {
         String url = constructUrl("?customerSpace=" + customerSpace);
         return post("getAttributesByNotions", url, notions, TalkingPointNotionAttributes.class);

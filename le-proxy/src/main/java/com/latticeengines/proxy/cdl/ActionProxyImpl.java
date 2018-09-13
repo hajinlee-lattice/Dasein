@@ -44,7 +44,7 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
         actionParameter.put("pids", null);
         actionParameter.put("nullOwnerId", false);
         actionParameter.put("ownerId", null);
-        List list = post("get actions", url, actionParameter, List.class);
+        List<?> list = post("get actions", url, actionParameter, List.class);
         return JsonUtils.convertList(list, Action.class);
     }
 
@@ -60,7 +60,7 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
             actionParameter.put("nullOwnerId", false);
             actionParameter.put("ownerId", ownerId);
         }
-        List list = post("get actions by owner", url, actionParameter, List.class);
+        List<?> list = post("get actions by owner", url, actionParameter, List.class);
         return JsonUtils.convertList(list, Action.class);
     }
 
@@ -71,7 +71,7 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
         actionParameter.put("pids", actionPids);
         actionParameter.put("ownerId", null);
         actionParameter.put("nullOwnerId", false);
-        List list = post("get actions by pids", url, actionParameter, List.class);
+        List<?> list = post("get actions by pids", url, actionParameter, List.class);
         return JsonUtils.convertList(list, Action.class);
     }
 

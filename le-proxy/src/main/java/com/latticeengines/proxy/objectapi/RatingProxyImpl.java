@@ -94,7 +94,7 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        Map map = _ratingProxy.getCoverageFromCache(customerSpace, frontEndQuery);
+        Map<String, Long> map = _ratingProxy.getCoverageFromCache(customerSpace, frontEndQuery);
         return JsonUtils.convertMap(map, String.class, Long.class);
     }
 

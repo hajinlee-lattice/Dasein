@@ -215,7 +215,6 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return JsonUtils.convertMap(map, String.class, Long.class);
     }
 
-    @SuppressWarnings("rawtypes")
     public List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(@PathVariable String customerSpace,
             @PathVariable String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/publishedhistory",

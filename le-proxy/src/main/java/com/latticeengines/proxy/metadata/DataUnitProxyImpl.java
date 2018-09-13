@@ -41,7 +41,7 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
         if (type != null) {
             url += "?type=" + type.name();
         }
-        List list = get("get data units", url, List.class);
+        List<?> list = get("get data units", url, List.class);
         return JsonUtils.convertList(list, DataUnit.class);
     }
 }

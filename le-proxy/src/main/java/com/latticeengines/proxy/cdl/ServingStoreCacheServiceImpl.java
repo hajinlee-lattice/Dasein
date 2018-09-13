@@ -74,7 +74,7 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         BusinessEntity entity = BusinessEntity.valueOf(tokens[1]);
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
                 shortenCustomerSpace(customerSpace), entity);
-        List list = get("serving store metadata", url, List.class);
+        List<?> list = get("serving store metadata", url, List.class);
         return JsonUtils.convertList(list, ColumnMetadata.class);
     }
 

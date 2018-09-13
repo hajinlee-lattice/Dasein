@@ -242,7 +242,6 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return path;
     }
 
-    @SuppressWarnings("unchecked")
     public List<ColumnMetadata> getTableColumns(String customerSpace, String tableName) {
         // This returns all table columns
         List<Attribute> attributes = getTableAttributes(customerSpace, tableName, null);
@@ -252,7 +251,6 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return attributes.stream().parallel().map(Attribute::getColumnMetadata).collect(Collectors.toList());
     }
     
-    @SuppressWarnings("unchecked")
     public List<Attribute> getTableAttributes(String customerSpace, String tableName, Long columnCount) {
         long attributeCount = columnCount == null ? getTableAttributeCount(customerSpace, tableName) : columnCount;
         List<Attribute> attributeLst = Collections.synchronizedList(new ArrayList<>());
@@ -266,7 +264,6 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return attributeLst;
     }
     
-    @SuppressWarnings("unchecked")
     public List<Attribute> getTableAttributes(String customerSpace, String tableName, int page, long size) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes", customerSpace, tableName);
         url = String.format("%s?page=%d&size=%d", url, page, size);

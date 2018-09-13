@@ -29,6 +29,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriTemplate;
 
@@ -351,7 +352,7 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T> List<T> getList(final String method, final String url, final Class<T> returnValueClazz) {
-        List list = get(method, url, List.class, false);
+        List<?> list = get(method, url, List.class, false);
         return JsonUtils.convertList(list, returnValueClazz);
     }
 
@@ -425,7 +426,7 @@ public abstract class BaseRestApiProxy {
      * callers, because it may be an infinite stream
      */
     protected <T> Mono<T> getMono(String channel, String url, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null, false);
+        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.GET, null, false);
         Mono<T> mono = request.retrieve().bodyToMono(clz);
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
@@ -439,33 +440,33 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T> Flux<T> getFlux(String channel, String url, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null, false);
+        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.GET, null, false);
         Flux<T> flux = request.retrieve().bodyToFlux(clz);
         return appendLogInterceptors(flux, channel, url);
     }
 
     protected <T> Flux<T> getStream(String channel, String url, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null, true);
+        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.GET, null, true);
         Flux<T> flux = request.retrieve().bodyToFlux(clz);
         return appendLogInterceptors(flux, channel, url);
     }
 
     protected <T, P> Mono<T> postMono(String channel, String url, P payload, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
+        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
         Mono<T> mono = request.retrieve().bodyToMono(clz);
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
     }
 
     protected <T, P> Mono<T> postMonoKryo(String channel, String url, P payload, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareKryoReactiveRequest(url, HttpMethod.POST, payload);
+        RequestHeadersSpec<?> request = prepareKryoReactiveRequest(url, HttpMethod.POST, payload);
         Mono<T> mono = extractKryoMono(request, clz);
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
     }
 
     protected <K, V, P> Mono<Map<K, V>> postMapMono(String channel, String url, P payload) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
+        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
         Mono<Map<K, V>> mono = request.retrieve().bodyToMono(new ParameterizedTypeReference<Map<K, V>>() {
         });
         mono = appendMonoHandler(mono, channel);
@@ -525,7 +526,8 @@ public abstract class BaseRestApiProxy {
                 });
     }
 
-    private <P> WebClient.RequestHeadersSpec prepareKryoReactiveRequest(String url, HttpMethod method, P payload) {
+    @SuppressWarnings("rawtypes")
+	private <P> WebClient.RequestHeadersSpec prepareKryoReactiveRequest(String url, HttpMethod method, P payload) {
         WebClient.RequestHeadersSpec request;
 
         if (payload != null) {
@@ -540,9 +542,10 @@ public abstract class BaseRestApiProxy {
         return request.accept(KryoHttpMessageConverter.KRYO);
     }
 
+    @SuppressWarnings("rawtypes")
     private <P> WebClient.RequestHeadersSpec<?> prepareReactiveRequest(String url, HttpMethod method, P payload,
             boolean streaming) {
-        WebClient.RequestHeadersSpec request;
+		WebClient.RequestHeadersSpec request;
 
         if (payload != null) {
             request = webClient.method(method).uri(url).syncBody(payload);

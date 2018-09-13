@@ -78,7 +78,7 @@ public class ModelProxy extends MicroserviceRestApiProxy implements ModelInterfa
 
     public Boolean flagToDownload(String tenantId) {
         String url = constructUrl("/downloadflags/{tenantId}/", tenantId);
-        ResponseDocument resDoc = post("flag to download models", url, null, ResponseDocument.class);
+        ResponseDocument<?> resDoc = post("flag to download models", url, null, ResponseDocument.class);
         return resDoc != null && resDoc.isSuccess();
     }
 

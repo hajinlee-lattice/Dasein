@@ -3,8 +3,6 @@ package com.latticeengines.proxy.exposed.pls;
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -13,7 +11,6 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 
 public class InternalResourceRestApiProxyUnitTestNG {
 
-    private static final Logger log = LoggerFactory.getLogger(InternalResourceRestApiProxyUnitTestNG.class);
     private String localhost = "http://localhost:8081";
     private String expectedPrefix = "http://localhost:8081/pls/internal/jobs/all/";
     private InternalResourceRestApiProxy internalProxy = new InternalResourceRestApiProxy(localhost);

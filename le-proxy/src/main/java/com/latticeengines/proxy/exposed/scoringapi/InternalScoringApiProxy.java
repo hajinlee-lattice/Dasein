@@ -12,7 +12,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResponseErrorHandler;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -47,7 +46,7 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
             IOUtils.copy(response.getBody(), baos);
             String body = new String(baos.toByteArray());
             try {
-                JsonNode node = new ObjectMapper().readTree(body);
+                new ObjectMapper().readTree(body);
             } catch (Exception e) {
                 // Throw a non-LedpException to allow for retries
                 throw new RuntimeException(

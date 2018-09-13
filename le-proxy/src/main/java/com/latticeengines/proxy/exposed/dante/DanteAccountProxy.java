@@ -21,10 +21,9 @@ public class DanteAccountProxy extends MicroserviceRestApiProxy implements Dante
         super("/dante/accounts");
     }
 
-    @SuppressWarnings("unchecked")
     public List<DanteAccount> getAccounts(int count, String customerSpace) {
         String url = constructUrl("/" + count + "?customerSpace=" + customerSpace);
-        List list = get("getAccounts", url, List.class);
+        List<?> list = get("getAccounts", url, List.class);
         return JsonUtils.convertList(list, DanteAccount.class);
     }
 }

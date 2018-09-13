@@ -30,7 +30,6 @@ public class SPSamlProxy extends BaseRestApiProxy {
 
     public LogoutValidationResponse validateSingleLogout(String tenantId, boolean isSPInitiatedLogout,
             Object samlLogoutRequest) {
-        String url = constructUrl("/SingleLogout/alias/{tenant}", tenantId);
         LogoutValidationResponse resp = new LogoutValidationResponse();
         resp.setValidated(true);
         return resp;

@@ -74,7 +74,7 @@ public class ModelMetadataProxyImpl extends MicroserviceRestApiProxy implements 
         ModelFieldsToAttributesRequest request = new ModelFieldsToAttributesRequest();
         request.setAttributes(attributes);
         request.setFields(fields);
-        List list = post("convert fields to attributes", url, request, List.class);
+        List<?> list = post("convert fields to attributes", url, request, List.class);
         return JsonUtils.convertList(list, Attribute.class);
     }
 
