@@ -8,54 +8,53 @@
   		<div class="body">
 			<table class="marketo-default-table">
 			  	<tbody>
-				  <tr>
-				    <td class="saml-url" style="width:25%"> Webhook Name </td>
-				    <td> 
-				    	{{$ctrl.webhookName}}
-				     </td>
-				  </tr>
-				  <tr>
-				    <td class="saml-url" style="width:25%"> URL </td>
-				    <td> 
-				    	{{$ctrl.url}}
-				     </td>
-				  </tr>
-				  <tr>
-				    <td class="saml-url" style="width:25%"> Request Type </td>
-				    <td> 
-				    	POST
-				     </td>
-				  </tr>
-				  <tr>
-				    <td class="saml-url" style="width:25%"> Template </td>
+			  	<tr>
+				    <td class="webhook-header"> Webhook Name </td>
+				    <td> {{$ctrl.webhookName}} </td>
+				</tr>
+		  		<tr>
+				    <td class="webhook-header"> URL </td>
+				    <td> {{$ctrl.url}} </td>
+		  		</tr>
+			  	<tr>
+				    <td class="webhook-header"> Request Type </td>
+				    <td> POST </td>
+			  	</tr>
+				<tr>
+				    <td class="webhook-header"> Template </td>
 				    <td>
 <pre>
 {
-"properties": {
-<span ng-repeat="(key, value) in $ctrl.template">  "{{key}}": {{value || 'null'}}<span ng-if="!$last">,</span>
+<span>"rule": {{$ctrl.rule}}, </span>
+"record": {
+<span ng-repeat="(key, value) in $ctrl.template">	"{{key}}": {{value || 'null'}}<span ng-if="!$last">,</span>
 </span>  }
 }
 </pre>
 				     </td>
-				  </tr>
-				  <tr>
-				    <td class="saml-url" style="width:25%"> Request Token Encoding </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> Request Token Encoding </td>
+				    <td> JSON </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> Response Type </td>
+				    <td> JSON </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> Custom Header </td>
 				    <td> 
-				    	JSON
-				     </td>
-				  </tr>
-				  <tr>
-				    <td class="saml-url" style="width:25%"> Response Type </td>
-				    <td> 
-				    	JSON
-				     </td>
-				  </tr>
-				  <tr>
-				    <td class="saml-url" style="width:25%"> Custom Header </td>
-				    <td> 
-				    	Content-Type: application/json
-				     </td>
-				  </tr>
+				    	<span> Content-Type: application/json </span> </br>
+				    	<span> lattice_secret_key: {{$ctrl.secretKey || 'null'}} </span>
+				    </td>
+				</tr>
+<!-- 
+				<tr>
+					<td style="background: #f9f9f9"> 
+						<span> lattice_secret_key: {{$ctrl.secretKey || 'null'}} </span>
+					</td>
+				</tr>
+-->
 				</tbody>
 			</table>
 		</div>

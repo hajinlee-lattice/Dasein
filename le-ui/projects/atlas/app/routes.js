@@ -953,7 +953,6 @@ angular
                 }
             },
             onEnter: ['FeatureFlags', '$state', '$stateParams', function(FeatureFlags, $state, $stateParams) {
-                console.log(FeatureFlags)
                 var useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
                 if (useMarketoLatticeIntegration){
                     console.log('credential', $stateParams.id);
@@ -1014,15 +1013,6 @@ angular
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
-                FeatureFlags: function($q, FeatureFlagService) {
-                    var deferred = $q.defer();
-
-                    FeatureFlagService.GetAllFlags().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                },
                 ActiveModels: function($q, MarketoStore, MarketoService) {
                     var deferred = $q.defer();
 
@@ -1049,11 +1039,11 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: function($scope, $stateParams, $state, ResourceUtility, FeatureFlags) {
+                    controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = $state.current.name;
                         $scope.id = $stateParams.credentialId;
                         $scope.ResourceUtility = ResourceUtility;
-                        $scope.useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
+                        $scope.useMarketoLatticeIntegration = true;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -1134,24 +1124,15 @@ angular
                     }
 
                     return deferred.promise;
-                },
-                FeatureFlags: function($q, FeatureFlagService) {
-                    var deferred = $q.defer();
-
-                    FeatureFlagService.GetAllFlags().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
                 }
             },
             views: {
                 "summary@": {
-                    controller: function($scope, $stateParams, $state, ResourceUtility, FeatureFlags) {
+                    controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = $state.current.name;
                         $scope.id = $stateParams.credentialId;
                         $scope.ResourceUtility = ResourceUtility;
-                        $scope.useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
+                        $scope.useMarketoLatticeIntegration = true;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -1165,6 +1146,15 @@ angular
                 pageTitle: 'Marketo Profiles'
             },
             resolve: {
+                MarketoCredentials: function($q, $stateParams, MarketoStore, MarketoService) {
+                    var deferred = $q.defer();
+
+                    MarketoStore.getMarketoCredential($stateParams.credentialId).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
                 ScoringRequest: function($q, $stateParams, MarketoService) {
                     var deferred = $q.defer();
 
@@ -1182,24 +1172,15 @@ angular
                     })
 
                     return deferred.promise;
-                },
-                FeatureFlags: function($q, FeatureFlagService) {
-                    var deferred = $q.defer();
-
-                    FeatureFlagService.GetAllFlags().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
                 }
             },
             views: {
                 "summary@": {
-                    controller: function($scope, $stateParams, $state, ResourceUtility, FeatureFlags) {
+                    controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = $state.current.name;
                         $scope.id = $stateParams.credentialId;
                         $scope.ResourceUtility = ResourceUtility;
-                        $scope.useMarketoLatticeIntegration = FeatureFlags.LatticeMarketoScoring;
+                        $scope.useMarketoLatticeIntegration = true;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },

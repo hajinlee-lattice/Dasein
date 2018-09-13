@@ -39,7 +39,7 @@ angular.module('lp.marketo.models', [])
 .component('marketoSetupModel', {
     templateUrl: 'app/marketo/views/MarketoModelSetupView.html',
     controller: function( 
-        $q, $state, $stateParams, $scope, $location, $timeout, BrowserStorageUtility, MarketoService) 
+        $q, $state, $stateParams, $scope, $location, $timeout, $filter, BrowserStorageUtility, MarketoService) 
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve;
@@ -52,14 +52,17 @@ angular.module('lp.marketo.models', [])
             scoringFields: resolve.ScoringFields,
             currentScoringRequest: resolve.ExistingScoringRequest,
             marketoDisplayFieldNames: [],
-            fieldsMapping: {}
+            fieldsMapping: {},
+            requiredMatchFields: ['CompanyName', 'DUNS', 'Email']
         });
 
         vm.init = function() {
-            if (vm.marketoFields) {
-                vm.marketoDisplayFieldNames = vm.marketoFields.map(function(field) {return field.displayName;});
-            }
+            vm.checkEnableSave();
             vm.updateMarketoScoringMatchFields();
+        }
+
+        vm.isRequiredField = function(field) {
+            return vm.requiredMatchFields.indexOf(field.fieldName) >= 0;
         }
 
         vm.updateMarketoScoringMatchFields = function() {
@@ -70,12 +73,25 @@ angular.module('lp.marketo.models', [])
             }
         }
 
+        vm.checkEnableSave = function() {
+            vm.enableSave = false;
+            vm.requiredMatchFields.forEach(function(field) {
+                if (vm.fieldsMapping[field] != undefined && vm.fieldsMapping[field] != '') {
+                    vm.enableSave = true;
+                    return;
+                } 
+            });
+        }
+
         vm.createOrUpdateScoringRequest = function() {
-            var marketoScoringMatchFields = Object.keys(vm.fieldsMapping).map(function(key) {
-                return {
-                    modelFieldName: key,
-                    marketoFieldName: vm.fieldsMapping[key]
-                };
+            var marketoScoringMatchFields = [];
+            Object.keys(vm.fieldsMapping).forEach(function(key) {
+                if (vm.fieldsMapping[key]) {
+                    marketoScoringMatchFields.push({
+                        modelFieldName: key,
+                        marketoFieldName: vm.fieldsMapping[key]                       
+                    });
+                }
             })
 
             if (!vm.currentScoringRequest) { // CREATE
@@ -112,14 +128,16 @@ angular.module('lp.marketo.models', [])
         var vm = this,
             resolve = $scope.$parent.$resolve,
             model = resolve.Model,
-            scoringRequest = resolve.ScoringRequest;
-            
+            scoringRequest = resolve.ScoringRequest,
+            credential = resolve.MarketoCredentials;
 
         angular.extend(vm, {
             credentialId: $stateParams.credentialId,
             webhookName: model.ModelDetails.DisplayName,
             url: scoringRequest.webhookResource,
-            marketoScoringMatchFields: scoringRequest.marketoScoringMatchFields
+            marketoScoringMatchFields: scoringRequest.marketoScoringMatchFields,
+            secretKey: credential ? credential.lattice_secret_key : 'null',
+            rule: "{{campaign.name}}"
         });
 
         vm.init = function() {

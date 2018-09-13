@@ -128,9 +128,21 @@
 		&.right-adjusted {
 			text-align: right;
 		}
+		&.webhook-header {
+			width: 20%;
+		}
 	}
 	td:last-child {
 		border-right: none;
+	}
+	tr {
+		&.info-row {
+			height: 46px;
+			color: #7e7e7e;
+		}
+		&.info-row.large {
+			height: 60px;
+		}
 	}
 
 
