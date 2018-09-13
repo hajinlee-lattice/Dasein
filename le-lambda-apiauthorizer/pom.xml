@@ -15,7 +15,7 @@
         <spring.version>5.0.3.RELEASE</spring.version>
         <spring.retry.version>1.2.1.RELEASE</spring.retry.version>
         <testng.version>6.13.1</testng.version>
-        
+        <jackson.fasterxml.versino>2.9.6</jackson.fasterxml.versino>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.5</version>
+            <version>${jackson.fasterxml.version}</version>
         </dependency>
 
         <dependency>
