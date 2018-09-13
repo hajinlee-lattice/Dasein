@@ -5,8 +5,6 @@ import static org.testng.Assert.assertEquals;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -21,8 +19,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflow.functionalframework.DynamicWorkflowChoreographer;
-import com.latticeengines.workflow.functionalframework.FailureInjectedWorkflow;
 import com.latticeengines.workflow.functionalframework.FailureInjectedWorkflowConfiguration;
 import com.latticeengines.workflow.functionalframework.InjectedFailureListener;
 import com.latticeengines.workflow.functionalframework.NamedStep;
@@ -30,19 +26,11 @@ import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 public class FailureInjectedWorkflowTestNG extends WorkflowTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(DynamicWorkflowTestNG.class);
-
     @Inject
     private WorkflowService workflowService;
 
     @Inject
     private TenantService tenantService;
-
-    @Inject
-    private FailureInjectedWorkflow failureInjectedWorkflow;
-
-    @Inject
-    private DynamicWorkflowChoreographer choreographer;
 
     @Resource(name = "stepA")
     private NamedStep stepA;

@@ -12,17 +12,12 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
-import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
 import java.util.Collections;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 @Component("finalJobListener")
 public class FinalJobListener extends LEJobListener implements LEJobCallerRegister {
-
-    private static final long UPDATE_CACHE_TIMEOUT_IN_SECONDS = 15L;
 
     private static final Logger log = LoggerFactory.getLogger(FinalJobListener.class);
 
@@ -34,9 +29,6 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
-
-    @Autowired
-    private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     @Autowired
     private JobCacheService jobCacheService;

@@ -145,8 +145,8 @@ public class RedisJobCacheWriterUnitTestNG {
 
     @SuppressWarnings("unchecked")
     private void mockMultiGet(List<Object> objects, RetryTemplate template) {
-        RedisTemplate redisTemplate = Mockito.mock(RedisTemplate.class);
-        ValueOperations ops = Mockito.mock(ValueOperations.class);
+        RedisTemplate<String, Object> redisTemplate = Mockito.mock(RedisTemplate.class);
+        ValueOperations<String, Object> ops = Mockito.mock(ValueOperations.class);
         Mockito.when(redisTemplate.opsForValue()).thenReturn(ops);
         Mockito.when(ops.multiGet(Mockito.anyCollection())).thenReturn(objects);
         cacheWriter = new RedisJobCacheWriter(redisTemplate, template);

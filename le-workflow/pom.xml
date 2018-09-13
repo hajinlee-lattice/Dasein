@@ -82,12 +82,10 @@
         <dependency>
             <groupId>org.springframework.batch</groupId>
             <artifactId>spring-batch-core</artifactId>
-            <version>${spring.batch.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.batch</groupId>
             <artifactId>spring-batch-infrastructure</artifactId>
-            <version>${spring.batch.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.batch</groupId>

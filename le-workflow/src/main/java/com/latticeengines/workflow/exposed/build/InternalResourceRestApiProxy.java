@@ -17,6 +17,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.DeprecatedBaseRestApiProxy;
 
+/*
+ * this suppress warning is for DeprecatedBaseRestApiProxy class
+ * the plan is to remove all the proxy that uses DeprecatedBaseRestApiProxy in the future,
+ * so suppress for now.
+ */
+@SuppressWarnings("deprecation")
 public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(InternalResourceRestApiProxy.class);

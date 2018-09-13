@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflow.functionalframework.DynamicWorkflow;
 import com.latticeengines.workflow.functionalframework.DynamicWorkflowChoreographer;
 import com.latticeengines.workflow.functionalframework.DynamicWorkflowConfiguration;
 import com.latticeengines.workflow.functionalframework.NamedStep;
@@ -45,9 +44,6 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
 
     @Inject
     private TenantService tenantService;
-
-    @Inject
-    private DynamicWorkflow dynamicWorkflow;
 
     @Inject
     private DynamicWorkflowChoreographer choreographer;

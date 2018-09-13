@@ -1,6 +1,5 @@
 package com.latticeengines.workflow.functionalframework;
 
-import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class DynamicSubWorkflowBConfiguration extends WorkflowConfiguration {

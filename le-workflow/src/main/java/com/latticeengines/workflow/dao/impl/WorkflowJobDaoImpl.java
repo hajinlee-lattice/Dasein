@@ -66,7 +66,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         String queryStr = String.format(
                 "from %s workflowjob where workflowjob.workflowId in :workflowIds and workflowjob.type in :types",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<WorkflowJob> query = session.createQuery(queryStr);
         query.setParameterList("workflowIds", workflowIds);
         query.setParameterList("types", types);
         return query.list();
@@ -109,7 +109,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         String queryStr = String.format(
                 "from %s workflowjob where workflowjob.pid in :pids and workflowjob.type in :types",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<WorkflowJob> query = session.createQuery(queryStr);
         query.setParameterList("pids", workflowPids);
         query.setParameterList("types", types);
         return query.list();
@@ -205,7 +205,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         String queryStr = String.format(
                 "update %s workflowjob set workflowjob.status=:status where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         query.setParameter("status", workflowJob.getStatus());
         query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
