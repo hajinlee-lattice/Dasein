@@ -42,6 +42,7 @@ public class ZendeskJwtHandler implements JwtHandler {
 
     public static final String ZENDESK_JWT_EMAIL_KEY = "email";
     public static final String ZENDESK_JWT_USER_NAME_KEY = "name";
+    public static final String ZENDESK_JWT_ORGANIZATION = "organization";
 
     @Override
     public String getName() {
@@ -73,10 +74,16 @@ public class ZendeskJwtHandler implements JwtHandler {
 
     @Override
     public String getJwtToken(GlobalAuthUser user, JwtRequestParameters parameters) throws LedpException {
+        String[] step1 = user.getEmail().split("@");
+        String[] step2 = step1[1].split("\\.");
+        String org = "";
+        for (int i = 0; i < step2.length - 1; i++) {
+            org += step2[i];
+        }
         JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
                 .claim(ZENDESK_JWT_USER_NAME_KEY, user.getFirstName() + " " + user.getLastName())
-                .claim(ZENDESK_JWT_EMAIL_KEY, user.getEmail()).jwtID(generateRandomString()).issueTime(new Date())
-                .build();
+                .claim(ZENDESK_JWT_EMAIL_KEY, user.getEmail()).claim(ZENDESK_JWT_ORGANIZATION, org)
+                .jwtID(generateRandomString()).issueTime(new Date()).build();
         String jwtString = "";
         try {
             JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).contentType("text/plain").build();

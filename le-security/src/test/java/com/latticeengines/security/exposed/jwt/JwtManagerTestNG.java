@@ -21,29 +21,24 @@ public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
     public void generateJwtTokenWithRedirectURL() throws Exception {
 
         GlobalAuthUser user = new GlobalAuthUser();
-        user.setFirstName("Lattice");
-        user.setLastName("Dev Group");
-        user.setEmail("ldg@lattice-engines.com");
+        user.setFirstName("Tim");
+        user.setLastName("Gates");
+        user.setEmail("timg@microsoft.com");
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(ZendeskJwtHandler.ZENDESK_URL_QUERY_RETURN_TO_KEY, "https://lattice-engineshelp.zendesk.com");
         parameters.put(JwtManager.SOURCE_REF_KEY, ZendeskJwtHandler.HANDLER_NAME);
         JwtRequestParameters reqParameters = new JwtRequestParameters();
         reqParameters.setRequestParameters(parameters);
         String url = null;
-        String token = null;
         try {
             url = jwtManager.handleJwtRequest(user, reqParameters, true);
-            token = jwtManager.handleJwtRequest(user, reqParameters, false);
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
         Assert.assertNotNull(url);
-        Assert.assertNotNull(token);
         Assert.assertTrue(url.contains(ZendeskJwtHandler.ZENDESK_URL_QUERY_RETURN_TO_KEY));
         Assert.assertTrue(url.contains(ZendeskJwtHandler.ZENDESK_URL_QUERY_JWT_TOKEN_KEY));
         System.out.println("token url : " + url);
-        System.out.println("token token : " + token);
     }
 }
