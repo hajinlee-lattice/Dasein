@@ -2,13 +2,12 @@ package com.latticeengines.modelquality.dao.impl;
 
 import java.util.List;
 
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.hibernate.query.Query;
-import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.modelquality.dao.DataSetDao;
 import com.latticeengines.modelquality.service.impl.FileModelRunServiceImpl;
@@ -29,10 +28,9 @@ public class DataSetDaoImpl extends ModelQualityBaseDaoImpl<DataSet> implements 
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where %s = :tenantID and %s = :trainingHdfsPath",
                 getEntityClass().getSimpleName(), "CUSTOMER_SPACE", "TRAINING_HDFS_PATH");
-        Query query = session.createQuery(queryStr);
+        Query<DataSet> query = session.createQuery(queryStr, DataSet.class);
         query.setParameter("tenantID", tenantID);
         query.setParameter("trainingHdfsPath", trainingSetFilePath);
-        @SuppressWarnings("unchecked")
         List<DataSet> results = query.list();
         if (results.size() == 0) {
             return null;

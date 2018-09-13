@@ -2,11 +2,10 @@ package com.latticeengines.modelquality.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.modelquality.dao.AnalyticPipelineDao;
 
@@ -23,8 +22,7 @@ public class AnalyticPipelineDaoImpl extends ModelQualityBaseDaoImpl<AnalyticPip
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where version = (select MAX(version) from %s)",
                 getEntityClass().getSimpleName(), getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        @SuppressWarnings("unchecked")
+        Query<AnalyticPipeline> query = session.createQuery(queryStr, AnalyticPipeline.class);
         List<AnalyticPipeline> results = query.list();
         if (results.size() == 0) {
             return null;

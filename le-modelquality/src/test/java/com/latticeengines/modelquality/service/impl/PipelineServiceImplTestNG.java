@@ -8,6 +8,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,9 +55,11 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
         when(proxy.getActiveStack()).thenReturn(activeStack);
         ReflectionTestUtils.setField(pipelineService, "internalResourceRestApiProxy", proxy);
 
+        Charset encoding = null;
         String pipelineStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
-                        .getFile()));
+                        .getFile()),
+                encoding);
         pipeline = JsonUtils.deserialize(pipelineStr, Pipeline.class);
         pipelineEntityMgr.create(pipeline);
     }

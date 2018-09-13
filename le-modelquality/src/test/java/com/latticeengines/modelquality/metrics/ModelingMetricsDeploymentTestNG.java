@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.metrics;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +22,18 @@ public class ModelingMetricsDeploymentTestNG extends ModelQualityTestNGBase {
 
     @Test(groups = "deployment")
     public void run() throws Exception {
+        Charset encoding = null;
         String mStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/modelsummary.json").getFile()));
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/modelsummary.json").getFile()),
+                encoding);
         String cStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/selectedconfig.json")
-                        .getFile()));
+                        .getFile()),
+                encoding);
         String nStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/modelrunentitynames.json")
-                        .getFile()));
+                        .getFile()),
+                encoding);
         SelectedConfig s = JsonUtils.deserialize(cStr, SelectedConfig.class);
         ModelSummary m = JsonUtils.deserialize(mStr, ModelSummary.class);
         ModelRunEntityNames n = JsonUtils.deserialize(nStr, ModelRunEntityNames.class);

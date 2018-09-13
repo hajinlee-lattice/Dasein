@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 public abstract class ModelQualityBaseDaoImpl<T extends HasPid> extends BaseDaoImpl<T> {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void delete(T entity) {
         if(entity == null) {

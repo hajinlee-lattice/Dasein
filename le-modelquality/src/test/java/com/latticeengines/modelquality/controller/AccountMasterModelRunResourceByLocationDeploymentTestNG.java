@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 
 public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
 
+    @SuppressWarnings("deprecation")
     @Override
     @BeforeClass(groups = { "deployment", "am", "am_all" })
     public void setup() throws Exception {

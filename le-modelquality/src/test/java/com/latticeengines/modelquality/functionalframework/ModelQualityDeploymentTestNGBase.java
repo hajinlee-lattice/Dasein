@@ -2,6 +2,7 @@ package com.latticeengines.modelquality.functionalframework;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -95,9 +96,11 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         try {
+            Charset encoding = null;
             String analyticTestStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/analytictest.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             AnalyticTestEntityNames analyticTestEntityNames = JsonUtils.deserialize(analyticTestStr,
                     AnalyticTestEntityNames.class);
             AnalyticTest analyticTestPrevAlreadyExists = analyticTestEntityMgr.findByName("TestAnalyticTest");
@@ -115,7 +118,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             String analyticPipelineStr = FileUtils.readFileToString(new File( //
                     ClassLoader
                             .getSystemResource("com/latticeengines/modelquality/functionalframework/analyticpipeline.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             AnalyticPipelineEntityNames analyticPipelineEntityNames = JsonUtils.deserialize(analyticPipelineStr,
                     AnalyticPipelineEntityNames.class);
 
@@ -148,7 +152,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             String algorithmStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/algorithm.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             algorithm = JsonUtils.deserialize(algorithmStr, Algorithm.class);
             Algorithm algorithmAlreadyExists = algorithmEntityMgr.findByName(algorithm.getName());
             if (algorithmAlreadyExists == null) {
@@ -157,7 +162,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             String dataflowStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataflow.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             dataflow = JsonUtils.deserialize(dataflowStr, DataFlow.class);
             DataFlow dataFlowAlreadyExists = dataFlowEntityMgr.findByName(dataflow.getName());
             if (dataFlowAlreadyExists != null) {
@@ -169,7 +175,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             String propDataStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/propdata.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             propData = JsonUtils.deserialize(propDataStr, PropData.class);
             String dataCloudVersion = columnMetadataProxy.latestVersion("2.0").getVersion();
             propData.setDataCloudVersion(dataCloudVersion);
@@ -184,7 +191,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             String samplingStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/sampling.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             sampling = JsonUtils.deserialize(samplingStr, Sampling.class);
             Sampling samplingAlreadyExists = samplingEntityMgr.findByName(sampling.getName());
             if (samplingAlreadyExists != null) {
@@ -207,7 +215,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             String pipelineStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             pipeline1 = JsonUtils.deserialize(pipelineStr, Pipeline.class);
             Pipeline pipelineAlreadyExists = pipelineEntityMgr.findByName(pipeline1.getName());
             if (pipelineAlreadyExists != null) {
@@ -234,7 +243,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             String datasetStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataset.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             dataset = JsonUtils.deserialize(datasetStr, DataSet.class);
             DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(dataset.getName());
             if (datasetAlreadyExists != null) {
@@ -266,7 +276,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             String modelRunStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/modelrun.json")
-                            .getFile()));
+                            .getFile()),
+                    encoding);
             ModelRunEntityNames modelRunEntityNames1 = JsonUtils.deserialize(modelRunStr, ModelRunEntityNames.class);
             modelRunEntityNames1.setAnalyticPipelineName(analyticPipeline1.getName());
             modelRunEntityNames1.setDataSetName(dataset.getName());
@@ -335,7 +346,6 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         deploymentTestBed.switchToSuperAdmin(mainTestTenant);
     }
 
-    @SuppressWarnings("unchecked")
     protected List<SelectedConfig> getSelectedConfigs() {
         SelectedConfig selectedConfig1 = new SelectedConfig();
         selectedConfig1.setAlgorithm(algorithm);
