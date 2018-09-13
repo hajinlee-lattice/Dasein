@@ -25,7 +25,7 @@ public class ProspectingUserServiceImpl implements ProspectingUserService {
     @Inject
     private UserService userService;
 
-    @Value("${security.app.public.url:http://localhost:8081}")
+    @Value("${security.app.public.url}")
     private String apiPublicUrl;
 
     @Override
