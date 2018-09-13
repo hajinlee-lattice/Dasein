@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagProvide
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
-import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 
 public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     private static final Logger log = LoggerFactory.getLogger(new Object() {

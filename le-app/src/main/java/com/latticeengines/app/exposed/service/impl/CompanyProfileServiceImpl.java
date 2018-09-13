@@ -36,6 +36,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 @Component("companyProfileService")
 public class CompanyProfileServiceImpl implements CompanyProfileService {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(CompanyProfileServiceImpl.class);
 
     @Autowired
@@ -95,6 +96,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private CompanyProfile createCompanyProfile(MatchOutput matchOutput, String dataCloudVersion,
             Boolean considerInternalAttributes) {
         CompanyProfile profile = new CompanyProfile();

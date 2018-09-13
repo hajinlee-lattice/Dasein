@@ -1,32 +1,19 @@
 package com.latticeengines.camille;
 
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.JobPublisher;
-import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.ZooDefs;
-import org.testng.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.camille.exposed.JobPublisher;
+import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.netflix.curator.test.TestingServer;
-
-import java.util.UUID;
 
 public class JobPublisherUnitTestNG {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 

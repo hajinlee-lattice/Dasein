@@ -28,6 +28,7 @@ public class FeatureFlagUnitTestNG {
         CamilleTestEnvironment.stop();
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testEnableFlag() throws Exception {
         final String id1 = "TestFlag1";
@@ -56,6 +57,7 @@ public class FeatureFlagUnitTestNG {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testDeprecatedFlag() throws Exception {
         final String id1 = "TestFlag1";
@@ -73,6 +75,7 @@ public class FeatureFlagUnitTestNG {
         Assert.assertFalse(FeatureFlagClient.isEnabled(CamilleTestEnvironment.getCustomerSpace(), id1));
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testFeatureFlagClientHandlesInvalidPath() throws Exception {
         final String id = "TestFlag";

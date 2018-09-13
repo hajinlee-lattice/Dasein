@@ -96,6 +96,7 @@ public class WatcherCache<K, V> {
                 log.info("ZK watcher " + watcherName + " changed, updating " + cacheName + " ...");
                 refresh(NodeWatcher.getWatchedData(watcherName));
             });
+            @SuppressWarnings("rawtypes")
             Caffeine caffeine = Caffeine.newBuilder().maximumSize(capacity);
             if (expireUnit != null) {
                 caffeine.expireAfterWrite(expire, expireUnit);

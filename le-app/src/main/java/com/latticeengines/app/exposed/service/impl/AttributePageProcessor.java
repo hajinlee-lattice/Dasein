@@ -163,7 +163,7 @@ public class AttributePageProcessor {
 
         for (ColumnMetadata column : allColumns) {
             if (onlySelectedAttributes == Boolean.TRUE //
-                    && !selectedAttributeNames.contains(column.getColumnId())) {
+                    && !selectedAttributeNames.contains(column.getAttrName())) {
                 continue;
             }
 
@@ -247,6 +247,7 @@ public class AttributePageProcessor {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private LeadEnrichmentAttribute constructAttribute(List<String> selectedAttributeNames, ColumnMetadata column) {
         LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
         attr.setDisplayName(column.getDisplayName());
@@ -259,7 +260,7 @@ public class AttributePageProcessor {
         attr.setFundamentalType(column.getFundamentalType());
         attr.setDataSource(column.getMatchDestination());
         attr.setDescription(column.getDescription());
-        attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));
+        attr.setIsSelected(selectedAttributeNames.contains(column.getAttrName()));
         attr.setIsPremium(column.isPremium());
         attr.setCategory(column.getCategory().getName());
         attr.setSubcategory(column.getSubcategory());

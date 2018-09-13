@@ -2,8 +2,8 @@ package com.latticeengines.app.exposed.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.dao.CategoryCustomizationPropertyDao;
@@ -21,7 +21,6 @@ public class CategoryCustomizationPropertyDaoImpl extends BaseDaoImpl<CategoryCu
         return CategoryCustomizationProperty.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public CategoryCustomizationProperty find(AttributeUseCase useCase, String categoryName, String propertyName) {
         Session session = getSessionFactory().getCurrentSession();
@@ -30,7 +29,7 @@ public class CategoryCustomizationPropertyDaoImpl extends BaseDaoImpl<CategoryCu
                         + "and useCase = :useCase " //
                         + "and propertyName = :propertyName", //
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<CategoryCustomizationProperty> query = session.createQuery(queryStr, CategoryCustomizationProperty.class);
         query.setParameter("categoryName", categoryName);
         query.setParameter("useCase", useCase);
         query.setParameter("propertyName", propertyName);
@@ -41,6 +40,7 @@ public class CategoryCustomizationPropertyDaoImpl extends BaseDaoImpl<CategoryCu
         return results.get(0);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void deleteSubcategories(Category category, AttributeUseCase useCase, String propertyName) {
         Session session = getSessionFactory().getCurrentSession();

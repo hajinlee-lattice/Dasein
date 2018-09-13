@@ -76,17 +76,17 @@ public class AttributeServiceImplTestNG extends AppTestNGBase {
         MultiTenantContext.setTenant(tenant);
 
         ColumnMetadata cm1 = new ColumnMetadata();
-        cm1.setColumnId(ATTRIBUTE_NAME_1);
+        cm1.setAttrName(ATTRIBUTE_NAME_1);
         cm1.setCategory(category1);
         cm1.setSubcategory(subcategory1);
 
         ColumnMetadata cm2 = new ColumnMetadata();
-        cm2.setColumnId(ATTRIBUTE_NAME_2);
+        cm2.setAttrName(ATTRIBUTE_NAME_2);
         cm2.setCategory(category1);
         cm2.setSubcategory(subcategory2);
 
         ColumnMetadata cm3 = new ColumnMetadata();
-        cm3.setColumnId(ATTRIBUTE_NAME_3);
+        cm3.setAttrName(ATTRIBUTE_NAME_3);
         cm3.setCategory(category2);
         cm3.setSubcategory(subcategory1);
 

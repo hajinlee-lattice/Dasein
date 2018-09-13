@@ -46,6 +46,7 @@ public class PrimaryAttributeServiceImpl implements PrimaryAttributeService {
         return primaryFields;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public PrimaryFieldValidationExpression getPrimaryFieldValidationExpression(CustomerSpace customerSpace) {
         boolean fuzzyMatchEnabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_FUZZY_MATCH);

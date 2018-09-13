@@ -2,8 +2,6 @@ package com.latticeengines.app.exposed.service.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -13,10 +11,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 

@@ -2,8 +2,8 @@ package com.latticeengines.app.exposed.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.dao.AttributeCustomizationPropertyDao;
@@ -22,7 +22,6 @@ public class AttributeCustomizationPropertyDaoImpl extends BaseDaoImpl<Attribute
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public AttributeCustomizationProperty find(String attributeName, AttributeUseCase useCase, String propertyName) {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format(
@@ -30,7 +29,8 @@ public class AttributeCustomizationPropertyDaoImpl extends BaseDaoImpl<Attribute
                         + "and useCase = :useCase " //
                         + "and propertyName = :propertyName", //
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<AttributeCustomizationProperty> query = session.createQuery(queryStr,
+                AttributeCustomizationProperty.class);
         query.setParameter("attributeName", attributeName);
         query.setParameter("useCase", useCase);
         query.setParameter("propertyName", propertyName);
@@ -41,6 +41,7 @@ public class AttributeCustomizationPropertyDaoImpl extends BaseDaoImpl<Attribute
         return results.get(0);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void deleteSubcategory(String categoryName, AttributeUseCase useCase, String propertyName) {
         Session session = getSessionFactory().getCurrentSession();
@@ -56,6 +57,7 @@ public class AttributeCustomizationPropertyDaoImpl extends BaseDaoImpl<Attribute
         query.executeUpdate();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void deleteCategory(Category category, AttributeUseCase useCase, String propertyName) {
         Session session = getSessionFactory().getCurrentSession();

@@ -69,6 +69,7 @@ public class AttributeServiceImpl implements AttributeService {
         columnMetadataProxy.scheduleLoadColumnMetadataCache();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
             Map<String, Integer> limitationMap, Boolean considerInternalAttributes) {
@@ -124,6 +125,7 @@ public class AttributeServiceImpl implements AttributeService {
                 });
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void saveSelectedAttribute(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
             Map<String, Integer> limitationMap, Boolean considerInternalAttributes) {

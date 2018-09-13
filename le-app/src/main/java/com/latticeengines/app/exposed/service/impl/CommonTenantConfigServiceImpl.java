@@ -3,9 +3,6 @@ package com.latticeengines.app.exposed.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.pls.TenantConfiguration;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -20,16 +17,18 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.DataLicense;
+import com.latticeengines.domain.exposed.pls.TenantConfiguration;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("appTenantConfigService")
 public class CommonTenantConfigServiceImpl implements CommonTenantConfigService {

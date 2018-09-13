@@ -1,31 +1,16 @@
 package com.latticeengines.camille.exposed;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.UUID;
 
-import com.google.common.primitives.Ints;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
-import org.springframework.util.SerializationUtils;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.api.CuratorWatcher;
-import org.apache.curator.framework.api.SetDataBuilder;
-import org.apache.curator.framework.recipes.cache.ChildData;
-import org.apache.curator.framework.recipes.cache.NodeCache;
-import org.apache.curator.framework.recipes.cache.TreeCache;
-import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.camille.exposed.Camille;
-
-import java.util.UUID;
 
 
 public class JobPublisher {
@@ -42,7 +27,6 @@ public class JobPublisher {
         if((jobID == null) || (jobID == ""))
             jobID = UUID.randomUUID().toString();
 
-        String reducedJobID = jobID.replace("/", "_");
         return rootPath.append(requestsFolder).append(jobID);
     }
 

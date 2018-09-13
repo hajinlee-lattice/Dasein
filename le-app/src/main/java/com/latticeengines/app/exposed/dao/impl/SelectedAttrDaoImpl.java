@@ -1,7 +1,7 @@
 package com.latticeengines.app.exposed.dao.impl;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.dao.SelectedAttrDao;
@@ -25,9 +25,10 @@ public class SelectedAttrDaoImpl extends BaseDaoImpl<SelectedAttribute> implemen
             basicQueryStr += " where isPremium = :isPremium ";
         }
         String queryStr = String.format(basicQueryStr, entityClz.getSimpleName());
+        @SuppressWarnings("rawtypes")
         Query query = session.createQuery(queryStr);
         if (onlyPremium) {
-            query.setBoolean("isPremium", onlyPremium);
+            query.setParameter("isPremium", onlyPremium);
         }
         return ((Long) query.uniqueResult()).intValue();
     }

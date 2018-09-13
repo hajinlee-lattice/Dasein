@@ -1,23 +1,20 @@
 package com.latticeengines.app.exposed.service.impl;
 
-import com.latticeengines.app.exposed.service.EnrichmentService;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.TestDataGenerator;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
-import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
-import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.latticeengines.app.exposed.service.EnrichmentService;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.TestDataGenerator;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 public class EnrichmentServiceImplUnitTestNG {
     private static final int INTERNAL_ATTR_COUNT = 200;

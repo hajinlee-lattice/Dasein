@@ -23,6 +23,7 @@ import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -32,7 +33,6 @@ import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("attributeCustomizationService")
 public class AttributeCustomizationServiceImpl implements AttributeCustomizationService {
@@ -47,6 +47,7 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
     @Autowired
     private AttributeService attributeService;
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void save(String name, AttributeUseCase useCase, String propertyName, String value) {
         log.info(String.format("Customizing attribute %s for tenant %s and use case %s with flags %s:%s", name,
@@ -194,6 +195,7 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
         return true;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
     public void saveCategory(Category category, AttributeUseCase useCase, String propertyName, String value) {
@@ -212,6 +214,7 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
         });
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
     public void saveSubcategory(Category category, String subcategoryName, AttributeUseCase useCase,
