@@ -137,6 +137,10 @@ public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements Fa
             this.bookSource = bookSource;
         }
 
+        public Item() {
+
+        }
+
         public String getDuns() {
             return duns;
         }
