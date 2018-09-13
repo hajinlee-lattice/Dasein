@@ -39,6 +39,10 @@ public class ModelingInstaller extends LatticeComponentInstaller {
         return configDir;
     }
 
+    public DataEncryptionService getDataEncryptionService() {
+        return dataEncryptionService;
+    }
+
     public void setDataEncryptionService(DataEncryptionService dataEncryptionService) {
         this.dataEncryptionService = dataEncryptionService;
     }

@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 
+@SuppressWarnings("deprecation")
 public class ModelRetrieverUnitTestNG {
 
     private static final String TARGETDIR = "/tmp/modelretrieverunittest/modelfiles";
@@ -69,6 +70,7 @@ public class ModelRetrieverUnitTestNG {
 
     private long defaultPmmlFileSize = 2l;
 
+    @SuppressWarnings("unused")
     private long largePmmlFileSize = 5l;
 
     @Mock
@@ -104,7 +106,6 @@ public class ModelRetrieverUnitTestNG {
         doReturn(ModelSummaryStatus.ACTIVE).when(oldModelSummary).getStatus();
     }
 
-    @SuppressWarnings("deprecation")
     private void mockModelRetriever() {
         scoringArtifact = new ScoringArtifacts(oldModelSummary, null, null, null, null, null, null, null, null, null);
         doReturn(scoringArtifact).when(modelRetriever).retrieveModelArtifactsFromHdfs(any(CustomerSpace.class),

@@ -125,6 +125,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
+    @SuppressWarnings("unused")
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     private String localPathToPersist = null;
@@ -189,6 +190,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return fields;
     }
 
+    @SuppressWarnings("deprecation")
     Fields loadModelFieldsViaCache(CustomerSpace customerSpace, String modelId) {
         Fields fields = new Fields();
         fields.setModelId(modelId);
@@ -329,6 +331,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return Triple.of(hdfsScoreArtifactBaseDir, hdfsScoreArtifactTableDir, hdfsSamplesAvroPath);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, //
             String modelId) {

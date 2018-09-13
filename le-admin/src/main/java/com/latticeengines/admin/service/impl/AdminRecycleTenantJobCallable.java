@@ -2,9 +2,9 @@ package com.latticeengines.admin.service.impl;
 
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import java.util.concurrent.TimeUnit;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
@@ -17,6 +17,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     private static final long inAccessPeriod = TimeUnit.DAYS.toMillis(90);
     private static final long exiprePeriod = TimeUnit.DAYS.toMillis(210);
     private static final long emailPeriod = TimeUnit.DAYS.toMillis(14);
+    @SuppressWarnings("unused")
     private String jobArguments;
 
     private EmailService emailService;

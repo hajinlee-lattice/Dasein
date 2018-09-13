@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -18,7 +17,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -36,9 +34,8 @@ public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     @Inject
     private PLSComponentDeploymentTestNG plsComponentDeploymentTestNG;
 
+    @SuppressWarnings("unused")
     private String cdlUrl;
-
-    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     @PostConstruct
     public void postConstruct() {
@@ -53,6 +50,7 @@ public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         plsComponentDeploymentTestNG.tearDown();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment")
     public void testInstallation() {
         loginAD();

@@ -23,10 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import org.dmg.pmml.CompoundPredicate;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.EmbeddedModel;
@@ -40,7 +36,13 @@ import org.dmg.pmml.Predicate;
 import org.dmg.pmml.ScoreDistribution;
 import org.dmg.pmml.TreeModel;
 
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+
 public class TreeModelEvaluator extends ModelEvaluator<TreeModel> implements HasEntityRegistry<Node> {
+    private static final long serialVersionUID = 7297235040483467495L;
 
     transient
     private BiMap<String, Node> entityRegistry = null;
@@ -309,10 +311,7 @@ public class TreeModelEvaluator extends ModelEvaluator<TreeModel> implements Has
         for(int i = 0, max = scoreDistributions.size(); i < max; i++){
             ScoreDistribution scoreDistribution = scoreDistributions.get(i);
 
-            Double recordCount = scoreDistribution.getRecordCount();
-            if(recordCount == null){
-                throw new InvalidFeatureException(scoreDistribution);
-            }
+            double recordCount = scoreDistribution.getRecordCount();
 
             sum += recordCount;
         } // End for

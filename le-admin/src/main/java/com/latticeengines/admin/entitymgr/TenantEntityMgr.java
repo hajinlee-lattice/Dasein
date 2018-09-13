@@ -2,8 +2,6 @@ package com.latticeengines.admin.entitymgr;
 
 import java.util.Collection;
 
-import org.apache.curator.framework.recipes.cache.TreeCache;
-
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;

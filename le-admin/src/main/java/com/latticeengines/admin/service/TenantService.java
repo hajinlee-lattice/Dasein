@@ -3,8 +3,6 @@ package com.latticeengines.admin.service;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.curator.framework.recipes.cache.TreeCache;
-
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;

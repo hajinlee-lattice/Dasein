@@ -109,6 +109,7 @@ public class DefaultModelJsonTypeHandlerUnitTestNG {
         record.put("K5", "Value");
     }
 
+    @SuppressWarnings("deprecation")
     private List<BucketMetadata> generateDefaultBucketMetadataList() {
         List<BucketMetadata> bucketMetadataList = new ArrayList<BucketMetadata>();
         BucketMetadata bucket1 = new BucketMetadata();

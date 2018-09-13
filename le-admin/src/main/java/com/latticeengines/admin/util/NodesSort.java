@@ -10,9 +10,8 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory.Nod
 
 public class NodesSort {
 
-    @SuppressWarnings("unchecked")
     public static void sortByServiceName(SerializableDocumentDirectory dir, String serviceName) {
-        List<Node> sortedNodes = new ArrayList();
+        List<Node> sortedNodes = new ArrayList<>();
         Collection<Node> collections = dir.getNodes();
         if (collections == null || collections.size() == 0) {
             return;

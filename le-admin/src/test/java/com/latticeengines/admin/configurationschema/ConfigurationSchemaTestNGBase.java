@@ -106,6 +106,7 @@ public class ConfigurationSchemaTestNGBase {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static JsonNode removeDataVersion(ObjectNode oNode) {
         ObjectMapper mapper = new ObjectMapper();
         if (oNode.has("Version"))

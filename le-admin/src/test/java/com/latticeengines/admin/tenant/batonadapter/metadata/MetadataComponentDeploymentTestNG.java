@@ -16,7 +16,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.service.impl.ComponentOrchestrator;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
 import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponentDeploymentTestNG;
@@ -27,9 +26,6 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
-
-    @Autowired
-    private ComponentOrchestrator orchestrator;
 
     @Autowired
     private PLSComponentDeploymentTestNG plsComponentTestNG;

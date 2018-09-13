@@ -49,6 +49,7 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
         return batonService.getTenantsInCache(contractId);
     }
 
+    @SuppressWarnings("unused")
     private DocumentDirectory getSpaceConfiguration(String contractId, String tenantId) {
         Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID).append(new Path("/SpaceConfiguration"));

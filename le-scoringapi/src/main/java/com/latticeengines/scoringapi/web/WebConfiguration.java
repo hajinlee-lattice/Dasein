@@ -14,6 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import com.latticeengines.monitor.exposed.metric.stats.Inspection;
 import com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection;
 
+@SuppressWarnings("deprecation")
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = { "com.latticeengines.db", "com.latticeengines.oauth2db", "com.latticeengines.scoringapi",

@@ -33,6 +33,7 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     private List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList;
     private BulkRecordScoreRequest request;
     private Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap;
+    @SuppressWarnings("unused")
     private Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap;
     private Map<String, Map<String, Predefined>> recordModelIdSelectionMap;
     private AdditionalScoreConfig additionalScoreConfig;

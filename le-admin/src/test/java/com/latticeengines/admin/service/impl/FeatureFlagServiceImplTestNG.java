@@ -39,6 +39,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         featureFlagService.undefineFlag(FLAG_ID);
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "functional")
     public void testDefaultFeatureFlags() {
         FeatureFlagDefinitionMap defaultFeatureFlagMap = featureFlagService.getDefinitions();

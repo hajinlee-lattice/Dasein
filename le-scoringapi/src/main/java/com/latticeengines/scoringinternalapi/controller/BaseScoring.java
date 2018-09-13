@@ -84,8 +84,6 @@ public abstract class BaseScoring extends CommonBase {
 
     private static final String TOTAL_TIME_PREFIX = "total_";
 
-    private static final Integer MAX_ALLOWED_WARNING_FOR_A_TYPE = null;
-
     @Autowired
     protected OAuthUserEntityMgr oAuthUserEntityMgr;
 
@@ -364,7 +362,6 @@ public abstract class BaseScoring extends CommonBase {
                     Record record = scoreRequests.getRecords().get(idx++);
                     for (ScoreModelTuple scoreTuple : resp.getScores()) {
                         Map<String, String> logMap = new HashMap<>();
-                        String modelId = scoreTuple.getModelId();
                         Integer score = scoreTuple.getScore();
                         String error = scoreTuple.getError();
                         String errorDesc = scoreTuple.getErrorDescription();

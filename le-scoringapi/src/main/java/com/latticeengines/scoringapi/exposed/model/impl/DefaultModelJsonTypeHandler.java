@@ -456,6 +456,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         return new ScoreEvaluation(probability, percentile, bucketName);
     }
 
+    @SuppressWarnings("deprecation")
     protected BucketName bucketPercileScore(ScoringArtifacts scoringArtifacts, int percentile) {
         List<BucketMetadata> bucketMetadataList = scoringArtifacts.getBucketMetadataList();
         BucketName bucketName = null;

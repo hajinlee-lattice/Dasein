@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,9 +83,10 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         int i = 0;
         for (File tenant : tenantList) {
             tenants[i][0] = tenant.getAbsolutePath();
+            Charset encoding = null;
             RecordTransformerTestMetadata metadata = JsonUtils.deserialize(
                     FileUtils.readFileToString(//
-                            new File(tenant.getAbsolutePath() + "/metadata.json")), //
+                            new File(tenant.getAbsolutePath() + "/metadata.json"), encoding), //
                     RecordTransformerTestMetadata.class);
             tenants[i][1] = metadata.keyColumn;
             i++;
@@ -129,10 +131,11 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
 
         new ModelExtractor().extractModelArtifacts(modelFilePath, modelExtractionDir.getAbsolutePath());
 
+        Charset encoding = null;
         DataComposition dataComposition = JsonUtils.deserialize( //
-                FileUtils.readFileToString(new File(dataCompositionPath)), DataComposition.class);
+                FileUtils.readFileToString(new File(dataCompositionPath), encoding), DataComposition.class);
         ScoreDerivation scoreDerivation = JsonUtils.deserialize(FileUtils.readFileToString( //
-                new File(scoreDerivationPath)), ScoreDerivation.class);
+                new File(scoreDerivationPath), encoding), ScoreDerivation.class);
 
         System.out.println("Processing tenant " + tenantName);
         
