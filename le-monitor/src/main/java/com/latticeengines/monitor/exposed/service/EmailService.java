@@ -21,6 +21,8 @@ public interface EmailService {
 
     void sendPlsNewInternalUserEmail(Tenant tenant, User user, String password, String hostport);
 
+    void sendPlsNewProspectingUserEmail(User user, String password, String hostport);
+
     void sendPlsNewExternalUserEmail(User user, String password, String hostport, boolean bccEmail);
 
     void sendPlsExistingInternalUserEmail(Tenant tenant, User user, String hostport);

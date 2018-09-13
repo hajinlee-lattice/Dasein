@@ -55,4 +55,6 @@ public interface UserService {
 
     String addUserAccessLevel(String userName,String emails, AccessLevel level);
 
+    public RegistrationResult registerUserWithNoTenant(UserRegistration userReg);
+
 }

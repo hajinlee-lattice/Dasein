@@ -77,6 +77,27 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public void sendPlsNewProspectingUserEmail(User user, String password, String hostport) {
+        try {
+            log.info("Sending new PLS internal user email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_NEW_PREVISION_USER);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{username}}", user.getUsername());
+            builder.replaceToken("{{password}}", password);
+            builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
+            log.info("Sending new PLS internal user email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send new PLS internal user email to " + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
     public void sendPlsNewInternalUserEmail(Tenant tenant, User user, String password, String hostport) {
         try {
             log.info("Sending new PLS internal user email to " + user.getEmail() + " started.");
@@ -622,7 +643,8 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-instructions.png", "image/png", "instruction");
+            builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-instructions.png", "image/png",
+                    "instruction");
             sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT, exportID), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS segment export complete email to " + user.getEmail() + " succeeded.");
@@ -661,11 +683,12 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{firstname}}", user.getFirstName());
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT, exportID), mp,
-                    Collections.singleton(user.getEmail()));
+            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT, exportID),
+                    mp, Collections.singleton(user.getEmail()));
             log.info("Sending PLS export segment in-progress email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS export segment in-progress email to " + user.getEmail() + " " + e.getMessage());
+            log.error(
+                    "Failed to send PLS export segment in-progress email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
@@ -717,8 +740,8 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendCDLProcessAnalyzeCompletionEmail(User user, Tenant tenant, String hostport) {
         try {
-            log.info("Sending CDL processanalyze complete email to " + user.getEmail() + " on " +
-                    tenant.getName() + " started.");
+            log.info("Sending CDL processanalyze complete email to " + user.getEmail() + " on " + tenant.getName()
+                    + " started.");
             EmailTemplateBuilder builder;
             builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_JOB_SUCCESS);
 
@@ -730,19 +753,19 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.CDL_PA_COMPLETION_EMAIL_SUBJECT, mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending CDL processanalyze complete email to " + user.getEmail() +
-                    " on " + tenant.getName() + " succeeded.");
+            log.info("Sending CDL processanalyze complete email to " + user.getEmail() + " on " + tenant.getName()
+                    + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send CDL processanalyze complete email to " + user.getEmail() +
-                    " on " + tenant.getName() +  " " + e.getMessage());
+            log.error("Failed to send CDL processanalyze complete email to " + user.getEmail() + " on "
+                    + tenant.getName() + " " + e.getMessage());
         }
     }
 
     @Override
     public void sendCDLProcessAnalyzeErrorEmail(User user, Tenant tenant, String hostport) {
         try {
-            log.info("Sending PLS processanalyze error email to " + user.getEmail() + " on " +
-                    tenant.getName() + " started.");
+            log.info("Sending PLS processanalyze error email to " + user.getEmail() + " on " + tenant.getName()
+                    + " started.");
             EmailTemplateBuilder builder;
             builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_JOB_ERROR);
 
@@ -752,13 +775,12 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(EmailSettings.CDL_PA_ERROR_EMAIL_SUBJECT, mp,
-                    Collections.singleton(user.getEmail()));
-            log.info("Sending CDL processanalyze error email to " + user.getEmail() +
-                    " on " + tenant.getName() + " succeeded.");
+            sendMultiPartEmail(EmailSettings.CDL_PA_ERROR_EMAIL_SUBJECT, mp, Collections.singleton(user.getEmail()));
+            log.info("Sending CDL processanalyze error email to " + user.getEmail() + " on " + tenant.getName()
+                    + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send CDL processanalyze error email to " + user.getEmail() +
-                    " on " + tenant.getName() +  " " + e.getMessage());
+            log.error("Failed to send CDL processanalyze error email to " + user.getEmail() + " on " + tenant.getName()
+                    + " " + e.getMessage());
         }
     }
 
@@ -778,9 +800,7 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.POC_STATE_NOTICE_EMAIL_SUBJECT, mp,
                     Collections.singleton(user.getEmail()));
-            log.info(
-                    "Sending POC tenant state email to " + user.getEmail() + " on " + tenant.getName()
-                    + " succeeded.");
+            log.info("Sending POC tenant state email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send POC tenant state notice email to " + user.getEmail() + " on " + tenant.getName()
                     + " " + e.getMessage());

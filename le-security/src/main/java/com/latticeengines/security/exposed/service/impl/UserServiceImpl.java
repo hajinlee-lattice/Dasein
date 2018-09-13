@@ -127,7 +127,6 @@ public class UserServiceImpl implements UserService {
         return userByEmail != null;
     }
 
-
     @Override
     public boolean upsertSamlIntegrationUser(LoginValidationResponse samlLoginResp, String tenantDeploymentId) {
         GlobalAuthUser globalAuthUser = globalUserManagementService.findByEmailNoJoin(samlLoginResp.getUserId());
@@ -136,17 +135,21 @@ public class UserServiceImpl implements UserService {
             LOGGER.info("Creating new User: %s for Tenant: %s", samlLoginResp.getUserId(), tenantDeploymentId);
             globalUserManagementService.registerExternalIntegrationUser(userInfoFromSaml);
         }
-        List<String> gaUserRights = globalUserManagementService.getRights(userInfoFromSaml.getEmail(), tenantDeploymentId);
-        
+        List<String> gaUserRights = globalUserManagementService.getRights(userInfoFromSaml.getEmail(),
+                tenantDeploymentId);
+
         AccessLevel grantAccessLevel = null;
         if (StringUtils.isBlank(userInfoFromSaml.getAccessLevel())) {
-            // If the SAML role doesn't match with any of the allowed roles, then grant External User role
+            // If the SAML role doesn't match with any of the allowed roles,
+            // then grant External User role
             assignAccessLevel(AccessLevel.EXTERNAL_USER, tenantDeploymentId, userInfoFromSaml.getEmail());
         } else {
-            // If there is any change in user configurations between login attempts, update the access level
+            // If there is any change in user configurations between login
+            // attempts, update the access level
             AccessLevel existingAccessLevel = AccessLevel.findAccessLevel(gaUserRights);
-            AccessLevel samlResponseAccessLevel = AccessLevel.findAccessLevel(Arrays.asList((String)userInfoFromSaml.getAccessLevel()));
-            
+            AccessLevel samlResponseAccessLevel = AccessLevel
+                    .findAccessLevel(Arrays.asList((String) userInfoFromSaml.getAccessLevel()));
+
             if (samlResponseAccessLevel != existingAccessLevel) {
                 assignAccessLevel(samlResponseAccessLevel, tenantDeploymentId, userInfoFromSaml.getEmail());
             }
@@ -156,13 +159,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username) {
-        if (accessLevel == null) { return resignAccessLevel(tenantId, username); }
+        if (accessLevel == null) {
+            return resignAccessLevel(tenantId, username);
+        }
         if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
-                LOGGER.warn(
-                        String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
+                LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
                 return true;
             }
         }
@@ -202,7 +206,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByEmail(String email) { return globalUserManagementService.getUserByEmail(email); }
+    public User findByEmail(String email) {
+        return globalUserManagementService.getUserByEmail(email);
+    }
 
     @Override
     public User findByUsername(String username) {
@@ -213,15 +219,16 @@ public class UserServiceImpl implements UserService {
     public List<User> getUsers(String tenantId, UserFilter filter) {
         List<User> users = new ArrayList<>();
         try {
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
-                    = globalUserManagementService.getAllUsersOfTenant(tenantId);
+            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
+                    .getAllUsersOfTenant(tenantId);
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
                 AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
                 if (accessLevel != null) {
                     user.setAccessLevel(accessLevel.name());
                 }
-                if (filter.visible(user)) users.add(user);
+                if (filter.visible(user))
+                    users.add(user);
             }
         } catch (LedpException e) {
             LOGGER.warn(String.format("Trying to get all users from a non-existing tenant %s", tenantId));
@@ -256,6 +263,45 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public RegistrationResult registerUserWithNoTenant(UserRegistration userReg) {
+        RegistrationResult result = new RegistrationResult();
+        result.setValid(true);
+
+        User user = userReg.getUser();
+        user.setUsername(user.getUsername().toLowerCase());
+        user.setEmail(user.getEmail().toLowerCase());
+
+        String email = user.getEmail();
+        String username = user.getUsername();
+
+        User oldUser = findByEmail(email);
+        if (oldUser != null) {
+            result.setValid(false);
+            result.setConflictingUser(oldUser);
+        }
+
+        if (result.isValid()) {
+            oldUser = findByUsername(username);
+            if (oldUser != null) {
+                result.setValid(false);
+                result.setConflictingUser(oldUser);
+            }
+        }
+
+        if (result.isValid()) {
+            Boolean flag = createUser(userReg);
+            result.setValid(flag);
+        }
+
+        if (result.isValid()) {
+            String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
+            result.setPassword(tempPass);
+        }
+
+        return result;
+    }
+
+    @Override
     public RegistrationResult registerUserToTenant(UserRegistrationWithTenant userRegistrationWithTenant) {
         UserRegistration userRegistration = userRegistrationWithTenant.getUserRegistration();
         userRegistration.toLowerCase();
@@ -263,10 +309,14 @@ public class UserServiceImpl implements UserService {
         String tenantId = userRegistrationWithTenant.getTenant();
 
         RegistrationResult result = validateNewUser(user, tenantId);
-        if (!result.isValid()) return result;
+        if (!result.isValid()) {
+            return result;
+        }
 
         result.setValid(createUser(userRegistration));
-        if (!result.isValid()) return result;
+        if (!result.isValid()) {
+            return result;
+        }
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername());
@@ -289,9 +339,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /*
-     * if isCredentialsClearText is
-     * true => password in UserUpdateData is clear text
-     * false => password in UserUpdateData is SHA256 hashed
+     * if isCredentialsClearText is true => password in UserUpdateData is clear
+     * text false => password in UserUpdateData is SHA256 hashed
      */
     private boolean updateCredentials(User user, UserUpdateData data, boolean isCredentialsClearText) {
         // change password
@@ -321,7 +370,8 @@ public class UserServiceImpl implements UserService {
 
             boolean updateSucceeded;
             if (isCredentialsClearText) {
-                updateSucceeded = globalUserManagementService.modifyClearTextLatticeCredentials(ticket, oldCreds, newCreds);
+                updateSucceeded = globalUserManagementService.modifyClearTextLatticeCredentials(ticket, oldCreds,
+                        newCreds);
             } else {
                 updateSucceeded = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
             }
@@ -368,12 +418,11 @@ public class UserServiceImpl implements UserService {
                 for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
                     try {
                         if (rights.contains(right.getAuthority())) {
-                            success = success
-                                    && globalUserManagementService.revokeRight(
-                                    right.getAuthority(), tenantId, username);
+                            success = success && globalUserManagementService.revokeRight(right.getAuthority(), tenantId,
+                                    username);
                         }
                     } catch (Exception e) {
-                        //ignore
+                        // ignore
                     }
                 }
             }
