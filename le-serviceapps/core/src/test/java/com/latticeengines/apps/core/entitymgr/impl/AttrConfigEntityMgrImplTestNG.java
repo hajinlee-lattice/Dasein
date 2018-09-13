@@ -24,7 +24,7 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
-    private static final String DISPALY_NAME = "Display Name 1 你好";
+    private static final String DISPALY_NAME = "Display Name 1";
 
     @BeforeClass(groups = "functional")
     public void setup() {
