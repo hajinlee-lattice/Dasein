@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -19,7 +20,10 @@ import java.time.Instant;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.View;
+
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
@@ -55,7 +59,7 @@ public class ZendeskJwtHandler implements JwtHandler {
     }
 
     @Override
-    public String getJwtTokenWithRedirectURL(GlobalAuthUser user, JwtRequestParameters reqParameters)
+    public String getJwtTokenWithRedirectURL(HttpServletRequest request, GlobalAuthUser user, JwtRequestParameters reqParameters)
             throws LedpException {
         Map<String, String> parameters = reqParameters.getRequestParameters();
         String jwtString = getJwtToken(user, reqParameters);
@@ -68,6 +72,9 @@ public class ZendeskJwtHandler implements JwtHandler {
             } catch (UnsupportedEncodingException e) {
                 throw new LedpException(LedpCode.LEDP_19008, e);
             }
+        }
+        if (request != null) {
+            request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.TEMPORARY_REDIRECT);
         }
         return "redirect:" + redirectUrl;
     }

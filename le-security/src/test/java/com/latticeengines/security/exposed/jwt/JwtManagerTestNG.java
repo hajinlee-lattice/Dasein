@@ -12,6 +12,8 @@ import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGB
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
 
     @Autowired
@@ -31,7 +33,7 @@ public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
         reqParameters.setRequestParameters(parameters);
         String url = null;
         try {
-            url = jwtManager.handleJwtRequest(user, reqParameters, true);
+            url = jwtManager.handleJwtRequest(null, user, reqParameters, true);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();

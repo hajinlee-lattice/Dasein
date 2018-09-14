@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
@@ -28,7 +30,7 @@ public class JwtManager {
         jwtTokenHandlers.put(sourceRef, jwtGenerator);
     }
 
-    public String handleJwtRequest(GlobalAuthUser user, JwtRequestParameters reqParameters, boolean withURL)
+    public String handleJwtRequest(HttpServletRequest request, GlobalAuthUser user, JwtRequestParameters reqParameters, boolean withURL)
             throws LedpException {
         Map<String, String> parameters = reqParameters.getRequestParameters();
         if (parameters.containsKey(SOURCE_REF_KEY)) {
@@ -48,9 +50,8 @@ public class JwtManager {
         }
         jwtHandler.validateJwtParameters(user, reqParameters);
         try {
-
             if (withURL) {
-                jwtToken = jwtHandler.getJwtTokenWithRedirectURL(user, reqParameters);
+                jwtToken = jwtHandler.getJwtTokenWithRedirectURL(request, user, reqParameters);
             } else {
                 jwtToken = jwtHandler.getJwtToken(user, reqParameters);
             }
