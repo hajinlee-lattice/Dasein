@@ -6,8 +6,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
@@ -44,7 +42,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/purchasehistory")
 public class PurchaseHistoryResource {
-    private static final Logger log = LoggerFactory.getLogger(PurchaseHistoryResource.class);
 
     @Inject
     private PeriodTransactionProxy periodTransactionProxy;
@@ -98,10 +95,8 @@ public class PurchaseHistoryResource {
                         startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
             }
         } catch (LedpException le) {
-            log.error("Failed to get the purchase history data", le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
-            log.error("Failed to get the purchase history data", e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
 
