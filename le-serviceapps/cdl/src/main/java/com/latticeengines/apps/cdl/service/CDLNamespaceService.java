@@ -15,7 +15,7 @@ public interface CDLNamespaceService {
     <T extends Serializable> Namespace2<String, T> prependTenantId(Namespace1<T> namespace1);
 
     Namespace2<String, String> resolveTableRole(TableRoleInCollection role, DataCollection.Version version);
-
+    boolean hasTableRole(TableRoleInCollection role, DataCollection.Version version);
     Namespace2<String, String> resolveServingStore(BusinessEntity businessEntity, DataCollection.Version version);
 
     Namespace1<String> resolveDataCloudVersion();

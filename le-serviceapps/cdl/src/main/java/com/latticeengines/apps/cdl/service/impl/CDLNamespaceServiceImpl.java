@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
-import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -72,6 +72,14 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
                     "Cannot find table name for " + role + " at version " + version + " in tenant " + tenantId);
         }
         return Namespace.as(tenantId, tableName);
+    }
+
+    @Override
+    public boolean hasTableRole(TableRoleInCollection role, DataCollection.Version version) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        List<String> names = dataCollectionService.getTableNames(customerSpace, "", role, version);
+        return CollectionUtils.isNotEmpty(names);
     }
 
     @Override
