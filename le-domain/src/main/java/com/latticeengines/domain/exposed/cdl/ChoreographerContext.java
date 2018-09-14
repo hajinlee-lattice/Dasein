@@ -33,7 +33,7 @@ public class ChoreographerContext {
     private boolean purchaseMetricsChanged;
 
     @JsonProperty
-    private boolean rebuildPeriodTrxOnly;
+    private boolean businessCalenderChanged;
 
     public Set<BusinessEntity> getJobImpactedEntities() {
         return jobImpactedEntities;
@@ -83,11 +83,11 @@ public class ChoreographerContext {
         this.purchaseMetricsChanged = purchaseMetricsChanged;
     }
 
-    public boolean isRebuildPeriodTrxOnly() {
-        return rebuildPeriodTrxOnly;
+    public boolean isBusinessCalenderChanged() {
+        return businessCalenderChanged;
     }
 
-    public void setRebuildPeriodTrxOnly(boolean rebuildPeriodTrxOnly) {
-        this.rebuildPeriodTrxOnly = rebuildPeriodTrxOnly;
+    public void setBusinessCalenderChanged(boolean businessCalenderChanged) {
+        this.businessCalenderChanged = businessCalenderChanged;
     }
 }

@@ -18,11 +18,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistory;
-import com.latticeengines.cdl.workflow.steps.rebuild.ProfileTransaction;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -75,10 +75,17 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     private boolean hasRawStore = false;
     private boolean hasProducts = false;
     private boolean hasAccounts = false;
+    private boolean isBusinessCalenderChanged = false;
 
     @Override
     void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         hasManyUpdate = false;
+    }
+
+    @Override
+    protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
+        super.doInitialize(step);
+        checkBusinessCalendarChanged(step);
     }
 
     @Override
@@ -167,10 +174,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             skip = isCommonSkip(step, seq);
         }
 
-        if (isProfileTransaction(step)) {
-            skip = !shouldProfileTransaction(step, skip);
-        }
-
         return skip;
     }
 
@@ -217,20 +220,21 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
 
-        log.info(String.format(
-                "Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, hasProducts=%b, productChoreographer.hasChange=%b",
-                reset, hasRawStore, hasProducts, productChoreographer.hasChange));
+        log.info(String.format("Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, " +
+                        "hasProducts=%b, productChoreographer.hasChange=%b, isBusinessCalendarChanged=%b",
+                reset, hasRawStore, hasProducts, productChoreographer.hasChange, isBusinessCalenderChanged));
 
         if (reset) {
             return should;
         }
 
         if (!should) {
-            if (hasRawStore && hasProducts) {
-                if (productChoreographer.hasChange) {
-                    log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
-                    should = true;
-                }
+            if (hasRawStore && hasProducts && productChoreographer.hasChange) {
+                log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
+                should = true;
+            } else if (isBusinessCalenderChanged) {
+                log.info("Need to rebuild " + mainEntity() + " due to business calendar changed.");
+                should = true;
             }
         } else if (!hasProducts) {
             log.info("Skip rebuild " + mainEntity() + " due to missing product table.");
@@ -252,31 +256,13 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         return should;
     }
 
-    private boolean isProfileTransaction(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().contains(ProfileTransaction.BEAN_NAME);
-    }
-
     private boolean isProfilePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step) {
         return step.name().contains(ProfilePurchaseHistory.BEAN_NAME);
     }
 
-    private boolean shouldProfileTransaction(AbstractStep<? extends BaseStepConfiguration> step, boolean commonSkip) {
-        boolean shouldProfileTransaction = false;
-
-        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
-                ChoreographerContext.class);
-        boolean shouldRebuildPeriodTransactions = grapherContext.isRebuildPeriodTrxOnly();
-        if (commonSkip) {
-            shouldProfileTransaction = shouldRebuildPeriodTransactions;
-            if (shouldRebuildPeriodTransactions) {
-                rebuild = true;
-            }
-        } else {
-            grapherContext.setRebuildPeriodTrxOnly(false);
-            shouldProfileTransaction = true;
-        }
-
-        return shouldProfileTransaction;
+    void checkBusinessCalendarChanged(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext context = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
+        isBusinessCalenderChanged = context.isBusinessCalenderChanged();
     }
 
     private boolean shouldCalculatePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -379,5 +365,25 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 ObjectNode.class);
         jsonReport = PAReportUtils.appendMessageToProductReport(jsonReport, warning, true);
         step.putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), jsonReport);
+    }
+
+    @VisibleForTesting
+    void setProductChoreographer(ProcessProductChoreographer productChoreographer) {
+        this.productChoreographer = productChoreographer;
+    }
+
+    @VisibleForTesting
+    void setHasRawStore(boolean hasRawStore) {
+        this.hasRawStore = hasRawStore;
+    }
+
+    @VisibleForTesting
+    void setHasProducts(boolean hasProducts) {
+        this.hasProducts = hasProducts;
+    }
+
+    @VisibleForTesting
+    void setHasProductChange(boolean hasProductChange) {
+        this.productChoreographer.hasChange = hasProductChange;
     }
 }

@@ -69,7 +69,6 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private Table rawTable, dailyTable;
     private List<Table> periodTables;
     private Map<String, List<Product>> productMap;
-    private boolean rebuildPeriodTrxOnly;
 
     private String sortedDailyTablePrefix;
     private String sortedPeriodTablePrefix;
@@ -92,24 +91,22 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     private void initializeConfiguration() {
         ChoreographerContext context = getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
-        rebuildPeriodTrxOnly = context.isRebuildPeriodTrxOnly();
-        log.info("rebuildPeriodTrxOnly=" + rebuildPeriodTrxOnly);
+        boolean isBusinessCalendarChanged = context.isBusinessCalenderChanged();
+        log.info("isBusinessCalendarChanged=" + isBusinessCalendarChanged);
 
         customerSpace = configuration.getCustomerSpace();
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
 
-        String rawTableName = getRawTableName();
-        rawTable = metadataProxy.getTable(customerSpace.toString(), rawTableName);
+        String rawTransactionTableName = getRawTransactionTableName();
+        rawTable = metadataProxy.getTable(customerSpace.toString(), rawTransactionTableName);
         if (rawTable == null) {
             throw new RuntimeException("Cannot find raw transaction table.");
         }
 
         periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
 
-        if (!rebuildPeriodTrxOnly) {
-            buildPeriodStore(TableRoleInCollection.ConsolidatedDailyTransaction);
-        }
+        buildPeriodStore(TableRoleInCollection.ConsolidatedDailyTransaction);
         buildPeriodStore(TableRoleInCollection.ConsolidatedPeriodTransaction);
 
         dailyTable = dataCollectionProxy.getTable(customerSpace.toString(),
@@ -123,7 +120,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         loadProductMap();
     }
 
-    private String getRawTableName() {
+    private String getRawTransactionTableName() {
         String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         if (StringUtils.isBlank(rawTableName)) {
@@ -191,17 +188,15 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     @Override
     protected void onPostTransformationCompleted() {
-        if (!rebuildPeriodTrxOnly) {
-            String sortedDailyTableName = TableUtils.getFullTableName(sortedDailyTablePrefix, pipelineVersion);
-            Table sortedDailyTable = metadataProxy.getTable(customerSpace.toString(), sortedDailyTableName);
-            if (sortedDailyTable == null) {
-                throw new IllegalStateException("sortedDailyTable is null.");
-            }
-            sortedDailyTableName = renameServingStoreTable(BusinessEntity.Transaction, sortedDailyTable);
-            exportTableRoleToRedshift(sortedDailyTableName, BusinessEntity.Transaction.getServingStore());
-            dataCollectionProxy.upsertTable(customerSpace.toString(), sortedDailyTableName,
-                    BusinessEntity.Transaction.getServingStore(), inactive);
+        String sortedDailyTableName = TableUtils.getFullTableName(sortedDailyTablePrefix, pipelineVersion);
+        Table sortedDailyTable = metadataProxy.getTable(customerSpace.toString(), sortedDailyTableName);
+        if (sortedDailyTable == null) {
+            throw new IllegalStateException("sortedDailyTable is null.");
         }
+        sortedDailyTableName = renameServingStoreTable(BusinessEntity.Transaction, sortedDailyTable);
+        exportTableRoleToRedshift(sortedDailyTableName, BusinessEntity.Transaction.getServingStore());
+        dataCollectionProxy.upsertTable(customerSpace.toString(), sortedDailyTableName,
+                BusinessEntity.Transaction.getServingStore(), inactive);
 
         String sortedPeriodTableName = TableUtils.getFullTableName(sortedPeriodTablePrefix, pipelineVersion);
         Table sortedPeriodTable = metadataProxy.getTable(customerSpace.toString(), sortedPeriodTableName);
@@ -225,53 +220,36 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         request.setEnableSlack(false);
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        if (!rebuildPeriodTrxOnly) {
-            productAgrStep = 0;
-            periodedStep = 1;
-            dailyAgrStep = 2;
-            dayPeriodStep = 3;
+        productAgrStep = 0;
+        periodedStep = 1;
+        dailyAgrStep = 2;
+        dayPeriodStep = 3;
+        TransformationStepConfig productAgr = rollupProduct(productMap); // productAgrStep
+        TransformationStepConfig perioded = addPeriod(productAgrStep, null); // periodedStep
+        TransformationStepConfig dailyAgr = aggregateDaily(); // dailyAgrStep
+        TransformationStepConfig dayPeriods = collectDays(); // dayPeriodStep
+        TransformationStepConfig updateDaily = updateDailyStore();
+        steps.add(productAgr);  // step 0
+        steps.add(perioded);  // step 1
+        steps.add(dailyAgr);  // step 2
+        steps.add(dayPeriods);  // step 3
+        steps.add(updateDaily);  // step 4
 
-            TransformationStepConfig productAgr = rollupProduct(productMap); // productAgrStep
-            TransformationStepConfig perioded = addPeriod(productAgrStep, null); // periodedStep
-            TransformationStepConfig dailyAgr = aggregateDaily(); // dailyAgrStep
-            TransformationStepConfig dayPeriods = collectDays(); // dayPeriodStep
-            TransformationStepConfig updateDaily = updateDailyStore();
-            steps.add(productAgr);  // step 0
-            steps.add(perioded);  // step 1
-            steps.add(dailyAgr);  // step 2
-            steps.add(dayPeriods);  // step 3
-            steps.add(updateDaily);  // step 4
-
-            periodedStep = 5;
-            periodAgrStep = 6;
-            periodsStep = 7;
-            perioded = addPeriod(dailyAgrStep, periodStrategies); // periodedStep
-            TransformationStepConfig periodAgr = aggregatePeriods(); // periodAgrStep
-            TransformationStepConfig periods = collectPeriods(); // periodsStep
-            TransformationStepConfig updatePeriod = updatePeriodStore(periodTables);
-            TransformationStepConfig sortDaily = sort(dailyTable.getName(), null, sortedDailyTablePrefix);
-            TransformationStepConfig sortPeriod = sort(null, periodAgrStep, sortedPeriodTablePrefix);
-            steps.add(perioded);  // step 5
-            steps.add(periodAgr);  // step 6
-            steps.add(periods);  // step 7
-            steps.add(updatePeriod);  // step 8
-            steps.add(sortDaily);  // step 9
-            steps.add(sortPeriod);  // step 10
-        } else {
-            periodedStep = 0;
-            periodAgrStep = 1;
-            periodsStep = 2;
-            TransformationStepConfig perioded = addPeriodToSourceTable(periodStrategies, dailyTable.getName());
-            TransformationStepConfig periodAgr = aggregatePeriods(); // periodAgrStep
-            TransformationStepConfig periods = collectPeriods(); // periodsStep
-            TransformationStepConfig updatePeriod = updatePeriodStore(periodTables);
-            TransformationStepConfig sortPeriod = sort(null, periodAgrStep, sortedPeriodTablePrefix);
-            steps.add(perioded);  // step 0
-            steps.add(periodAgr);  // step 1
-            steps.add(periods);  // step 2
-            steps.add(updatePeriod);  // step 3
-            steps.add(sortPeriod);  // step 4
-        }
+        periodedStep = 5;
+        periodAgrStep = 6;
+        periodsStep = 7;
+        perioded = addPeriod(dailyAgrStep, periodStrategies); // periodedStep
+        TransformationStepConfig periodAgr = aggregatePeriods(); // periodAgrStep
+        TransformationStepConfig periods = collectPeriods(); // periodsStep
+        TransformationStepConfig updatePeriod = updatePeriodStore(periodTables);
+        TransformationStepConfig sortDaily = sort(dailyTable.getName(), null, sortedDailyTablePrefix);
+        TransformationStepConfig sortPeriod = sort(null, periodAgrStep, sortedPeriodTablePrefix);
+        steps.add(perioded);  // step 5
+        steps.add(periodAgr);  // step 6
+        steps.add(periods);  // step 7
+        steps.add(updatePeriod);  // step 8
+        steps.add(sortDaily);  // step 9
+        steps.add(sortPeriod);  // step 10
 
         request.setSteps(steps);
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());

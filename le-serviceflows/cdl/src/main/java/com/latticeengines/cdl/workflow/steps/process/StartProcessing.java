@@ -187,7 +187,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Action> purchaseMetricsActions = getPurchaseMetricsActions(actions);
         grapherContext.setPurchaseMetricsChanged(CollectionUtils.isNotEmpty(purchaseMetricsActions));
         List<Action> businessCalenderChangedActions = getBusinessCalendarChangedActions(actions);
-        grapherContext.setRebuildPeriodTrxOnly(CollectionUtils.isNotEmpty(businessCalenderChangedActions));
+        grapherContext.setBusinessCalenderChanged(CollectionUtils.isNotEmpty(businessCalenderChangedActions));
 
         List<Action> ratingActions = getRatingRelatedActions(actions);
         List<String> segments = getActionImpactedSegmentNames(ratingActions);

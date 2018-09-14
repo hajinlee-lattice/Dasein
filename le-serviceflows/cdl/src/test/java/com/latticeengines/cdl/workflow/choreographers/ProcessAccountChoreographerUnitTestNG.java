@@ -30,7 +30,7 @@ public class ProcessAccountChoreographerUnitTestNG {
         };
         step.setExecutionContext(new ExecutionContext());
         choreographer.checkManyUpdate(step);
-        Assert.assertEquals(choreographer.hasManyUpdate, false);
+        Assert.assertFalse(choreographer.hasManyUpdate);
         Map<BusinessEntity, Long> updateValueMap = new HashMap<>();
         updateValueMap.put(BusinessEntity.Account, 2L);
         step.putObjectInContext(BaseWorkflowStep.UPDATED_RECORDS, updateValueMap);
@@ -40,12 +40,12 @@ public class ProcessAccountChoreographerUnitTestNG {
         step.putObjectInContext(BaseWorkflowStep.EXISTING_RECORDS, existValueMap);
 
         choreographer.checkManyUpdate(step);
-        Assert.assertEquals(choreographer.hasManyUpdate, false);
+        Assert.assertFalse(choreographer.hasManyUpdate);
 
         updateValueMap.put(BusinessEntity.Account, 5L);
         step.putObjectInContext(BaseWorkflowStep.UPDATED_RECORDS, updateValueMap);
         choreographer.checkManyUpdate(step);
-        Assert.assertEquals(choreographer.hasManyUpdate, true);
+        Assert.assertTrue(choreographer.hasManyUpdate);
 
     }
 
@@ -62,7 +62,7 @@ public class ProcessAccountChoreographerUnitTestNG {
         grapherContext.setDataCloudChanged(true);
         step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
         choreographer.checkDataCloudChange(step);
-        Assert.assertEquals(choreographer.dataCloudChanged, true);
+        Assert.assertTrue(choreographer.dataCloudChanged);
     }
 
     @Test(groups = "unit")
@@ -78,13 +78,13 @@ public class ProcessAccountChoreographerUnitTestNG {
         grapherContext.setJobImpactedEntities(new HashSet<>(Collections.singletonList(BusinessEntity.Contact)));
         step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
         choreographer.checkJobImpactedEntity(step);
-        Assert.assertEquals(choreographer.jobImpacted, false);
+        Assert.assertFalse(choreographer.jobImpacted);
 
         grapherContext.setJobImpactedEntities(
                 new HashSet<>(Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)));
         step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
         choreographer.checkJobImpactedEntity(step);
-        Assert.assertEquals(choreographer.jobImpacted, true);
+        Assert.assertTrue(choreographer.jobImpacted);
     }
 
 }
