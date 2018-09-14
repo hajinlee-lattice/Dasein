@@ -7,18 +7,28 @@ public class HdfsToS3PathBuilder {
 
     private static final String PATH_SEPARATOR = "/";
 
-    private String analyticsBaseHdfsDir = "/user/s-analytics/customers";
-    private String eventTableModelHdfsDir = analyticsBaseHdfsDir + "/%s/models";
-    private String eventTableDataHdfsDir = analyticsBaseHdfsDir + "/%s/data";
-    private String hdfsAtlasDataDir = "/Pods/%s/Contracts/%s/Tenants/%s/Spaces/Production/Data";
-    private String hdfsAtlasMetadataDir = "/Pods/%s/Contracts/%s/Tenants/%s/Spaces/Production/Metadata";
+    private String hddfAnalyticsBaseDir = "/user/s-analytics/customers";
+    private String hdfsAnalyticsDir = hddfAnalyticsBaseDir + "/%s";
+    private String hdfsEventTableModelDir = hdfsAnalyticsDir + "/models";
+    private String hdfsEventTableDataDir = hdfsAnalyticsDir + "/data";
 
-    private String eventTableModelS3Dir = "s3n://%s/%s/analytics/models";
-    private String eventTableDataS3Dir = "s3n://%s/%s/analytics/data";
-    private String s3AtlasDataDir = "s3n://%s/%s/atlas/Data";
-    private String s3AtlasMetadataDir = "s3n://%s/%s/atlas/Metadata";
+    private String hdfsAtlasDir = "/Pods/%s/Contracts/%s/Tenants/%s/Spaces/Production";
+    private String hdfsAtlasDataDir = hdfsAtlasDir + "/Data";
+    private String hdfsAtlasMetadataDir = hdfsAtlasDir + "/Metadata";
+
+    private String s3AnalyticsDir = "s3n://%s/%s/analytics";
+    private String s3EventTableModelDir = s3AnalyticsDir + "/models";
+    private String s3EventTableDataDir = s3AnalyticsDir + "/data";
+
+    private String s3AtlasDir = "s3n://%s/%s/atlas";
+    private String s3AtlasDataDir = s3AtlasDir + "/Data";
+    private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
 
     // Hdfs Atlas
+    public String getHdfsAtlasDir(String pod, String tenantId) {
+        return String.format(hdfsAtlasDir, pod, tenantId, tenantId);
+    }
+
     public String getHdfsAtlasDataDir(String pod, String tenantId) {
         return String.format(hdfsAtlasDataDir, pod, tenantId, tenantId);
     }
@@ -44,12 +54,16 @@ public class HdfsToS3PathBuilder {
     }
 
     // Hdfs Analytics
+    public String getHdfsAnalyticsDir(String customer) {
+        return String.format(hdfsAnalyticsDir, customer);
+    }
+
     public String getHdfsAnalyticsModelDir(String customer) {
-        return String.format(eventTableModelHdfsDir, customer);
+        return String.format(hdfsEventTableModelDir, customer);
     }
 
     public String getHdfsAnalyticsDataDir(String customer) {
-        return String.format(eventTableDataHdfsDir, customer);
+        return String.format(hdfsEventTableDataDir, customer);
     }
 
     public String getHdfsAnalyticsModelTableDir(String customer, String eventTable) {
@@ -65,6 +79,10 @@ public class HdfsToS3PathBuilder {
     }
 
     // S3 Atlas
+    public String getS3AtlasDir(String s3Bucket, String tenantId) {
+        return String.format(s3AtlasDir, s3Bucket, tenantId);
+    }
+
     public String getS3AtlasDataDir(String s3Bucket, String tenantId) {
         return String.format(s3AtlasDataDir, s3Bucket, tenantId);
     }
@@ -90,12 +108,16 @@ public class HdfsToS3PathBuilder {
     }
 
     // S3 Analytics
+    public String getS3AnalyticsDir(String s3Bucket, String tenantId) {
+        return String.format(s3AnalyticsDir, s3Bucket, tenantId);
+    }
+
     public String getS3AnalyticsModelDir(String s3Bucket, String tenantId) {
-        return String.format(eventTableModelS3Dir, s3Bucket, tenantId);
+        return String.format(s3EventTableModelDir, s3Bucket, tenantId);
     }
 
     public String getS3AnalyticsDataDir(String s3Bucket, String tenantId) {
-        return String.format(eventTableDataS3Dir, s3Bucket, tenantId);
+        return String.format(s3EventTableDataDir, s3Bucket, tenantId);
     }
 
     public String getS3AnalyticsModelTableDir(String s3Bucket, String tenantId, String eventTable) {
