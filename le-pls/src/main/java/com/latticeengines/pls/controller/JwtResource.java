@@ -1,7 +1,10 @@
 package com.latticeengines.pls.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
@@ -44,7 +48,7 @@ public class JwtResource {
     @ResponseBody
     @ApiOperation(value = "Get the jwt redirect URL. for Zendesk handler, 'return_to' and 'source_ref' are required in the post body")
     public ModelAndView getJwtToken(@RequestBody JwtRequestParameters reqParams,
-            @RequestHeader(Constants.AUTHORIZATION) String auth) throws LedpException {
+            @RequestHeader(Constants.AUTHORIZATION) String auth, HttpServletRequest request) throws LedpException {
         Ticket ticket = new Ticket(auth);
         GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
         if (ticketData == null) {
@@ -54,9 +58,10 @@ public class JwtResource {
         if (userData == null) {
             throw new LedpException(LedpCode.LEDP_10004, new String[] { "USER" });
         }
-        String view = jwtManager.handleJwtRequest(userData, reqParams, true);
-        log.info(view);
-        return new ModelAndView(view);
+        String redirect = jwtManager.handleJwtRequest(request, userData, reqParams, true);
+        log.info(redirect);
+        request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.TEMPORARY_REDIRECT);
+        ModelAndView view = new ModelAndView(redirect);
+        return view;
     }
-
 }
