@@ -54,6 +54,8 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
     // from different book source, choose from the book source with higher
     // priority (lower priority value)
     private Node mergeRedirectBooks(Node fullDuns, List<Node> books) {
+        books = enforceSchema(books);
+
         Node mergedBook = books.get(0);
         if (books.size() > 1) {
             books.remove(0);
@@ -77,6 +79,17 @@ public class DunsGuideBookRebuild extends ConfigurableFlowBase<DunsGuideBookConf
         DunsGuideBookAggregator agg = new DunsGuideBookAggregator(new Fields(fields), config.getBookPriority());
         mergedBook = mergedBook.groupByAndAggregate(new FieldList(DunsRedirectBookConfig.DUNS), agg, fms);
         return mergedBook;
+    }
+
+    private List<Node> enforceSchema(List<Node> books) {
+        List<Node> newBooks = new ArrayList<>();
+        String[] fields = { DunsRedirectBookConfig.DUNS, DunsRedirectBookConfig.TARGET_DUNS,
+                DunsRedirectBookConfig.KEY_PARTITION, DunsRedirectBookConfig.BOOK_SOURCE };
+        books.forEach(book -> {
+            book = book.retain(new FieldList(fields));
+            newBooks.add(book);
+        });
+        return newBooks;
     }
 
     // Put all the duns from AMSeed in DunsGuideBook so DunsGuideBook can also

@@ -210,7 +210,19 @@ public class DunsGuideBookRebuildTestNG extends PipelineTransformationTestNGBase
         };
         uploadBaseSourceData(dunsRedirectFromDomDunsMap.getSourceName(), baseSourceVersion, schema, bookFromDomDunsMap);
         uploadBaseSourceData(dunsRedirectFromMS.getSourceName(), baseSourceVersion, schema, bookFromMS);
-        uploadBaseSourceData(dunsRedirectFromHQ.getSourceName(), baseSourceVersion, schema, bookFromHQ);
+
+        // Test merging DunsRedirectBook with schema out of order
+        List<Pair<String, Class<?>>> schemaOutOfOrder = new ArrayList<>();
+        for (int i = schema.size() - 1; i >= 0; i--) {
+            schemaOutOfOrder.add(schema.get(i));
+        }
+        Object[][] bookFromHQOutOfOrder = new Object[bookFromHQ.length][bookFromHQ[0].length];
+        for (int i = 0; i < bookFromHQ.length; i++)
+            for (int j = bookFromHQ[0].length - 1; j >= 0; j--) {
+                bookFromHQOutOfOrder[i][bookFromHQ[0].length - 1 - j] = bookFromHQ[i][j];
+            }
+        uploadBaseSourceData(dunsRedirectFromHQ.getSourceName(), baseSourceVersion, schemaOutOfOrder,
+                bookFromHQOutOfOrder);
     }
 
     private Map<String, List<DunsGuideBook.Item>> constructExpectedDunsGuideBook() {

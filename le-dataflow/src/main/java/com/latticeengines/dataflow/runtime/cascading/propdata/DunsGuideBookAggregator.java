@@ -7,11 +7,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBookConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DunsRedirectBookConfig;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
