@@ -135,7 +135,7 @@ public class QueryProcessor {
     private Expression<?> processSubueryExpression(AttributeRepository repository, SubQuery subQuery, String sqlUser,
             boolean setAlias) {
         if (subQuery.getSubQueryExpression() != null) {
-            return (SubQueryExpression) subQuery.getSubQueryExpression();
+            return (SubQueryExpression<?>) subQuery.getSubQueryExpression();
         } else {
             return (setAlias) ? process(repository, subQuery.getQuery(), sqlUser).as(subQuery.getAlias())
                     : process(repository, subQuery.getQuery(), sqlUser);

@@ -26,7 +26,6 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
         super(repository);
     }
 
-    @SuppressWarnings({ "unchecked" })
     @Override
     public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(AttributeLookup lookup) {
         if (lookup.getEntity() == null) {
@@ -64,7 +63,7 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
                     offset = 0;
                 }
                 long bitMask = BitCodecUtils.bitMask(0L, 0, numBits);
-                log.info("Using bit mask " + bitMask + " and right shift " + offset + " to extract " + cm.getColumnId() + " from " + cm.getPhysicalName());
+                log.info("Using bit mask " + bitMask + " and right shift " + offset + " to extract " + cm.getAttrName() + " from " + cm.getPhysicalName());
                 if (alias) {
                     return Expressions
                             .stringTemplate("({0}>>{1})&{2}", QueryUtils.getAttributePath(entity, physicalColumnName), //

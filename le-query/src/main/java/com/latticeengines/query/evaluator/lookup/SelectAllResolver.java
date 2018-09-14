@@ -3,7 +3,6 @@ package com.latticeengines.query.evaluator.lookup;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.SelectAllLookup;
 import com.latticeengines.query.exposed.factory.QueryFactory;
-import com.latticeengines.query.factory.RedshiftQueryProvider;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;

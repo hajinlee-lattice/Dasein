@@ -32,6 +32,7 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.WindowFunction;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class TranslatorCommon {
     static final int NUM_ADDITIONAL_PERIOD = 2;
     static final String ACCOUNT_ID = InterfaceName.AccountId.name();
@@ -98,7 +99,6 @@ public class TranslatorCommon {
     static final StringPath shiftedPeriodId = Expressions.stringPath(shiftedRevenuePath, PERIOD_ID);
     static final StringPath shiftedRevenue = Expressions.stringPath(shiftedRevenuePath, REVENUE);
 
-    @SuppressWarnings("unchecked")
     BooleanExpression translateAggregatePredicate(StringPath stringPath,
                                                   AggregationFilter aggregationFilter,
                                                   boolean aggregate) {
@@ -130,18 +130,15 @@ public class TranslatorCommon {
                  aggregationFilter.isIncludeNotPurchased());
     }
 
-    @SuppressWarnings("unchecked")
     private WindowFunction translateEver(WindowFunction windowAgg) {
         return windowAgg.rows().between().unboundedPreceding().currentRow();
     }
 
-    @SuppressWarnings("unchecked")
     private WindowFunction translatePrior(WindowFunction windowAgg,
                                           int priorOffset) {
         return windowAgg.rows().between().unboundedPreceding().preceding(priorOffset);
     }
 
-    @SuppressWarnings("unchecked")
     private WindowFunction translateBetween(WindowFunction windowAgg,
                                             int startOffset, int endOffset,
                                             boolean preceding) {
@@ -189,7 +186,6 @@ public class TranslatorCommon {
         }
     }
 
-    @SuppressWarnings("unchecked")
     WindowFunction translateAggregateTimeWindow(StringPath keysAccountId,
                                                 StringPath keysPeriodId,
                                                 StringPath trxnVal,
@@ -282,7 +278,6 @@ public class TranslatorCommon {
         return Restriction.builder().and(txRestriction, hasPurchased).build();
     }
 
-    @SuppressWarnings("unchecked")
     protected SubQuery translateAPSUnionAll(QueryFactory queryFactory,
                                             AttributeRepository repository,
                                             SubQuery[] apsSubQueryList,
@@ -302,7 +297,6 @@ public class TranslatorCommon {
         return subQuery.withProjections(ACCOUNT_ID, PERIOD_ID, AMOUNT_AGG, QUANTITY_AGG);
     }
 
-    @SuppressWarnings("unchecked")
     protected SubQuery translateAPSUnionAllReplaceNull(QueryFactory queryFactory,
                                                        AttributeRepository repository,
                                                        String apsTableName, String sqlUser) {

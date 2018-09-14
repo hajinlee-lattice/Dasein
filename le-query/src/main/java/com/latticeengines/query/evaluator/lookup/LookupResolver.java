@@ -3,7 +3,6 @@ package com.latticeengines.query.evaluator.lookup;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.query.Lookup;
-import com.latticeengines.domain.exposed.query.SubQuery;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.sql.SQLQuery;

@@ -1,16 +1,9 @@
 package com.latticeengines.query.exposed.translator;
 
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.TotalAmount;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.TotalQuantity;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionDate;
-import static com.latticeengines.domain.exposed.query.BusinessEntity.Transaction;
-
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -30,11 +23,7 @@ import com.querydsl.sql.SQLQuery;
 
 public class DateRangeTranslator extends TranslatorCommon {
 
-    private static final BusinessEntity transaction = Transaction;
-    private static final Set<ComparisonType> NEGATIVE_COMPARATORS = ImmutableSet.of( //
-            ComparisonType.LESS_OR_EQUAL, //
-            ComparisonType.LESS_THAN, //
-            ComparisonType.IS_NULL);
+    private static final BusinessEntity transaction = BusinessEntity.Transaction;
 
     public Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
             AttributeRepository repository, String sqlUser) {
@@ -61,22 +50,6 @@ public class DateRangeTranslator extends TranslatorCommon {
         AggregationFilter unitFilter = txnRestriction.getUnitFilter();
         AggregationFilter spendFilter = txnRestriction.getSpentFilter();
         return unitFilter == null && spendFilter == null && Boolean.TRUE.equals(txnRestriction.isNegate());
-    }
-
-    /**
-     * Negative restriction means a restriction need to include null values
-     */
-    private boolean isNegativeRestriction(TransactionRestriction txnRestriction) {
-        AggregationFilter unitFilter = txnRestriction.getUnitFilter();
-        AggregationFilter spendFilter = txnRestriction.getSpentFilter();
-        boolean unitIsNegative = isNegativeAggregation(unitFilter);
-        boolean spendIsNegative = isNegativeAggregation(spendFilter);
-        return (unitIsNegative && spendIsNegative) || (unitFilter == null && spendIsNegative)
-                || (unitIsNegative && spendFilter == null);
-    }
-
-    private boolean isNegativeAggregation(AggregationFilter filter) {
-        return filter != null && NEGATIVE_COMPARATORS.contains(filter.getComparisonType());
     }
 
     private SubQuery constructSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
@@ -122,7 +95,7 @@ public class DateRangeTranslator extends TranslatorCommon {
 
     private BooleanExpression getProductPredicate(String productId) {
         String[] productIds = productId.split(",");
-        StringPath productIdPath = Expressions.stringPath(ProductId.name());
+        StringPath productIdPath = Expressions.stringPath(InterfaceName.ProductId.name());
         if (productIds.length == 1) {
             return productIdPath.eq(productId);
         } else {
@@ -134,12 +107,12 @@ public class DateRangeTranslator extends TranslatorCommon {
         if (ComparisonType.EVER.equals(timeFilter.getRelation())) {
             return null;
         }
-        if (!TimeFilter.Period.Date.name().equals(timeFilter.getPeriod())) {
+        if (!PeriodStrategy.Template.Date.name().equals(timeFilter.getPeriod())) {
             throw new UnsupportedOperationException(
                     "Can only translate Date period, but " + timeFilter.getPeriod() + " was given.");
         }
 
-        StringPath datePath = Expressions.stringPath(TransactionDate.name());
+        StringPath datePath = Expressions.stringPath(InterfaceName.TransactionDate.name());
 
         List<Object> vals = timeFilter.getValues();
         BooleanExpression predicate1 = vals.get(0) == null ? null : datePath.goe((String) vals.get(0));
@@ -165,8 +138,8 @@ public class DateRangeTranslator extends TranslatorCommon {
         AggregationFilter spentFilter = txnRestriction.getSpentFilter();
         AggregationFilter unitFilter = txnRestriction.getUnitFilter();
 
-        StringPath amtAgg = Expressions.stringPath(TotalAmount.name());
-        StringPath qtyAgg = Expressions.stringPath(TotalQuantity.name());
+        StringPath amtAgg = Expressions.stringPath(InterfaceName.TotalAmount.name());
+        StringPath qtyAgg = Expressions.stringPath(InterfaceName.TotalQuantity.name());
 
         BooleanExpression aggrAmountPredicate = (spentFilter != null)
                 ? translateAggregatePredicate(amtAgg, spentFilter, true) : null;

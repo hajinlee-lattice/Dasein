@@ -6,6 +6,7 @@ import java.util.Collections;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
@@ -22,14 +23,6 @@ import com.querydsl.sql.SQLQuery;
 
 public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGBase {
 
-    public static class EnhancedEventQueryTranslator extends EventQueryTranslator {
-        @Override
-        protected String getPeriodTransactionTableName(AttributeRepository repository) {
-            return "tftest_8_periodtransaction_2018_01_06_00_57_09_utc";
-        }
-
-    }
-
     private EventQueryTranslator getEventQueryTranslator() {
         return new EnhancedEventQueryTranslator();
     }
@@ -38,8 +31,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.PRIOR_ONLY, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
@@ -52,32 +45,14 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         return txRestriction;
     }
 
-    private TransactionRestriction getHasNotEngagedProd2(String prodIdList) {
-        TransactionRestriction txRestriction = new TransactionRestriction();
-        txRestriction.setProductId(prodIdList);
-        txRestriction.setTimeFilter(TimeFilter.ever());
-        txRestriction.setNegate(true);
-        return txRestriction;
-    }
-
     private TransactionRestriction getHasNotEngagedWithinPeriod(String prodIdList) {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
         txRestriction.setNegate(true);
-        return txRestriction;
-    }
-
-    private TransactionRestriction getEngagedWithinSeven(String prodIdList) {
-        TransactionRestriction txRestriction = new TransactionRestriction();
-        txRestriction.setProductId(prodIdList);
-        TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(7));
-        txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
 
@@ -85,8 +60,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(0));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(0));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
@@ -95,8 +70,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(6));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(6));
         txRestriction.setTimeFilter(timeFilter);
         txRestriction.setNegate(true);
         return txRestriction;
@@ -106,13 +81,9 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.SPENT,
-            AggregationType.SUM,
-            ComparisonType.LESS_THAN,
-            Collections.singletonList(1000000.0),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.SUM, ComparisonType.LESS_THAN, Collections.singletonList(1000000.0),
+                true);
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -121,12 +92,9 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_OR_EQUAL,
-                Collections.singletonList(10.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.AT_LEAST_ONCE, ComparisonType.GREATER_OR_EQUAL,
+                Collections.singletonList(10.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -135,8 +103,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.PRIOR_ONLY, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(7));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(7));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
@@ -152,15 +120,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Arrays.asList(5, 10));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(1000)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.AT_LEAST_ONCE, ComparisonType.GREATER_THAN,
+                Collections.singletonList(1000));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -169,16 +134,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.SPENT,
-            AggregationType.EACH,
-            ComparisonType.LESS_THAN,
-            Arrays.asList(100),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.EACH, ComparisonType.LESS_THAN, Collections.singletonList(100),
+                true);
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -187,12 +148,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.EACH,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.EACH, ComparisonType.GREATER_THAN, Collections.singletonList(0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -201,15 +158,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.EACH,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.EACH, ComparisonType.GREATER_THAN, Collections.singletonList(0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -218,30 +171,24 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AVG,
-                ComparisonType.GREATER_OR_EQUAL,
-                Arrays.asList(1.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.AVG, ComparisonType.GREATER_OR_EQUAL,
+                Collections.singletonList(1.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
 
     private TransactionRestriction getAvgAmountInCurrentPeriod(String prodIdList) {
         TransactionRestriction txRestriction = new TransactionRestriction();
-        //txRestriction.setProductId(PROD_ID2);
+        // txRestriction.setProductId(PROD_ID2);
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(0));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(0));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.AVG,
-                ComparisonType.GREATER_OR_EQUAL,
-                Arrays.asList(100.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.AVG, ComparisonType.GREATER_OR_EQUAL,
+                Collections.singletonList(100.0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -250,15 +197,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Arrays.asList(5, 10));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.SUM,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(5000.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.SUM, ComparisonType.GREATER_THAN,
+                Collections.singletonList(5000.0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -268,15 +212,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.AVG,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(1000.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.AVG, ComparisonType.GREATER_THAN,
+                Collections.singletonList(1000.0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -285,16 +226,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Arrays.asList(7, 30));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(7, 30));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.SPENT,
-            AggregationType.AVG,
-            ComparisonType.LESS_OR_EQUAL,
-            Arrays.asList(10),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.AVG, ComparisonType.LESS_OR_EQUAL, Collections.singletonList(10),
+                true);
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -303,15 +240,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(0));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(0));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.EACH,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(10.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.EACH, ComparisonType.GREATER_THAN, Collections.singletonList(10.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -320,16 +253,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.UNIT,
-            AggregationType.AVG,
-            ComparisonType.LESS_OR_EQUAL,
-            Arrays.asList(10.0),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.AVG, ComparisonType.LESS_OR_EQUAL, Collections.singletonList(10.0),
+                true);
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -338,16 +267,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Arrays.asList(5, 10));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.UNIT,
-            AggregationType.SUM,
-            ComparisonType.LESS_THAN,
-            Arrays.asList(100.0),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.SUM, ComparisonType.LESS_THAN, Collections.singletonList(100.0),
+                true);
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -356,15 +281,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Arrays.asList(5, 10));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(50.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.AT_LEAST_ONCE, ComparisonType.GREATER_THAN,
+                Collections.singletonList(50.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -373,15 +295,12 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_OR_EQUAL,
-                Arrays.asList(100.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.AT_LEAST_ONCE, ComparisonType.GREATER_OR_EQUAL,
+                Collections.singletonList(100.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -390,15 +309,11 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.EACH,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(0.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.EACH, ComparisonType.GREATER_THAN, Collections.singletonList(0.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -407,20 +322,15 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               TimeFilter.Period.Month.name(),  //
-                                               Arrays.asList(7, 30));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(7, 30));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.UNIT,
-            AggregationType.AVG,
-            ComparisonType.LESS_THAN,
-            Arrays.asList(1.0),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT,
+                AggregationType.AVG, ComparisonType.LESS_THAN, Collections.singletonList(1.0),
+                true);
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
-
 
     @Test(groups = "functional")
     public void testHasEngagedPrior() {
@@ -429,8 +339,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getHasEngagedPriorToFive(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 5966);
@@ -443,8 +353,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getEngagedInCurrentPeriod(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 2862);
@@ -457,22 +367,22 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getHasNotPurchasedWithin(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 76987);
     }
 
-    //@Test(groups = "functional")
+    // @Test(groups = "functional")
     public void testHasNotEngaged() {
         // DS_Test_4
         String prodIdList = "tbd";
         TransactionRestriction txRestriction = getHasNotEngagedProd1(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 68680);
@@ -487,8 +397,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getPriorSevenEngaged(prodIdList);
         txRestriction.setNegate(true);
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 88959);
@@ -501,8 +411,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getTotalAmountLessThan1M(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 96058);
@@ -516,8 +426,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 210);
@@ -531,8 +441,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 13985);
@@ -545,8 +455,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         TransactionRestriction txRestriction = getTotalQuantityGTE10Once(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 1196);
@@ -561,8 +471,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 3795);
@@ -576,8 +486,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 318);
@@ -591,8 +501,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 6023);
@@ -606,8 +516,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 4464);
@@ -621,8 +531,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 2881);
@@ -637,9 +547,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Restriction logicalRestriction = Restriction.builder().or(amount, hasNotEngaged).build();
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
-        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, logicalRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo,
+                logicalRestriction, getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER)
+                .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 85989);
@@ -653,8 +564,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 82723);
@@ -668,8 +579,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 776);
@@ -683,8 +594,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 95895);
@@ -698,8 +609,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 95949);
@@ -713,8 +624,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 97);
@@ -728,8 +639,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 596);
@@ -743,8 +654,8 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 317);
@@ -758,11 +669,19 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
-        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+                getDefaultEventFrontEndQuery(), Query.builder(), SQL_USER).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query, SQL_USER);
         Assert.assertEquals(count, 89763);
+    }
+
+    public static class EnhancedEventQueryTranslator extends EventQueryTranslator {
+        @Override
+        protected String getPeriodTransactionTableName(AttributeRepository repository) {
+            return "tftest_8_periodtransaction_2018_01_06_00_57_09_utc";
+        }
+
     }
 
 }

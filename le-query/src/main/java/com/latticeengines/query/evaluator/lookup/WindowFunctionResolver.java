@@ -17,6 +17,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.WindowFunction;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class WindowFunctionResolver extends BaseLookupResolver<WindowFunctionLookup>
         implements LookupResolver<WindowFunctionLookup> {
     private LookupResolverFactory factory;
@@ -40,7 +41,6 @@ public class WindowFunctionResolver extends BaseLookupResolver<WindowFunctionLoo
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtype" })
     private Expression<?> windowExpressionForSelect(WindowFunctionLookup lookup, boolean asAlias) {
         if (lookup.getTarget() == null) {
             throw new RuntimeException("Target is not specified for window function.");
@@ -71,7 +71,6 @@ public class WindowFunctionResolver extends BaseLookupResolver<WindowFunctionLoo
                 : windowFunction;
     }
 
-    @SuppressWarnings("unchecked")
     private WindowFunction windowFunction(NumberExpression targetExpression,
             WindowFunctionLookup.FunctionType functionType) {
         switch (functionType) {
@@ -95,7 +94,6 @@ public class WindowFunctionResolver extends BaseLookupResolver<WindowFunctionLoo
         return expressions;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtype" })
     private Expression<?> resolvePartitionBy(Lookup partitionLookup) {
         Expression<?> expression = null;
         if (partitionLookup instanceof AttributeLookup) {

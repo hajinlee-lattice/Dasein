@@ -33,7 +33,6 @@ public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup
         return resolveForDate(lookup, cm, lookup.getPeriod(), false);
     }
 
-    @SuppressWarnings({ "unchecked" })
     @Override
     public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(DateAttributeLookup lookup) {
         if (lookup.getEntity() == null) {

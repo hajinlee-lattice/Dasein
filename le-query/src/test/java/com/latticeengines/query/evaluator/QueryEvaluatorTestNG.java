@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -18,7 +19,6 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
-import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.query.WindowFunctionLookup;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
@@ -332,7 +332,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         // time restriction
         Restriction inner = Restriction.builder() //
                 .let(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE)//
-                .inCurrentPeriod(Period.Quarter.name()) //
+                .inCurrentPeriod(PeriodStrategy.Template.Quarter.name()) //
                 .build();
 
         Restriction restriction = Restriction.builder() //
@@ -341,10 +341,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         Query query = Query.builder().from(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        sqlContains(sqlQuery, String.format("DATE_TRUNC('%s', TO_DATE(%s.%s, 'YYYY-MM-DD')) = ", Period.Quarter.name(),
+        sqlContains(sqlQuery, String.format("DATE_TRUNC('%s', TO_DATE(%s.%s, 'YYYY-MM-DD')) = ", PeriodStrategy.Template.Quarter.name(),
                 TRANSACTION, ATTR_TRANSACTION_DATE));
         sqlContains(sqlQuery,
-                String.format("DATEADD('%1$s', %2$d, DATE_TRUNC('%1$s', GETDATE()))", Period.Quarter.name(), 0));
+                String.format("DATEADD('%1$s', %2$d, DATE_TRUNC('%1$s', GETDATE()))", PeriodStrategy.Template.Quarter.name(), 0));
     }
 
     @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)

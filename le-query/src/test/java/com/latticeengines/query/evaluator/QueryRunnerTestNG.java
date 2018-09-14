@@ -214,9 +214,11 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
                 break;
             case IN_COLLECTION:
+                Assert.assertNotNull(vals);
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(Arrays.asList(vals));
                 break;
             case NOT_IN_COLLECTION:
+                Assert.assertNotNull(vals);
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notInCollection(Arrays.asList(vals));
                 break;
             default:

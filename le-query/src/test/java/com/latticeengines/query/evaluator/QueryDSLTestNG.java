@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
@@ -31,6 +31,8 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 
+
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 
     @Autowired
@@ -81,7 +83,6 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testIntersect() throws SQLException {
         StringPath outerTable = Expressions.stringPath("bernard_txn_poc");
         StringPath innerTable = Expressions.stringPath("bernard_txn_poc");
@@ -89,9 +90,9 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         StringPath outerColumn2 = Expressions.stringPath(outerTable, "period_id");
         StringPath innerColumn1 = Expressions.stringPath(innerTable, "account_id");
         StringPath innerColumn2 = Expressions.stringPath(innerTable, "period_id");
-        SQLQuery withQuery1 = factory().query().from(outerTable).select(outerColumn1, outerColumn2).where(outerColumn1.eq("6"));
-        SQLQuery withQuery2 = factory().query().from(innerTable).select(innerColumn1, innerColumn2).where(innerColumn1.eq("2"));
-        SQLQuery withQuery3 = factory().query().from(innerTable)
+        SQLQuery<?> withQuery1 = factory().query().from(outerTable).select(outerColumn1, outerColumn2).where(outerColumn1.eq("6"));
+        SQLQuery<?> withQuery2 = factory().query().from(innerTable).select(innerColumn1, innerColumn2).where(innerColumn1.eq("2"));
+        SQLQuery<?> withQuery3 = factory().query().from(innerTable)
                 .select(innerColumn1, innerColumn2).where(innerColumn2.eq("2").and(innerColumn1.eq("6")));
         SQLQuery withQuery5 = factory().query().from(innerTable).select(innerColumn1, innerColumn2)
                 .where(innerColumn1.eq("3"));
@@ -103,12 +104,12 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         StringPath col2 = Expressions.stringPath("period_id");
         SQLQuery unionQuery1 = factory().query().select(SQLExpressions.all).from(withTable1);
         SQLQuery unionQuery2 = factory().query().select(SQLExpressions.all).from(withTable2);
-        SQLQuery unionQuery3 = factory().query().select(SQLExpressions.all).from(withTable3);
-        SQLQuery withQuery4 = factory().query().select(SQLExpressions.all)
+        SQLQuery<?> unionQuery3 = factory().query().select(SQLExpressions.all).from(withTable3);
+        SQLQuery<?> withQuery4 = factory().query().select(SQLExpressions.all)
                 .from(SQLExpressions.intersect(
                         SQLExpressions.except(SQLExpressions.union(unionQuery1, unionQuery2), withQuery5),
                         unionQuery3));
-        SQLQuery testQuery = factory().query()
+        SQLQuery<?> testQuery = factory().query()
                 .with(withTable1, col1, col2).as(withQuery1)
                 .with(withTable2, col1, col2).as(withQuery2)
                 .with(withTable3, col1, col2).as(withQuery3)
@@ -132,7 +133,6 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testHasEngagedOneLegBehind() throws SQLException {
         /*
         select accountid, periodid
@@ -178,21 +178,20 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         Expression windowAgg = SQLExpressions.max(trxnValExists).over().partitionBy(keysAccountId).orderBy(keysPeriodId)
                 .rows().between().following(followingOffset).following(followingOffset).as(aggrAmount);
 
-        SQLQuery productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
+        SQLQuery<?> productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
                 .where(productId.eq(productIdStr));
 
-        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
+        SQLQuery<?> apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
                 .from(keysPath).leftJoin(productQuery, trxnPath)
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
-        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+        SQLQuery<?> finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(aggrAmount.eq(String.valueOf(1)));
 
         System.out.println("finalQuery = " + finalQuery);
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testHasEngagedPrior() throws SQLException {
         SQLQueryFactory factory = factory();
         /*
@@ -255,14 +254,14 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         //        .rows().between().preceding(startOffset).preceding(endOffset).as(aggrAmount);
 
         // change for spent or unit
-        SQLQuery productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
+        SQLQuery<?> productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
                 .where(productId.eq(productIdStr));
 
-        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
+        SQLQuery<?> apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
                 .from(keysPath).leftJoin(productQuery, trxnPath)
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
-        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+        SQLQuery<?> finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(aggrVal.eq(String.valueOf(1)));    // change
         //        .where(aggrVal.gt(String.valueOf(0)));   // at_least_once
         //        .where(aggrVal.gt(String.valueOf(?)));   // total sum
@@ -271,7 +270,6 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testSumWithin() throws SQLException {
         SQLQueryFactory factory = factory();
         /*
@@ -318,20 +316,19 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         Expression sumWindowAgg = SQLExpressions.sum(trxnNumber).over().partitionBy(keysAccountId).orderBy(keysPeriodId)
                 .rows().between().preceding(startOffset).preceding(endOffset).as(aggrAmount);
 
-        SQLQuery productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
+        SQLQuery<?> productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
                 .where(productId.eq(productIdStr));
 
-        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, sumWindowAgg)
+        SQLQuery<?> apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, sumWindowAgg)
                 .from(keysPath).leftJoin(productQuery, trxnPath)
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
-        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+        SQLQuery<?> finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(aggrAmount.gt(String.valueOf(amount)));
         System.out.println("finalQuery = " + finalQuery);
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testMaxPeriodId() throws SQLException {
         SQLQueryFactory factory = factory();
         /*
@@ -341,7 +338,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath periodId = Expressions.stringPath("periodid");
 
-        SQLQuery maxPeriodIdSubQuery = factory.query().from(tablePath).select(periodId.max());
+        SQLQuery<?> maxPeriodIdSubQuery = factory.query().from(tablePath).select(periodId.max());
         System.out.println(maxPeriodIdSubQuery.toString());
     }
 
@@ -350,7 +347,6 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testGetAllPeriods() throws SQLException {
         SQLQueryFactory factory = factory();
         String txTableName = "query_test_transaction";
@@ -358,23 +354,23 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath periodId = Expressions.stringPath("periodid");
         Expression<?> maxPeriodOffset =
-                Expressions.numberTemplate(BigDecimal.class, getDateDiffTemplate(TimeFilter.Period.Quarter.name())).max().add(1);
+                Expressions.numberTemplate(BigDecimal.class, getDateDiffTemplate(PeriodStrategy.Template.Quarter.name())).max().add(1);
         StringPath numberPath = Expressions.stringPath("number");
         StringPath allPeriods = Expressions.stringPath("allperiods");
         NumberPath number = Expressions.numberPath(BigDecimal.class, "n");
         NumberPath dummy = Expressions.numberPath(BigDecimal.class, "dummy");
 
-        SQLQuery numberQuery = factory.query()
+        SQLQuery<?> numberQuery = factory.query()
                 .select(SQLExpressions.rowNumber().over(), Expressions.constant(1))
                 .from(tablePath);
-        SQLQuery maxPeriodQuery = factory().from(tablePath).select(maxPeriodOffset);
-        SQLQuery allPeriodsQuery = factory.query()
+        SQLQuery<?> maxPeriodQuery = factory().from(tablePath).select(maxPeriodOffset);
+        SQLQuery<?> allPeriodsQuery = factory.query()
                 .select((Expression<?>) number.subtract(1), Expressions.constant(1))
                 .from(numberPath)
                 .where(number.loe(maxPeriodQuery));
 
         // has to use a dummy column or querydsl will not generate the right sql
-        SQLQuery query = factory.query()
+        SQLQuery<?> query = factory.query()
                 .with(numberPath, number, dummy).as(numberQuery)
                 .with(allPeriods, periodId, dummy).as(allPeriodsQuery)
                 .select(SQLExpressions.all)
@@ -386,7 +382,6 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testAggregateTransactionByPeriod() throws SQLException {
         SQLQueryFactory factory = factory();
         String txTableName = "query_test_transaction";
@@ -399,7 +394,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         Expression<?> totalAmountSum = Expressions.numberPath(BigDecimal.class, "totalAmount").sum();
         Expression<?> totalQuantitySum = Expressions.numberPath(BigDecimal.class, "totalQuantity").sum();
         Expression<?> periodOffset =
-                Expressions.numberTemplate(BigDecimal.class, getDateDiffTemplate(TimeFilter.Period.Quarter.name()));
+                Expressions.numberTemplate(BigDecimal.class, getDateDiffTemplate(PeriodStrategy.Template.Quarter.name()));
         StringPath trxnPeriodPath = Expressions.stringPath("trxnbyperiod");
 
 
@@ -411,11 +406,11 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
          */
 
 
-        SQLQuery trxnByPeriodSubQuery = factory.from(tablePath)
+        SQLQuery<?> trxnByPeriodSubQuery = factory.from(tablePath)
                 .select(totalAmountSum, totalQuantitySum, periodOffset, productId, accountId)
                 .groupBy(periodOffset, productId, accountId);
 
-        SQLQuery trxnSelectAll = factory.query()
+        SQLQuery<?> trxnSelectAll = factory.query()
                 .with(trxnPeriodPath, totalAmount, totalQuantity, periodId, productId, accountId).as(trxnByPeriodSubQuery)
                 .select(SQLExpressions.all)
                 .from(trxnPeriodPath);
@@ -425,7 +420,6 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testAllKeys() throws SQLException {
         SQLQueryFactory factory = factory();
         /*
@@ -454,16 +448,16 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         EntityPath<String> crossProd = new PathBuilder<>(String.class, "crossprod");
         StringPath crossAccountId = Expressions.stringPath(crossProd, "accountid");
         StringPath crossPeriodId = Expressions.stringPath(crossProd, "periodid");
-        SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
+        SQLQuery<?> crossProdQuery = factory.query().select(accountId, periodId).from(
                 factory.selectDistinct(accountId).from(tablePath).as("allaccounts"),
                 factory.selectDistinct(periodId).from(tablePath).as("allperiods"));
 
-        SQLQuery periodRangeSubQuery =
+        SQLQuery<?> periodRangeSubQuery =
                 factory.query().select(accountId, SQLExpressions.min(periodId).as("minpid")).from(tablePath).groupBy(accountId);
-        SQLQuery crossProdSubQuery = factory.query().from(crossProdQuery, crossProd)
+        SQLQuery<?> crossProdSubQuery = factory.query().from(crossProdQuery, crossProd)
                 .innerJoin(periodRangeSubQuery, periodRange).on(periodAccountId.eq(crossAccountId))
                 .where(crossPeriodId.goe(minPid.subtract(2)));
-        SQLQuery minusProdSubQuery = crossProdSubQuery.select(crossAccountId, periodId);
+        SQLQuery<?> minusProdSubQuery = crossProdSubQuery.select(crossAccountId, periodId);
         System.out.println(minusProdSubQuery.toString());
         Assert.assertEquals(minusProdSubQuery.fetchCount(), 8529);
     }

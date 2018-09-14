@@ -5,21 +5,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import com.latticeengines.domain.exposed.query.AggregationFilter;
-import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.TransactionRestriction;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.sql.SQLExpressions;
-import com.querydsl.sql.WindowFunction;
 
 public class TranslatorUtils {
     public static String generateAlias(String prefix) {
@@ -51,7 +41,7 @@ public class TranslatorUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static BooleanExpression toAggregatedBooleanExpression(StringPath stringPath, ComparisonType cmp, List<Object> values) {
         NumberPath numberPath = Expressions.numberPath(BigDecimal.class, stringPath.getMetadata());
 

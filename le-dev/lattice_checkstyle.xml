@@ -4,10 +4,10 @@
         "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
 <!-- Checkstyle configuration that checks the coding conventions for lattice java projects. -->
- 
+
 <module name = "Checker">
     <property name="charset" value="UTF-8"/>
-    
+
     <property name="severity" value="warning"/>
 
     <property name="fileExtensions" value="java"/>
@@ -163,7 +163,7 @@
             <property name="allowNonPrintableEscapes" value="true"/>
         </module>
         <module name="AvoidStaticImport">
-            <property name="excludes" value="org.testng.Assert.*,com.latticeengines.domain.exposed.metadata.TableRoleInCollection.*"/>
+            <property name="excludes" value="org.testng.Assert.*,com.latticeengines.domain.exposed.metadata.TableRoleInCollection.*,com.latticeengines.domain.exposed.metadata.InterfaceName.*"/>
         </module>
         <module name="DeclarationOrder"/>
         <module name="EmptyBlock">

@@ -18,7 +18,7 @@ public class AttrRepoUtils {
         if (cm == null) {
             throw new QueryEvaluationException("Cannot find attribute " + attributeLookup + " in the repository.");
         }
-        cm.setColumnId(attributeLookup.getAttribute());
+        cm.setAttrName(attributeLookup.getAttribute());
         return cm;
     }
 

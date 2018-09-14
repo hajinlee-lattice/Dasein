@@ -44,7 +44,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         super(factory);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public BooleanExpression resolve(ConcreteRestriction restriction) {
         Lookup lhs = restriction.getLhs();
@@ -129,133 +129,159 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             BooleanExpression booleanExpression;
 
             switch (restriction.getRelation()) {
-            case EQUAL:
-                if (rhs instanceof SubQueryAttrLookup) {
-                    SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
-                    if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                        booleanExpression = lhsPaths.get(0)
-                                .eq((SQLQuery<?>) subQueryAttrLookup.getSubQuery().getSubQueryExpression());
-                    } else {
-                        ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
-                        booleanExpression = lhsPath.eq(subselect);
-                    }
-                } else {
-                    if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                        booleanExpression = ((StringExpression) lhsPath).equalsIgnoreCase(rhsPaths.get(0));
-                    } else {
-                        booleanExpression = lhsPath.eq(rhsPaths.get(0));
-                    }
-                }
-                break;
-            case NOT_EQUAL:
-                if (rhs instanceof SubQueryAttrLookup) {
-                    SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
-                    if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                        booleanExpression = lhsPaths.get(0)
-                                .ne((SQLQuery<?>) subQueryAttrLookup.getSubQuery().getSubQueryExpression());
-                    } else {
-                        ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
-                        booleanExpression = lhsPath.ne(subselect);
-                    }
-                } else {
-                    if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                        booleanExpression = ((StringExpression) lhsPath).notEqualsIgnoreCase(rhsPaths.get(0));
-                    } else {
-                        booleanExpression = lhsPath.ne(rhsPaths.get(0));
-                    }
-                }
-                break;
-            case GREATER_OR_EQUAL:
-                booleanExpression = lhsPath.goe(rhsPaths.get(0));
-                break;
-            case GREATER_THAN:
-                booleanExpression = lhsPath.gt(rhsPaths.get(0));
-                break;
-            case LESS_OR_EQUAL:
-                booleanExpression = lhsPath.loe(rhsPaths.get(0));
-                break;
-            case LESS_THAN:
-                booleanExpression = lhsPath.lt(rhsPaths.get(0));
-                break;
-            case NOT_IN_COLLECTION:
-                if (rhs instanceof SubQueryAttrLookup) {
-                    SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
-                    if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                        booleanExpression = lhsPaths.get(0)
-                                .notIn((SQLQuery<?>) subQueryAttrLookup.getSubQuery().getSubQueryExpression());
-                    } else {
-                        ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
-                        booleanExpression = lhsPaths.get(0).notIn(subselect);
-                    }
-                } else {
-                    if (rhsPaths.size() > 1) {
-                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                            rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
-                            booleanExpression = ((StringExpression) lhsPath).toLowerCase()
-                                    .notIn(rhsPaths.toArray(new ComparableExpression[0]));
-
+                case EQUAL:
+                    if (rhs instanceof SubQueryAttrLookup) {
+                        SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                            booleanExpression = lhsPaths.get(0).eq((SQLQuery<?>) subQueryAttrLookup
+                                    .getSubQuery().getSubQueryExpression());
                         } else {
-                            booleanExpression = lhsPath.notIn(rhsPaths.toArray(new ComparableExpression[0]));
+                            ComparableExpression<String> subselect = rhsResolver
+                                    .resolveForSubselect(rhs);
+                            booleanExpression = lhsPath.eq(subselect);
                         }
                     } else {
                         if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                            booleanExpression = ((StringExpression) lhsPath).notEqualsIgnoreCase(rhsPaths.get(0));
-                        } else {
-                            booleanExpression = lhsPath.ne(rhsPaths.get(0));
-                        }
-                    }
-                }
-                break;
-            case IN_COLLECTION:
-                if (rhs instanceof SubQueryAttrLookup) {
-                    SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
-                    if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                        booleanExpression = lhsPaths.get(0).in(rhsResolver.resolveForFrom(rhs));
-                    } else {
-                        ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
-                        booleanExpression = lhsPaths.get(0).in(subselect);
-                    }
-                } else {
-                    // when there's only 1 element in the collection, querydsl
-                    // generates something
-                    // like "attr in ?", which is not a valid syntax so we treat
-                    // it differently
-                    if (rhsPaths.size() > 1) {
-                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                            rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
-                            booleanExpression = ((StringExpression) lhsPath).toLowerCase()
-                                    .in(rhsPaths.toArray(new ComparableExpression[0]));
-
-                        } else {
-                            booleanExpression = lhsPath.in(rhsPaths.toArray(new ComparableExpression[0]));
-                        }
-                    } else {
-                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                            booleanExpression = ((StringExpression) lhsPath).equalsIgnoreCase(rhsPaths.get(0));
+                            booleanExpression = ((StringExpression) lhsPath)
+                                    .equalsIgnoreCase(rhsPaths.get(0));
                         } else {
                             booleanExpression = lhsPath.eq(rhsPaths.get(0));
                         }
                     }
-                }
-                break;
-            case CONTAINS:
-                if (lhsPath instanceof StringExpression) {
-                    booleanExpression = ((StringExpression) lhsPath).containsIgnoreCase(rhsPaths.get(0));
                     break;
-                }
-            case STARTS_WITH:
-                if (lhsPath instanceof StringExpression) {
-                    booleanExpression = ((StringExpression) lhsPath).startsWithIgnoreCase(rhsPaths.get(0));
+                case NOT_EQUAL:
+                    if (rhs instanceof SubQueryAttrLookup) {
+                        SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                            booleanExpression = lhsPaths.get(0).ne((SQLQuery<?>) subQueryAttrLookup
+                                    .getSubQuery().getSubQueryExpression());
+                        } else {
+                            ComparableExpression<String> subselect = rhsResolver
+                                    .resolveForSubselect(rhs);
+                            booleanExpression = lhsPath.ne(subselect);
+                        }
+                    } else {
+                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                            booleanExpression = ((StringExpression) lhsPath)
+                                    .notEqualsIgnoreCase(rhsPaths.get(0));
+                        } else {
+                            booleanExpression = lhsPath.ne(rhsPaths.get(0));
+                        }
+                    }
                     break;
-                }
-            case ENDS_WITH:
-                if (lhsPath instanceof StringExpression) {
-                    booleanExpression = ((StringExpression) lhsPath).endsWithIgnoreCase(rhsPaths.get(0));
+                case GREATER_OR_EQUAL:
+                    booleanExpression = lhsPath.goe(rhsPaths.get(0));
                     break;
-                }
-            case NOT_CONTAINS:
-            default:
-                throw new LedpException(LedpCode.LEDP_37006, new String[] { restriction.getRelation().toString() });
+                case GREATER_THAN:
+                    booleanExpression = lhsPath.gt(rhsPaths.get(0));
+                    break;
+                case LESS_OR_EQUAL:
+                    booleanExpression = lhsPath.loe(rhsPaths.get(0));
+                    break;
+                case LESS_THAN:
+                    booleanExpression = lhsPath.lt(rhsPaths.get(0));
+                    break;
+                case NOT_IN_COLLECTION:
+                    if (rhs instanceof SubQueryAttrLookup) {
+                        SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                            booleanExpression = lhsPaths.get(0)
+                                    .notIn((SQLQuery<?>) subQueryAttrLookup.getSubQuery()
+                                            .getSubQueryExpression());
+                        } else {
+                            ComparableExpression<String> subselect = rhsResolver
+                                    .resolveForSubselect(rhs);
+                            booleanExpression = lhsPaths.get(0).notIn(subselect);
+                        }
+                    } else {
+                        if (rhsPaths.size() > 1) {
+                            if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                                rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
+                                booleanExpression = ((StringExpression) lhsPath).toLowerCase()
+                                        .notIn(rhsPaths.toArray(new ComparableExpression[0]));
+
+                            } else {
+                                booleanExpression = lhsPath
+                                        .notIn(rhsPaths.toArray(new ComparableExpression[0]));
+                            }
+                        } else {
+                            if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                                booleanExpression = ((StringExpression) lhsPath)
+                                        .notEqualsIgnoreCase(rhsPaths.get(0));
+                            } else {
+                                booleanExpression = lhsPath.ne(rhsPaths.get(0));
+                            }
+                        }
+                    }
+                    break;
+                case IN_COLLECTION:
+                    if (rhs instanceof SubQueryAttrLookup) {
+                        SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                            booleanExpression = lhsPaths.get(0).in(rhsResolver.resolveForFrom(rhs));
+                        } else {
+                            ComparableExpression<String> subselect = rhsResolver
+                                    .resolveForSubselect(rhs);
+                            booleanExpression = lhsPaths.get(0).in(subselect);
+                        }
+                    } else {
+                        // when there's only 1 element in the collection,
+                        // querydsl
+                        // generates something
+                        // like "attr in ?", which is not a valid syntax so we
+                        // treat
+                        // it differently
+                        if (rhsPaths.size() > 1) {
+                            if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                                rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
+                                booleanExpression = ((StringExpression) lhsPath).toLowerCase()
+                                        .in(rhsPaths.toArray(new ComparableExpression[0]));
+
+                            } else {
+                                booleanExpression = lhsPath
+                                        .in(rhsPaths.toArray(new ComparableExpression[0]));
+                            }
+                        } else {
+                            if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                                booleanExpression = ((StringExpression) lhsPath)
+                                        .equalsIgnoreCase(rhsPaths.get(0));
+                            } else {
+                                booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                            }
+                        }
+                    }
+                    break;
+                case CONTAINS:
+                    if (lhsPath instanceof StringExpression) {
+                        booleanExpression = ((StringExpression) lhsPath)
+                                .containsIgnoreCase(rhsPaths.get(0));
+                        break;
+                    } else {
+                        throw new LedpException(LedpCode.LEDP_37006,
+                                new String[] { restriction.getRelation().toString() });
+                    }
+                case STARTS_WITH:
+                    if (lhsPath instanceof StringExpression) {
+                        booleanExpression = ((StringExpression) lhsPath)
+                                .startsWithIgnoreCase(rhsPaths.get(0));
+                        break;
+                    } else {
+                        throw new LedpException(LedpCode.LEDP_37006,
+                                new String[] { restriction.getRelation().toString() });
+                    }
+                case ENDS_WITH:
+                    if (lhsPath instanceof StringExpression) {
+                        booleanExpression = ((StringExpression) lhsPath)
+                                .endsWithIgnoreCase(rhsPaths.get(0));
+                        break;
+                    } else {
+                        throw new LedpException(LedpCode.LEDP_37006,
+                                new String[] { restriction.getRelation().toString() });
+                    }
+                case NOT_CONTAINS:
+                default:
+                    throw new LedpException(LedpCode.LEDP_37006,
+                            new String[] { restriction.getRelation().toString() });
             }
 
             if (restriction.getNegate()) {
@@ -274,8 +300,10 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         }
     }
 
-    private boolean applyEqualIgnoreCase(boolean isBitEncoded, Lookup lhs, ComparableExpression lhsPath) {
-        return !isBitEncoded && !(lhs instanceof CaseLookup) && (lhsPath instanceof StringExpression);
+    private boolean applyEqualIgnoreCase(boolean isBitEncoded, Lookup lhs,
+            ComparableExpression<?> lhsPath) {
+        return !isBitEncoded && !(lhs instanceof CaseLookup)
+                && (lhsPath instanceof StringExpression);
     }
 
     private boolean isNullValueLookup(Lookup lookup) {
@@ -308,14 +336,16 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                         return true;
                     } else {
                         throw new UnsupportedOperationException(
-                                "Bucket attribute can only do string value lookup. But found " + val + " instead.");
+                                "Bucket attribute can only do string value lookup. But found " + val
+                                        + " instead.");
                     }
                 } else if (rhs != null && rhs instanceof CollectionLookup) {
                     CollectionLookup colLookup = (CollectionLookup) rhs;
                     for (Object val : colLookup.getValues()) {
                         if (val != null && !(val instanceof String)) {
                             throw new UnsupportedOperationException(
-                                    "Bucket attribute can only do string value lookup. But found " + val + " instead.");
+                                    "Bucket attribute can only do string value lookup. But found "
+                                            + val + " instead.");
                         }
                     }
                     return true;
@@ -362,7 +392,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         return new ValueLookup(value);
     }
 
-    private Lookup convertValueLookup(ConcreteRestriction restriction, Buckets buckets, String bktLbl) {
+    private Lookup convertValueLookup(ConcreteRestriction restriction, Buckets buckets,
+            String bktLbl) {
         List<Object> ids = new ArrayList<>();
         if (bktLbl != null) {
             ids = buckets.getBucketList().stream() //
@@ -371,7 +402,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     .collect(Collectors.toList());
         }
         if (ids.isEmpty()) {
-            log.warn("Cannot find corresponding label for " + bktLbl + " in statistics, use -1 bkt id instead.");
+            log.warn("Cannot find corresponding label for " + bktLbl
+                    + " in statistics, use -1 bkt id instead.");
             return new ValueLookup(-1);
         }
         if (ids.size() > 1) {

@@ -49,6 +49,7 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.Union;
 import com.querydsl.sql.WindowFunction;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class EventQueryTranslator extends TranslatorCommon {
     private static final int ONE_LAG_BEHIND_OFFSET = 1;
 
@@ -91,7 +92,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         return repository.getTableName(AggregatedPeriodTransaction);
     }
 
-    @SuppressWarnings("unchecked")
     private BooleanExpression limitPeriodByNameAndCount(QueryFactory queryFactory, AttributeRepository repository,
                                                         String period, int periodCount, String sqlUser) {
         BooleanExpression matchedPeriod = periodName.eq(period);
@@ -100,7 +100,6 @@ public class EventQueryTranslator extends TranslatorCommon {
             : matchedPeriod.and(periodId.gt(translateValidPeriodId(queryFactory, repository, period, periodCount, sqlUser)));
     }
 
-    @SuppressWarnings({"unchecked", "rawtype"})
     private SubQuery translateAllKeys(QueryFactory queryFactory, AttributeRepository repository, String period,
                                       int periodCount, String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
@@ -131,7 +130,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
     }
 
-    @SuppressWarnings({"unchecked", "rawtype"})
     private SubQuery translateProductRevenue(QueryFactory queryFactory,
                                              AttributeRepository repository,
                                              List<String> targetProductIds,
@@ -162,7 +160,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID).withProjection(REVENUE);
     }
 
-    @SuppressWarnings({"unchecked", "rawtype"})
     private SubQuery translateShiftedRevenue(QueryFactory queryFactory,
                                              AttributeRepository repository,
                                              int laggingPeriodCount, String sqlUser) {
@@ -182,7 +179,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID).withProjection(REVENUE);
     }
 
-    @SuppressWarnings("unchecked")
     private SubQueryExpression translateValidPeriodId(QueryFactory queryFactory,
                                                       AttributeRepository repository,
                                                       String period,
@@ -199,7 +195,6 @@ public class EventQueryTranslator extends TranslatorCommon {
 
     }
 
-    @SuppressWarnings("unchecked")
     private Expression translateEvaluationPeriodId(QueryFactory queryFactory,
                                                    AttributeRepository repository,
                                                    String periodNameStr,
@@ -219,7 +214,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Expression translateMaxTrainingPeriodId(QueryFactory queryFactory,
                                                     AttributeRepository repository,
                                                     String periodNameStr,
@@ -240,7 +234,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Expression translateMinPeriodId(QueryFactory queryFactory,
                                             AttributeRepository repository,
                                             String periodNameStr,
@@ -266,7 +259,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Expression translateMinPeriodId(QueryFactory queryFactory,
                                             AttributeRepository repository,
                                             String periodNameStr,
@@ -286,7 +278,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         return productId.in(productIdStr.split(","));
     }
 
-    @SuppressWarnings("unchecked")
     private BooleanExpression translatePeriodRestriction(QueryFactory queryFactory,
                                                          AttributeRepository repository,
                                                          boolean isScoring,
@@ -294,13 +285,12 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                          int evaluationPeriodId,
                                                          int laggingPeriodCount,
                                                          String sqlUser) {
-        return (isScoring)
-            ? periodId.eq(translateEvaluationPeriodId(queryFactory, repository, periodName, evaluationPeriodId, sqlUser))
+        return isScoring //
+            ? periodId.eq(translateEvaluationPeriodId(queryFactory, repository, periodName, evaluationPeriodId, sqlUser)) //
             : periodId.loe(translateMaxTrainingPeriodId(queryFactory, repository, periodName, evaluationPeriodId,
                                                         laggingPeriodCount, sqlUser));
     }
 
-    @SuppressWarnings("unchecked")
     private SQLQuery joinAccountWithPeriods(QueryFactory queryFactory,
                                             AttributeRepository repository,
                                             String accountViewAlias,
@@ -323,7 +313,6 @@ public class EventQueryTranslator extends TranslatorCommon {
             .where(periodIdPredicate);
     }
 
-    @SuppressWarnings("unchecked")
     private SQLQuery joinEventTupleWithRevenue(QueryFactory queryFactory,
                                                AttributeRepository repository,
                                                String eventTupleViewAlias,
@@ -339,7 +328,6 @@ public class EventQueryTranslator extends TranslatorCommon {
             .on(tupleAccountId.eq(shiftedAccountId).and(tuplePeriodId.eq(shiftedPeriodId)));
     }
 
-    @SuppressWarnings("unchecked")
     private SubQuery translateSingleProductAPS(QueryFactory queryFactory,
                                                AttributeRepository repository,
                                                TransactionRestriction txRestriction,
@@ -413,7 +401,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjections(ACCOUNT_ID, PERIOD_ID, AMOUNT_AGG, QUANTITY_AGG);
     }
 
-    @SuppressWarnings("unchecked")
     private SQLQuery translateMultiProductRestriction(QueryFactory queryFactory,
                                                       AttributeRepository repository,
                                                       TransactionRestriction txOld,
@@ -448,9 +435,9 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
 
-        EntityPath<String> apsUnionAllPath = (products.length == 1) ?
-            new PathBuilder<>(String.class, apsUnionAll.getAlias()) :
-            new PathBuilder<>(String.class, apsUnionAllNoNull.getAlias());
+        EntityPath<String> apsUnionAllPath = (products.length == 1) //
+                ? new PathBuilder<>(String.class, apsUnionAll.getAlias()) //
+                : new PathBuilder<>(String.class, apsUnionAllNoNull.getAlias());
 
         AggregationFilter spentFilter = txOld.getSpentFilter();
         AggregationFilter unitFilter = txOld.getUnitFilter();
@@ -473,7 +460,6 @@ public class EventQueryTranslator extends TranslatorCommon {
             .having(aggrValPredicate);
     }
 
-    @SuppressWarnings("unchecked")
     private SQLQuery translateTransaction(QueryFactory queryFactory,
                                           AttributeRepository repository,
                                           TransactionRestriction txRestriction,
@@ -493,7 +479,6 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                 isScoring, builder, sqlUser);
     }
 
-    @SuppressWarnings("unchecked")
     private SQLQuery translateHasEngaged(QueryFactory queryFactory,
                                          AttributeRepository repository,
                                          TransactionRestriction txRestriction,
@@ -564,7 +549,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         return query;
     }
 
-    @SuppressWarnings("unchecked")
     private SubQuery translateSelectAll(QueryFactory queryFactory,
                                         AttributeRepository repository,
                                         String tableName,
@@ -1024,13 +1008,12 @@ public class EventQueryTranslator extends TranslatorCommon {
     }
 
     private Restriction translateNotWithinToSkipOffset(TransactionRestriction txRestriction) {
-        Restriction newRestriction = new TransactionRestriction(txRestriction.getProductId(),
+        return new TransactionRestriction(txRestriction.getProductId(),
                                                                 txRestriction.getTimeFilter(),
                                                                 txRestriction.isNegate(),
                                                                 txRestriction.getSpentFilter(),
                                                                 txRestriction.getUnitFilter(),
                                                                 true);
-        return newRestriction;
     }
 
     private static class UnionCollector {
@@ -1059,7 +1042,6 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtype"})
     private Union<?> mergeQueryResult(LogicalOperator ops, SubQueryExpression[] childQueries) {
         return (LogicalOperator.AND == ops) //
             ? SQLExpressions.intersect(childQueries)
