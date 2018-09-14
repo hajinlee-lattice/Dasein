@@ -59,7 +59,6 @@ public class PrepareDunsRedirectManualMatchTestNG
                 .mapToObj(idx -> Pair.of(SRC_COLUMNS.get(idx).getKey(), idx))
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
-
         // generate transformer config
         CONFIG.setManId("MAN_Id");
         CONFIG.setDuns("MAN_DUNS");
@@ -156,45 +155,51 @@ public class PrepareDunsRedirectManualMatchTestNG
     private Object[][] provideManualSeedStandardTestData() {
         return new Object[][] {
                 // #1: all name/location fields present, large & small company size
-                newManualSeedStandardRow("499034", "Wall Street Chinese", "USA",
+                newManualSeedStandardRow("1", "Wall Street Chinese", "USA",
                         "NY", "New York", EMPLOYEE_SIZE_LARGE),
-                newManualSeedStandardRow("12345", "Wall Street Chinese", "USA",
+                newManualSeedStandardRow("2", "Wall Street Chinese", "USA",
                         "NY", "New York", EMPLOYEE_SIZE_SMALL),
 
                 // #2: name, country, state present, large & small company size
-                newManualSeedStandardRow("499034", "Wall Street Chinese", "USA",
+                newManualSeedStandardRow("3", "Wall Street Chinese", "USA",
                         "NY", null, EMPLOYEE_SIZE_LARGE),
-                newManualSeedStandardRow("12345", "Wall Street Chinese", "USA",
+                newManualSeedStandardRow("4", "Wall Street Chinese", "USA",
                         "NY", null, EMPLOYEE_SIZE_SMALL),
 
-                // #3: name, country present, large & small company size
-                newManualSeedStandardRow("499034", "Wall Street Chinese", "USA",
+                // #3: name, country, city present, large & small company size
+                newManualSeedStandardRow("5", "Wall Street Chinese", "USA",
+                        null, "New York", EMPLOYEE_SIZE_LARGE),
+                newManualSeedStandardRow("6", "Wall Street Chinese", "USA",
+                        null, "New York", EMPLOYEE_SIZE_SMALL),
+
+                // #4: name, country present, large & small company size
+                newManualSeedStandardRow("7", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_LARGE),
-                newManualSeedStandardRow("12345", "Wall Street Chinese", "USA",
+                newManualSeedStandardRow("8", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_SMALL),
 
-                // #4: name present, large & small company size
-                newManualSeedStandardRow("499034", "Wall Street Chinese", null,
+                // #5: name present, large & small company size
+                newManualSeedStandardRow("9", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_LARGE),
-                newManualSeedStandardRow("12345", "Wall Street Chinese", null,
+                newManualSeedStandardRow("10", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_SMALL),
 
                 /* invalid rows, will not generate any output rows */
 
-                // #5: invalid employee size
-                newManualSeedStandardRow("499034", "Wall Street Chinese", "USA",
+                // #6: invalid employee size
+                newManualSeedStandardRow("11", "Wall Street Chinese", "USA",
                         "NY", "New York", null),
-                newManualSeedStandardRow("499034", "Wall Street Chinese", "USA",
+                newManualSeedStandardRow("12", "Wall Street Chinese", "USA",
                         "NY", "New York", "Medium"),
 
-                // #6: no company name
-                newManualSeedStandardRow("499034", null, "USA",
+                // #7: no company name
+                newManualSeedStandardRow("13", null, "USA",
                         "NY", "New York", EMPLOYEE_SIZE_LARGE),
-                newManualSeedStandardRow("499034", null, "USA",
+                newManualSeedStandardRow("14", null, "USA",
                         "NY", null, EMPLOYEE_SIZE_LARGE),
-                newManualSeedStandardRow("499034", null, "USA",
+                newManualSeedStandardRow("15", null, "USA",
                         null, null, EMPLOYEE_SIZE_LARGE),
-                newManualSeedStandardRow("499034", null, null,
+                newManualSeedStandardRow("16", null, null,
                         null, null, EMPLOYEE_SIZE_LARGE),
 
         };
@@ -203,47 +208,62 @@ public class PrepareDunsRedirectManualMatchTestNG
     private Object[][] provideExpectedData() {
         return new Object[][] {
                 // #1: all name/location fields present, large & small company size
-                newExpectedRow("499034", "Wall Street Chinese", null,
+                newExpectedRow("1", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_LARGE),
-                newExpectedRow("499034", "Wall Street Chinese", "USA",
+                newExpectedRow("1", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_LARGE),
 
-                newExpectedRow("12345", "Wall Street Chinese", null,
+                newExpectedRow("2", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_SMALL),
-                newExpectedRow("12345", "Wall Street Chinese", "USA",
+                newExpectedRow("2", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_SMALL),
-                newExpectedRow("12345", "Wall Street Chinese", "USA",
+                newExpectedRow("2", "Wall Street Chinese", "USA",
                         "NY", null, EMPLOYEE_SIZE_SMALL),
+                newExpectedRow("2", "Wall Street Chinese", "USA",
+                        null, "New York", EMPLOYEE_SIZE_SMALL),
 
                 // #2: name, country, state present, large & small company size
-                newExpectedRow("499034", "Wall Street Chinese", null,
+                newExpectedRow("3", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_LARGE),
-                newExpectedRow("499034", "Wall Street Chinese", "USA",
+                newExpectedRow("3", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_LARGE),
 
-                newExpectedRow("12345", "Wall Street Chinese", null,
+                newExpectedRow("4", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_SMALL),
-                newExpectedRow("12345", "Wall Street Chinese", "USA",
+                newExpectedRow("4", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_SMALL),
-                newExpectedRow("12345", "Wall Street Chinese", "USA",
+                newExpectedRow("4", "Wall Street Chinese", "USA",
                         "NY", null, EMPLOYEE_SIZE_SMALL),
 
-                // #3: name, country present, large & small company size
-                newExpectedRow("499034", "Wall Street Chinese", null,
+                // #3: name, country, city present, large & small company size
+                newExpectedRow("5", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_LARGE),
-                newExpectedRow("499034", "Wall Street Chinese", "USA",
+                newExpectedRow("5", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_LARGE),
 
-                newExpectedRow("12345", "Wall Street Chinese", null,
+                newExpectedRow("6", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_SMALL),
-                newExpectedRow("12345", "Wall Street Chinese", "USA",
+                newExpectedRow("6", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_SMALL),
+                newExpectedRow("6", "Wall Street Chinese", "USA",
+                        null, "New York", EMPLOYEE_SIZE_SMALL),
 
-                // #4: name present, large & small company size
-                newExpectedRow("499034", "Wall Street Chinese", null,
+                // #4: name, country present, large & small company size
+                newExpectedRow("7", "Wall Street Chinese", null,
+                        null, null, EMPLOYEE_SIZE_LARGE),
+                newExpectedRow("7", "Wall Street Chinese", "USA",
                         null, null, EMPLOYEE_SIZE_LARGE),
 
-                newExpectedRow("12345", "Wall Street Chinese", null,
+                newExpectedRow("8", "Wall Street Chinese", null,
+                        null, null, EMPLOYEE_SIZE_SMALL),
+                newExpectedRow("8", "Wall Street Chinese", "USA",
+                        null, null, EMPLOYEE_SIZE_SMALL),
+
+                // #5: name present, large & small company size
+                newExpectedRow("9", "Wall Street Chinese", null,
+                        null, null, EMPLOYEE_SIZE_LARGE),
+
+                newExpectedRow("10", "Wall Street Chinese", null,
                         null, null, EMPLOYEE_SIZE_SMALL),
         };
     }
@@ -266,7 +286,7 @@ public class PrepareDunsRedirectManualMatchTestNG
         for (int i = 0; i < SINK_COLUMNS.size() - 1; i++) {
             result[i] = row[SRC_FIELD_INDEX_MAP.get(SINK_COLUMNS.get(i).getKey())];
         }
-        result[SINK_COLUMNS.size() - 1] = MatchKeyUtils.evalKeyPartition(newTuple(country, state));
+        result[SINK_COLUMNS.size() - 1] = MatchKeyUtils.evalKeyPartition(newTuple(country, state, city));
         return result;
     }
 
@@ -284,12 +304,13 @@ public class PrepareDunsRedirectManualMatchTestNG
         columns.add(Pair.of(columnName, String.class));
     }
 
-    private MatchKeyTuple newTuple(String country, String state) {
+    private MatchKeyTuple newTuple(String country, String state, String city) {
         MatchKeyTuple tuple = new MatchKeyTuple();
-        // always have name and no city at the moment
+        // always have name at the moment
         tuple.setName("CompanyName");
         tuple.setCountryCode(country);
         tuple.setState(state);
+        tuple.setCity(city);
         return tuple;
     }
 }

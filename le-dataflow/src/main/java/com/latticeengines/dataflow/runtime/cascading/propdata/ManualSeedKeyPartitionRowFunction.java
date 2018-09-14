@@ -20,7 +20,9 @@ import java.util.stream.IntStream;
  * Generate one or multiple intermediate rows for each valid key partition that contains the required
  * information to populate DunsRedirectBook.
  */
+@SuppressWarnings("rawtypes")
 public class ManualSeedKeyPartitionRowFunction extends BaseOperation implements Function {
+    private static final long serialVersionUID = -4314247333801902743L;
     private static final String EMP_SIZE_SMALL = PrepareDunsRedirectManualMatchConfig.SMALL_COMPANY_EMPLOYEE_SIZE;
 
     private final String nameField;
@@ -57,20 +59,27 @@ public class ManualSeedKeyPartitionRowFunction extends BaseOperation implements 
         String name = arguments.getString(nameField);
         String country = arguments.getString(countryField);
         String state = arguments.getString(stateField);
+        String city = arguments.getString(cityField);
         if (StringUtils.isNotBlank(name)) {
-            functionCall.getOutputCollector().add(getResult(arguments, null, null));
+            functionCall.getOutputCollector().add(getResult(arguments, null, null, null));
         }
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country)) {
-            functionCall.getOutputCollector().add(getResult(arguments, country, null));
+            functionCall.getOutputCollector().add(getResult(arguments, country, null, null));
         }
         // only for small company
-        if (EMP_SIZE_SMALL.equals(employeeSize) && StringUtils.isNotBlank(name) &&
-                StringUtils.isNotBlank(country) && StringUtils.isNotBlank(state)) {
-            functionCall.getOutputCollector().add(getResult(arguments, country, state));
+        if (EMP_SIZE_SMALL.equals(employeeSize)) {
+            // name, country, state
+            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country) && StringUtils.isNotBlank(state)) {
+                functionCall.getOutputCollector().add(getResult(arguments, country, state, null));
+            }
+            // name, country, city
+            if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(country) && StringUtils.isNotBlank(city)) {
+                functionCall.getOutputCollector().add(getResult(arguments, country, null, city));
+            }
         }
     }
 
-    private Tuple getResult(TupleEntry arguments, String country, String state) {
+    private Tuple getResult(TupleEntry arguments, String country, String state, String city) {
         Tuple result = getResult(arguments);
         // clear location fields
         if (country == null) {
@@ -79,7 +88,9 @@ public class ManualSeedKeyPartitionRowFunction extends BaseOperation implements 
         if (state == null) {
             result.set(stateFieldIdx, null);
         }
-        result.set(cityFieldIdx, null);
+        if (city == null) {
+            result.set(cityFieldIdx, null);
+        }
         return result;
     }
 

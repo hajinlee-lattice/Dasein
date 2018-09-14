@@ -176,16 +176,16 @@ public class MatchKeyUtils {
 
         List<String> keys = new ArrayList<>();
         // relevant fields
-        if (StringUtils.isNotEmpty(tuple.getName())) {
+        if (StringUtils.isNotBlank(tuple.getName())) {
             keys.add(MatchKey.Name.name());
         }
-        if (StringUtils.isNotEmpty(tuple.getCountryCode())) {
+        if (StringUtils.isNotBlank(tuple.getCountryCode())) {
             keys.add(MatchKey.Country.name());
         }
-        if (StringUtils.isNotEmpty(tuple.getCity())) {
+        if (StringUtils.isNotBlank(tuple.getCity())) {
             keys.add(MatchKey.City.name());
         }
-        if (StringUtils.isNotEmpty(tuple.getState())) {
+        if (StringUtils.isNotBlank(tuple.getState())) {
             keys.add(MatchKey.State.name());
         }
 

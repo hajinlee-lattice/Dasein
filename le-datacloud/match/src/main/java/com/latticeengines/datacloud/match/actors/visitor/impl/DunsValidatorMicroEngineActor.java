@@ -6,9 +6,11 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -76,7 +78,7 @@ public class DunsValidatorMicroEngineActor extends MicroEngineActorTemplate<Duns
      * pick a target DUNS to redirect to, return source DUNS if no valid target DUNS in the guide book.
      */
     private String pickTargetDuns(@NotNull MatchKeyTuple tuple, @NotNull DunsGuideBook book, @NotNull MatchTraveler traveler) {
-        String keyPartition = MatchKeyUtils.evalKeyPartition(tuple);
+        String keyPartition = getKeyPartition(tuple);
         String srcDuns = tuple.getDuns();
 
         for (DunsGuideBook.Item item : book.getItems()) {
@@ -120,5 +122,33 @@ public class DunsValidatorMicroEngineActor extends MicroEngineActorTemplate<Duns
         }
         return duns.equals(dunsOriginMap.get(LocationToDunsMicroEngineActor.class.getName()))
                 || duns.equals(dunsOriginMap.get(LocationToCachedDunsMicroEngineActor.class.getName()));
+    }
+
+    /*
+     * when country is not specified by the user in the MatchKey and city/state is,
+     * we will add USA as the default country, therefore we need to add country
+     * when evaluating KeyPartition.
+     *
+     * NOTE input MatchKeyTuple will not be change by this function
+     */
+    private String getKeyPartition(@NotNull MatchKeyTuple tuple) {
+        if (isCountryMatchKeyMissing(tuple)) {
+            // add country match key for KeyPartition
+            tuple.setCountryCode(MatchKey.Country.name());
+            String keyPartition = MatchKeyUtils.evalKeyPartition(tuple);
+            // clear country match key so that match key tuple does not change
+            tuple.setCountryCode(null);
+            return keyPartition;
+        } else {
+            return MatchKeyUtils.evalKeyPartition(tuple);
+        }
+    }
+
+    /*
+     * return true if country is missing and state/city is present
+     */
+    private boolean isCountryMatchKeyMissing(@NotNull MatchKeyTuple tuple) {
+        return StringUtils.isBlank(tuple.getCountry())
+                && (StringUtils.isNotBlank(tuple.getState()) || StringUtils.isNotBlank(tuple.getCity()));
     }
 }
