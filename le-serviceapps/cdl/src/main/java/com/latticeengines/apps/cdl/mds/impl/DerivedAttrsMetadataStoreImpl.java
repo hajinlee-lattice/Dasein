@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.mds.DerivedAttrsMetadataStore;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -53,6 +54,7 @@ public class DerivedAttrsMetadataStoreImpl implements DerivedAttrsMetadataStore 
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
                 cm.disableGroup(ColumnSelection.Predefined.Model);
 
+                cm.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
                 return cm;
             });
         } else {
