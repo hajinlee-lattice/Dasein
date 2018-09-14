@@ -701,7 +701,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getWorkflowTypes() {
+    public List<Map<String, Object>> getWorkflowTypes(String tenantId) {
         String sql = "SELECT External_ID as ID, Display_Name AS DisplayName FROM PlayWorkflowType WHERE IsActive = 1";
 
         MapSqlParameterSource source = new MapSqlParameterSource();

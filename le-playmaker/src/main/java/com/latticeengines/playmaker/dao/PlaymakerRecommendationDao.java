@@ -29,7 +29,7 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     long getPlayValueCount(long start, List<Integer> playgroupIds);
 
-    List<Map<String, Object>> getWorkflowTypes();
+    List<Map<String, Object>> getWorkflowTypes(String customerSpace);
 
     List<Map<String, Object>> getPlayGroups(long start, int offset, int maximum);
 

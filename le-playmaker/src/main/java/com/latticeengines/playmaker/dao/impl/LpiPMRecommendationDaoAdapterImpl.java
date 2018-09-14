@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,6 +20,7 @@ import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("lpiPMRecommendationDaoAdapter")
 public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
@@ -33,6 +35,9 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Inject
     private LpiPMAccountExtension lpiPMAccountExtension;
+
+    @Inject
+    private PlayProxy playProxy;
 
     public LpiPMRecommendationDaoAdapterImpl() {
         super(null);
@@ -144,24 +149,17 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public List<Map<String, Object>> getWorkflowTypes() {
-        // TODO - dummy impl in M13, fix in M14
-        List<Map<String, Object>> result = new ArrayList<>();
-
-        createWorkflowTypeMap(result, "ADefault", "List");
-        createWorkflowTypeMap(result, "Cross-Sell", "Cross-Sell");
-        createWorkflowTypeMap(result, "Prospecting", "Prospecting");
-        createWorkflowTypeMap(result, "Renewal", "Renewal");
-        createWorkflowTypeMap(result, "Upsell", "Upsell");
-
-        return result;
+    public List<Map<String, Object>> getWorkflowTypes(String tenanId) {
+        return playProxy.getPlayTypes(tenanId).stream()
+                .map(type -> createWorkflowTypeMap(type.getDisplayName(), type.getDisplayName()))
+                .collect(Collectors.toList());
     }
 
-    private void createWorkflowTypeMap(List<Map<String, Object>> result, String type, String typeDisplayName) {
+    private Map<String, Object> createWorkflowTypeMap(String type, String typeDisplayName) {
         Map<String, Object> wf = new HashMap<>();
         wf.put("ID", type);
         wf.put("DisplayName", typeDisplayName);
-        result.add(wf);
+        return wf;
     }
 
     @Override
