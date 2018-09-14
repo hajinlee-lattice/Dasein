@@ -49,10 +49,6 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
                 BusinessEntity.PeriodTransaction);
 
-        if (StringUtils.isEmpty(periodTransactionTableName)) {
-
-        }
-
         log.info(String.format(
                 "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s",
                 periodTransactionTableName, tenant.getId(), accountId, periodName, productType));
@@ -96,8 +92,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         Tenant tenant = MultiTenantContext.getTenant();
         String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
                 BusinessEntity.PeriodTransaction);
-        String accountTableName = dataCollectionProxy.getTableName(tenant.getId(),
-                BusinessEntity.Account.getServingStore());
+        String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
 
         log.info(String.format(
                 "Get Period Transaction Table %s, Account Table %s for %s with segment %s and periodName %s, productType %s",
