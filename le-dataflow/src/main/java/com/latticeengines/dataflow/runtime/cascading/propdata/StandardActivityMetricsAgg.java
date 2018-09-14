@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -20,8 +18,6 @@ import cascading.tuple.TupleEntry;
 
 public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityMetricsAgg.Context>
         implements Aggregator<StandardActivityMetricsAgg.Context> {
-
-    private static final Logger log = LoggerFactory.getLogger(StandardActivityMetricsAgg.class);
 
     private static final long serialVersionUID = -7883873860033640700L;
 

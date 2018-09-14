@@ -11,8 +11,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.EVFitFunctionParameters;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 
+@SuppressWarnings("rawtypes")
 public class CalculateExpectedRevenueFunction extends BaseOperation implements Function {
-    private String percentileFieldName;
+	private static final long serialVersionUID = 8549465250465151489L;
+	private String percentileFieldName;
     private String predictedRevenuePercentileFieldName;
     private int expectedRevenueFieldPos;
     private FittedConversionRateCalculator probabilityFitter;

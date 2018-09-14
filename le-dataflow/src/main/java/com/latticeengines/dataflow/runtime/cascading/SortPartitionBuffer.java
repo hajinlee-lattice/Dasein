@@ -25,6 +25,7 @@ import cascading.tuple.TupleEntry;
  * Find partition boundaries of sorted ids.
  * CAUTION: This buffer needs to hold all ids in memory.
  */
+@SuppressWarnings("rawtypes")
 public class SortPartitionBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = 1423189753525474796L;
@@ -38,7 +39,6 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
     private FileBackedOrderedList<?> ids;
 
     // output fields (dummyJoinKey, grpBdriesField)
-    @SuppressWarnings("unchecked")
     public SortPartitionBuffer(String sortField, String dummyJoinKeyField, String grpBdriesField, Class<?> sortFieldClz, int partitions) {
         super(new Fields(dummyJoinKeyField, grpBdriesField));
         this.sortField = sortField;

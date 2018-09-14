@@ -10,8 +10,11 @@ import cascading.tuple.TupleEntry;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
+@SuppressWarnings("rawtypes")
 public class AttrMarginFunction extends BaseOperation implements Function {
-    public AttrMarginFunction(InterfaceName field) {
+	private static final long serialVersionUID = -6183109795216528748L;
+
+	public AttrMarginFunction(InterfaceName field) {
         super(new Fields(field.name()));
     }
 

@@ -13,7 +13,8 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class TrimFunction extends BaseOperation implements Function {
 
-    private String trimField;
+	private static final long serialVersionUID = 1461026240384987251L;
+	private String trimField;
 
     public TrimFunction(String trimField) {
         super(new Fields(trimField));

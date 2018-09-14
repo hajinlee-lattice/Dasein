@@ -28,7 +28,6 @@ public class CompreCntVersionsrDomOnlyChkFunction extends BaseOperation implemen
         this.currVersCountField = currVersCountField;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();

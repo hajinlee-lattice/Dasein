@@ -31,7 +31,7 @@ public class RawScoreToPercentileMapperUnitTestNG {
             "/com/latticeengines/dataflow/runtime/cascading/cdl/scorederivation1.json");
 
         Assert.assertNotNull(scoreDerivation);
-        RawScoreToPercentileMapper mapper = new RawScoreToPercentileMapper(scoreDerivation);
+        new RawScoreToPercentileMapper(scoreDerivation);
     }
 
     private ScoreDerivation loadScoreDerivationFromResource(String resourceName) {

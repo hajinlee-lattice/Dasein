@@ -15,7 +15,8 @@ import java.util.Map;
  */
 public class AddKeyPartitionStrategy extends AddFieldStrategyBase {
 
-    private final Map<MatchKey, String> matchKeyColumnNameMap;
+	private static final long serialVersionUID = -288839367295707093L;
+	private final Map<MatchKey, String> matchKeyColumnNameMap;
 
     /**
      * Constructor to pass in the map from {@link MatchKey} to the column name

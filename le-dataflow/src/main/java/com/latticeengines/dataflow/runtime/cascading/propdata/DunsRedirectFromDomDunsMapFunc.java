@@ -22,7 +22,9 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class DunsRedirectFromDomDunsMapFunc extends BaseOperation implements Function {
 
-    private Map<String, Integer> namePositionMap;
+	private static final long serialVersionUID = 1618206727776198248L;
+	
+	private Map<String, Integer> namePositionMap;
     private String bookSource;
     private String priDunsField;
     private String priCtryDunsField;

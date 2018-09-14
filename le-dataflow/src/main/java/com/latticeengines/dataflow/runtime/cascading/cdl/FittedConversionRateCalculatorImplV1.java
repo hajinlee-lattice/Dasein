@@ -2,11 +2,11 @@ package com.latticeengines.dataflow.runtime.cascading.cdl;
 
 import java.io.Serializable;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 
 public class FittedConversionRateCalculatorImplV1 implements FittedConversionRateCalculator, Serializable {
-    private FitFunctionParameters params;
+	private static final long serialVersionUID = -661135563911121355L;
+	private FitFunctionParameters params;
 
     public FittedConversionRateCalculatorImplV1(FitFunctionParameters params) {
         validateParameters(params);

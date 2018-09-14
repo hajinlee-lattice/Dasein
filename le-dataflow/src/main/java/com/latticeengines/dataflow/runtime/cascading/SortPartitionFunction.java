@@ -11,11 +11,11 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class SortPartitionFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 5495338743901277641L;
 
-    private final String partitionField;
     private final String grpBdriesField;
     private final String sortingField;
     private final Class<Comparable<?>> sortingFieldClz;
@@ -24,7 +24,6 @@ public class SortPartitionFunction extends BaseOperation implements Function {
     public SortPartitionFunction(String partitionField, String grpBdriesField, String sortingField,
             Class<Comparable<?>> sortingFieldClz) {
         super(new Fields(partitionField));
-        this.partitionField = partitionField;
         this.grpBdriesField = grpBdriesField;
         this.sortingField = sortingField;
         this.sortingFieldClz = sortingFieldClz;

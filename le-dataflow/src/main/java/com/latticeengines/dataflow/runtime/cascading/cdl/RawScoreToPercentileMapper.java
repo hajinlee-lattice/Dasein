@@ -2,14 +2,13 @@ package com.latticeengines.dataflow.runtime.cascading.cdl;
 
 import java.io.Serializable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
 public class RawScoreToPercentileMapper implements Serializable {
-    private static final int MIN_PERCENTILE = 5;
+	private static final long serialVersionUID = -7382907476491844959L;
+	private static final int MIN_PERCENTILE = 5;
     private static final int MAX_PERCENTILE = 99;
 
     private ScoreDerivation derivation;

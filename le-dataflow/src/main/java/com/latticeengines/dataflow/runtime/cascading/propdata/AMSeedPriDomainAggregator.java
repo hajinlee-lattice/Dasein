@@ -15,8 +15,8 @@ import cascading.tuple.TupleEntry;
 
 public class AMSeedPriDomainAggregator extends BaseAggregator<AMSeedPriDomainAggregator.Context>
         implements Aggregator<AMSeedPriDomainAggregator.Context> {
-
-    private List<String> groupFields;
+	private static final long serialVersionUID = -5799582067670721843L;
+	private List<String> groupFields;
 
     public AMSeedPriDomainAggregator(Fields fieldDeclaration, List<String> groupFields) {
         super(fieldDeclaration);

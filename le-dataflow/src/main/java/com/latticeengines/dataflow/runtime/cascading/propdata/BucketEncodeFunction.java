@@ -30,6 +30,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class BucketEncodeFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -1L;

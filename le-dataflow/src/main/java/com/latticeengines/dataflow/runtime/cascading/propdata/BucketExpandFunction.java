@@ -21,6 +21,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class BucketExpandFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 2798963376075410999L;
@@ -38,7 +39,6 @@ public class BucketExpandFunction extends BaseOperation implements Function {
     private final Map<Integer, Integer> argIdToAttrIdMap = new HashMap<>();  // arg pos to attr id
     private final Map<Integer, DCEncodedAttr> encAttrArgPos = new HashMap<>();
     private final Map<Integer, BucketAlgorithm> bktAttrArgPos = new HashMap<>();
-    private final Map<String, Integer> dimIdMap = new HashMap<>();  // field name to arg pos
 
     // expand a row into multiple records of (attrId, bktId, dim ...)
     public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Set<String> excludeAttrs, List<String> dimAttrs,

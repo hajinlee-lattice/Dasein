@@ -7,8 +7,6 @@ import java.util.Map;
 
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
@@ -22,8 +20,6 @@ import cascading.tuple.TupleEntry;
 public class TransactionAggregator
         extends BaseAggregator<TransactionAggregator.Context>
         implements Aggregator<TransactionAggregator.Context> {
-
-    private static final Logger log = LoggerFactory.getLogger(TransactionAggregator.class);
 
     private static final long serialVersionUID = 6298800516602499546L;
 
@@ -186,7 +182,7 @@ public class TransactionAggregator
                     result.set(loc++, periodAmount.get(productId));
                 }
             } else {
-                for (String productId : productIds) {
+                for (@SuppressWarnings("unused") String productId : productIds) {
                      result.set(loc++, null);
                 }
             }

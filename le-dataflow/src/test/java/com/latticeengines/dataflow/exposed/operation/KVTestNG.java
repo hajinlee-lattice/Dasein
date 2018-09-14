@@ -248,7 +248,9 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
     }
 
     private static class ExampleAttrPicker implements KVAttrPicker {
-        private static final Collection<String> HELP_FIELDS = Collections.singleton("SourceTable");
+		private static final long serialVersionUID = -5219012167374767129L;
+
+		private static final Collection<String> HELP_FIELDS = Collections.singleton("SourceTable");
 
         private String valClzName;
 

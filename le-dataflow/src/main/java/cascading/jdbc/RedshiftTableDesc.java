@@ -38,7 +38,9 @@ import cascading.util.Util;
  */
 public class RedshiftTableDesc extends TableDesc {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RedshiftTap.class);
+	private static final long serialVersionUID = -3792499487098752666L;
+
+	private static final Logger LOG = LoggerFactory.getLogger(RedshiftTap.class);
 
     private String distStyle;
     private String distributionkey;

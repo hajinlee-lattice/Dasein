@@ -126,6 +126,7 @@ public class DataFlowUtils {
             return new First();
         case LAST:
             return new Last();
+        default:
         }
         return null;
     }

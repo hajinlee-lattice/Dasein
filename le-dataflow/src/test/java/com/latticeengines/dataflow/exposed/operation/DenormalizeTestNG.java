@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.exposed.operation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class DenormalizeTestNG extends DataFlowOperationFunctionalTestNGBase {
                 URL url = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/operation/ListType.avsc");
                 String schemaStr;
                 try {
-                    schemaStr = FileUtils.readFileToString(new File(url.getFile()));
+                    schemaStr = FileUtils.readFileToString(new File(url.getFile()), Charset.defaultCharset());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

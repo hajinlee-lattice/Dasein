@@ -9,16 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
@@ -31,9 +28,6 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
-import com.latticeengines.domain.exposed.scoringapi.FieldType;
-import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -122,36 +116,10 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty(DataFlowProperty.CHECKPOINT, true);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, engine);
-        Table table = dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
+        dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
 
         // verifyMetadata(table, "/tmp/EventTable");
         verifyNumRows(config, "/tmp/EventTable", 308);
-    }
-
-    @SuppressWarnings("deprecation")
-    private void verifyMetadata(Table table, String targetDir) throws Exception {
-        List<String> avroFiles = HdfsUtils.getFilesByGlob(config, String.format("%s/*.avro", targetDir));
-        Schema schema = AvroUtils.getSchema(config, new Path(avroFiles.get(0)));
-        Schema.Field field = schema.getField("DomainHashCode");
-        Map<String, String> props = field.getProps();
-        assertEquals(props.get("StatisticalType"), "ratio");
-        assertEquals(props.get("ApprovedUsage"), "Model");
-
-        for (Attribute attr : table.getAttributes()) {
-            if (attr.getName().equals("DomainHashCode")) {
-                assertEquals(attr.getApprovedUsage().get(0), "Model");
-                assertEquals(attr.getStatisticalType(), "ratio");
-            }
-        }
-
-        Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> transformDefinitions = table
-                .getRealTimeTransformationMetadata();
-        assertEquals(transformDefinitions.getValue().size(), 1);
-        TransformDefinition transform = transformDefinitions.getValue().get(0);
-        assertEquals(transform.name, "encoder");
-        assertEquals(transform.type, FieldType.LONG);
-        assertEquals(transform.arguments.get("column"), "Domain");
-        assertEquals(transform.output, "DomainHashCode");
     }
 
     @DataProvider(name = "engineProvider")

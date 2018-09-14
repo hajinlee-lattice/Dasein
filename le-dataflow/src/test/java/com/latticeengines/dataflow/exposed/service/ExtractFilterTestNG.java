@@ -70,7 +70,6 @@ public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void testFiltered() throws Exception {
         Table table = getTable();
 

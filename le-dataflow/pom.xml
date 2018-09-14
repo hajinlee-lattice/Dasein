@@ -126,17 +126,14 @@
         <dependency>
             <groupId>org.apache.tez</groupId>
             <artifactId>tez-dag</artifactId>
-            <version>${tez.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tez</groupId>
             <artifactId>tez-mapreduce</artifactId>
-            <version>${tez.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tez</groupId>
             <artifactId>tez-api</artifactId>
-            <version>${tez.version}</version>
             <classifier>ledp</classifier>
         </dependency>
 
@@ -144,12 +141,10 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
-            <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_2.11</artifactId>
-            <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>

@@ -22,7 +22,8 @@ public class SampleDataFlowBuilder extends TypesafeDataFlowBuilder<DataFlowParam
      * BY Domain ) WHERE MaxRevenue > 0 AND TotalEmployees > 0
      */
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public Node construct(DataFlowParameters parameters) {
         Node lead = addSource("Lead");
         Node oppty = addSource("Opportunity");

@@ -62,6 +62,7 @@ public class GroupByAndBufferOperation extends Operation {
         init(prior, groupByFields, sortFields, buffer, descending, caseInsensitive);
     }
 
+    @SuppressWarnings("rawtypes")
     public GroupByAndBufferOperation(Input prior, FieldList groupByFields, FieldList sortFields,
             Map<String, Comparator<?>> comparators, Buffer buffer) {
         init(prior, groupByFields, sortFields, comparators, buffer);
@@ -85,6 +86,7 @@ public class GroupByAndBufferOperation extends Operation {
         this.metadata = new ArrayList<>(prior.metadata);
     }
 
+    @SuppressWarnings("rawtypes")
     private void init(Input prior, FieldList groupByFields, FieldList sortFields,
             Map<String, Comparator<?>> comparators, Buffer buffer) {
         Fields fields = new Fields(groupByFields.getFields());

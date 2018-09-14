@@ -195,6 +195,7 @@ public class Node {
                 sortFieldList, buffer, descending, caseInsensitive)), builder);
     }
 
+    @SuppressWarnings("rawtypes")
     public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList,
             Map<String, Comparator<?>> comparators, Buffer buffer) {
         return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList,

@@ -47,7 +47,9 @@ import cascading.tuple.TupleEntryCollector;
  */
 public class RedshiftTap extends JDBCTap {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RedshiftTap.class);
+	private static final long serialVersionUID = -6463699369427271861L;
+
+	private static final Logger LOG = LoggerFactory.getLogger(RedshiftTap.class);
 
     public static final String DB_DRIVER = "org.postgresql.Driver";
 
@@ -82,6 +84,7 @@ public class RedshiftTap extends JDBCTap {
     }
 
     // New constructor added
+    @SuppressWarnings("rawtypes")
     public RedshiftTap(String connectionUrl, String username, String password,
             Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String hfsStagingDir,
             AWSCredentials awsCredentials, RedshiftTableDesc redshiftTableDesc,
@@ -153,6 +156,7 @@ public class RedshiftTap extends JDBCTap {
         super.sinkConfInit(process, conf);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public TupleEntryCollector openForWrite(FlowProcess<? extends Configuration> flowProcess,
             OutputCollector outputCollector) throws IOException {

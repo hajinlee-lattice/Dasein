@@ -15,8 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("rawtypes")
 public class ContactNameConcatenateFunction extends BaseOperation implements Function {
-    private static final Logger log = LoggerFactory.getLogger(ContactNameConcatenateFunction.class);
+	private static final long serialVersionUID = -7494994574004771238L;
+	private static final Logger log = LoggerFactory.getLogger(ContactNameConcatenateFunction.class);
     private Map<String, Integer> positionMap;
     private List<String> concatenateFields;
     private String resultField;

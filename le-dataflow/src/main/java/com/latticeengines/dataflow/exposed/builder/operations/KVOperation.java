@@ -116,10 +116,9 @@ public class KVOperation extends Operation {
     private static List<FieldMetadata> constructSchema(Map<String, String> argTypeMap, FieldList fieldsToAppend,
             FieldList fieldsToSkip, Map<String, FieldMetadata> priorMap) {
         Fields fields = constructDeclaration(argTypeMap, fieldsToAppend);
-        Set<String> skipFieldsSet = new HashSet<>(fieldsToSkip.getFieldsAsList());
 
         List<FieldMetadata> fms = new ArrayList<>();
-        for (Comparable comp : fields) {
+        for (Comparable<?> comp : fields) {
             String fieldName = (String) comp;
             if (priorMap.containsKey(fieldName)) {
                 fms.add(priorMap.get(fieldName));

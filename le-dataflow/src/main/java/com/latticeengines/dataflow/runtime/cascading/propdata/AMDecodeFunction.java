@@ -13,8 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("rawtypes")
 public class AMDecodeFunction extends BaseOperation implements Function {
-    private Map<String, BitCodeBook> codeBookMap;
+	private static final long serialVersionUID = 8140621590398789609L;
+	private Map<String, BitCodeBook> codeBookMap;
     private Map<String, Integer> positionMap;
     private Map<String, List<String>> encode2Decode;
 

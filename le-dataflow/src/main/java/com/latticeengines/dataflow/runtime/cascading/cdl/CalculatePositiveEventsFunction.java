@@ -15,7 +15,8 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 public class CalculatePositiveEventsFunction extends BaseOperation
     implements Function, FittedConversionRateCalculatorFactory {
 
-    private String avgScoreFieldName;
+	private static final long serialVersionUID = -3505533055111984029L;
+	private String avgScoreFieldName;
     private String totalEventFieldName;
     private RawScoreToPercentileMapper rawScoreToPercentileMapper;
     private FittedConversionRateCalculator fittedConversionRateCalculator;

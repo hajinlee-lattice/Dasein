@@ -20,8 +20,6 @@ public class AddMD5Hash extends BaseOperation implements Function {
     private static final long serialVersionUID = -9005009537092431868L;
 
     private Set<String> excludeFields;
-    private Integer truncateLen;
-    private boolean compressed;
 
     @ConstructorProperties({ "fieldDeclaration" })
     public AddMD5Hash(Fields fieldDeclaration, Set<String> excludeFields) {

@@ -316,7 +316,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         for (Extract extract : extracts) {
 
-            String path = null;
             try {
                 log.info(String.format("Retrieving extract for table %s located at %s", sourceTableName,
                         extract.getPath()));
@@ -332,12 +331,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
                 return matches;
             } catch (Exception e) {
-                if (path != null) {
-                    throw new LedpException(LedpCode.LEDP_26006, e, new String[] { path });
-                } else {
-                    throw new LedpException(LedpCode.LEDP_26005, e);
-                }
-
+                throw new LedpException(LedpCode.LEDP_26005, e);
             }
         }
 

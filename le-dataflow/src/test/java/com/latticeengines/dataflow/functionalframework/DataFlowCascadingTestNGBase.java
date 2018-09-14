@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.functionalframework;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -207,7 +208,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
     private Table retrieveSourceTableTemplate(String name, String extractPath) {
         if (templatePaths.containsKey(name)) {
             try (FileInputStream fis = new FileInputStream(templatePaths.get(name))) {
-                Table table = JsonUtils.deserialize(IOUtils.toString(fis), Table.class);
+                Table table = JsonUtils.deserialize(IOUtils.toString(fis, Charset.defaultCharset()), Table.class);
                 fixExtractPaths(table, extractPath);
                 return table;
             } catch (Exception e) {

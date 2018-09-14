@@ -5,7 +5,8 @@ import java.io.Serializable;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 
 public class FittedConversionRateCalculatorImplV2 implements FittedConversionRateCalculator, Serializable {
-    private FitFunctionParameters params;
+	private static final long serialVersionUID = -6982693393807845252L;
+	private FitFunctionParameters params;
 
     public FittedConversionRateCalculatorImplV2(FitFunctionParameters params) {
         validateParameters(params);

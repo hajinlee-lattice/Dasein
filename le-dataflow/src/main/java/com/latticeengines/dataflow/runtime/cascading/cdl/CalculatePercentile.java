@@ -1,7 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.cdl;
 
 import java.util.Iterator;
-import java.util.List;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -11,11 +10,11 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @SuppressWarnings("rawtypes")
 public class CalculatePercentile extends BaseOperation implements Buffer {
-    private int minPct;
+	private static final long serialVersionUID = -7641395420638947868L;
+	private int minPct;
     private int maxPct;
     private String countFieldName;
     private int scoreFieldPos;

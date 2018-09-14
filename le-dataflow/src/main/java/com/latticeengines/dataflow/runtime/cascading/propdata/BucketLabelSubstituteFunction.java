@@ -16,6 +16,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class BucketLabelSubstituteFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 9085016308216893042L;
