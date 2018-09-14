@@ -40,7 +40,7 @@
         <maven.deploy.version>2.8.2</maven.deploy.version>
         <maven.dependency.version>3.0.2</maven.dependency.version>
         <maven.install.version>2.5.2</maven.install.version>
-        <maven.eclipse.version>2.9</maven.eclipse.version> <!-- Users are advised to use m2e, the Eclipse Maven Integration instead 
+        <maven.eclipse.version>2.9</maven.eclipse.version> <!-- Users are advised to use m2e, the Eclipse Maven Integration instead
             of this plugin -->
         <maven.aspectj.version>1.8</maven.aspectj.version>
         <maven.archetype.version>3.0.1</maven.archetype.version>
@@ -56,7 +56,7 @@
         <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> <!-- need ledp3 classifier -->
-        <spring.data.jpa.version>2.0.0.RELEASE</spring.data.jpa.version> 
+        <spring.data.jpa.version>2.0.0.RELEASE</spring.data.jpa.version>
         <tez.version>0.9.0</tez.version>
         <guava.version>19.0</guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
@@ -67,7 +67,7 @@
         <cascading.version>3.2.1</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <cascading.redshift.version>3.0.0</cascading.redshift.version>
-        <!-- if until 2018 or cascading 3.3, they still do not release new 
+        <!-- if until 2018 or cascading 3.3, they still do not release new
             version, we should move away from cascading-flink -->
         <cascading.flink.version>0.3.0</cascading.flink.version>
         <scala.version>2.11.8</scala.version>
@@ -149,7 +149,7 @@
         <influxdb.version>2.8</influxdb.version>
         <hive.version>1.2.1.2.3.6.0-3796</hive.version>
         <sqljdbc.version>7.0.0.jre8</sqljdbc.version>
-        <mysql.connector.version>5.1.47</mysql.connector.version>
+        <mysql.connector.version>5.1.38</mysql.connector.version>
         <!-- commons -->
         <commons.io.version>2.6</commons.io.version>
         <commons.lang3.version>3.7</commons.lang3.version>
@@ -248,7 +248,7 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <filters>
-                                <!-- Strip any signatures to avoid security 
+                                <!-- Strip any signatures to avoid security
                                     errors running the shaded JAR. -->
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -343,7 +343,7 @@
                             </artifactSet>
 
                             <filters>
-                                <!-- Strip any signatures to avoid security 
+                                <!-- Strip any signatures to avoid security
                                     errors running the shaded JAR. -->
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -382,7 +382,7 @@
                         <artifactId>maven-dependency-plugin</artifactId>
                         <version>${maven.dependency.version}</version>
                         <executions>
-                            <!-- Copy the ant tasks jar. Needed for ts.jacoco.report-ant 
+                            <!-- Copy the ant tasks jar. Needed for ts.jacoco.report-ant
                                 . -->
                             <execution>
                                 <id>copy-jacoco-agent</id>
@@ -1032,7 +1032,7 @@
                     </configuration>
                 </plugin>
                 <!-- -->
-                <!-- jar plugin to produce 3 jars: impl (default), interface, 
+                <!-- jar plugin to produce 3 jars: impl (default), interface,
                     tests -->
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -2060,8 +2060,8 @@
                 <artifactId>jsp-api</artifactId>
                 <version>${javax.jsp.version}</version>
             </dependency>
-            
-            
+
+
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-server</artifactId>
@@ -2354,7 +2354,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
