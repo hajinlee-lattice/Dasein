@@ -1,7 +1,7 @@
 package com.latticeengines.dataplatform.dao.impl.modeling;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +24,9 @@ public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {
     @Transactional(propagation = Propagation.REQUIRED)
     public Model findByObjectId(String id) {
         Session session = sessionFactory.getCurrentSession();
-        Query query = session.createQuery("from " + Model.class.getSimpleName() + " model where model.id=:aModelId");
-        query.setString("aModelId", id);
+        Query<Model> query = session
+                .createQuery("from " + Model.class.getSimpleName() + " model where model.id=:aModelId", Model.class);
+        query.setParameter("aModelId", id);
         Model model = (Model) query.uniqueResult();
 
         return model;

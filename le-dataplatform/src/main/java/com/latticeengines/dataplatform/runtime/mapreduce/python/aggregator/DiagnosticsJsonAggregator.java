@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,7 +29,8 @@ public class DiagnosticsJsonAggregator extends ProfilingAggregator {
 
         List<JsonNode> diagnosticsFiles = new ArrayList<JsonNode>();
         for (String path : localPaths) {
-            String content = FileUtils.readFileToString(new File(path));
+            Charset encoding = null;
+            String content = FileUtils.readFileToString(new File(path), encoding);
             diagnosticsFiles.add(mapper.readTree(content));
         }
 
@@ -48,11 +50,12 @@ public class DiagnosticsJsonAggregator extends ProfilingAggregator {
                 break;
 
             default:
-                diagnosticsFile.put(key, value);
+                diagnosticsFile.set(key, value);
                 break;
             }
         }
-        FileUtils.writeStringToFile(new File(getName()), diagnosticsFile.toString());
+        Charset encoding = null;
+        FileUtils.writeStringToFile(new File(getName()), diagnosticsFile.toString(), encoding);
     }
 
     private void aggregatDataSummary(ObjectNode firstSummary, List<JsonNode> diagnosticsFiles) throws Exception {
@@ -64,7 +67,7 @@ public class DiagnosticsJsonAggregator extends ProfilingAggregator {
         }
         dataSummary.put("ColumnSize", columnSize);
 
-        diagnosticsFile.put(DATA_SUMMARY, dataSummary);
+        diagnosticsFile.set(DATA_SUMMARY, dataSummary);
     }
 
     private void aggregatAttributeSummary(JsonNode firstSummary, List<JsonNode> diagnosticsFiles) throws Exception {
@@ -82,9 +85,9 @@ public class DiagnosticsJsonAggregator extends ProfilingAggregator {
                     attributeFieldArray.add(tempArray.get(i));
                 }
             }
-            attributeSummary.put(key, attributeFieldArray);
+            attributeSummary.set(key, attributeFieldArray);
         }
-        diagnosticsFile.put(ATTRIBUTE_SUMMARY, attributeSummary);
+        diagnosticsFile.set(ATTRIBUTE_SUMMARY, attributeSummary);
     }
 
     @Override

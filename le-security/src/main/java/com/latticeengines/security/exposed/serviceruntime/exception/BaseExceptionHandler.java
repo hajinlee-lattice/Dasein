@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed.serviceruntime.exception;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +11,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -18,8 +18,8 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 public abstract class BaseExceptionHandler {
-    @Autowired
-    private AlertService alertService;
+    @Inject
+    protected AlertService alertService;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -54,6 +54,6 @@ public abstract class BaseExceptionHandler {
 
         String dedupKey = getCurrentRequest().getRequestURL().toString() + "|" + e.getClass().getName() + "|" + tenant;
         String message = StringUtils.isBlank(e.getMessage()) ? e.toString() : e.getMessage();
-        this.alertService.triggerCriticalEvent(message, null, dedupKey, details);
+        alertService.triggerCriticalEvent(message, null, dedupKey, details);
     }
 }

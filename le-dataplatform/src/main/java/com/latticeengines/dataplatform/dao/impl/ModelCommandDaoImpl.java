@@ -22,7 +22,7 @@ public class ModelCommandDaoImpl extends BaseDaoImpl<ModelCommand> implements Mo
         return ModelCommand.class;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public List<ModelCommand> getNewAndInProgress() {
         Session session = getSessionFactory().getCurrentSession();

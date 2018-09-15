@@ -287,7 +287,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>${maven.exec.version}</version>
                 <executions>
                     <execution>
                         <id>python-unit-test</id>
@@ -334,7 +333,6 @@
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
-            <version>${avro.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -344,7 +342,6 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.connector.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -416,7 +413,6 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-sqoop</artifactId>
-            <version>${le.sqoop.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -428,7 +424,6 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-sqoop</artifactId>
-            <version>${le.sqoop.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>

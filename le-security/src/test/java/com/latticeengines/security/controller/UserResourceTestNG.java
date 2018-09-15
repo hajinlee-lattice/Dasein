@@ -362,11 +362,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         data.setOldPassword(DigestUtils.sha256Hex("wrong"));
         data.setNewPassword(DigestUtils.sha256Hex("newpass"));
         String url = usersApi + "creds";
-        boolean exception = false;
         try {
             sendHttpPutForObject(restTemplate, url, data, ResponseDocument.class);
         } catch (RuntimeException e) {
-            exception = true;
             assertEquals(e.getMessage(), "401");
         }
 

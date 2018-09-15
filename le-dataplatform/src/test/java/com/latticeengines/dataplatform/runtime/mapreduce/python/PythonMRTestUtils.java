@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +44,8 @@ public class PythonMRTestUtils {
         String localPath = ClassLoader.getSystemResource(localDir).getPath();
 
         try {
-            String metadata = FileUtils.readFileToString(new File(localPath + "/" + filename));
+            Charset encoding = null;
+            String metadata = FileUtils.readFileToString(new File(localPath + "/" + filename), encoding);
             classifier = JsonUtils.deserialize(metadata, Classifier.class);
         } catch (Exception e) {
             throw new RuntimeException(e);

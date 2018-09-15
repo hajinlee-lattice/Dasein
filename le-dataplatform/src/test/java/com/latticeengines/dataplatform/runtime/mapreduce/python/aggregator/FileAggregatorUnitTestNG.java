@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotEquals;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -62,8 +63,9 @@ public class FileAggregatorUnitTestNG {
         DiagnosticsJsonAggregator aggregator = new DiagnosticsJsonAggregator();
         aggregator.aggregateToLocal(paths);
 
-        String aggregatedDiagnostics = FileUtils.readFileToString(new File(FileAggregator.DIAGNOSTICS_JSON));
-        String original = FileUtils.readFileToString(new File(comparePath));
+        Charset encoding = null;
+        String aggregatedDiagnostics = FileUtils.readFileToString(new File(FileAggregator.DIAGNOSTICS_JSON), encoding);
+        String original = FileUtils.readFileToString(new File(comparePath), encoding);
         String orginalDiagnostics = new ObjectMapper().readTree(original).toString();
 
         assertEquals(aggregatedDiagnostics.length(), orginalDiagnostics.length());
@@ -84,7 +86,8 @@ public class FileAggregatorUnitTestNG {
         } catch (Exception e) {
             // ignore invoker exception
         }
-        String metadataNew = FileUtils.readFileToString(new File(PythonMRUtils.METADATA_JSON_PATH));
+        Charset encoding = null;
+        String metadataNew = FileUtils.readFileToString(new File(PythonMRUtils.METADATA_JSON_PATH), encoding);
         Classifier classifierNew = JsonUtils.deserialize(metadataNew, Classifier.class);
 
         assertNotEquals(metadataNew, metadata);

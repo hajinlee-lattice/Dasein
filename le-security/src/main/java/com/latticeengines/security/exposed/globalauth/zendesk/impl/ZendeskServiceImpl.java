@@ -1,14 +1,13 @@
 package com.latticeengines.security.exposed.globalauth.zendesk.impl;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-import com.latticeengines.common.exposed.util.CipherUtils;
-import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
-import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -30,12 +29,14 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.PostConstruct;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.security.zendesk.ZendeskUser;
+import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
 
 @Service("zendeskService")
 public class ZendeskServiceImpl implements ZendeskService {
@@ -292,6 +293,7 @@ public class ZendeskServiceImpl implements ZendeskService {
     private static class UserWrapper {
         private ZendeskUser user;
 
+        @SuppressWarnings("unused")
         public UserWrapper() {
         }
 
@@ -303,6 +305,7 @@ public class ZendeskServiceImpl implements ZendeskService {
             return user;
         }
 
+        @SuppressWarnings("unused")
         public void setUser(ZendeskUser user) {
             this.user = user;
         }
@@ -314,9 +317,11 @@ public class ZendeskServiceImpl implements ZendeskService {
     private static class UserListWrapper {
         private List<ZendeskUser> users;
 
+        @SuppressWarnings("unused")
         public UserListWrapper() {
         }
 
+        @SuppressWarnings("unused")
         public UserListWrapper(List<ZendeskUser> users) {
             this.users = users;
         }
@@ -325,6 +330,7 @@ public class ZendeskServiceImpl implements ZendeskService {
             return users;
         }
 
+        @SuppressWarnings("unused")
         public void setUsers(List<ZendeskUser> users) {
             this.users = users;
         }

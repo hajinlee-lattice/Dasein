@@ -24,7 +24,7 @@ public class ModelCommandStateDaoImpl extends BaseDaoImpl<ModelCommandState> imp
         return ModelCommandState.class;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public List<ModelCommandState> findByModelCommandAndStep(ModelCommand modelCommand,
             ModelCommandStep modelCommandStep) {

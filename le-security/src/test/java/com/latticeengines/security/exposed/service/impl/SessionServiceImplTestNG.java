@@ -29,7 +29,6 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.service.SessionService;
-import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
 public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
@@ -40,9 +39,6 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private SessionService sessionService;

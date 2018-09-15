@@ -3,15 +3,16 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -97,7 +98,8 @@ public class PythonMRUtils {
     public static void writeMetadataJsonToLocal(Classifier classifier) throws IOException {
         String metadata = JsonUtils.serialize(classifier);
         File metadataFile = new File(METADATA_JSON_PATH);
-        FileUtils.writeStringToFile(metadataFile, metadata);
+        Charset encoding = null;
+        FileUtils.writeStringToFile(metadataFile, metadata, encoding);
     }
 
     public static void copyMetadataJsonToHdfs(Configuration config, String hdfsPath) throws Exception {

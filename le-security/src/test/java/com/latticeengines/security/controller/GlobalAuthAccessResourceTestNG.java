@@ -22,7 +22,6 @@ public class GlobalAuthAccessResourceTestNG extends UserResourceTestNGBase {
         destroyTestTenant();
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void getPrincipal() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);

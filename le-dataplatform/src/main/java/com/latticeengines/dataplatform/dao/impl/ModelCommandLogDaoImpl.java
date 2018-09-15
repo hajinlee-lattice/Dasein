@@ -24,7 +24,7 @@ public class ModelCommandLogDaoImpl extends BaseDaoImpl<ModelCommandLog> impleme
         return ModelCommandLog.class;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     @Transactional(value = "dlorchestration", propagation = Propagation.REQUIRED)
     public List<ModelCommandLog> findByModelCommand(ModelCommand modelCommand) {

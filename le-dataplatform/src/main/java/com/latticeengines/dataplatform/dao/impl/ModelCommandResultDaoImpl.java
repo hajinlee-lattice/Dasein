@@ -21,6 +21,7 @@ public class ModelCommandResultDaoImpl extends BaseDaoImpl<ModelCommandResult> i
         return ModelCommandResult.class;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ModelCommandResult findByModelCommand(ModelCommand modelCommand) {
         Session session = getSessionFactory().getCurrentSession();

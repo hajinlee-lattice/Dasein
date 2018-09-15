@@ -39,7 +39,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -53,9 +52,6 @@ import io.swagger.annotations.ApiOperation;
 public class LoginResource {
 
     private static final Logger log = LoggerFactory.getLogger(LoginResource.class);
-
-    @Autowired
-    private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
     private SessionService sessionService;

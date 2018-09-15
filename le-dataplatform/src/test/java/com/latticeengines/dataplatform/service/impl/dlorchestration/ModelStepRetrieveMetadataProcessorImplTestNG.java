@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -94,7 +95,8 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         try {
             URL metadataUrl = ClassLoader
                     .getSystemResource("com/latticeengines/dataplatform/service/incorrect-metadata.json");
-            String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+            Charset encoding = null;
+            String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), encoding);
             modelStepRetrieveMetadataProcessor.writeStringToHdfs(hdfsPath, metadata);
             Assert.fail("Should have thrown exception.");
         } catch (Exception e) {
@@ -145,7 +147,8 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
         URL metadataUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/service/incorrect-metadata.json");
-        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+        Charset encoding = null;
+        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), encoding);
         String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataDiagnosticsFile(command,
                 commandParameters);
         if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
@@ -191,7 +194,8 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
         URL metadataUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/service/correct-metadata.json");
-        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+        Charset encoding = null;
+        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), encoding);
 
         modelStepRetrieveMetadataProcessor.validateMetadata(metadata, command, commandParameters);
 
