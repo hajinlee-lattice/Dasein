@@ -44,8 +44,8 @@ public class DerivedAttrsMetadataStoreImpl implements DerivedAttrsMetadataStore 
     public ParallelFlux<ColumnMetadata> getMetadataInParallel(Namespace2<String, DataCollection.Version> namespace) {
         ParallelFlux<ColumnMetadata> cms;
         String tenantId = CustomerSpace.shortenCustomerSpace(namespace.getCoord1());
-        cdlNamespaceService.setMultiTenantContext(tenantId);
         if (StringUtils.isNotBlank(tenantId)) {
+            cdlNamespaceService.setMultiTenantContext(tenantId);
             DataCollection.Version version = namespace.getCoord2();
             TableRoleInCollection role = TableRoleInCollection.CalculatedCuratedAccountAttribute;
             Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(role, version);
