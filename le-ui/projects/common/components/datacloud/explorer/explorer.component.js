@@ -1574,7 +1574,7 @@ angular.module('common.datacloud.explorer', [
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
         
-        var addEntity = entity == 'Rating' || entity == 'LatticeAccount' ? 'Account' : entity;
+        var addEntity = entity == 'Rating' || entity == 'LatticeAccount' || entity == 'CuratedAccount' ? 'Account' : entity;
 
         var attributeData = {
             columnName: attributeKey, 
@@ -1607,7 +1607,7 @@ angular.module('common.datacloud.explorer', [
             return false;
         }
         var bucketToAdd = entity;
-        if (entity === 'LatticeAccount' || entity === 'Transaction' || entity === 'Rating'){
+        if (entity === 'LatticeAccount' || entity === 'Transaction' || entity === 'Rating' || entity === 'CuratedAccount'){
             bucketToAdd = 'Account';
         }
 

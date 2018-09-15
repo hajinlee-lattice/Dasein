@@ -124,6 +124,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 case 'LatticeAccount':
                 case 'Account':
                 case 'Contact':
+                case 'CuratedAccount':
                 case 'Rating': {
                     return QueryTreeAccountEntityService;
                 };
