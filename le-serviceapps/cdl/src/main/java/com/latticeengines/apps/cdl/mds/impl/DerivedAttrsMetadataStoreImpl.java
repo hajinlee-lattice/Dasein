@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.DerivedAttrsMetadataStore;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
+import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -26,6 +27,9 @@ public class DerivedAttrsMetadataStoreImpl implements DerivedAttrsMetadataStore 
     @Inject
     private TableRoleTemplate tableRoleTemplate;
 
+    @Inject
+    private CDLNamespaceService cdlNamespaceService;
+
     @Override
     public Flux<ColumnMetadata> getMetadata(Namespace2<String, DataCollection.Version> namespace) {
         Flux<ColumnMetadata> cms = Flux.empty();
@@ -40,6 +44,7 @@ public class DerivedAttrsMetadataStoreImpl implements DerivedAttrsMetadataStore 
     public ParallelFlux<ColumnMetadata> getMetadataInParallel(Namespace2<String, DataCollection.Version> namespace) {
         ParallelFlux<ColumnMetadata> cms;
         String tenantId = CustomerSpace.shortenCustomerSpace(namespace.getCoord1());
+        cdlNamespaceService.setMultiTenantContext(tenantId);
         if (StringUtils.isNotBlank(tenantId)) {
             DataCollection.Version version = namespace.getCoord2();
             TableRoleInCollection role = TableRoleInCollection.CalculatedCuratedAccountAttribute;
