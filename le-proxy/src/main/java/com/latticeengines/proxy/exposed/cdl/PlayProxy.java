@@ -191,12 +191,24 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         delete("Delete a play", url);
     }
 
-    public PlayLaunch createPlayLaunch(String customerSpace, String playName, PlayLaunch playLaunch,
-            boolean isDryRunMode) {
-        String url = constructUrl(URL_PREFIX + "/{playName}/launches?dry-run={isDryRunMode}",
-                shortenCustomerSpace(customerSpace), playName, isDryRunMode);
+    public PlayLaunch createPlayLaunch(String customerSpace, String playName, PlayLaunch playLaunch) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/launches", shortenCustomerSpace(customerSpace), playName);
         log.info("url is " + url);
-        return post("create or update play", url, playLaunch, PlayLaunch.class);
+        return post("create play launch", url, playLaunch, PlayLaunch.class);
+    }
+
+    public PlayLaunch updatePlayLaunch(String customerSpace, String playName, String launchId, PlayLaunch pLayLaunch) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}", shortenCustomerSpace(customerSpace),
+                playName, launchId);
+        log.info("url is " + url);
+        return post("update play launch", url, pLayLaunch, PlayLaunch.class);
+    }
+
+    public PlayLaunch launchPlay(String customerSpace, String playName, String launchId, boolean isDryRunMode) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}/launch?dry-run={isDryRunMode}",
+                shortenCustomerSpace(customerSpace), playName, launchId, isDryRunMode);
+        log.info("url is " + url);
+        return post("Launchplay", url, null, PlayLaunch.class);
     }
 
     @SuppressWarnings("rawtypes")

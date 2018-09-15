@@ -145,8 +145,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), playName);
         Assert.assertNotNull(retrievedFullPlay);
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
-        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getPlayLaunch());
-        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getMostRecentLaunch());
+        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getLastIncompleteLaunch());
+        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getLastCompletedLaunch());
         // TODO will change to NotNull after integration with RatingEngine is
         // fully done
         // Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getNewAccountsNum());

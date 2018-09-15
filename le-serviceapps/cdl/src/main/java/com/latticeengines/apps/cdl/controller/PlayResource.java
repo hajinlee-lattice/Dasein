@@ -11,12 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -82,7 +84,10 @@ public class PlayResource {
         this.playLaunchWorkflowSubmitter = playLaunchWorkflowSubmitter;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    // -----
+    // Plays
+    // -----
+    @GetMapping(value = "", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all full plays for a tenant")
     public List<Play> getPlays( //
@@ -94,69 +99,13 @@ public class PlayResource {
         return playService.getAllFullPlays(shouldLoadCoverage, ratingEngineId);
     }
 
-    @RequestMapping(value = "/deleted-play-ids", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/deleted-play-ids", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all deleted play ids for a tenant")
     public List<String> getDeletedPlayIds( //
             @PathVariable String customerSpace, //
             @RequestParam(value = "for-cleanup-only", required = false, defaultValue = "false") Boolean forCleanupOnly) {
         return playService.getAllDeletedPlayIds(forCleanupOnly);
-    }
-
-    @RequestMapping(value = "/launches/dashboard", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Play launch dashboard for a tenant")
-    public PlayLaunchDashboard getPlayLaunchDashboard( //
-            @PathVariable String customerSpace, //
-            @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
-                    + "should consider play launches across all plays", required = false) //
-            @RequestParam(value = "play-name", required = false) String playName, //
-            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
-                    + "should consider play launches across all org ids and external system type", required = false) //
-            @RequestParam(value = "org-id", required = false) String orgId, //
-            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
-                    + "should consider play launches across all org ids and external system type", required = false) //
-            @RequestParam(value = "external-sys-type", required = false) String externalSysType, //
-            @ApiParam(value = "List of launch states to consider", required = false) //
-            @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates, //
-            @ApiParam(value = "Start date in Unix timestamp", required = true) //
-            @RequestParam(value = "start-timestamp", required = true) Long startTimestamp, //
-            @ApiParam(value = "Play launch offset from start time", required = true) //
-            @RequestParam(value = "offset", required = true) Long offset, //
-            @ApiParam(value = "Maximum number of play launches to consider", required = true) //
-            @RequestParam(value = "max", required = true) Long max, //
-            @ApiParam(value = "Sort by", required = false) //
-            @RequestParam(value = "sortby", required = false) String sortby, //
-            @ApiParam(value = "Sort in descending order", required = false, defaultValue = "true") //
-            @RequestParam(value = "descending", required = false, defaultValue = "true") boolean descending, //
-            @ApiParam(value = "End date in Unix timestamp", required = false) //
-            @RequestParam(value = "end-timestamp", required = false) Long endTimestamp) {
-        return playLaunchService.getDashboard(getPlayId(playName), launchStates, startTimestamp, offset, max, sortby,
-                descending, endTimestamp, orgId, externalSysType, false);
-    }
-
-    @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Play entries count for launch dashboard for a tenant")
-    public Long getPlayLaunchDashboardEntriesCount( //
-            @PathVariable String customerSpace, //
-            @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
-                    + "should consider play launches across all plays", required = false) //
-            @RequestParam(value = "play-name", required = false) String playName, //
-            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
-                    + "should consider play launches across all org ids and external system type", required = false) //
-            @RequestParam(value = "org-id", required = false) String orgId, //
-            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
-                    + "should consider play launches across all org ids and external system type", required = false) //
-            @RequestParam(value = "external-sys-type", required = false) String externalSysType, //
-            @ApiParam(value = "List of launch states to consider", required = false) //
-            @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates, //
-            @ApiParam(value = "Start date in Unix timestamp", required = true) //
-            @RequestParam(value = "start-timestamp", required = true) Long startTimestamp, //
-            @ApiParam(value = "End date in Unix timestamp", required = false) //
-            @RequestParam(value = "end-timestamp", required = false) Long endTimestamp) {
-        return playLaunchService.getDashboardEntriesCount(getPlayId(playName), launchStates, startTimestamp,
-                endTimestamp, orgId, externalSysType);
     }
 
     @GetMapping(value = "/{playName}")
@@ -194,7 +143,7 @@ public class PlayResource {
         return playService.createOrUpdate(play, shouldLoadCoverage, tenant.getId());
     }
 
-    @RequestMapping(value = "/{playName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping(value = "/{playName}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a play")
     public Boolean delete( //
@@ -204,106 +153,185 @@ public class PlayResource {
         playService.deleteByName(playName, hardDelete == Boolean.TRUE);
         return true;
     }
+    // -----
+    // Plays
+    // -----
 
-    @RequestMapping(value = "/{playName}/launches", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create play launch for a given play")
-    public PlayLaunch createPlayLaunch( //
-            @PathVariable String customerSpace, //
-            @PathVariable("playName") String playName, //
-            @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
-            boolean isDryRunMode, //
-            @RequestBody PlayLaunch playLaunch, //
-            HttpServletResponse response) {
-        Play play = playService.getPlayByName(playName, false);
-        PlayUtils.validatePlayBeforeLaunch(playName, play);
-        PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
-
-        if (play != null) {
-            validateNonEmptyTargetsForLaunch(play, playName, playLaunch, //
-                    playLaunch.getDestinationAccountId());
-
-            playLaunch.setLaunchState(LaunchState.Launching);
-            playLaunch.setPlay(play);
-            playLaunch.setTableName(createTable(playLaunch));
-            playLaunchService.create(playLaunch);
-
-            // this dry run flag is useful in writing robust testcases
-            if (!isDryRunMode) {
-                String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
-                playLaunch.setApplicationId(appId);
-            }
-
-            List<String> allAvailableBuckets = Arrays.asList(RatingBucketName.values()).stream().map(b -> b.name())
-                    .collect(Collectors.toList());
-            Long totalAvailableRatedAccounts = ratingEntityPreviewService.getEntityPreviewCount(play.getRatingEngine(),
-                    BusinessEntity.Account, false, null, allAvailableBuckets, null);
-            playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
-            playLaunch.setAccountsSuppressed(0L);
-            playLaunch.setAccountsErrored(0L);
-            playLaunch.setAccountsLaunched(0L);
-            playLaunch.setContactsLaunched(0L);
-
-            playLaunchService.update(playLaunch);
-        } else {
-            log.error("Invalid playName: " + playName);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-        return playLaunch;
-    }
-
-    @RequestMapping(value = "/{playName}/talkingpoints/publish", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Publish Talking Points for a given play")
-    public void publishTalkingPoints( //
-            @PathVariable String customerSpace, //
-            @PathVariable("playName") String playName) {
-        playService.publishTalkingPoints(playName, customerSpace);
-    }
-
-    private String createTable(PlayLaunch playLaunch) {
-        CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
-
-        Table generatedRecommendationTable = new Table();
-        generatedRecommendationTable.addAttributes(Recommendation.getSchemaAttributes());
-
-        String tableName = "play_launch_" + UUID.randomUUID().toString().replaceAll("-", "_");
-        generatedRecommendationTable.setName(tableName);
-        generatedRecommendationTable.setTableType(TableType.DATATABLE);
-
-        generatedRecommendationTable.setDisplayName("Play Launch recommendation");
-        generatedRecommendationTable.setTenant(MultiTenantContext.getTenant());
-        generatedRecommendationTable.setTenantId(MultiTenantContext.getTenant().getPid());
-        generatedRecommendationTable.setMarkedForPurge(false);
-        metadataProxy.createTable(customerSpace.toString(), tableName, generatedRecommendationTable);
-
-        generatedRecommendationTable = metadataProxy.getTable(customerSpace.toString(), tableName);
-
-        return generatedRecommendationTable.getName();
-    }
-
-    @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)
+    // -------------
+    // Play Launches
+    // -------------
+    @GetMapping(value = "/{playName}/launches")
     @ResponseBody
     @ApiOperation(value = "Get list of launches for a given play")
-    public List<PlayLaunch> getPlayLaunches( //
-            @PathVariable String customerSpace, //
+    public List<PlayLaunch> getPlayLaunches(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates) {
         return playLaunchService.findByPlayId(getPlayId(playName), launchStates);
     }
 
-    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)
+    @PostMapping(value = "/{playName}/launches", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create play launch for a given play")
+    public PlayLaunch createPlayLaunch( //
+            @PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, @RequestBody PlayLaunch playLaunch) {
+        if (playLaunch == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play launch object is null" });
+        }
+
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
+        }
+
+        playLaunch.setLaunchState(LaunchState.UnLaunched);
+        playLaunch.setPlay(play);
+        playLaunchService.create(playLaunch);
+        return playLaunch;
+
+    }
+
+    @GetMapping(value = "/{playName}/launches/{launchId}")
     @ResponseBody
     @ApiOperation(value = "Get play launch for a given play and launch id")
-    public PlayLaunch getPlayLaunch( //
-            @PathVariable String customerSpace, //
+    public PlayLaunch getPlayLaunch(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId) {
         getPlayId(playName);
         return playLaunchService.findByLaunchId(launchId);
     }
 
-    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.PATCH)
+    @PostMapping(value = "/{playName}/launches/{launchId}", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update a play launch for a given play")
+    public PlayLaunch updatePlayLaunch(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @RequestBody PlayLaunch playLaunch, //
+            HttpServletResponse response) {
+        if (StringUtils.isEmpty(launchId)) {
+            throw new LedpException(LedpCode.LEDP_18205, new String[] { "empty or blank launch Id" });
+        }
+        if (playLaunch == null) {
+            throw new LedpException(LedpCode.LEDP_18205, new String[] { "Invalid play launch" });
+        }
+        if (!playLaunch.getId().equals(launchId)) {
+            throw new LedpException(LedpCode.LEDP_18205,
+                    new String[] { "LaunchId is not the same for the Play launch being updated" });
+        }
+
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            log.error("Invalid playName: " + playName);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+        return playLaunchService.update(playLaunch);
+    }
+
+    @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update a play launch for a given play")
+    public PlayLaunch launchPlay(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
+            boolean isDryRunMode) {
+        if (StringUtils.isEmpty(launchId)) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank launch Id" });
+        }
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found by play Id: " + playName });
+        }
+        PlayUtils.validatePlay(playName, play);
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        if (playLaunch == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
+        }
+        PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
+        validateNonEmptyTargetsForLaunch(play, playName, playLaunch, //
+                playLaunch.getDestinationAccountId());
+
+        // this dry run flag is useful in writing robust testcases
+        if (!isDryRunMode) {
+            String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            playLaunch.setApplicationId(appId);
+        }
+
+        playLaunch.setLaunchState(LaunchState.Launching);
+        playLaunch.setPlay(play);
+        playLaunch.setTableName(createTable(playLaunch));
+        List<String> allAvailableBuckets = Arrays.asList(RatingBucketName.values()).stream().map(RatingBucketName::name)
+                .collect(Collectors.toList());
+        Long totalAvailableRatedAccounts = ratingEntityPreviewService.getEntityPreviewCount(play.getRatingEngine(),
+                BusinessEntity.Account, false, null, allAvailableBuckets, null);
+        playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
+        playLaunch.setAccountsSuppressed(0L);
+        playLaunch.setAccountsErrored(0L);
+        playLaunch.setAccountsLaunched(0L);
+        playLaunch.setContactsLaunched(0L);
+        playLaunchService.update(playLaunch);
+
+        return playLaunch;
+    }
+
+    @GetMapping(value = "/launches/dashboard", headers = "Accept=application/json")
+    @ResponseBody
+    public PlayLaunchDashboard getPlayLaunchDashboard( //
+            @PathVariable String customerSpace, //
+            @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
+                    + "should consider play launches across all plays", required = false) //
+            @RequestParam(value = "play-name", required = false) String playName, //
+            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
+            @RequestParam(value = "org-id", required = false) String orgId, //
+            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
+            @RequestParam(value = "external-sys-type", required = false) String externalSysType, //
+            @ApiParam(value = "List of launch states to consider", required = false) //
+            @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates, //
+            @ApiParam(value = "Start date in Unix timestamp", required = true) //
+            @RequestParam(value = "start-timestamp", required = true) Long startTimestamp, //
+            @ApiParam(value = "Play launch offset from start time", required = true) //
+            @RequestParam(value = "offset", required = true) Long offset, //
+            @ApiParam(value = "Maximum number of play launches to consider", required = true) //
+            @RequestParam(value = "max", required = true) Long max, //
+            @ApiParam(value = "Sort by", required = false) //
+            @RequestParam(value = "sortby", required = false) String sortby, //
+            @ApiParam(value = "Sort in descending order", required = false, defaultValue = "true") //
+            @RequestParam(value = "descending", required = false, defaultValue = "true") boolean descending, //
+            @ApiParam(value = "End date in Unix timestamp", required = false) //
+            @RequestParam(value = "end-timestamp", required = false) Long endTimestamp) {
+        return playLaunchService.getDashboard(getPlayId(playName), launchStates, startTimestamp, offset, max, sortby,
+                descending, endTimestamp, orgId, externalSysType, false);
+    }
+
+    @GetMapping(value = "/launches/dashboard/count", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Play entries count for launch dashboard for a tenant")
+    public Long getPlayLaunchDashboardEntriesCount( //
+            @PathVariable String customerSpace, //
+            @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
+                    + "should consider play launches across all plays", required = false) //
+            @RequestParam(value = "play-name", required = false) String playName, //
+            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
+            @RequestParam(value = "org-id", required = false) String orgId, //
+            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
+            @RequestParam(value = "external-sys-type", required = false) String externalSysType, //
+            @ApiParam(value = "List of launch states to consider", required = false) //
+            @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates, //
+            @ApiParam(value = "Start date in Unix timestamp", required = true) //
+            @RequestParam(value = "start-timestamp", required = true) Long startTimestamp, //
+            @ApiParam(value = "End date in Unix timestamp", required = false) //
+            @RequestParam(value = "end-timestamp", required = false) Long endTimestamp) {
+        return playLaunchService.getDashboardEntriesCount(getPlayId(playName), launchStates, startTimestamp,
+                endTimestamp, orgId, externalSysType);
+    }
+
+    @PatchMapping(value = "/{playName}/launches/{launchId}")
     @ResponseBody
     @ApiOperation(value = "Update play launch progress.")
     public PlayLaunch updatePlayLaunchProgress(//
@@ -326,8 +354,7 @@ public class PlayResource {
         return playLaunchService.update(playLaunch);
     }
 
-    @RequestMapping(value = "/{playName}/launches/{launchId}/{action}", //
-            method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/{playName}/launches/{launchId}/{action}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update play launch for a given play and launch id with given action")
     public PlayLaunch updatePlayLaunch( //
@@ -336,7 +363,6 @@ public class PlayResource {
             @PathVariable("launchId") String launchId, //
             @PathVariable("action") LaunchState action) {
         getPlayId(playName);
-
         PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId);
         if (existingPlayLaunch != null) {
             if (LaunchState.canTransit(existingPlayLaunch.getLaunchState(), action)) {
@@ -347,7 +373,7 @@ public class PlayResource {
         return existingPlayLaunch;
     }
 
-    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/{playName}/launches/{launchId}")
     @ResponseBody
     @ApiOperation(value = "Delete play launch for a given play and launch id")
     public void deletePlayLaunch( //
@@ -359,6 +385,45 @@ public class PlayResource {
         if (playLaunch != null) {
             playLaunchService.deleteByLaunchId(launchId, hardDelete == Boolean.TRUE);
         }
+    }
+    // -------------
+    // Play Launches
+    // -------------
+
+    // --------------
+    // Talking Points
+    // --------------
+    @PostMapping(value = "/{playName}/talkingpoints/publish", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Publish Talking Points for a given play")
+    public void publishTalkingPoints( //
+            @PathVariable String customerSpace, //
+            @PathVariable("playName") String playName) {
+        playService.publishTalkingPoints(playName, customerSpace);
+    }
+    // --------------
+    // Talking Points
+    // --------------
+
+    private String createTable(PlayLaunch playLaunch) {
+        CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
+
+        Table generatedRecommendationTable = new Table();
+        generatedRecommendationTable.addAttributes(Recommendation.getSchemaAttributes());
+
+        String tableName = "play_launch_" + UUID.randomUUID().toString().replaceAll("-", "_");
+        generatedRecommendationTable.setName(tableName);
+        generatedRecommendationTable.setTableType(TableType.DATATABLE);
+
+        generatedRecommendationTable.setDisplayName("Play Launch recommendation");
+        generatedRecommendationTable.setTenant(MultiTenantContext.getTenant());
+        generatedRecommendationTable.setTenantId(MultiTenantContext.getTenant().getPid());
+        generatedRecommendationTable.setMarkedForPurge(false);
+        metadataProxy.createTable(customerSpace.toString(), tableName, generatedRecommendationTable);
+
+        generatedRecommendationTable = metadataProxy.getTable(customerSpace.toString(), tableName);
+
+        return generatedRecommendationTable.getName();
     }
 
     private Long getPlayId(String playName) {

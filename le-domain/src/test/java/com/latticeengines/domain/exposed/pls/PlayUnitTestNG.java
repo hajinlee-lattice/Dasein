@@ -37,7 +37,7 @@ public class PlayUnitTestNG {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setLaunchState(LaunchState.Launching);
         playLaunch.setPlay(play);
-        launchHistory.setPlayLaunch(playLaunch);
+        launchHistory.setLastIncompleteLaunch(playLaunch);
         play.setLaunchHistory(launchHistory);
 
         List<TalkingPoint> talkingPoints = new ArrayList<>();

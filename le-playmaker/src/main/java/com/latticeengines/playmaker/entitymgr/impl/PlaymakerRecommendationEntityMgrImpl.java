@@ -3,15 +3,14 @@ package com.latticeengines.playmaker.entitymgr.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.String;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
-import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 
 @Component("playmakerRecommendationEntityMgr")
 public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommendationEntityMgr {
@@ -199,7 +198,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public List<Map<String, Object>> getWorkflowTypes(String tenantName, String lookupSource) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
-        return dao.getWorkflowTypes();
+        return dao.getWorkflowTypes(tenantName);
     }
 
     private Map<String, Object> wrapResult(List<Map<String, Object>> records) {

@@ -296,7 +296,7 @@ public enum LedpCode {
     LEDP_18173("SchemaInterpretation {0} not supported for cleanup file template!"), //
     LEDP_18174("Cannot transition Rating Engine: {0} from {1} to {2}"), //
     LEDP_18175("There are Plays associated with the current Rating Engine {0} and thus it cannot be deleted."), //
-    LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchble accounts."), //
+    LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchable accounts."), //
     LEDP_18177("Websocket session {0} has NOT associated with any authentication token yet."), //
     LEDP_18178("Websocket session {0} has associated with tenant {1} and cannot associate with tenant {2}."), //
     LEDP_18179("Error finding the AI Model for {0}."), //
@@ -327,6 +327,7 @@ public enum LedpCode {
     LEDP_18202("Could not process Scoring Request as ConfigID is empty."), //
     LEDP_18203("Validation fails and there are errors."), //
     LEDP_18204("User {0} does not have the right to update name/description of attribute"), //
+    LEDP_18205("Unable to update PlayLaunch due to {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -334,7 +335,7 @@ public enum LedpCode {
     LEDP_19002("Access denied."), //
     LEDP_19003("Resource not found."), //
     LEDP_19004("External User is not allowed with Lattice Email ID."), //
-    LEDP_19005("Could not validate current user as the requried information is missing from Identity Provider."), //
+    LEDP_19005("Could not validate current user as the required information is missing from Identity Provider."), //
     LEDP_19006("Sign jwt token fail."), LEDP_19007("No such jwt handler {0}."), LEDP_19008(
             "URL encode fail."), LEDP_19009(
                     "No User Name key/value"), LEDP_19010("No User Email key/value"), LEDP_19011(

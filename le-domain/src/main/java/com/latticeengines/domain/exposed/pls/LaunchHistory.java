@@ -5,9 +5,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class LaunchHistory {
 
-    @JsonProperty("playLaunch")
-    private PlayLaunch playLaunch;
-
     @JsonProperty("newContactsNum")
     private Long newContactsNum;
 
@@ -16,6 +13,12 @@ public class LaunchHistory {
 
     @JsonProperty("mostRecentLaunch")
     private PlayLaunch mostRecentLaunch;
+
+    @JsonProperty("lastIncompleteLaunch")
+    private PlayLaunch lastIncompleteLaunch;
+
+    @JsonProperty("lastCompletedLaunch")
+    private PlayLaunch lastCompletedLaunch;
 
     public void setNewContactsNum(Long newContactsNum) {
         this.newContactsNum = newContactsNum;
@@ -33,20 +36,28 @@ public class LaunchHistory {
         return this.newAccountsNum;
     }
 
-    public PlayLaunch getPlayLaunch() {
-        return this.playLaunch;
-    }
-
-    public void setPlayLaunch(PlayLaunch playLaunch) {
-        this.playLaunch = playLaunch;
-    }
-
     public PlayLaunch getMostRecentLaunch() {
-        return this.mostRecentLaunch;
+        return mostRecentLaunch;
     }
 
     public void setMostRecentLaunch(PlayLaunch mostRecentLaunch) {
         this.mostRecentLaunch = mostRecentLaunch;
+    }
+
+    public PlayLaunch getLastIncompleteLaunch() {
+        return this.lastIncompleteLaunch;
+    }
+
+    public void setLastIncompleteLaunch(PlayLaunch lastIncompleteLaunch) {
+        this.lastIncompleteLaunch = lastIncompleteLaunch;
+    }
+
+    public PlayLaunch getLastCompletedLaunch() {
+        return this.lastCompletedLaunch;
+    }
+
+    public void setLastCompletedLaunch(PlayLaunch lastCompletedLaunch) {
+        this.lastCompletedLaunch = lastCompletedLaunch;
     }
 
     @Override

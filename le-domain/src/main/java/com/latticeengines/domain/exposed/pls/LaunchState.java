@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 public enum LaunchState {
+    UnLaunched, //
     Launching, //
     Launched, //
     Failed, //
@@ -16,12 +17,16 @@ public enum LaunchState {
     private static Map<LaunchState, Collection<LaunchState>> transitionMap = new HashMap<>();
 
     static {
-        Set<LaunchState> stateAfterLaunching = new HashSet<>();
-        stateAfterLaunching.add(Launched);
-        stateAfterLaunching.add(Canceled);
-        stateAfterLaunching.add(Failed);
-        stateAfterLaunching.add(Deleted);
-        transitionMap.put(Launching, stateAfterLaunching);
+        Set<LaunchState> statesAfterUnLaunched = new HashSet<>();
+        statesAfterUnLaunched.add(Launching);
+        transitionMap.put(UnLaunched, statesAfterUnLaunched);
+
+        Set<LaunchState> statesAfterLaunching = new HashSet<>();
+        statesAfterLaunching.add(Launched);
+        statesAfterLaunching.add(Canceled);
+        statesAfterLaunching.add(Failed);
+        statesAfterLaunching.add(Deleted);
+        transitionMap.put(Launching, statesAfterLaunching);
     }
 
     public static boolean canTransit(LaunchState srcState, LaunchState dstState) {

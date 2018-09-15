@@ -129,6 +129,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(playLaunch_org1_2_pid > playLaunch_org1_1_pid);
         Assert.assertNotNull(playLaunch_org1_1.getLaunchId());
         Assert.assertNotNull(playLaunch_org1_2.getLaunchId());
+        Assert.assertEquals(playLaunch_org1_1.getLaunchState(), LaunchState.UnLaunched);
+        Assert.assertEquals(playLaunch_org1_1.getLaunchState(), LaunchState.UnLaunched);
 
         Thread.sleep(1000);
         playLaunchEntityMgr.create(playLaunch_org2_1);
@@ -162,7 +164,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         });
 
         List<LaunchState> states1 = new ArrayList<>();
-        states1.add(LaunchState.Launching);
+        states1.add(LaunchState.UnLaunched);
 
         playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states1);
         Assert.assertNotNull(playLaunchList);
@@ -173,7 +175,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertTrue(states1.contains(l.getLaunchState()));
         });
 
-        states.add(LaunchState.Launching);
+        states.add(LaunchState.UnLaunched);
 
         playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
@@ -184,12 +186,12 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertTrue(states1.contains(l.getLaunchState()));
         });
 
-        playLaunchList = playLaunchEntityMgr.findByState(LaunchState.Launching);
+        playLaunchList = playLaunchEntityMgr.findByState(LaunchState.UnLaunched);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 6);
         Assert.assertEquals(playLaunchList.get(4).getPid(), retreivedPlayLaunch.getPid());
         playLaunchList.stream().forEach(l -> {
-            Assert.assertEquals(l.getLaunchState(), LaunchState.Launching);
+            Assert.assertEquals(l.getLaunchState(), LaunchState.UnLaunched);
         });
 
         retreivedPlayLaunch = playLaunchEntityMgr.findLatestByPlayId(play.getPid(), states);
@@ -200,7 +202,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
     public void testUpdateLaunch() throws InterruptedException {
-        List<LaunchState> states = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+        List<LaunchState> states = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.UnLaunched });
 
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 6, null, null);
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org1,
@@ -473,7 +475,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             String destinationAccountIdColumn) {
         PlayLaunch launch = new PlayLaunch();
         launch.setTenant(mainTestTenant);
-        launch.setLaunchState(LaunchState.Launching);
+        launch.setLaunchState(LaunchState.UnLaunched);
         launch.setPlay(play);
         launch.setDestinationOrgId(org);
         launch.setDestinationSysType(externalSystemType);
@@ -482,7 +484,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private void cleanupPlayLunches() {
-        for (PlayLaunch launch : playLaunchEntityMgr.findByState(LaunchState.Launching)) {
+        for (PlayLaunch launch : playLaunchEntityMgr.findByState(LaunchState.UnLaunched)) {
             playLaunchEntityMgr.deleteByLaunchId(launch.getLaunchId(), false);
         }
     }

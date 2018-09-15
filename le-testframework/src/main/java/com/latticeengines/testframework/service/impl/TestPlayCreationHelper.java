@@ -252,24 +252,26 @@ public class TestPlayCreationHelper {
     }
 
     public void createPlayLaunch() {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, createDefaultPlayLaunch(), false);
-        assertPlayLaunch(playLaunch, false);
-    }
-
-    public void createPlayLaunch(boolean isDryRunMode) {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, createDefaultPlayLaunch(), isDryRunMode);
-        assertPlayLaunch(playLaunch, isDryRunMode);
+        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, createDefaultPlayLaunch());
+        assertPlayLaunch(playLaunch);
     }
 
     public void createPlayLaunch(boolean isDryRunMode, Set<RatingBucketName> bucketsToLaunch,
             Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
         playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName,
-                createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount), isDryRunMode);
-        assertPlayLaunch(playLaunch, isDryRunMode);
+                createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount));
+        assertPlayLaunch(playLaunch);
+        playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(), isDryRunMode);
+        if (isDryRunMode) {
+            Assert.assertNull(playLaunch.getApplicationId());
+        } else {
+            Assert.assertNotNull(playLaunch.getApplicationId());
+        }
     }
 
     private PlayLaunch createDefaultPlayLaunch() {
         return createDefaultPlayLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null);
+
     }
 
     private PlayLaunch createDefaultPlayLaunch(Set<RatingBucketName> bucketsToLaunch,
@@ -284,20 +286,15 @@ public class TestPlayCreationHelper {
         return playLaunch;
     }
 
-    private void assertPlayLaunch(PlayLaunch playLaunch, boolean isDryRunMode) {
+    private void assertPlayLaunch(PlayLaunch playLaunch) {
         Assert.assertNotNull(playLaunch);
         Assert.assertNotNull(playLaunch.getLaunchId());
         Assert.assertNotNull(playLaunch.getPid());
         Assert.assertNotNull(playLaunch.getUpdated());
         Assert.assertNotNull(playLaunch.getCreated());
-        if (isDryRunMode) {
-            Assert.assertNull(playLaunch.getApplicationId());
-        } else {
-            Assert.assertNotNull(playLaunch.getApplicationId());
-        }
         Assert.assertNotNull(playLaunch.getLaunchState());
         assertBucketsToLaunch(playLaunch.getBucketsToLaunch());
-        Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
+        Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.UnLaunched);
     }
 
     private void assertBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {

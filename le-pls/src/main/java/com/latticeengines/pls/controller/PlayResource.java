@@ -155,14 +155,34 @@ public class PlayResource {
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Create play launch for a given play")
     public PlayLaunch createPlayLaunch( //
-            @PathVariable("playName") String playName, //
-            @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
-            boolean isDryRunMode, //
-            @RequestBody PlayLaunch playLaunch, //
+            @PathVariable("playName") String playName, @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
 
-        return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch, isDryRunMode);
+        return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
+    }
+
+    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @PreAuthorize("hasRole('Create_PLS_Plays')")
+    @ApiOperation(value = "Update play launch for a given play")
+    public PlayLaunch updatePlayLaunch( //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @RequestBody PlayLaunch playLaunch, //
+            HttpServletResponse response) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.updatePlayLaunch(tenant.getId(), playName, launchId, playLaunch);
+    }
+
+    @RequestMapping(value = "/{playName}/launches/{launchId}/launch", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @PreAuthorize("hasRole('Create_PLS_Plays')")
+    @ApiOperation(value = "Launch a given play")
+    public PlayLaunch launchPlay(@PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, HttpServletResponse response) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.launchPlay(tenant.getId(), playName, launchId, false);
     }
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)

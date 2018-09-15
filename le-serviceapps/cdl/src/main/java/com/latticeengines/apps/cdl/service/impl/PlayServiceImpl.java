@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -334,19 +335,19 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private LaunchHistory getLaunchHistoryForPlay(Play play) {
-        List<LaunchState> launchStates = new ArrayList<>();
-        launchStates.add(LaunchState.Launched);
-        PlayLaunch playLaunch = playLaunchService.findLatestByPlayId(play.getPid(), launchStates);
-        PlayLaunch mostRecentPlayLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
+        PlayLaunch lastIncompleteLaunch = playLaunchService.findLatestByPlayId(play.getPid(), Arrays.asList(LaunchState.UnLaunched));
+        PlayLaunch lastCompletedLaunch = playLaunchService.findLatestByPlayId(play.getPid(), Arrays.asList(LaunchState.Launched));
+        PlayLaunch mostRecentLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
         LaunchHistory launchHistory = new LaunchHistory();
-        launchHistory.setPlayLaunch(playLaunch);
-        launchHistory.setMostRecentLaunch(mostRecentPlayLaunch);
+        launchHistory.setLastIncompleteLaunch(lastIncompleteLaunch);
+        launchHistory.setLastCompletedLaunch(lastCompletedLaunch);
+        launchHistory.setMostRecentLaunch(mostRecentLaunch);
         return launchHistory;
     }
 
     private void populateCoverageInfo(Play play, LaunchHistory launchHistory, RatingEngine ratingEngine) {
         try {
-            PlayLaunch mostRecentSuccessfulPlayLaunch = launchHistory.getPlayLaunch();
+            PlayLaunch mostRecentSuccessfulPlayLaunch = launchHistory.getLastIncompleteLaunch();
 
             CoverageInfo coverageInfo = RatingEngineUtils.getCoverageInfo(ratingEngine);
             Long accountCount = coverageInfo.getAccountCount();

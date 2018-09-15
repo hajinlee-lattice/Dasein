@@ -155,7 +155,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             return new ArrayList<>();
         } else {
             return playLaunches.stream() //
-                    .map(launch -> convertToSummary(launch)) //
+                    .map(this::convertToSummary) //
                     .collect(Collectors.toList());
         }
     }

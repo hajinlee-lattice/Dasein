@@ -15,17 +15,16 @@ import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 
 public class PlayUtils {
 
-    public static void validatePlayBeforeLaunch(String playName, Play play) {
+    public static void validatePlay(String playName, Play play) {
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_18149, new String[] { playName });
         }
-
         if (play.getRatingEngine() == null) {
             throw new LedpException(LedpCode.LEDP_18149, new String[] { play.getName() });
-        } else if (play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
+        }
+        if (play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
             throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });
         }
-
     }
 
     public static void validatePlayLaunchBeforeLaunch(String customerSpace, PlayLaunch playLaunch, Play play) {
