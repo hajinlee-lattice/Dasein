@@ -52,11 +52,11 @@ public class DunsRedirectFromManualMatch
                         new FieldList(DataCloudConstants.ATTR_LDC_DUNS, keyPartition),
                         new FieldList(salesInB, totalEmployees),
                         1, true, false)
-                .retain(manDuns, DataCloudConstants.ATTR_LDC_DUNS, keyPartition)
                 .rename(new FieldList(DataCloudConstants.ATTR_LDC_DUNS, manDuns),
                         new FieldList(srcDuns, targetDuns))
                 // add BookSource
-                .addColumnWithFixedValue(bookSource, config.getBookSource(), String.class);
+                .addColumnWithFixedValue(bookSource, config.getBookSource(), String.class)
+                .retain(srcDuns, targetDuns, keyPartition, bookSource);
 
         return source;
     }
