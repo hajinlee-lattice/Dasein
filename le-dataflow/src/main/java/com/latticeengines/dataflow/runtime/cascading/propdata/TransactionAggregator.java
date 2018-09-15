@@ -73,6 +73,9 @@ public class TransactionAggregator
        }
     }
 
+    // Currently, dummy group is disabled
+    // the unused code is left here because we might need them later
+    @SuppressWarnings("unused")
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
         boolean isDummy = false;

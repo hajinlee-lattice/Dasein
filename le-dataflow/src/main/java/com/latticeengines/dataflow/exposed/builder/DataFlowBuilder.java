@@ -137,7 +137,7 @@ public abstract class DataFlowBuilder {
                 if (logicalType != null && //
                         (logicalType.equals(LogicalDataType.InternalId.toString()) || //
                                 logicalType.equals(LogicalDataType.Reference.toString()) || //
-                                logicalType.equals(LogicalDataType.Id))) {
+                                logicalType.equals(LogicalDataType.Id.toString()))) {
                     continue;
                 }
             }

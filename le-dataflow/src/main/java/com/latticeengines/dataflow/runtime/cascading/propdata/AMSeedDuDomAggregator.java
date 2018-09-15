@@ -2,8 +2,6 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 
@@ -14,8 +12,6 @@ import cascading.tuple.TupleEntry;
 
 public class AMSeedDuDomAggregator extends BaseAggregator<AMSeedDuDomAggregator.Context>
         implements Aggregator<AMSeedDuDomAggregator.Context> {
-
-    private static final Logger log = LoggerFactory.getLogger(AMSeedPriDomAggregator.class);
 
     private static final long serialVersionUID = 7153412402674903342L;
 
