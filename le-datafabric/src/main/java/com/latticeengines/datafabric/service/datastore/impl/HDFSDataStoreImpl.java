@@ -11,9 +11,9 @@ import java.util.TimeZone;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -32,6 +32,7 @@ public class HDFSDataStoreImpl implements FabricDataStore {
 
     private Configuration config;
     private String fileName;
+    @SuppressWarnings("unused")
     private String recordType;
     private Schema schema;
     private String repositoryDir;

@@ -27,6 +27,7 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import kafka.utils.VerifiableProperties;
 
+@SuppressWarnings("deprecation")
 public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(SimpleFabricMessageConsumerImpl.class);
