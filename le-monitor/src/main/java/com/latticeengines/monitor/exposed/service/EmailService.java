@@ -2,7 +2,6 @@ package com.latticeengines.monitor.exposed.service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Date;
 
 import javax.mail.Multipart;
 
@@ -81,4 +80,6 @@ public interface EmailService {
     void sendCDLProcessAnalyzeErrorEmail(User user, Tenant tenant, String appPublicUrl);
 
     void sendPOCTenantStateNoticeEmail(User user, Tenant tenant, String state, int days);
+
+    void sendCredentialEmail(User user, Tenant tenant, String credentials);
 }

@@ -14,6 +14,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -807,4 +808,29 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    public void sendCredentialEmail(User user, Tenant tenant, String credentials) {
+        try {
+            log.info("Sending s3 credentials to " + user.getEmail() + " on " + tenant.getName()
+                    + " started.");
+            EmailTemplateBuilder builder;
+            if (StringUtils.isNotEmpty(credentials)) {
+                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.S3_CREDENTIALS);
+            } else {
+                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.S3_EMPTY_CREDENTIALS);
+            }
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
+            builder.replaceToken("{{credentials}}", credentials);
+
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(EmailSettings.S3_CREDENTIALS_EMAIL_SUBJECT, mp, Collections.singleton(user.getEmail()));
+            log.info(
+                    "Sending s3 credentials email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send s3 credentials email to " + user.getEmail() + " on " + tenant.getName()
+                    + " " + e.getMessage());
+        }
+    }
 }
