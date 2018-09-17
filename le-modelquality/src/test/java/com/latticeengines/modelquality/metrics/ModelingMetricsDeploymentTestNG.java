@@ -22,18 +22,17 @@ public class ModelingMetricsDeploymentTestNG extends ModelQualityTestNGBase {
 
     @Test(groups = "deployment")
     public void run() throws Exception {
-        Charset encoding = null;
         String mStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/modelsummary.json").getFile()),
-                encoding);
+                Charset.defaultCharset());
         String cStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/selectedconfig.json")
                         .getFile()),
-                encoding);
+                Charset.defaultCharset());
         String nStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/metrics/modelrunentitynames.json")
                         .getFile()),
-                encoding);
+                Charset.defaultCharset());
         SelectedConfig s = JsonUtils.deserialize(cStr, SelectedConfig.class);
         ModelSummary m = JsonUtils.deserialize(mStr, ModelSummary.class);
         ModelRunEntityNames n = JsonUtils.deserialize(nStr, ModelRunEntityNames.class);

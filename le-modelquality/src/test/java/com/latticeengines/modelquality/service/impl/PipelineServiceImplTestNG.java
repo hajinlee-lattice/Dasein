@@ -55,11 +55,10 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
         when(proxy.getActiveStack()).thenReturn(activeStack);
         ReflectionTestUtils.setField(pipelineService, "internalResourceRestApiProxy", proxy);
 
-        Charset encoding = null;
         String pipelineStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
                         .getFile()),
-                encoding);
+                Charset.defaultCharset());
         pipeline = JsonUtils.deserialize(pipelineStr, Pipeline.class);
         pipelineEntityMgr.create(pipeline);
     }
