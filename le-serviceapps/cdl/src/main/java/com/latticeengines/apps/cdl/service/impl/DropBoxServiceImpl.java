@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Principal;
 import com.amazonaws.auth.policy.Resource;
 import com.amazonaws.auth.policy.Statement;
 import com.amazonaws.auth.policy.actions.S3Actions;
@@ -23,11 +25,11 @@ import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
-import com.latticeengines.domain.exposed.cdl.RevokeDropBoxAccessRequest;
 
 @Service("dropBoxService")
 public class DropBoxServiceImpl implements DropBoxService {
@@ -37,6 +39,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     private static final String DROPBOX = "dropbox";
     private static final String POLICY_NAME = "dropbox";
     private static final String WILD_CARD = "/*";
+    private static final String ARN_PREFIX = "arn:aws:s3:::";
 
     @Inject
     private DropBoxEntityMgr entityMgr;
@@ -75,6 +78,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             if (StringUtils.isBlank(policyDoc)) {
                 iamService.deleteCustomerUser(userName);
             }
+            revokeDropBoxFromBucket(dropBoxId);
         }
         entityMgr.delete(dropbox);
     }
@@ -96,30 +100,50 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public GrantDropBoxAccessResponse grantAccess(GrantDropBoxAccessRequest request) {
-        GrantDropBoxAccessResponse response;
-        switch (request.getAccessMode()) {
-            case LatticeUser:
-                response = grantAccessToLatticeUser(request.getExistingUser());
-                break;
-            case ExternalAccount:
-                response = grantAccessToExternalAccount(request.getExternalAccountId());
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
+        DropBox dropbox = entityMgr.getDropBox();
+        if (dropbox != null) {
+            revokeAccess();
+            dropbox.setAccessMode(request.getAccessMode());
+            GrantDropBoxAccessResponse response;
+            switch (request.getAccessMode()) {
+                case LatticeUser:
+                    response = grantAccessToLatticeUser(request.getExistingUser());
+                    dropbox.setLatticeUser(response.getLatticeUser());
+                    break;
+                case ExternalAccount:
+                    response = grantAccessToExternalAccount(request.getExternalAccountId());
+                    dropbox.setExternalAccount(response.getExternalAccountId());
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
+            }
+            entityMgr.update(dropbox);
+            return response;
+        } else {
+            throw new RuntimeException("Tenant " + MultiTenantContext.getShortTenantId() + " does not have a dropbox.");
         }
-        return response;
     }
 
     @Override
-    public void revokeAccess(RevokeDropBoxAccessRequest request) {
-        switch (request.getAccessMode()) {
-            case LatticeUser:
-                revokeAccessToLatticeUser(request.getLatticeUser());
-                break;
-            case ExternalAccount:
-            default:
-                throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
+    public void revokeAccess() {
+        DropBox dropbox = entityMgr.getDropBox();
+        if (dropbox != null && dropbox.getAccessMode() != null) {
+            switch (dropbox.getAccessMode()) {
+                case LatticeUser:
+                    revokeAccessToLatticeUser(dropbox.getLatticeUser());
+                    break;
+                case ExternalAccount:
+                    revokeDropBoxFromBucket(getDropBoxId());
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown access mode " + dropbox.getAccessMode());
+            }
         }
+    }
+
+    private String getDropBoxId() {
+        String prefix = getDropBoxPrefix();
+        return prefix.substring(prefix.indexOf("/") + 1);
     }
 
     private GrantDropBoxAccessResponse grantAccessToLatticeUser(String existingUser) {
@@ -159,7 +183,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private Policy newDropBoxPolicy(String bucket, String dropBoxId) {
-        String arnPrefix = "arn:aws:s3:::" + bucket + "/" + DROPBOX + "/" + dropBoxId;
+        String arnPrefix = ARN_PREFIX + bucket + "/" + DROPBOX + "/" + dropBoxId;
         return new Policy().withStatements(//
                 listDropBoxStatement(bucket, dropBoxId), //
                 new Statement(Statement.Effect.Allow) //
@@ -188,7 +212,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 List<Resource> resourceList = stmt.getResources();
                 Set<String> resources = resourceList.stream().map(Resource::getId)
                         .collect(Collectors.toSet());
-                String rsc = "arn:aws:s3:::" + bucket + "/" + DROPBOX + "/" + dropBoxId + WILD_CARD;
+                String rsc = ARN_PREFIX + bucket + "/" + DROPBOX + "/" + dropBoxId + WILD_CARD;
                 if (!resources.contains(rsc)) {
                     resourceList.add(new Resource(rsc));
                     resources.add(rsc);
@@ -204,7 +228,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         return new Statement(Statement.Effect.Allow) //
                 .withId(listDropBoxStmtId(dropBoxId)) //
                 .withActions(S3Actions.ListObjects) //
-                .withResources(new Resource("arn:aws:s3:::" + bucket)) //
+                .withResources(new Resource(ARN_PREFIX + bucket)) //
                 .withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
@@ -222,7 +246,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         String policyDoc = iamService.getUserPolicy(userName, POLICY_NAME);
         if (StringUtils.isNotBlank(policyDoc)) {
             Policy policy = Policy.fromJson(policyDoc);
-            removeDropbox(policy, dropBoxId);
+            removeDropBoxFromUser(policy, dropBoxId);
             if (CollectionUtils.isEmpty(policy.getStatements())) {
                 String msg = "After revoking access to dropbox " + dropBoxId + " from user " + userName + ", " //
                         + POLICY_NAME + " policy becomes dummy, remove it";
@@ -234,7 +258,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         }
     }
 
-    private void removeDropbox(Policy policy, String dropboxId) {
+    private void removeDropBoxFromUser(Policy policy, String dropboxId) {
         List<Statement> nonEmptyStmts = policy.getStatements().stream() //
                 .peek(stmt -> {
                     List<Resource> resourceList = stmt.getResources().stream() //
@@ -248,11 +272,143 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private GrantDropBoxAccessResponse grantAccessToExternalAccount(String accountId) {
-        throw new UnsupportedOperationException("Grating access to external AWS account is not supported yet.");
+        if (StringUtils.isBlank(accountId)) {
+            throw new IllegalArgumentException("Must provide a valid account id");
+        }
+        String dropBoxId = getDropBoxId();
+        Policy policy = getCustomerPolicy(dropBoxId, accountId);
+        s3Service.setBucketPolicy(customersBucket, policy.toJson());
+        log.info("Granted access to dropbox " + dropBoxId + " to external account " + accountId);
+
+        GrantDropBoxAccessResponse response = new GrantDropBoxAccessResponse();
+        response.setAccessMode(DropBoxAccessMode.ExternalAccount);
+        response.setExternalAccountId(accountId);
+        return response;
+    }
+
+    private Policy getCustomerPolicy(String dropBoxId, String accountId) {
+        String bucketPolicy = s3Service.getBucketPolicy(customersBucket);
+        List<Statement> statements = new ArrayList<>();
+        Policy policy;
+        if (StringUtils.isBlank(bucketPolicy)) {
+            policy = new Policy();
+        } else {
+            policy = Policy.fromJson(bucketPolicy);
+            revokeAccountFromDropBox(policy, dropBoxId, accountId);
+        }
+        boolean hasAccountStmt = false;
+        if (CollectionUtils.isNotEmpty(policy.getStatements())) {
+            for (Statement stmt: policy.getStatements()) {
+                if (stmt.getId().equals(accountId)) {
+                    insertAccountStatement(customersBucket, dropBoxId, stmt);
+                    hasAccountStmt = true;
+                }
+                statements.add(stmt);
+            }
+        }
+        if (!hasAccountStmt) {
+            statements.add(getAccountStatement(customersBucket, dropBoxId, accountId));
+        }
+        statements.add(getAccountListDropBoxStatement(customersBucket, dropBoxId, accountId));
+        policy.setStatements(statements);
+        return policy;
+    }
+
+    private Statement getAccountStatement(String bucketName, String dropBoxId, String accountId) {
+        String arn = ARN_PREFIX + bucketName + "/dropbox/" + dropBoxId;
+        return new Statement(Statement.Effect.Allow) //
+                .withId(accountId) //
+                .withPrincipals(new Principal(accountId)) //
+                .withActions(//
+                        S3Actions.AbortMultipartUpload, //
+                        S3Actions.GetObject, //
+                        S3Actions.PutObject, //
+                        S3Actions.DeleteObject //
+                ) //
+                .withResources(new Resource(arn), new Resource(arn + "*"));
+    }
+
+    private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId, String accountId) {
+        return new Statement(Statement.Effect.Allow) //
+                .withId(accountId + "_" + dropBoxId) //
+                .withPrincipals(new Principal(accountId)) //
+                .withActions(S3Actions.ListObjects) //
+                .withResources(new Resource(ARN_PREFIX + bucketName))
+                .withConditions(new StringCondition(//
+                        StringCondition.StringComparisonType.StringLike, //
+                        "s3:prefix", //
+                        DROPBOX + "/" + dropBoxId + "*" //
+                ));
+    }
+
+    private void revokeAccountFromDropBox(Policy policy, String dropBoxId, String accountId) {
+        List<Statement> nonEmptyStmts = policy.getStatements().stream() //
+                .peek(stmt -> {
+                    if (accountId.equals(stmt.getId())) {
+                        List<Resource> resourceList = stmt.getResources().stream() //
+                                .filter(rsc -> !rsc.getId().contains(dropBoxId))//
+                                .collect(Collectors.toList());
+                        stmt.setResources(resourceList);
+                    }
+                }) //
+                .filter(stmt -> {
+                    boolean keep = true;
+                    if (CollectionUtils.isEmpty(stmt.getResources())) {
+                        keep = false;
+                    } else if (stmt.getId().contains(accountId) && stmt.getId().contains(dropBoxId)) {
+                        keep = false;
+                    }
+                    return keep;
+                }) //
+                .collect(Collectors.toList());
+        policy.setStatements(nonEmptyStmts);
+    }
+
+    private void revokeDropBoxFromBucket(String dropBoxId) {
+        String bucketPolicy = s3Service.getBucketPolicy(customersBucket);
+        if (StringUtils.isBlank(bucketPolicy)) {
+            return;
+        }
+        Policy policy = Policy.fromJson(bucketPolicy);
+        List<Statement> nonEmptyStmts = policy.getStatements().stream() //
+                .peek(stmt -> {
+                    List<Resource> resourceList = stmt.getResources().stream() //
+                            .filter(rsc -> !rsc.getId().contains(dropBoxId))//
+                            .collect(Collectors.toList());
+                    stmt.setResources(resourceList);
+                }) //
+                .filter(stmt -> {
+                    boolean keep = true;
+                    if (CollectionUtils.isEmpty(stmt.getResources())) {
+                        keep = false;
+                    } else if (stmt.getId().contains(dropBoxId)) {
+                        keep = false;
+                    }
+                    return keep;
+                }) //
+                .collect(Collectors.toList());
+        policy.setStatements(nonEmptyStmts);
+        if (CollectionUtils.isEmpty(nonEmptyStmts)) {
+            s3Service.deleteBucketPolicy(customersBucket);
+        } else {
+            s3Service.setBucketPolicy(customersBucket, policy.toJson());
+        }
+    }
+
+    private void insertAccountStatement(String bucketName, String dropBoxId, Statement statement) {
+        String arn = ARN_PREFIX + bucketName + "/dropbox/" + dropBoxId;
+        List<Resource> rscs = new ArrayList<>(statement.getResources());
+        rscs.add(new Resource(arn));
+        rscs.add(new Resource(arn + "*"));
+        statement.setResources(rscs);
     }
 
     private String toPrefix(DropBox dropbox) {
         return DROPBOX + "/" + dropbox.getDropBox();
     }
 
+    // for tests
+    void setCustomersBucket(String customersBucket) {
+        this.customersBucket = customersBucket;
+    }
 }

@@ -5,6 +5,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,6 +49,16 @@ public class DropBox implements HasPid, HasTenant {
     @Column(name = "DROPBOX", length = 8)
     private String dropBox;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ACCESS_MODE", length = 20)
+    private DropBoxAccessMode accessMode;
+
+    @Column(name = "LATTICE_USER", length = 20)
+    private String latticeUser;
+
+    @Column(name = "EXTERNAL_ACCOUNT", length = 20)
+    private String externalAccount;
+
     @Override
     public Long getPid() {
         return pid;
@@ -73,5 +85,29 @@ public class DropBox implements HasPid, HasTenant {
 
     public void setDropBox(String dropBox) {
         this.dropBox = dropBox;
+    }
+
+    public DropBoxAccessMode getAccessMode() {
+        return accessMode;
+    }
+
+    public void setAccessMode(DropBoxAccessMode accessMode) {
+        this.accessMode = accessMode;
+    }
+
+    public String getLatticeUser() {
+        return latticeUser;
+    }
+
+    public void setLatticeUser(String latticeUser) {
+        this.latticeUser = latticeUser;
+    }
+
+    public String getExternalAccount() {
+        return externalAccount;
+    }
+
+    public void setExternalAccount(String externalAccount) {
+        this.externalAccount = externalAccount;
     }
 }

@@ -4,7 +4,7 @@ import com.amazonaws.services.identitymanagement.model.AccessKey;
 
 public interface IAMService {
 
-    // return ARN
+    // return IAM User ARN
     String createCustomerUser(String userName);
 
     void deleteCustomerUser(String userName);

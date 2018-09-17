@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.BucketPolicy;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -272,6 +273,26 @@ public class S3ServiceImpl implements S3Service {
             log.info("Object " + object + " does not exist in bucket " + bucket);
             return null;
         }
+    }
+
+    @Override
+    public String getBucketPolicy(String bucket) {
+        BucketPolicy bucketPolicy = s3Client().getBucketPolicy(bucket);
+        return bucketPolicy.getPolicyText();
+    }
+
+    @Override
+    public void setBucketPolicy(String bucket, String policyDoc) {
+        s3Client().setBucketPolicy(bucket, policyDoc);
+    }
+
+    @Override
+    public void deleteBucketPolicy(String bucket) {
+        s3Client().deleteBucketPolicy(bucket);
+    }
+
+    private AmazonS3 s3Client() {
+        return s3Client;
     }
 
     private static ExecutorService workers() {

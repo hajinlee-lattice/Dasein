@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.ExternalAccount;
 import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.LatticeUser;
 
 import java.io.InputStream;
@@ -29,7 +30,6 @@ import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
-import com.latticeengines.domain.exposed.cdl.RevokeDropBoxAccessRequest;
 
 public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -42,11 +42,20 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private IAMService iamService;
 
-    @Value("${aws.customer.s3.bucket}")
-    private String customersBucket;
+    @Value("${aws.test.s3.bucket}")
+    private String testBucket;
 
     @Value("${aws.region}")
     private String awsRegion;
+
+    @Value("${aws.test.customer.account.id}")
+    private String accountId;
+
+    @Value("${aws.test.customer.access.key}")
+    private String customerAccessKey;
+
+    @Value("${aws.test.customer.secret.key.encrypted}")
+    private String customerSecret;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -59,9 +68,20 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testCrud() {
+    public void testCrudLatticeUser() {
         String prefix = testCreate();
-        testGrantAccess();
+        testGrantAccessToNewUser();
+        testGrantAccessToExistingUser();
+        testDelete(prefix);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCrudLatticeUser")
+    // @Test(groups = "functional")
+    public void testCrudExternalAccount() {
+        DropBoxServiceImpl impl = (DropBoxServiceImpl) dropboxService;
+        impl.setCustomersBucket(testBucket);
+        String prefix = testCreate();
+        testGrantAccessToExternalAccount();
         testDelete(prefix);
     }
 
@@ -79,39 +99,20 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertFalse(s3Service.objectExist(dropboxService.getDropBoxBucket(), prefix + "/"));
     }
 
-    private void testGrantAccess() {
-        testGrantAccessToNewUser();
-        testGrantAccessToExistingUser();
-    }
-
     private void testGrantAccessToNewUser() {
         GrantDropBoxAccessRequest request = new GrantDropBoxAccessRequest();
         request.setAccessMode(LatticeUser);
         GrantDropBoxAccessResponse response = dropboxService.grantAccess(request);
         Assert.assertEquals(response.getAccessMode(), LatticeUser);
 
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-        BasicAWSCredentialsProvider credentialsProvider = //
+        waitPolicyTakeEffect();
+        BasicAWSCredentialsProvider creds = //
                 new BasicAWSCredentialsProvider(response.getAccessKey(), response.getSecretKey());
-        AmazonS3 s3Client = AmazonS3ClientBuilder.standard() //
-                .withCredentials(credentialsProvider).withRegion(awsRegion).build();
-        verifyAccess(s3Client, true);
+        verifyAccess(creds, true);
 
-        String userName = response.getLatticeUser();
-        RevokeDropBoxAccessRequest revokeRequest = new RevokeDropBoxAccessRequest();
-        revokeRequest.setAccessMode(LatticeUser);
-        revokeRequest.setLatticeUser(userName);
-        dropboxService.revokeAccess(revokeRequest);
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-        verifyNoAccess(s3Client);
+        dropboxService.revokeAccess();
+        waitPolicyTakeEffect();
+        verifyNoAccess(creds, false);
     }
 
     private void testGrantAccessToExistingUser() {
@@ -119,15 +120,8 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         String userName = "c-" + dropBoxId;
         iamService.createCustomerUser(userName);
         AccessKey accessKey = iamService.createCustomerKey(userName);
-        BasicAWSCredentialsProvider credentialsProvider = //
+        BasicAWSCredentialsProvider creds = //
                 new BasicAWSCredentialsProvider(accessKey.getAccessKeyId(), accessKey.getSecretAccessKey());
-        AmazonS3 s3Client = AmazonS3ClientBuilder.standard() //
-                .withCredentials(credentialsProvider).withRegion(awsRegion).build();
-        try {
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
 
         GrantDropBoxAccessRequest request = new GrantDropBoxAccessRequest();
         request.setAccessMode(LatticeUser);
@@ -137,52 +131,72 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(response.getLatticeUser(), userName);
         Assert.assertNull(response.getAccessKey());
 
-        try {
-            Thread.sleep(7000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-        verifyAccess(s3Client, false);
-        RevokeDropBoxAccessRequest revokeRequest = new RevokeDropBoxAccessRequest();
-        revokeRequest.setAccessMode(LatticeUser);
-        revokeRequest.setLatticeUser(userName);
-        dropboxService.revokeAccess(revokeRequest);
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-        verifyNoAccess(s3Client);
+        waitPolicyTakeEffect();
+        verifyAccess(creds, false);
+        dropboxService.revokeAccess();
+        waitPolicyTakeEffect();
+        verifyNoAccess(creds, false);
 
         iamService.deleteCustomerUser(userName);
     }
 
-    private void verifyAccess(AmazonS3 s3Client, boolean upload) {
+    private void testGrantAccessToExternalAccount() {
+        GrantDropBoxAccessRequest request = new GrantDropBoxAccessRequest();
+        request.setAccessMode(ExternalAccount);
+        request.setExternalAccountId(accountId);
+        GrantDropBoxAccessResponse response = dropboxService.grantAccess(request);
+        Assert.assertEquals(response.getAccessMode(), ExternalAccount);
+
+        waitPolicyTakeEffect();
+        BasicAWSCredentialsProvider creds = //
+                new BasicAWSCredentialsProvider(customerAccessKey, customerSecret);
+        verifyAccess(creds, true);
+
+        dropboxService.revokeAccess();
+        waitPolicyTakeEffect();
+        verifyNoAccess(creds, true);
+    }
+
+    private void verifyAccess(BasicAWSCredentialsProvider creds, boolean upload) {
         String bucket = dropboxService.getDropBoxBucket();
         String prefix = dropboxService.getDropBoxPrefix();
 
+        AmazonS3 s3Client = AmazonS3ClientBuilder.standard() //
+                .withCredentials(creds).withRegion(awsRegion).build();
         String objectKey = prefix + "/le.html";
         if (upload) {
-            uploadFile(s3Client, bucket, objectKey);
+            uploadFile(s3Client, bucket, prefix);
         }
         Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
         ListObjectsV2Result result = s3Client.listObjectsV2(bucket, prefix);
         Assert.assertTrue(result.getKeyCount() > 0);
     }
 
-    private void verifyNoAccess(AmazonS3 s3Client) {
+    private void verifyNoAccess(BasicAWSCredentialsProvider creds, boolean skipGet) {
         String bucket = dropboxService.getDropBoxBucket();
         String prefix = dropboxService.getDropBoxPrefix();
         String objectKey = prefix + "/le.html";
+
+        AmazonS3 s3Client = AmazonS3ClientBuilder.standard() //
+                .withCredentials(creds).withRegion(awsRegion).build();
         try {
-            s3Client.doesObjectExist(bucket, objectKey);
-            Assert.fail("Should trow AmazonS3Exception.");
+            s3Client.listObjectsV2(bucket, objectKey);
+            Assert.fail("Should throw AmazonS3Exception.");
         } catch (AmazonS3Exception e) {
-            Assert.assertTrue(e.getMessage().contains("Forbidden"));
+            Assert.assertTrue(e.getMessage().contains("403"));
+        }
+        if (!skipGet) {
+            try {
+                s3Client.getObject(bucket, objectKey);
+                Assert.fail("Should throw AmazonS3Exception.");
+            } catch (AmazonS3Exception e) {
+                Assert.assertTrue(e.getMessage().contains("403"));
+            }
         }
     }
 
-    private void uploadFile(AmazonS3 s3Client, String bucket, String key) {
+    private void uploadFile(AmazonS3 s3Client, String bucket, String prefix) {
+        String key = prefix + "/le.html";
         InputStream inputStream = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("dropbox/le.html");
         TransferManager tm = TransferManagerBuilder.standard().withS3Client(s3Client).build();
@@ -191,6 +205,14 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
             upload.waitForCompletion();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void waitPolicyTakeEffect() {
+        try {
+            Thread.sleep(10000L);
+        } catch (InterruptedException e) {
+            // ignore
         }
     }
 

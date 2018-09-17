@@ -35,4 +35,10 @@ public interface S3Service {
     boolean isNonEmptyDirectory(String bucket, String prefix);
 
     void changeKeyRecursive(String bucket, String srcFolder, String tgtFolder, String keyId);
+
+    String getBucketPolicy(String bucket);
+
+    void setBucketPolicy(String bucket, String policyDoc);
+
+    void deleteBucketPolicy(String bucket);
 }

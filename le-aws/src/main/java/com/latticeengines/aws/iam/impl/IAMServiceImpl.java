@@ -49,9 +49,6 @@ public class IAMServiceImpl implements IAMService {
 
     private static final Logger log = LoggerFactory.getLogger(IAMServiceImpl.class);
 
-    @Resource(name = "awsCredentials")
-    private AWSCredentials awsCredentials;
-
     @Resource(name = "customerCredentials")
     private AWSCredentials customerCredentials;
 
@@ -63,15 +60,10 @@ public class IAMServiceImpl implements IAMService {
 
     private AmazonIdentityManagement iamClient;
 
-    //TODO: for temp test use, should be removed
-    public AmazonIdentityManagement getIamClient() {
-        return iamClient();
-    }
-
     @Override
     public String createCustomerUser(String userName) {
         String arn = getCustomerUserArn(userName);
-        AmazonIdentityManagement iam = getIamClient();
+        AmazonIdentityManagement iam = iamClient();
         if (StringUtils.isNotBlank(arn)) {
             log.info("User " + userName + " already exists with arn " + arn);
         } else {
@@ -89,7 +81,7 @@ public class IAMServiceImpl implements IAMService {
     @Override
     public AccessKey createCustomerKey(String userName) {
         if (hasCustomerUser(userName)) {
-            AmazonIdentityManagement iam = getIamClient();
+            AmazonIdentityManagement iam = iamClient();
             CreateAccessKeyRequest request = new CreateAccessKeyRequest().withUserName(userName);
             CreateAccessKeyResult result = iam.createAccessKey(request);
             return result.getAccessKey();
@@ -102,7 +94,7 @@ public class IAMServiceImpl implements IAMService {
     public boolean hasCustomerKey(String userName) {
         boolean hasKey = false;
         if (hasCustomerUser(userName)) {
-            AmazonIdentityManagement iam = getIamClient();
+            AmazonIdentityManagement iam = iamClient();
             ListAccessKeysRequest request = new ListAccessKeysRequest().withUserName(userName);
             ListAccessKeysResult result = iam.listAccessKeys(request);
             hasKey = CollectionUtils.isNotEmpty(result.getAccessKeyMetadata());
@@ -115,7 +107,7 @@ public class IAMServiceImpl implements IAMService {
         if (hasCustomerUser(userName)) {
             removeUserGroups(userName);
             removeAccessKeys(userName);
-            AmazonIdentityManagement iam = getIamClient();
+            AmazonIdentityManagement iam = iamClient();
             RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, //
                     Collections.singleton(NoSuchEntityException.class));
             try {
@@ -139,7 +131,7 @@ public class IAMServiceImpl implements IAMService {
 
     @Override
     public String getUserPolicy(String userName, String policyName) {
-        AmazonIdentityManagement iam = getIamClient();
+        AmazonIdentityManagement iam = iamClient();
         GetUserPolicyResult result;
         GetUserPolicyRequest request = new GetUserPolicyRequest().withUserName(userName).withPolicyName(policyName);
         try {
@@ -157,7 +149,7 @@ public class IAMServiceImpl implements IAMService {
 
     @Override
     public void putUserPolicy(String userName, String policyName, String policyDocument) {
-        AmazonIdentityManagement iam = getIamClient();
+        AmazonIdentityManagement iam = iamClient();
         PutUserPolicyRequest request = new PutUserPolicyRequest() //
                 .withUserName(userName) //
                 .withPolicyName(policyName) //
@@ -169,7 +161,7 @@ public class IAMServiceImpl implements IAMService {
     }
 
     private void removeUserGroups(String userName) {
-        AmazonIdentityManagement iam = getIamClient();
+        AmazonIdentityManagement iam = iamClient();
         RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, //
                 Collections.singleton(NoSuchEntityException.class));
         ListGroupsForUserRequest listGrpRequest = new ListGroupsForUserRequest().withUserName(userName);
@@ -184,7 +176,7 @@ public class IAMServiceImpl implements IAMService {
     }
 
     private void removeAccessKeys(String userName) {
-        AmazonIdentityManagement iam = getIamClient();
+        AmazonIdentityManagement iam = iamClient();
         RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, //
                 Collections.singleton(NoSuchEntityException.class));
         ListAccessKeysRequest listKeyRequest = new ListAccessKeysRequest().withUserName(userName);
@@ -199,7 +191,7 @@ public class IAMServiceImpl implements IAMService {
     }
 
     public void deleteUserPolicy(String userName, String policyName) {
-        AmazonIdentityManagement iam = getIamClient();
+        AmazonIdentityManagement iam = iamClient();
         DeleteUserPolicyRequest request = new DeleteUserPolicyRequest() //
                 .withUserName(userName) //
                 .withPolicyName(policyName);
@@ -218,7 +210,7 @@ public class IAMServiceImpl implements IAMService {
     }
 
     public String getCustomerUserArn(String username) {
-        AmazonIdentityManagement iam = getIamClient();
+        AmazonIdentityManagement iam = iamClient();
         GetUserRequest request = new GetUserRequest().withUserName(username);
         try {
             GetUserResult result = iam.getUser(request);
