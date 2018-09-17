@@ -27,7 +27,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.net.HttpHeaders;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
@@ -35,10 +37,12 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.domain.exposed.saml.LogoutValidationResponse;
 import com.latticeengines.domain.exposed.saml.SamlConfigMetadata;
 import com.latticeengines.domain.exposed.saml.SpSamlLoginRequest;
+import com.latticeengines.domain.exposed.saml.SpSamlLoginResponse;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.proxy.exposed.saml.SPSamlProxy;
@@ -236,9 +240,12 @@ public class SamlLoginResource {
             throw new LedpException(LedpCode.LEDP_33006);
         }
         String encodedRelayState = encode(constructRelayState(spLoginRequest));
-        String ssoUrl = String.format("redirect:%s?RelayState=%s", samlConfigMetadata.getSingleSignOnService(), encodedRelayState);
+        String ssoUrl = String.format("%s?RelayState=%s", samlConfigMetadata.getSingleSignOnService(), encodedRelayState);
         log.info("SSO Url for Sp Initiated Login: %s", ssoUrl);
-        return new ModelAndView(ssoUrl);
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        SpSamlLoginResponse spResp = new SpSamlLoginResponse();
+        spResp.setSsoUrl(ssoUrl);
+        return new ModelAndView(jsonView, ImmutableMap.of(SpSamlLoginResponse.class.getSimpleName(), spResp));
     }
 
     private String encode(String constructRelayState) {
