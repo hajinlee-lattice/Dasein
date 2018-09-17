@@ -75,8 +75,8 @@ public class ModelExtractor {
                 if (filter != null && !filter.accept(null, entry.getKey())) {
                     continue;
                 } else {
-                    Charset encoding = null;
-                    FileUtils.write(new File(targetDir + "/" + entry.getKey()), entry.getValue(), encoding);
+                    FileUtils.write(new File(targetDir + "/" + entry.getKey()), entry.getValue(),
+                            Charset.defaultCharset());
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
