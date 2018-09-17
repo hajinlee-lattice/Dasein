@@ -42,6 +42,7 @@ public class ECSServiceImpl implements ECSService {
 
     @Inject
     private AmazonECS ecsClient;
+
     @Inject
     private AmazonECR ecrClient;
 

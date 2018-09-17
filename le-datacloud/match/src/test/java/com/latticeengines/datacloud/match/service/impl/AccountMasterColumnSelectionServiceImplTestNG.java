@@ -40,6 +40,11 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Test(groups = "functional")
+    public void testGetAllColumns() {
+        columnEntityMgr.findAll(versionEntityMgr.currentApprovedVersionAsString());
+    }
+
+    @Test(groups = "functional")
     public void testGetBitCodeBook() {
         dataCloudVersion = versionEntityMgr.currentApprovedVersionAsString();
 

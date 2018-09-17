@@ -37,6 +37,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -154,7 +155,7 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public Upload uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync) {
         key = sanitizePathToKey(key);
-        TransferManager tm = new TransferManager(s3Client);
+        TransferManager tm = TransferManagerBuilder.standard().withS3Client(s3Client).build();
         Upload upload = tm.upload(bucket, key, inputStream, null);
 
         log.info(upload.getDescription());

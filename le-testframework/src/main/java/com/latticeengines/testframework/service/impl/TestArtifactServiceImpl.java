@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.ClientConfiguration;
@@ -39,7 +40,7 @@ public class TestArtifactServiceImpl implements TestArtifactService {
     private AmazonS3 S3;
 
     @Inject
-    public TestArtifactServiceImpl(BasicAWSCredentials basicAWSCredentials) {
+    public TestArtifactServiceImpl(@Qualifier(value = "awsCredentials") BasicAWSCredentials basicAWSCredentials) {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
         clientConfiguration.setSocketTimeout(120000);
         this.S3 = AmazonS3ClientBuilder.standard()
