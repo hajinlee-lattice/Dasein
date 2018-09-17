@@ -26,7 +26,6 @@ import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.service.SourceFileService;
 import com.latticeengines.apps.lp.testframework.LPDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -36,7 +35,6 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -140,9 +138,6 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
         Tenant tenant = new Tenant();
         if (tenantIsEncrypted) {
             tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.LPA3);
-            ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
-                    .construct(new CustomerSpaceScope(CustomerSpace.parse(tenant.getId())));
-            assertTrue(controller.exists(new com.latticeengines.domain.exposed.camille.Path("/EncryptionKey")));
         } else {
             String TenantName = TestFrameworkUtils.generateTenantName();
             tenant.setName(String.format("%s.%s.Production", TenantName, TenantName));
