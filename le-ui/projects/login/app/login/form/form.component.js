@@ -11,7 +11,7 @@ angular.module('login.form', [
         logindocument: '<'
     },
     controller: function (
-        $state, $location, $stateParams, ResourceUtility, LoginService, BrowserStorageUtility, 
+        $state, $window, $location, $stateParams, ResourceUtility, LoginService, BrowserStorageUtility, 
         SessionTimeoutUtility, TimestampIntervalUtility, Banner
     ) {
         var vm = this;
@@ -61,14 +61,13 @@ angular.module('login.form', [
                     var params = $location.$$search;
                     if (Object.keys(params).length != 0 && params.constructor === Object){
                         
-                        var unique = result.Uniqueness,
-                            random = result.Randomness,
-                            token = random.concat('.', unique);
+                        LoginService.PostToJwt(params).then(function(result){
 
-                        LoginService.PostToJwt(params, token).then(function(result){
-                            var returnUrl = result.return_to;
-                            $location.path(returnUrl).replace();
+                            console.log(result);
+
+                            // $window.location.href = result.content;
                         });
+                        
                     } else {
                         SessionTimeoutUtility.refreshSessionLastActiveTimeStamp();
                         $state.go('login.tenants');
@@ -79,6 +78,26 @@ angular.module('login.form', [
                 }
             });
         };
+
+        vm.ssoClick = function () {
+            
+            vm.tenantNameInvalid = vm.tenantName === "";
+            
+            console.log();
+
+            if (vm.tenantNameInvalid) {
+                return;
+            }
+
+            vm.loginInProgress = true;
+            var params = $location.$$search;
+
+            LoginService.SSOLogin(vm.tenantName, params).then(function(result){
+                vm.loginInProgress = false;
+                $window.location.href = result.content;
+            })
+
+        }
 
         vm.showLoginHeaderMessage = function (message) {
             if (message == null) {

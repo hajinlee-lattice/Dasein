@@ -49,7 +49,7 @@
                 autocomplete="on"
                 data-ng-model="$ctrl.tenantName"
                 title="{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}"
-                class="form-control {{$ctrl.passwordInvalid ? 'error' : ''}}">
+                class="form-control {{$ctrl.tenantNameInvalid ? 'error' : ''}}">
 
                 <!-- data-ng-enter="$ctrl.loginClick()" -->
     </div>
@@ -57,7 +57,7 @@
         <button
                 id="loginSSOButton"
                 type="submit"
-                data-ng-click="$ctrl.loginClick()"
+                data-ng-click="$ctrl.ssoClick()"
                 class="button orange-button"
                 ng-disabled="$ctrl.loginInProgress">
             Login Using SSO

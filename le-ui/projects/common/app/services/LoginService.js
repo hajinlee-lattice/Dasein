@@ -24,7 +24,7 @@ angular.module('mainApp.login.services.LoginService', [
             }
          }).then(
             function onSuccess(response) {
-                console.log('BACK Again');
+                // console.log('BACK Again');
                 var result = response.data;
                 if (result != null && result !== "" && result.Success == true) {
                     BrowserStorageUtility.setTokenDocument(result.Uniqueness + "." + result.Randomness);
@@ -71,7 +71,7 @@ angular.module('mainApp.login.services.LoginService', [
         return deferred.promise;
     };
 
-    this.PostToJwt = function (params, token) {
+    this.PostToJwt = function (params) {
         var deferred = $q.defer();
 
         console.log(params);
@@ -80,20 +80,14 @@ angular.module('mainApp.login.services.LoginService', [
             method: 'POST',
             url: '/pls/jwt/handle_request',
             data: {
-                reqParams: {
-                    requestParameters: params
-                }
+                'requestParameters': params
             },
             headers: {
-                "Authorization": token
+                'Content-Type': 'application/json'
             }
         }).then(
-            function onSuccess(d, status, headers, config){
-                var data = d.data;
-                var result = false;
-    
+            function onSuccess(data, status, headers, config){
                 deferred.resolve(data);
-
             },
             function onError(data, status, headers, config) {
                 SessionService.HandleResponseErrors(data.data, status);
@@ -102,6 +96,34 @@ angular.module('mainApp.login.services.LoginService', [
         );
         return deferred.promise;
     };
+
+    this.SSOLogin = function (tenantName, params) {
+        var deferred = $q.defer();
+
+        console.log(params);
+
+        $http({
+            method: 'POST',
+            url: '/pls/saml/splogin',
+            data: {
+                'requestParameters': params,
+                'tenantDeploymentId': tenantName
+            },
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(
+            function onSuccess(data){        
+                console.log(data.data);
+                deferred.resolve(data.data);
+            },
+            function onError(data, status, headers, config) {
+                SessionService.HandleResponseErrors(data.data, status);
+                deferred.resolve(data.data);
+            }
+        );
+        return deferred.promise;
+    }
 
 
     this.GetSessionDocument = function (tenant, username) {
