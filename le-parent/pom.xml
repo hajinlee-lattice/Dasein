@@ -135,10 +135,10 @@
         <confluent.version>5.0.0</confluent.version>
         <libthrift.version>0.11.0</libthrift.version>
         <!-- Spring -->
-        <spring.version>5.0.3.RELEASE</spring.version>
+        <spring.version>5.0.9.RELEASE</spring.version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
         <spring.batch.version>4.0.0.RELEASE</spring.batch.version>
-        <spring.security.version>5.0.1.RELEASE</spring.security.version>
+        <spring.security.version>5.0.8.RELEASE</spring.security.version>
         <spring.saml2.version>1.0.4.RELEASE</spring.saml2.version>
         <spring.oauth2.version>2.2.1.RELEASE</spring.oauth2.version>
         <!-- Camel -->
