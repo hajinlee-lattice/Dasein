@@ -38,8 +38,7 @@ public class GzipUtils {
         if (isCompressed(compressed)) {
             try (ByteArrayInputStream bais = new ByteArrayInputStream(compressed)) {
                 try (GzipCompressorInputStream gis = new GzipCompressorInputStream(bais)) {
-                    Charset encoding = null;
-                    return IOUtils.toString(gis, encoding);
+                    return IOUtils.toString(gis, Charset.defaultCharset());
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

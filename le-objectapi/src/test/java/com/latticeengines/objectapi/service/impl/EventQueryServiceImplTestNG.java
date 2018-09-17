@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -99,7 +100,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     public void testCrossPeriodQuery() {
         Bucket.Transaction txn1 = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), null, null, false);
         TimeFilter timeFilter = TimeFilter.ever();
-        timeFilter.setPeriod(TimeFilter.Period.Quarter.name());
+        timeFilter.setPeriod(PeriodStrategy.Template.Quarter.name());
         Bucket.Transaction txn2 = new Bucket.Transaction(PRODUCT_ID, timeFilter, null, null, false);
 
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
@@ -134,6 +135,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertEquals(count, 8501);
     }
 
+    @SuppressWarnings("unused")
     private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();

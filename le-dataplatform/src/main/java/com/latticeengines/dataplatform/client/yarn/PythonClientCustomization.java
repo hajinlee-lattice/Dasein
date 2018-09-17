@@ -88,8 +88,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             setLatticeVersion(classifier, properties);
             metadata = JsonUtils.serialize(classifier);
             File metadataFile = new File(dir + "/metadata.json");
-            Charset encoding = null;
-            FileUtils.writeStringToFile(metadataFile, metadata, encoding);
+            FileUtils.writeStringToFile(metadataFile, metadata, Charset.defaultCharset());
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
         } catch (Exception e) {

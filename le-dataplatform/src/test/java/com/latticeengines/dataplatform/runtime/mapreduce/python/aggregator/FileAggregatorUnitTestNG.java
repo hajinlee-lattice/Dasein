@@ -63,9 +63,9 @@ public class FileAggregatorUnitTestNG {
         DiagnosticsJsonAggregator aggregator = new DiagnosticsJsonAggregator();
         aggregator.aggregateToLocal(paths);
 
-        Charset encoding = null;
-        String aggregatedDiagnostics = FileUtils.readFileToString(new File(FileAggregator.DIAGNOSTICS_JSON), encoding);
-        String original = FileUtils.readFileToString(new File(comparePath), encoding);
+        String aggregatedDiagnostics = FileUtils.readFileToString(new File(FileAggregator.DIAGNOSTICS_JSON),
+                Charset.defaultCharset());
+        String original = FileUtils.readFileToString(new File(comparePath), Charset.defaultCharset());
         String orginalDiagnostics = new ObjectMapper().readTree(original).toString();
 
         assertEquals(aggregatedDiagnostics.length(), orginalDiagnostics.length());
@@ -86,8 +86,8 @@ public class FileAggregatorUnitTestNG {
         } catch (Exception e) {
             // ignore invoker exception
         }
-        Charset encoding = null;
-        String metadataNew = FileUtils.readFileToString(new File(PythonMRUtils.METADATA_JSON_PATH), encoding);
+        String metadataNew = FileUtils.readFileToString(new File(PythonMRUtils.METADATA_JSON_PATH),
+                Charset.defaultCharset());
         Classifier classifierNew = JsonUtils.deserialize(metadataNew, Classifier.class);
 
         assertNotEquals(metadataNew, metadata);

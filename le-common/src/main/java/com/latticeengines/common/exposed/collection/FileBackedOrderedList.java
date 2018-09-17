@@ -117,8 +117,7 @@ public class FileBackedOrderedList<T extends Comparable<?>> implements Iterable<
         File parentFile = new File(tempDir + File.separator + parent);
         List<String> lines;
         try {
-            Charset encoding = null;
-            lines = FileUtils.readLines(parentFile, encoding);
+            lines = FileUtils.readLines(parentFile, Charset.defaultCharset());
         } catch (IOException e) {
             throw new RuntimeException("Failed to read lines for the parent file " + parent);
         }
@@ -243,8 +242,8 @@ public class FileBackedOrderedList<T extends Comparable<?>> implements Iterable<
 
         private Iterator<String> getLineIterator(String file) {
             try {
-                Charset encoding = null;
-                List<String> lines = FileUtils.readLines(new File(tempDir + File.separator + file), encoding);
+                List<String> lines = FileUtils.readLines(new File(tempDir + File.separator + file),
+                        Charset.defaultCharset());
                 return lines.listIterator();
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read lines from local file", e);

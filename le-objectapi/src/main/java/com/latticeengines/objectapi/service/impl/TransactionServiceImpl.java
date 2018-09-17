@@ -64,7 +64,6 @@ public class TransactionServiceImpl implements TransactionService {
         return getMaxTransactionDate(customerSpace, version);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public TimeFilterTranslator getTimeFilterTranslator(String evaluationDate) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -76,7 +75,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .get(String.format("%s|%s", customerSpace.getTenantId(), evaluationDate));
     }
 
-    @SuppressWarnings("unchecked")
     private TimeFilterTranslator getTimeFilterTranslatorBehindCache(String key) {
         String[] tokens = key.split("\\|");
         CustomerSpace customerSpace = CustomerSpace.parse(tokens[0]);

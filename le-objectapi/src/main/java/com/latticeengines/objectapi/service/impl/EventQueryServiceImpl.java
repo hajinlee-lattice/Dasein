@@ -27,6 +27,7 @@ import com.latticeengines.query.factory.RedshiftQueryProvider;
 @Service("eventQueryService")
 public class EventQueryServiceImpl implements EventQueryService {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(EventQueryServiceImpl.class);
     private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
 

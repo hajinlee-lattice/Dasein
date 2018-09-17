@@ -44,8 +44,8 @@ public class PythonMRTestUtils {
         String localPath = ClassLoader.getSystemResource(localDir).getPath();
 
         try {
-            Charset encoding = null;
-            String metadata = FileUtils.readFileToString(new File(localPath + "/" + filename), encoding);
+            String metadata = FileUtils.readFileToString(new File(localPath + "/" + filename),
+                    Charset.defaultCharset());
             classifier = JsonUtils.deserialize(metadata, Classifier.class);
         } catch (Exception e) {
             throw new RuntimeException(e);

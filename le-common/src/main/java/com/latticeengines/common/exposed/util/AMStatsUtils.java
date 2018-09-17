@@ -51,8 +51,7 @@ public class AMStatsUtils {
         String str = "";
         if (options.hasOption("f")) {
             String filePath = cmdLine.getOptionValue("f");
-            Charset encoding = null;
-            str = IOUtils.toString(new FileInputStream(new File(filePath)), encoding);
+            str = IOUtils.toString(new FileInputStream(new File(filePath)), Charset.defaultCharset());
         } else {
             str = cmdLine.getOptionValue("s");
         }

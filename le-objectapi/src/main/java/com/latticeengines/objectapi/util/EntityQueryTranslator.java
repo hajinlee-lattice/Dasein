@@ -17,6 +17,7 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 
 public class EntityQueryTranslator extends QueryTranslator {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(EntityQueryTranslator.class);
 
     public EntityQueryTranslator(QueryFactory queryFactory, AttributeRepository repository) {

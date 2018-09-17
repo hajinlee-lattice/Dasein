@@ -98,8 +98,7 @@ public class PythonMRUtils {
     public static void writeMetadataJsonToLocal(Classifier classifier) throws IOException {
         String metadata = JsonUtils.serialize(classifier);
         File metadataFile = new File(METADATA_JSON_PATH);
-        Charset encoding = null;
-        FileUtils.writeStringToFile(metadataFile, metadata, encoding);
+        FileUtils.writeStringToFile(metadataFile, metadata, Charset.defaultCharset());
     }
 
     public static void copyMetadataJsonToHdfs(Configuration config, String hdfsPath) throws Exception {

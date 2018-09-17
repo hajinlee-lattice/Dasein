@@ -169,15 +169,15 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     public Object[][] timefilterProvider() {
         TimeFilter currentMonth = new TimeFilter( //
                 ComparisonType.IN_CURRENT_PERIOD, //
-                TimeFilter.Period.Month.name(), //
+                PeriodStrategy.Template.Month.name(), //
                 Collections.emptyList());
         TimeFilter lastMonth = new TimeFilter( //
                 ComparisonType.WITHIN, //
-                TimeFilter.Period.Month.name(), //
+                PeriodStrategy.Template.Month.name(), //
                 Collections.singletonList(1));
         TimeFilter betweendates = new TimeFilter( //
                 ComparisonType.BETWEEN_DATE, //
-                TimeFilter.Period.Date.name(), //
+                PeriodStrategy.Template.Date.name(), //
                 Arrays.asList("2017-07-15", "2017-08-15"));
         return new Object[][] { //
                 { TimeFilter.ever(), 832L }, //
@@ -338,6 +338,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         return count;
     }
 
+    @SuppressWarnings("unused")
     private long compareTgtCount(Bucket.Transaction txn) {
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);

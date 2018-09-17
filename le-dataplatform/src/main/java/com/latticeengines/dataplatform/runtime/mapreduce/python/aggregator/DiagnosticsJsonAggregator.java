@@ -29,8 +29,7 @@ public class DiagnosticsJsonAggregator extends ProfilingAggregator {
 
         List<JsonNode> diagnosticsFiles = new ArrayList<JsonNode>();
         for (String path : localPaths) {
-            Charset encoding = null;
-            String content = FileUtils.readFileToString(new File(path), encoding);
+            String content = FileUtils.readFileToString(new File(path), Charset.defaultCharset());
             diagnosticsFiles.add(mapper.readTree(content));
         }
 
@@ -54,8 +53,7 @@ public class DiagnosticsJsonAggregator extends ProfilingAggregator {
                 break;
             }
         }
-        Charset encoding = null;
-        FileUtils.writeStringToFile(new File(getName()), diagnosticsFile.toString(), encoding);
+        FileUtils.writeStringToFile(new File(getName()), diagnosticsFile.toString(), Charset.defaultCharset());
     }
 
     private void aggregatDataSummary(ObjectNode firstSummary, List<JsonNode> diagnosticsFiles) throws Exception {

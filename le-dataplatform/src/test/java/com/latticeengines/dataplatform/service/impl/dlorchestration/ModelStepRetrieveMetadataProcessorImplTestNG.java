@@ -95,8 +95,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         try {
             URL metadataUrl = ClassLoader
                     .getSystemResource("com/latticeengines/dataplatform/service/incorrect-metadata.json");
-            Charset encoding = null;
-            String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), encoding);
+            String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), Charset.defaultCharset());
             modelStepRetrieveMetadataProcessor.writeStringToHdfs(hdfsPath, metadata);
             Assert.fail("Should have thrown exception.");
         } catch (Exception e) {
@@ -147,8 +146,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
         URL metadataUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/service/incorrect-metadata.json");
-        Charset encoding = null;
-        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), encoding);
+        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), Charset.defaultCharset());
         String hdfsPath = modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataDiagnosticsFile(command,
                 commandParameters);
         if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
@@ -194,8 +192,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
         URL metadataUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/service/correct-metadata.json");
-        Charset encoding = null;
-        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), encoding);
+        String metadata = FileUtils.readFileToString(new File(metadataUrl.getPath()), Charset.defaultCharset());
 
         modelStepRetrieveMetadataProcessor.validateMetadata(metadata, command, commandParameters);
 
