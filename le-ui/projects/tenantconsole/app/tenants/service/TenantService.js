@@ -252,6 +252,22 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
         return this.PostFeatureFlags(tenantId, featureFlags);
     };
 
+    this.UpdateTenantInfo = function(contractId, tenantId, tenantInfo) {
+        var defer = $q.defer();
+
+        $http({
+            method: 'PUT',
+            url: '/admin/tenants/'+contractId+'/'+tenantId,
+            data: tenantInfo
+        }).success(function (data) {
+            defer.resolve(data);
+        }).error(function (err, status) {
+            defer.reject(err);
+        });
+
+        return defer.promise;
+    };
+
     this.PostComponents = function (tenantId, components) {
         var defer = $q.defer();
 

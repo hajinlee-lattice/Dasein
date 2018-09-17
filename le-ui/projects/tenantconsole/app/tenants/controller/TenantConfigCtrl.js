@@ -610,6 +610,40 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         return component;
     }
 
+
+    //==================================================
+    // edit tenant info
+    //==================================================
+
+    $scope.isEditingTenantInfo = false;
+    $scope.isSavingTenantInfo = false;
+
+    $scope.editTenantInfo = function() {
+        $scope.originalTenantStatus = $scope.tenantInfo ? $scope.tenantInfo.properties.status : '';
+        $scope.originalTenantType = $scope.tenantInfo ? $scope.tenantInfo.properties.tenantType : '';
+        $scope.isEditingTenantInfo = true;
+    }
+
+    $scope.saveTenantInfo = function() {
+        $scope.isEditingTenantInfo = false;
+        $scope.isSavingTenantInfo = true;
+        TenantService.UpdateTenantInfo($scope.contractId, $scope.tenantId, $scope.tenantInfo).then(function(result) {
+            $scope.isSavingTenantInfo = false;
+            if (result === false) {
+                $scope.tenantInfo.properties.status = $scope.originalTenantStatus;
+                $scope.tenantInfo.properties.tenantType = $scope.originalTenantType;
+            }
+            
+        });
+    }
+
+    $scope.cancelTenantInfo = function() {
+        $scope.tenantInfo.properties.status = $scope.originalTenantStatus;
+        $scope.tenantInfo.properties.tenantType = $scope.originalTenantType;
+        $scope.isEditingTenantInfo = false;
+    }
+
+
     //==================================================
     // edit feature flags
     //==================================================

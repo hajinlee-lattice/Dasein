@@ -26,14 +26,25 @@
                     {{ tenantInfo.properties.lastModified | date : "yyyy-MM-dd HH:mm:ss Z" }}
                 </div>
                 <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
-                    <span class="node">Status</span> :
-                    {{ tenantInfo.properties.status }}
+                    <span class="node">Status </span> :
+                    <span ng-show="!isEditingTenantInfo"> {{ tenantInfo.properties.status }} </span>
+                    <select class="form-control inline" ng-show="isEditingTenantInfo"
+                                ng-options="option for option in availableStatuses"
+                                ng-model="tenantInfo.properties.status">
+                    </select>
                 </div>
                 <div class="col col-md-4 col-sm-4 col-xs-6 readonly-config-entry">
                     <span class="node">Type</span> :
-                    {{ tenantInfo.properties.tenantType }}
+                    <span ng-show="!isEditingTenantInfo"> {{ tenantInfo.properties.tenantType }} </span>
+                    <select class="form-control inline" ng-show="isEditingTenantInfo"
+                                    ng-options="option for option in availableTenantTypes"
+                                    ng-model="tenantInfo.properties.tenantType">
+                    </select>
                 </div>
             </div>
+            <button class="btn btn-primary" ng-if="!isEditingTenantInfo" ng-click="editTenantInfo()">EDIT</button>
+            <button class="btn btn-primary" ng-if="isEditingTenantInfo" ng-click="saveTenantInfo()">SAVE</button>
+            <button class="btn btn-primary" ng-if="isEditingTenantInfo" ng-click="cancelTenantInfo()">CANCEL</button>
             <form ng-if="!readonly" class="row form-inline">
                 <div class="col col-md-12 col-sm-12 col-xs-12">
                     <label class="control-label">
@@ -164,7 +175,7 @@
         <button class="btn btn-primary" ng-if="!new" ng-click="onDeleteClick()"><i class="fa fa-trash-o"></i> DELETE</button>
         <button class="btn btn-primary" ng-if="!new && !isEditingComponents" ng-click="editComponents()">EDIT</button>
         <button class="btn btn-primary" ng-if="isEditingComponents" ng-click="saveComponents()">SAVE</button>
-        <button class="btn btn-primary" ng-if="isEditingComponents" ng-click="cancelComponents()">CACEL</button>
+        <button class="btn btn-primary" ng-if="isEditingComponents" ng-click="cancelComponents()">CANCEL</button>
         <br/>
     </div>
 </div>
