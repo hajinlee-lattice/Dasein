@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.pls.PlayType;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -157,7 +158,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     private Map<String, Object> createWorkflowTypeMap(String type, String typeDisplayName) {
         Map<String, Object> wf = new HashMap<>();
-        wf.put("ID", type);
+        wf.put("ID", PlayType.getIdForBIS(type));
         wf.put("DisplayName", typeDisplayName);
         return wf;
     }

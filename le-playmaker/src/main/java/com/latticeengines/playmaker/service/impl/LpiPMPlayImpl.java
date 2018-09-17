@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
+import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
@@ -116,7 +117,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getCustomerSpace().toString(),
                 play.getRatingEngine().getId());
         playMap.put(PlaymakerConstants.TargetProducts, getTargetProducts(ratingEngine, allProducts));
-        playMap.put(PlaymakerConstants.Workflow, play.getPlayType().getDisplayName());
+        playMap.put(PlaymakerConstants.Workflow, PlayType.getIdForBIS(play.getPlayType().getDisplayName()));
 
         playMap.put(PlaymakerConstants.RowNum, rowNum);
         result.add(playMap);

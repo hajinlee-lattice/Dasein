@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "PLAY_TYPE")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
-        @ParamDef(name = "tenantFilterId", type = "java.lang.Long") })
+        @ParamDef(name = "tenantFilterId", type = "java.lang.Long")})
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
     @Id
@@ -57,7 +57,7 @@ public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditing
     @Column(name = "DESCRIPTION", length = 8192, nullable = true)
     private String description;
 
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -186,5 +186,9 @@ public class PlayType implements HasPid, HasId<String>, HasTenantId, HasAuditing
 
     public static String generateId() {
         return UUID.randomUUID().toString();
+    }
+
+    public static String getIdForBIS(String type) {
+        return type.equals("List") ? "ADefault" : type;
     }
 }
