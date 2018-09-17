@@ -11,7 +11,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-//import com.latticeengines.apps.cdl.service.impl.TestPlayCreationHelper;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -24,6 +23,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
+
+//import com.latticeengines.apps.cdl.service.impl.TestPlayCreationHelper;
 
 public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -74,11 +75,12 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         playName = playCreationHelper.getPlayName();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {"testCrud"})
+    @Test(groups = "deployment", dependsOnMethods = { "testCrud" })
     public void createPlayLaunch() {
         playCreationHelper.createPlayLaunch();
         play = playCreationHelper.getPlay();
         playLaunch = playCreationHelper.getPlayLaunch();
+        playLaunch = playProxy.launchPlay(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(), true);
         Assert.assertNotNull(playLaunch.getAccountsSelected());
         Assert.assertNotNull(playLaunch.getAccountsLaunched());
         Assert.assertNotNull(playLaunch.getContactsLaunched());
@@ -145,7 +147,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), playName);
         Assert.assertNotNull(retrievedFullPlay);
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
-        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getLastIncompleteLaunch());
+        Assert.assertNull(retrievedFullPlay.getLaunchHistory().getLastIncompleteLaunch());
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getLastCompletedLaunch());
         // TODO will change to NotNull after integration with RatingEngine is
         // fully done

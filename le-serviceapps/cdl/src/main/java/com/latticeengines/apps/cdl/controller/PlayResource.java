@@ -271,9 +271,7 @@ public class PlayResource {
         playLaunch.setAccountsErrored(0L);
         playLaunch.setAccountsLaunched(0L);
         playLaunch.setContactsLaunched(0L);
-        playLaunchService.update(playLaunch);
-
-        return playLaunch;
+        return playLaunchService.update(playLaunch);
     }
 
     @GetMapping(value = "/launches/dashboard", headers = "Accept=application/json")
