@@ -252,11 +252,14 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
             List<ColumnMetadata> columns = getSystemMetadata(category);
             Set<String> columnsInSystem = columns.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+            log.info("metadata name in " + category.getName() + " are " + columnsInSystem.toString());
             List<AttrConfig> customConfigInCategory = customConfig.stream() //
                     .filter(attrConfig -> category
                             .equals(attrConfig.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class))
                             || columnsInSystem.contains(attrConfig.getAttrName()))
                     .collect(Collectors.toList());
+            log.info("system metadata in category are " + JsonUtils.serialize(columns));
+            log.info("custom config in category are " + JsonUtils.serialize(customConfigInCategory));
             renderedList = render(columns, customConfigInCategory);
             modifyInactivateState(renderedList);
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
@@ -510,9 +513,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         for (AttrConfig config : customConfigs) {
             map.put(config.getAttrName(), config);
         }
+        log.info("system meta data in render " + JsonUtils.serialize(systemMetadata));
+        log.info("custom config in render " + JsonUtils.serialize(customConfigs));
         List<String> renderedAttrNames = customConfigs.stream().map(config -> config.getAttrName())
                 .collect(Collectors.toList());
-        ThreadLocal<List<String>> nameslocal = ThreadLocal.withInitial(() -> renderedAttrNames);
+        log.info("custom config name " + renderedAttrNames.toString());
         for (ColumnMetadata metadata : systemMetadata) {
             AttrType type = AttrTypeResolver.resolveType(metadata);
             AttrSubType subType = AttrTypeResolver.resolveSubType(metadata);
@@ -530,7 +535,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 mergeConfig.setAttrName(metadata.getAttrName());
                 mergeConfig.setAttrProps(new HashMap<>());
             } else {
-                nameslocal.get().remove(mergeConfig.getAttrName());
+                renderedAttrNames.remove(mergeConfig.getAttrName());
             }
             mergeConfig.setAttrType(type);
             mergeConfig.setAttrSubType(subType);
@@ -608,8 +613,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             map.put(metadata.getAttrName(), mergeConfig);
         }
         // make sure the system metadata include the customer config
-        if (CollectionUtils.isNotEmpty(nameslocal.get())) {
-            throw new LedpException(LedpCode.LEDP_40023, new String[] { nameslocal.get().toString() });
+        if (CollectionUtils.isNotEmpty(renderedAttrNames)) {
+            throw new LedpException(LedpCode.LEDP_40023, new String[] { renderedAttrNames.toString() });
         }
         return new ArrayList<>(map.values());
     }
