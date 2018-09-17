@@ -2,8 +2,8 @@ package com.latticeengines.dante.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
 @Component("publishedTalkingPointDao")
 public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPoint>
         implements PublishedTalkingPointDao {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(PublishedTalkingPointDaoImpl.class);
 
     @Override
@@ -27,7 +28,7 @@ public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPo
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("select tp from %s tp " + "where tp.playName = :playName",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<PublishedTalkingPoint> query = session.createQuery(queryStr);
         query.setParameter("playName", playName);
         return (List<PublishedTalkingPoint>) query.list();
     }

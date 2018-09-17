@@ -29,6 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/talkingpoints")
 public class TalkingPointResource implements TalkingPointInterface {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(TalkingPointResource.class);
 
     @Autowired

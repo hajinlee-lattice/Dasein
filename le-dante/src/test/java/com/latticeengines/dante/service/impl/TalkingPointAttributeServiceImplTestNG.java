@@ -85,7 +85,6 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
         ((TalkingPointAttributeServiceImpl) talkingPointAttributeService).setServingStoreProxy(spiedServingStoreProxy);
 
         ColumnMetadata at = new ColumnMetadata();
-        at.setColumnId("something");
         at.setAttrName("something");
         at.setDisplayName("something more");
         at.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
@@ -93,14 +92,12 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
         attrList.add(at);
 
         at = new ColumnMetadata();
-        at.setColumnId("something1");
         at.setAttrName("something1");
         at.setDisplayName("something more 1");
         at.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
         attrList.add(at);
 
         at = new ColumnMetadata();
-        at.setColumnId("something2");
         at.setAttrName("something3");
         at.setDisplayName("something more 2");
         at.enableGroupIfNotPresent(ColumnSelection.Predefined.CompanyProfile);

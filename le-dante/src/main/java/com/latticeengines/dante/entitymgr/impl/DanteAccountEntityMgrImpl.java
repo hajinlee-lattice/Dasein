@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.dante.DanteAccount;
 @Deprecated
 @Component("danteAccountEntityMgr")
 public class DanteAccountEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteAccount> implements DanteAccountEntityMgr {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DanteAccountEntityMgrImpl.class);
 
     @Autowired

@@ -2,8 +2,8 @@ package com.latticeengines.dante.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.dante.DanteAccount;
 @Component("danteAccountDao")
 public class DanteAccountDaoImpl extends BaseDanteDaoImpl<DanteAccount> implements DanteAccountDao {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DanteAccountDaoImpl.class);
 
     @Override
@@ -32,7 +33,7 @@ public class DanteAccountDaoImpl extends BaseDanteDaoImpl<DanteAccount> implemen
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("select a from %s a where customerID = :customerID",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr).setMaxResults(count);
+        Query<DanteAccount> query = session.createQuery(queryStr).setMaxResults(count);
         query.setParameter("customerID", customerID);
         return (List<DanteAccount>) query.list();
     }

@@ -57,7 +57,6 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
         this.servingStoreProxy = servingStoreProxy;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<TalkingPointAttribute> getAccountAttributes(String customerSpace) {
         log.info("Attempting to find Account attributes for customer space : " + customerSpace);
@@ -148,7 +147,6 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public TalkingPointNotionAttributes getAttributesForNotions(List<String> notions, String customerSpace) {
         Set<String> uniqueNotions = new HashSet<>(notions.stream() //
                 .map(String::toLowerCase) //

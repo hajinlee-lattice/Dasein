@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Deprecated
 @Component("danteAccountService")
 public class DanteAccountServiceImpl implements DanteAccountService {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DanteAccountServiceImpl.class);
 
     @Autowired

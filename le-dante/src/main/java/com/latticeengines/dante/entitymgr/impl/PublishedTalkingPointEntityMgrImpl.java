@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
 @Controller("publishedTalkingPointEntityMgr")
 public class PublishedTalkingPointEntityMgrImpl extends BaseEntityMgrImpl<PublishedTalkingPoint>
         implements PublishedTalkingPointEntityMgr {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(TalkingPointEntityMgrImpl.class);
 
     @Autowired
