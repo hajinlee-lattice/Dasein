@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.pls.JwtReplyParameters;
 import com.latticeengines.domain.exposed.pls.JwtRequestParameters;
 import com.latticeengines.security.exposed.jwt.JwtManager;
 import com.latticeengines.security.exposed.jwt.handler.impl.ZendeskJwtHandler;
@@ -12,15 +13,13 @@ import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGB
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
 
     @Autowired
     private JwtManager jwtManager;
 
     @Test(groups = "functional")
-    public void generateJwtTokenWithRedirectURL() throws Exception {
+    public void generateJwtTokenWithFunction() throws Exception {
 
         GlobalAuthUser user = new GlobalAuthUser();
         user.setFirstName("Tim");
@@ -31,16 +30,17 @@ public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
         parameters.put(JwtManager.SOURCE_REF_KEY, ZendeskJwtHandler.HANDLER_NAME);
         JwtRequestParameters reqParameters = new JwtRequestParameters();
         reqParameters.setRequestParameters(parameters);
-        String url = null;
+        JwtReplyParameters reply = null;
         try {
-            url = jwtManager.handleJwtRequest(null, user, reqParameters, true);
+            reply = jwtManager.handleJwtRequest(user, reqParameters);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
-        Assert.assertNotNull(url);
-        Assert.assertTrue(url.contains(ZendeskJwtHandler.ZENDESK_URL_QUERY_RETURN_TO_KEY));
-        Assert.assertTrue(url.contains(ZendeskJwtHandler.ZENDESK_URL_QUERY_JWT_TOKEN_KEY));
-        System.out.println("token url : " + url);
+        Assert.assertNotNull(reply);
+        Assert.assertNotNull(reply.getType());
+        Assert.assertNotNull(reply.getUrl());
+        System.out.println("token function : " + reply.getType());
+        System.out.println("token url : " + reply.getUrl());
     }
 }

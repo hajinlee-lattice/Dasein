@@ -5,13 +5,12 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.JwtReplyParameters;
 import com.latticeengines.domain.exposed.pls.JwtRequestParameters;
 import com.latticeengines.security.exposed.jwt.handler.JwtHandler;
 
@@ -30,7 +29,7 @@ public class JwtManager {
         jwtTokenHandlers.put(sourceRef, jwtGenerator);
     }
 
-    public String handleJwtRequest(HttpServletRequest request, GlobalAuthUser user, JwtRequestParameters reqParameters, boolean withURL)
+    public JwtReplyParameters handleJwtRequest(GlobalAuthUser user, JwtRequestParameters reqParameters)
             throws LedpException {
         Map<String, String> parameters = reqParameters.getRequestParameters();
         if (parameters.containsKey(SOURCE_REF_KEY)) {
@@ -41,23 +40,17 @@ public class JwtManager {
             throw new LedpException(LedpCode.LEDP_10004, new String[] { SOURCE_REF_KEY });
         }
         String ref = parameters.get(SOURCE_REF_KEY).toUpperCase();
-        String jwtToken = "";
-
         JwtHandler jwtHandler = getJwtTokenHandler(ref);
-
         if (jwtHandler == null) {
             throw new LedpException(LedpCode.LEDP_19007, new String[] { ref });
         }
-        jwtHandler.validateJwtParameters(user, reqParameters);
+        JwtReplyParameters reply;
         try {
-            if (withURL) {
-                jwtToken = jwtHandler.getJwtTokenWithRedirectURL(request, user, reqParameters);
-            } else {
-                jwtToken = jwtHandler.getJwtToken(user, reqParameters);
-            }
+            jwtHandler.validateJwtParameters(user, reqParameters);
+            reply = jwtHandler.getJwtTokenWithFunction(user, reqParameters);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_19006, e);
         }
-        return jwtToken;
+        return reply;
     }
 }

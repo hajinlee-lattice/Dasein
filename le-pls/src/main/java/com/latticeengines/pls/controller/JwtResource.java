@@ -1,18 +1,13 @@
 package com.latticeengines.pls.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
@@ -20,6 +15,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.JwtReplyParameters;
 import com.latticeengines.domain.exposed.pls.JwtRequestParameters;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.Constants;
@@ -47,8 +43,8 @@ public class JwtResource {
     @RequestMapping(value = "/handle_request", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the jwt redirect URL. for Zendesk handler, 'return_to' and 'source_ref' are required in the post body")
-    public ModelAndView getJwtToken(@RequestBody JwtRequestParameters reqParams,
-            @RequestHeader(Constants.AUTHORIZATION) String auth, HttpServletRequest request) throws LedpException {
+    public JwtReplyParameters getJwtToken(@RequestBody JwtRequestParameters reqParams,
+            @RequestHeader(Constants.AUTHORIZATION) String auth) throws LedpException {
         Ticket ticket = new Ticket(auth);
         GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
         if (ticketData == null) {
@@ -58,10 +54,8 @@ public class JwtResource {
         if (userData == null) {
             throw new LedpException(LedpCode.LEDP_10004, new String[] { "USER" });
         }
-        String redirect = jwtManager.handleJwtRequest(request, userData, reqParams, true);
-        log.info(redirect);
-        request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.TEMPORARY_REDIRECT);
-        ModelAndView view = new ModelAndView(redirect);
-        return view;
+        JwtReplyParameters reply = jwtManager.handleJwtRequest(userData, reqParams);
+        log.info(reply);
+        return reply;
     }
 }

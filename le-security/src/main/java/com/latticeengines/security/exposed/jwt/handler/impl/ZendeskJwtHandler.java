@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed.jwt.handler.impl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.JwtReplyParameters;
 import com.latticeengines.domain.exposed.pls.JwtRequestParameters;
 import com.latticeengines.security.exposed.jwt.JwtManager;
 import com.latticeengines.security.exposed.jwt.handler.JwtHandler;
@@ -48,6 +49,8 @@ public class ZendeskJwtHandler implements JwtHandler {
     public static final String ZENDESK_JWT_USER_NAME_KEY = "name";
     public static final String ZENDESK_JWT_ORGANIZATION = "organization";
 
+    public static final String ZENDESK_JWT_REPLY_FUNCTION_REDIRECT = "redirect";
+
     @Override
     public String getName() {
         return HANDLER_NAME;
@@ -59,7 +62,7 @@ public class ZendeskJwtHandler implements JwtHandler {
     }
 
     @Override
-    public String getJwtTokenWithRedirectURL(HttpServletRequest request, GlobalAuthUser user, JwtRequestParameters reqParameters)
+    public  JwtReplyParameters getJwtTokenWithFunction(GlobalAuthUser user, JwtRequestParameters reqParameters)
             throws LedpException {
         Map<String, String> parameters = reqParameters.getRequestParameters();
         String jwtString = getJwtToken(user, reqParameters);
@@ -73,10 +76,10 @@ public class ZendeskJwtHandler implements JwtHandler {
                 throw new LedpException(LedpCode.LEDP_19008, e);
             }
         }
-        if (request != null) {
-            request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.TEMPORARY_REDIRECT);
-        }
-        return "redirect:" + redirectUrl;
+        JwtReplyParameters reply = new JwtReplyParameters();
+        reply.setType("redirect");
+        reply.setUrl(redirectUrl);
+        return reply;
     }
 
     @Override
@@ -91,7 +94,7 @@ public class ZendeskJwtHandler implements JwtHandler {
                 .claim(ZENDESK_JWT_USER_NAME_KEY, user.getFirstName() + " " + user.getLastName())
                 .claim(ZENDESK_JWT_EMAIL_KEY, user.getEmail()).claim(ZENDESK_JWT_ORGANIZATION, org)
                 .jwtID(generateRandomString()).issueTime(new Date()).build();
-        String jwtString = "";
+        String jwtString;
         try {
             JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).contentType("text/plain").build();
             JWSObject jwsObject = new JWSObject(header, new Payload(jwtClaims.toJSONObject()));
