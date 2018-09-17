@@ -1,12 +1,5 @@
 package com.latticeengines.apps.lp.service.impl;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +9,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -28,6 +21,13 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
 
@@ -49,8 +49,7 @@ public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
-    private ModelSummaryEntityMgr mockedModelSummaryEntityMgr = Mockito
-            .mock(ModelSummaryEntityMgr.class);
+    private ModelSummaryService mockedModelSummaryService = Mockito.mock(ModelSummaryService.class);
     private MetadataProxy mockedMetadataProxy = Mockito.mock(MetadataProxy.class);
 
     private void setupTenant(String t) {
@@ -69,8 +68,8 @@ public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
     @BeforeClass(groups = { "functional" })
     public void setup() {
         setupTenant(TENANT1);
-        ReflectionTestUtils.setField(pythonScriptModelService, "modelSummaryEntityMgr",
-                mockedModelSummaryEntityMgr);
+        ReflectionTestUtils.setField(pythonScriptModelService, "modelSummaryService",
+                mockedModelSummaryService);
         ReflectionTestUtils.setField(pythonScriptModelService, "metadataProxy",
                 mockedMetadataProxy);
         MODEL_SUMMARY.setEventTableName(TABLE_NAME);
@@ -88,8 +87,8 @@ public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
         TABLE.addAttribute(ATTRIBUTE_2);
         TABLE.addAttribute(ATTRIBUTE_3);
 
-        when(mockedModelSummaryEntityMgr.findValidByModelId(MODEL_ID)).thenReturn(MODEL_SUMMARY);
-        when(mockedModelSummaryEntityMgr.getByModelId(MODEL_ID)).thenReturn(MODEL_SUMMARY);
+        when(mockedModelSummaryService.findValidByModelId(MODEL_ID)).thenReturn(MODEL_SUMMARY);
+        when(mockedModelSummaryService.getModelSummaryByModelId(MODEL_ID)).thenReturn(MODEL_SUMMARY);
         when(mockedMetadataProxy.getTable(anyString(), eq(TABLE_NAME))).thenReturn(TABLE);
     }
 
@@ -125,5 +124,4 @@ public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
         assertEquals(latticeAttributes.size(), 1);
         assertTrue(latticeAttributes.contains(ATTRIBUTE_NAME_2));
     }
-
 }

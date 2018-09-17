@@ -1,10 +1,5 @@
 package com.latticeengines.apps.lp.service.impl;
 
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -15,8 +10,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.ModelMetadataService;
+import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -24,6 +19,11 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.security.Tenant;
+
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 public class ModelMetadataServiceImplTestNG extends LPFunctionalTestNGBase {
     
@@ -72,10 +72,10 @@ public class ModelMetadataServiceImplTestNG extends LPFunctionalTestNGBase {
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, pivotMappingLocalPath, pivotMappingHdfsPath);
         summary.setPivotArtifactPath(pivotMappingHdfsPath + "/pivotvalues.csv");
         
-        ModelSummaryEntityMgr mockedModelSummaryEntityMgr = Mockito.mock(ModelSummaryEntityMgr.class);
-        when(mockedModelSummaryEntityMgr.findByModelId(anyString(), anyBoolean(), anyBoolean(), anyBoolean())).thenReturn(summary);
-        ReflectionTestUtils.setField(modelMetadataService, "modelSummaryEntityMgr", mockedModelSummaryEntityMgr);
-        ReflectionTestUtils.setField(pmmlModelService, "modelSummaryEntityMgr", mockedModelSummaryEntityMgr);
+        ModelSummaryService mockedModelSummaryService = Mockito.mock(ModelSummaryService.class);
+        when(mockedModelSummaryService.findByModelId(anyString(), anyBoolean(), anyBoolean(), anyBoolean())).thenReturn(summary);
+        ReflectionTestUtils.setField(modelMetadataService, "modelSummaryService", mockedModelSummaryService);
+        ReflectionTestUtils.setField(pmmlModelService, "modelSummaryService", mockedModelSummaryService);
     }
 
     @Test(groups = "functional")
@@ -83,5 +83,4 @@ public class ModelMetadataServiceImplTestNG extends LPFunctionalTestNGBase {
         List<Attribute> attrs = modelMetadataService.getRequiredColumns(summary.getId());
         assertEquals(attrs.size(), 100);
     }
-    
 }
