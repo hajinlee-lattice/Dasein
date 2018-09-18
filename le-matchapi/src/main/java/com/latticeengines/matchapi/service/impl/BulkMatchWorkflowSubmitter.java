@@ -11,6 +11,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 public class BulkMatchWorkflowSubmitter {
 
     private BulkMatchWorkflowConfiguration.Builder builder = new BulkMatchWorkflowConfiguration.Builder();
+    @SuppressWarnings("unused")
     private WorkflowProxy workflowProxy;
 
     public BulkMatchWorkflowSubmitter matchInput(MatchInput matchInput) {

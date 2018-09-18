@@ -19,7 +19,7 @@ public class ColumnMetadataResourceFunctionalTestNG extends MatchapiFunctionalTe
 
     private static final String METADATA_PREDEFINED = "/match/metadata/predefined";
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Test(groups = { "functional" })
     public void testPredefined() {
         for (Predefined predefined: Predefined.values()) {

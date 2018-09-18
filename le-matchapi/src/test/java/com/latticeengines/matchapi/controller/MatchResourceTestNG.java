@@ -23,6 +23,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -31,7 +32,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiFunctionalTestNGBase;
 import com.latticeengines.matchapi.testframework.TestMatchInputService;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 @Component
 public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
@@ -63,10 +63,12 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
         try (PerformanceTimer timer = new PerformanceTimer("Match via json")) {
             ResponseEntity<MatchOutput> response1 = restTemplate.exchange(url, HttpMethod.POST, entity, MatchOutput.class);
             MatchOutput output1 = response1.getBody();
+            Assert.assertNotNull(output1);
         }
         try (PerformanceTimer timer = new PerformanceTimer("Match via kryo")) {
             ResponseEntity<MatchOutput> response1 = restTemplate.exchange(url, HttpMethod.POST, entity, MatchOutput.class);
             MatchOutput output1 = response1.getBody();
+            Assert.assertNotNull(output1);
         }
 
         // MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);

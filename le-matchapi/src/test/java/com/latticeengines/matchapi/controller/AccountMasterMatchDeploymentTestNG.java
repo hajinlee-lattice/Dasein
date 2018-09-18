@@ -1,6 +1,7 @@
 package com.latticeengines.matchapi.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -10,6 +11,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -40,10 +43,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
-
-import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component
 public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
@@ -158,8 +157,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
                 "accountmaster/AccountMaster.csv", fieldTypes, "ID__");
 
     }
-    
-    @SuppressWarnings("unchecked")
+
     private List<Class<?>> getDunsAccountMasterAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
         fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
@@ -174,7 +172,6 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         return avroPath;
     }
 
-    @SuppressWarnings("unchecked")
     private List<Class<?>> getInputAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
         fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class, String.class,
@@ -182,14 +179,13 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         return fieldTypes;
     }
 
-    @SuppressWarnings("unchecked")
     private List<Class<?>> getAccountMasterLookupAvroTypes() {
         List<Class<?>> fieldTypes = new ArrayList<>();
         fieldTypes.addAll(Arrays.asList(new Class<?>[] { Integer.class, String.class, String.class }));
         return fieldTypes;
     }
 
-    @SuppressWarnings({ "unchecked", "unused" })
+    @SuppressWarnings({ "unused" })
     private List<Class<?>> getDnBAccountMasterAvroTypes(String csvFile) {
         List<String> fieldNames = getFieldNamesFromCSVFile(csvFile);
         fieldNames = fieldNames.subList(9, fieldNames.size());

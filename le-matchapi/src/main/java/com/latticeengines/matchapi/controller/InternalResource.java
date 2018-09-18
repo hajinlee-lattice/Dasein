@@ -2,12 +2,8 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.Collections;
 
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,13 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import springfox.documentation.annotations.ApiIgnore;
 
+@SuppressWarnings("deprecation")
 @Api(value = "internal", description = "Internal REST resource for match api.")
 @RestController
 @RequestMapping("/internal")

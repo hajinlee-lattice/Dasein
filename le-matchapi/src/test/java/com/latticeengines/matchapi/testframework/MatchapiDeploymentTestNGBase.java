@@ -81,7 +81,6 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void uploadDataCsv(String avroDir, String fileName, String csvFile, List<Class<?>> fieldTypes,
             String IdKey) {
         try {

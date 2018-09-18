@@ -376,7 +376,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                 currentDataCloudVersion);
         Map<String, ColumnMetadata> columnsMetadata = new HashMap<String, ColumnMetadata>();
         for (ColumnMetadata columnMetadata : allColumns) {
-            columnsMetadata.put(columnMetadata.getColumnId(), columnMetadata);
+            columnsMetadata.put(columnMetadata.getAttrName(), columnMetadata);
         }
         return columnsMetadata;
     }
