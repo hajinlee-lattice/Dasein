@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
+import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -79,6 +80,9 @@ public class PlayServiceImpl implements PlayService {
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
+    @Inject
+    private PlayTypeService playTypeService;
+
     private ForkJoinPool tpForParallelStream;
 
     @PostConstruct
@@ -103,6 +107,12 @@ public class PlayServiceImpl implements PlayService {
         play.setTenant(tenant);
         Play retrievedPlay = null;
         boolean shouldCreateNew = false;
+
+        // TODO: Remove in M24
+        if (play.getPlayType() == null) {
+            play.setPlayType(playTypeService.getAllPlayTypes(tenantId).get(0));
+        }
+
         if (StringUtils.isBlank(play.getName())) {
             shouldCreateNew = true;
         } else {
@@ -335,8 +345,10 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private LaunchHistory getLaunchHistoryForPlay(Play play) {
-        PlayLaunch lastIncompleteLaunch = playLaunchService.findLatestByPlayId(play.getPid(), Arrays.asList(LaunchState.UnLaunched));
-        PlayLaunch lastCompletedLaunch = playLaunchService.findLatestByPlayId(play.getPid(), Arrays.asList(LaunchState.Launched));
+        PlayLaunch lastIncompleteLaunch = playLaunchService.findLatestByPlayId(play.getPid(),
+                Arrays.asList(LaunchState.UnLaunched));
+        PlayLaunch lastCompletedLaunch = playLaunchService.findLatestByPlayId(play.getPid(),
+                Arrays.asList(LaunchState.Launched));
         PlayLaunch mostRecentLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
         LaunchHistory launchHistory = new LaunchHistory();
         launchHistory.setLastIncompleteLaunch(lastIncompleteLaunch);

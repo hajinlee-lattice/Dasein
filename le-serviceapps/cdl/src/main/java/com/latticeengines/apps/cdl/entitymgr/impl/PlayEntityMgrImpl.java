@@ -101,6 +101,7 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         if (play.getRatingEngine() != null) {
             play.setRatingEngine(findRatingEngine(play));
         }
+        // TODO: Remove in M24
         if (play.getDisplayName() == null) {
             play.setDisplayName(String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
         }

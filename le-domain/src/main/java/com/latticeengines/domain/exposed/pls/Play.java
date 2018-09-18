@@ -63,6 +63,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
 
     public static final String PLAY_NAME_PREFIX = "play";
     public static final String PLAY_NAME_FORMAT = "%s__%s";
+    // TODO: Remove in M24
     public static final String DEFAULT_NAME_PATTERN = "PLAY -- %s";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
@@ -272,7 +273,9 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
         return this.updated;
     }
 
-    public void setUpdated(Date updated) { this.updated = updated; }
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
 
     public LaunchHistory getLaunchHistory() {
         return this.launchHistory;
@@ -290,7 +293,9 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
         this.lastTalkingPointPublishTime = lastTalkingPointPublishTime;
     }
 
-    public List<RatingBucketCoverage> getRatings() { return this.ratings; }
+    public List<RatingBucketCoverage> getRatings() {
+        return this.ratings;
+    }
 
     public void setRatings(List<RatingBucketCoverage> ratings) {
         this.ratings = ratings;
@@ -304,9 +309,13 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
         this.isCleanupDone = isCleanupDone;
     }
 
-    public PlayType getPlayType() { return playType; }
+    public PlayType getPlayType() {
+        return playType;
+    }
 
-    public void setPlayType(PlayType playType) { this.playType = playType; }
+    public void setPlayType(PlayType playType) {
+        this.playType = playType;
+    }
 
     @Override
     public String toString() {
