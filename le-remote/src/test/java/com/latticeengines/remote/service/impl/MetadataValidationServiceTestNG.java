@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -29,7 +30,7 @@ public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase 
     @Test(groups = { "functional" })
     public void testGenerateMetadataValidationResult() throws IOException {
         URL metadataUrl = ClassLoader.getSystemResource("incorrect-metadata.json");
-        String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+        String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()), Charset.defaultCharset());
         Metadata metadataObj = JsonUtils.deserialize(metadataContents, Metadata.class);
         List<AttributeMetadata> attributeMetadata = metadataObj.getAttributeMetadata();
 
@@ -44,7 +45,7 @@ public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase 
     @Test(groups = { "functional" })
     public void testValidateThrowsException() throws IOException {
         URL metadataUrl = ClassLoader.getSystemResource("incorrect-metadata.json");
-        String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+        String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()), Charset.defaultCharset());
         String jsonString = null;
         try {
             metadataValidationService.validate(metadataContents);
@@ -70,7 +71,7 @@ public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase 
     @Test(groups = { "functional" })
     public void testValidateDoNotThrowsException() throws IOException {
         URL metadataUrl = ClassLoader.getSystemResource("correct-metadata.json");
-        String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+        String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()), Charset.defaultCharset());
         try {
             metadataValidationService.validate(metadataContents);
         } catch (MetadataValidationException e) {

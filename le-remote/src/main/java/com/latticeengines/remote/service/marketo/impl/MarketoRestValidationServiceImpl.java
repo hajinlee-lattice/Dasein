@@ -55,6 +55,7 @@ public class MarketoRestValidationServiceImpl implements MarketoRestValidationSe
         return result;
     }
     
+    @SuppressWarnings("rawtypes")
     private String getToken(String identityEndpoint, String clientId, String clientSecret) {
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         Object accessToken = null;

@@ -63,6 +63,7 @@ import com.latticeengines.remote.util.CrmUtils;
 import com.latticeengines.remote.util.DlConfigUtils;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
+@SuppressWarnings("deprecation")
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
 

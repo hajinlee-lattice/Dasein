@@ -1,6 +1,7 @@
 package com.latticeengines.remote.util;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
@@ -17,11 +18,14 @@ public class DlConfigUtilsUnitTestNG {
     @BeforeClass(groups = {"unit", "functional"})
     public void setup() throws IOException {
         sfdcConfig = IOUtils.toString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("sfdc.config"));
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("sfdc.config"),
+                Charset.defaultCharset());
         eloquaConfig = IOUtils.toString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("eloqua.config"));
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("eloqua.config"),
+                Charset.defaultCharset());
         marketoConfig = IOUtils.toString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("mkto.config"));
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("mkto.config"),
+                Charset.defaultCharset());
     }
 
     @Test(groups = {"unit", "functional"}, dataProvider = "sfdcConfigProvider")
