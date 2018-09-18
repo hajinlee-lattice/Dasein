@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +73,8 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
 
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         fileImportConfig.setSourceType(SourceType.FILE);
-        Table t = JsonUtils.deserialize(IOUtils.toString(new FileInputStream(new File(metadataUrl.getPath()))),
+        Table t = JsonUtils.deserialize(
+                IOUtils.toString(new FileInputStream(new File(metadataUrl.getPath())), Charset.defaultCharset()),
                 Table.class);
         fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { t }));
         fileImportConfig.setProperties(properties);

@@ -5,6 +5,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -121,7 +122,7 @@ public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGB
         } else {
             String contents;
             try {
-                contents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+                contents = FileUtils.readFileToString(new File(metadataUrl.getPath()), Charset.defaultCharset());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

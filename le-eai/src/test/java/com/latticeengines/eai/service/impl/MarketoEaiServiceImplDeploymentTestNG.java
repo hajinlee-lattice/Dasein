@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -105,7 +106,7 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
         for (String tableName : tableNameList) {
             URL url = ClassLoader.getSystemResource(
                     String.format("com/latticeengines/eai/service/impl/marketo/%s.avsc", tableName).toString());
-            String str = FileUtils.readFileToString(new File(url.getFile()));
+            String str = FileUtils.readFileToString(new File(url.getFile()), Charset.defaultCharset());
             Table table = JsonUtils.deserialize(str, Table.class);
             tables.add(table);
         }

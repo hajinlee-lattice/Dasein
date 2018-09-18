@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -17,12 +18,12 @@ import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.testng.AbstractCamelTestNGSpringContextTests;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
@@ -191,7 +192,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         for (String tableName : tableNameList) {
             URL url = ClassLoader.getSystemResource(
                     String.format("com/latticeengines/eai/service/impl/salesforce/%s.json", tableName).toString());
-            String str = FileUtils.readFileToString(new File(url.getFile()));
+            String str = FileUtils.readFileToString(new File(url.getFile()), Charset.defaultCharset());
             Table table = JsonUtils.deserialize(str, Table.class);
             DateTime date = new DateTime(2014, 1, 1, 0, 0);
             table.getLastModifiedKey().setLastModifiedTimestamp(date.getMillis());

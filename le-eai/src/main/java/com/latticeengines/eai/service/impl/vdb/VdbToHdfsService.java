@@ -226,21 +226,23 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
     private CleanupOperationType getCleanupTypeFromMergeRule(ImportVdbTableMergeRule mergeRule) {
         CleanupOperationType cleanupOperationType = null;
         switch (mergeRule) {
-            case REPLACE:
-                cleanupOperationType = CleanupOperationType.ALLDATA;
-                break;
-            case UPSERT_ID:
-                cleanupOperationType = CleanupOperationType.BYUPLOAD_ID;
-                break;
-            case UPSERT_ACPD:
-                cleanupOperationType = CleanupOperationType.BYUPLOAD_ACPD;
-                break;
-            case UPSERT_MINDATE:
-                cleanupOperationType = CleanupOperationType.BYUPLOAD_MINDATE;
-                break;
-            case UPSERT_MINDATEANDACCOUNT:
-                cleanupOperationType = CleanupOperationType.BYUPLOAD_MINDATEANDACCOUNT;
-                break;
+        case REPLACE:
+            cleanupOperationType = CleanupOperationType.ALLDATA;
+            break;
+        case UPSERT_ID:
+            cleanupOperationType = CleanupOperationType.BYUPLOAD_ID;
+            break;
+        case UPSERT_ACPD:
+            cleanupOperationType = CleanupOperationType.BYUPLOAD_ACPD;
+            break;
+        case UPSERT_MINDATE:
+            cleanupOperationType = CleanupOperationType.BYUPLOAD_MINDATE;
+            break;
+        case UPSERT_MINDATEANDACCOUNT:
+            cleanupOperationType = CleanupOperationType.BYUPLOAD_MINDATEANDACCOUNT;
+            break;
+        default:
+            break;
         }
         return cleanupOperationType;
     }

@@ -105,8 +105,6 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Qualifier("commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
-    private VdbValueConverter vdbValueConverter = new VdbValueConverter();
-
     private static final int MAX_RETRIES = 3;
 
     private Set<String> uniqueIds = Collections.synchronizedSet(new HashSet<>());
@@ -297,6 +295,7 @@ public class VdbTableImportServiceImpl extends ImportService {
         return metaData;
     }
 
+    @SuppressWarnings("unused")
     private Table createTable(String customerSpace, String tableName, ImportVdbTableConfiguration importTableConfig) {
         Table table;
         table = eaiMetadataService.getTable(customerSpace.toString(), tableName);
