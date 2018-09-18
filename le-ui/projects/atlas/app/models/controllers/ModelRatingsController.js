@@ -274,7 +274,6 @@ angular.module('lp.models.ratings', [
             this.right = right;
             vm.slider.style.right = right + '%';
             vm.right = right;
-
         } else if (!leftCheck && rightCheck) {
             vm.right = 98;
         } else if (leftCheck && !rightCheck) {

@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <div class="form-group">
+<!--     <div class="form-group">
         <label>Tenant Name</label>
         <input  type="text"
                 id="tenant"
@@ -50,8 +50,6 @@
                 data-ng-model="$ctrl.tenantName"
                 title="{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}"
                 class="form-control {{$ctrl.tenantNameInvalid ? 'error' : ''}}">
-
-                <!-- data-ng-enter="$ctrl.loginClick()" -->
     </div>
     <div class="form-actions">
         <button
@@ -62,9 +60,7 @@
                 ng-disabled="$ctrl.loginInProgress">
             Login Using SSO
         </button>
-        <!-- <span class="login-label">{{$ctrl.ResourceUtility.getString('LOGIN_TO_LATTICE')}}&reg;</span> -->
-        <!-- <i ng-show="$ctrl.loginInProgress" class="fa fa-spinner fa-pulse fa-fw"></i> -->
-    </div>
+    </div> -->
 
     <p class="footer login-footer">&copy; {{$ctrl.ResourceUtility.getString('LOGIN_COPYRIGHT', [$ctrl.dateString])}}
         <a href="http://lattice-engines.com/about-us/privacy-policy">

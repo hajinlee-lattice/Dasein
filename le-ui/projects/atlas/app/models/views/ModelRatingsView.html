@@ -159,10 +159,9 @@
             		<dl>
             			<dt>Lift</dt>
             			<dd class="lift">{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
+                        
             			<dt>{{vm.modelType}} %</dt>
-
-                        <dd ng-if="bucket.right_bound_score == 98">1%</dd>
-            			<dd ng-if="bucket.right_bound_score != 98">{{ vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads) }}%</dd>
+                        <dd>{{ vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads) }}%</dd>
 
             			<dt>{{vm.modelType}}</dt>
             			<dd>{{bucket.num_leads | number}}</dd>
