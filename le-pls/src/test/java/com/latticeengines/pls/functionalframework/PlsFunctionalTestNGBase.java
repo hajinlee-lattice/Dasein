@@ -1,6 +1,7 @@
 package com.latticeengines.pls.functionalframework;
 
 import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,26 +15,15 @@ import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
-import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
-import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 public class PlsFunctionalTestNGBase extends PlsDeploymentTestNGBase {
 
-    protected static final String BISAP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000WjNY";
-    protected static final String BISLP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000Kk28";
-
-    @Autowired
-    private PdSegmentEntityMgr segmentEntityMgr;
-
     @Autowired
     private QuotaEntityMgr quotaEntityMgr;
-
-    @Autowired
-    private TargetMarketEntityMgr targetMarketEntityMgr;
 
     @Autowired
     private ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
@@ -41,7 +31,7 @@ public class PlsFunctionalTestNGBase extends PlsDeploymentTestNGBase {
     @Autowired
     private MarketoCredentialEntityMgr marketoCredentialEntityMgr;
 
-    @Value("${pls.test.functional.api:http://localhost:8080/}")
+    @Value("${pls.test.functional.api}")
     private String hostPort;
 
     @Autowired
@@ -67,7 +57,7 @@ public class PlsFunctionalTestNGBase extends PlsDeploymentTestNGBase {
 
     /**
      * bootstrap one tenant with random tenantId
-     * 
+     *
      * @throws Exception
      */
     protected void setupTestEnvironmentWithOneGATenant() throws Exception {
@@ -89,7 +79,7 @@ public class PlsFunctionalTestNGBase extends PlsDeploymentTestNGBase {
      * bootstrap two tenants with random tenantIds. The first has a marketo
      * modelsummary, the second has an eloqua one. The tenants are marketoTenant
      * and eloquaTenant, the modelIds are marketoModelId and eloquaModelId.
-     * 
+     *
      * @throws Exception
      */
     protected void setupMarketoEloquaTestEnvironment() throws Exception {
@@ -113,7 +103,7 @@ public class PlsFunctionalTestNGBase extends PlsDeploymentTestNGBase {
     }
 
     protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
-        setupDbUsingDefaultTenantIds(useTenant1, useTenant2, true, true);
+        setupDbUsingDefaultTenantIds(useTenant1, useTenant2, false, true);
     }
 
     protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries,
