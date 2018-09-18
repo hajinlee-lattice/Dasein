@@ -168,7 +168,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 .forEach(e -> {
                     log.info("enabling step:" + e.getKey());
                     e.getValue().setSkipStep(false);
-                    (BaseWrapperStepConfiguration.class.cast(e.getValue())).setPhase(Phase.PRE_PROCESSING);
+                    ((BaseWrapperStepConfiguration) e.getValue()).setPhase(Phase.PRE_PROCESSING);
                     putObjectInContext(e.getKey(), e.getValue());
                 });
     }
@@ -255,9 +255,13 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         action.setActionInitiator(WorkflowUser.DEFAULT_USER.name());
         action.setOwnerId(configuration.getOwnerId());
         action = actionProxy.createAction(customerSpace.getTenantId(), action);
-        List<Long> actionIds = configuration.getActionIds();
-        actionIds.add(action.getPid());
-        configuration.setActionIds(actionIds);
+        List<Long> systemActionIds = getListObjectFromContext(SYSTEM_ACTION_IDS, Long.class);
+        if (CollectionUtils.isEmpty(systemActionIds)) {
+            systemActionIds = new ArrayList<>();
+        }
+        systemActionIds.add(action.getPid());
+        putObjectInContext(SYSTEM_ACTION_IDS, systemActionIds);
+        log.info(String.format("System actions are: %s", JsonUtils.serialize(systemActionIds)));
     }
 
     boolean hasAccountBatchStore() {

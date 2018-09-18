@@ -235,11 +235,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .collect(Collectors.toList());
         log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
 
-        List<Long> datacloudActionIds = actions.stream()
-                .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType())).map(Action::getPid)
-                .collect(Collectors.toList());
-        log.info(String.format("Data cloud related Actions are: %s", datacloudActionIds));
-
         return new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
     }
 

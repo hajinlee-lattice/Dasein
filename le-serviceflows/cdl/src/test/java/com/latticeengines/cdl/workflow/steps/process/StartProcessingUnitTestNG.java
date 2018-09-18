@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.batch.item.ExecutionContext;
 import org.testng.annotations.Test;
 
@@ -38,18 +39,25 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 public class StartProcessingUnitTestNG {
     @Test(groups = { "unit" })
     public void testRebuildOnDataCloudVersionChange() {
+        Long actionPid = 1L, ownerId = 100L;
+
         DataCollectionStatus dataCollectionStatus = new DataCollectionStatus();
         dataCollectionStatus.setDataCloudBuildNumber("2.12.8.7654321");
         DataCollectionProxy dataCollectionProxy = mock(DataCollectionProxy.class);
         when(dataCollectionProxy.getOrCreateDataCollectionStatus(anyString(), any())).thenReturn(dataCollectionStatus);
         Action mockAction = new Action();
-        mockAction.setPid(1L);
+        mockAction.setPid(actionPid);
+        mockAction.setOwnerId(ownerId);
         ActionProxy actionProxy = mock(ActionProxy.class);
         when(actionProxy.createAction(anyString(), any())).thenReturn(mockAction);
 
         StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, null, actionProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
+        List<Long> actionIds = startProcessing.getListObjectFromContext(BaseWorkflowStep.SYSTEM_ACTION_IDS, Long.class);
+        assertTrue(CollectionUtils.isEmpty(actionIds));
+        actionIds = new ArrayList<>();
+        actionIds.add(actionPid);
         ProcessStepConfiguration config = new ProcessStepConfiguration();
         config.setActionIds(new ArrayList<>());
         config.setDataCloudBuildNumber("2.13.1.1234567");
@@ -66,6 +74,11 @@ public class StartProcessingUnitTestNG {
         ChoreographerContext context = spy.getObjectFromContext(BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
         assertTrue(context.isDataCloudChanged());
+        spy.putObjectInContext(BaseWorkflowStep.SYSTEM_ACTION_IDS, actionIds);
+        actionIds = startProcessing.getListObjectFromContext(BaseWorkflowStep.SYSTEM_ACTION_IDS, Long.class);
+        assertTrue(CollectionUtils.isNotEmpty(actionIds));
+        assertEquals(actionIds.size(), 1);
+        assertEquals(actionIds.get(0), actionPid);
     }
 
     @Test(groups = { "unit" })

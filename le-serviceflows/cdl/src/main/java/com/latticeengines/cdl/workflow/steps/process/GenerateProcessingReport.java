@@ -354,9 +354,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private List<Action> getDataCloudChangeActions() {
-        if (actions == null) {
-            actions = getActions();
-        }
+        List<Long> systemActionIds = getListObjectFromContext(SYSTEM_ACTION_IDS, Long.class);
+        List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), systemActionIds);
         return actions.stream()
                 .filter(action -> ActionType.getDataCloudRelatedTypes().contains(action.getType()))
                 .collect(Collectors.toList());
