@@ -193,8 +193,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                                 S3Actions.GetObject, //
                                 S3Actions.PutObject, //
                                 S3Actions.DeleteObject, //
-                                S3Actions.GetObjectAcl, //
-                                S3Actions.SetObjectAcl
+                                S3Actions.SetObjectAcl //
                         ) //
                         .withResources(new Resource(arnPrefix + WILD_CARD)) //
         );
@@ -326,7 +325,6 @@ public class DropBoxServiceImpl implements DropBoxService {
                         S3Actions.GetObject, //
                         S3Actions.PutObject, //
                         S3Actions.DeleteObject, //
-                        S3Actions.GetObjectAcl, //
                         S3Actions.SetObjectAcl //
                 ) //
                 .withResources(new Resource(arn), new Resource(arn + "*"));

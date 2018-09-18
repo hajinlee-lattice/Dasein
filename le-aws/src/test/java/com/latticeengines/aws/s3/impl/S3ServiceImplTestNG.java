@@ -103,7 +103,6 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         if (!s3Service.objectExist(testBucket, dropBoxDir)) {
             s3Service.createFolder(testBucket, dropBoxDir);
         }
-        Assert.assertTrue(StringUtils.isBlank(s3Service.getBucketPolicy(testBucket)));
 
         verifyNoAccess();
         Policy policy = getCustomerPolicy(dropBoxId, accountId);
@@ -182,7 +181,8 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
                                 S3Actions.AbortMultipartUpload, //
                                 S3Actions.GetObject, //
                                 S3Actions.PutObject, //
-                                S3Actions.DeleteObject //
+                                S3Actions.DeleteObject, //
+                                S3Actions.SetObjectAcl
                         ) //
                         .withResources(new Resource(arn), new Resource(arn + "*"));
     }

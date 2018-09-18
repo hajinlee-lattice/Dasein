@@ -167,7 +167,7 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         dropboxService.revokeAccess();
         waitPolicyTakeEffect();
-        // verifyNoAccess(creds, true);
+        verifyNoAccess(creds, true);
         verifyAccess(latticeProvider, false);
     }
 
