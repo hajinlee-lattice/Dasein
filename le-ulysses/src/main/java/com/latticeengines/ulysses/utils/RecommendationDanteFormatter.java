@@ -20,7 +20,6 @@ public class RecommendationDanteFormatter implements DanteFormatter<Recommendati
     private static final String notionName = "DanteLead";
 
     @Override
-    @SuppressWarnings("unchecked")
     public String format(Recommendation entity) {
         return new DanteLead(entity).toString();
     }

@@ -45,7 +45,7 @@ public class CompanyProfileResourceDeploymentTestNG extends UlyssesDeploymentTes
     public void testIgnoreProperties() {
         String url = ulyssesHostPort + "/ulysses/companyprofiles/?enforceFuzzyMatch=true";
         ObjectNode body = JsonUtils.createObjectNode();
-        body.put("record", JsonUtils.createObjectNode());
+        body.set("record", JsonUtils.createObjectNode());
         ObjectNode record = (ObjectNode) body.get("record");
         record.put("Email", "someuser@google.com");
         body.put("ignoreMe", "foo");

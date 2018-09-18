@@ -10,9 +10,8 @@ public class AccountResourceDeploymentTestNG extends UlyssesDeploymentTestNGBase
     public void testGetAccounts() {
         FrontEndQuery query = new FrontEndQuery();
         try {
-            long count = getOAuth2RestTemplate().postForObject(getUlyssesRestAPIPort() + "/ulysses/accounts/count",
+            getOAuth2RestTemplate().postForObject(getUlyssesRestAPIPort() + "/ulysses/accounts/count",
                     query, Long.class);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

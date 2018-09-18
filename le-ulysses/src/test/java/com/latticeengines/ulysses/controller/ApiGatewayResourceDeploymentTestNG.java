@@ -10,12 +10,14 @@ import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
 public class ApiGatewayResourceDeploymentTestNG extends UlyssesDeploymentTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ApiGatewayResourceDeploymentTestNG.class);
 
     private String getAttributeResourceUrl() {
         return ulyssesHostPort + "/ulysses/api-gateway";
     }
     
+    @SuppressWarnings("static-access")
     @Test(groups = "deployment")
     public void testGetGatewayPolicyConfiguration() {
         String url = getAttributeResourceUrl() + "/tenant-config";

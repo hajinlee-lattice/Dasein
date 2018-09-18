@@ -10,10 +10,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
-import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.ulysses.PrimaryFieldConfiguration;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
@@ -25,6 +25,7 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
         return ulyssesHostPort + "/ulysses/attributes";
     }
     
+    @SuppressWarnings("deprecation")
     @Test(groups = "deployment")
     public void testGetPrimaryAttributeConfiguration() {
         String url = getAttributeResourceUrl() + "/primaryfield-configuration";

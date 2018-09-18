@@ -26,6 +26,7 @@ import com.latticeengines.ulysses.monitoring.UlyssesTalkingPointsMetrics;
 @Aspect
 public class UlyssesMetricPublishAspect {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(UlyssesMetricPublishAspect.class);
 
     @Autowired

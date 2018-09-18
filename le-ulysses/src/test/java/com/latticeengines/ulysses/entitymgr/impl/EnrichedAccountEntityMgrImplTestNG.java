@@ -48,7 +48,6 @@ public class EnrichedAccountEntityMgrImplTestNG extends UlyssesTestNGBase {
         assertEquals(record.getAttributes().get("ExternalId"), "abcde");
     }
 
-    @SuppressWarnings("rawtypes")
     @Test(groups = "functional", dependsOnMethods = { "create" })
     public void findAttributesByKey() {
         Map<String, Object> map = enrichedAccountEntityMgr.findAttributesByKey("12345");

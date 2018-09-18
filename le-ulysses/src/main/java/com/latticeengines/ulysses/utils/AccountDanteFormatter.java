@@ -18,6 +18,7 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
     public static final String Qualifier = "accountDanteFormatter";
 
     private static final String notionName = "DanteAccount";
+    @SuppressWarnings("unused")
     private static final String defaultIsSegmentValue = Boolean.toString(false);
     private static final String accountIdColumnName = "AccountId";
     private static final String lookupIdColumnName = "SalesforceAccountID";
@@ -32,6 +33,7 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
     }
 
     private static class DanteAccountSegmentProperty {
+        @SuppressWarnings("unused")
         public static String RepresentativeAccounts = "RepresentativeAccounts";
         public static String IsSegment = "IsSegment";
         public static String Segment1Name = "Segment1Name";
@@ -40,7 +42,6 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public String format(Map<String, Object> entity) {
         if (!entity.containsKey(accountIdColumnName) && !entity.containsKey(accountIdColumnName.toLowerCase())) {
             throw new LedpException(LedpCode.LEDP_39004);

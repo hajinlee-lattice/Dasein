@@ -49,17 +49,9 @@ public class DanteConfigurationResource {
             return metadataDocument;
         }
 
-        public void setMetadataDocument(MetadataDocument metadataDocument) {
-            this.metadataDocument = metadataDocument;
-        }
-
         @JsonProperty("WidgetConfigurationDocument")
         public String getWidgetConfigurationDocument() {
             return widgetConfigurationDocument;
-        }
-
-        public void setWidgetConfigurationDocument(String widgetConfigurationDocument) {
-            this.widgetConfigurationDocument = widgetConfigurationDocument;
         }
 
         FrontEndDanteConfigurationDocument(MetadataDocument metadataDocument, String widgetConfigurationDocument) {
