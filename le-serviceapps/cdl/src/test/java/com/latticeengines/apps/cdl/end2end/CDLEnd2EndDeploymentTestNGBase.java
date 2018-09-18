@@ -37,7 +37,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.cache.exposed.service.CacheService;
@@ -253,6 +252,9 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
 
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
+
+    @Value("${common.le.environment}")
+    private String leEnv;
 
     @javax.annotation.Resource(name = "localCacheService")
     private CacheService localCacheService;
@@ -1108,6 +1110,10 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
             throw new RuntimeException("Failed to update DefaultAPSRollupPeriod", e);
         }
         log.info("Updated DefaultAPSRollupPeriod to " + rollupPeriod);
+    }
+
+    boolean isLocalEnvironment() {
+        return "dev".equals(leEnv);
     }
 
 }

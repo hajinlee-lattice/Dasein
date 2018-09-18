@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
@@ -51,7 +51,9 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         try {
             verifyProcess();
         } finally {
-            saveCheckpoint(CHECK_POINT);
+            if (isLocalEnvironment()) {
+                saveCheckpoint(CHECK_POINT);
+            }
         }
     }
 

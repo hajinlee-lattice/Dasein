@@ -33,7 +33,9 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         try {
             verifyProcess();
         } finally {
-            saveCheckpoint(CHECK_POINT);
+            if (isLocalEnvironment()) {
+                saveCheckpoint(CHECK_POINT);
+            }
         }
 
     }
