@@ -18,6 +18,9 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
     @JsonProperty
     private boolean crossSell;
 
+    @JsonProperty
+    private boolean useAccountFeature;
+
     public CreateCdlEventTableConfiguration() {
         setBeanName("createCdlEventTableFlow");
     }
@@ -52,6 +55,14 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
 
     public void setCrossSell(boolean crossSell) {
         this.crossSell = crossSell;
+    }
+
+    public boolean isUseAccountFeature() {
+        return useAccountFeature;
+    }
+
+    public void setUseAccountFeature(boolean useAccountFeature) {
+        this.useAccountFeature = useAccountFeature;
     }
 
 }

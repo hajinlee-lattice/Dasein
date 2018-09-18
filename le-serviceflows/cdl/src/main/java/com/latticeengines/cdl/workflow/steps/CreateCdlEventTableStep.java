@@ -88,10 +88,12 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     private Table getAndSetAccountTable() {
         TableRoleInCollection roleInCollection = TableRoleInCollection.ConsolidatedAccount;
-        accountFeatureTable = getAccountFeatureTable();
-        if (StringUtils.isNotEmpty(accountFeatureTable)) {
-            roleInCollection = TableRoleInCollection.AccountFeatures;
-            log.info("Use account feature table instead.");
+        if (configuration.isUseAccountFeature()) {
+            accountFeatureTable = getAccountFeatureTable();
+            if (StringUtils.isNotEmpty(accountFeatureTable)) {
+                roleInCollection = TableRoleInCollection.AccountFeatures;
+                log.info("Use account feature table instead.");
+            }
         }
         Table accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
                 roleInCollection, version);

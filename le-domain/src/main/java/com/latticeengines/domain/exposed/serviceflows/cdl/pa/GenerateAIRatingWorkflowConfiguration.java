@@ -116,6 +116,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder useAccountFeature(boolean useAccountFeature) {
+            cdlEventTable.setUseAccountFeature(useAccountFeature);
+            return this;
+        }
+
         public Builder uniqueKeyColumn(String uniqueKeyColumn) {
             score.setUniqueKeyColumn(uniqueKeyColumn);
             return this;

@@ -114,6 +114,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             generateRatingWorfklow.setUseScorederivation(false);
             generateRatingWorfklow.cdlMultiModel(true);
             generateRatingWorfklow.fetchOnly(true);
+            generateRatingWorfklow.useAccountFeature(true);
 
             configuration.setContainerConfiguration("processRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

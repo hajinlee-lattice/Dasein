@@ -56,6 +56,11 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder useAccountFeature(boolean useAccountFeature) {
+            generateAIRating.useAccountFeature(useAccountFeature);
+            return this;
+        }
+
         public Builder fetchOnly(boolean fetchOnly) {
             generateAIRating.fetchOnly(fetchOnly);
             return this;
