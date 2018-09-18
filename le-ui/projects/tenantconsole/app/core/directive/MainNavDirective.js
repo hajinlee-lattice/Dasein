@@ -73,6 +73,29 @@ app.service('MainNavService', function($q, $http, SessionUtility){
 
         return defer.promise;
     };
+    this.createHelpUser = function(userRegistration) {
+        var defer = $q.defer();
+
+        var result = {
+            success: false,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'POST',
+            url: '/admin/prospectingusers',
+            data: userRegistration
+        }).success(function(data) {
+            result.success = (data === "true" || data === true);
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.errMsg = err;
+        });
+
+        return defer.promise;
+    };
 });
 
 app.directive('mainNav', function(){
@@ -189,6 +212,89 @@ app.directive('mainNav', function(){
                                     $scope.saving = true;
 
                                     MainNavService.addUserAccessLevel($scope.emails, $scope.right).then(function() {
+                                        $uibModalInstance.close();
+                                    }).catch(function(result) {
+                                        $scope.saving = false;
+
+                                        if (result && result.errMsg) {
+                                            $scope.errorMsg = result.errMsg;
+                                        } else {
+                                            $scope.errorMsg = 'Unexpected Error. Please try again';
+                                        }
+                                    });
+                                } else {
+                                    $scope.okClicked = true;
+                                }
+                            }
+                        };
+
+                        $scope.cancel = function () {
+                            if (!$scope.okClicked) {
+                                $uibModalInstance.dismiss('cancel');
+                            } else {
+                                $scope.okClicked = false;
+                            }
+                        };
+                    }
+                });
+
+                modalInstance.result.then(function () {
+                    $state.go('TENANT.LIST');
+                }, function () {
+                    $state.go('TENANT.LIST');
+                });
+
+            };
+
+
+            $scope.onCreateHelpUserClick = function(){
+                var modalInstance = $uibModal.open({
+                    templateUrl: 'createHelpUser.html',
+                    controller: function($scope, $uibModalInstance, _, $window, MainNavService){
+                        $scope.firstName = "";
+                        $scope.lastName = "";
+                        $scope.email = "";
+                        $scope.isValid = true;
+                        $scope.okClicked = false;
+                        $scope.saving = false;
+                        $scope.errorMsg = "";
+
+                        $scope.validateInfo = function(component, displayName){
+                            if ($scope.addform[component].$error.required || $scope[component] === '') {
+                                $scope.errorMsg = displayName + ' is required.';
+                                $scope.isValid = false;
+                                return false;
+                            } else {
+                                $scope.errorMsg = '';
+                                $scope.isValid = true;
+                                return true;
+                            }
+                        };
+
+                        $scope.validateAllFields = function() {
+                            return $scope.validateInfo('firstName', 'First name') && $scope.validateInfo('lastName', 'Last name') && $scope.validateInfo('emailId', 'Email');
+                        };
+
+                        $scope.ok = function () {
+                            if ($scope.validateAllFields()) {
+                                if ($scope.okClicked) {
+                                    $scope.saving = true;
+
+                                    var userRegistration = {
+                                        "Credentials": {
+                                            "Password": "",
+                                            "Username": $scope.email
+                                        },
+                                        "User": {
+                                            "Email": $scope.email,
+                                            "FirstName": $scope.firstName,
+                                            "LastName": $scope.lastName,
+                                            "Username": $scope.email
+                                        }
+                                    };
+
+                                    MainNavService.createHelpUser(userRegistration).then(function(result) {
+                                        console.log(result);
                                         $uibModalInstance.close();
                                     }).catch(function(result) {
                                         $scope.saving = false;
