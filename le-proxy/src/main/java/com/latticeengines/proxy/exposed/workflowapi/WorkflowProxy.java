@@ -247,21 +247,21 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
 
     public List<Job> getJobs(List<String> jobIds, List<String> types, Boolean includeDetails, String customerSpace) {
         checkCustomerSpace(customerSpace);
-        String baseUrl = "/jobs";
-        String url = generateGetWorkflowUrls(baseUrl, customerSpace, jobIds, types, includeDetails, false);
-        return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
+        return getJobs(jobIds, types, null, includeDetails, customerSpace);
     }
 
     public List<Job> getJobs(List<String> jobIds, List<String> types, Boolean includeDetails, String... params) {
+        return getJobs(jobIds, types, null, includeDetails, params);
+    }
+
+    public List<Job> getJobs(List<String> jobIds, List<String> types, List<String> jobStatuses, Boolean includeDetails, String... params) {
         String baseUrl = "/jobs";
+        String customerSpace = null;
         if (params != null && params.length > 0) {
-            String customerSpace = params[0];
-            String url = generateGetWorkflowUrls(baseUrl, customerSpace, jobIds, types, includeDetails, false);
-            return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
-        } else {
-            String url = generateGetWorkflowUrls(baseUrl, null, jobIds, types, includeDetails, false);
-            return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
+            customerSpace = params[0];
         }
+        String url = generateGetWorkflowUrls(baseUrl, customerSpace, jobIds, types, jobStatuses, includeDetails, false);
+        return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
     }
 
     public void updateParentJobId(List<String> jobIds, String parentJobId, String customerSpace) {
@@ -334,6 +334,12 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
     @VisibleForTesting
     String generateGetWorkflowUrls(String baseUrl, String customerSpace, List<String> jobIds, List<String> types,
             Boolean includeDetails, Boolean hasParentId) {
+        return generateGetWorkflowUrls(baseUrl, customerSpace, jobIds, types, null, includeDetails, hasParentId);
+    }
+
+    @VisibleForTesting
+    String generateGetWorkflowUrls(String baseUrl, String customerSpace, List<String> jobIds, List<String> types,
+            List<String> statuses, Boolean includeDetails, Boolean hasParentId) {
         StringBuilder urlStr = new StringBuilder();
         urlStr.append(baseUrl);
         if (StringUtils.isNotEmpty(customerSpace)) {
@@ -346,6 +352,9 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         }
         if (CollectionUtils.isNotEmpty(types)) {
             urlStr.append(buildQueryString("type", types)).append("&");
+        }
+        if (CollectionUtils.isNotEmpty(statuses)) {
+            urlStr.append(buildQueryString("status", statuses)).append("&");
         }
         if (includeDetails != null) {
             urlStr.append("includeDetails=").append(String.valueOf(includeDetails)).append("&");

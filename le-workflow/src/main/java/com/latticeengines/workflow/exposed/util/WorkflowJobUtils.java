@@ -11,16 +11,22 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class WorkflowJobUtils {
     private static final String CUSTOMER_SPACE = "CustomerSpace";
@@ -159,5 +165,17 @@ public class WorkflowJobUtils {
             outputs.put(key, outputContext.get(key));
         }
         return outputs;
+    }
+
+    public static List<String> getWorkflowJobMappingsForJobStatuses(List<String> jobStatuses) {
+        if (CollectionUtils.isEmpty(jobStatuses)) {
+            return Collections.emptyList();
+        }
+
+        Set<String> workflowJobStatuses = new HashSet<>();
+        jobStatuses.stream().forEach(jobStatus -> {
+            workflowJobStatuses.addAll(JobStatus.mappedWorkflowJobStatuses(jobStatus));
+        });
+        return workflowJobStatuses.stream().collect(Collectors.toList());
     }
 }

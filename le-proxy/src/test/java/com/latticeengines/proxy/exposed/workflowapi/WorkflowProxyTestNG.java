@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
 public class WorkflowProxyTestNG extends AbstractTestNGSpringContextTests {
@@ -27,6 +28,9 @@ public class WorkflowProxyTestNG extends AbstractTestNGSpringContextTests {
 
     private static final List<String> types = Arrays.asList(
             "consolidateAndPublishWorkflow", "profileAndPublishWorkflow");
+
+    private static final List<String> jobStatuses = Arrays.asList(
+            JobStatus.RUNNING.toString(), JobStatus.COMPLETED.toString());
 
     private static final CustomerSpace customerSpace = CustomerSpace.parse("tenant");
 
@@ -80,6 +84,10 @@ public class WorkflowProxyTestNG extends AbstractTestNGSpringContextTests {
         url = workflowProxy.generateGetWorkflowUrls(baseUrl, null, null, types, null, false);
         Assert.assertEquals(url, PropertyUtils.getProperty("common.microservice.url")
                 + "/workflowapi/workflows/jobs?type=consolidateAndPublishWorkflow&type=profileAndPublishWorkflow&hasParentId=false");
+        // Add Status Filters
+        url = workflowProxy.generateGetWorkflowUrls(baseUrl, null, null, types, jobStatuses, null, false);
+        Assert.assertEquals(url, PropertyUtils.getProperty("common.microservice.url")
+                + "/workflowapi/workflows/jobs?type=consolidateAndPublishWorkflow&type=profileAndPublishWorkflow&status=RUNNING&status=COMPLETED&hasParentId=false");
 
         url = workflowProxy.generateGetWorkflowUrls(baseUrl, customerSpace.toString(), null, null, null, null);
         Assert.assertEquals(url, PropertyUtils.getProperty("common.microservice.url")

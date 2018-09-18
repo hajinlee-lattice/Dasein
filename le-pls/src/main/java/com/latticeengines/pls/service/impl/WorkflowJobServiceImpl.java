@@ -653,8 +653,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public List<Job> findJobs(List<String> jobIds, List<String> types, Boolean includeDetails, Boolean hasParentId) {
-        List<Job> jobs = workflowProxy.getJobs(jobIds, types, includeDetails,
+    public List<Job> findJobs(List<String> jobIds, List<String> types, List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId) {
+        List<Job> jobs = workflowProxy.getJobs(jobIds, types, jobStatuses, includeDetails,
                 MultiTenantContext.getCustomerSpace().toString());
         if (jobs == null) {
             return Collections.emptyList();

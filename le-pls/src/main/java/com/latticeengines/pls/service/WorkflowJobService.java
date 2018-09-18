@@ -27,7 +27,7 @@ public interface WorkflowJobService {
 
     List<Job> findByJobIds(List<String> jobIds);
 
-    List<Job> findJobs(List<String> jobIds, List<String> types, Boolean includeDetails, Boolean hasParentId);
+    List<Job> findJobs(List<String> jobIds, List<String> types, List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId);
 
     List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType);
 

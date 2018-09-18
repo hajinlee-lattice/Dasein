@@ -77,21 +77,14 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobId(List<Long> workflowIds, List<String> types,
                                                                    Long parentJobId) {
-        if (workflowIds != null && types != null && parentJobId != null) {
-            return workflowJobDao.findByWorkflowIds(workflowIds, types, parentJobId);
-        } else if (workflowIds != null && types != null) {
-            return workflowJobDao.findByWorkflowIds(workflowIds, types);
-        } else if (workflowIds != null && parentJobId != null) {
-            return workflowJobDao.findByWorkflowIds(workflowIds, parentJobId);
-        } else if (workflowIds != null) {
-            return workflowJobDao.findByWorkflowIds(workflowIds);
-        } else if (types != null && parentJobId != null) {
-            return workflowJobDao.findByTypes(types, parentJobId);
-        } else if (types != null) {
-            return workflowJobDao.findByTypes(types);
-        } else {
-            return null;
-        }
+        return findByWorkflowIdsOrTypesOrParentJobId(workflowIds, types, null, parentJobId);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobId(List<Long> workflowIds, List<String> types,
+            List<String> statuses, Long parentJobId) {
+        return workflowJobDao.findByWorkflowIds(workflowIds, types, statuses, parentJobId);
     }
 
     @Override

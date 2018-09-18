@@ -1,8 +1,12 @@
 package com.latticeengines.workflow.dao.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.query.Query;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
@@ -98,6 +102,51 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         query.setParameterList("workflowIds", workflowIds);
         query.setParameterList("types", types);
         query.setParameter("parentJobId", parentJobId);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types, List<String> statuses, Long parentJobId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+
+        StringBuffer queryStr = new StringBuffer(String.format("from %s workflowjob", entityClz.getSimpleName()));
+
+        List<String> queryCriteriaClauses = new ArrayList<>();
+        Map<String, Object> queryParams = new HashMap<>();
+
+        if (CollectionUtils.isNotEmpty(workflowIds)) {
+            queryCriteriaClauses.add(" workflowjob.workflowId in :workflowIds ");
+            queryParams.put("workflowIds", workflowIds);
+        }
+        if (CollectionUtils.isNotEmpty(types)) {
+            queryCriteriaClauses.add(" workflowjob.type in :types ");
+            queryParams.put("types", types);
+        }
+        if (CollectionUtils.isNotEmpty(statuses)) {
+            queryCriteriaClauses.add(" workflowjob.status in :statuses ");
+            queryParams.put("statuses", statuses);
+        }
+        if (parentJobId != null) {
+            queryCriteriaClauses.add(" workflowjob.parentJobId=:parentJobId ");
+            queryParams.put("parentJobId", parentJobId);
+        }
+
+        if (!queryCriteriaClauses.isEmpty()) {
+            queryStr.append(" WHERE ").append(String.join(" AND ", queryCriteriaClauses));
+        }
+
+        Query<WorkflowJob> query = session.createQuery(queryStr.toString());
+        queryParams.keySet().stream().forEach(param -> {
+            Object value = queryParams.get(param);
+            if(value instanceof List) {
+                query.setParameterList(param, (List)value);
+            } else {
+                query.setParameter(param, value);
+            }
+        });
+
         return query.list();
     }
 

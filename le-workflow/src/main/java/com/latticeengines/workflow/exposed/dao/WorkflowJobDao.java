@@ -22,6 +22,8 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types, Long parentJobId);
 
+    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types, List<String> statuses, Long parentJobId);
+
     List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids);
 
     List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids, List<String> types);

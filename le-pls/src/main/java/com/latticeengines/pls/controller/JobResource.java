@@ -45,18 +45,19 @@ public class JobResource {
     public List<Job> findAll( //
             @RequestParam(value = "jobId", required = false) List<String> jobIds, //
             @RequestParam(value = "type", required = false) List<String> types, //
+            @RequestParam(value = "status", required = false) List<String> jobStatuses, //
             @RequestParam(value = "includeDetails", required = false) Boolean includeDetails, //
             @RequestParam(value = "hasParentId", required = false) Boolean hasParentId //
     ) {
-        if (jobIds == null && types == null && includeDetails == null && hasParentId == null) {
+        if (jobIds == null && types == null && includeDetails == null && hasParentId == null && jobStatuses == null) {
             return workflowJobService.findAll();
         }
         // TODO ygao this if statement will be removed when le-workflow work
         // service layer is completed
-        if (jobIds != null && types == null && includeDetails == null && hasParentId == null) {
+        if (jobIds != null && types == null && includeDetails == null && hasParentId == null && jobStatuses == null) {
             return workflowJobService.findByJobIds(jobIds);
         }
-        return workflowJobService.findJobs(jobIds, types, includeDetails, false);
+        return workflowJobService.findJobs(jobIds, types, jobStatuses, includeDetails, false);
     }
 
     @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

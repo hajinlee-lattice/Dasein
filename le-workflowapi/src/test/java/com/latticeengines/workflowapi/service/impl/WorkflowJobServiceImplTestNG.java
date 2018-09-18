@@ -1,6 +1,7 @@
 package com.latticeengines.workflowapi.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -243,6 +244,10 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
         Assert.assertTrue(applicationIds.contains("application_30000"));
         Assert.assertTrue(applicationIds.contains("application_30001"));
+        // Apply Status Filter
+        jobs = workflowJobService.getJobsByWorkflowIds(customerSpace3.toString(), null, null,
+                Arrays.asList(JobStatus.PENDING.toString()), true, false, null);
+        Assert.assertEquals(jobs.size(), 1);
 
         MultiTenantContext.setTenant(null);
         jobs = workflowJobService.getJobsByCustomerSpace(null, false);
@@ -275,6 +280,10 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(jobs.get(4).getApplicationId(), "application_20000");
         Assert.assertEquals(jobs.get(4).getSteps().size(), 9);
         Assert.assertEquals(jobs.get(4).getSteps().get(1).getJobStepType(), "step2_8");
+        // Apply Status Filter
+        jobs = workflowJobService.getJobsByWorkflowIds(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds,
+                null, Arrays.asList(JobStatus.FAILED.toString()), true, null, null);
+        Assert.assertEquals(jobs.size(), 3);
 
         List<Long> pids = new ArrayList<>(workflowPids.values());
         jobs = workflowJobService.getJobsByWorkflowPids(WFAPITEST_CUSTOMERSPACE.toString(), pids,

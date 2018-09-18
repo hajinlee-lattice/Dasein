@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,23 +109,24 @@ public class WorkflowResource {
     @ApiOperation(value = "Get list of workflow jobs by given list of job Ids or job types.")
     public List<Job> getJobs(@RequestParam(value = "jobId", required = false) List<String> jobIds,
             @RequestParam(value = "type", required = false) List<String> types,
+            @RequestParam(value = "status", required = false) List<String> statuses,
             @RequestParam(value = "includeDetails", required = false) Boolean includeDetails,
             @RequestParam(required = false) String customerSpace) {
         Optional<List<String>> optionalJobIds = Optional.ofNullable(jobIds);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
+        Optional<List<String>> optionalStatuses = Optional.ofNullable(statuses);
         Optional<Boolean> optionalIncludeDetails = Optional.ofNullable(includeDetails);
 
-        if (optionalJobIds.isPresent() && !jobIds.isEmpty() && !optionalTypes.isPresent()) {
+        List<Long> workflowIds = null;
+        if (optionalJobIds.isPresent() && !jobIds.isEmpty()) {
+            workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
+        }
+        if (CollectionUtils.isNotEmpty(workflowIds) && !optionalTypes.isPresent() && !optionalStatuses.isPresent()) {
             // from cache
-            List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
             return workflowJobService.getJobsByWorkflowIdsFromCache(customerSpace, workflowIds, optionalIncludeDetails.orElse(true));
-        } else if (optionalJobIds.isPresent()) {
-            List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
+        } else if (optionalTypes.isPresent() || optionalStatuses.isPresent()) {
             return workflowJobService.getJobsByWorkflowIds(customerSpace, workflowIds, optionalTypes.orElse(null),
-                    optionalIncludeDetails.orElse(true), false, -1L);
-        } else if (optionalTypes.isPresent()) {
-            return workflowJobService.getJobsByWorkflowIds(customerSpace, null, optionalTypes.get(),
-                    optionalIncludeDetails.orElse(true), false, -1L);
+                    optionalStatuses.orElse(null), optionalIncludeDetails.orElse(true), false, -1L);
         } else {
             return workflowJobService.getJobsByCustomerSpaceFromCache(customerSpace, optionalIncludeDetails.orElse(true));
         }

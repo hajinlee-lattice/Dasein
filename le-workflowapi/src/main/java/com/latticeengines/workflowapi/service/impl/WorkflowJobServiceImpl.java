@@ -4,9 +4,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,11 +70,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Autowired
     private WorkflowContainerService workflowContainerService;
 
-    private static final long HEARTBEAT_FAILURE_THRESHOLD =
-            TimeUnit.MILLISECONDS.convert(10L, TimeUnit.MINUTES);
+    private static final long HEARTBEAT_FAILURE_THRESHOLD = TimeUnit.MILLISECONDS.convert(10L, TimeUnit.MINUTES);
 
-    private static final long SPRING_BATCH_FAILURE_THRESHOLD =
-            TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
+    private static final long SPRING_BATCH_FAILURE_THRESHOLD = TimeUnit.MILLISECONDS.convert(1L, TimeUnit.HOURS);
 
     @Override
     @WithCustomerSpace
@@ -120,8 +120,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<JobStatus> getJobStatusByWorkflowPids(String customerSpace, List<Long> workflowPids) {
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(workflowPids,
-                null, null);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(workflowPids, null,
+                null);
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
@@ -136,8 +136,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return null;
         }
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(
-                reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails);
+        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob,
+                includeDetails);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (disableCache) {
             return getJobByWorkflowId(customerSpace, workflowId, includeDetails);
         }
-        Job job =  jobCacheService.getByWorkflowId(workflowId, includeDetails);
+        Job job = jobCacheService.getByWorkflowId(workflowId, includeDetails);
         checkLastUpdateTime(Collections.singletonList(toWorkflowJob(job)));
         if (!currentTenantHasAccess(job)) {
             return null;
@@ -164,8 +164,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(
-                reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails);
+        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob,
+                includeDetails);
     }
 
     @Override
@@ -177,8 +177,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         workflowJob = checkExecutionId(Collections.singletonList(workflowJob)).get(0);
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
-        return WorkflowJobUtils.assembleJob(
-                reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails);
+        return WorkflowJobUtils.assembleJob(reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob,
+                includeDetails);
     }
 
     @Override
@@ -188,9 +188,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
-        List<Job> jobs = workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(
-                reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails))
-                .collect(Collectors.toList());
+        List<Job> jobs = workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
+                leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails)).collect(Collectors.toList());
         jobs.forEach(this::removeTenantInfo);
         return jobs;
     }
@@ -208,8 +207,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             jobs.forEach(this::removeTenantInfo);
             return jobs;
         } catch (Exception e) {
-            log.error(String.format(
-                    "Failed to retrieve jobs from cache for customer space %s, fallback to database", customerSpace), e);
+            log.error(String.format("Failed to retrieve jobs from cache for customer space %s, fallback to database",
+                    customerSpace), e);
             // fallback
             return getJobsByCustomerSpace(customerSpace, includeDetails);
         }
@@ -218,9 +217,19 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
-                                          Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+            Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+        return getJobsByWorkflowIds(customerSpace, workflowIds, types, null, includeDetails, hasParentId, parentJobId);
+    }
+
+    @Override
+    public List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
+            List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         Optional<List<Long>> optionalWorkflowIds = Optional.ofNullable(workflowIds);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
+
+        // JobStatuses
+        List<String> workflowStatuses = WorkflowJobUtils.getWorkflowJobMappingsForJobStatuses(jobStatuses);
+
         List<WorkflowJob> workflowJobs;
 
         if (hasParentId != null && hasParentId) {
@@ -228,20 +237,29 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     optionalTypes.orElse(null), parentJobId);
         } else {
             workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(optionalWorkflowIds.orElse(null),
-                    optionalTypes.orElse(null), null);
+                    optionalTypes.orElse(null), workflowStatuses, null);
         }
 
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkLastUpdateTime(workflowJobs);
 
-        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(
-                reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails))
-                .collect(Collectors.toList());
+        // Apply the status filter again on results, Because "checkLastUpdateTime" can
+        // update the status
+        if (CollectionUtils.isNotEmpty(jobStatuses) && CollectionUtils.isNotEmpty(workflowJobs)) {
+            Set<String> jobStatusSet = jobStatuses.stream().map(st -> st.toUpperCase()).collect(Collectors.toSet());
+            workflowJobs = workflowJobs.stream().filter(workflowJob -> {
+                return workflowJob.getStatus() == null || jobStatusSet.contains(workflowJob.getStatus().toUpperCase());
+            }).collect(Collectors.toList());
+        }
+
+        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
+                leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails)).collect(Collectors.toList());
     }
 
     @Override
     @WithCustomerSpace
-    public List<Job> getJobsByWorkflowIdsFromCache(String customerSpace, @NotNull List<Long> workflowIds, boolean includeDetails) {
+    public List<Job> getJobsByWorkflowIdsFromCache(String customerSpace, @NotNull List<Long> workflowIds,
+            boolean includeDetails) {
         if (disableCache) {
             return getJobsByWorkflowIds(customerSpace, workflowIds, null, includeDetails, false, -1L);
         }
@@ -253,26 +271,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowPids(String customerSpace, List<Long> workflowPids, List<String> types,
-                                           Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+            Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         Optional<List<Long>> optionalWorkflowPids = Optional.ofNullable(workflowPids);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
         List<WorkflowJob> workflowJobs;
 
         if (hasParentId != null && hasParentId) {
-            workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(optionalWorkflowPids.orElse(null),
-                    optionalTypes.orElse(null), parentJobId);
+            workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(
+                    optionalWorkflowPids.orElse(null), optionalTypes.orElse(null), parentJobId);
         } else {
-            workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(optionalWorkflowPids.orElse(null),
-                    optionalTypes.orElse(null), null);
+            workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(
+                    optionalWorkflowPids.orElse(null), optionalTypes.orElse(null), null);
         }
 
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
 
-        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(
-                reportService, leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails))
-                .collect(Collectors.toList());
+        return workflowJobs.stream().map(workflowJob -> WorkflowJobUtils.assembleJob(reportService,
+                leJobExecutionRetriever, timelineServiceUrl, workflowJob, includeDetails)).collect(Collectors.toList());
     }
 
     @Override
@@ -304,8 +321,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public void updateParentJobIdByWorkflowPids(String customerSpace, List<Long> workflowPids, Long parentJobId) {
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(workflowPids,
-                null, null);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(workflowPids, null,
+                null);
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkLastUpdateTime(workflowJobs);
         workflowJobs.forEach(job -> {
@@ -317,7 +334,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration,
-                                        Long workflowPid) {
+            Long workflowPid) {
         return workflowContainerService.submitWorkflow(workflowConfiguration, workflowPid);
     }
 
@@ -382,12 +399,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     && workflowJob.getWorkflowId() == null) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
-                log.warn(String.format("Spring-batch has failed to start job. WorkflowPId=%s. Job started at %s. " +
-                                "Current timestamp=%s. Spring-batch failure threshold=%s. " +
-                                "DiffBetweenCurrentAndStartTime=%s",
-                        workflowJob.getPid(), workflowJob.getStartTimeInMillis(),
-                        currentTimeMillis, SPRING_BATCH_FAILURE_THRESHOLD,
-                        currentTimeMillis - workflowJob.getStartTimeInMillis()));
+                log.warn(String.format(
+                        "Spring-batch has failed to start job. WorkflowPId=%s. Job started at %s. "
+                                + "Current timestamp=%s. Spring-batch failure threshold=%s. "
+                                + "DiffBetweenCurrentAndStartTime=%s",
+                        workflowJob.getPid(), workflowJob.getStartTimeInMillis(), currentTimeMillis,
+                        SPRING_BATCH_FAILURE_THRESHOLD, currentTimeMillis - workflowJob.getStartTimeInMillis()));
                 if (workflowJob.getWorkflowId() != null) {
                     // invalidate cache entry
                     jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
@@ -420,9 +437,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     && (currentTimeMillis - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
-                log.warn(String.format("First heartbeat failed. WorkflowId=%s. Heartbeat created time=%s. " +
-                                "Heartbeat update time=%s. Heartbeat failure threshold=%s. Current time=%s. " +
-                                "DiffBetweenLastUpdateAndCreate=%s. DiffBetweenCurrentAndLastUpdate=%s",
+                log.warn(String.format(
+                        "First heartbeat failed. WorkflowId=%s. Heartbeat created time=%s. "
+                                + "Heartbeat update time=%s. Heartbeat failure threshold=%s. Current time=%s. "
+                                + "DiffBetweenLastUpdateAndCreate=%s. DiffBetweenCurrentAndLastUpdate=%s",
                         workflowJob.getWorkflowId(), jobUpdate.getCreateTime(), jobUpdate.getLastUpdateTime(),
                         HEARTBEAT_FAILURE_THRESHOLD, currentTimeMillis,
                         jobUpdate.getLastUpdateTime() - jobUpdate.getCreateTime(),
@@ -497,4 +515,5 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     void setLeJobExecutionRetriever(LEJobExecutionRetriever leJobExecutionRetriever) {
         this.leJobExecutionRetriever = leJobExecutionRetriever;
     }
+
 }

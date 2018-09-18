@@ -21,6 +21,9 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
     List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobId(List<Long> workflowIds, List<String> types,
                                                             Long parentJobId);
 
+    List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobId(List<Long> workflowIds, List<String> types,
+            List<String> statuses, Long parentJobId);
+
     List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids);
 
     List<WorkflowJob> findByWorkflowPidsAndTypes(List<Long> workflowIds, List<String> types);
