@@ -22,7 +22,7 @@ public class ScoringCommandResultDaoImpl extends BaseDaoImpl<ScoringCommandResul
         return ScoringCommandResult.class;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public List<ScoringCommandResult> getConsumed() {
         Session session = getSessionFactory().getCurrentSession();

@@ -19,6 +19,7 @@ public class ScoringTestUtils {
     private static final int NUM_LEADS_BUCKET_3 = 25206;
     private static final int NUM_LEADS_BUCKET_4 = 25565;
 
+    @SuppressWarnings("deprecation")
     public static List<BucketMetadata> generateDefaultBucketMetadataList() {
         List<BucketMetadata> bucketMetadataList = new ArrayList<BucketMetadata>();
         BucketMetadata BUCKET_METADATA_A = new BucketMetadata();

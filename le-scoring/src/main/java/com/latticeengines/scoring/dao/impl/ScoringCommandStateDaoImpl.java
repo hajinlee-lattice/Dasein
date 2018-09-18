@@ -23,6 +23,7 @@ public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState>
         return ScoringCommandState.class;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ScoringCommandState findByScoringCommandAndStep(ScoringCommand scoringCommand,
             ScoringCommandStep scoringCommandStep) {
@@ -39,7 +40,7 @@ public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState>
         return scoringCommandState;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public List<ScoringCommandState> findByScoringCommand(ScoringCommand scoringCommand) {
         Session session = getSessionFactory().getCurrentSession();
@@ -50,6 +51,7 @@ public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState>
         return states;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void delete(ScoringCommand scoringCommand) {
         Session session = getSessionFactory().getCurrentSession();

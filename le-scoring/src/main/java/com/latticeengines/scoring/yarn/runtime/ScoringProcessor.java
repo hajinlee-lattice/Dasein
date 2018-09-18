@@ -605,6 +605,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         private CSVPrinter csvFilePrinter;
         private AtomicLong counter;
         private long recordCount;
+        @SuppressWarnings("unused")
         private Map<String, String> fieldNameMapping;
         private boolean enrichmentEnabledForInternalAttributes;
         private boolean enableMatching;

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.LineNumberReader;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -165,7 +166,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         System.out.println("The test full path is " + expectedFile.getAbsolutePath());
         leadFileBufferMap.get(expectedFileName).close();
 
-        String leadInputFileContents = FileUtils.readFileToString(expectedFile);
+        String leadInputFileContents = FileUtils.readFileToString(expectedFile, Charset.defaultCharset());
         Assert.assertTrue(transformedLeadIsCorrect(leadInputFileContents),
                 "The lead input file does not contain the right contents.");
 

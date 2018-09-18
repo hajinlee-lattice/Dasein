@@ -22,7 +22,7 @@ public class ScoringCommandDaoImpl extends BaseDaoImpl<ScoringCommand> implement
         return ScoringCommand.class;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public List<ScoringCommand> getPopulated() {
         Session session = getSessionFactory().getCurrentSession();
@@ -33,7 +33,7 @@ public class ScoringCommandDaoImpl extends BaseDaoImpl<ScoringCommand> implement
         return commands;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public List<ScoringCommand> getConsumed() {
         Session session = getSessionFactory().getCurrentSession();
