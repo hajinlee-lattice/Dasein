@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepC
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.MergeUserRefinedAttributesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
@@ -67,6 +68,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private GenerateAIRatingWorkflowConfiguration.Builder generateAIRating = new GenerateAIRatingWorkflowConfiguration.Builder();
 
         private MergeUserRefinedAttributesConfiguration mergeUserRefinedAttributes = new MergeUserRefinedAttributesConfiguration();
+        private UseConfiguredModelingAttributesConfiguration.Builder useConfiguredModelingAttributesBuilder = new UseConfiguredModelingAttributesConfiguration.Builder();
+
         private ExportToS3StepConfiguration modelExportToS3 = new ExportToS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
@@ -85,6 +88,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             generateAIRating.customer(customerSpace);
             mergeUserRefinedAttributes.setCustomerSpace(customerSpace);
             modelExportToS3.setCustomerSpace(customerSpace);
+            useConfiguredModelingAttributesBuilder.customerSpace(customerSpace);
             return this;
         }
 
@@ -284,6 +288,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder excludeDataCloudAttrs(boolean exclude) {
             customEventMatchWorkflowConfigurationBuilder.excludeDataCloudAttrs(exclude);
             modelWorkflowBuilder.excludeDataCloudAttrs(exclude);
+            useConfiguredModelingAttributesBuilder.excludeDataCloudAttributes(exclude);
             return this;
         }
 
@@ -392,6 +397,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder skipLdcAttributesOnly(boolean skipLdcAttributesOnly) {
             ldcOnlyAttributes.setSkipStep(skipLdcAttributesOnly);
+            useConfiguredModelingAttributesBuilder.excludeCDLAttributes(!skipLdcAttributesOnly);
             return this;
         }
 
@@ -414,11 +420,20 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder dataCollectionVersion(DataCollection.Version version) {
             generateAIRating.dataCollectionVersion(version);
+            useConfiguredModelingAttributesBuilder.dataCollectionVersion(version);
             return this;
         }
 
         public Builder setUserRefinedAttributes(Map<String, ColumnMetadata> userRefinedAttributes) {
             mergeUserRefinedAttributes.setUserRefinedAttributes(userRefinedAttributes);
+            return this;
+        }
+
+        public Builder modelIteration(Integer modelIteration) {
+            useConfiguredModelingAttributesBuilder.modelIteration(modelIteration);
+            if (modelIteration != null && modelIteration.intValue() == 1) {
+                useConfiguredModelingAttributesBuilder.skipStep(false);
+            }
             return this;
         }
 
@@ -444,6 +459,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(exportScoreTrainingFile);
             configuration.add(modelExportToS3);
             configuration.add(mergeUserRefinedAttributes);
+            configuration.add(useConfiguredModelingAttributesBuilder.build());
 
             return configuration;
         }

@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBat
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ChooseModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
@@ -56,6 +57,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = SetConfigurationForScoringConfiguration.class, name = "SetConfigurationForScoringConfiguration"),
         @Type(value = MatchCdlStepConfiguration.class, name = "MatchCdlStepConfiguration"),
         @Type(value = LdcOnlyAttributesConfiguration.class, name = "LdcOnlyAttributesConfiguration"),
+        @Type(value = UseConfiguredModelingAttributesConfiguration.class, name = "UseConfiguredModelingAttributesConfiguration"),
         @Type(value = WriteOutputStepConfiguration.class, name = "WriteOutputStepConfiguration"), })
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 

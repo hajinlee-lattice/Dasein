@@ -643,6 +643,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT, activeVersion));
             parameters.setEventFilterTableName(aiModel.getId() + "_event");
             parameters.setUserRefinedAttributes(userRefinedAttributes);
+            parameters.setModelIteration(aiModel.getIteration());
+
             if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
                 parameters.setExpectedValue(true);
             }
@@ -673,6 +675,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             modelingParameters.setExcludeCustomFileAttributes(
                     !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
             modelingParameters.setUserRefinedAttributes(userRefinedAttributes);
+            modelingParameters.setModelIteration(aiModel.getIteration());
+
             modelSummaryProxy.setDownloadFlag(CustomerSpace.parse(customerSpace).toString());
 
             log.info(String.format("Custom event modelling job submitted with parameters %s",

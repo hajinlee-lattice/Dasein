@@ -34,6 +34,9 @@ public class RatingEngineModelingParameters extends ModelingParameters {
     @JsonProperty
     private boolean liftChart = true;
 
+    @JsonProperty
+    private Integer modelIteration;
+
     public String getTableName() {
         return tableName;
     }
@@ -106,5 +109,11 @@ public class RatingEngineModelingParameters extends ModelingParameters {
         this.liftChart = liftChart;
     }
 
+    public Integer getModelIteration() {
+        return modelIteration;
+    }
 
+    public void setModelIteration(Integer modelIteration) {
+        this.modelIteration = modelIteration;
+    }
 }

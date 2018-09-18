@@ -227,6 +227,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .cdlMultiModel(!isLPI) //
                 .dataCollectionVersion(version) //
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
+                .modelIteration(parameters.getModelIteration()) //
                 .build();
     }
 

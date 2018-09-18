@@ -85,6 +85,9 @@ public class ModelingParameters {
     @JsonProperty
     private Map<String, ColumnMetadata> userRefinedAttributes;
 
+    @JsonProperty
+    private Integer modelIteration;
+
     public String getFilename() {
         return filename;
     }
@@ -269,9 +272,16 @@ public class ModelingParameters {
         this.userRefinedAttributes = userRefinedAttributes;
     }
 
+    public Integer getModelIteration() {
+        return modelIteration;
+    }
+
+    public void setModelIteration(Integer modelIteration) {
+        this.modelIteration = modelIteration;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
-
 }

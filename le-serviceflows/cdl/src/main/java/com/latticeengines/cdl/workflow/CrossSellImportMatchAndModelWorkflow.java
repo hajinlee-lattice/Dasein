@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAn
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
+import com.latticeengines.modeling.workflow.steps.UseConfiguredModelingAttributes;
 import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
 import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
@@ -43,6 +44,9 @@ public class CrossSellImportMatchAndModelWorkflow
 
     @Inject
     private AddStandardAttributes addStandardAttributesDataFlow;
+
+    @Inject
+    private UseConfiguredModelingAttributes useConfiguredModelingAttributes;
 
     @Inject
     private MergeUserRefinedAttributes mergeUserRefinedAttributes;
@@ -76,6 +80,7 @@ public class CrossSellImportMatchAndModelWorkflow
                 .next(matchDataCloudWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
+                .next(useConfiguredModelingAttributes) //
                 .next(mergeUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //

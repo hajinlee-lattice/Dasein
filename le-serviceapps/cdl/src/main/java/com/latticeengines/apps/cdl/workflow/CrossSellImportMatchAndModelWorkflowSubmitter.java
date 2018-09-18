@@ -145,6 +145,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
                 .aiModelId(parameters.getAiModelId()) //
                 .ratingEngineId(parameters.getRatingEngineId()) //
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
+                .modelIteration(parameters.getModelIteration()) //
                 .workflowContainerMem(workflowMemMb) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
