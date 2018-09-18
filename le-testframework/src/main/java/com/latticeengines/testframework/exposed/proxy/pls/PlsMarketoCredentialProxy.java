@@ -34,7 +34,7 @@ public class PlsMarketoCredentialProxy extends PlsRestApiProxyBase {
     }
     
     private List<MarketoCredential> getMarketoCredentials(String endpoint) {
-        List response = get("Get Marketo Crendetials", endpoint, List.class);
+        List<?> response = get("Get Marketo Crendetials", endpoint, List.class);
         assertNotNull(response);
         List<MarketoCredential> credentialList = JsonUtils.convertList(response, MarketoCredential.class);
         return credentialList;
@@ -49,7 +49,7 @@ public class PlsMarketoCredentialProxy extends PlsRestApiProxyBase {
     
     public List<ScoringRequestConfigSummary> getScoringRequestConfigs(Long credentialId) {
         String url = constructUrl("/{credentialId}"+PLS_MARKETO_SCORING_REQUESTS, credentialId);
-        List response = get("Get ScoringRequestConfig Summary", url, List.class);
+        List<?> response = get("Get ScoringRequestConfig Summary", url, List.class);
         assertNotNull(response);
         List<ScoringRequestConfigSummary> scoringRequestConfigList = JsonUtils.convertList(response, ScoringRequestConfigSummary.class);
         return scoringRequestConfigList;

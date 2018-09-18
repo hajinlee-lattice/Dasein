@@ -2,8 +2,8 @@ package com.latticeengines.quartzclient.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
@@ -26,8 +26,8 @@ public class JobSourceDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<JobS
                         "from %s where TenantId = :tenantId and JobName = :jobName",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("tenantId", tenantId);
-        query.setString("jobName", jobName);
+        query.setParameter("tenantId", tenantId);
+        query.setParameter("jobName", jobName);
         List list = query.list();
         if (list.size() == 0) {
             return null;

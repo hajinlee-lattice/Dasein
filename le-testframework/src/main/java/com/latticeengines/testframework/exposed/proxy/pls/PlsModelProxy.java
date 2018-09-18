@@ -17,7 +17,7 @@ public class PlsModelProxy extends PlsRestApiProxyBase {
 
     public ApplicationId createRatingModel(RatingEngineModelingParameters parameters) {
         String url = constructUrl("/rating/{modelName}", parameters.getName());
-        ResponseDocument responseDoc = post("create rating model", url, parameters, ResponseDocument.class);
+        ResponseDocument<?> responseDoc = post("create rating model", url, parameters, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }

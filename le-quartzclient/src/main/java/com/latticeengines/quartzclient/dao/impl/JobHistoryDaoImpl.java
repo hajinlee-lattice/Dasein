@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -30,8 +30,8 @@ public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Job
                         "from %s where TenantId = :tenantId and JobName = :jobName order by PID desc",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("tenantId", tenantId);
-        query.setString("jobName", jobName);
+        query.setParameter("tenantId", tenantId);
+        query.setParameter("jobName", jobName);
         query.setMaxResults(displayCount);
         List list = query.list();
         List<JobHistory> jobHistories = new ArrayList<JobHistory>();
@@ -56,6 +56,7 @@ public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Job
         super.create(jobHistory);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void deleteOldJobHistory(int retainingDays) {
         Session session = sessionFactory.getCurrentSession();
@@ -63,7 +64,7 @@ public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Job
         String queryStr = String
                 .format("delete from %s where TriggeredTime < :date and TriggeredJobStatus in (:jobStatus)",
                         entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -(retainingDays));
         query.setCalendarDate("date", calendar);
@@ -91,8 +92,8 @@ public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Job
                                 "TriggeredJobStatus in (:jobStatus) order by PID desc",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("tenantId", tenantId);
-        query.setString("jobName", jobName);
+        query.setParameter("tenantId", tenantId);
+        query.setParameter("jobName", jobName);
         List<Integer> statusCode = new ArrayList<>();
         statusCode.add(TriggeredJobStatus.START.getValue());
         statusCode.add(TriggeredJobStatus.TRIGGERED.getValue());
@@ -117,9 +118,9 @@ public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Job
                                 "TriggeredJobHandle = :jobHandle order by PID desc",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("tenantId", tenantId);
-        query.setString("jobName", jobName);
-        query.setString("jobHandle", triggeredJobHandle);
+        query.setParameter("tenantId", tenantId);
+        query.setParameter("jobName", jobName);
+        query.setParameter("jobHandle", triggeredJobHandle);
         query.setMaxResults(1);
         List list = query.list();
         if (list.size() == 0) {
@@ -139,8 +140,8 @@ public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Job
                         "from %s where TenantId = :tenantId and JobName = :jobName order by PID desc",
                         entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("tenantId", tenantId);
-        query.setString("jobName", jobName);
+        query.setParameter("tenantId", tenantId);
+        query.setParameter("jobName", jobName);
         query.setMaxResults(1);
         List list = query.list();
         if (list.size() == 0) {
@@ -161,9 +162,9 @@ public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Job
         Class<JobHistory> entityClz = getEntityClass();
         String queryStr = String.format("delete from %s where TenantId = :tenantId and JobName = :jobName ",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("tenantId", tenantId);
-        query.setString("jobName", jobName);
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("tenantId", tenantId);
+        query.setParameter("jobName", jobName);
         query.executeUpdate();
     }
 }

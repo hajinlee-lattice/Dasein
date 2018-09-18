@@ -16,7 +16,7 @@ public class ModelSummaryProxy extends PlsRestApiProxyBase {
 
     public List<ModelSummary> getSummaries() {
         String url = constructUrl("/");
-        List list = get("get model summaries", url, List.class);
+        List<?> list = get("get model summaries", url, List.class);
         return JsonUtils.convertList(list, ModelSummary.class);
     }
 

@@ -11,6 +11,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ContextResetTestListener implements ITestListener {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ContextResetTestListener.class);
 
     @Override

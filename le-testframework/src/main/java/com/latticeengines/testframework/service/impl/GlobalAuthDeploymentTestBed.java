@@ -64,6 +64,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     private String enviroment;
     private String plsApiHostPort;
+    @SuppressWarnings("unused")
     private String adminApiHostPort;
     private boolean involvedDL = false;
     private boolean involvedZK = false;

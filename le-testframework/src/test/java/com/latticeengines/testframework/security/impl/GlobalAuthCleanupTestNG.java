@@ -67,6 +67,7 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+@SuppressWarnings("deprecation")
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-testframework-cleanup-context.xml" })
 public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
@@ -382,6 +383,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         return headers;
     }
 
+    @SuppressWarnings("rawtypes")
     private Map<String, String> findAllMultiTenantDocStores() {
         Reflections reflections = new Reflections("com.latticeengines.documentdb.entity");
 
@@ -428,6 +430,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         return null;
     }
 
+    @SuppressWarnings("rawtypes")
     private String findTableName(Class<? extends BaseMultiTenantDocEntity> clz) {
         Annotation[] annotations = clz.getAnnotations();
         for (Annotation annotation : annotations) {
