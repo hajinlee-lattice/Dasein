@@ -116,7 +116,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             data.callback(derivedValue);
         }
     });
-    
+
     $scope.toggleSelection = function toggleSelection(productName) {
         var idx = $scope.selectedProductNames.indexOf(productName);
         if (idx > -1) {
@@ -132,7 +132,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
               }
           });
         }
-        
+
         getSelecetedFeatureFlags($scope.selectedProducts);
         getSelectedComponents($scope.selectedProducts, $scope.components);
     };
@@ -167,11 +167,11 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     };
 
     function setAutoSchedulingFlagValue() {
-        return $scope.tenantInfo.properties.tenantType === "CUSTOMER" && 
+        return $scope.tenantInfo.properties.tenantType === "CUSTOMER" &&
                                     $scope.selectedProductNames.length === 2 && $scope.selectedProductNames.indexOf("Lead Prioritization 3.0") >= 0 &&
                                     $scope.selectedProductNames.indexOf("Customer Growth") >= 0;
     }
-    
+
     function getSelecetedFeatureFlags(selectedProducts) {
         var featureFlags = [];
         var flagNames = [];
@@ -188,7 +188,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         });
         $scope.selectedFeatureFlags = featureFlags;
     }
-    
+
     function getSelectedComponents(selectedProducts, components) {
         $scope.selectedComponents = [];
         _.each(selectedProducts, function(selectedProduct){
@@ -205,7 +205,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         });
         console.log($scope.selectedComponents);
     }
-    
+
     function containsObject(obj, list) {
         var i;
         for (i = 0; i < list.length; i++) {
@@ -281,7 +281,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 $scope.contractInfo = result1.resultObj.ContractInfo;
                 $scope.tenantInfo = result1.resultObj.TenantInfo;
                 $scope.spaceConfig = result1.resultObj.SpaceConfiguration;
-                
+
                 try {
                     $scope.selectedFeatureFlagMap = JSON.parse($scope.spaceInfo.featureFlags);
                 } catch (err) {
@@ -295,7 +295,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                         console.log($scope.availableProducts);
                         $scope.services = constructSelectedComponentsInViewPage(allServices);
                         $scope.componentsToScan = $scope.services.length;
-                        
+
                         _.each($scope.services, function(service) {
                             if (!$scope.selectedFeatureFlagMap.Dante && service === "Dante") {
                                 $scope.componentsToScan--;
@@ -351,7 +351,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         if ($scope.availableProducts === null || $scope.availableProducts.length === 0) {
             return allServices;
         }
-        
+
         var toReturn = [];
         var selectedProducts = $scope.spaceConfig.Products;
         _.each($scope.availableProducts, function(availableProduct){
@@ -408,14 +408,14 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             }
         });
     }
-    
+
     function preSaveCheck() {
          if ($scope.twoLPsAreSelected) {
              alert("Cannot choose two LPA products at the same time!");
              return false;
          } else if ($scope.LPA3isSelected) {
              var atLeastOneSourceFeatureFlagIsChecked = true;
-             if ($scope.featureFlags.UseSalesforceSettings === false && $scope.featureFlags.UseMarketoSettings === false && 
+             if ($scope.featureFlags.UseSalesforceSettings === false && $scope.featureFlags.UseMarketoSettings === false &&
                      $scope.featureFlags.UseEloquaSettings === false ) {
                  atLeastOneSourceFeatureFlagIsChecked = false;
              }
@@ -433,7 +433,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             '<h3 class="modal-title">Delete tenant</h3></div>' +
             '<div class="modal-body">' +
             'Are you sure you want to delete the tenant {{ tenantId }}?' +
-            '<div>Type "DELETE ME" into the the text area below to confirm you want to delete this tenant</div>' + 
+            '<div>Type "DELETE ME" into the the text area below to confirm you want to delete this tenant</div>' +
             '<div><input ng-model="confirm"></div>' +
             '</div>' +
             '<div class="modal-footer">' +
@@ -590,11 +590,11 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                             $scope.availableTemplatePath = node.Options;
                             break;
                         case "Status":
-                        	$scope.availableStatuses = node.Options;
-                        	break;
+                            $scope.availableStatuses = node.Options;
+                            break;
                         case "TenantType":
-                        	$scope.availableTenantTypes = node.Options;
-                        	break;
+                            $scope.availableTenantTypes = node.Options;
+                            break;
                     }
                 });
             }
@@ -622,7 +622,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         $scope.originalTenantStatus = $scope.tenantInfo ? $scope.tenantInfo.properties.status : '';
         $scope.originalTenantType = $scope.tenantInfo ? $scope.tenantInfo.properties.tenantType : '';
         $scope.isEditingTenantInfo = true;
-    }
+    };
 
     $scope.saveTenantInfo = function() {
         $scope.isEditingTenantInfo = false;
@@ -633,15 +633,15 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 $scope.tenantInfo.properties.status = $scope.originalTenantStatus;
                 $scope.tenantInfo.properties.tenantType = $scope.originalTenantType;
             }
-            
+
         });
-    }
+    };
 
     $scope.cancelTenantInfo = function() {
         $scope.tenantInfo.properties.status = $scope.originalTenantStatus;
         $scope.tenantInfo.properties.tenantType = $scope.originalTenantType;
         $scope.isEditingTenantInfo = false;
-    }
+    };
 
 
     //==================================================
@@ -713,37 +713,37 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     var componentsBackUp = null;
 
     $scope.editComponents = function () {
-    	backupComponents();
+        backupComponents();
         $scope.isEditingComponents = true;
     };
     $scope.saveComponents = function () {
-    	 $scope.ComponentsUpdateError = null;
+         $scope.ComponentsUpdateError = null;
 
          var componentsToUpdate = {};
          if (componentsBackup) {
              _.each($scope.selectedComponents, function (component) {
                  if (componentsBackup[component.Component] !== undefined) {
-                	 var copy = componentsBackup[component.Component];
-                	 var update = {};
-                	 _.each(component.Nodes, function(node) {
-                		 if(copy[node.Node] !== undefined) {
-                			 if (angular.isObject(copy[node.Node])) {
-                				 var copy2 = copy[node.Node];
-                				 _.each(node.Children, function (node2) {
-                					 if (copy2[node2.Node] !== node2.Data) {
-                						 update['/'+ node.Node + '/' + node2.Node] = angular.copy(node2.Data);
-                					 }
-                				 });
-                			 } else if (copy[node.Node] !== node.Data) {
-                		    	 update['/'+ node.Node] = angular.copy(node.Data);
-                		     }
-                		 }
-                	 });
-                	 if (!angular.equals(update, {})) {
+                     var copy = componentsBackup[component.Component];
+                     var update = {};
+                     _.each(component.Nodes, function(node) {
+                         if(copy[node.Node] !== undefined) {
+                             if (angular.isObject(copy[node.Node])) {
+                                 var copy2 = copy[node.Node];
+                                 _.each(node.Children, function (node2) {
+                                     if (copy2[node2.Node] !== node2.Data) {
+                                         update['/'+ node.Node + '/' + node2.Node] = angular.copy(node2.Data);
+                                     }
+                                 });
+                             } else if (copy[node.Node] !== node.Data) {
+                                 update['/'+ node.Node] = angular.copy(node.Data);
+                             }
+                         }
+                     });
+                     if (!angular.equals(update, {})) {
                          componentsToUpdate[component.Component] = update;
-                	 }
+                     }
                  }
-                 
+
              });
          }
 
@@ -760,50 +760,50 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
              });
     };
     $scope.cancelComponents = function () {
-    	undoComponentsChanges();
+        undoComponentsChanges();
         $scope.isEditingComponents = false;
         $scope.componentsUpdateError = null;
     };
     function backupComponents() {
         componentsBackup = {};
         _.each($scope.selectedComponents, function (component) {
-        	var copy = {};
-        	_.each(component.Nodes, function(node)  {
-        		var copy2 = {};
-        		_.each(node.Children, function (node2) {
-		    		copy2[node2.Node] = angular.copy(node2.Data);
-		    	});
-        		if (angular.equals(copy2, {})) {
-        			copy[node.Node] = angular.copy(node.Data);
-        		} else {
-        			copy[node.Node] = copy2;
-        		}
-        		
-        	});
-        	componentsBackup[component.Component]=copy;
+            var copy = {};
+            _.each(component.Nodes, function(node)  {
+                var copy2 = {};
+                _.each(node.Children, function (node2) {
+                    copy2[node2.Node] = angular.copy(node2.Data);
+                });
+                if (angular.equals(copy2, {})) {
+                    copy[node.Node] = angular.copy(node.Data);
+                } else {
+                    copy[node.Node] = copy2;
+                }
+
+            });
+            componentsBackup[component.Component]=copy;
         });
     }
     function undoComponentsChanges() {
         if (componentsBackup) {
             _.each($scope.selectedComponents, function (component) {
-            	if (componentsBackup[component.Component] !== undefined) {
-            		var copy = componentsBackup[component.Component];
-            		_.each(component.Nodes, function (node) {
-            		    if (copy[node.Node] !== undefined) {
-            			    var copy2 = copy[node.Node];
-            			    if (angular.isObject(copy[node.Node])) {
-            			    	_.each(node.Children, function (node2) {
-            			    		if (copy2[node2.Node] !== undefined) {
-            			    			node2.Data = copy2[node2.Node];
-            			    		}
-            			    	});
-            			    } else {
-            			    	node.Data = copy[node.Node];
-            			    }
-            		    	
-            		    }
-            	    });
-            	}
+                if (componentsBackup[component.Component] !== undefined) {
+                    var copy = componentsBackup[component.Component];
+                    _.each(component.Nodes, function (node) {
+                        if (copy[node.Node] !== undefined) {
+                            var copy2 = copy[node.Node];
+                            if (angular.isObject(copy[node.Node])) {
+                                _.each(node.Children, function (node2) {
+                                    if (copy2[node2.Node] !== undefined) {
+                                        node2.Data = copy2[node2.Node];
+                                    }
+                                });
+                            } else {
+                                node.Data = copy[node.Node];
+                            }
+
+                        }
+                    });
+                }
             });
             componentsBackup = null;
         }
