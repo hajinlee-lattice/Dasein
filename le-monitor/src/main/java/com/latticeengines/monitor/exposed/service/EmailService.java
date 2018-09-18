@@ -82,4 +82,7 @@ public interface EmailService {
     void sendPOCTenantStateNoticeEmail(User user, Tenant tenant, String state, int days);
 
     void sendCredentialEmail(User user, Tenant tenant, String credentials);
+
+    void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, String templateName,
+            String fileName, String failedMessage, String type);
 }

@@ -819,8 +819,9 @@ public class EmailServiceImpl implements EmailService {
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{tenantname}}", tenant.getName());
-            builder.replaceToken("{{credentials}}", credentials);
-
+            if (StringUtils.isNotEmpty(credentials)) {
+                builder.replaceToken("{{credentials}}", credentials);
+            }
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.S3_CREDENTIALS_EMAIL_SUBJECT, mp, Collections.singleton(user.getEmail()));
             log.info(
@@ -828,6 +829,42 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             log.error("Failed to send s3 credentials email to " + user.getEmail() + " on " + tenant.getName()
                     + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, String templateName,
+            String fileName, String errorMessage, String type) {
+        try {
+            log.info("Sending cdl ingestion status to " + user.getEmail() + " on " + tenant.getName() + " started.");
+            EmailTemplateBuilder builder;
+            if ("success".equals(status)) {
+                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_SUCCESS);
+            } else if ("in progress".equals(status)) {
+                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_IN_PROCESS);
+            } else {
+                builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_ERROR);
+            }
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{templatename}}", templateName);
+            if (StringUtils.isNotEmpty(errorMessage)) {
+                builder.replaceToken("{{errormessage}}", errorMessage);
+            }
+            builder.replaceToken("{{tenantname}}", tenant.getName());
+            builder.replaceToken("{{type}}", type);
+            builder.replaceToken("{{filename}}", fileName);
+            builder.replaceToken("{{url}}", hostport);
+            builder.replaceToken("{{apppublicurl}}", hostport);
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(
+                    String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), templateName), mp,
+                    Collections.singleton(user.getEmail()));
+            log.info("Sending cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
+                    + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
+                    + " "
+                    + e.getMessage());
         }
     }
 }
