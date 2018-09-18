@@ -187,7 +187,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         return new Policy().withStatements(//
                 listDropBoxStatement(bucket, dropBoxId), //
                 new Statement(Statement.Effect.Allow) //
-                        .withId("objects") //
+                        .withId("Objects") //
                         .withActions(//
                                 S3Actions.AbortMultipartUpload, //
                                 S3Actions.GetObject, //
@@ -239,7 +239,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private String listDropBoxStmtId(String dropBoxId) {
-        return "list_" + dropBoxId;
+        return "List" + dropBoxId;
     }
 
     private void revokeAccessToLatticeUser(String userName) {

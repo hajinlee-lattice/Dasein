@@ -85,7 +85,6 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCrudLatticeUser")
-    // @Test(groups = "functional")
     public void testCrudExternalAccount() {
         DropBoxServiceImpl impl = (DropBoxServiceImpl) dropboxService;
         impl.setCustomersBucket(testBucket);
