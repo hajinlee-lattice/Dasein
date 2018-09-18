@@ -18,11 +18,11 @@ BEGIN
        INSERT INTO `PLS_MultiTenant`.`PLAY_TYPE`
 		(`CREATED`, `CREATED_BY`, `DISPLAY_NAME`, `ID`, `UPDATED`, `UPDATED_BY`, `FK_TENANT_ID`, `TENANT_ID`)
 		VALUES
-		(NOW(), 'bnguyen@lattice-engines.com', 'List', UUID(), NOW(), 'bnguyen@lattice-engines.com', tenantId, tenantId),
-		(NOW(), 'bnguyen@lattice-engines.com', 'Cross-Sell', UUID(), NOW(), 'bnguyen@lattice-engines.com', tenantId, tenantId),
-		(NOW(), 'bnguyen@lattice-engines.com', 'Prospecting', UUID(), NOW(), 'bnguyen@lattice-engines.com', tenantId, tenantId),
-		(NOW(), 'bnguyen@lattice-engines.com', 'Renewal', UUID(), NOW(), 'bnguyen@lattice-engines.com', tenantId, tenantId),
-		(NOW(), 'bnguyen@lattice-engines.com', 'Upsell', UUID(), NOW(), 'bnguyen@lattice-engines.com', tenantId, tenantId);
+		(NOW(), 'build-admin@lattice-engines.com', 'List', UUID(), NOW(), 'build-admin@lattice-engines.com', tenantId, tenantId),
+		(NOW(), 'build-admin@lattice-engines.com', 'Cross-Sell', UUID(), NOW(), 'build-admin@lattice-engines.com', tenantId, tenantId),
+		(NOW(), 'build-admin@lattice-engines.com', 'Prospecting', UUID(), NOW(), 'build-admin@lattice-engines.com', tenantId, tenantId),
+		(NOW(), 'build-admin@lattice-engines.com', 'Renewal', UUID(), NOW(), 'build-admin@lattice-engines.com', tenantId, tenantId),
+		(NOW(), 'build-admin@lattice-engines.com', 'Upsell', UUID(), NOW(), 'build-admin@lattice-engines.com', tenantId, tenantId);
 		SET tenants = concat(tenants , tenantId, ', ');
     END IF;
   END WHILE;
@@ -97,6 +97,7 @@ CREATE PROCEDURE `UpdatePLSTables`()
 
     CALL `AttachPlayTypes`();
 
+    -- IMPORTANT NOTE: Following ddl should only be executed after the active stack switches to the M23 release candidate
     ALTER `PLS_MultiTenant`.`PLAY` Modify `FK_PLAY_TYPE` bigint NOT NULL;
   END;
 //
