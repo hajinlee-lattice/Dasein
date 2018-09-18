@@ -12,7 +12,7 @@
     <properties>
         <aws.lambda.java.core.version>1.1.0</aws.lambda.java.core.version>
         <aws.lambda.java.log4j.version>1.0.0</aws.lambda.java.log4j.version>
-        <spring.version>5.0.3.RELEASE</spring.version>
+        <spring.version>5.0.9.RELEASE</spring.version>
         <spring.retry.version>1.2.1.RELEASE</spring.retry.version>
         <testng.version>6.13.1</testng.version>
         <jackson.fasterxml.versino>2.9.6</jackson.fasterxml.versino>
