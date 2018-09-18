@@ -9,6 +9,7 @@ import com.latticeengines.playmaker.service.RecommendationCleanupService;
 
 public class RecommendationCleanupCallable implements Callable<Boolean> {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(RecommendationCleanupCallable.class);
 
     private RecommendationCleanupService recommendationCleanupService;

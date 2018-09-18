@@ -27,6 +27,7 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
         "classpath:playmakercore-context.xml", "classpath:test-playmaker-context.xml" })
 public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(LpiPMPlayImplDeploymentTestNG.class);
 
     @Inject
@@ -34,8 +35,6 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
 
     @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
-
-    private long accountCount;
 
     private Play firstPlayWithLaunch;
     private Play secondPlayWithLaunch;

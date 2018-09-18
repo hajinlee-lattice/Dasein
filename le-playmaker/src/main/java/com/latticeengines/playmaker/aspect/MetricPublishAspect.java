@@ -28,6 +28,7 @@ import com.latticeengines.playmaker.measurements.PlaymakerRecMetrics;
 @Aspect
 public class MetricPublishAspect {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MetricPublishAspect.class);
 
     @Autowired

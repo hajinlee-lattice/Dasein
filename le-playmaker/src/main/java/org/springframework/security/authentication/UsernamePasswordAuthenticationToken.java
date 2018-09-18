@@ -9,7 +9,7 @@ public class UsernamePasswordAuthenticationToken extends AbstractAuthenticationT
     private final Object principal;
     private Object credentials;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public UsernamePasswordAuthenticationToken(Object principal, Object credentials) {
         super((Collection)null);
         this.principal = principal;

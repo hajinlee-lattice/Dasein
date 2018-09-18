@@ -51,7 +51,6 @@ public class LpiPMRecommendationImplUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setup() {
         String randId = UUID.randomUUID().toString();
-        String tenantIdentifier = randId + "." + randId + ".Production";
         playId = "play__" + randId;
         playLaunchId = "launch__" + randId;
         TOTAL_REC_COUNT = 2;
@@ -135,7 +134,7 @@ public class LpiPMRecommendationImplUnitTestNG {
         play.setDisplayName("My Play");
         play.setDescription("Play for business usecase");
         plays.add(play);
-        when(playProxy.getPlays(anyString(), isNull(Boolean.class), isNull(String.class))).thenReturn(plays);
+        when(playProxy.getPlays(anyString(), isNull(), isNull())).thenReturn(plays);
     }
 
     private List<Map<String, Object>> createDummyRecommendationResult(int count) {
