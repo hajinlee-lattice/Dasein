@@ -84,13 +84,12 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     // oversea head quarter
     private static final Object[][] TEST_DATA_5 = new Object[][] { //            
-            { null, "Royal Dutch Shell", null, null, null, "Netherlands", null, "shell.com", "ROYAL DUTCH SHELL plc",
-                    "ZUID HOLLAND", "NETHERLANDS", ">10,000", ">10B" },
+            // { null, "Royal Dutch Shell", null, null, null, "Netherlands", null, "shell.com", "ROYAL DUTCH SHELL plc","ZUID HOLLAND", "NETHERLANDS", ">10,000", ">10B" },
     };
 
     // us head quarter, oversea domestic ultimate
     private static final Object[][] TEST_DATA_6 = new Object[][] { //            
-            { null, "Google UK", null, null, null, "UK", null, "google.co.uk", "GOOGLE UK LIMITED", "LONDON", "UNITED KINGDOM", "1001-2500", "1-5B" },
+            // { null, "Google UK", null, null, null, "UK", null, "google.co.uk", "GOOGLE UK LIMITED", "LONDON", "UNITED KINGDOM", "1001-2500", "1-5B" },
     };
 
     // slight mis-spell in name
