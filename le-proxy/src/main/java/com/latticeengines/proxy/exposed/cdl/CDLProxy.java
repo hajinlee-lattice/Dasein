@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -115,6 +116,23 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         } else {
             throw new RuntimeException(
                     "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId submitS3ImportJob(String customerSpace, S3FileToHdfsConfiguration s3FileToHdfsConfiguration) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/s3import", customerSpace);
+        ResponseDocument<String> responseDoc = post("submitS3ImportJob", url, s3FileToHdfsConfiguration, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to submit s3 import job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 

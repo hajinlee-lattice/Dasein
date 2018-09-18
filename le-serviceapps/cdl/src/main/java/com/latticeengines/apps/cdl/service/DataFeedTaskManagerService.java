@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface DataFeedTaskManagerService {
@@ -11,4 +12,6 @@ public interface DataFeedTaskManagerService {
     String submitImportJob(String customerSpaceStr, String taskIdentifier, CDLImportConfig importConfig);
 
     boolean resetImport(String customerSpaceStr, BusinessEntity entity);
+
+    String submitS3ImportJob(String customerSpaceStr, S3FileToHdfsConfiguration importConfig);
 }

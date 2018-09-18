@@ -1,5 +1,7 @@
 package com.latticeengines.eai.service.impl.file;
 
+import static com.latticeengines.eai.util.HdfsUriGenerator.EXTRACT_DATE_FORMAT;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +12,6 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.DeleteFileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -30,8 +29,6 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -40,9 +37,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
-
-import static com.latticeengines.eai.util.HdfsUriGenerator.EXTRACT_DATE_FORMAT;
 
 @Component("deleteFileToHdfsService")
 public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsConfiguration> {
@@ -51,9 +45,6 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private JobProxy jobProxy;
 
     @Autowired
     private EaiMetadataService eaiMetadataService;
@@ -155,28 +146,4 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
         }
     }
 
-    private void waitForAppId(String appId) {
-        log.info(String.format("Waiting for appId: %s", appId));
-
-        JobStatus status;
-        int maxTries = 17280; // Wait maximum 24 hours
-        int i = 0;
-        do {
-            status = jobProxy.getJobStatus(appId);
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
-            i++;
-
-            if (i == maxTries) {
-                break;
-            }
-        } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
-
-        if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new LedpException(LedpCode.LEDP_28015, new String[] { appId, status.getStatus().toString() });
-        }
-    }
 }

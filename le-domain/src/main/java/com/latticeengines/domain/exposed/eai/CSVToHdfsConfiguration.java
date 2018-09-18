@@ -1,7 +1,11 @@
 package com.latticeengines.domain.exposed.eai;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+@JsonSubTypes({ @JsonSubTypes.Type(value = S3FileToHdfsConfiguration.class, name = "S3FileToHdfsConfiguration") })
 public class CSVToHdfsConfiguration extends ImportConfiguration {
 
     @JsonProperty("file_path")

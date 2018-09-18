@@ -59,6 +59,21 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public void copyObject(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey) {
+        sourceKey = sanitizePathToKey(sourceKey);
+        destinationKey = sanitizePathToKey(destinationKey);
+        s3Client.copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
+    }
+
+    @Override
+    public void moveObject(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey) {
+        sourceKey = sanitizePathToKey(sourceKey);
+        destinationKey = sanitizePathToKey(destinationKey);
+        s3Client.copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
+        s3Client.deleteObject(sourceBucketName, sourceKey);
+    }
+
+    @Override
     public boolean isNonEmptyDirectory(String bucket, String prefix) {
         prefix = sanitizePathToKey(prefix);
         ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(bucket).withPrefix(prefix);

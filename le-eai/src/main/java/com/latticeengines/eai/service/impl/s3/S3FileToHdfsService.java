@@ -1,26 +1,39 @@
-package com.latticeengines.eai.service.impl.file;
+package com.latticeengines.eai.service.impl.s3;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
+import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
+import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -29,22 +42,66 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLS3FolderProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
-@Component("csvToHdfsService")
-public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> {
+@Component("s3FileToHdfsService")
+public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(CSVToHdfsService.class);
+    private static Logger log = LoggerFactory.getLogger(S3FileToHdfsService.class);
 
-    @Autowired
+    @Inject
+    private S3Service s3Service;
+
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private DataFeedProxy dataFeedProxy;
+    @Inject
+    private CDLS3FolderProxy cdls3FolderProxy;
+
+    @Value("${dataplatform.queue.scheme}")
+    protected String queueScheme;
+
+
+    private String hdfsFilePath;
 
     @Override
+    public void invoke(S3FileToHdfsConfiguration config) {
+        try {
+            copyToHdfs(config);
+            importFile(config);
+        } catch (Exception e) {
+            cdls3FolderProxy.moveToFailed(config.getCustomerSpace().toString(), config.getS3FilePath());
+            throw e;
+        }
+    }
+
+    private void copyToHdfs(S3FileToHdfsConfiguration config) {
+        try {
+            Path rawPath = new Path(getValiePath(config.getS3FilePath()));
+            String s3nPath = rawPath.toS3NUri(config.getS3Bucket());
+            Path hdfsPath = PathBuilder.buildS3FilePath(CamilleEnvironment.getPodId(), config.getCustomerSpace());
+            hdfsPath = hdfsPath.append(String.valueOf(new Date().getTime()));
+            hdfsPath = hdfsPath.append(config.getS3FileName());
+            String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
+            String overwriteQueue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+            HdfsUtils.distcp(yarnConfiguration, s3nPath, hdfsPath.toString(), overwriteQueue);
+            hdfsFilePath = hdfsPath.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot copy s3 file to hdfs!" + e.getMessage());
+        }
+    }
+
+    private String getValiePath(String path) {
+        if (!path.startsWith("/")) {
+            return "/" + path;
+        } else {
+            return path;
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    public void invoke(CSVToHdfsConfiguration config) {
+    private void importFile(S3FileToHdfsConfiguration config) {
         String jobDetailIds = config.getProperty(ImportProperty.EAIJOBDETAILIDS);
         List<Object> jobDetailIdsRaw = JsonUtils.deserialize(jobDetailIds, List.class);
         List<Long> eaiJobDetailIds = JsonUtils.convertList(jobDetailIdsRaw, Long.class);
@@ -59,7 +116,7 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
             context.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
             context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
-            context.setProperty(ImportProperty.HDFSFILE, config.getFilePath());
+            context.setProperty(ImportProperty.HDFSFILE, hdfsFilePath);
             context.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
             context.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
             context.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
@@ -97,7 +154,7 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
                 }
                 sourceImportConfig.getProperties().put(ImportProperty.METADATA,
                         JsonUtils.serialize(template.getModelingMetadata()));
-                sourceImportConfig.getProperties().put(ImportProperty.HDFSFILE, config.getFilePath());
+                sourceImportConfig.getProperties().put(ImportProperty.HDFSFILE, hdfsFilePath);
                 ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
                 ConnectorConfiguration connectorConfiguration = importService.generateConnectorConfiguration("",
                         context);
@@ -111,7 +168,8 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
                 }
                 importService.importDataAndWriteToHdfs(sourceImportConfig, context, connectorConfiguration);
 
-                waitAndFinalizeJob(config, context, template.getName(), eaiJobDetailIds.get(0));
+                waitAndFinalizeJob(context, template.getName(), eaiJobDetailIds.get(0));
+                cdls3FolderProxy.moveToSucceed(customerSpace, config.getS3FilePath());
             }
         } catch (RuntimeException e) {
             updateJobDetailStatus(jobDetailId, ImportStatus.FAILED);
@@ -120,9 +178,8 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
     }
 
     @SuppressWarnings("unchecked")
-    private void waitAndFinalizeJob(CSVToHdfsConfiguration config, ImportContext context, String templateName,
-            Long jobDetailID) {
-        // update csv import processed records.
+    private void waitAndFinalizeJob(ImportContext context, String templateName,
+                                    Long jobDetailID) {
         ApplicationId appId = context.getProperty(ImportProperty.APPID, ApplicationId.class);
 
         log.info("Application id is : " + appId.toString());
@@ -140,6 +197,7 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
         long totalRecords = processedRecords + ignoredRecords + duplicatedRecords;
         updateJobDetailExtractInfo(jobDetailID, templateName, Arrays.asList(targetPathsMap.get(templateName)),
                 Arrays.asList(Long.toString(processedRecords)), totalRecords, ignoredRecords, duplicatedRecords);
+
     }
 
 }

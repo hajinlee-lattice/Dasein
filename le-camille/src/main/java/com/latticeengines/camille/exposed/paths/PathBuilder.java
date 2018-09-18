@@ -108,6 +108,10 @@ public final class PathBuilder {
         return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES);
     }
 
+    public static Path buildS3FilePath(String podId, CustomerSpace space) {
+        return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.S3FILES);
+    }
+
     public static Path buildDataFileExportPath(String podId, CustomerSpace space) {
         return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES)
                 .append(PathConstants.EXPORTS);

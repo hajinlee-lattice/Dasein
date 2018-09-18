@@ -1,5 +1,7 @@
 package com.latticeengines.eai.runtime.service;
 
+import static com.latticeengines.eai.util.HdfsUriGenerator.EXTRACT_DATE_FORMAT;
+
 import java.lang.reflect.ParameterizedType;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,24 +11,38 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.eai.service.EaiImportJobDetailService;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(EaiRuntimeService.class);
 
     private static Map<Class<? extends EaiJobConfiguration>, EaiRuntimeService<? extends EaiJobConfiguration>> map = new HashMap<>();
 
@@ -40,6 +56,12 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    protected JobProxy jobProxy;
+
+    @Autowired
+    protected DataFeedProxy dataFeedProxy;
 
     @SuppressWarnings("unchecked")
     public EaiRuntimeService() {
@@ -144,6 +166,15 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
         }
     }
 
+    protected String createTargetPath(CustomerSpace customerSpace, BusinessEntity entity, SourceType sourceType) {
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-%s/Extracts/%s",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
+                sourceType.getName(),
+                entity.name(),
+                new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
+        return targetPath;
+    }
+
     public JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
 
         int retryOnException = 4;
@@ -170,5 +201,31 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    protected void waitForAppId(String appId) {
+        log.info(String.format("Waiting for appId: %s", appId));
+
+        com.latticeengines.domain.exposed.dataplatform.JobStatus status;
+        int maxTries = 17280; // Wait maximum 24 hours
+        int i = 0;
+        do {
+            status = jobProxy.getJobStatus(appId);
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                // Do nothing for InterruptedException
+            }
+            i++;
+
+            if (i == maxTries) {
+                break;
+            }
+        } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
+
+        if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
+            throw new LedpException(LedpCode.LEDP_28015, new String[] { appId, status.getStatus().toString() });
+        }
+
     }
 }

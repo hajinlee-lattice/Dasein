@@ -773,6 +773,7 @@ public enum LedpCode {
     LEDP_40040("Cannot create an iteration derived from iteration of another Model. Customer Space {0}"), //
     LEDP_40041("Cannot perform action as potential circular dependencies found: {0}"), //
     LEDP_40042("Cannot perform deletion as there are direct dependencies: {0}"), //
+    LEDP_40043("S3 File missing the following required fields: {0}"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

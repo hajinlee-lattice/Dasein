@@ -1,5 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.CDLConstants.DEFAULT_S3_USER;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,6 +19,10 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -26,15 +36,23 @@ import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
+import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
+import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
+import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -74,6 +92,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private final AttrConfigEntityMgr attrConfigEntityMgr;
 
+    private final S3Service s3Service;
+
+    private final S3ImportFolderService s3ImportFolderService;
+
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
@@ -83,7 +105,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                                           DLTenantMappingService dlTenantMappingService,
                                           CDLExternalSystemService cdlExternalSystemService,
                                           ActionService actionService,
-                                          MetadataProxy metadataProxy, AttrConfigEntityMgr attrConfigEntityMgr) {
+                                          MetadataProxy metadataProxy, AttrConfigEntityMgr attrConfigEntityMgr,
+                                          S3Service s3Service, S3ImportFolderService s3ImportFolderService) {
         this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
         this.dataFeedProxy = dataFeedProxy;
         this.tenantService = tenantService;
@@ -92,6 +115,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         this.actionService = actionService;
         this.metadataProxy = metadataProxy;
         this.attrConfigEntityMgr = attrConfigEntityMgr;
+        this.s3Service = s3Service;
+        this.s3ImportFolderService = s3ImportFolderService;
     }
 
     @Override
@@ -239,6 +264,86 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             metadataProxy.deleteImportTable(customerSpaceStr, dft.getImportTemplate().getName());
         }
         return true;
+    }
+
+    @Override
+    public String submitS3ImportJob(String customerSpaceStr, S3FileToHdfsConfiguration importConfig) {
+        CustomerSpace customerSpace = CustomerSpace.parse(customerSpaceStr);
+        if (importConfig == null) {
+            throw new IllegalArgumentException("S3 Import config cannot be null!");
+        }
+        if (importConfig.getEntity() == null || StringUtils.isEmpty(importConfig.getFeedType())) {
+            throw new IllegalArgumentException("Entity & Template name cannot be empty for S3 import!");
+        }
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName()
+                , importConfig.getFeedType(), importConfig.getEntity().name());
+        if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
+            throw new RuntimeException("Cannot find the template for S3 file: " + importConfig.getS3FilePath());
+        }
+        String newFilePath = s3ImportFolderService.startImport(customerSpace.getTenantId(), importConfig.getS3Bucket(),
+                importConfig.getS3FilePath());
+        importConfig.setS3FilePath(newFilePath);
+        importConfig.setS3Bucket(s3ImportFolderService.getBucket());
+        //validate
+        validateS3File(dataFeedTask.getImportTemplate(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
+        importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
+        importConfig.setFileSource("S3");
+        CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
+        csvImportFileInfo.setFileUploadInitiator(DEFAULT_S3_USER);
+        csvImportFileInfo.setReportFileName(importConfig.getS3FileName());
+        csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
+
+        ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
+                JsonUtils.serialize(importConfig), csvImportFileInfo);
+        return appId.toString();
+    }
+
+    private void validateS3File(Table template, String s3Bucket, String s3FilePath) {
+        try {
+            InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath);
+            InputStreamReader reader = new InputStreamReader(
+                    new BOMInputStream(fileStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                            ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                    StandardCharsets.UTF_8);
+
+            CSVFormat format = LECSVFormat.format;
+            CSVParser parser = new CSVParser(reader, format);
+            Set<String> headerFields = parser.getHeaderMap().keySet();
+            Map<String, Attribute> displayNameMap = template.getAttributes().stream()
+                    .collect(Collectors.toMap(Attribute::getDisplayName, attr -> attr));
+            List<String> templateMissing = new ArrayList<>();
+            List<String> csvMissing = new ArrayList<>();
+            List<String> requiredMissing = new ArrayList<>();
+            for (String header : headerFields) {
+                if (!displayNameMap.containsKey(header)) {
+                    templateMissing.add(header);
+                }
+            }
+            for (Map.Entry<String, Attribute> entry : displayNameMap.entrySet()) {
+                if (!headerFields.contains(entry.getKey())) {
+                    csvMissing.add(entry.getKey());
+                    if (entry.getValue().getRequired()) {
+                        requiredMissing.add(entry.getKey());
+                    }
+                }
+            }
+            if (CollectionUtils.isNotEmpty(templateMissing)) {
+                log.warn(String.format("Template doesn't contains the following columns: %s", String.join(",", templateMissing)));
+            }
+            if (CollectionUtils.isNotEmpty(csvMissing)) {
+                log.warn(String.format("S3File doesn't contains the following columns: %s", String.join(",", csvMissing)));
+            }
+            if (CollectionUtils.isNotEmpty(requiredMissing)) {
+                throw new LedpException(LedpCode.LEDP_40043, new String[] {String.join(",", requiredMissing)});
+            }
+            parser.close();
+        } catch (LedpException e) {
+            s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
+            throw e;
+        } catch (IOException e) {
+            log.error("Cannot close fileStream!");
+        }
+
     }
 
     private List<DataFeedTask> getAllDataFeedTask(String customerSpaceStr, BusinessEntity entity) {

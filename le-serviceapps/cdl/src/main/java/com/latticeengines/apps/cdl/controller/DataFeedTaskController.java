@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
+import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -102,6 +103,22 @@ public class DataFeedTaskController {
                                                               @RequestBody CDLImportConfig importConfig) {
         try {
             String applicationId = dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier, importConfig);
+            return ResponseDocument.successResponse(applicationId);
+        } catch (Exception e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @RequestMapping(value = "/s3import", method = RequestMethod.POST, headers =
+            "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a data feed task")
+    @NoCustomerSpace
+    public ResponseDocument<String>  startImportJobForS3(@PathVariable String customerSpace,
+                                                          @RequestBody S3FileToHdfsConfiguration s3FileToHdfsConfiguration) {
+        try {
+            String applicationId = dataFeedTaskManagerService.submitS3ImportJob(customerSpace,
+                    s3FileToHdfsConfiguration);
             return ResponseDocument.successResponse(applicationId);
         } catch (Exception e) {
             return ResponseDocument.failedResponse(e);

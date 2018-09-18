@@ -140,8 +140,8 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";
     private static final String S3_VDB_VERSION = "2";
 
-    private static final String S3_CSV_DIR = "le-serviceapps/cdl/end2end/csv";
-    private static final String S3_CSV_VERSION = "2";
+    protected static final String S3_CSV_DIR = "le-serviceapps/cdl/end2end/csv";
+    protected static final String S3_CSV_VERSION = "2";
 
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
     private static final String S3_AVRO_VERSION = "1";

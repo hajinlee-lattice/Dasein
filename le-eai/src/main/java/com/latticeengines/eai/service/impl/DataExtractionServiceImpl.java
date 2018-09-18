@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
+import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -144,8 +145,9 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
             importService.validate(sourceImportConfig, importContext);
             if (!sourceImportConfig.getSourceType().willSubmitEaiJob()) {
-                if (!importConfig.getClass().equals(CSVToHdfsConfiguration.class) &&
-                        !importConfig.getClass().equals(DeleteFileToHdfsConfiguration.class)) {
+                if (!importConfig.getClass().equals(CSVToHdfsConfiguration.class)
+                        && !importConfig.getClass().equals(DeleteFileToHdfsConfiguration.class)
+                        && !importConfig.getClass().equals(S3FileToHdfsConfiguration.class)) {
                     hasNonEaiJobSourceType = true;
                 }
             }

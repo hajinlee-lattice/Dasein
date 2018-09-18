@@ -32,6 +32,12 @@ public interface S3Service {
 
     boolean objectExist(String bucket, String object);
 
+    void copyObject(String sourceBucketName, String sourceKey,
+                    String destinationBucketName, String destinationKey);
+
+    void moveObject(String sourceBucketName, String sourceKey,
+                    String destinationBucketName, String destinationKey);
+
     boolean isNonEmptyDirectory(String bucket, String prefix);
 
     void changeKeyRecursive(String bucket, String srcFolder, String tgtFolder, String keyId);
