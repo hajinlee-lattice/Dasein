@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
@@ -42,6 +44,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/purchasehistory")
 public class PurchaseHistoryResource {
+    private static final Logger log = LoggerFactory.getLogger(PurchaseHistoryResource.class);
 
     @Inject
     private PeriodTransactionProxy periodTransactionProxy;
@@ -84,7 +87,10 @@ public class PurchaseHistoryResource {
                 }
                 BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
                 LocalDate startDate;
-                if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
+                if (businessCalendar == null) {
+                    // Use Natural calendar since no Business calender has been defined
+                    startDate = LocalDate.of(DEFAULT_START_YEAR, 1, 1);
+                } else if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
                     startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
                             DEFAULT_START_YEAR);
                 } else {
@@ -95,8 +101,10 @@ public class PurchaseHistoryResource {
                         startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
             }
         } catch (LedpException le) {
+            log.error("Failed to populate purchase history for account: " + crmAccountId, le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
+            log.error("Failed to populate purchase history for account: " + crmAccountId, e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
 
@@ -108,23 +116,32 @@ public class PurchaseHistoryResource {
     public FrontEndResponse<List<String>> getPurchaseHistoryAccountBySegment(
             @PathVariable String spendAnalyticsSegment) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        List<PeriodTransaction> periodTransactions = periodTransactionProxy
-                .getPeriodTransactionsForSegmentAccounts(customerSpace, spendAnalyticsSegment, defaultPeriodName);
+        try {
+            List<PeriodTransaction> periodTransactions = periodTransactionProxy
+                    .getPeriodTransactionsForSegmentAccounts(customerSpace, spendAnalyticsSegment, defaultPeriodName);
 
-        if (CollectionUtils.isEmpty(periodTransactions)) {
-            throw new LedpException(LedpCode.LEDP_39006, new String[] { spendAnalyticsSegment, customerSpace });
+            if (CollectionUtils.isEmpty(periodTransactions)) {
+                throw new LedpException(LedpCode.LEDP_39006, new String[] { spendAnalyticsSegment, customerSpace });
+            }
+
+            BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
+            LocalDate startDate;
+            if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
+                startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
+                        DEFAULT_START_YEAR);
+            } else {
+                startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
+                        DEFAULT_START_YEAR);
+            }
+            return new FrontEndResponse<>(Arrays.asList(purchaseHistoryDanteFormatter.format(spendAnalyticsSegment,
+                    startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
+        } catch (LedpException le) {
+            log.error("Failed to populate purchase history for segment: " + spendAnalyticsSegment, le);
+            return new FrontEndResponse<>(le.getErrorDetails());
+        } catch (Exception e) {
+            log.error("Failed to populate purchase history for segment: " + spendAnalyticsSegment, e);
+            return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
 
-        BusinessCalendar businessCalendar = periodProxy.getBusinessCalendar(customerSpace);
-        LocalDate startDate;
-        if (businessCalendar.getMode() == BusinessCalendar.Mode.STARTING_DATE) {
-            startDate = BusinessCalendarUtils.parseLocalDateFromStartingDate(businessCalendar.getStartingDate(),
-                    DEFAULT_START_YEAR);
-        } else {
-            startDate = BusinessCalendarUtils.parseLocalDateFromStartingDay(businessCalendar.getStartingDay(),
-                    DEFAULT_START_YEAR);
-        }
-        return new FrontEndResponse<>(Arrays.asList(purchaseHistoryDanteFormatter.format(spendAnalyticsSegment,
-                startDate, JsonUtils.convertList(periodTransactions, PeriodTransaction.class))));
     }
 }
