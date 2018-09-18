@@ -53,7 +53,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
             output = initializeMatchOutput(input, columnSelection, null);
         }
         context.setColumnSelection(columnSelection);
-        logger.info(String.format("Parsed %d columns in column selection", columnSelection.getColumnIds().size()));
+        logger.info(String.format("Parsed %d columns in column selection", columnSelection.getColumns().size()));
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);
