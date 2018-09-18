@@ -252,14 +252,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
             List<ColumnMetadata> columns = getSystemMetadata(category);
             Set<String> columnsInSystem = columns.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
-            log.info("metadata name in " + category.getName() + " are " + columnsInSystem.toString());
             List<AttrConfig> customConfigInCategory = customConfig.stream() //
                     .filter(attrConfig -> category
                             .equals(attrConfig.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class))
                             || columnsInSystem.contains(attrConfig.getAttrName()))
                     .collect(Collectors.toList());
-            log.info("system metadata in category are " + JsonUtils.serialize(columns));
-            log.info("custom config in category are " + JsonUtils.serialize(customConfigInCategory));
             renderedList = render(columns, customConfigInCategory);
             modifyInactivateState(renderedList);
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
@@ -513,15 +510,15 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         for (AttrConfig config : customConfigs) {
             map.put(config.getAttrName(), config);
         }
-        log.info("system meta data in render " + JsonUtils.serialize(systemMetadata));
-        log.info("custom config in render " + JsonUtils.serialize(customConfigs));
-        List<String> renderedAttrNames = customConfigs.stream().map(config -> config.getAttrName())
-                .collect(Collectors.toList());
-        log.info("custom config name " + renderedAttrNames.toString());
+        Set<String> renderedAttrNames = customConfigs.stream().map(config -> config.getAttrName())
+                .collect(Collectors.toSet());
         for (ColumnMetadata metadata : systemMetadata) {
             AttrType type = AttrTypeResolver.resolveType(metadata);
             AttrSubType subType = AttrTypeResolver.resolveSubType(metadata);
             if (AttrType.Internal.equals(type)) {
+                if (renderedAttrNames.contains(metadata.getAttrName())) {
+                    renderedAttrNames.remove(metadata.getAttrName());
+                }
                 continue;
             }
             AttrSpecification attrSpec = AttrSpecification.getAttrSpecification(type, subType, metadata.getEntity());
