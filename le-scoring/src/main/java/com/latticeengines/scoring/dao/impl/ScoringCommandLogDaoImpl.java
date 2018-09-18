@@ -22,7 +22,7 @@ public class ScoringCommandLogDaoImpl extends BaseDaoImpl<ScoringCommandLog> imp
         return ScoringCommandLog.class;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public List<ScoringCommandLog> findByScoringCommand(ScoringCommand scoringCommand) {
         Session session = getSessionFactory().getCurrentSession();
@@ -33,6 +33,7 @@ public class ScoringCommandLogDaoImpl extends BaseDaoImpl<ScoringCommandLog> imp
         return logs;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void delete(ScoringCommand scoringCommand) {
         Session session = getSessionFactory().getCurrentSession();
