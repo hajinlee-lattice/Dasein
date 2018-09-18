@@ -187,12 +187,14 @@ public class DropBoxServiceImpl implements DropBoxService {
         return new Policy().withStatements(//
                 listDropBoxStatement(bucket, dropBoxId), //
                 new Statement(Statement.Effect.Allow) //
-                        .withId("Objects") //
+                        .withId("objects") //
                         .withActions(//
                                 S3Actions.AbortMultipartUpload, //
                                 S3Actions.GetObject, //
                                 S3Actions.PutObject, //
-                                S3Actions.DeleteObject //
+                                S3Actions.DeleteObject, //
+                                S3Actions.GetObjectAcl, //
+                                S3Actions.SetObjectAcl
                         ) //
                         .withResources(new Resource(arnPrefix + WILD_CARD)) //
         );
@@ -237,7 +239,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     private String listDropBoxStmtId(String dropBoxId) {
-        return "ListDropBox" + dropBoxId;
+        return "list_" + dropBoxId;
     }
 
     private void revokeAccessToLatticeUser(String userName) {
@@ -323,14 +325,16 @@ public class DropBoxServiceImpl implements DropBoxService {
                         S3Actions.AbortMultipartUpload, //
                         S3Actions.GetObject, //
                         S3Actions.PutObject, //
-                        S3Actions.DeleteObject //
+                        S3Actions.DeleteObject, //
+                        S3Actions.GetObjectAcl, //
+                        S3Actions.SetObjectAcl //
                 ) //
                 .withResources(new Resource(arn), new Resource(arn + "*"));
     }
 
     private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId, String accountId) {
         return new Statement(Statement.Effect.Allow) //
-                .withId(accountId + "_" + dropBoxId) //
+                .withId(accountId + "_" + dropBoxId + "_list") //
                 .withPrincipals(new Principal(accountId)) //
                 .withActions(S3Actions.ListObjects) //
                 .withResources(new Resource(ARN_PREFIX + bucketName))

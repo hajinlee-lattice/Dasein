@@ -10,8 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
@@ -232,19 +230,6 @@ public class IAMServiceImpl implements IAMService {
             }
         }
         return iamClient;
-    }
-
-    private RetryTemplate getRetryTemplate() {
-        RetryTemplate retry = new RetryTemplate();
-        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-        retryPolicy.setMaxAttempts(3);
-        retry.setRetryPolicy(retryPolicy);
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(2000);
-        backOffPolicy.setMultiplier(2.0);
-        retry.setBackOffPolicy(backOffPolicy);
-        retry.setThrowLastExceptionOnExhausted(true);
-        return retry;
     }
 
 }

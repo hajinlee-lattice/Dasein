@@ -38,7 +38,6 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -47,6 +46,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 public class S3ServiceImpl implements S3Service {
 
     private static final Logger log = LoggerFactory.getLogger(S3ServiceImpl.class);
+    private static final CannedAccessControlList ACL = CannedAccessControlList.BucketOwnerRead;
 
     private static ExecutorService workers = null;
 
@@ -154,43 +154,18 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public Upload uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync) {
+    public void uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync) {
         key = sanitizePathToKey(key);
-        TransferManager tm = TransferManagerBuilder.standard().withS3Client(s3Client).build();
-        Upload upload = tm.upload(bucket, key, inputStream, null);
-
-        log.info(upload.getDescription());
-        if (sync) {
-            try {
-                upload.waitForCompletion();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
-            setAclRecursive(bucket, key);
-        }
-
-        return upload;
+        PutObjectRequest request = new PutObjectRequest(bucket, key, inputStream, null).withCannedAcl(ACL);
+        s3Client().putObject(request);
     }
 
     @Override
-    public Upload uploadLocalFile(String bucket, String key, File file, Boolean sync) {
+    public void uploadLocalFile(String bucket, String key, File file, Boolean sync) {
         key = sanitizePathToKey(key);
-        TransferManager tm = new TransferManager(s3Client);
-        Upload upload = tm.upload(bucket, key, file);
-
-        log.info(upload.getDescription());
-        if (sync) {
-            try {
-                upload.waitForCompletion();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
-            setAclRecursive(bucket, key);
-        }
-
-        return upload;
+        PutObjectRequest request = new PutObjectRequest(bucket, key, file).withCannedAcl(ACL);
+        s3Client().putObject(request);
+        log.info("Uploaded " + key);
     }
 
     @Override
@@ -201,13 +176,14 @@ public class S3ServiceImpl implements S3Service {
         InputStream emptyContent = new ByteArrayInputStream(new byte[0]);
         // create a PutObjectRequest passing the folder name suffixed by /
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, folderName + "/", emptyContent, metadata);
+        putObjectRequest.setCannedAcl(ACL);
         s3Client.putObject(putObjectRequest);
     }
 
     private void setAclRecursive(String bucket, String prefix) {
         prefix = sanitizePathToKey(prefix);
         for (S3ObjectSummary summary : listObjects(bucket, prefix)) {
-            s3Client.setObjectAcl(summary.getBucketName(), summary.getKey(), CannedAccessControlList.AuthenticatedRead);
+            s3Client.setObjectAcl(summary.getBucketName(), summary.getKey(), ACL);
         }
     }
 

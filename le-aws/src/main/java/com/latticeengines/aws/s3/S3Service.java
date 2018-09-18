@@ -20,9 +20,9 @@ public interface S3Service {
 
     MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync);
 
-    Upload uploadLocalFile(String bucket, String key, File file, Boolean sync);
+    void uploadLocalFile(String bucket, String key, File file, Boolean sync);
 
-    Upload uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync);
+    void uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync);
 
     void createFolder(String bucketName, String folderName);
 

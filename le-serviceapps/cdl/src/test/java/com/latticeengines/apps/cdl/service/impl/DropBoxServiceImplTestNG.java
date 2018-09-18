@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.LatticeUse
 
 import java.io.InputStream;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -16,14 +17,15 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.identitymanagement.model.AccessKey;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.amazonaws.services.s3.transfer.Upload;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.aws.iam.IAMService;
@@ -57,9 +59,16 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Value("${aws.test.customer.secret.key.encrypted}")
     private String customerSecret;
 
+    @Resource(name = "awsCredentials")
+    private BasicAWSCredentials awsCredentials;
+
+    private BasicAWSCredentialsProvider latticeProvider;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
+        latticeProvider = new BasicAWSCredentialsProvider(awsCredentials.getAWSAccessKeyId(), //
+                awsCredentials.getAWSSecretKey());
     }
 
     @AfterClass(groups = "functional")
@@ -109,10 +118,12 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         BasicAWSCredentialsProvider creds = //
                 new BasicAWSCredentialsProvider(response.getAccessKey(), response.getSecretKey());
         verifyAccess(creds, true);
+        verifyAccess(latticeProvider, false);
 
         dropboxService.revokeAccess();
         waitPolicyTakeEffect();
         verifyNoAccess(creds, false);
+        verifyAccess(latticeProvider, false);
     }
 
     private void testGrantAccessToExistingUser() {
@@ -120,8 +131,6 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         String userName = "c-" + dropBoxId;
         iamService.createCustomerUser(userName);
         AccessKey accessKey = iamService.createCustomerKey(userName);
-        BasicAWSCredentialsProvider creds = //
-                new BasicAWSCredentialsProvider(accessKey.getAccessKeyId(), accessKey.getSecretAccessKey());
 
         GrantDropBoxAccessRequest request = new GrantDropBoxAccessRequest();
         request.setAccessMode(LatticeUser);
@@ -131,11 +140,15 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(response.getLatticeUser(), userName);
         Assert.assertNull(response.getAccessKey());
 
+        BasicAWSCredentialsProvider creds = //
+                new BasicAWSCredentialsProvider(accessKey.getAccessKeyId(), accessKey.getSecretAccessKey());
         waitPolicyTakeEffect();
         verifyAccess(creds, false);
+        verifyAccess(latticeProvider, false);
         dropboxService.revokeAccess();
         waitPolicyTakeEffect();
         verifyNoAccess(creds, false);
+        verifyAccess(latticeProvider, false);
 
         iamService.deleteCustomerUser(userName);
     }
@@ -151,10 +164,12 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         BasicAWSCredentialsProvider creds = //
                 new BasicAWSCredentialsProvider(customerAccessKey, customerSecret);
         verifyAccess(creds, true);
+        verifyAccess(latticeProvider, false);
 
         dropboxService.revokeAccess();
         waitPolicyTakeEffect();
-        verifyNoAccess(creds, true);
+        // verifyNoAccess(creds, true);
+        verifyAccess(latticeProvider, false);
     }
 
     private void verifyAccess(BasicAWSCredentialsProvider creds, boolean upload) {
@@ -199,13 +214,11 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         String key = prefix + "/le.html";
         InputStream inputStream = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("dropbox/le.html");
-        TransferManager tm = TransferManagerBuilder.standard().withS3Client(s3Client).build();
-        Upload upload = tm.upload(bucket, key, inputStream, null);
-        try {
-            upload.waitForCompletion();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        ObjectMetadata om = new ObjectMetadata();
+        om.setSSEAlgorithm("AES256");
+        PutObjectRequest request = new PutObjectRequest(bucket, key, inputStream, om)
+                .withCannedAcl(CannedAccessControlList.BucketOwnerRead);
+        s3Client.putObject(request);
     }
 
     private void waitPolicyTakeEffect() {
