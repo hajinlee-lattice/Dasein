@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -29,7 +27,6 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.monitor.util.EmailTemplateBuilder;
 import com.latticeengines.monitor.util.EmailTemplateBuilder.Template;
 import com.latticeengines.monitor.util.EmailUtils;
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 
 @Component
 public class EmailServiceImpl implements EmailService {

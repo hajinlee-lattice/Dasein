@@ -130,6 +130,7 @@ public class HttpClientUtils {
         return reqFac;
     }
 
+    @SuppressWarnings("unused")
     private static List<ClientHttpRequestInterceptor> defaultInterceptors() {
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         interceptors.add(new HeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));

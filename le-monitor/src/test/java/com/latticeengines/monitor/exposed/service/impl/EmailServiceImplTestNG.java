@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.mockito.Mockito;
@@ -299,7 +298,6 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsExportSegmentSuccessEmail() {
-        Date date = new Date();
         emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());

@@ -21,6 +21,7 @@ public class HttpClientWithOptionalRetryUtilsUnitTestNG {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String AUTHORIZATION = "Authorization";
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testExecuteGetRequest() throws Exception {
         List<BasicNameValuePair> headers = new ArrayList<>();
@@ -45,6 +46,7 @@ public class HttpClientWithOptionalRetryUtilsUnitTestNG {
         Assert.assertTrue(headersObj.get(CONTENT_TYPE).asText().equals(APPLICATION_JSON));
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testExecutePostRequest() throws Exception {
         List<BasicNameValuePair> headers = new ArrayList<>();

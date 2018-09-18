@@ -1,6 +1,7 @@
 package com.latticeengines.monitor.util;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -18,7 +19,8 @@ public class EmailTemplateBuilder {
 
     public EmailTemplateBuilder(Template template) throws IOException {
         String tmpFile = template.templateFile();
-        htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(tmpFile));
+        htmlTemplate = IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(tmpFile),
+                Charset.defaultCharset());
     }
 
     public EmailTemplateBuilder replaceToken(String token, String value) {

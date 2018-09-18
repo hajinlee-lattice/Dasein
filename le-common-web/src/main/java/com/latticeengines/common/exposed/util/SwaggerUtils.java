@@ -10,6 +10,7 @@ public class SwaggerUtils {
 
     public static Predicate<RequestHandler> getApiSelector(final String ... classCanonicalNameRegex) {
         return new Predicate<RequestHandler>() {
+            @SuppressWarnings("deprecation")
             @Override
             public boolean apply(@Nullable RequestHandler requestHandler) {
                 if (requestHandler != null && requestHandler.getRequestMapping() != null) {

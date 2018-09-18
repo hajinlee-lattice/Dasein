@@ -1,7 +1,6 @@
 package com.latticeengines.common.exposed.rest.controller;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -32,7 +31,8 @@ public class BaseRestResource {
     }
     
     protected Pageable getPageRequest(Integer pageIndex, Integer size) {
-        return getPageRequest(pageIndex, size, null, null);
+        String[] sortColumns = {};
+        return getPageRequest(pageIndex, size, null, sortColumns);
     }
     
     protected Pageable getPageRequest(Integer pageIndex, Integer size, String... sortColumns) {

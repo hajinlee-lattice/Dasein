@@ -17,7 +17,7 @@ public class LoggerAdapterUnitTestNG {
     private static final String arg1 = "arg1";
     private static final String arg2 = "arg2";
     private static final String arg3 = "arg3";
-    private static final String[] argArray = new String[] { arg1, arg2, arg3 };
+    private static final Object[] argArray = new Object[] { arg1, arg2, arg3 };
     private static final Throwable throwable = new Exception("TestException");
     private static final Marker marker = MarkerFactory.getMarker("TestMarker");
 

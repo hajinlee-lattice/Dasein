@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.monitor.metric.service.MetricWriter;
 
+@SuppressWarnings("deprecation")
 @Component("influxDbMetricWriter")
 public class InfluxDbMetricWriter implements MetricWriter {
 

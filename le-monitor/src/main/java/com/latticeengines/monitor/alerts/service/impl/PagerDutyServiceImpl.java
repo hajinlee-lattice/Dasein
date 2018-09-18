@@ -33,6 +33,7 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.monitor.exposed.alerts.service.PagerDutyService;
 
+@SuppressWarnings("deprecation")
 @Component("pagerDutyService")
 public class PagerDutyServiceImpl implements PagerDutyService {
 
@@ -123,7 +124,6 @@ public class PagerDutyServiceImpl implements PagerDutyService {
         return response;
     }
 
-    @SuppressWarnings("unchecked")
     private String getRequestPayload(String description, String clientUrl, String incidentKey,
                                        Iterable<? extends BasicNameValuePair> details) {
         ObjectNode payload = om.createObjectNode();
@@ -144,7 +144,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
             BasicNameValuePair detail = iterator.next();
             detailsMap.put(detail.getName(), detail.getValue());
         }
-        payload.put("details", om.valueToTree(detailsMap));
+        payload.set("details", om.valueToTree(detailsMap));
 
         return JsonUtils.serialize(payload);
     }
