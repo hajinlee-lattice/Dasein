@@ -30,7 +30,7 @@ public class MetricActor extends ActorTemplate {
         return msg instanceof MeasurementMessage;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected void processMessage(Object msg) {
         MeasurementMessage message = (MeasurementMessage) msg;
         metricService.write(message.getMetricDB(), message.getMeasurements());

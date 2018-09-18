@@ -64,6 +64,7 @@ public class SampleMatchActorSystem {
         return getActorRef(SampleFuzzyMatchAnchorActor.class);
     }
 
+    @SuppressWarnings("deprecation")
     public void sendResponse(Object response, String returnAddress) {
         ActorRef ref = system.actorFor(returnAddress);
         ref.tell(response, null);

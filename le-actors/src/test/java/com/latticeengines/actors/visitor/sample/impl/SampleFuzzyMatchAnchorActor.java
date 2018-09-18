@@ -19,6 +19,7 @@ import akka.actor.ActorRef;
 @Component("sampleFuzzyMatchAnchorActor")
 @Scope("prototype")
 public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SampleFuzzyMatchAnchorActor.class);
 
     @Autowired

@@ -12,14 +12,10 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.Level;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 
 public abstract class Traveler {
-
-    private static final Logger log = LoggerFactory.getLogger(Traveler.class);
 
     private final String rootOperationUid;
     private final String travelerId;
@@ -96,7 +92,6 @@ public abstract class Traveler {
         return visitingQueue.poll();
     }
 
-    @SuppressWarnings("unchecked")
     public void addLocationsToVisitingQueue(String... nextLocations) {
         for (String location : nextLocations) {
             if (!visitingQueue.contains(location)) {

@@ -60,6 +60,7 @@ public abstract class SampleDataSourceWrapperActorTemplate extends ActorTemplate
         return false;
     }
 
+    @SuppressWarnings("deprecation")
     private void sendResponseToCaller(SampleDataSourceLookupRequest request, Response response) {
         ActorRef callerMicroEngineActorRef = context().actorFor(request.getCallerMicroEngineReference());
         callerMicroEngineActorRef.tell(response, self());

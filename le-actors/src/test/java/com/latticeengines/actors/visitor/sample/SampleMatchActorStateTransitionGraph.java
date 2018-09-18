@@ -8,7 +8,6 @@ import com.latticeengines.actors.exposed.traveler.Traveler;
 public class SampleMatchActorStateTransitionGraph {
     private List<String> dummyGraph = new ArrayList<>();
 
-    @SuppressWarnings("unchecked")
     public SampleMatchActorStateTransitionGraph(String... actorRefs) {
         if (actorRefs != null) {
             for (String ref : actorRefs) {

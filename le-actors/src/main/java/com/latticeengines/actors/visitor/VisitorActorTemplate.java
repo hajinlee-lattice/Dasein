@@ -70,6 +70,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         }
     }
 
+    @SuppressWarnings("deprecation")
     protected void travel(Traveler traveler, ActorRef currentActorRef, boolean rejected) {
         getGuideBook().logVisit(currentActorRef.path().toSerializationFormat(), traveler);
         String nextLocation = getNextLocation(traveler);
