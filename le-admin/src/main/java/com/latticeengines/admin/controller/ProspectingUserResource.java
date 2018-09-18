@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "internal_user_resource", description = "REST service resource for internally create prospecting users")
 @RestController
-@RequestMapping(value = "/users")
+@RequestMapping(value = "/prospectingusers")
 public class ProspectingUserResource {
 
     @Inject

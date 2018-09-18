@@ -26,7 +26,7 @@
     </security:http>
 
     <security:http use-expressions="true"
-                   pattern="/admin/users/**"
+                   pattern="/admin/prospectingusers/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
