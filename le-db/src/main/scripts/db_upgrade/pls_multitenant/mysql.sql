@@ -1,3 +1,5 @@
+USE `PLS_MultiTenant`;
+
 CREATE PROCEDURE `CreatePlayTypes`()
 BEGIN
   DECLARE tenantId INT;
@@ -103,17 +105,21 @@ DELIMITER;
 CREATE PROCEDURE `CreateDropBoxTable`()
   BEGIN
     create table `ATLAS_DROPBOX` (
-      `PID`          bigint not null auto_increment,
-      `DROPBOX`      varchar(8),
-      `FK_TENANT_ID` bigint not null,
+      `PID`              bigint not null auto_increment,
+      `ACCESS_MODE`      varchar(20),
+      `DROPBOX`          varchar(8),
+      `EXTERNAL_ACCOUNT` varchar(20),
+      `LATTICE_USER`     varchar(20),
+      `FK_TENANT_ID`     bigint not null,
       primary key (`PID`)
     )
       engine = InnoDB;
     alter table `ATLAS_DROPBOX`
-      add constraint `UX_DROPBOX` unique (`DROPBOX`);
+      add constraint UX_DROPBOX unique (`DROPBOX`);
     alter table `ATLAS_DROPBOX`
       add constraint `FK_ATLASDROPBOX_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`)
       on delete cascade;
+
   END;
 //
 DELIMITER;

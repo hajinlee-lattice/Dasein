@@ -28,6 +28,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 
@@ -95,6 +96,24 @@ public class DropBoxServiceImpl implements DropBoxService {
             return null;
         } else {
             return toPrefix(dropbox);
+        }
+    }
+
+    @Override
+    public DropBoxSummary getDropBoxSummary() {
+        DropBox dropbox = entityMgr.getDropBox();
+        if (dropbox == null) {
+            return null;
+        } else {
+            DropBoxSummary summary = new DropBoxSummary();
+            summary.setBucket(customersBucket);
+            summary.setDropBox(dropbox.getDropBox());
+            if (dropbox.getAccessMode() != null) {
+                summary.setAccessMode(dropbox.getAccessMode());
+                summary.setExternalAccount(dropbox.getExternalAccount());
+                summary.setLatticeUser(dropbox.getLatticeUser());
+            }
+            return summary;
         }
     }
 
@@ -327,7 +346,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                         S3Actions.DeleteObject, //
                         S3Actions.SetObjectAcl //
                 ) //
-                .withResources(new Resource(arn), new Resource(arn + "*"));
+                .withResources(new Resource(arn + "*"));
     }
 
     private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId, String accountId) {

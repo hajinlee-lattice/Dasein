@@ -325,6 +325,15 @@
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
+    <security:http use-expressions="true"
+                   pattern="/pls/dropbox/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
+
     <!-- apis inherited from le-app, need to set access roles here -->
     <security:http use-expressions="true"
                    pattern="/pls/latticeinsights/**"

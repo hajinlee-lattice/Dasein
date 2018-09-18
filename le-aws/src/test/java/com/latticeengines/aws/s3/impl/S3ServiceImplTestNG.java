@@ -184,7 +184,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
                                 S3Actions.DeleteObject, //
                                 S3Actions.SetObjectAcl
                         ) //
-                        .withResources(new Resource(arn), new Resource(arn + "*"));
+                        .withResources(new Resource(arn + "*"));
     }
 
     private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId, String accountId) {
