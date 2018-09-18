@@ -15,6 +15,8 @@ public class LoginDocument {
     private String randomness;
     private boolean success;
     private String authenticationRoute;
+    private String firstName;
+    private String lastName;
 
     public LoginDocument() {
 
@@ -24,6 +26,26 @@ public class LoginDocument {
         String[] tokens = ticketData.split("\\.");
         setUniqueness(tokens[0]);
         setRandomness(tokens[1]);
+    }
+
+    @JsonProperty("FirstName")
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    @JsonProperty("FirstName")
+    public String getFirstName() {
+        return firstName;
+    }
+
+    @JsonProperty("LastName")
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    @JsonProperty("LastName")
+    public String getLastName() {
+        return lastName;
     }
 
     @JsonProperty("Errors")

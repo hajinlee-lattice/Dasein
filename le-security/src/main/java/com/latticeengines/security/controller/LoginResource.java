@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +20,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -39,6 +44,12 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
+<<<<<<< .mine
+//import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+||||||| .r95610
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+=======
+>>>>>>> .r95691
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -53,7 +64,19 @@ public class LoginResource {
 
     private static final Logger log = LoggerFactory.getLogger(LoginResource.class);
 
+<<<<<<< .mine
+    @Value("${security.app.public.url}")
+    private String APP_BASE_URL;
+
     @Autowired
+||||||| .r95610
+    @Autowired
+    private GlobalAuthenticationService globalAuthenticationService;
+
+    @Autowired
+=======
+    @Autowired
+>>>>>>> .r95691
     private SessionService sessionService;
 
     @Autowired
@@ -68,6 +91,12 @@ public class LoginResource {
     @Autowired
     private TenantService tenantService;
 
+    @Autowired
+    private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
+
+    @Autowired
+    private GlobalAuthUserEntityMgr gaUserEntityMgr;
+
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Login to Lattice external application")
@@ -81,9 +110,19 @@ public class LoginResource {
                 doc.setErrors(Collections.singletonList("The credentials provided for login are incorrect."));
                 return doc;
             }
+
             doc.setRandomness(ticket.getRandomness());
             doc.setUniqueness(ticket.getUniqueness());
             doc.setSuccess(true);
+
+            GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
+            GlobalAuthUser userData = gaUserEntityMgr.findByUserId(ticketData.getUserId());
+            if (userData == null) {
+                doc.setErrors(Collections.singletonList("The credentials provided for login are incorrect."));
+                return doc;
+            }
+            doc.setFirstName(userData.getFirstName());
+            doc.setLastName(userData.getLastName());
 
             LoginResult result = doc.new LoginResult();
             result.setMustChangePassword(ticket.isMustChangePassword());
@@ -102,7 +141,6 @@ public class LoginResource {
             }
             throw e;
         }
-
         return doc;
     }
 
@@ -177,27 +215,38 @@ public class LoginResource {
     public SimpleBooleanResponse logout(HttpServletRequest request) {
         String token = request.getHeader(Constants.AUTHORIZATION);
         if (StringUtils.isNotEmpty(token)) {
-            // Make sure the token has at least two parts separated by a period in order to generate a valid ticket.
+            // Make sure the token has at least two parts separated by a period
+            // in order to generate a valid ticket.
             if (token.split("\\.").length > 1) {
                 sessionService.logout(new Ticket(token));
                 return SimpleBooleanResponse.successResponse();
             } else {
                 log.warn("Invalid token (missing period) passed by HttpServletRequest to Logout.");
-                // For now, return a successful response even though the token was invalid.  Based on the behavior of
-                // login above, it looks like the proper response would be to through an exception.  However, throwing
-                // exception is undesirable because they might trigger pager duty.  Returning a failure response was
-                // considered but from looking at the UI code, unless a HTTP 401 Unauthorized response status code is
-                // set, the UI doesn't properly clear the user state on a failed response.  It seemed the only way to
-                // set the 401 code was to throw an exception so a failed response won't do.  Since the desired outcome
-                // of an invalid token is to clear the user state and logout the user which is the same as the behavior
-                // for a valid token, we return a successful response to trigger the proper logout action.
-                // TODO: Reevaluate the proper response for this error condition (return success, return failures, or
-                //       throw exception).
+                // For now, return a successful response even though the token
+                // was invalid. Based on the behavior of
+                // login above, it looks like the proper response would be to
+                // through an exception. However, throwing
+                // exception is undesirable because they might trigger pager
+                // duty. Returning a failure response was
+                // considered but from looking at the UI code, unless a HTTP 401
+                // Unauthorized response status code is
+                // set, the UI doesn't properly clear the user state on a failed
+                // response. It seemed the only way to
+                // set the 401 code was to throw an exception so a failed
+                // response won't do. Since the desired outcome
+                // of an invalid token is to clear the user state and logout the
+                // user which is the same as the behavior
+                // for a valid token, we return a successful response to trigger
+                // the proper logout action.
+                // TODO: Reevaluate the proper response for this error condition
+                // (return success, return failures, or
+                // throw exception).
                 return SimpleBooleanResponse.successResponse();
             }
         } else {
             log.warn("Logout request made with empty token.");
-            // See above invalid token case as to why we return a successful response here despite the empty token.
+            // See above invalid token case as to why we return a successful
+            // response here despite the empty token.
             return SimpleBooleanResponse.successResponse();
         }
     }
