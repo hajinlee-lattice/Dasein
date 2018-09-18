@@ -2,7 +2,6 @@ package com.latticeengines.db.naming;
 
 import java.util.List;
 
-
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.ImplicitForeignKeyNameSource;
 import org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl;
@@ -16,6 +15,7 @@ public class LEImplicitNamingStrategy extends ImplicitNamingStrategyJpaCompliant
     private static final long serialVersionUID = 4391821679953137277L;
     public static final LEImplicitNamingStrategy INSTANCE = new LEImplicitNamingStrategy();
 
+    @SuppressWarnings("unused")
     @Override
     public Identifier determineForeignKeyName(ImplicitForeignKeyNameSource source) {
         Identifier userProvidedIdentifier = source.getUserProvidedIdentifier();

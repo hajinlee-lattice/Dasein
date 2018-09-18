@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -28,10 +29,10 @@ public abstract class PostProcessor {
     public void process(File file) {
         if (file.exists()) {
             try (InputStream stream = new FileInputStream(file)) {
-                List<String> lines = IOUtils.readLines(stream);
+                List<String> lines = IOUtils.readLines(stream, Charset.defaultCharset());
                 process(lines);
                 try (OutputStream ostream = new FileOutputStream(file)) {
-                    IOUtils.writeLines(lines, "\n", ostream);
+                    IOUtils.writeLines(lines, "\n", ostream, Charset.defaultCharset());
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
