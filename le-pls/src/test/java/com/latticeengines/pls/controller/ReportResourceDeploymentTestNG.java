@@ -1,9 +1,6 @@
 package com.latticeengines.pls.controller;
 
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Map;
 
@@ -15,19 +12,22 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-public class ReportResourceTestNG extends PlsFunctionalTestNGBase {
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+public class ReportResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String REPORT_DATA = "{\"report\":\"abd\"}";
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupMarketoEloquaTestEnvironment();
     }
 
     @SuppressWarnings("unchecked")
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         switchToExternalAdmin();
         List<?> reports = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports",
@@ -53,13 +53,13 @@ public class ReportResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void createOrUpdateReportWithAccess() throws Exception {
         switchToExternalAdmin();
         assertTrue(createOrUpdate().isSuccess());
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "createOrUpdateReportWithAccess" })
+    @Test(groups = "deployment", dependsOnMethods = { "createOrUpdateReportWithAccess" })
     public void findReportByName() throws Exception {
         switchToExternalAdmin();
         Report report = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports/SomeReport",
@@ -70,7 +70,7 @@ public class ReportResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(payload, REPORT_DATA);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void createOrUpdateReportWithNoAccess() throws Exception {
         switchToExternalUser();
         boolean exception = false;

@@ -1,12 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 import java.io.InputStream;
 import java.util.List;
 
@@ -24,11 +17,18 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
-public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+public class MetadataFileUploadServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     
     @Autowired
     private Configuration yarnConfiguration;
@@ -36,7 +36,7 @@ public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
     
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         MetadataProxy proxy = mock(MetadataProxy.class);
         when(proxy.createArtifact(anyString(), anyString(), anyString(), any(Artifact.class))).thenReturn(true);
@@ -45,25 +45,25 @@ public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase
         switchToSuperAdmin();
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", eloquaTenant.getName()));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "uploadFile" })
+    @Test(groups = "deployment", dependsOnMethods = { "uploadFile" })
     public void getModules() {
         List<Module> modules = metadataFileUploadService.getModules();
         assertEquals(modules.size(), 3);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "uploadFile" })
+    @Test(groups = "deployment", dependsOnMethods = { "uploadFile" })
     public void getArtifacts() {
         List<Artifact> artifacts = metadataFileUploadService.getArtifacts("module2",
                 ArtifactType.Function.getUrlToken());
         assertEquals(artifacts.size(), 1);
     }
 
-    @Test(groups = "functional", dataProvider = "fileScenarios")
+    @Test(groups = "deployment", dataProvider = "fileScenarios")
     public void uploadFile(String artifactType, //
             String moduleName, //
             String artifactName, //

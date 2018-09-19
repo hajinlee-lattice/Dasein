@@ -1,7 +1,6 @@
 package com.latticeengines.pls.functionalframework;
 
 import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +12,12 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
-import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
-public class PlsFunctionalTestNGBase extends PlsDeploymentTestNGBase {
+public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired
     private QuotaEntityMgr quotaEntityMgr;
@@ -36,9 +33,6 @@ public class PlsFunctionalTestNGBase extends PlsDeploymentTestNGBase {
 
     @Autowired
     private GlobalAuthFunctionalTestBed functionalTestBed;
-
-    protected Tenant marketoTenant;
-    protected Tenant eloquaTenant;
 
     @PostConstruct
     private void postConstruct() {
@@ -73,47 +67,6 @@ public class PlsFunctionalTestNGBase extends PlsDeploymentTestNGBase {
         testBed.bootstrap(numTenants);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
-    }
-
-    /**
-     * bootstrap two tenants with random tenantIds. The first has a marketo
-     * modelsummary, the second has an eloqua one. The tenants are marketoTenant
-     * and eloquaTenant, the modelIds are marketoModelId and eloquaModelId.
-     *
-     * @throws Exception
-     */
-    protected void setupMarketoEloquaTestEnvironment() throws Exception {
-        testBed.bootstrap(2);
-        setupDbUsingDefaultTenantIds();
-        switchToSuperAdmin();
-    }
-
-    /**
-     * the LedpResponseErrorHandler bound to the testbed's restTemplate. Can be
-     * used to assert http errors.
-     *
-     * @throws Exception
-     */
-    protected LedpResponseErrorHandler getErrorHandler() {
-        return testBed.getErrorHandler();
-    }
-
-    protected void setupDbUsingDefaultTenantIds() throws Exception {
-        setupDbUsingDefaultTenantIds(true, true);
-    }
-
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
-        setupDbUsingDefaultTenantIds(useTenant1, useTenant2, false, true);
-    }
-
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries,
-            boolean createSegments) throws Exception {
-        marketoTenant = testTenants().get(0);
-        eloquaTenant = testTenants().get(1);
-        testBed.setMainTestTenant(eloquaTenant);
-        mainTestTenant = testBed.getMainTestTenant();
-        setupDbWithMarketoSMB(marketoTenant, createSummaries, createSegments);
-        setupDbWithEloquaSMB(eloquaTenant, createSummaries, createSegments);
     }
 
     protected void cleanupQuotaDB() {
