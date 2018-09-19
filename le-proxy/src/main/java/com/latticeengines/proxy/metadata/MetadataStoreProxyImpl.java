@@ -25,7 +25,9 @@ public class MetadataStoreProxyImpl extends MicroserviceRestApiProxy implements 
     @Override
     public Flux<ColumnMetadata> getMetadata(String mdsName, String... namespace) {
         String url = constructUrl("/{mdsName}/namespace/{namespace}", mdsName, StringUtils.join(namespace, ","));
-        return getFlux("get metadata", url, ColumnMetadata.class);
+        // getFlux is having issues with spring security
+        // use getList to workaround
+        return Flux.fromIterable(getList("get metadata", url, ColumnMetadata.class));
     }
 
     @Override
