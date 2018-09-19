@@ -43,7 +43,8 @@ angular.module('common.datacloud.query.results', [
         config: Config,
         currentTargetTab: 'Accounts',
         tmpAccounts: [],
-        tmpContacts: []
+        tmpContacts: [],
+        recommendationCounts: {}
     });
 
     vm.init = function() {
@@ -362,6 +363,7 @@ angular.module('common.datacloud.query.results', [
         PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
 
         updatePage();
+        vm.makeRecommendationCounts();
     }
 
     vm.showNoResultsText = function(accounts, contacts) {
@@ -490,6 +492,33 @@ angular.module('common.datacloud.query.results', [
             });
         };
     };
+
+    vm.makeRecommendationCounts = function() {
+        var sections = {
+                total: 0,
+                selected: 0,
+                supressed: 0,
+                launched: 0,
+                contacts: 0
+            },
+            buckets = {};
+
+        vm.accountsCoverage.bucketCoverageCounts.forEach(function(count) {
+            sections.total += parseInt(count.count);
+        });
+        
+        for(var i in vm.selectedBuckets) {
+            var bucket = vm.selectedBuckets[i];
+            var count = vm.accountsCoverage.bucketCoverageCounts.find(function(value) {
+                return value.bucket === bucket;
+            });
+            sections.selected += parseInt(count.count);
+        }
+        sections.supressed = parseInt(sections.total - sections.selected);
+
+        vm.recommendationCounts = sections;
+        PlaybookWizardStore.setRecommendationCounts(sections);
+    }
 
     $scope.$watch('vm.current', function(newValue, oldValue) {
         vm.loading = true;

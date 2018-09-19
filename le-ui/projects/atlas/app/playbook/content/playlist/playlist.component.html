@@ -98,7 +98,7 @@
 
                         <!-- Ratings chart if play has Launched -->
                         <div 
-                            ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched' && vm.current.tileStates[play.name].launching != true"
+                            ng-if="(play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'UnLaunched') && vm.current.tileStates[play.name].launching != true"
                             class="{{ play.ratingEngine.tileClass }}">
                             <bar-chart
                                 config="play.ratingEngine.chartConfig" 
@@ -141,10 +141,10 @@
                             <button 
                                 type="button"
                                 class="button white-button pull-right"
-                                ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'Failed'"
+                                ng-if="(play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'UnLaunched') || play.launchHistory.mostRecentLaunch.launchState === 'Failed'"
                                 ng-disabled="play.ratingEngine.status != 'ACTIVE'"
-                                ng-click="vm.launchPlay($event, play)">
-                                Re-Launch
+                                ui-sref="home.playbook.launch({play_name:play.name})">
+                                Relaunch
                             </button>
                         </span>
 

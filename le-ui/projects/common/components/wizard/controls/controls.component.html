@@ -10,7 +10,7 @@
     </div>
     <div class="pull-right">
         <button
-            ng-if="vm.secondaryLink && vm.item.lastRoute"
+            ng-if="(vm.secondaryLink || vm.item.secondaryLink || vm.item.secondaryFn) && vm.item.lastRoute"
             class="button white-button"
             ng-click="vm.clickSecondary()">
             {{vm.item.secondaryLinkLabel}}
@@ -24,6 +24,5 @@
             {{vm.item.nextLabel || 'Next'}}
             <i ng-if="vm.item.showNextSpinner && vm.nextDisabled" class="fa fa-spinner fa-pulse fa-fw"></i>
         </button>
-
     </div>
 </div>

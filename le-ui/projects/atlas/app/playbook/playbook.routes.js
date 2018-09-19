@@ -10,10 +10,12 @@ angular
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.rating',
     'lp.playbook.wizard.targets',
+    'lp.playbook.wizard.name',
     'lp.playbook.wizard.crmselection',
     'lp.playbook.wizard.insights',
     'lp.playbook.wizard.preview',
-    'lp.playbook.wizard.launch'
+    'lp.playbook.wizard.launch',
+    'lp.playbook.wizard.newlaunch',
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -585,14 +587,32 @@ angular
                 WizardProgressContext: function() {
                     return 'playbook.create';
                 },
-                WizardProgressItems: function(PlaybookWizardStore) {
+                WizardProgressItems: function($state, PlaybookWizardStore) {
                     return [
-                        { label: 'Rating', state: 'rating', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true },
-                        { label: 'CRM System', state: 'rating.crmselection', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true },
-                        { label: 'Targets', state: 'rating.crmselection.targets', progressDisabled: true },
-                        { label: 'Insights', state: 'rating.crmselection.targets.insights', progressDisabled: true},
-                        { label: 'Preview', state: 'rating.crmselection.targets.insights.preview', progressDisabled: true },
-                        { label: 'Launch', state: 'rating.crmselection.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch, progressDisabled: true }
+                        {
+                            label: 'Model', 
+                            state: 'rating', 
+                            nextFn: function(nextState) {
+                                $state.go(nextState); // we don't want to auto save anymore, but go to the next step (it'll be saved in the store)
+                            },
+                            //PlaybookWizardStore.nextSaveGeneric, 
+                            progressDisabled: true 
+                        },{
+                            label: 'Name', 
+                            state: 'rating.name', 
+                            secondaryLinkLabel: 'Save & Create Insights',
+                            secondaryFn: function() {
+                                PlaybookWizardStore.nextSaveAndGoto('home.playbook.dashboard.insights', {
+                                    include_play_name: true
+                                });
+                            },
+                            lastRoute: true,
+                            nextFn: function() {
+                                PlaybookWizardStore.nextSaveAndGoto('home.playbook');
+                            },
+                            nextLabel: 'Save & Go to Campaign List',
+                            progressDisabled: true
+                        }
                     ];
                 },
                 WizardControlsOptions: function() {
@@ -654,8 +674,135 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.crmselection', {
-            url: '/crm-selection',
+        .state('home.playbook.create.rating.name', {
+            url: '/name',
+            params: {
+                section: 'wizard.insights',
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
+            },
+            resolve: {
+                types: function($q, PlaybookWizardStore) {
+                    var deferred = $q.defer();
+
+                    PlaybookWizardStore.getTypes().then(function(result){
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                'wizard_content@home.playbook.create': 'name'
+            }
+        })
+        .state('home.playbook.launch', {
+            url: '/launch/:play_name',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook',
+                play_name: ''
+            },
+            onEnter: function($stateParams, PlaybookWizardStore) {
+                var play = PlaybookWizardStore.getCurrentPlay() || {};
+                if(play.name) {
+                    PlaybookWizardStore.setSettings({
+                        name: play.name,
+                        createdBy: play.createdBy,
+                        ratingEngine: {
+                            id: play.ratingEngine.id,
+
+                        }
+                    });
+                }
+            },
+            onExit: function($transition$, PlaybookWizardStore){
+                var to = $transition$._targetState._definition.name;
+
+                if (!to.includes('home.playbook.create')){
+                    PlaybookWizardStore.clear();                
+                }
+            },
+            resolve: {
+                WizardValidationStore: function(PlaybookWizardStore) {
+                    return PlaybookWizardStore;
+                },
+                WizardProgressContext: function() {
+                    return 'playbook.launch';
+                },
+                WizardProgressItems: function($state, PlaybookWizardStore) {
+                    return [
+                        {
+                            label: 'System',  // CRM Selection
+                            state: 'crmselection', 
+                            nextFn: function(nextState) {
+                                $state.go(nextState); // we don't want to auto save anymore, but go to the next step (it'll be saved in the store)
+                            },
+                            progressDisabled: true 
+                        },{
+                            label: 'Suppressions', // Targets
+                            state: 'crmselection.targets', 
+                            nextFn: function(nextState) {
+                                $state.go(nextState);
+                            },
+                            progressDisabled: true
+                        },{
+                            label: 'Launch', // *New*
+                            state: 'crmselection.targets.launch', 
+                            nextLabel: 'Save & Launch later',
+                            nextFn: function(nextState) {
+                                PlaybookWizardStore.nextSaveLaunch(nextState, true);
+                            },
+                            progressDisabled: true
+                        }
+                        //{ label: 'CRM System', state: 'rating.crmselection', nextFn: PlaybookWizardStore.nextSaveGeneric, progressDisabled: true }.
+                        // { label: 'Targets', state: 'rating.crmselection.targets', progressDisabled: true },
+                        // { label: 'Insights', state: 'rating.crmselection.targets.insights', progressDisabled: true},
+                        // { label: 'Preview', state: 'rating.crmselection.targets.insights.preview', progressDisabled: true },
+                        // { label: 'Launch', state: 'rating.crmselection.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch, progressDisabled: true }
+                    ];
+                },
+                WizardControlsOptions: function() {
+                    return { 
+                        backState: 'home.playbook', 
+                        nextState: 'home.playbook' 
+                    };
+                },
+                WizardHeaderTitle: function() {
+                    return 'Launch Play';
+                },
+                WizardContainerId: function() {
+                    return 'playbook';
+                }
+            },
+            views: {
+                'summary@': {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
+                },
+                'main@': {
+                    controller: 'ImportWizard',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/wizard.component.html'
+                },
+                'wizard_progress@home.playbook.launch': {
+                    resolve: {
+                    },
+                    controller: 'ImportWizardProgress',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/progress/progress.component.html'
+                },
+                'wizard_controls@home.playbook.launch': {
+                    resolve: {
+                    },
+                    controller: 'ImportWizardControls',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/controls/controls.component.html'
+                }
+            },
+            redirectTo: 'home.playbook.launch.crmselection'
+        })
+        .state('home.playbook.launch.crmselection', {
+            url: '/system',
             params: {
                 section: 'wizard.insights',
                 pageIcon: 'ico-playbook',
@@ -682,29 +829,17 @@ angular
                         }
 
                         deferred.resolve(orgs);
-                        
-                        // var orgs = result.CRM;
-
-                        // angular.forEach(orgs, function(value, key) {
-                        //     if (value.isRegistered === false) {
-                        //         orgs.splice(key, 1);
-                        //     }
-                        // });
-
-                        // orgs.filter(function(vendor){ return vendor.Name === "Magenic" });
-
-                        // deferred.resolve(orgs);
                     });
 
                     return deferred.promise;
                 }
             },
             views: {
-                'wizard_content@home.playbook.create': 'crmSelection'
+                'wizard_content@home.playbook.launch': 'crmSelection'
             }
         })
-        .state('home.playbook.create.rating.crmselection.targets', {
-            url: '/targets',
+        .state('home.playbook.launch.crmselection.targets', {
+            url: '/suppressions',
             params: {
                 section: 'wizard.targets',
                 currentTargetTab: 'accounts',
@@ -810,77 +945,89 @@ angular
                 }]
             },
             views: {
-                "wizard_content@home.playbook.create": {
+                "wizard_content@home.playbook.launch": {
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
                 }
             }
         })
-        .state('home.playbook.create.rating.crmselection.targets.insights', {
-            url: '/insights',
+        .state('home.playbook.launch.crmselection.targets.launch', {
+            url: '/launch',
             params: {
                 section: 'wizard.insights',
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Playbook'
             },
-            resolve: {
-                Entities : function(){
-                    return ['account','recommendation','variable'];
-                },
-                TalkingPoints: function(CgTalkingPointStore, $stateParams) {
-                    var play_name = $stateParams.play_name || '';
-                    return CgTalkingPointStore.getTalkingPoints(play_name);
-                },
-                TalkingPointAttributes: function (CgTalkingPointStore, Entities) {
-                    return CgTalkingPointStore.getAttributes(Entities);
-                },
-                TalkingPointPreviewResources: function(CgTalkingPointStore) {
-                    return CgTalkingPointStore.getTalkingPointsPreviewResources();
-                },
-                loadTinyMce: function($ocLazyLoad) {
-                    return $ocLazyLoad.load('lib/js/tinymce/tinymce.min.js');
-                },
-                loadUiTinyMce: function($ocLazyLoad) {
-                    return $ocLazyLoad.load('lib/js/tinymce/uitinymce.min.js');
-                }
-            },
+            resolve: {},
             views: {
-                'wizard_content@home.playbook.create': {
-                    controller: 'PlaybookWizardInsights',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/insights/insights.component.html'
-                }
+                'wizard_content@home.playbook.launch': 'newlaunch'
             }
         })
-        .state('home.playbook.create.rating.crmselection.targets.insights.preview', {
-            url: '/preview',
-            params: {
-                pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
-            },
-            resolve: {
-                Play: function(PlaybookWizardStore) {
-                    return PlaybookWizardStore.getCurrentPlay();
-                },
-                TalkingPointPreviewResources: function(CgTalkingPointStore) {
-                    return CgTalkingPointStore.getTalkingPointsPreviewResources();
-                }
-            },
-            views: {
-                'wizard_content@home.playbook.create': {
-                    controller: 'PlaybookWizardPreview',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/preview/preview.component.html'
-                }
-            }
-        })
-        .state('home.playbook.create.rating.crmselection.targets.insights.preview.launch', {
-            url: '/launch',
-            views: {
-                'wizard_content@home.playbook.create': {
-                    templateUrl: 'app/playbook/content/launch/launch.component.html'
-                }
-            }
-        })
+        // .state('home.playbook.create.rating.crmselection.targets.insights', {
+        //     url: '/insights',
+        //     params: {
+        //         section: 'wizard.insights',
+        //         pageIcon: 'ico-playbook',
+        //         pageTitle: 'Playbook'
+        //     },
+        //     resolve: {
+        //         Entities : function(){
+        //             return ['account','recommendation','variable'];
+        //         },
+        //         TalkingPoints: function(CgTalkingPointStore, $stateParams) {
+        //             var play_name = $stateParams.play_name || '';
+        //             return CgTalkingPointStore.getTalkingPoints(play_name);
+        //         },
+        //         TalkingPointAttributes: function (CgTalkingPointStore, Entities) {
+        //             return CgTalkingPointStore.getAttributes(Entities);
+        //         },
+        //         TalkingPointPreviewResources: function(CgTalkingPointStore) {
+        //             return CgTalkingPointStore.getTalkingPointsPreviewResources();
+        //         },
+        //         loadTinyMce: function($ocLazyLoad) {
+        //             return $ocLazyLoad.load('lib/js/tinymce/tinymce.min.js');
+        //         },
+        //         loadUiTinyMce: function($ocLazyLoad) {
+        //             return $ocLazyLoad.load('lib/js/tinymce/uitinymce.min.js');
+        //         }
+        //     },
+        //     views: {
+        //         'wizard_content@home.playbook.create': {
+        //             controller: 'PlaybookWizardInsights',
+        //             controllerAs: 'vm',
+        //             templateUrl: 'app/playbook/content/insights/insights.component.html'
+        //         }
+        //     }
+        // })
+        // .state('home.playbook.create.rating.crmselection.targets.insights.preview', {
+        //     url: '/preview',
+        //     params: {
+        //         pageIcon: 'ico-playbook',
+        //         pageTitle: 'Playbook'
+        //     },
+        //     resolve: {
+        //         Play: function(PlaybookWizardStore) {
+        //             return PlaybookWizardStore.getCurrentPlay();
+        //         },
+        //         TalkingPointPreviewResources: function(CgTalkingPointStore) {
+        //             return CgTalkingPointStore.getTalkingPointsPreviewResources();
+        //         }
+        //     },
+        //     views: {
+        //         'wizard_content@home.playbook.create': {
+        //             controller: 'PlaybookWizardPreview',
+        //             controllerAs: 'vm',
+        //             templateUrl: 'app/playbook/content/preview/preview.component.html'
+        //         }
+        //     }
+        // })
+        // .state('home.playbook.create.rating.crmselection.targets.insights.preview.launch', {
+        //     url: '/launch',
+        //     views: {
+        //         'wizard_content@home.playbook.create': {
+        //             templateUrl: 'app/playbook/content/launch/launch.component.html'
+        //         }
+        //     }
+        // })
 });

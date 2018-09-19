@@ -13,9 +13,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
         vm.showMAPSystems = vm.featureflags.EnableCdl;
 
         vm.$onInit = function() {
-
-            console.log(vm.orgs);
-
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
             $scope.excludeItemsWithoutSalesforceId = false;

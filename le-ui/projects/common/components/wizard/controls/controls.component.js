@@ -77,8 +77,13 @@ angular.module('common.wizard.controls', [])
 
     }
 
-    vm.clickSecondary = function() {
-        $state.go(vm.item.secondaryLink);
+    vm.clickSecondary = function(state, params) {
+        var current = vm.itemMap[$state.current.name];
+        if(current.secondaryFn) {
+            current.secondaryFn(state, params);
+        } else {
+            $state.go(vm.item.secondaryLink);
+        }
     }
 
     vm.go = function(state, isPrev, params) {

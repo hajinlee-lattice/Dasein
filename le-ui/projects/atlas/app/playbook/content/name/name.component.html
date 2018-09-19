@@ -1,0 +1,18 @@
+<div class="playbook-content name container">
+    <ul>
+        <li>
+            <label for="name">Enter Name</label>
+            <input class="form-control" id="name" type="text" ng-model="$ctrl.updatedPlay['displayName']" ng-blur="$ctrl.change()" />
+        </li>
+        <li>
+            <label for="description">Enter Description</label>
+            <textarea class="form-control" id="description" ng-model="$ctrl.updatedPlay['description']" ng-blur="$ctrl.change()">{{$ctrl.currentPlay.description}}</textarea>
+        </li>
+        <li>
+            <label for="type">Choose Type</label>
+            <select class="form-control" id="type" ng-model="$ctrl.updatedPlay['typeId']" ng-change="$ctrl.change()" ng-options="type.id as type.displayName for type in $ctrl.types">
+                <option value="" hidden disabled>Select</option>
+            </select>
+        </li>
+    </ul>
+</div>

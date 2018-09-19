@@ -1,5 +1,6 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, RatingsEngineStore){
+.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, 
+    PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, RatingsEngineStore){
     var PlaybookWizardStore = this;
     
     this.current = {
@@ -22,11 +23,14 @@ angular.module('lp.playbook')
     this.init = function() {
 
         this.settings = {};
+        this.launch = {};
         this.savedSegment = null;
         this.currentPlay = this.currentPlay || null;
         this.playLaunches = null;
         this.savedTalkingPoints = null;
         this.targetData = null;
+        this.types = null;
+        this.recommendationCounts = null;
 
         this.settings_form = {
             play_display_name: '',
@@ -49,10 +53,12 @@ angular.module('lp.playbook')
             settings: false,
             rating: true,
             targets: false,
+            name: true,
             crmselection: false,
             insights: false,
             preview: true,
-            launch: true
+            launch: true,
+            newlaunch: true
         };
 
         this.barChartConfig = {
@@ -206,12 +212,9 @@ angular.module('lp.playbook')
         }
     }
     
-    
-
-
     this.nextSaveGeneric = function(nextState) {
-        var changed = false,
-            opts = PlaybookWizardStore.settings;
+        var opts = PlaybookWizardStore.settings,
+            changed = false;
 
         if(PlaybookWizardStore.currentPlay && PlaybookWizardStore.currentPlay.name) {
             opts.name = PlaybookWizardStore.currentPlay.name;
@@ -251,6 +254,78 @@ angular.module('lp.playbook')
         }
     }
 
+    this.nextSaveAndGoto = function(nextState) {
+        var opts = PlaybookWizardStore.settings,
+            changed = false;
+
+        if(PlaybookWizardStore.currentPlay && PlaybookWizardStore.currentPlay.name) {
+            opts.name = PlaybookWizardStore.currentPlay.name;
+        }
+
+        if(PlaybookWizardStore.settings) {
+            if(PlaybookWizardStore.currentPlay) {
+                for(var i in PlaybookWizardStore.settings) {
+                    var key = i,
+                        setting = PlaybookWizardStore.settings[i];
+
+                    if(PlaybookWizardStore.currentPlay[key] != setting) {
+                        changed = true;
+                        break;
+                    }
+                }
+            } else {
+                changed = true;
+            }
+            if(changed) {
+                PlaybookWizardStore.savePlay(opts).then(function(play){
+                    if(['home.playbook.dashboard'].indexOf(nextState) > -1) {
+                        $state.go(nextState);
+                    } else {
+                        $state.go(nextState, {play_name: play.name});
+                    }
+                });
+            }
+        }
+    }
+
+    this.nextSaveLaunch = function(nextState, saveOnly) {
+        var play = PlaybookWizardStore.settings,
+            launchObj = {
+                bucketsToLaunch: PlaybookWizardStore.getBucketsToLaunch(),
+                destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
+                destinationSysType: PlaybookWizardStore.getDestinationSysType(),
+                destinationAccountId: PlaybookWizardStore.getDestinationAccountId(),
+                topNCount: PlaybookWizardStore.getTopNCount(),
+                //excludeItems: PlaybookWizardStore.getExcludeItems()
+            }
+        if(play) {
+            if(play.ratingEngine){
+                RatingsEngineStore.getRating(play.ratingEngine.id).then(function(result){
+                    PlaybookWizardStore.setRating(result);
+                });
+            } else {
+                var ratingEngine = PlaybookWizardStore.getSavedRating();
+                play.ratingEngine = ratingEngine;
+            }
+            // save play
+            PlaybookWizardStore.savePlay(play).then(function(play) {
+                // get launchid
+                PlaybookWizardService.saveLaunch(play.name, {
+                    launchObj: launchObj
+                }).then(function(launch) {
+                    var launch = launch || {};
+                    // save launch
+                    if(launch && !saveOnly) {
+                        PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                            launch_id: launch.id,
+                            action: 'launch',
+                        });
+                    }
+                });
+            });
+        }
+    }
+
     // this.nextSaveInsight = function(nextState) {
     //     if(PlaybookWizardStore.savedTalkingPoints && PlaybookWizardStore.savedTalkingPoints.length) {
     //         CgTalkingPointStore.saveTalkingPoints(PlaybookWizardStore.savedTalkingPoints).then(function(){
@@ -261,6 +336,7 @@ angular.module('lp.playbook')
     //     }
     // }
 
+    // *OLD*
     this.nextLaunch = function() {
 
         var play = PlaybookWizardStore.currentPlay,
@@ -500,6 +576,7 @@ angular.module('lp.playbook')
         }
         
     }
+
     this.getPlayLaunchCount = function(params) {
         var deferred = $q.defer(),
             params = {
@@ -515,6 +592,7 @@ angular.module('lp.playbook')
         });
         return deferred.promise;        
     }
+
     this.launchPlay = function(play, opts) {
         var deferred = $q.defer();
         PlaybookWizardService.launchPlay(play, opts).then(function(data){
@@ -545,7 +623,7 @@ angular.module('lp.playbook')
                     label: 'Launching'
                 },
                 Launched: {
-                    label: 'Re-Launch Now'
+                    label: 'Relaunch'
                 }
             },
             state = (play.launchHistory && play.launchHistory.mostRecentLaunch && play.launchHistory.mostRecentLaunch.launchState ? play.launchHistory.mostRecentLaunch.launchState : null);
@@ -588,6 +666,29 @@ angular.module('lp.playbook')
     this.getTalkingPoints = function() {
         return this.savedTalkingPoints;
     }
+
+    this.setTypes = function(types) {
+        this.types = types;
+    }
+
+    this.getTypes = function(params) {
+        var deferred = $q.defer();
+
+        PlaybookWizardService.getTypes().then(function(data){
+            PlaybookWizardStore.setTypes(data);
+            deferred.resolve(data);
+        });
+        return deferred.promise;        
+    }
+
+    this.setRecommendationCounts = function(recommendationCounts) {
+        this.recommendationCounts = recommendationCounts;
+    }
+
+    this.getRecommendationCounts = function() {
+        return this.recommendationCounts;
+    }
+
 
 })
 .service('PlaybookWizardService', function($q, $http, $state, $timeout) {
@@ -677,6 +778,33 @@ angular.module('lp.playbook')
             method: 'POST',
             url: this.host + '/play',
             data: opts
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.saveLaunch = function(play_name, opts) {
+        var deferred = $q.defer(),
+            opts = opts || {},
+            launch_id = opts.launch_id || '', 
+            action = opts.action || '', 
+            launchObj = opts.launchObj || '';
+
+        $http({
+            method: 'POST',
+            url: this.host + '/play/' + play_name + '/launches' + (launch_id ? '/' + launch_id : '') + (action ? '/' + action : ''),
+            data: launchObj
         }).then(
             function onSuccess(response) {
                 var result = response.data;
@@ -912,4 +1040,24 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
+    this.getTypes = function(engineId, query) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: '/pls/playtypes',
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
 });

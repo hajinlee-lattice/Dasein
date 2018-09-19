@@ -126,11 +126,12 @@ angular.module('lp.playbook.plays', [
         $event.preventDefault();
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
         PlaybookWizardStore.setPlay(play);
-        
+
         if(launchedStatus.hasLaunched) {
             $state.go('home.playbook.dashboard', {play_name: play.name} );
         } else if (play.ratingEngine && play.ratingEngine.id) {
-            $state.go('home.playbook.create.rating', { play_name: play.name, rating_id: play.ratingEngine.id } );
+            $state.go('home.playbook.dashboard', {play_name: play.name} );
+            //$state.go('home.playbook.create.rating', { play_name: play.name, rating_id: play.ratingEngine.id } );
         }
     };
 

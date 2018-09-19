@@ -18,7 +18,7 @@ angular.module('lp.playbook.dashboard', [
                 label: 'Launching'
             },
             Launched: {
-                label: 'Re-Launch Now'
+                label: 'Relaunch'
             }
         };
 
