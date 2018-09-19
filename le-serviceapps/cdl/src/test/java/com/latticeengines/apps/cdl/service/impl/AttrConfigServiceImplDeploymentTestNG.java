@@ -409,10 +409,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
             flags[9] = false;
             flags[10] = false;
         }
-        if (internalEnrichAttrs.contains(attrName)) {
-            // internal attrs should be inactive
-            state = AttrState.Inactive;
-        }
         if (!flags[2] && !flags[4] && !flags[10]) {
             // if cannot enable for segment, enrichment or model
             // the cannot be activated

@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 import reactor.core.publisher.Flux;
@@ -210,8 +209,8 @@ public class SystemMetadataStoreImpl extends DecoratedMetadataStore<//
                                 if (!internalEnrichEnabled && Boolean.TRUE.equals(cm.getCanInternalEnrich())) {
                                     cm.disableGroup(Enrichment);
                                     cm.disableGroup(TalkingPoint);
+                                    cm.disableGroup(CompanyProfile);
                                     cm.setCanEnrich(false);
-                                    cm.setAttrState(AttrState.Inactive);
                                 } else if (Boolean.TRUE.equals(cm.getCanEnrich())
                                         && (Category.FIRMOGRAPHICS.equals(cm.getCategory())
                                                 || StringUtils.isNotBlank(cm.getDataLicense()))) {
