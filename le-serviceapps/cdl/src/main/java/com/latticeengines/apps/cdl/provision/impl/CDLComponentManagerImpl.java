@@ -10,7 +10,9 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.cdl.service.DropFolderService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -43,6 +45,13 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     @Inject
     private DropBoxService dropBoxService;
 
+    @Inject
+    private DropFolderService dropFolderService;
+
+    @Inject
+    private S3Service s3Service;
+
+
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
         String camilleTenantId = space.getTenantId();
@@ -56,6 +65,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
+        dropFolderService.createTenantDefaultFolder(space.toString());
     }
 
     public void discardTenant(String customerSpace) {
@@ -71,5 +81,4 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         DropBox dropBox = dropBoxService.create();
         log.info("Created dropbox " + dropBox.getDropBox() + " for " + customerSpace.getTenantId());
     }
-
 }
