@@ -21,6 +21,9 @@ public class Ticket {
     
     public Ticket(String ticketData) {
         String[] tokens = ticketData.split("\\.");
+        if (tokens.length < 2) {
+            throw new IllegalArgumentException("Invalid token");
+        }
         setUniqueness(tokens[0]);
         setRandomness(tokens[1]);
     }

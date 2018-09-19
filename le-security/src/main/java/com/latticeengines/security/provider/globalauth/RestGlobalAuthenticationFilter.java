@@ -30,7 +30,12 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationTokenF
         if (ticket == null) {
             throw new BadCredentialsException("Unauthorized.");
         }
-        TicketAuthenticationToken authRequest = new TicketAuthenticationToken(null, ticket);
+        TicketAuthenticationToken authRequest = null;
+        try {
+            authRequest = new TicketAuthenticationToken(null, ticket);
+        } catch (IllegalArgumentException e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
         return this.getAuthenticationManager().authenticate(authRequest);
     }
 
