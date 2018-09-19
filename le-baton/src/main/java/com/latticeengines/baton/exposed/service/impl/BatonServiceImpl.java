@@ -650,12 +650,15 @@ public class BatonServiceImpl implements BatonService {
                         public void childEvent(CuratorFramework client, TreeCacheEvent event)
                                 throws Exception {
                             switch (event.getType()) {
-                                case INITIALIZED: {
-                                    long endTime = System.currentTimeMillis();
-                                    log.info("Tree cache is initialized, duration = {} ms", (endTime - startTime));
-                                    sem.release();
-                                }
+                            case INITIALIZED: {
+                                long endTime = System.currentTimeMillis();
+                                log.info("Tree cache is initialized, duration = {} ms", (endTime - startTime));
+                                sem.release();
+                                break;
                             }
+                            default:
+                                break;
+                                }
                         }
                     };
                     cache.getListenable().addListener(listener);
