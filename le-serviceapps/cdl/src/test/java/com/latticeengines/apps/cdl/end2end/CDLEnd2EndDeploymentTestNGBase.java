@@ -911,6 +911,7 @@ public abstract class  CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestN
         return segment;
     }
 
+    @SuppressWarnings("deprecation")
     RatingEngine createRuleBasedRatingEngine() {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(constructTestSegment2());

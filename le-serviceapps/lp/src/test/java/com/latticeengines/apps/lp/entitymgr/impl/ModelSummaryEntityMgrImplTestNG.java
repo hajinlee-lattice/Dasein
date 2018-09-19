@@ -20,7 +20,6 @@ import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -32,7 +31,6 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.security.exposed.service.TenantService;
 
 public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
@@ -41,12 +39,6 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
     @Autowired
     private KeyValueEntityMgr keyValueEntityMgr;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private TenantService tenantService;
 
     private Tenant tenant1;
     private Tenant tenant2;

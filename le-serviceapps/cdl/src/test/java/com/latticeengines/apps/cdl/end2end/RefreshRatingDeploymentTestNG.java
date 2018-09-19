@@ -96,6 +96,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         verifyProcess();
     }
 
+    @SuppressWarnings("deprecation")
     private void setup(boolean useExistingTenant, boolean enableAIRatings) throws Exception {
         if (useExistingTenant) {
             testBed.useExistingTenantAsMain(EXISTING_TENANT);
@@ -155,6 +156,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         uuid3 = uploadModel(MODELS_RESOURCE_ROOT + "/ce_model.tar.gz");
     }
 
+    @SuppressWarnings("deprecation")
     private RatingEngine createCrossSellEngine(MetadataSegment segment, ModelSummary modelSummary,
             PredictionType predictionType) throws InterruptedException {
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL, segment);
@@ -183,6 +185,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
 
+    @SuppressWarnings("deprecation")
     private RatingEngine createCustomEventEngine(MetadataSegment segment, ModelSummary modelSummary)
             throws InterruptedException {
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CUSTOM_EVENT, segment);

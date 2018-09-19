@@ -838,7 +838,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         return new ArrayList<>(attributes);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<AttributeLookup> getDependentAttrsInActiveModel(String ratingEngineId) {
         RatingEngine ratingEngine = validateRatingEngine_PopulateActiveModel(ratingEngineId);
@@ -948,7 +947,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         ((AIModelService) aiModelService).updateModelingJobStatus(ratingEngineId, aiModelId, newStatus);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "unused" })
     private Map<Long, String> ratingEngineCyclicDependency(RatingEngine ratingEngine, LinkedHashMap<Long, String> map) {
         LinkedHashMap<Long, String> ratingEngineMap = (LinkedHashMap<Long, String>) map.clone();
         ratingEngineMap.put(ratingEngine.getPid(), ratingEngine.getDisplayName());

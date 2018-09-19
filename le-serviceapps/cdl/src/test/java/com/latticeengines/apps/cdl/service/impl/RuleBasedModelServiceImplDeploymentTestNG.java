@@ -88,11 +88,13 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         return ratingEngine;
     }
 
+    @SuppressWarnings("deprecation")
     protected void assertRatingEngine(RatingEngine createdRatingEngine) {
         Assert.assertNotNull(createdRatingEngine.getActiveModel());
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
     public void testGetRatingEngineAndModel() {
         // test get a list

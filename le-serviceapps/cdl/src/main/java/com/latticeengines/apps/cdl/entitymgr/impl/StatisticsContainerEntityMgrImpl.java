@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 
+@SuppressWarnings("deprecation")
 @Component("statisticsContainerEntityMgr")
 public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<StatisticsContainer>
         implements StatisticsContainerEntityMgr {
@@ -76,20 +77,20 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findInSegment(String segmentName, DataCollection.Version version) {
-        StatisticsContainer container =  statisticsContainerDao.findInSegment(segmentName, version);
+        StatisticsContainer container = statisticsContainerDao.findInSegment(segmentName, version);
         return copyStatisticsToStatsCubes(container);
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findInMasterSegment(String collectionName, DataCollection.Version version) {
-        collectionName = StringUtils.isBlank(collectionName)
-                ? dataCollectionEntityMgr.findDefaultCollection().getName() : collectionName;
+        collectionName = StringUtils.isBlank(collectionName) ? dataCollectionEntityMgr.findDefaultCollection().getName()
+                : collectionName;
         StatisticsContainer container = statisticsContainerDao.findInMasterSegment(collectionName, version);
         return copyStatisticsToStatsCubes(container);
     }
 
-    //TODO: deprecating in M20
+    // TODO: deprecating in M20
     private StatisticsContainer copyStatisticsToStatsCubes(StatisticsContainer container) {
         if (container == null) {
             return null;

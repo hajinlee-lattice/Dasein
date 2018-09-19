@@ -18,7 +18,7 @@ public class StatisticsContainerDaoImpl extends BaseDaoImpl<StatisticsContainer>
         return StatisticsContainer.class;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public StatisticsContainer findInSegment(String segmentName, DataCollection.Version version) {
         Session session = getSessionFactory().getCurrentSession();
@@ -28,7 +28,7 @@ public class StatisticsContainerDaoImpl extends BaseDaoImpl<StatisticsContainer>
             queryPattern += " and stat.version = :version";
         }
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<StatisticsContainer> query = session.createQuery(queryStr);
         query.setString("segmentName", segmentName);
         if (version != null) {
             query.setParameter("version", version);
@@ -37,7 +37,7 @@ public class StatisticsContainerDaoImpl extends BaseDaoImpl<StatisticsContainer>
         return (StatisticsContainer) list.stream().findFirst().orElse(null);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public StatisticsContainer findInMasterSegment(String collectionName, DataCollection.Version version) {
         Session session = getSessionFactory().getCurrentSession();
@@ -48,7 +48,7 @@ public class StatisticsContainerDaoImpl extends BaseDaoImpl<StatisticsContainer>
             queryPattern += " and stat.version = :version";
         }
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<StatisticsContainer> query = session.createQuery(queryStr);
         query.setString("collectionName", collectionName);
         query.setBoolean("isMaster", true);
         if (version != null) {

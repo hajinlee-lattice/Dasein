@@ -23,7 +23,8 @@ public class DataFeedExecutionDaoImpl extends BaseDaoImpl<DataFeedExecution> imp
         String queryStr = String.format(
                 "update %s execution set execution.status=:status where execution.pid=:pid",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        @SuppressWarnings("unchecked")
+        Query<DataFeedExecution> query = session.createQuery(queryStr);
         query.setParameter("status", execution.getStatus());
         query.setParameter("pid", execution.getPid());
         query.executeUpdate();

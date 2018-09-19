@@ -21,6 +21,7 @@ public class PlayDaoImpl extends BaseDaoImpl<Play> implements PlayDao {
         return Play.class;
     }
 
+    @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
     public Play findByName(String name, boolean considerDeleted) {
 
@@ -35,13 +36,13 @@ public class PlayDaoImpl extends BaseDaoImpl<Play> implements PlayDao {
 
         selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
 
-        Query query = session.createQuery(selectQueryStr);
+        Query<Play> query = session.createQuery(selectQueryStr);
         query.setParameter("name", name);
         if (!considerDeleted) {
             query.setBoolean("deleted", Boolean.FALSE);
         }
 
-        Play play = (Play) query.uniqueResult();
+        Play play = query.uniqueResult();
         return play;
     }
 
@@ -50,6 +51,7 @@ public class PlayDaoImpl extends BaseDaoImpl<Play> implements PlayDao {
         return super.findAllByField("FK_RATING_ENGINE_ID", pid);
     }
 
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     @Override
     public List<String> findAllDeletedPlayIds(boolean forCleanupOnly) {
         Session session = getSessionFactory().getCurrentSession();

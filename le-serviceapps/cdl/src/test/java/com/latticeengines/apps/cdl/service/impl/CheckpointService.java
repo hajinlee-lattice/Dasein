@@ -224,7 +224,7 @@ public class CheckpointService {
         ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("redshift-clone", poolSize);
         List<Future<?>> futures = new ArrayList<>();
         redshiftTablesToClone.forEach((src, tgt) -> {
-            Future future = executorService.submit(() -> {
+            Future<?> future = executorService.submit(() -> {
                 String msg = "Clone redshift table " + src + " to " + tgt;
                 try (PerformanceTimer timer = new PerformanceTimer(msg)) {
                     redshiftService.cloneTable(src, tgt);
@@ -292,6 +292,7 @@ public class CheckpointService {
         return entityProxy.getCount(mainTestTenant.getId(), frontEndQuery);
     }
 
+    @SuppressWarnings("unused")
     private void verifyStatistics() {
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer);

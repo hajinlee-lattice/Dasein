@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 
+@SuppressWarnings("deprecation")
 @Component("featureImportanceParser")
 public class FeatureImportanceParser {
 

@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 
+@SuppressWarnings("deprecation")
 public class BucketedScoreTestUtils {
 
     private static final Double LIFT_1 = 3.4;

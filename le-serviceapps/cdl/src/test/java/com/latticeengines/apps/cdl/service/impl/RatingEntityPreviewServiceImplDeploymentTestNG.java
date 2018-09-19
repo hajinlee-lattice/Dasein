@@ -90,6 +90,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         Assert.assertNotNull(ratingModels);
         Assert.assertTrue(ratingModels.size() > 0);
         Assert.assertTrue(ratingModels.get(0) instanceof RuleBasedModel);
+        @SuppressWarnings("deprecation")
         RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
         Assert.assertNotNull(ruleBasedModel);
 

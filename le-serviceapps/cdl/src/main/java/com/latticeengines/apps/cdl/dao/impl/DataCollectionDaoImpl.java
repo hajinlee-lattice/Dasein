@@ -1,6 +1,10 @@
 package com.latticeengines.apps.cdl.dao.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -35,6 +39,7 @@ public class DataCollectionDaoImpl extends BaseDaoImpl<DataCollection> implement
             queryPattern += " and cTbl.version = :version";
         }
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
+        @SuppressWarnings("rawtypes")
         Query query = session.createQuery(queryStr);
         query.setParameter("collectionName", collectionName);
         if (tableRole != null) {
@@ -47,7 +52,7 @@ public class DataCollectionDaoImpl extends BaseDaoImpl<DataCollection> implement
     }
 
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     @Override
     public Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> findTableNamesOfAllRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version){
         Session session = getSessionFactory().getCurrentSession();

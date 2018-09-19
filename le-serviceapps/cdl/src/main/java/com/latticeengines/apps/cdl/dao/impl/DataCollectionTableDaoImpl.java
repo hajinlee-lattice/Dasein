@@ -33,7 +33,7 @@ public class DataCollectionTableDaoImpl extends BaseDaoImpl<DataCollectionTable>
         }
         queryPattern += " order by cTbl.pid desc";
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<DataCollectionTable> query = session.createQuery(queryStr);
         query.setParameter("collectionName", collectionName);
         query.setParameter("tableName", tableName);
         if (version != null) {

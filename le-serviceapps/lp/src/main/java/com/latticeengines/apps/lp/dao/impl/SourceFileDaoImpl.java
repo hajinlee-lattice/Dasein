@@ -29,7 +29,7 @@ public class SourceFileDaoImpl extends BaseDaoImpl<SourceFile> implements Source
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where %s = :value",
                 getEntityClass().getSimpleName(), "applicationId");
-        Query query = session.createQuery(queryStr);
+        Query<SourceFile> query = session.createQuery(queryStr);
         query.setParameter("value", applicationId);
         List<SourceFile> results = query.list();
         if (results.size() == 0) {
@@ -54,7 +54,7 @@ public class SourceFileDaoImpl extends BaseDaoImpl<SourceFile> implements Source
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where %s = :value",
                 getEntityClass().getSimpleName(), "tableName");
-        Query query = session.createQuery(queryStr);
+        Query<SourceFile> query = session.createQuery(queryStr);
         query.setParameter("value", tableName);
         List<SourceFile> results = query.list();
         if (results.size() == 0) {

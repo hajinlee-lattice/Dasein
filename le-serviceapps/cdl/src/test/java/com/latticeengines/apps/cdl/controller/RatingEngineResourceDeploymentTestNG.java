@@ -154,6 +154,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         log.info("After loading, ratingEngine is " + ruleRatingEngine);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
 
+        @SuppressWarnings("deprecation")
         RatingModel ratingModel = ruleRatingEngine.getActiveModel();
         Assert.assertNotNull(ratingModel);
         Assert.assertTrue(ratingModel instanceof RuleBasedModel);
@@ -304,6 +305,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         return ratingEngine;
     }
 
+    @SuppressWarnings("deprecation")
     private void testCreate(RatingEngine re) {
         RatingEngine createdRe = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re, CREATED_BY,
                 false, true);

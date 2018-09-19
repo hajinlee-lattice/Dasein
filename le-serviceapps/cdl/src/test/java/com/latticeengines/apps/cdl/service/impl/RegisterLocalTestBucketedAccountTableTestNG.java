@@ -132,7 +132,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends CDLFunctionalTe
         Table table;
         try {
             ObjectMapper om = new ObjectMapper();
-            List list = om.readValue(is, List.class);
+            List<?> list = om.readValue(is, List.class);
             table = JsonUtils.convertList(list, Table.class).get(0);
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse table from " + role.name() + ".json.", e);

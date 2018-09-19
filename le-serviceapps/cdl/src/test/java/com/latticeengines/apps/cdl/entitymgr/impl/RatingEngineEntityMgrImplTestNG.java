@@ -113,6 +113,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ActionContext.remove();
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "functional")
     public void testCreation() {
         createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine);
@@ -230,6 +231,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "functional", dependsOnMethods = { "testFind" })
     public void testUpdate() {
         // test update

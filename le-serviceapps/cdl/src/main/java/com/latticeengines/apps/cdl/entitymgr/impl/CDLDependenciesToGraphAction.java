@@ -198,6 +198,7 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
         }
     }
 
+    @SuppressWarnings("unused")
     private void checkDeleteSafetyWithId(String vertexId, String vertexType) throws Exception {
         List<Map<String, String>> dependencies = //
                 checkDirectDependencies(MultiTenantContext.getTenant().getId(), //

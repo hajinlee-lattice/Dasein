@@ -210,6 +210,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         bucketedScoreService.createABCDBuckets(request);
     }
 
+    @SuppressWarnings("deprecation")
     private List<BucketMetadata> copyBucketMetadatasForCopiedModel(List<BucketMetadata> originalBucketMetadatas,
             String copiedModelId) {
         List<BucketMetadata> bucketMetadatas = new ArrayList<>();

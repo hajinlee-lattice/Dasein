@@ -115,6 +115,7 @@ public class PythonScriptModelCopyServiceImplTestNG extends LPFunctionalTestNGBa
         tenantEntityMgr.delete(targetTenant);
     }
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "functional", enabled = true)
     public void testModelCopyInHdfs() throws IOException {
         ModelSummary modelSummary = new ModelSummary();

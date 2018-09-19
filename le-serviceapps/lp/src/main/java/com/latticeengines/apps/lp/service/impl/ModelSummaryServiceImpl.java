@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -322,6 +323,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         return summary;
     }
 
+    @SuppressWarnings("deprecation")
     @VisibleForTesting
     void fixAccountCategory(ModelSummary summary) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -351,6 +353,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         keyValueEntityMgr.update(keyValue);
     }
 
+    @SuppressWarnings("deprecation")
     private void fixBusinessAnnualSalesAbs(ModelSummary summary) {
         ObjectMapper objectMapper = new ObjectMapper();
         KeyValue keyValue = summary.getDetails();

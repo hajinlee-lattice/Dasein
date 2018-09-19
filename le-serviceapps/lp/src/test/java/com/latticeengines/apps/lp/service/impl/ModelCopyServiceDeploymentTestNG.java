@@ -1,11 +1,16 @@
 package com.latticeengines.apps.lp.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
@@ -31,7 +36,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -43,10 +47,6 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
 
@@ -70,9 +70,6 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
 
     @Inject
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
-
-    @Inject
-    private TenantEntityMgr tenantEntityMgr;
 
     private static final String localPathBase = ClassLoader
             .getSystemResource("modelcopyserviceimpl/pythonscriptmodel").getPath();

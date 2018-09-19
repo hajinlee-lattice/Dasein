@@ -25,19 +25,20 @@ public class RuleBasedModelDaoImpl extends BaseDaoImpl<RuleBasedModel> implement
         return super.findByField("ID", id);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public MetadataSegment findParentSegmentById(String id) {
         Session session = getSessionFactory().getCurrentSession();
         String queryPattern = "select model.ratingEngine.segment from %s as model";
         queryPattern += " where model.id = :id";
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<MetadataSegment> query = session.createQuery(queryStr);
         query.setParameter("id", id);
-        List list =  query.list();
+        List<MetadataSegment> list = query.list();
         if (CollectionUtils.size(list) != 1) {
             throw new RuntimeException(String.format("Found %d segments for rule based model %s, while it should be 1.", CollectionUtils.size(list), id));
         } else {
-            return (MetadataSegment) list.get(0);
+            return list.get(0);
         }
     }
 }

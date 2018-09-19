@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
+@SuppressWarnings("deprecation")
 @Component("playLaunchDao")
 public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLaunchDao {
 
@@ -34,7 +35,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return PlayLaunch.class;
     }
 
-    @SuppressWarnings({ "deprecation", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public PlayLaunch findByLaunchId(String launchId) {
         if (StringUtils.isBlank(launchId)) {
@@ -56,7 +57,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return (PlayLaunch) list.get(0);
     }
 
-    @SuppressWarnings({ "deprecation", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public PlayLaunch findByPlayAndTimestamp(Long playId, Date created) {
         if (playId == null) {
@@ -80,7 +81,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return (PlayLaunch) list.get(0);
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
         if (playId == null) {
@@ -114,7 +115,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query.list();
     }
 
-    @SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<PlayLaunch> findByState(LaunchState state) {
         if (state == null) {
@@ -142,7 +143,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<PlayLaunch> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType) {
@@ -156,7 +157,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query.list();
     }
 
-    @SuppressWarnings({ "deprecation", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public Long findCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
@@ -171,7 +172,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Play> findDashboardPlaysWithLaunches(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -184,7 +185,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Pair<String, String>> findDashboardOrgIdWithLaunches(Long playId, List<LaunchState> states,
             Long startTimestamp, Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -213,7 +214,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Stats findTotalCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -251,7 +252,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return val == null ? 0L : (Long) val;
     }
 
-    @SuppressWarnings({ "deprecation", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
             Class<PlayLaunch> entityClz, String queryStr, boolean sortNeeded, String orgId, String externalSysType) {
@@ -259,7 +260,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 session, entityClz, queryStr, null, sortNeeded, orgId, externalSysType);
     }
 
-    @SuppressWarnings({ "deprecation", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
             Class<PlayLaunch> entityClz, String queryStr, String closingQueryStr, boolean sortNeeded, String orgId,

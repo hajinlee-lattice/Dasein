@@ -73,7 +73,7 @@ public class VdbMetadataUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static AttrConfig getAttrConfig(VdbSpecMetadata metadata, String entity) {
         AttrConfig attrConfig = new AttrConfig();
         attrConfig.setAttrName(metadata.getColumnName());

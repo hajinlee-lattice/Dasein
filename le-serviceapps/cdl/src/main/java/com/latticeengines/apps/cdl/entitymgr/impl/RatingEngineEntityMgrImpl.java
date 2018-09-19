@@ -185,6 +185,7 @@ public class RatingEngineEntityMgrImpl //
         return findById(id, false);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     @SoftDeleteConfiguration
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -235,6 +236,7 @@ public class RatingEngineEntityMgrImpl //
         ratingEngineDao.revertDeleteById(id);
     }
 
+    @SuppressWarnings("deprecation")
     private void updateExistingRatingEngine(RatingEngine retrievedRatingEngine, RatingEngine ratingEngine,
             String tenantId, Boolean unlinkSegment) {
         log.info(String.format("Updating existing rating engine with id %s for tenant %s", ratingEngine.getId(),
@@ -417,6 +419,7 @@ public class RatingEngineEntityMgrImpl //
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void createRuleBasedModel(RatingEngine ratingEngine) {
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         ruleBasedModel.setId(RuleBasedModel.generateIdStr());
@@ -480,6 +483,7 @@ public class RatingEngineEntityMgrImpl //
                         .put(type, bucketAccountRestriction));
     }
 
+    @SuppressWarnings("deprecation")
     private void createAIModel(RatingEngine ratingEngine, AdvancedModelingConfig advancedModelingConfig) {
         AIModel aiModel = new AIModel();
         aiModel.setId(AIModel.generateIdStr());

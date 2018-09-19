@@ -23,7 +23,8 @@ public class DataFeedDaoImpl extends BaseDaoImpl<DataFeed> implements DataFeedDa
         String queryStr = String.format(
                 "update %s feed set feed.status=:status where feed.pid=:pid",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        @SuppressWarnings("unchecked")
+        Query<DataFeed> query = session.createQuery(queryStr);
         query.setParameter("status", dataFeed.getStatus());
         query.setParameter("pid", dataFeed.getPid());
         query.executeUpdate();

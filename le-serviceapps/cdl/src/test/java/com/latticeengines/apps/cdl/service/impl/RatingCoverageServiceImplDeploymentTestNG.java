@@ -78,6 +78,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNotNull(ratingModels);
         Assert.assertTrue(ratingModels.size() > 0);
         Assert.assertTrue(ratingModels.get(0) instanceof RuleBasedModel);
+        @SuppressWarnings("deprecation")
         RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
         Assert.assertNotNull(ruleBasedModel);
 
@@ -171,6 +172,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @Test(groups = "deployment")
     public void testRatingModelIdCoverage() {
+        @SuppressWarnings("deprecation")
         RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
         RatingsCountRequest request = new RatingsCountRequest();
         RatingModelIdPair p1 = new RatingModelIdPair();
@@ -274,6 +276,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @Test(groups = "deployment")
     public void testSegmentIdModelRulesCoverage() {
+        @SuppressWarnings("deprecation")
         RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
         RatingsCountRequest request = new RatingsCountRequest();
         SegmentIdAndModelRulesPair r1 = new SegmentIdAndModelRulesPair();

@@ -26,15 +26,16 @@ public class AIModelDaoImpl extends BaseDaoImpl<AIModel> implements AIModelDao {
         String queryPattern = "select model.ratingEngine.segment from %s as model";
         queryPattern += " where model.id = :id";
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        @SuppressWarnings("unchecked")
+        Query<MetadataSegment> query = session.createQuery(queryStr);
         query.setParameter("id", id);
-        List list = query.list();
+        List<MetadataSegment> list = query.list();
         if (CollectionUtils.size(list) != 1) {
             throw new RuntimeException(
                     String.format("Found %d segments for AI model %s, while it should be 1.",
                             CollectionUtils.size(list), id));
         } else {
-            return (MetadataSegment) list.get(0);
+            return list.get(0);
         }
     }
 
@@ -54,12 +55,13 @@ public class AIModelDaoImpl extends BaseDaoImpl<AIModel> implements AIModelDao {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public int findMaxIterationByRatingEngineId(String ratineEngindId) {
         Session session = getSessionFactory().getCurrentSession();
         String queryPattern = "select max(model.iteration) from %s as model where model.ratingEngine.id = :id";
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<Integer> query = session.createQuery(queryStr);
         query.setParameter("id", ratineEngindId);
         return query.uniqueResult() != null ? (int) query.uniqueResult() : 0;
     }

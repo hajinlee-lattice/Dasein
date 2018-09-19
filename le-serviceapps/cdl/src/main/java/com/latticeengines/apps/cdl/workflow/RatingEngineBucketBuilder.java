@@ -40,6 +40,7 @@ public class RatingEngineBucketBuilder {
         return buckets;
     }
 
+    @SuppressWarnings("deprecation")
     private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
         BucketMetadata bucket = new BucketMetadata();
         bucket.setLeftBoundScore(leftBoundScore);
