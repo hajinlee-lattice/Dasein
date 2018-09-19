@@ -519,7 +519,7 @@ public class ProcessorContext {
     private List<String> parseMetadataFields() {
         List<String> fields = new ArrayList<>();
         for (ColumnMetadata column : metadatas) {
-            fields.add(column.getColumnId());
+            fields.add(column.getAttrName());
         }
         return fields;
     }

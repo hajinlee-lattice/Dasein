@@ -15,7 +15,9 @@ public class DataCloudRefreshCallable implements Callable<Boolean> {
 
     private static final Logger log = LoggerFactory.getLogger(DataCloudRefreshCallable.class);
 
+    @SuppressWarnings("unused")
     private final SourceTransformationService transformationService;
+    @SuppressWarnings("unused")
     private final PublicationService publicationService;
     private final IngestionService ingestionService;
     private final OrchestrationService orchestrationService;

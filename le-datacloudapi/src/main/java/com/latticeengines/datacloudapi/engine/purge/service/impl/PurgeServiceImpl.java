@@ -27,6 +27,7 @@ public class PurgeServiceImpl implements PurgeService {
 
     private static Logger log = LoggerFactory.getLogger(PurgeServiceImpl.class);
 
+    @SuppressWarnings("serial")
     private Set<String> retainedSources = new HashSet<String>() {
         {
             add("AMRefreshVersionUpdater");

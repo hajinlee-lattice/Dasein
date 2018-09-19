@@ -1,6 +1,7 @@
 package com.latticeengines.datacloudapi.engine.testframework;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Random;
 
@@ -33,7 +34,7 @@ public class PublicationWorkflowServlet extends HttpServlet {
             throws ServletException, IOException {
         resp.setContentType("application/json");
 
-        String payload = IOUtils.toString(req.getInputStream());
+        String payload = IOUtils.toString(req.getInputStream(), Charset.defaultCharset());
         PublishWorkflowConfiguration configuration = JsonUtils.deserialize(payload, PublishWorkflowConfiguration.class);
         verifier.verify(configuration);
 

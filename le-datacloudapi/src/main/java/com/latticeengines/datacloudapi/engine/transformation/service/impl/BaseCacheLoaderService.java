@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.source.Source;
@@ -50,9 +49,6 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
 
     @Value("${datacloud.match.cache.loader.thread.pool.size:16}")
     private int poolSize;
-
-    @Autowired
-    private DataCloudVersionEntityMgr versionEntityMgr;
 
     private static Logger log = LoggerFactory.getLogger(BaseCacheLoaderService.class);
 

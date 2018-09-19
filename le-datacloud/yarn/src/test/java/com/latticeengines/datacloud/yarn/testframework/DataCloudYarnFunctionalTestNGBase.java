@@ -58,7 +58,6 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
         HdfsPodContext.changeHdfsPodId(podId);
     }
 
-    @SuppressWarnings("unchecked")
     protected void uploadDataCsv(String avroDir, String fileName) {
         try {
             URL url = Thread.currentThread().getContextClassLoader()
