@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationContext;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.PropertyUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -54,9 +53,6 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private VersionManager versionManager;
 
     @Value("${dataflowapi.checkpoint:false}")
     private boolean checkpoint;

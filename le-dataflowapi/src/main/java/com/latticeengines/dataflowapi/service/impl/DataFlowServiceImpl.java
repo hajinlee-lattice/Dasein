@@ -23,6 +23,7 @@ import com.latticeengines.yarn.exposed.service.JobService;
 @Component("dataFlowService")
 public class DataFlowServiceImpl implements DataFlowService {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DataFlowServiceImpl.class);
 
     @Autowired

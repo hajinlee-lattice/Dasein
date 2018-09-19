@@ -82,7 +82,6 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>${aws.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>joda-time</groupId>
