@@ -19,9 +19,9 @@ public class StatusResource {
     @ResponseBody
     public Status calculate(@PathVariable("op") String op, @PathVariable("left") Integer left,
             @PathVariable("right") Integer right) {
-        Assert.notNull(op);
-        Assert.notNull(left);
-        Assert.notNull(right);
+        Assert.notNull(op, "PathVariable op cannot be null");
+        Assert.notNull(left, "PathVariable left cannot be null");
+        Assert.notNull(right, "PathVariable right cannot be null");
         Status result = new Status();
         result.setOperation(op);
         result.setLeft(left);
@@ -32,10 +32,10 @@ public class StatusResource {
     @RequestMapping(value = "/post", method = RequestMethod.POST)
     @ResponseBody
     public Status calculate(@RequestBody Status calc) {
-        Assert.notNull(calc);
-        Assert.notNull(calc.getOperation());
-        Assert.notNull(calc.getLeft());
-        Assert.notNull(calc.getRight());
+        Assert.notNull(calc, "RequestBody status cannot be null");
+        Assert.notNull(calc.getOperation(), "RequestBody status.operation cannot be null");
+        Assert.notNull(calc.getLeft(), "RequestBody status.left cannot be null");
+        Assert.notNull(calc.getRight(), "RequestBody status.right cannot be null");
         return doCalc(calc);
     }
 

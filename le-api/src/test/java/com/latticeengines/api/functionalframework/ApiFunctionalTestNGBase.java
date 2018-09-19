@@ -1,11 +1,12 @@
 package com.latticeengines.api.functionalframework;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -73,7 +74,7 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
-            String responseBody = IOUtils.toString(response.getBody());
+            String responseBody = IOUtils.toString(response.getBody(), Charset.defaultCharset());
             log.info("Error response from rest call: " + response.getStatusCode() + " " + response.getStatusText()
                     + " " + responseBody);
 
