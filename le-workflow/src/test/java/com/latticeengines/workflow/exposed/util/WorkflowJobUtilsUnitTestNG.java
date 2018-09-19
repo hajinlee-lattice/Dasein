@@ -2,6 +2,7 @@ package com.latticeengines.workflow.exposed.util;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,7 +33,10 @@ public class WorkflowJobUtilsUnitTestNG {
         List<String> combinedList = Stream.of(workflowStatusForRunning, workflowStatusForCompleted)
                 .flatMap(Collection::stream).collect(Collectors.toList());
 
-        assertEquals(workflowStatusForMultipleValues, combinedList);
+        assertEquals(workflowStatusForMultipleValues.size(), combinedList.size());
+        workflowStatusForMultipleValues.stream().forEach(status -> {
+            assertTrue(combinedList.contains(status));
+        });
 
         final String invalidType = "Invalid";
         List<String> workflowStatusForInvalidStr = WorkflowJobUtils.getWorkflowJobMappingsForJobStatuses(Arrays.asList(invalidType));

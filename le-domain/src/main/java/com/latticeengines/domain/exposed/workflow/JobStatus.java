@@ -64,45 +64,6 @@ public enum JobStatus {
         }
     }
 
-    private static Map<JobStatus, List<String>> workflowJobStatusMap = null;
-
-    private static void initWorkflowJobStatusMao() {
-        workflowJobStatusMap = new HashMap<>();
-        for (JobStatus jobStatus : values()) {
-            List<String> mappedValues = new ArrayList<String>();
-            System.out.println("*******************" + jobStatus);
-            switch (jobStatus) {
-            case PENDING:
-                mappedValues.add(FinalApplicationStatus.UNDEFINED.name());
-                mappedValues.add("PENDING"); //Noticed that some test cases are adding Status "PENDING" into workflowJob
-                mappedValues.add("");
-                break;
-            case RUNNING:
-                mappedValues.add(BatchStatus.STARTING.name());
-                mappedValues.add(BatchStatus.STARTED.name());
-                mappedValues.add(BatchStatus.STOPPING.name());
-                break;
-            case COMPLETED:
-                mappedValues.add(FinalApplicationStatus.SUCCEEDED.name());
-                mappedValues.add(BatchStatus.COMPLETED.name());
-                break;
-            case FAILED:
-                mappedValues.add(FinalApplicationStatus.FAILED.name());
-                mappedValues.add(FinalApplicationStatus.KILLED.name());
-                mappedValues.add(BatchStatus.ABANDONED.name());
-                mappedValues.add(BatchStatus.FAILED.name());
-                mappedValues.add(BatchStatus.UNKNOWN.name());
-                break;
-            case CANCELLED:
-                mappedValues.add(BatchStatus.STOPPED.name());
-                break;
-            default:
-                mappedValues.add("");
-            }
-            workflowJobStatusMap.put(jobStatus, mappedValues);
-        }
-    }
-
     @JsonValue
     public String getName() {
         return StringUtils.capitalize(super.name().toLowerCase());
@@ -131,16 +92,17 @@ public enum JobStatus {
         }
     }
 
+    /*
+     * Technically we donot need to return a list. Because we are returning JobStatus as is without any mapping.
+     * Incase, if we want to map one status to multiple values, we will keep it as List.
+     */
     public static List<String> mappedWorkflowJobStatuses(String jobStatusStr) {
-        if (workflowJobStatusMap == null) {
-            initWorkflowJobStatusMao();
-        }
         if (jobStatusStr == null) {
             return null;
         }
         if (EnumUtils.isValidEnum(JobStatus.class, jobStatusStr.toUpperCase())) {
             JobStatus jobStatus = JobStatus.valueOf(jobStatusStr.toUpperCase());
-            return workflowJobStatusMap.get(jobStatus);
+            return Collections.singletonList(jobStatus.name());
         }
 
         return Collections.singletonList(jobStatusStr);

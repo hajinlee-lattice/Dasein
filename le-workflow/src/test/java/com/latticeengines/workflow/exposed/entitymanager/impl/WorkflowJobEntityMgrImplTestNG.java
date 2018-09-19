@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -95,7 +94,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob1.setWorkflowId(1L);
         workflowJob1.setType("type1");
         workflowJob1.setParentJobId(null);
-        workflowJob1.setStatus(BatchStatus.STARTING.toString());
+        workflowJob1.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
         workflowJobEntityMgr.create(workflowJob1);
 
         WorkflowJob workflowJob11 = new WorkflowJob();
@@ -105,7 +104,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob11.setWorkflowId(11L);
         workflowJob11.setType("type1");
         workflowJob11.setParentJobId(1L);
-        workflowJob11.setStatus(BatchStatus.STARTED.toString());
+        workflowJob11.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name());
         workflowJobEntityMgr.create(workflowJob11);
 
         WorkflowJob workflowJob12 = new WorkflowJob();
@@ -115,7 +114,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob12.setWorkflowId(12L);
         workflowJob12.setType("type1");
         workflowJob12.setParentJobId(1L);
-        workflowJob12.setStatus(BatchStatus.COMPLETED.toString());
+        workflowJob12.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED.name());
         workflowJobEntityMgr.create(workflowJob12);
 
         WorkflowJob workflowJob2 = new WorkflowJob();
@@ -124,7 +123,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob2.setUserId(WorkflowUser.DEFAULT_USER.name());
         workflowJob2.setWorkflowId(2L);
         workflowJob2.setType("type2");
-        workflowJob2.setStatus(BatchStatus.FAILED.toString());
+        workflowJob2.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.FAILED.name());
         workflowJobEntityMgr.create(workflowJob2);
 
         MultiTenantContext.setTenant(tenant2);
@@ -170,7 +169,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertTrue(applicationIds.contains("application_10002"));
 
         //Query by Status
-        List<String> statuses = Arrays.asList(BatchStatus.STARTING.toString(), BatchStatus.COMPLETED.toString());
+        List<String> statuses = Arrays.asList(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name(),
+                com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED.name());
         jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 null, Collections.singletonList("type1"), statuses, null);
         assertEquals(jobs.size(), 2);
