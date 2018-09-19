@@ -89,8 +89,7 @@ angular.module('pd.navigation.header', [
         clientSession = BrowserStorageUtility.getClientSession() || {},
         accessLevel = clientSession.AccessLevel || null;
 
-    $scope.mayChangePassword = (authenticationRoute !== 'SSO' || 
-        (authenticationRoute === 'SSO'  && ['SUPER_ADMIN','INTERNAL_ADMIN', 'EXTERNAL_ADMIN'].indexOf(accessLevel) >= 0));
+    $scope.mayChangePassword = authenticationRoute !== 'SSO';
 
     $scope.mayViewSSOConfig = typeof BrowserStorageUtility.getClientSession().AvailableRights.PLS_SSO_Config != 'undefined' &&
                                 BrowserStorageUtility.getClientSession().AvailableRights.PLS_SSO_Config.MayView === true;

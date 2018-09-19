@@ -27,7 +27,7 @@ angular.module('login.update', [
                 clientSession = BrowserStorageUtility.getClientSession() || {},
                 accessLevel = clientSession.AccessLevel || null;
 
-            vm.mayChangePassword = (authenticationRoute !== 'SSO' || (authenticationRoute === 'SSO'  && ['SUPER_ADMIN', 'EXTERNAL_ADMIN', 'INTERNAL_ADMIN'].indexOf(accessLevel) >= 0));
+            vm.mayChangePassword = authenticationRoute !== 'SSO';
 
             vm.oldPassword = null;
             vm.newPassword = null;
