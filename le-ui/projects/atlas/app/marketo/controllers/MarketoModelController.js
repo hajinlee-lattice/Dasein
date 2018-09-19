@@ -134,7 +134,7 @@ angular.module('lp.marketo.models', [])
         angular.extend(vm, {
             credentialId: $stateParams.credentialId,
             webhookName: model.ModelDetails.DisplayName,
-            url: scoringRequest.webhookResource,
+            url: scoringRequest.webhookResource + $stateParams.configId,
             marketoScoringMatchFields: scoringRequest.marketoScoringMatchFields,
             secretKey: credential ? credential.lattice_secret_key : 'null',
             rule: "{{campaign.name}}"
