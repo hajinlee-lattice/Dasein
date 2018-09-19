@@ -1,22 +1,17 @@
 package com.latticeengines.workflowapi.flows.testflows.dynamo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePreprocessingStepConfiguration;
 
-public class PrepareTestDynamoConfiguration extends BaseStepConfiguration {
-
-    @JsonProperty("customer_space")
-    private String customerSpace;
+public class PrepareTestDynamoConfiguration extends TestBasePreprocessingStepConfiguration {
 
     @JsonProperty("update_mode")
     private boolean updateMode;
 
-    public String getCustomerSpace() {
-        return customerSpace;
-    }
+    public PrepareTestDynamoConfiguration() {}
 
-    public void setCustomerSpace(String customerSpace) {
-        this.customerSpace = customerSpace;
+    public PrepareTestDynamoConfiguration(String stepBeanName) {
+        super(stepBeanName);
     }
 
     public boolean isUpdateMode() {
@@ -26,5 +21,4 @@ public class PrepareTestDynamoConfiguration extends BaseStepConfiguration {
     public void setUpdateMode(boolean updateMode) {
         this.updateMode = updateMode;
     }
-
 }

@@ -9,16 +9,22 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePreprocessingStep;
 
 @Component("prepareTestDynamo")
-public class PrepareTestDynamo extends BaseWorkflowStep<PrepareTestDynamoConfiguration> {
+public class PrepareTestDynamo extends TestBasePreprocessingStep<PrepareTestDynamoConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(PrepareTestDynamo.class);
 
     @Override
     public void execute() {

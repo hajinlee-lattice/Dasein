@@ -4,37 +4,50 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
 
-import com.latticeengines.workflowapi.flows.testflows.redshift.TestRedshiftWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.TestFrameworkWrapperWorkflowConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SamplePostprocessingStepConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.redshift.PrepareTestRedshiftConfiguration;
 
-public class ExportToRedshiftDeploymentTestNG extends BaseExportDeploymentTestNG<TestRedshiftWorkflowConfiguration> {
+public class ExportToRedshiftDeploymentTestNG extends
+        BaseExportDeploymentTestNG<TestFrameworkWrapperWorkflowConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(ExportToRedshiftDeploymentTestNG.class);
 
     @Resource(name = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
     @Override
-    protected TestRedshiftWorkflowConfiguration generateCreateConfiguration() {
-        TestRedshiftWorkflowConfiguration.Builder builder = new TestRedshiftWorkflowConfiguration.Builder();
-        return builder //
-                .internalResourceHostPort(internalResourceHostPort) //
-                .microServiceHostPort(microServiceHostPort) //
-                .customer(mainTestCustomerSpace) //
-                .updateMode(false) //
-                .build();
+    protected TestFrameworkWrapperWorkflowConfiguration generateCreateConfiguration() {
+        return generateConfiguration(false);
     }
 
     @Override
-    protected  TestRedshiftWorkflowConfiguration generateUpdateConfiguration() {
-        TestRedshiftWorkflowConfiguration.Builder builder = new TestRedshiftWorkflowConfiguration.Builder();
-        return builder //
-                .internalResourceHostPort(internalResourceHostPort) //
-                .microServiceHostPort(microServiceHostPort) //
-                .customer(mainTestCustomerSpace) //
-                .updateMode(true) //
-                .build();
+    protected TestFrameworkWrapperWorkflowConfiguration generateUpdateConfiguration() {
+        return generateConfiguration(true);
     }
+
+    private TestFrameworkWrapperWorkflowConfiguration generateConfiguration(boolean isUpdateMode) {
+        PrepareTestRedshiftConfiguration prepareTestRedshiftConfig = new PrepareTestRedshiftConfiguration(
+                "prepareTestRedshift");
+        prepareTestRedshiftConfig.setUpdateMode(isUpdateMode);
+        SamplePostprocessingStepConfiguration postStepConfig = new SamplePostprocessingStepConfiguration(
+                "samplePostprocessingStep");
+
+        ExportToRedshiftStepConfiguration exportToRedshiftStepConfig = new ExportToRedshiftStepConfiguration();
+        exportToRedshiftStepConfig.setCustomerSpace(mainTestCustomerSpace);
+        exportToRedshiftStepConfig.setInternalResourceHostPort(internalResourceHostPort);
+        exportToRedshiftStepConfig.setMicroServiceHostPort(microServiceHostPort);
+
+        return generateStepTestConfiguration(prepareTestRedshiftConfig, "exportToRedshift",
+                exportToRedshiftStepConfig, postStepConfig);
+    }
+
 
     @Override
     protected  void verifyCreateExport() {

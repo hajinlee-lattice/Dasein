@@ -13,6 +13,10 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -25,9 +29,12 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
+import com.latticeengines.workflowapi.functionalframework.WorkflowFrameworkDeploymentTestNGBase;
 
-public abstract class BaseExportDeploymentTestNG<T extends WorkflowConfiguration> extends WorkflowApiDeploymentTestNGBase {
+public abstract class BaseExportDeploymentTestNG<T extends WorkflowConfiguration>
+        extends WorkflowFrameworkDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseExportDeploymentTestNG.class);
 
     public static final String TABLE_1 = "Table1";
     public static final String TABLE_2 = "Table2";

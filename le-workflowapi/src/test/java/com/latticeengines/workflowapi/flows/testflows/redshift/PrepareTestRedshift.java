@@ -8,16 +8,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePreprocessingStep;
 
 @Component("prepareTestRedshift")
-public class PrepareTestRedshift extends BaseWorkflowStep<PrepareTestRedshiftConfiguration> {
+public class PrepareTestRedshift extends TestBasePreprocessingStep<PrepareTestRedshiftConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(PrepareTestRedshift.class);
 
     @Override
     public void execute() {

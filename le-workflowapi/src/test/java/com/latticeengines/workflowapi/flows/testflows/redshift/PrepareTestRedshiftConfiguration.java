@@ -1,22 +1,17 @@
 package com.latticeengines.workflowapi.flows.testflows.redshift;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePreprocessingStepConfiguration;
 
-public class PrepareTestRedshiftConfiguration extends BaseStepConfiguration {
-
-    @JsonProperty("customer_space")
-    private String customerSpace;
+public class PrepareTestRedshiftConfiguration extends TestBasePreprocessingStepConfiguration {
 
     @JsonProperty("update_mode")
     private boolean updateMode;
 
-    public String getCustomerSpace() {
-        return customerSpace;
-    }
+    public PrepareTestRedshiftConfiguration() {}
 
-    public void setCustomerSpace(String customerSpace) {
-        this.customerSpace = customerSpace;
+    public PrepareTestRedshiftConfiguration(String stepBeanName) {
+        super(stepBeanName);
     }
 
     public boolean isUpdateMode() {

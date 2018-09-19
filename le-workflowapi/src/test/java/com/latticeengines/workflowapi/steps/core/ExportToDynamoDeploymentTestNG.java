@@ -8,6 +8,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -19,9 +21,15 @@ import com.latticeengines.datafabric.entitymanager.GenericTableEntityMgr;
 import com.latticeengines.datafabric.entitymanager.impl.GenericTableEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.workflowapi.flows.testflows.dynamo.TestDynamoWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.dynamo.PrepareTestDynamoConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.TestFrameworkWrapperWorkflowConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SamplePostprocessingStepConfiguration;
 
-public class ExportToDynamoDeploymentTestNG extends BaseExportDeploymentTestNG<TestDynamoWorkflowConfiguration> {
+public class ExportToDynamoDeploymentTestNG extends
+        BaseExportDeploymentTestNG<TestFrameworkWrapperWorkflowConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(ExportToDynamoDeploymentTestNG.class);
 
     @Value("${eai.export.dynamo.signature}")
     private String signature;
@@ -45,27 +53,30 @@ public class ExportToDynamoDeploymentTestNG extends BaseExportDeploymentTestNG<T
     }
 
     @Override
-    protected TestDynamoWorkflowConfiguration generateCreateConfiguration() {
-        TestDynamoWorkflowConfiguration.Builder builder = new TestDynamoWorkflowConfiguration.Builder();
-        return builder //
-                .internalResourceHostPort(internalResourceHostPort) //
-                .microServiceHostPort(microServiceHostPort) //
-                .customer(mainTestCustomerSpace) //
-                .dynamoSignature(signature) //
-                .updateMode(false) //
-                .build();
+    protected TestFrameworkWrapperWorkflowConfiguration generateCreateConfiguration() {
+        return generateConfiguration(false);
     }
 
     @Override
-    protected TestDynamoWorkflowConfiguration generateUpdateConfiguration() {
-        TestDynamoWorkflowConfiguration.Builder builder = new TestDynamoWorkflowConfiguration.Builder();
-        return builder //
-                .internalResourceHostPort(internalResourceHostPort) //
-                .microServiceHostPort(microServiceHostPort) //
-                .customer(mainTestCustomerSpace) //
-                .dynamoSignature(signature) //
-                .updateMode(true) //
-                .build();
+    protected TestFrameworkWrapperWorkflowConfiguration generateUpdateConfiguration() {
+        return generateConfiguration(true);
+    }
+
+    private TestFrameworkWrapperWorkflowConfiguration generateConfiguration(boolean isUpdateMode) {
+        PrepareTestDynamoConfiguration prepareTestDynamoConfig = new PrepareTestDynamoConfiguration(
+                "prepareTestDynamo");
+        prepareTestDynamoConfig.setUpdateMode(isUpdateMode);
+        SamplePostprocessingStepConfiguration postStepConfig = new SamplePostprocessingStepConfiguration(
+                "samplePostprocessingStep");
+
+        ExportToDynamoStepConfiguration exportToDynamoStepConfig = new ExportToDynamoStepConfiguration();
+        exportToDynamoStepConfig.setCustomerSpace(mainTestCustomerSpace);
+        exportToDynamoStepConfig.setInternalResourceHostPort(internalResourceHostPort);
+        exportToDynamoStepConfig.setMicroServiceHostPort(microServiceHostPort);
+        exportToDynamoStepConfig.setDynamoSignature(signature);
+
+        return generateStepTestConfiguration(prepareTestDynamoConfig, "exportToDynamo",
+                exportToDynamoStepConfig, postStepConfig);
     }
 
     @Override
