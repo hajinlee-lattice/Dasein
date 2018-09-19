@@ -44,12 +44,6 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
-<<<<<<< .mine
-//import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-||||||| .r95610
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-=======
->>>>>>> .r95691
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -64,19 +58,10 @@ public class LoginResource {
 
     private static final Logger log = LoggerFactory.getLogger(LoginResource.class);
 
-<<<<<<< .mine
     @Value("${security.app.public.url}")
     private String APP_BASE_URL;
 
     @Autowired
-||||||| .r95610
-    @Autowired
-    private GlobalAuthenticationService globalAuthenticationService;
-
-    @Autowired
-=======
-    @Autowired
->>>>>>> .r95691
     private SessionService sessionService;
 
     @Autowired
