@@ -16,6 +16,7 @@ angular.module('lp.ratingsengine.remodel')
         this.selected = [];
         this.start_selected = [];
         this.category = '';
+        this.associatedRules = [];
 
         this.remodelAttributes = {};
         this.configFilters = RatingsEngineStore.getConfigFilters();
@@ -61,6 +62,17 @@ angular.module('lp.ratingsengine.remodel')
 
         return deferred.promise;
     };
+
+    this.getAssociatedRules = function(modelSummaryId) {
+        var deferred = $q.defer();
+
+        AtlasRemodelService.getAssociatedRules(modelSummaryId).then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
     this.setConfigFilters = function(filters){
         this.configFilters = filters;
     }
@@ -152,6 +164,33 @@ angular.module('lp.ratingsengine.remodel')
             function onSuccess(response) {
                 var result = response.data;
                 deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.resolve(errorMsg);
+            }
+        );
+    
+        return deferred.promise;
+    }
+
+    this.getAssociatedRules = function(modelSummaryId){
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url:  '/pls/models/modelreview/' + modelSummaryId
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+
+                if(result.Success == true){
+                    deferred.resolve(result.Result);                    
+                } else {
+                    deferred.resolve(result);
+                }
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};

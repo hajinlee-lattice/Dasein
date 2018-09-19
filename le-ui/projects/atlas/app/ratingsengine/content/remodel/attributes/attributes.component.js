@@ -26,6 +26,19 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
                     deferred.resolve(copy);
                     return deferred.promise;
                    
+                }],
+                associatedRules: ['$q', '$stateParams', 'AtlasRemodelStore', function ($q, $stateParams, AtlasRemodelStore) {
+
+                    var deferred = $q.defer(),
+                        iteration = AtlasRemodelStore.getRemodelIteration(),
+                        modelSummaryId = iteration.AI.modelSummaryId;
+
+                    AtlasRemodelStore.getAssociatedRules(modelSummaryId).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+
                 }]
             },
             views: {
@@ -38,7 +51,8 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
     bindings: {
         attributes: '<',
         filters: '<',
-        configfilters: '<'
+        configfilters: '<',
+        associatedRules: '<'
     },
     controller: function (
         $q, $scope, $stateParams, $timeout,
@@ -50,6 +64,7 @@ angular.module('lp.ratingsengine.remodel.attributes', [])
         vm.$onInit = function() {
             vm.store = AtlasRemodelStore;
             vm.store.setConfigFilters(vm.configfilters);
+            vm.store.set('associatedRules', vm.associatedRules)
 
             if(!vm.attributes['My Attributes']){
                 vm.attributes['My Attributes'] = [];

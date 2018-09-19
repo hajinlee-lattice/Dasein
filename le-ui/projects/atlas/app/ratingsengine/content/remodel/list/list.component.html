@@ -42,7 +42,19 @@
                         | limitTo: $ctrl.filters.pageSize))"
                 ng-class="{'disabled': attribute.ApprovedUsage[0] == 'None'}">
                 <td>
-                    <span class="ico ico-warning" ng-if="attribute.hasWarning"></span>
+                    <span 
+                        class="ico ico-warning show-tooltip top delay" 
+                        ng-if="attribute.ruleTooptips">
+                        <div class="tooltip_ small">
+                            <div class="cover">
+
+                                <div ng-repeat="rule in attribute.ruleTooltips">
+                                    <h4>rule</h4>
+                                </div>
+
+                            </div>
+                        </div>
+                    </span>
                 </td>
                 <td>
                     <span class="ico ico-check" ng-if="attribute.ImportanceOrdering"></span>

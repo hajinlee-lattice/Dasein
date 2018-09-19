@@ -28,10 +28,27 @@ angular.module('lp.ratingsengine.remodel.list', [])
 
         vm.getCategoryAttributes = function(){
             var category = AtlasRemodelStore.get('category'),
-                categoryAttributes = vm.allAttributes[category];
+                categoryAttributes = vm.allAttributes[category],
+                associatedRules = AtlasRemodelStore.get('associatedRules');
 
             angular.forEach(categoryAttributes, function(attribute){
-                attribute.hasWarning = (attribute.IsCoveredByOptionalRule || attribute.IsCoveredByMandatoryRule) ? true : false;
+
+                var attributeRules = attribute.AssociatedDataRules;
+
+                if(attributeRules.length > 0){
+                    var filtered = associatedRules.filter(function (e) {
+                        return attributeRules.indexOf(e.name) >= 0; 
+                    });
+
+                    console.log(filtered);
+                    attribute.ruleTooptips = filtered;
+                }
+
+                // attribute.hasWarning = (attribute.IsCoveredByOptionalRule || attribute.IsCoveredByMandatoryRule) ? true : false;
+
+                // if(attribute.hasWarning){
+                //     console.log(attribute);
+                // }
             });
 
             return categoryAttributes;
