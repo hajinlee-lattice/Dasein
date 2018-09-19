@@ -107,7 +107,8 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
             // Account attributes
             return JsonUtils.convertList(allAttrs, ColumnMetadata.class).stream()
                     .map(attr -> new TalkingPointAttribute(attr.getDisplayName(),
-                            accountAttributePrefix + attr.getAttrName()))
+                            accountAttributePrefix + attr.getAttrName(),
+                            attr.getCategoryAsString()))
                     .collect(Collectors.toList());
         } catch (LedpException e) {
             throw e;

@@ -87,6 +87,7 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
         ColumnMetadata at = new ColumnMetadata();
         at.setAttrName("something");
         at.setDisplayName("something more");
+        at.setCategoryByString("My Attributes");
         at.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
         List<ColumnMetadata> attrList = new ArrayList<>();
         attrList.add(at);
@@ -94,6 +95,7 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
         at = new ColumnMetadata();
         at.setAttrName("something1");
         at.setDisplayName("something more 1");
+        at.setCategoryByString("My Attributes");
         at.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
         attrList.add(at);
 
@@ -113,7 +115,9 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
         Assert.assertNotNull(attributes);
         Assert.assertEquals(2, attributes.size());
         Assert.assertTrue(attributes.get(0).getValue().startsWith(accountAttributePrefix));
+        Assert.assertEquals(attributes.get(0).getCategory(), "My Attributes");
         Assert.assertTrue(attributes.get(1).getValue().startsWith(accountAttributePrefix));
+        Assert.assertEquals(attributes.get(1).getCategory(), "My Attributes");
     }
 
     @Test(groups = "functional")
