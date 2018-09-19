@@ -37,6 +37,7 @@ angular.module('login.form', [
             vm.visible = true;
 
             $('[autofocus]').focus();
+
         }
 
         vm.loginClick = function () {
@@ -62,10 +63,7 @@ angular.module('login.form', [
                     if (Object.keys(params).length != 0 && params.constructor === Object){
                         
                         LoginService.PostToJwt(params).then(function(result){
-
-                            console.log(result);
-
-                            // $window.location.href = result.content;
+                            $window.location.href = result.url;
                         });
                         
                     } else {

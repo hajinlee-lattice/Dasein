@@ -87,7 +87,7 @@ angular.module('mainApp.login.services.LoginService', [
             }
         }).then(
             function onSuccess(data, status, headers, config){
-                deferred.resolve(data);
+                deferred.resolve(data.data);
             },
             function onError(data, status, headers, config) {
                 SessionService.HandleResponseErrors(data.data, status);

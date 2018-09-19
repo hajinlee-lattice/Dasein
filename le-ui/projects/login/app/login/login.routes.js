@@ -20,6 +20,9 @@ angular.module('login', [
                 },
                 clientsession: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getClientSession() || {};
+                },
+                params: function($stateParams){
+                    return $stateParams;
                 }
             },
             views: {
@@ -29,7 +32,6 @@ angular.module('login', [
         })
         .state('login.form', {
             url: 'form',
-            params: {},
             resolve: {
                 logindocument: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getLoginDocument() || {};
