@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -38,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 
 // Description: Runs a Workflow Step to compute "curated" attributes which are derived from other attributes.  At this
 //     time the only curated attributes is the Number of Contacts per account.  This computation employs the
@@ -55,6 +58,9 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     private int numberOfContactsStep, profileStep, bucketStep;
     private String accountTableName;
     private String contactTableName;
+    // Set to true if either of the Account or Contact table is missing or empty and we should not
+    // run this step's transformation.
+    boolean skipTransformation;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -70,37 +76,19 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     }
 
     @Override
-    protected PipelineTransformationRequest getTransformRequest() {
-        PipelineTransformationRequest request = new PipelineTransformationRequest();
+    protected TransformationWorkflowConfiguration executePreTransformation() {
+        // Initially, plan to run this step's transformation.
+        skipTransformation = false;
 
-        request.setName("CalculateCuratedAttributes");
-        request.setSubmitter(customerSpace.getTenantId());
-        request.setKeepTemp(false);
-        request.setEnableSlack(false);
-        // -----------
-        List<TransformationStepConfig> steps = new ArrayList<>();
+        initializeConfiguration();
 
-        numberOfContactsStep = 0;
-        profileStep = 1;
-        bucketStep = 2;
-
-        TransformationStepConfig numberOfContacts = numberOfContacts();
-        TransformationStepConfig profile = profile();
-        TransformationStepConfig bucket = bucket();
-        TransformationStepConfig calcStats = calcStats();
-        steps.add(numberOfContacts);
-        steps.add(profile);
-        steps.add(bucket);
-        steps.add(calcStats);
-
-        // -----------
-        request.setSteps(steps);
-        return request;
-    }
-
-    @Override
-    protected void onPostTransformationCompleted() {
-        super.onPostTransformationCompleted();
+        // Only generate a Workflow Configuration if all the necessary input tables are available and the
+        // step's configuration.
+        if (skipTransformation) {
+            return null;
+        } else {
+            return generateWorkflowConf();
+        }
     }
 
     @Override
@@ -108,13 +96,21 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         super.initializeConfiguration();
 
         accountTableName = getAccountTableName();
+        contactTableName = getContactTableName();
+
         if (StringUtils.isBlank(accountTableName)) {
-            throw new IllegalStateException("Cannot find account master table.");
+            log.warn("Cannot find account master table.");
+            skipTransformation = true;
         }
 
-        contactTableName = getContactTableName();
         if (StringUtils.isBlank(contactTableName)) {
-            throw new IllegalStateException("Cannot find contact master table.");
+            log.warn("Cannot find contact master table.");
+            skipTransformation = true;
+        }
+
+        if (skipTransformation) {
+            log.warn("Resetting Curated Account Attributes Step context.");
+            resetCuratedAttributesContext();
         }
     }
 
@@ -147,6 +143,44 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
             log.info("Found contact batch store in inactive version " + inactive);
         }
         return contactTableName;
+    }
+
+    protected void resetCuratedAttributesContext() {
+        Set<BusinessEntity> entitySet = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
+        if (entitySet == null) {
+            entitySet = new HashSet<>();
+        }
+        entitySet.add(BusinessEntity.CuratedAccount);
+        putObjectInContext(RESET_ENTITIES, entitySet);
+    }
+
+    @Override
+    protected PipelineTransformationRequest getTransformRequest() {
+        PipelineTransformationRequest request = new PipelineTransformationRequest();
+
+        request.setName("CalculateCuratedAttributes");
+        request.setSubmitter(customerSpace.getTenantId());
+        request.setKeepTemp(false);
+        request.setEnableSlack(false);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+
+        numberOfContactsStep = 0;
+        profileStep = 1;
+        bucketStep = 2;
+
+        TransformationStepConfig numberOfContacts = numberOfContacts();
+        TransformationStepConfig profile = profile();
+        TransformationStepConfig bucket = bucket();
+        TransformationStepConfig calcStats = calcStats();
+        steps.add(numberOfContacts);
+        steps.add(profile);
+        steps.add(bucket);
+        steps.add(calcStats);
+
+        // -----------
+        request.setSteps(steps);
+        return request;
     }
 
     private TransformationStepConfig numberOfContacts() {
@@ -212,11 +246,13 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         return step;
     }
 
-    // TODO: Not sure if this function is implemented correctly.
+    @Override
+    protected void onPostTransformationCompleted() {
+        super.onPostTransformationCompleted();
+    }
+
     @Override
     protected void enrichTableSchema(Table servingStoreTable) {
-        log.error("$JAW$ In CuratedAccountAttributesStep.enrichTablesScheme");
-
         List<Attribute> attrs = servingStoreTable.getAttributes();
         attrs.forEach(attr -> {
             if (InterfaceName.NumberOfContacts.name().equals(attr.getName())) {

@@ -111,7 +111,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         }
     }
 
-    private TransformationWorkflowConfiguration generateWorkflowConf() {
+    protected TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getTransformRequest();
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
