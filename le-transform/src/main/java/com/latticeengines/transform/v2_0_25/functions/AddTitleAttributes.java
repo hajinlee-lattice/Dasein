@@ -59,6 +59,7 @@ public class AddTitleAttributes implements RealTimeTransform {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void importLoookupMapFromJson(String filename) {
         try {
+            @SuppressWarnings("deprecation")
             String contents = FileUtils.readFileToString(new File(filename));
             Map<String, Object> titleAttributeData = JsonUtils.deserialize(contents, Map.class, true);
             for (Map.Entry<String, Object> entry : titleAttributeData.entrySet()) {

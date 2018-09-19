@@ -55,6 +55,7 @@ public abstract class ColumnToValueToDoubleLookup implements RealTimeTransform {
     @SuppressWarnings({ "unchecked" })
     protected void importLookupMapFromJson(String filename) {
         try {
+            @SuppressWarnings("deprecation")
             String contents = FileUtils.readFileToString(new File(filename));
             columnToValueToDoubleMap = JsonUtils.deserialize(contents, Map.class, true);
         } catch (FileNotFoundException e) {

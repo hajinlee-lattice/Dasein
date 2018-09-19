@@ -74,6 +74,7 @@ public class Pivot implements RealTimeTransform {
 
     private void importLoookupMapFromPythonString(String filename) {
         try {
+            @SuppressWarnings("deprecation")
             String pythonString = FileUtils.readFileToString(new File(filename));
             String dictionaryString = "";
             Matcher matcherDictionary = patternDictionary.matcher(pythonString);

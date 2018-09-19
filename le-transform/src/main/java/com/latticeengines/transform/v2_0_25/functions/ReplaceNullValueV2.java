@@ -46,6 +46,7 @@ public class ReplaceNullValueV2 implements RealTimeTransform {
     @SuppressWarnings("unchecked")
     private void importLoookupMapFromJson(String filename) {
         try {
+            @SuppressWarnings("deprecation")
             String contents = FileUtils.readFileToString(new File(filename));
             lookupMap = JsonUtils.deserialize(contents, Map.class, true);
         } catch (IOException e) {

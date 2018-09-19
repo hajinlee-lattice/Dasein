@@ -105,6 +105,7 @@ public class AddPhoneAttributes implements RealTimeTransform {
     @SuppressWarnings("unchecked")
     private void importLoookupMapFromJson(String filename) {
         try {
+            @SuppressWarnings("deprecation")
             String contents = FileUtils.readFileToString(new File(filename));
             Map<String, Object> attributeData = JsonUtils.deserialize(contents, Map.class, true);
             for (Map.Entry<String, Object> entry : attributeData.entrySet()) {

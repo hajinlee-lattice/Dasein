@@ -8,6 +8,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 public class DSUtils {
 
+    @SuppressWarnings("deprecation")
     public static Boolean hasUnUsualChar(String s) {
         if (StringUtils.isEmpty(s))
             return true;

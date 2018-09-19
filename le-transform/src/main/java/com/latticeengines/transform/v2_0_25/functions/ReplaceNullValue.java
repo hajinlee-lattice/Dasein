@@ -25,7 +25,6 @@ public class ReplaceNullValue implements RealTimeTransform {
     public ReplaceNullValue() {
     }
 
-    @SuppressWarnings("unchecked")
     public ReplaceNullValue(String modelPath) {
         importLoookupMapFromPythonString(modelPath + "/imputations.txt");
     }
@@ -47,6 +46,7 @@ public class ReplaceNullValue implements RealTimeTransform {
 
     private void importLoookupMapFromPythonString(String filename) {
         try {
+            @SuppressWarnings("deprecation")
             String pythonString = FileUtils.readFileToString(new File(filename));
             String dictionaryString = "";
             Matcher matcherDictionary = patternDictionary.matcher(pythonString);
