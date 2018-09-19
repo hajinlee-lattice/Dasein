@@ -1,4 +1,4 @@
-<span   class="query-input-number category-{{ vm.item.Category.replace(' ','_') | lowercase }} noselect-children" 
+<span   class="query-input-number category-{{ vm.categoryClass(vm.item.Category) | lowercase }} noselect-children" 
         ng-if="vm.tree.bucketRestriction" 
         ng-init="data = vm.items[vm.tree.bucketRestriction.attr]"
         title="{{ vm.item.Category }} - {{ vm.item.Subcategory }} - {{ vm.item.DisplayName }}">

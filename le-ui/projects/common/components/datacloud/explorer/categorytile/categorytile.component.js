@@ -21,7 +21,7 @@ angular
             }
 
             vm.categoryClass = function(category) {
-                var category = 'category-' + category.toLowerCase().replace(' ','-');
+                var category = 'category-' + category.toLowerCase().replace(/\s/g, "-");
                 return category;
             }
 

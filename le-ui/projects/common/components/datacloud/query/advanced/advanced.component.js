@@ -654,5 +654,10 @@ angular.module('common.datacloud.query.builder', [
         vm.setCurrentSavedTree();
     }
 
+    vm.categoryClass = function(category) {
+        var category = 'category-' + category.toLowerCase().replace(/\s/g, "-");
+        return category;
+    }
+
     vm.init();
 });

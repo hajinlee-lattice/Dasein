@@ -492,6 +492,7 @@ angular.module('common.datacloud.explorer', [
 
     var getHighlightMetadata = function() {
         var timestamp = new Date().getTime();
+        console.log(vm.categories);
         vm.categories.forEach(function(category) {
             if (vm.enrichmentsObj && vm.enrichmentsObj[category]) {
                 vm.highlightMetadata.categories[category] = {};
@@ -902,6 +903,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.processCategories = function() {
+        console.log(EnrichmentTopAttributes);
         vm.categories = Object.keys(EnrichmentTopAttributes).sort();
 
         if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment' || vm.section == 'dashboard.rules') {
@@ -910,6 +912,7 @@ angular.module('common.datacloud.explorer', [
                 'Firmographics',
                 'My Attributes',
                 'Contact Attributes',
+                'Curated Account Attributes',
                 'Product Spend Profile',
                 'Intent',
                 'Technology Profile',

@@ -41,7 +41,7 @@
 </div>
 
 <!-- Drag and Drop item outline (insert before item) -->
-<div    class="dashed dashed-top query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 
+<div    class="dashed dashed-top query-section-item noselect-children category-{{ vm.categoryClass(vm.root.draggedItem.item.Category) | lowercase }}" 
         ng-style="{ 'marginBottom': vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem) ? 0 : '.25em'  }"
         ng-if="!vm.tree.logicalRestriction && vm.root.droppedItemAppend == false && (vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem)))"
         ng-mouseover="vm.mouseOver($event)"
@@ -50,7 +50,7 @@
 </div>
 
 <!-- Attribute item container -->
-<div    class="query-section-item noselect-children category-{{ vm.item.Category.replace(' ','_') | lowercase }}" 
+<div    class="query-section-item noselect-children category-{{ vm.categoryClass(vm.item.Category) | lowercase }}" 
         ng-class="{ 
             'editing': vm.editing,
             'dragging': vm.root.draggedItem == vm
@@ -118,7 +118,7 @@
 </div>
 
 <!-- Drag and Drop item outline (append after item) -->
-<div    class="dashed query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 
+<div    class="dashed query-section-item noselect-children category-{{ vm.categoryClass(vm.root.draggedItem.item.Category) | lowercase }}" 
         ng-style="{ 'marginTop': vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem) ? 0 : '.25em'  }"
         ng-if="!vm.tree.logicalRestriction && vm.root.droppedItemAppend == true && (vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem)))"
         ng-mouseover="vm.mouseOver($event)"
@@ -130,7 +130,7 @@
     <!-- Drag and Drop item outline directly before "add new item/operator" -->
     <li     class="query-section-item-box"
             ng-if="vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem))">
-        <div    class="dashed query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 
+        <div    class="dashed query-section-item noselect-children category-{{ vm.categoryClass(vm.root.draggedItem.item.Category) | lowercase }}" 
                 ng-mouseover="vm.mouseOver($event)"
                 ng-mousemove="vm.mouseMove($event, true)">
             <div class="query-section-item-label"><strong>{{vm.root.draggedItem.root.getBucketLabel(vm.root.draggedItem.tree) || '-'}}</strong></div>

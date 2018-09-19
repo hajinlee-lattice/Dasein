@@ -13,8 +13,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'rating': 'account',
             'purchasehistory': 'account',
             'account': 'account',
-            'contact':'contact'
-
+            'contact':'contact',
+            'curatedaccount': 'account'
 
         };
         this.transactionMap = {
@@ -504,7 +504,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 segment.preexisting_segment_name = segmentName;
                 // segment.contact_restriction = {};
             }
-
+            console.log(bucketRestriction.attr);
             this.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
             //This call is done to associate some mode to account
             this.treeMode = QueryTreeService.treeMapping[this.treeMode];
@@ -513,6 +513,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
                     "bucketRestriction": angular.copy(bucketRestriction)
                 }
             };
+            console.log(this.treeMode);
             QueryService.GetCountByQuery(
                 this.treeMode + 's',
                 segment,
