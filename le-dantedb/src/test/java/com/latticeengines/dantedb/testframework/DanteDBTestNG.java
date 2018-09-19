@@ -2,8 +2,8 @@ package com.latticeengines.dantedb.testframework;
 
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -26,6 +26,7 @@ public class DanteDBTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     SessionFactory sessionFactory;
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment")
     public void testDanteDBConnection() {
         String externalID = "DanteDBTestExtID";
@@ -46,7 +47,7 @@ public class DanteDBTestNG extends AbstractTestNGSpringContextTests {
         txnTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             public void doInTransactionWithoutResult(TransactionStatus status) {
-                Query query = sessionFactory.getCurrentSession().createSQLQuery(insertTPSql);
+                Query<?> query = sessionFactory.getCurrentSession().createQuery(insertTPSql);
                 query.setParameter("externalID", externalID);
                 query.executeUpdate();
             }
@@ -55,8 +56,8 @@ public class DanteDBTestNG extends AbstractTestNGSpringContextTests {
         // Select a Talking Point
         @SuppressWarnings("unchecked")
         DanteTalkingPoint dtp = (DanteTalkingPoint) txnTemplate.execute((TransactionCallback) status -> {
-            Query query = sessionFactory.getCurrentSession()
-                    .createQuery("FROM DanteTalkingPoint WHERE External_ID = :externalID");
+            Query<DanteTalkingPoint> query = sessionFactory.getCurrentSession()
+                    .createQuery("FROM DanteTalkingPoint WHERE External_ID = :externalID", DanteTalkingPoint.class);
             query.setParameter("externalID", externalID);
             return (DanteTalkingPoint) query.list().get(0);
         });
@@ -66,7 +67,7 @@ public class DanteDBTestNG extends AbstractTestNGSpringContextTests {
         txnTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             public void doInTransactionWithoutResult(TransactionStatus status) {
-                Query query = sessionFactory.getCurrentSession().createSQLQuery(deleteTPSql);
+                Query query = sessionFactory.getCurrentSession().createQuery(deleteTPSql);
                 query.setParameter("externalID", externalID);
                 query.executeUpdate();
             }
