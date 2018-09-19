@@ -8,7 +8,7 @@
     { "Node": "EnrichAttributesMaxNumber", "Data": 32},
     { "Node": "DataCloudLicense",
       "Children" : [
-        { "Node": "MaxEnrichAttributes", "Data": 232},
+        { "Node": "MaxEnrichAttributes", "Data": 1000},
         { "Node": "HG", "Data": 12},
         { "Node": "Bombora", "Data": 20},
         { "Node": "WebsiteKeywords", "Data": 200}
