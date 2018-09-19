@@ -182,12 +182,15 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     boolean includeCurrentAttr = true;
                     AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
                             .get(ColumnMetadataKey.State);
+                    if (attrConfigProp == null) {
+                        log.info("Attr config with null state prop : " + JsonUtils.serialize(attrConfig));
+                    }
                     if (onlyActiveAttrs) {
-                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))) {
+                        if (attrConfigProp != null && AttrState.Inactive.equals(getActualValue(attrConfigProp))) {
                             includeCurrentAttr = false;
                         }
                     } else {
-                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))
+                        if (attrConfigProp != null && AttrState.Inactive.equals(getActualValue(attrConfigProp))
                                 && !attrConfigProp.isAllowCustomization()) {
                             includeCurrentAttr = false;
                         }
