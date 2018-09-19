@@ -64,6 +64,7 @@
         <avro.version>1.7.7</avro.version>
         <parquet.avro.version>1.4.3</parquet.avro.version> <!-- remove ? -->
         <aws.version>1.11.343</aws.version>
+        <aws.sqs.version>1.0.4</aws.sqs.version>
         <cascading.version>3.2.1</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <cascading.redshift.version>3.0.0</cascading.redshift.version>
@@ -2298,6 +2299,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
         </dependency>
 
         <dependency>

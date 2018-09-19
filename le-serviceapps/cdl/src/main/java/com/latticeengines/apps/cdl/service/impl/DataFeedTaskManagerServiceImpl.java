@@ -280,8 +280,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new RuntimeException("Cannot find the template for S3 file: " + importConfig.getS3FilePath());
         }
-        String newFilePath = s3ImportFolderService.startImport(customerSpace.getTenantId(), importConfig.getS3Bucket(),
-                importConfig.getS3FilePath());
+        String newFilePath = s3ImportFolderService.startImport(customerSpace.getTenantId(),
+                importConfig.getEntity().name(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
         importConfig.setS3FilePath(newFilePath);
         importConfig.setS3Bucket(s3ImportFolderService.getBucket());
         //validate

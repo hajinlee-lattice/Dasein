@@ -6,7 +6,7 @@ public interface S3ImportFolderService {
 
     String getBucket();
 
-    String startImport(String tenantId, String sourceBucket, String sourceKey);
+    String startImport(String tenantId, String entity, String sourceBucket, String sourceKey);
 
     String moveFromInProgressToSucceed(String key);
 

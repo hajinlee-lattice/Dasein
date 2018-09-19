@@ -36,4 +36,22 @@
         <constructor-arg index="0" ref="awsCredentials" />
     </bean>
 
+    <bean id="credentialsProvider" class="com.amazonaws.auth.AWSStaticCredentialsProvider">
+        <constructor-arg index="0" ref="awsCredentials" />
+    </bean>
+
+    <bean id="sqsClientBuilder" class="com.amazonaws.services.sqs.AmazonSQSClientBuilder" factory-method="standard">
+        <property name="region" value="${aws.region}"/>
+        <property name="credentials" ref="credentialsProvider"/>
+    </bean>
+
+    <bean id="sqsProviderConfiguration" class="com.amazon.sqs.javamessaging.ProviderConfiguration">
+        <property name="numberOfMessagesToPrefetch" value="5"/>
+    </bean>
+
+    <bean name="sqsConnectionFactory" class="com.amazon.sqs.javamessaging.SQSConnectionFactory" lazy-init="true">
+        <constructor-arg ref="sqsProviderConfiguration" />
+        <constructor-arg ref="sqsClientBuilder" />
+    </bean>
+
 </beans>

@@ -32,7 +32,7 @@ public class S3ImportFolderServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
 
-        String key = s3ImportFolderService.startImport(tenantId,
+        String key = s3ImportFolderService.startImport(tenantId, "Account",
                 "latticeengines-test-artifacts", "le-serviceapps/cdl/end2end/csv/2/Account_400_1000.csv");
 
         List<S3ObjectSummary> inProgress = s3Service.listObjects(s3ImportFolderService.getBucket(), tenantId +

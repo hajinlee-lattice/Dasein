@@ -62,15 +62,15 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
     }
 
     @Override
-    public String startImport(String tenantId, String sourceBucket, String sourceKey) {
+    public String startImport(String tenantId, String entity, String sourceBucket, String sourceKey) {
         initialize(tenantId);
         String date = dateFormat.format(new Date());
-        String prefix = String.valueOf(System.currentTimeMillis()) + "-";
-        String path = tenantId + INPUT_ROOT + IN_PROGRESS + "/" + date + "/";
+        String prefix = String.valueOf(System.currentTimeMillis() / 1000L) + "-" + entity;
+        String path = tenantId + INPUT_ROOT + IN_PROGRESS + "/" + date + "/" + prefix + "/";
         if (!s3Service.objectExist(s3Bucket, path)) {
             s3Service.createFolder(s3Bucket, path);
         }
-        String target = path + prefix + getFileName(sourceKey);
+        String target = path + getFileName(sourceKey);
         s3Service.copyObject(sourceBucket, sourceKey, s3Bucket, target);
         return target;
     }
@@ -96,7 +96,8 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
             return StringUtils.EMPTY;
         }
         String[] parts = getParts(key);
-        String target = parts[0] + INPUT_ROOT + COMPLETED + SUCCEEDED + "/" + parts[4] + "/" + getFileName(key);
+        String target = parts[0] + INPUT_ROOT + COMPLETED + SUCCEEDED + "/" + parts[4] + "/" + parts[5] + "/" +
+                getFileName(key);
         s3Service.moveObject(s3Bucket, key, s3Bucket, target);
         return target;
     }
@@ -107,7 +108,8 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
             return StringUtils.EMPTY;
         }
         String[] parts = getParts(key);
-        String target = parts[0] + INPUT_ROOT + COMPLETED + FAILED + "/" + parts[4] + "/" + getFileName(key);
+        String target = parts[0] + INPUT_ROOT + COMPLETED + FAILED + "/" + parts[4] + "/" + parts[5] + "/"  +
+                getFileName(key);
         s3Service.moveObject(s3Bucket, key, s3Bucket, target);
         return target;
     }
