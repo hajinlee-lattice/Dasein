@@ -20,12 +20,13 @@ public class PlaymakerRecommendationEntityMgrImplUnitTestNG {
         myMap.put(PlaymakerConstants.Description,
                 "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"
                         + "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"
-                        + "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij");
+                        + "123456789A123456789A123456789A123456789A123456789A123456789A123456789A123456789A123456789A123456789A");
         products.add(myMap);
         PlaymakerRecommendationEntityMgrImpl playMakerRecommendationEntityMgr = new PlaymakerRecommendationEntityMgrImpl();
         playMakerRecommendationEntityMgr.truncateDescriptionLength(products);
         products.stream().forEach(item -> {
             Assert.assertTrue(((String) item.get(PlaymakerConstants.Description)).length() <= 255);
+            System.out.println(item.get(PlaymakerConstants.Description));
         });
     }
 }

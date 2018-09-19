@@ -139,7 +139,7 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
     @Test(groups = "deployment")
     public void testPlays() {
         Map<String, Object> playCount = playmakerRecommendationMgr.getPlayCount(customerSpace.toString(),
-                PlaymakerSyncLookupSource.V2.name(), 0, null);
+                PlaymakerSyncLookupSource.V2.name(), 0, null, SynchronizationDestinationEnum.SFDC.ordinal(), orgInfo);
         Assert.assertNotNull(playCount);
         Object countObj = playCount.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
         Assert.assertNotNull(countObj);
@@ -150,7 +150,8 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
         Assert.assertTrue(count < 100);
 
         Map<String, Object> plays = playmakerRecommendationMgr.getPlays(customerSpace.toString(),
-                PlaymakerSyncLookupSource.V2.name(), 0, 0, 10, null);
+                PlaymakerSyncLookupSource.V2.name(), 0, 0, 10, null, SynchronizationDestinationEnum.SFDC.ordinal(),
+                orgInfo);
         Assert.assertNotNull(plays);
         Assert.assertNotNull(plays.get(PlaymakerRecommendationEntityMgr.START_KEY));
         Assert.assertNotNull(plays.get(PlaymakerRecommendationEntityMgr.END_KEY));

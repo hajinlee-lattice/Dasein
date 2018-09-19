@@ -3,14 +3,15 @@ package com.latticeengines.playmaker.entitymgr.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.String;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 
 @Component("playmakerRecommendationEntityMgr")
 public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommendationEntityMgr {
@@ -44,10 +45,10 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     @Override
     public Map<String, Object> getPlays(String tenantName, String lookupSource, long start, int offset, int maximum,
-            List<Integer> playgroupIds) {
+            List<Integer> playgroupIds, int syncDestination, Map<String, String> orgInfo) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
-        List<Map<String, Object>> plays = dao.getPlays(start, offset, maximum, playgroupIds);
+        List<Map<String, Object>> plays = dao.getPlays(start, offset, maximum, playgroupIds, syncDestination, orgInfo);
 
         truncateDescriptionLength(plays);
 
@@ -72,11 +73,11 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     @Override
     public Map<String, Object> getPlayCount(String tenantName, String lookupSource, long start,
-            List<Integer> playgroupIds) {
+            List<Integer> playgroupIds, int syncDestination, Map<String, String> orgInfo) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getPlayCount(start, playgroupIds));
+        result.put(COUNT_KEY, dao.getPlayCount(start, playgroupIds, syncDestination, orgInfo));
         return result;
     }
 
@@ -198,7 +199,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     @Override
     public List<Map<String, Object>> getWorkflowTypes(String tenantName, String lookupSource) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
-        return dao.getWorkflowTypes(tenantName);
+        return dao.getWorkflowTypes();
     }
 
     private Map<String, Object> wrapResult(List<Map<String, Object>> records) {

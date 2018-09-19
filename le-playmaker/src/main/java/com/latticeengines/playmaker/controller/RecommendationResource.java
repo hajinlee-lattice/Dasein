@@ -73,27 +73,33 @@ public class RecommendationResource {
     @RequestMapping(value = "/plays", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get plays")
-    public Map<String, Object> getPlays(HttpServletRequest request,
+    public Map<String, Object> getPlays(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
+            @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = false) @RequestParam(value = "destination", required = false) String destination,
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getPlays(tenantName, lookupSource, start, offset, maximum, playgroupIds);
+        return playmakerRecommendationMgr.getPlays(tenantName, lookupSource, start, offset, maximum, playgroupIds,
+                SynchronizationDestinationEnum.mapToIntType(destination),
+                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/playcount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get play count")
-    public Map<String, Object> getPlayCount(HttpServletRequest request,
+    public Map<String, Object> getPlayCount(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
+            @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = false) @RequestParam(value = "destination", required = false) String destination,
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getPlayCount(tenantName, lookupSource, start, playgroupIds);
+        return playmakerRecommendationMgr.getPlayCount(tenantName, lookupSource, start, playgroupIds,
+                SynchronizationDestinationEnum.mapToIntType(destination),
+                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/accountextensions", method = RequestMethod.GET, headers = "Accept=application/json")

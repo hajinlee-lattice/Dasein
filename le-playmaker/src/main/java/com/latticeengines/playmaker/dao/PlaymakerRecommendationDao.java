@@ -12,9 +12,10 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     long getRecommendationCount(long start, int syncDestination, List<String> playIds, Map<String, String> orgInfo);
 
-    List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds);
+    List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds,
+            int syncDestination, Map<String, String> orgInfo);
 
-    long getPlayCount(long start, List<Integer> playgroupIds);
+    long getPlayCount(long start, List<Integer> playgroupIds, int syncDestination, Map<String, String> orgInfo);
 
     List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, List<String> accountIds,
             String filterBy, Long recStart, String columns, boolean hasSfdcContactId, Map<String, String> orgInfo);
@@ -29,7 +30,7 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     long getPlayValueCount(long start, List<Integer> playgroupIds);
 
-    List<Map<String, Object>> getWorkflowTypes(String customerSpace);
+    List<Map<String, Object>> getWorkflowTypes();
 
     List<Map<String, Object>> getPlayGroups(long start, int offset, int maximum);
 

@@ -18,7 +18,7 @@ public interface PlaymakerRecommendationEntityMgr {
             int syncDestination, List<String> playIds, Map<String, String> orgInfo);
 
     Map<String, Object> getPlays(String tenantName, String lookupSource, long start, int offset, int maximum,
-            List<Integer> playgroupIds);
+            List<Integer> playgroupIds, int syncDestination, Map<String, String> orgInfo);
 
     Map<String, Object> getAccountExtensions(String tenantName, String lookupSource, Long start, int offset,
             int maximum, List<String> accountIds, String filterBy, Long recStart, String columns,
@@ -32,7 +32,8 @@ public interface PlaymakerRecommendationEntityMgr {
     Map<String, Object> getRecommendationCount(String tenantName, String lookupSource, long start, int syncDestination,
             List<String> playIds, Map<String, String> orgInfo);
 
-    Map<String, Object> getPlayCount(String tenantName, String lookupSource, long start, List<Integer> playgroupIds);
+    Map<String, Object> getPlayCount(String tenantName, String lookupSource, long start, List<Integer> playgroupIds,
+            int syncDestination, Map<String, String> orgInfo);
 
     Map<String, Object> getAccountextExsionCount(String tenantName, String lookupSource, Long start,
             List<String> accountIds, String filterBy, Long recStart);

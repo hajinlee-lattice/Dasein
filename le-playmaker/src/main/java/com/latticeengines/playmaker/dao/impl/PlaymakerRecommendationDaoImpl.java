@@ -176,9 +176,11 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
+    public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds,
+            int syncDestination, Map<String, String> orgInfo) {
         String sql = "SELECT * FROM (SELECT PL.[Play_ID] AS ID, PL.[External_ID] AS ExternalID, PL.[Display_Name] AS DisplayName, "
-                + "PL.[Description] AS Description, PL.[Average_Probability] AS AverageProbability," + DATEDIFF_1970
+                + "PL.[Description] AS Description, "
+                + "PL.[Average_Probability] AS AverageProbability," + DATEDIFF_1970
                 + " PL.[Last_Modification_Date]) AS LastModificationDate, "
                 + "(SELECT DISTINCT G.Display_Name + '|' as [text()] FROM PlayGroupMap M JOIN PlayGroup G "
                 + "ON M.PlayGroup_ID = G.PlayGroup_ID WHERE M.Play_ID = PL.Play_ID FOR XML PATH ('')) AS PlayGroups, "
@@ -239,7 +241,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public long getPlayCount(long start, List<Integer> playgroupIds) {
+    public long getPlayCount(long start, List<Integer> playgroupIds, int syncDestination, Map<String, String> orgInfo) {
         String sql = "SELECT COUNT(*) " + getPlayFromWhereClause(playgroupIds);
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
@@ -523,7 +525,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds,
             List<Integer> accountIds) {
         String sql = "SELECT * FROM (SELECT C.[LEContact_ID] AS ID, C.[External_ID] AS ExternalID, C.[Display_Name] AS Name, C.[Account_ID] AS AccountID, "
-                + "C.[Description] AS Description, C.[Title] AS Title, C.[Phone_Number] AS Phone,"
+                + "C.[Description] AS Description, C.[Title] AS Title, C.[Phone_Number] AS Phone, "
                 + "C.[Fax_Number] AS Fax, C.[Email_Address] AS Email,"
                 + "C.[Address_Street_1] AS Address, C.[Address_Street_2] AS Address2,"
                 + "C.[City] AS City, C.[State_Province] AS State," + "C.[Country] AS Country, C.[Zip] AS ZipCode,"
@@ -701,7 +703,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getWorkflowTypes(String tenantId) {
+    public List<Map<String, Object>> getWorkflowTypes() {
         String sql = "SELECT External_ID as ID, Display_Name AS DisplayName FROM PlayWorkflowType WHERE IsActive = 1";
 
         MapSqlParameterSource source = new MapSqlParameterSource();

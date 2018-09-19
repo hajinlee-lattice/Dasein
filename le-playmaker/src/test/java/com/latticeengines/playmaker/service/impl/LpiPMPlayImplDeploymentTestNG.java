@@ -1,6 +1,8 @@
 package com.latticeengines.playmaker.service.impl;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
@@ -27,7 +30,6 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
         "classpath:playmakercore-context.xml", "classpath:test-playmaker-context.xml" })
 public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(LpiPMPlayImplDeploymentTestNG.class);
 
     @Inject
@@ -35,6 +37,8 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
 
     @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
+
+    private long accountCount;
 
     private Play firstPlayWithLaunch;
     private Play secondPlayWithLaunch;
@@ -59,7 +63,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
 
     @Test(groups = "deployment")
     public void testGetPlayCountWithoutPlayCreation() {
-        int playCount = lpiPMPlayImpl.getPlayCount(0, null);
+        int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
         Assert.assertEquals(playCount, 0);
     }
 
@@ -68,7 +72,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
         testPlayCreationHelper.setupPlayTestEnv();
         testPlayCreationHelper.createPlay();
 
-        int playCount = lpiPMPlayImpl.getPlayCount(0, null);
+        int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
         Assert.assertEquals(playCount, 0);
     }
 
@@ -76,7 +80,10 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     public void testGetPlayCountAfterCreatingPlayWithLaunch() throws Exception {
         testPlayCreationHelper.createPlayLaunch();
         firstPlayWithLaunch = testPlayCreationHelper.getPlay();
-        int playCount = lpiPMPlayImpl.getPlayCount(0, null);
+        Map<String, String> org = new HashMap<String, String>();
+        org.put(CDLConstants.ORG_ID, testPlayCreationHelper.getDestinationOrgId());
+        org.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, testPlayCreationHelper.getDestinationOrgType().toString());
+        int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, org);
         Assert.assertEquals(playCount, 1);
     }
 
@@ -85,11 +92,11 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
         Thread.sleep(TimeUnit.SECONDS.toMillis(4));
         Play secondPlay = testPlayCreationHelper.createPlayOnlyAndGet();
 
-        int playCount = lpiPMPlayImpl.getPlayCount(0, null);
+        int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
         Assert.assertEquals(playCount, 1);
 
         testPlayCreationHelper.createPlayLaunch();
-        playCount = lpiPMPlayImpl.getPlayCount(0, null);
+        playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
         Assert.assertEquals(playCount, 2);
         secondPlayWithLaunch = secondPlay;
     }
@@ -105,17 +112,17 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
         System.out.println("lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) = "
                 + lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch));
 
-        int playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch), null);
+        int playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch), null, 1, null);
         Assert.assertEquals(playCount, 2);
-        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch) - 2, null);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch) - 2, null, 1, null);
         Assert.assertEquals(playCount, 2);
-        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch) + 2, null);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(firstPlayWithLaunch) + 2, null, 1, null);
         Assert.assertEquals(playCount, 1);
-        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) - 2, null);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) - 2, null, 1, null);
         Assert.assertEquals(playCount, 1);
-        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch), null);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch), null, 1, null);
         Assert.assertEquals(playCount, 1);
-        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) + 2, null);
+        playCount = lpiPMPlayImpl.getPlayCount(lpiPMPlayImpl.secondsFromEpoch(secondPlayWithLaunch) + 2, null, 1, null);
         Assert.assertEquals(playCount, 0);
     }
 }

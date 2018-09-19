@@ -117,6 +117,7 @@ public class TestPlayCreationHelper {
     private String playName;
 
     private String destinationOrgId;
+    private CDLExternalSystemType destinationOrgType;
 
     private String tenantIdentifier;
     private Tenant tenant;
@@ -144,6 +145,7 @@ public class TestPlayCreationHelper {
 
     public void setupTenantAndData() {
         destinationOrgId = "O_" + System.currentTimeMillis();
+        destinationOrgType = CDLExternalSystemType.CRM;
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier, 3);
@@ -151,6 +153,14 @@ public class TestPlayCreationHelper {
         MultiTenantContext.setTenant(tenant);
         log.info("Tenant = " + tenant.getId());
         deploymentTestBed.switchToSuperAdmin(tenant);
+    }
+
+    public String getDestinationOrgId() {
+        return destinationOrgId;
+    }
+
+    public CDLExternalSystemType getDestinationOrgType() {
+        return destinationOrgType;
     }
 
     public Tenant getTenant() {
@@ -279,7 +289,7 @@ public class TestPlayCreationHelper {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setBucketsToLaunch(bucketsToLaunch);
         playLaunch.setDestinationOrgId(destinationOrgId);
-        playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch.setDestinationSysType(destinationOrgType);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
         playLaunch.setTopNCount(topNCount);

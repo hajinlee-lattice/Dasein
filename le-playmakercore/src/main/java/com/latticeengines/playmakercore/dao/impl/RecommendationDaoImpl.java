@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -20,6 +21,7 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryI
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
+import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.playmakercore.dao.RecommendationDao;
 
 @Component("recommendationDao")
@@ -66,7 +68,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             String syncDestination, List<String> playIds, Map<String, String> orgInfo) {
         Session session = getSessionFactory().getCurrentSession();
 
-        Pair<String, String> effectiveOrgInfo = getEffectiveOrgInfo(orgInfo);
+        Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
 
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "FROM %s " //
@@ -108,7 +110,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             Map<String, String> orgInfo) {
         Session session = getSessionFactory().getCurrentSession();
 
-        Pair<String, String> effectiveOrgInfo = getEffectiveOrgInfo(orgInfo);
+        Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
 
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT count(*) " //
@@ -137,7 +139,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             String syncDestination, List<String> playIds, Map<String, String> orgInfo) {
         Session session = getSessionFactory().getCurrentSession();
 
-        Pair<String, String> effectiveOrgInfo = getEffectiveOrgInfo(orgInfo);
+        Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
 
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT new map " //
@@ -183,27 +185,6 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
         setParamValues(playIds, effectiveOrgInfo, query);
         return query.list();
-    }
-
-    private Pair<String, String> getEffectiveOrgInfo(Map<String, String> orgInfo) {
-        Pair<String, String> effectiveOrgInfo = null;
-
-        if (MapUtils.isNotEmpty(orgInfo)) {
-            log.info(String.format("Org info for this request: %s = %s, %s = %s. ", CDLConstants.ORG_ID,
-                    orgInfo.get(CDLConstants.ORG_ID), CDLConstants.EXTERNAL_SYSTEM_TYPE,
-                    orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE)));
-
-            if (StringUtils.isNotBlank(orgInfo.get(CDLConstants.ORG_ID))
-                    && StringUtils.isNotBlank(orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE))) {
-                effectiveOrgInfo = new ImmutablePair<String, String>(orgInfo.get(CDLConstants.ORG_ID).trim(),
-                        orgInfo.get(CDLConstants.EXTERNAL_SYSTEM_TYPE).trim());
-
-                log.info(String.format("Effective org info: %s = %s, %s = %s", //
-                        CDLConstants.ORG_ID, effectiveOrgInfo.getLeft(), //
-                        CDLConstants.EXTERNAL_SYSTEM_TYPE, effectiveOrgInfo.getRight()));
-            }
-        }
-        return effectiveOrgInfo;
     }
 
     private String additionalWhereClause(List<String> playIds, Pair<String, String> effectiveOrgInfo, String queryStr) {

@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.pls.PlayType;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -21,7 +19,6 @@ import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("lpiPMRecommendationDaoAdapter")
 public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
@@ -36,9 +33,6 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Inject
     private LpiPMAccountExtension lpiPMAccountExtension;
-
-    @Inject
-    private PlayProxy playProxy;
 
     public LpiPMRecommendationDaoAdapterImpl() {
         super(null);
@@ -63,13 +57,15 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
-        return lpiPMPlay.getPlays(start, offset, maximum, playgroupIds);
+    public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds,
+            int syncDestination, Map<String, String> orgInfo) {
+        return lpiPMPlay.getPlays(start, offset, maximum, playgroupIds, syncDestination, orgInfo);
     }
 
     @Override
-    public long getPlayCount(long start, List<Integer> playgroupIds) {
-        return lpiPMPlay.getPlayCount(start, playgroupIds);
+    public long getPlayCount(long start, List<Integer> playgroupIds,
+            int syncDestination, Map<String, String> orgInfo) {
+        return lpiPMPlay.getPlayCount(start, playgroupIds, syncDestination, orgInfo);
     }
 
     @Override
@@ -150,17 +146,24 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public List<Map<String, Object>> getWorkflowTypes(String tenanId) {
-        return playProxy.getPlayTypes(tenanId).stream()
-                .map(type -> createWorkflowTypeMap(type.getDisplayName(), type.getDisplayName()))
-                .collect(Collectors.toList());
+    public List<Map<String, Object>> getWorkflowTypes() {
+        // TODO - dummy impl in M13, fix in M14
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        createWorkflowTypeMap(result, "ADefault", "List");
+        createWorkflowTypeMap(result, "Cross-Sell", "Cross-Sell");
+        createWorkflowTypeMap(result, "Prospecting", "Prospecting");
+        createWorkflowTypeMap(result, "Renewal", "Renewal");
+        createWorkflowTypeMap(result, "Upsell", "Upsell");
+
+        return result;
     }
 
-    private Map<String, Object> createWorkflowTypeMap(String type, String typeDisplayName) {
+    private void createWorkflowTypeMap(List<Map<String, Object>> result, String type, String typeDisplayName) {
         Map<String, Object> wf = new HashMap<>();
-        wf.put("ID", PlayType.getIdForBIS(type));
+        wf.put("ID", type);
         wf.put("DisplayName", typeDisplayName);
-        return wf;
+        result.add(wf);
     }
 
     @Override
