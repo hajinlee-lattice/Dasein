@@ -565,6 +565,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         case RULE_BASED:
             errors.add(LedpException.buildMessage(LedpCode.LEDP_31107,
                     new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() }));
+            break;
         case CROSS_SELL:
             if (CollectionUtils
                     .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts())) {
@@ -589,8 +590,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (StringUtils.isEmpty(CustomEventModelingConfig.getAdvancedModelingConfig(aiModel).getSourceFileName())) {
                 errors.add("SourceFileName cannot be empty for custom event model's iteration");
             }
+            break;
         case PROSPECTING:
+            break;
         default:
+            break;
         }
         if (CollectionUtils.isEmpty(errors)) {
             return true;
