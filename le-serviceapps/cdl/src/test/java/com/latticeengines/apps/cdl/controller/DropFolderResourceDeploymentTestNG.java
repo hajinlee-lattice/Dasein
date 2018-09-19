@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
 
 public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
@@ -29,24 +30,24 @@ public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
     @Test(groups = "deployment")
     public void test() {
         List<String> subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, null, null);
-        Assert.assertEquals(subFolders.size(), 5);
+        Assert.assertEquals(subFolders.size(), 4);
 
-        dropFolderProxy.createTemplateFolder(mainCustomerSpace, "Accounts", "template1");
-        dropFolderProxy.createTemplateFolder(mainTestTenant.getName(), "/Accounts", "template2");
-        dropFolderProxy.createTemplateFolder(mainCustomerSpace, "Accounts/", "template3");
-        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, "/Accounts/", null);
+        dropFolderProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
+        dropFolderProxy.createTemplateFolder(mainTestTenant.getName(), BusinessEntity.Account.name(), "template2");
+        dropFolderProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template3");
+        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), null);
         Assert.assertEquals(subFolders.size(), 3);
 
-        dropFolderProxy.createTemplateFolder(mainCustomerSpace, "/Accounts", "template1/test1/test2");
-        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, "Accounts", "template1");
+        dropFolderProxy.createTemplateFolder(mainCustomerSpace, BusinessEntity.Account.name(), "template1/test1/test2");
+        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), "template1");
         Assert.assertEquals(subFolders.size(), 1);
 
-        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, "Accounts", "template1/test1");
+        subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, BusinessEntity.Account.name(), "template1/test1");
         Assert.assertEquals(subFolders.size(), 1);
 
         dropFolderProxy.createTemplateFolder(mainCustomerSpace, "Account123", "template1");
         subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, null, null);
-        Assert.assertEquals(subFolders.size(), 6);
+        Assert.assertEquals(subFolders.size(), 5);
 
         subFolders = dropFolderProxy.getAllSubFolders(mainCustomerSpace, "Account123", null);
         Assert.assertEquals(subFolders.size(), 1);

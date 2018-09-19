@@ -12,12 +12,18 @@ import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.DropFolderService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Service("dropFolderService")
 public class DropFolderServiceImpl implements DropFolderService {
     private static final Logger log = LoggerFactory.getLogger(DropFolderServiceImpl.class);
 
-    private static final String[] objectsName = {"Accounts", "Contacts", "Product_Bundles", "Product_Hierarchy", "Purchases"};
+    private static final String[] objectsName = {
+            BusinessEntity.Account.name(),
+            BusinessEntity.Contact.name(),
+            BusinessEntity.Product.name(),
+            BusinessEntity.Transaction.name()
+    };
 
     @Inject
     private DropBoxService dropBoxService;
