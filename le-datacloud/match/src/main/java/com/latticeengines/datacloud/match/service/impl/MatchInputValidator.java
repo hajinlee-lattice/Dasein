@@ -81,6 +81,9 @@ public class MatchInputValidator {
         if (input.getTenant() == null) {
             throw new IllegalArgumentException("Must provide tenant to run a match.");
         }
+        if (input.getTenant().getId() == null) {
+            throw new IllegalArgumentException("Must provide tenant identifier to run a match.");
+        }
         validateColumnSelection(input);
 
         if (input.getFields() == null || input.getFields().isEmpty()) {

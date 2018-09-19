@@ -30,6 +30,17 @@ public class MatchInputValidatorUnitTestNG {
             failed = true;
         }
         Assert.assertTrue(failed, "Should failed on missing tenant.");
+
+        // tenant without identifier
+        input.setTenant(new Tenant());
+        try {
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
+            Assert.fail("Should failed on missing tenant identifier.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        // valid tenant
         input.setTenant(new Tenant("PD_Test"));
 
         failed = false;

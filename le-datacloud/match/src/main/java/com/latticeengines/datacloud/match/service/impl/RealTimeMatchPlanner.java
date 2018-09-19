@@ -33,13 +33,13 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
 
     @MatchStep
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
+        validate(input);
         if (isCdlMatch(input)) {
             if (StringUtils.isBlank(input.getDataCloudVersion())) {
                 input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
             }
         }
 
-        validate(input);
         setDataCloudVersion(input);
         setDecisionGraph(input);
         input.setNumRows(input.getData().size());
