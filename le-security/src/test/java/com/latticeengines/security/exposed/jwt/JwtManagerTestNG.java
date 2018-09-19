@@ -24,9 +24,9 @@ public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
         GlobalAuthUser user = new GlobalAuthUser();
         user.setFirstName("Tim");
         user.setLastName("Gates");
-        user.setEmail("timg@microsoft.com");
+        user.setEmail("timg@lattice-engines.com");
         Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put(ZendeskJwtHandler.ZENDESK_URL_QUERY_RETURN_TO_KEY, "https://lattice-engineshelp.zendesk.com");
+        parameters.put(ZendeskJwtHandler.ZENDESK_URL_QUERY_RETURN_TO_KEY, "https://lattice-engines.zendesk.com");
         parameters.put(JwtManager.SOURCE_REF_KEY, ZendeskJwtHandler.HANDLER_NAME);
         JwtRequestParameters reqParameters = new JwtRequestParameters();
         reqParameters.setRequestParameters(parameters);
