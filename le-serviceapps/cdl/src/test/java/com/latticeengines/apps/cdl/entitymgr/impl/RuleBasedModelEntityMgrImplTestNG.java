@@ -142,7 +142,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Action action = ActionContext.getAction();
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
-        Assert.assertEquals(action.getActionInitiator(), CREATED_BY);
+        Assert.assertNull(action.getActionInitiator());
         Assert.assertTrue(action.getActionConfiguration() instanceof RatingEngineActionConfiguration);
         Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration()).getSubType(),
                 RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);

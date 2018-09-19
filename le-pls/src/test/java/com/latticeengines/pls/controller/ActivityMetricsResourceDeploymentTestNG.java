@@ -26,13 +26,13 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.ActionService;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 
 public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ActivityMetricsResourceDeploymentTestNG.class);
 
     @Inject
-    private ActionService actionService;
+    private ActionProxy actionProxy;
 
     private List<ActivityMetrics> created, updated, secUpdated, invalid;
 
@@ -51,8 +51,8 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
     // Create 2 new metrics
     @Test(groups = "deployment", priority = 1)
     public void testCreate() {
-        List<?> list = restTemplate.postForObject(getRestAPIHostPort() + "/pls/datacollection/metrics/PurchaseHistory", created,
-                List.class);
+        List<?> list = restTemplate.postForObject(getRestAPIHostPort() + "/pls/datacollection/metrics/PurchaseHistory",
+                created, List.class);
         List<ActivityMetrics> saved = JsonUtils.convertList(list, ActivityMetrics.class);
         Assert.assertNotNull(saved);
         Assert.assertEquals(saved.size(), created.size());
@@ -66,7 +66,8 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
         verifyActions(1);
     }
 
-    // Update 1 metrics (new 1 & deprecate 1), Create 1 metrics, Retain 1 metrics
+    // Update 1 metrics (new 1 & deprecate 1), Create 1 metrics, Retain 1
+    // metrics
     @Test(groups = "deployment", priority = 2)
     public void testUpdate() {
         List<?> list = restTemplate.postForObject(getRestAPIHostPort() + "/pls/datacollection/metrics/PurchaseHistory",
@@ -116,7 +117,8 @@ public class ActivityMetricsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     private void verifyActions(int cnt) {
-        List<Action> actions = actionService.findAll();
+        String tenantId = MultiTenantContext.getShortTenantId();
+        List<Action> actions = actionProxy.getActions(tenantId);
         Assert.assertNotNull(actions);
         Assert.assertEquals(actions.size(), cnt);
         actions.forEach(action -> {

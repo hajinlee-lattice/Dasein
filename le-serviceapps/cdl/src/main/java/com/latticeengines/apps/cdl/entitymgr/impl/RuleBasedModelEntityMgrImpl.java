@@ -88,8 +88,6 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
                 retrievedRuleBasedModel.getId(), ratingEngineId));
         Action ruleChangeAction = new Action();
         ruleChangeAction.setType(ActionType.RATING_ENGINE_CHANGE);
-        RatingEngine ratingEngine = ratingEngineDao.findById(ratingEngineId);
-        ruleChangeAction.setActionInitiator(ratingEngine.getCreatedBy());
         RatingEngineActionConfiguration reActionConfig = new RatingEngineActionConfiguration();
         reActionConfig.setModelId(retrievedRuleBasedModel.getId());
         reActionConfig.setRatingEngineId(ratingEngineId);

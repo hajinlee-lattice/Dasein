@@ -13,7 +13,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -27,17 +26,14 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         super("cdl/customerspaces");
     }
 
-    public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment metadataSegment) {
-        String url = constructUrl("/{customerSpace}/segments", //
-                shortenCustomerSpace(customerSpace));
+    public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment metadataSegment, String user) {
+        String url = constructUrl("/{customerSpace}/segments?user={user}", //
+                shortenCustomerSpace(customerSpace), user);
         return post("createOrUpdateSegment", url, metadataSegment, MetadataSegment.class);
     }
 
-    public MetadataSegmentAndActionDTO createOrUpdateSegmentAndActionDTO(String customerSpace,
-            MetadataSegment metadataSegment) {
-        String url = constructUrl("/{customerSpace}/segments/with-action", //
-                shortenCustomerSpace(customerSpace));
-        return post("createOrUpdateSegment with action", url, metadataSegment, MetadataSegmentAndActionDTO.class);
+    public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment metadataSegment) {
+        return createOrUpdateSegment(customerSpace, metadataSegment, null);
     }
 
     public MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName) {

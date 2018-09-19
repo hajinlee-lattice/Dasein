@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -22,9 +23,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
-import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.AttrConfigService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -32,6 +33,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -41,6 +43,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
@@ -71,6 +74,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
 
     @Inject
     private ZKConfigService zkConfigService;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     @Inject
     private CDLExternalSystemService externalSystemService;
@@ -147,6 +153,18 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
         testProductSpendAttributes();
     }
 
+    @Test(groups = "deployment")
+    public void testServingStoreProxy() {
+        Flux<ColumnMetadata> newModelingAttrs = servingStoreProxy.getNewModelingAttrs(mainTestTenant.getId());
+        Predicate<ColumnMetadata> p = attr -> ApprovedUsage.MODEL_ALLINSIGHTS.equals(attr.getApprovedUsageList().get(0))
+                && attr.getTagList() != null;
+        Assert.assertTrue(newModelingAttrs.all(p).block());
+
+        Flux<ColumnMetadata> allModelingAttrs = servingStoreProxy.getAllowedModelingAttrs(mainTestTenant.getId());
+        p = attr -> attr.getCanModel();
+        Assert.assertTrue(allModelingAttrs.all(p).block());
+    }
+
     private void testMyAttributes() {
         final Category cat = Category.ACCOUNT_ATTRIBUTES;
         checkAndVerifyCategory(cat, config -> {
@@ -175,7 +193,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
                         true, true, //
                         false, true, //
                         false, false);
-                    break;
+                break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //
                         Active, true, //
@@ -254,7 +272,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends CDLDeploymentTestNGBa
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             verifyFlags(config, cat, null, //
-                    // FIXME: YSong - M23, lcChg should be false for curated attrs
+                    // FIXME: YSong - M23, lcChg should be false for curated
+                    // attrs
                     Active, true, //
                     true, true, //
                     false, true, //

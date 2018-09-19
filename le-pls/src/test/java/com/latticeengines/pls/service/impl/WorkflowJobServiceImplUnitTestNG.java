@@ -1,5 +1,13 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,19 +47,12 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.pls.service.ActionService;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 public class WorkflowJobServiceImplUnitTestNG {
 
@@ -65,7 +66,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     private TenantEntityMgr tenantEntityMgr;
 
     @Mock
-    private ActionService actionService;
+    private ActionProxy actionProxy;
 
     @Mock
     private BatonService batonService;
@@ -161,7 +162,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         log.info("Note is " + job.getNote());
 
         // test when no action, we still have P&A job
-        when(actionService.findByOwnerId(null, null)).thenReturn(Collections.EMPTY_LIST);
+        when(actionProxy.getActionsByOwnerId(anyString(), isNull())).thenReturn(Collections.EMPTY_LIST);
         job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         testUnstartedPnAJob(job);
     }
@@ -290,8 +291,8 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     private void mockActionService() {
-        when(actionService.findByOwnerId(null, null)).thenReturn(generateActions());
-        when(actionService.findByPidIn(anyList())).thenReturn(generateActions());
+        when(actionProxy.getActionsByOwnerId(anyString(), isNull())).thenReturn(generateActions());
+        when(actionProxy.getActionsByPids(anyString(), anyList())).thenReturn(generateActions());
     }
 
     private void mockDataFeedProxy() {

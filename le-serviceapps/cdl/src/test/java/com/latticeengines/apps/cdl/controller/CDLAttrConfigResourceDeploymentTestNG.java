@@ -10,10 +10,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
-import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -166,7 +162,8 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         modelProp.setCustomValue(Boolean.TRUE);
         config3.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.TalkingPoint.name(), modelProp));
 
-        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, true);
+        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
+                BusinessEntity.Rating, true);
         Assert.assertTrue(request.getAttrConfigs().size() > 0);
         AttrConfig config4 = request.getAttrConfigs().get(0);
         config4.setEntity(BusinessEntity.Rating);
@@ -195,10 +192,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     }
 
     private void createRatingEngine(RatingEngine re) {
-        RatingEngineAndActionDTO createdReAndActionDTO = ratingEngineProxy
-                .createOrUpdateRatingEngineAndActionDTO(mainTestTenant.getId(), re);
-        Assert.assertNotNull(createdReAndActionDTO);
-        RatingEngine createdRe = createdReAndActionDTO.getRatingEngine();
+        RatingEngine createdRe = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re);
         Assert.assertNotNull(createdRe);
         re.setId(createdRe.getId());
     }

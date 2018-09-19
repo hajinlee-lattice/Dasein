@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingEntityPreviewService;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
@@ -37,16 +38,15 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -76,17 +76,21 @@ public class RatingEngineResource {
 
     private final RatingEntityPreviewService ratingEntityPreviewService;
 
+    private final ActionService actionService;
+
     @Inject
     public RatingEngineResource(RatingEngineService ratingEngineService, //
             RatingEngineNoteService ratingEngineNoteService, //
             RatingCoverageService ratingCoverageService, //
             RatingEngineDashboardService ratingEngineDashboardService, //
-            RatingEntityPreviewService ratingEntityPreviewService) {
+            RatingEntityPreviewService ratingEntityPreviewService, //
+            ActionService actionService) {
         this.ratingEngineService = ratingEngineService;
         this.ratingEngineNoteService = ratingEngineNoteService;
         this.ratingCoverageService = ratingCoverageService;
         this.ratingEngineDashboardService = ratingEngineDashboardService;
         this.ratingEntityPreviewService = ratingEntityPreviewService;
+        this.actionService = actionService;
     }
 
     // -------------
@@ -133,17 +137,37 @@ public class RatingEngineResource {
 
     @PostMapping(value = "")
     @ResponseBody
+    @Action
     @ApiOperation(value = "Register or update a Rating Engine")
     public RatingEngine createOrUpdateRatingEngine(@PathVariable String customerSpace,
             @RequestBody RatingEngine ratingEngine,
-            @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment) {
+            @RequestParam(value = "user", required = false, defaultValue = "DEFAULT_USER") String user,
+            @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment,
+            @RequestParam(value = "create-action", required = false, defaultValue = "true") Boolean createAction) {
         if (StringUtils.isEmpty(customerSpace)) {
             throw new LedpException(LedpCode.LEDP_39002);
         }
         if (ratingEngine == null) {
             throw new NullPointerException("Rating Engine is null.");
         }
-        return ratingEngineService.createOrUpdate(ratingEngine, unlinkSegment);
+        RatingEngine res = ratingEngineService.createOrUpdate(ratingEngine, unlinkSegment);
+        if (createAction) {
+            registerAction(ActionContext.getAction(), user);
+        }
+        return res;
+    }
+
+    private void registerAction(com.latticeengines.domain.exposed.pls.Action action, String user) {
+        if (action != null) {
+            action.setTenant(MultiTenantContext.getTenant());
+            action.setActionInitiator(user);
+            log.info(String.format("Registering action %s", action));
+            ActionConfiguration actionConfig = action.getActionConfiguration();
+            if (actionConfig != null) {
+                action.setDescription(actionConfig.serialize());
+            }
+            actionService.create(action);
+        }
     }
 
     @PostMapping(value = "/replicate/{engineId}")
@@ -151,17 +175,6 @@ public class RatingEngineResource {
     @ApiOperation(value = "Replicate a Rating Engine")
     public RatingEngine replicateRatingEngine(@PathVariable String customerSpace, @PathVariable String engineId) {
         return ratingEngineService.replicateRatingEngine(engineId);
-    }
-
-    @PostMapping(value = "/with-action")
-    @ResponseBody
-    @Action
-    @ApiOperation(value = "Register or update a Rating Engine, returns RatingEngineAndActionDTO")
-    public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(@PathVariable String customerSpace,
-            @RequestBody RatingEngine ratingEngine,
-            @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment) {
-        RatingEngine updatedRatingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine, unlinkSegment);
-        return new RatingEngineAndActionDTO(updatedRatingEngine, ActionContext.getAction());
     }
 
     @DeleteMapping(value = "/{ratingEngineId}")
@@ -221,7 +234,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get a published bucket metadata per iteration of a rating engine given its id")
     public List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(@PathVariable String customerSpace,
-                                                                        @PathVariable String ratingEngineId) {
+            @PathVariable String ratingEngineId) {
         return ratingEngineService.getPublishedHistory(CustomerSpace.parse(customerSpace).toString(), ratingEngineId);
     }
 
@@ -305,23 +318,19 @@ public class RatingEngineResource {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
     }
 
-    @PostMapping(value = "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}")
-    @ResponseBody
-    @Action
-    @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id, returns RatingModelAndActionDTO")
-    public RatingModelAndActionDTO updateRatingModelAndActionDTO(@PathVariable String customerSpace,
-            @RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId) {
-        RatingModel updatedRatingModel = updateRatingModel(customerSpace, ratingModel, ratingEngineId, ratingModelId);
-        return new RatingModelAndActionDTO(updatedRatingModel, ActionContext.getAction());
-    }
-
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", headers = "Accept=application/json")
     @ResponseBody
+    @Action
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel updateRatingModel(@PathVariable String customerSpace, @RequestBody RatingModel ratingModel,
-            @PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
-        return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
+    public RatingModel updateRatingModel(@PathVariable String customerSpace, //
+            @RequestBody RatingModel ratingModel, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestParam(value = "user", required = false, defaultValue = "DEFAULT_USER") String user) {
+        RatingModel updatedRatingModel = ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId,
+                ratingModel);
+        registerAction(ActionContext.getAction(), user);
+        return updatedRatingModel;
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")

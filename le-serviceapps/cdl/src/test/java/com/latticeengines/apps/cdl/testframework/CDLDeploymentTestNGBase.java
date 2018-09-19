@@ -41,12 +41,9 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -321,22 +318,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(engineId);
         ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
-        RatingEngineAndActionDTO ratingEngineAndAction = ratingEngineProxy
-                .createOrUpdateRatingEngineAndActionDTO(mainTestTenant.getId(), ratingEngine, true);
-        Action action = ratingEngineAndAction.getAction();
-        registerAction(action, tenant);
-    }
-
-    private void registerAction(Action action, Tenant tenant) {
-        if (action != null) {
-            action.setTenant(tenant);
-            log.info(String.format("Registering action %s", action));
-            ActionConfiguration actionConfig = action.getActionConfiguration();
-            if (actionConfig != null) {
-                action.setDescription(actionConfig.serialize());
-            }
-            actionProxy.createAction(tenant.getId(), action);
-        }
+        ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine, true);
     }
 
 }

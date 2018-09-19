@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -23,12 +24,10 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -100,7 +99,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         delete("delete rating engine", url);
     }
 
-    public void deleteRatingEngine(String customerSpace, String ratingEngineId, Boolean hardDelete, String actionInitiator) {
+    public void deleteRatingEngine(String customerSpace, String ratingEngineId, Boolean hardDelete,
+            String actionInitiator) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}", shortenCustomerSpace(customerSpace),
                 ratingEngineId);
         if (hardDelete != null) {
@@ -119,27 +119,19 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         put("revert delete rating engine", url);
     }
 
+    public RatingEngine createOrUpdateRatingEngine(String customerSpace, RatingEngine ratingEngine, String user,
+            Boolean unlinkSegment, Boolean creaateAction) {
+        String url = constructCreateOrUpdateRatingEngineUrl(customerSpace, user, unlinkSegment, creaateAction);
+        return post("create rating engine", url, ratingEngine, RatingEngine.class);
+    }
+
     public RatingEngine createOrUpdateRatingEngine(String customerSpace, RatingEngine ratingEngine) {
-        return createOrUpdateRatingEngine(customerSpace, ratingEngine, false);
+        return createOrUpdateRatingEngine(customerSpace, ratingEngine, null, false, true);
     }
 
     public RatingEngine createOrUpdateRatingEngine(String customerSpace, RatingEngine ratingEngine,
             Boolean unlinkSegment) {
-        String url = constructUrl(URL_PREFIX + createUnlinkSegmentSuffix(unlinkSegment),
-                shortenCustomerSpace(customerSpace), unlinkSegment);
-        return post("create rating engine", url, ratingEngine, RatingEngine.class);
-    }
-
-    public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(String customerSpace,
-            RatingEngine ratingEngine) {
-        return createOrUpdateRatingEngineAndActionDTO(customerSpace, ratingEngine, false);
-    }
-
-    public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(String customerSpace,
-            RatingEngine ratingEngine, Boolean unlinkSegment) {
-        String url = constructUrl(URL_PREFIX + "/with-action" + createUnlinkSegmentSuffix(unlinkSegment),
-                shortenCustomerSpace(customerSpace), unlinkSegment);
-        return post("create rating engine with action", url, ratingEngine, RatingEngineAndActionDTO.class);
+        return createOrUpdateRatingEngine(customerSpace, ratingEngine, null, unlinkSegment, true);
     }
 
     @SuppressWarnings("rawtypes")
@@ -163,10 +155,14 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public RatingModel updateRatingModel(String customerSpace, String ratingEngineId, String ratingModelId,
-            RatingModel ratingModel) {
-        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}",
-                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+            RatingModel ratingModel, String user) {
+        String url = constructUpdateRatingModelUrl(customerSpace, ratingEngineId, ratingModelId, user);
         return post("update rating model", url, ratingModel, ratingModel.getClass());
+    }
+
+    public RatingModel updateRatingModel(String customerSpace, String ratingEngineId, String ratingModelId,
+            RatingModel ratingModel) {
+        return updateRatingModel(customerSpace, ratingEngineId, ratingModelId, ratingModel, null);
     }
 
     @SuppressWarnings("unchecked")
@@ -176,13 +172,6 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return JsonUtils.convertMapWithListValue(get("get metadata for a rating model", url, Map.class), String.class,
                 ColumnMetadata.class);
-    }
-
-    public RatingModelAndActionDTO updateRatingModelAndActionDTO(String customerSpace, String ratingEngineId,
-            String ratingModelId, RatingModel ratingModel) {
-        String url = constructUrl(URL_PREFIX + "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}",
-                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
-        return post("update rating model with action", url, ratingModel, RatingModelAndActionDTO.class);
     }
 
     public void setScoringIteration(String customerSpace, String ratingEngineId, String ratingModelId,
@@ -351,8 +340,50 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("getCoverage", url, ratingModelSegmentIds, RatingsCountResponse.class);
     }
 
-    private String createUnlinkSegmentSuffix(Boolean unlinkSegment) {
-        return unlinkSegment == Boolean.TRUE ? "?unlink-segment={unlink-segment}" : "";
+    @VisibleForTesting
+    String constructUpdateRatingModelUrl(String customerSpace, String ratingEngineId, String ratingModelId,
+            String user) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(URL_PREFIX).append("/{ratingEngineId}/ratingmodels/{ratingModelId}");
+        if (user != null) {
+            sb.append("?user={user}");
+        }
+        String url = constructUrl(sb.toString(), shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId,
+                user);
+        return url;
+    }
+
+    @VisibleForTesting
+    String constructCreateOrUpdateRatingEngineUrl(String customerSpace, String user, Boolean unlinkSegment,
+            Boolean creaateAction) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(URL_PREFIX);
+        List<Object> paramObjects = new ArrayList<>();
+        paramObjects.add(shortenCustomerSpace(customerSpace));
+        if (user != null) {
+            sb.append("?user={user}");
+            paramObjects.add(user);
+        }
+        if (unlinkSegment != null) {
+            if (paramObjects.size() == 1) {
+                sb.append("?");
+            } else {
+                sb.append("&");
+            }
+            sb.append("unlink-segment={unlink-segment}");
+            paramObjects.add(unlinkSegment);
+        }
+        if (creaateAction != null) {
+            if (paramObjects.size() == 1) {
+                sb.append("?");
+            } else {
+                sb.append("&");
+            }
+            sb.append("create-action={create-action}");
+            paramObjects.add(creaateAction);
+        }
+        String url = constructUrl(sb.toString(), paramObjects.toArray(new Object[paramObjects.size()]));
+        return url;
     }
 
     public DataPage getEntityPreview(String customerSpace, String ratingEngineId, long offset, long maximum,

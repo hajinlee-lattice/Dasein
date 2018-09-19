@@ -1,10 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -19,33 +16,9 @@ public class ActionServiceImpl implements ActionService {
     private ActionProxy actionProxy;
 
     @Override
-    public List<Action> findAll() {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        return actionProxy.getActions(tenantId);
-    }
-
-    @Override
-    public List<Action> findByOwnerId(Long ownerId, Pageable pageable) {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        return actionProxy.getActionsByOwnerId(tenantId, ownerId);
-    }
-
-    @Override
     public Action create(Action action) {
         String tenantId = MultiTenantContext.getShortTenantId();
         return actionProxy.createAction(tenantId, action);
-    }
-
-    @Override
-    public Action update(Action action) {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        return actionProxy.updateAction(tenantId, action);
-    }
-
-    @Override
-    public List<Action> findByPidIn(List<Long> actionPids) {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        return actionProxy.getActionsByPids(tenantId, actionPids);
     }
 
 }

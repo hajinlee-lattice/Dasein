@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.proxy.TestRatingEngineProxy;
-import com.latticeengines.pls.service.ActionService;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
@@ -65,7 +65,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private ActionService actionService;
+    private ActionProxy actionProxy;
 
     private String segmentName;
     private String ratingEngineId;
@@ -174,13 +174,16 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
             segmentProxy.deleteSegmentByName(mainTestTenant.getId(), segmentName);
             Assert.fail("Should not be able to delete segment if rating engine is associated with it");
         } catch (Exception ex) {
-            ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), ratingEngineId, false, "test@lattice-engines.com");
+            ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), ratingEngineId, false,
+                    "test@lattice-engines.com");
             segmentProxy.deleteSegmentByName(mainTestTenant.getId(), segmentName);
         }
     }
 
     private List<Action> getSegmentActiosn() {
-        return actionService.findAll().stream() //
+        String tenantId = MultiTenantContext.getShortTenantId();
+        List<Action> actions = actionProxy.getActions(tenantId);
+        return actions.stream() //
                 .filter(action -> ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) //
                 .collect(Collectors.toList());
     }

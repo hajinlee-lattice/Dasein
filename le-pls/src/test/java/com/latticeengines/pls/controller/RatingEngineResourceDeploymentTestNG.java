@@ -39,8 +39,8 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.MetadataSegmentService;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
@@ -69,7 +69,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     private MetadataSegmentService metadataSegmentService;
 
     @Autowired
-    private ActionService actionService;
+    private ActionProxy actionProxy;
 
     @Autowired
     private RatingEngineProxy ratingEngineProxy;
@@ -392,7 +392,8 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     private void assertRatingEngineActivationAction(RatingEngine ratingEngine) {
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
-        List<Action> actions = actionService.findAll();
+        String tenantId = MultiTenantContext.getShortTenantId();
+        List<Action> actions = actionProxy.getActions(tenantId);
         Assert.assertEquals(actions.size(), 1);
         Action action = actions.get(0);
         Assert.assertNotNull(action);
@@ -407,7 +408,8 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void assertRuleBasedModelUpdateAction(RatingEngine ratingEngine, String ratingModelId) {
-        List<Action> actions = actionService.findAll();
+        String tenantId = MultiTenantContext.getShortTenantId();
+        List<Action> actions = actionProxy.getActions(tenantId);
         Assert.assertEquals(actions.size(), 2);
         Action action = actions.get(1);
         Assert.assertNotNull(action);
@@ -422,7 +424,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void assertSecondTimeRatingModelUpdateDoesNotGenerateAction() {
-        Assert.assertEquals(actionService.findAll().size(), 2);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        List<Action> actions = actionProxy.getActions(tenantId);
+        Assert.assertEquals(actions.size(), 2);
     }
 
     @SuppressWarnings("unchecked")

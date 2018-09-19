@@ -15,18 +15,13 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
@@ -43,18 +38,14 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private final SegmentProxy segmentProxy;
 
-    private final ActionService actionService;
-
     private final ServingStoreCacheService servingStoreCacheService;
 
     private final GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
     @Inject
-    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ActionService actionService,
-            ServingStoreCacheService servingStoreCacheService,
+    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ServingStoreCacheService servingStoreCacheService,
             GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
         this.segmentProxy = segmentProxy;
-        this.actionService = actionService;
         this.servingStoreCacheService = servingStoreCacheService;
         this.graphDependencyToUIActionUtil = graphDependencyToUIActionUtil;
     }
@@ -108,15 +99,15 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
         segment = translateForBackend(segment);
-        MetadataSegmentAndActionDTO metadataSegmentAndAction;
+        MetadataSegment metadataSegment;
         try {
-            metadataSegmentAndAction = segmentProxy.createOrUpdateSegmentAndActionDTO(customerSpace, segment);
+            metadataSegment = segmentProxy.createOrUpdateSegment(customerSpace, segment,
+                    MultiTenantContext.getEmailAddress());
         } catch (Exception ex) {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
         }
-        Action action = metadataSegmentAndAction.getAction();
-        registerAction(action, MultiTenantContext.getTenant());
-        MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegmentAndAction.getMetadataSegment());
+
+        MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegment);
         String segmentName = createdOrUpdatedSegment.getName();
         try {
             Thread.sleep(100);
@@ -210,18 +201,6 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private FrontEndRestriction emptyFrontEndRestriction() {
         Restriction restriction = Restriction.builder().and(Collections.emptyList()).build();
         return new FrontEndRestriction(restriction);
-    }
-
-    private void registerAction(Action action, Tenant tenant) {
-        if (action != null) {
-            action.setTenant(tenant);
-            log.info(String.format("Registering action %s", action));
-            ActionConfiguration actionConfig = action.getActionConfiguration();
-            if (actionConfig != null) {
-                action.setDescription(actionConfig.serialize());
-            }
-            actionService.create(action);
-        }
     }
 
     private void clearRatingCache() {

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.controller;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -14,6 +15,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -21,13 +23,11 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
-import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -56,10 +56,11 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
+    @Inject
+    private ActionService actionService;
+
     private RatingEngine re1;
     private RatingEngine re2;
-    private final boolean shouldCreateActionWithRatingEngine1 = true;
-    private final boolean shouldCreateActionWithRatingEngine2 = false;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -185,7 +186,8 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         re1.setDisplayName(RATING_ENGINE_NAME_1);
         re1.setStatus(RatingEngineStatus.INACTIVE);
         re1.setNote(RATING_ENGINE_NEW_NOTE);
-        RatingEngine ratingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re1);
+        RatingEngine ratingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re1,
+                CREATED_BY, false, true);
         Assert.assertNotNull(ratingEngine);
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
         Assert.assertEquals(re1.getId(), ratingEngine.getId());
@@ -252,28 +254,31 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         ratingRule.setDefaultBucketName(RatingBucketName.D.getName());
         ruleBasedModel.setRatingRule(ratingRule);
         ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
-        RatingModelAndActionDTO rmAndActionDTO = ratingEngineProxy.updateRatingModelAndActionDTO(mainTestTenant.getId(),
-                re1.getId(), ratingModelId, ruleBasedModel);
-        log.info("rmAndActionDTO is " + rmAndActionDTO);
-        rm = rmAndActionDTO.getRatingModel();
+        rm = ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), re1.getId(), ratingModelId, ruleBasedModel,
+                ratingEngine.getCreatedBy());
+        log.info("rm is " + rm);
         Assert.assertNotNull(rm);
         Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(), RatingBucketName.D.getName());
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR1));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR2));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR3));
-        Action action = rmAndActionDTO.getAction();
+
+        List<Action> actions = actionService.findAll();
+        Assert.assertEquals(actions.size(), 2);
+        Predicate<Action> p = a -> a.getActionConfiguration() instanceof RatingEngineActionConfiguration
+                && ((RatingEngineActionConfiguration) a.getActionConfiguration()).getSubType()
+                        .equals(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
+        Action action = actions.stream().filter(p).findAny().orElse(null);
         assertRuleBasedModelUpdateAction(action, ratingEngine, ratingModelId);
 
         // update only the selected attributes
         ruleBasedModel = new RuleBasedModel();
         ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
-        rmAndActionDTO = ratingEngineProxy.updateRatingModelAndActionDTO(mainTestTenant.getId(), re1.getId(),
-                ratingModelId, ruleBasedModel);
-        log.info("Second time rmAndActionDTO is " + rmAndActionDTO);
-        rm = rmAndActionDTO.getRatingModel();
+        rm = ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), re1.getId(), ratingModelId, ruleBasedModel);
+        log.info("Second time rm is " + rm);
         Assert.assertNotNull(rm);
-        action = rmAndActionDTO.getAction();
-        Assert.assertNull(action);
+        actions = actionService.findAll();
+        Assert.assertEquals(actions.size(), 2);
     }
 
     private RatingEngine createRuleBasedRatingEngine(MetadataSegment retrievedSegment) {
@@ -282,9 +287,10 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE_1);
-        if (shouldCreateActionWithRatingEngine1) {
-            ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
-        }
+        // set rule based rating engine to be active by default
+        // this will create an action
+        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+
         return ratingEngine;
     }
 
@@ -293,20 +299,20 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         ratingEngine.setSegment(retrievedSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.CROSS_SELL);
-        if (shouldCreateActionWithRatingEngine2) {
-            ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
-        }
+        // not set the status of ai rating engine, whose default value is
+        // inactive, and thus no action will be created
         return ratingEngine;
     }
 
     private void testCreate(RatingEngine re) {
-        RatingEngineAndActionDTO createdReAndActionDTO = ratingEngineProxy
-                .createOrUpdateRatingEngineAndActionDTO(mainTestTenant.getId(), re);
-        Assert.assertNotNull(createdReAndActionDTO);
-        RatingEngine createdRe = createdReAndActionDTO.getRatingEngine();
+        RatingEngine createdRe = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re, CREATED_BY,
+                false, true);
         Assert.assertNotNull(createdRe);
-        Action action = createdReAndActionDTO.getAction();
         re.setId(createdRe.getId());
+        List<Action> actions = actionService.findAll();
+        Assert.assertEquals(actions.size(), 1);
+        Action action = actions.get(0);
+        assertRatingEngineActivationAction(action, re1);
         Assert.assertNotNull(createdRe.getActiveModel());
         RatingEngine retrievedRe = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), createdRe.getId());
 
@@ -316,19 +322,9 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
             Assert.assertNotNull(ruModel);
             Assert.assertNotNull(ruModel.getSelectedAttributes());
             Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
-            if (shouldCreateActionWithRatingEngine1) {
-                assertRatingEngineActivationAction(action, createdRe);
-            } else {
-                Assert.assertNull(action);
-            }
         } else if (retrievedRe.getActiveModel() instanceof AIModel) {
             AIModel aiModel = (AIModel) retrievedRe.getActiveModel();
             Assert.assertNotNull(aiModel);
-            if (shouldCreateActionWithRatingEngine2) {
-                // do nothing for now
-            } else {
-                Assert.assertNull(action);
-            }
         }
     }
 

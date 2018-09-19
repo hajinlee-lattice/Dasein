@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,8 +53,8 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.WorkflowJobService;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -82,7 +83,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private SourceFileProxy sourceFileProxy;
 
     @Inject
-    private ActionService actionService;
+    private ActionProxy actionProxy;
 
     @Inject
     private DataFeedProxy dataFeedProxy;
@@ -172,7 +173,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     List<Action> getActions(List<Long> actionPids) {
-        return actionService.findByPidIn(actionPids);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        return actionProxy.getActionsByPids(tenantId, actionPids);
     }
 
     @Override
@@ -374,7 +376,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         job.setName("processAnalyzeWorkflow");
         job.setJobStatus(JobStatus.READY);
         job.setJobType("processAnalyzeWorkflow");
-        List<Action> actions = actionService.findByOwnerId(null, null);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        List<Action> actions = actionProxy.getActionsByOwnerId(tenantId, null);
         updateStartTimeStampAndForJob(job);
         if (CollectionUtils.isNotEmpty(actions)) {
             Map<String, String> unfinishedInputContext = new HashMap<>();

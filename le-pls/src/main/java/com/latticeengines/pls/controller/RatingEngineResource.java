@@ -33,18 +33,14 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
@@ -188,19 +184,18 @@ public class RatingEngineResource {
     @ApiOperation(value = "Register or update a Rating Engine")
     @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
     public RatingEngine createOrUpdateRatingEngine(@RequestBody RatingEngine ratingEngine,
-            @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment) {
+            @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment, //
+            @RequestParam(value = "create-action", required = false, defaultValue = "true") Boolean createAction) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingEngineAndActionDTO ratingEngineAndAction;
+        String user = MultiTenantContext.getEmailAddress();
+        RatingEngine res;
         try {
-            ratingEngineAndAction = ratingEngineProxy.createOrUpdateRatingEngineAndActionDTO(tenant.getId(),
-                    ratingEngine, unlinkSegment);
+            res = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine, user, unlinkSegment,
+                    createAction);
         } catch (Exception ex) {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
         }
-
-        Action action = ratingEngineAndAction.getAction();
-        registerAction(action, tenant);
-        return ratingEngineAndAction.getRatingEngine();
+        return res;
     }
 
     @DeleteMapping(value = "/{ratingEngineId}")
@@ -286,17 +281,14 @@ public class RatingEngineResource {
     public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingModelAndActionDTO ratingModelAndAction;
+        String user = MultiTenantContext.getEmailAddress();
+        RatingModel res;
         try {
-            ratingModelAndAction = ratingEngineProxy.updateRatingModelAndActionDTO(tenant.getId(), ratingEngineId,
-                    ratingModelId, ratingModel);
+            res = ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId, ratingModel, user);
         } catch (Exception ex) {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
         }
-
-        Action action = ratingModelAndAction.getAction();
-        registerAction(action, tenant);
-        return ratingModelAndAction.getRatingModel();
+        return res;
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
@@ -316,19 +308,6 @@ public class RatingEngineResource {
         Tenant tenant = MultiTenantContext.getTenant();
         ratingEngineProxy.setScoringIteration(tenant.getId(), ratingEngineId, ratingModelId, bucketMetadatas,
                 MultiTenantContext.getEmailAddress());
-    }
-
-    private void registerAction(Action action, Tenant tenant) {
-        if (action != null) {
-            action.setTenant(tenant);
-            action.setActionInitiator(MultiTenantContext.getEmailAddress());
-            log.info(String.format("Registering action %s", action));
-            ActionConfiguration actionConfig = action.getActionConfiguration();
-            if (actionConfig != null) {
-                action.setDescription(actionConfig.serialize());
-            }
-            actionService.create(action);
-        }
     }
 
     @GetMapping(value = "/{ratingEngineId}/notes")
