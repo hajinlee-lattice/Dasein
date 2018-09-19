@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -29,6 +30,7 @@ public class DropBoxResource {
     private DropBoxProxy dropBoxProxy;
 
     @GetMapping("")
+    @ResponseBody
     @ApiOperation(value = "Get drop box summary")
     public DropBoxSummary getDropBox() {
         String customerSpace = MultiTenantContext.getShortTenantId();
@@ -36,6 +38,7 @@ public class DropBoxResource {
     }
 
     @PutMapping("/access")
+    @ResponseBody
     @ApiOperation(value = "Grant external access to drop box")
     @PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
     public GrantDropBoxAccessResponse grantAccess(@RequestBody GrantDropBoxAccessRequest request) {

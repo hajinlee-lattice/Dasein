@@ -50,7 +50,7 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Value("${aws.region}")
     private String awsRegion;
 
-    @Value("${aws.test.customer.account.id}")
+    @Value("${aws.customer.account.id}")
     private String accountId;
 
     @Value("${aws.test.customer.access.key}")

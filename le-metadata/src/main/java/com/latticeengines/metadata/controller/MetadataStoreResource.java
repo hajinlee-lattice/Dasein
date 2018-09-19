@@ -22,14 +22,14 @@ public class MetadataStoreResource {
     private MetadataStoreService metadataStoreService;
 
     @GetMapping("/{mdsName}/namespace/{namespace}")
-    public Flux<ColumnMetadata> getMetadata( //
+    public Flux<ColumnMetadata> getMetadata(//
             @PathVariable(name = "mdsName") String mdsName, //
             @PathVariable(name = "namespace") String[] namespace) {
         return metadataStoreService.getMetadata(mdsName, namespace);
     }
 
     @GetMapping("/{mdsName}/namespace/{namespace}/count")
-    public Long count( //
+    public Long count(//
             @PathVariable(name = "mdsName") String mdsName, //
             @PathVariable(name = "namespace") String[] namespace) {
         return metadataStoreService.count(mdsName, namespace);

@@ -48,7 +48,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     @Value("${aws.test.s3.bucket}")
     private String testBucket;
 
-    @Value("${aws.test.customer.account.id}")
+    @Value("${aws.customer.account.id}")
     private String accountId;
 
     @Value("${aws.test.customer.access.key}")

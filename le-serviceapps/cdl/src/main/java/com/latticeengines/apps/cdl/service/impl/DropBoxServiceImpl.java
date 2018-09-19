@@ -41,6 +41,8 @@ public class DropBoxServiceImpl implements DropBoxService {
     private static final String POLICY_NAME = "dropbox";
     private static final String WILD_CARD = "/*";
     private static final String ARN_PREFIX = "arn:aws:s3:::";
+    // naming convention for S3 bucket policy statement
+    private static final String PUT_POLICY_ID = "RequirementsOnPut";
 
     @Inject
     private DropBoxEntityMgr entityMgr;
@@ -53,6 +55,9 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Value("${aws.customer.s3.bucket}")
     private String customersBucket;
+
+    @Value("${aws.customer.account.id}")
+    private String customerAccountId;
 
     @Override
     public DropBox create() {
@@ -71,15 +76,14 @@ public class DropBoxServiceImpl implements DropBoxService {
             String prefix = toPrefix(dropbox);
             s3Service.cleanupPrefix(customersBucket, prefix);
 
-            prefix = getDropBoxPrefix();
-            String dropBoxId = prefix.substring(prefix.indexOf("/") + 1);
+            String dropBoxId = dropbox.getDropBox();
             String userName = "c-" + dropBoxId;
             revokeAccessToLatticeUser(userName);
             String policyDoc = iamService.getUserPolicy(userName, POLICY_NAME);
             if (StringUtils.isBlank(policyDoc)) {
                 iamService.deleteCustomerUser(userName);
             }
-            revokeDropBoxFromBucket(dropBoxId);
+            revokeDropBoxFromBucket(dropBoxId, dropbox.getExternalAccount());
         }
         entityMgr.delete(dropbox);
     }
@@ -120,27 +124,29 @@ public class DropBoxServiceImpl implements DropBoxService {
     @Override
     public GrantDropBoxAccessResponse grantAccess(GrantDropBoxAccessRequest request) {
         DropBox dropbox = entityMgr.getDropBox();
-        if (dropbox != null) {
-            revokeAccess();
-            dropbox.setAccessMode(request.getAccessMode());
-            GrantDropBoxAccessResponse response;
-            switch (request.getAccessMode()) {
-                case LatticeUser:
-                    response = grantAccessToLatticeUser(request.getExistingUser());
-                    dropbox.setLatticeUser(response.getLatticeUser());
-                    break;
-                case ExternalAccount:
-                    response = grantAccessToExternalAccount(request.getExternalAccountId());
-                    dropbox.setExternalAccount(response.getExternalAccountId());
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
-            }
-            entityMgr.update(dropbox);
-            return response;
-        } else {
-            throw new RuntimeException("Tenant " + MultiTenantContext.getShortTenantId() + " does not have a dropbox.");
+        if (dropbox == null) {
+            log.info("Tenant " + MultiTenantContext.getShortTenantId() //
+                    + " does not have a dropbox yet, create one.");
+            dropbox = create();
         }
+        revokeAccess();
+        dropbox.setAccessMode(request.getAccessMode());
+        GrantDropBoxAccessResponse response;
+        switch (request.getAccessMode()) {
+            case LatticeUser:
+                response = grantAccessToLatticeUser(request.getExistingUser());
+                dropbox.setLatticeUser(response.getLatticeUser());
+                break;
+            case ExternalAccount:
+                response = grantAccessToExternalAccount(request.getExternalAccountId());
+                dropbox.setExternalAccount(response.getExternalAccountId());
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        "Unknown access mode " + request.getAccessMode());
+        }
+        entityMgr.update(dropbox);
+        return response;
     }
 
     @Override
@@ -152,10 +158,11 @@ public class DropBoxServiceImpl implements DropBoxService {
                     revokeAccessToLatticeUser(dropbox.getLatticeUser());
                     break;
                 case ExternalAccount:
-                    revokeDropBoxFromBucket(getDropBoxId());
+                    revokeDropBoxFromBucket(getDropBoxId(), dropbox.getExternalAccount());
                     break;
                 default:
-                    throw new UnsupportedOperationException("Unknown access mode " + dropbox.getAccessMode());
+                    throw new UnsupportedOperationException(
+                            "Unknown access mode " + dropbox.getAccessMode());
             }
         }
     }
@@ -221,7 +228,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     private void appendDropBox(Policy policy, String bucket, String dropBoxId) {
         boolean hasListBucketStmt = false;
         String listStmtId = listDropBoxStmtId(dropBoxId);
-        for (Statement stmt: policy.getStatements()) {
+        for (Statement stmt : policy.getStatements()) {
             if (listStmtId.equals(stmt.getId())) {
                 hasListBucketStmt = true;
                 break;
@@ -253,7 +260,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROPBOX + "/" + dropBoxId + "*" //
-                ));
+        ));
     }
 
     private String listDropBoxStmtId(String dropBoxId) {
@@ -268,7 +275,8 @@ public class DropBoxServiceImpl implements DropBoxService {
             Policy policy = Policy.fromJson(policyDoc);
             removeDropBoxFromUser(policy, dropBoxId);
             if (CollectionUtils.isEmpty(policy.getStatements())) {
-                String msg = "After revoking access to dropbox " + dropBoxId + " from user " + userName + ", " //
+                String msg = "After revoking access to dropbox " + dropBoxId + " from user "
+                        + userName + ", " //
                         + POLICY_NAME + " policy becomes dummy, remove it";
                 log.info(msg);
                 iamService.deleteUserPolicy(userName, POLICY_NAME);
@@ -286,7 +294,8 @@ public class DropBoxServiceImpl implements DropBoxService {
                             .collect(Collectors.toList());
                     stmt.setResources(resourceList);
                 }) //
-                .filter(stmt -> !stmt.getId().contains(dropboxId) && CollectionUtils.isNotEmpty(stmt.getResources())) //
+                .filter(stmt -> !stmt.getId().contains(dropboxId) //
+                        && CollectionUtils.isNotEmpty(stmt.getResources())) //
                 .collect(Collectors.toList());
         policy.setStatements(nonEmptyStmts);
     }
@@ -318,10 +327,12 @@ public class DropBoxServiceImpl implements DropBoxService {
         }
         boolean hasAccountStmt = false;
         if (CollectionUtils.isNotEmpty(policy.getStatements())) {
-            for (Statement stmt: policy.getStatements()) {
+            for (Statement stmt : policy.getStatements()) {
                 if (stmt.getId().equals(accountId)) {
                     insertAccountStatement(customersBucket, dropBoxId, stmt);
                     hasAccountStmt = true;
+                } else if (PUT_POLICY_ID.equals(stmt.getId())) {
+                    addAccountFromPutStatement(stmt, accountId);
                 }
                 statements.add(stmt);
             }
@@ -349,7 +360,8 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withResources(new Resource(arn + "*"));
     }
 
-    private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId, String accountId) {
+    private Statement getAccountListDropBoxStatement(String bucketName, String dropBoxId,
+            String accountId) {
         return new Statement(Statement.Effect.Allow) //
                 .withId(accountId + "_" + dropBoxId + "_list") //
                 .withPrincipals(new Principal(accountId)) //
@@ -359,7 +371,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROPBOX + "/" + dropBoxId + "*" //
-                ));
+        ));
     }
 
     private void revokeAccountFromDropBox(Policy policy, String dropBoxId, String accountId) {
@@ -376,7 +388,8 @@ public class DropBoxServiceImpl implements DropBoxService {
                     boolean keep = true;
                     if (CollectionUtils.isEmpty(stmt.getResources())) {
                         keep = false;
-                    } else if (stmt.getId().contains(accountId) && stmt.getId().contains(dropBoxId)) {
+                    } else if (stmt.getId().contains(accountId)
+                            && stmt.getId().contains(dropBoxId)) {
                         keep = false;
                     }
                     return keep;
@@ -385,7 +398,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         policy.setStatements(nonEmptyStmts);
     }
 
-    private void revokeDropBoxFromBucket(String dropBoxId) {
+    private void revokeDropBoxFromBucket(String dropBoxId, String accountId) {
         String bucketPolicy = s3Service.getBucketPolicy(customersBucket);
         if (StringUtils.isBlank(bucketPolicy)) {
             return;
@@ -408,6 +421,18 @@ public class DropBoxServiceImpl implements DropBoxService {
                     return keep;
                 }) //
                 .collect(Collectors.toList());
+        if (StringUtils.isNotBlank(accountId) && CollectionUtils.isNotEmpty(nonEmptyStmts) //
+                && !accountId.contains(customerAccountId)) {
+            boolean accountIsRedundant = nonEmptyStmts.stream() //
+                    .noneMatch(stmt -> accountId.equals(stmt.getId()));
+            if (accountIsRedundant) {
+                nonEmptyStmts = nonEmptyStmts.stream().peek(stmt -> {
+                    if (PUT_POLICY_ID.equals(stmt.getId())) {
+                        removeAccountFromPutStatement(stmt, accountId);
+                    }
+                }).collect(Collectors.toList());
+            }
+        }
         policy.setStatements(nonEmptyStmts);
         if (CollectionUtils.isEmpty(nonEmptyStmts)) {
             s3Service.deleteBucketPolicy(customersBucket);
@@ -422,6 +447,24 @@ public class DropBoxServiceImpl implements DropBoxService {
         rscs.add(new Resource(arn));
         rscs.add(new Resource(arn + "*"));
         statement.setResources(rscs);
+    }
+
+    private void addAccountFromPutStatement(Statement statement, String accountId) {
+        List<Principal> principals = statement.getPrincipals();
+        boolean hasAccount = principals.stream()
+                .anyMatch(principal -> principal.getId().contains(accountId));
+        if (!hasAccount) {
+            principals.add(new Principal(accountId));
+            statement.setPrincipals(principals);
+        }
+    }
+
+    private void removeAccountFromPutStatement(Statement statement, String accountId) {
+        List<Principal> principals = statement.getPrincipals();
+        principals = principals.stream() //
+                .filter(principal -> !principal.getId().contains(accountId))
+                .collect(Collectors.toList());
+        statement.setPrincipals(principals);
     }
 
     private String toPrefix(DropBox dropbox) {

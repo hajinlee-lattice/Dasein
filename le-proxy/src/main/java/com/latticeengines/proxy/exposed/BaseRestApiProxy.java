@@ -545,7 +545,7 @@ public abstract class BaseRestApiProxy {
     @SuppressWarnings("rawtypes")
     private <P> WebClient.RequestHeadersSpec<?> prepareReactiveRequest(String url, HttpMethod method, P payload,
             boolean streaming) {
-		WebClient.RequestHeadersSpec request;
+        WebClient.RequestHeadersSpec request;
 
         if (payload != null) {
             request = webClient.method(method).uri(url).syncBody(payload);
@@ -560,7 +560,7 @@ public abstract class BaseRestApiProxy {
         if (streaming) {
             return request.accept(MediaType.APPLICATION_STREAM_JSON);
         } else {
-            return request.accept((MediaType.APPLICATION_JSON));
+            return request.accept(MediaType.APPLICATION_JSON);
         }
     }
 
