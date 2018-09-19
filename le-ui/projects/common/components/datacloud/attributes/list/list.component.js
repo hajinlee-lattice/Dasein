@@ -340,6 +340,7 @@ angular.module('common.attributes.list', [])
 
         vm.getAttributes = function(filtered) {
             if (vm.subcategory) {
+                vm.store.set('TotalFilteredAttrs', filtered);
                 return filtered;
             }
 
@@ -349,6 +350,8 @@ angular.module('common.attributes.list', [])
                 list = item.Attributes.concat(list);
             });
 
+            vm.store.set('TotalFilteredAttrs', list);
+
             return list;
         };
 
@@ -357,19 +360,7 @@ angular.module('common.attributes.list', [])
         };
 
         vm.getFiltering = function(root) {
-            var obj = {};
-
-            Object.keys(vm.filters.show).forEach(function(property) {
-                if (vm.filters.show[property] === true) {
-                    obj[property] = true;
-                }
-            });
-
-            Object.keys(vm.filters.hide).forEach(function(property) {
-                if (vm.filters.hide[property] === true) {
-                    obj[property] = false;
-                }
-            });
+            var obj = vm.store.getFiltering();
 
             return root || vm.subcategory ? obj : { Attributes: obj };
         };

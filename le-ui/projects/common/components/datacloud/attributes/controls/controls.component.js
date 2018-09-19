@@ -5,7 +5,7 @@ angular.module('common.attributes.controls', [])
     bindings: {
         overview: '<'
     },
-    controller: function ($state, $stateParams, AttrConfigStore, Modal) {
+    controller: function ($stateParams, AttrConfigStore, Modal) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -40,6 +40,11 @@ angular.module('common.attributes.controls', [])
             } else {
                 vm.store.saveConfig();
             }
+        };
+
+        vm.getTotalAttrs = function() {
+            console.log(vm.store.get('TotalFilteredAttrs'));
+            return vm.store.get('TotalFilteredAttrs');
         };
     }
 });

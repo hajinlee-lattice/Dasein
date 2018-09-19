@@ -35,15 +35,22 @@ angular.module('common.attributes.enable', [])
                     var section = $stateParams.section;
                     var category = $stateParams.category;
 
+                    var tab = overview.Selections.filter(function(item) {
+                        return item.DisplayName == section;
+                    });
+
+                    var categories = tab[0].Categories;
+
                     if (!category) {
-                        Object.keys(overview.AttrNums).some(function(key) {
-                            if (key != 'Lattice Ratings' && overview.AttrNums[key] > 0) {
+                        Object.keys(categories).some(function(key) {
+                            if (key != 'Lattice Ratings' && categories[key] > 0) {
                                 return category = key;
                             }
                         });
                     }
 
                     AttrConfigStore.set('category', category);
+                    AttrConfigStore.set('categories', categories);
                     
                     AttrConfigService.getConfig('usage', category, { 
                         usage: section 
@@ -67,7 +74,7 @@ angular.module('common.attributes.enable', [])
         overview: '<',
         config: '<'
     },
-    controller: function($q, $state, AttrConfigStore, Modal) {
+    controller: function(AttrConfigStore) {
         var vm = this;
 
         vm.store = AttrConfigStore;
@@ -75,7 +82,7 @@ angular.module('common.attributes.enable', [])
         vm.uiCanExit = vm.store.uiCanExit;
 
         vm.$onInit = function() {
-            vm.categories = vm.overview.AttrNums;
+            vm.categories = vm.store.get('categories');
         };
     }
 });

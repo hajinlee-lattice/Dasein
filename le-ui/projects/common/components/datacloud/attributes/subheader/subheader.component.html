@@ -2,7 +2,8 @@
     <ul class="noselect-children">
         <li ng-repeat="tab in $ctrl.tabs"
             ng-class="{ 'active': $ctrl.isActive(tab) }"
-            ng-click="$ctrl.click(tab.DisplayName)">
+            ng-click="$ctrl.click(tab.DisplayName)"
+            ng-if="tab.TotalAttrs != undefined ? tab.TotalAttrs > 0 : true">
             <div class="tab-container">
                 <h2>{{tab.DisplayName}}</h2>
                 <div class="enrichmentCounts">

@@ -1,7 +1,7 @@
 <ul class="controls" id="attrControls">
     <li class="attr-text">
         <span>
-            {{$ctrl.category}} Attributes ({{$ctrl.data.config.TotalAttrs|number}})
+            {{$ctrl.category}} Attributes ({{($ctrl.getTotalAttrs() | filter: $ctrl.store.getFiltering()).length | number}})
         </span>
     </li>
 

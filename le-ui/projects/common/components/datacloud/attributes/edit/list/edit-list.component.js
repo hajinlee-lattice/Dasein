@@ -22,6 +22,10 @@ angular.module('common.attributes.edit.list', [])
             return this.data.config.Attributes;
         };
 
+        this.getPageSize = function() {
+            return this.filters.pagesize;
+        };
+
         this.onBlur = function(item, name) {
             if (item.DisplayName === '') {
                 item.DisplayName = item.DefaultName;

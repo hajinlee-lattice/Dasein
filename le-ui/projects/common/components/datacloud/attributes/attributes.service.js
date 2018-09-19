@@ -30,6 +30,7 @@ angular.module('common.attributes')
         this.limit = -1;
         this.selected = [];
         this.start_selected = [];
+        this.TotalFilteredAttrs = [];
         this.category = '';
         this.accesslevel = '';
 
@@ -67,6 +68,25 @@ angular.module('common.attributes')
         }
 
         return this.accesslevel;
+    };
+
+    this.getFiltering = function() {
+        var filters = this.get('filters'),
+            obj = {};
+
+        Object.keys(filters.show).forEach(function(property) {
+            if (filters.show[property] === true) {
+                obj[property] = true;
+            }
+        });
+
+        Object.keys(filters.hide).forEach(function(property) {
+            if (filters.hide[property] === true) {
+                obj[property] = false;
+            }
+        });
+
+        return obj;
     };
 
     this.modalCallback = function(args) {
