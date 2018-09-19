@@ -137,6 +137,7 @@ public class S3ServiceImpl implements S3Service {
                 .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir,
             Boolean sync) {

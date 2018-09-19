@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
-import com.amazonaws.services.s3.transfer.Upload;
 
 public interface S3Service {
 

@@ -19,6 +19,7 @@ import com.latticeengines.aws.emr.EMRService;
 @ContextConfiguration(locations = { "classpath:test-aws-context.xml" })
 public class EMRServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(EMRServiceImplTestNG.class);
 
     @Value("${aws.test.emr.cluster}")
