@@ -21,9 +21,7 @@ import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 /**
  * Used to redirect source duns to a target duns that is obtained by a more accurate match key.
  *
- * 1. Input of DunsGuideBook#setItems should be ordered by key level accuracy in ascending order
- * (i.e., less accurate ones are at the front of the list).
- * 2. Use JSON string to store the list of Item instead of embedded Avro schema because other part
+ * 1. Use JSON string to store the list of Item instead of embedded Avro schema because other part
  * of the system support single layer Avro record better
  */
 public class DunsGuideBook extends BaseFabricEntity<DunsGuideBook> implements FabricEntity<DunsGuideBook> {
