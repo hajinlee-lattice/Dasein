@@ -95,17 +95,17 @@ CREATE PROCEDURE `UpdatePLSTables`()
     ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD COLUMN `FK_PLAY_TYPE` bigint;
     ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD CONSTRAINT `FK_PLAY_FKPLAYTYPE_PLAYTYPE` FOREIGN KEY (`FK_PLAY_TYPE`) REFERENCES `PLS_MultiTenant`.`PLAY_TYPE` (`PID`);
     ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD COLUMN `UPDATED_BY` VARCHAR(255) NOT NULL DEFAULT 'placeholderForUpdate';
-    UPDATE `PLS_MultiTenant`.`PLAY` DET UPDATED_BY = CREATED_BY WHERE UPDATED_BY = 'placeholderForUpdate';
-
-    CALL `AttachPlayTypes`();
-
-    -- IMPORTANT NOTE: Following ddl should only be executed after the active stack switches to the M23 release candidate
-    ALTER `PLS_MultiTenant`.`PLAY` Modify `FK_PLAY_TYPE` bigint NOT NULL;
+    UPDATE `PLS_MultiTenant`.`PLAY` SET UPDATED_BY = CREATED_BY WHERE UPDATED_BY = 'placeholderForUpdate';
     ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` ADD COLUMN `CREATED_BY` VARCHAR(255) NOT NULL DEFAULT 'placeholderForUpdate';
     ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` ADD COLUMN `UPDATED_BY` VARCHAR(255) NOT NULL DEFAULT 'placeholderForUpdate';
     UPDATE `PLS_MultiTenant`.`PLAY_LAUNCH` pl, `PLS_MultiTenant`.`PLAY` p
     SET pl.UPDATED_BY = p.UPDATED_BY, pl.CREATED_BY = p.CREATED_BY
     WHERE pl.FK_PLAY_ID = p.PID;
+
+    CALL `AttachPlayTypes`();
+
+    -- IMPORTANT NOTE: Following ddl should only be executed after the active stack switches to the M23 release candidate
+    ALTER `PLS_MultiTenant`.`PLAY` Modify `FK_PLAY_TYPE` bigint NOT NULL;
 
   END;
 //
