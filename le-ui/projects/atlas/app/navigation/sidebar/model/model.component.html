@@ -154,6 +154,17 @@
         </a>
     </li>
     <li 
+        ng-if="vm.IsRatingEngine && vm.viewingIteration" 
+        role="presentation" 
+        ui-sref-active="active">
+        <a ng-click="vm.remodelIteration()" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REMODEL')}}">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REMODEL')}}">
+                <span class="ico ico-remodel-large ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REMODEL')}}</span>
+        </a>
+    </li>
+    <li 
         ng-if="!vm.IsRatingEngine" 
         role="presentation" 
         ui-sref-active="active">

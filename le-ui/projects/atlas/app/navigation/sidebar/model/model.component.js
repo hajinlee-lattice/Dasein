@@ -6,7 +6,7 @@ angular
     'lp.ratingsengine'
 ])
 .controller('SidebarModelController', function(
-    $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, RatingsEngineStore,
+    $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, RatingsEngineStore, AtlasRemodelStore,
     StateHistory, Model, IsPmml, IsRatingEngine, RatingEngine, HasRatingsAvailable
 ) {
     var vm = this;
@@ -56,6 +56,17 @@ angular
 
     vm.goToRatingEngineRoute = function() {
         $state.go('home.ratingsengine.dashboard', { "rating_id": vm.stateParams.rating_id, "modelId": vm.stateParams.modelId, viewingIteration: false });
+    }
+
+    vm.remodelIteration = function() {
+        var engineId = vm.ratingEngine.id,
+            modelId = vm.model.ModelDetails.Name;
+
+        RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+            AtlasRemodelStore.setRemodelIteration(result);
+            RatingsEngineStore.setRatingEngine(vm.ratingEngine);
+            $state.go('home.ratingsengine.remodel', { engineId: engineId, modelId: modelId });
+        });
     }
 
     vm.checkToState = function(toState) {

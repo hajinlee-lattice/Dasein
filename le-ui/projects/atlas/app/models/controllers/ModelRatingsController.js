@@ -80,7 +80,7 @@ angular.module('lp.models.ratings', [
                     }
                 }
             } else {
-                if (dashboard.summary.publishedIterationId){
+                if (dashboard.summary.publishedIterationId && dashboard.status == 'ACTIVE'){
                     for(var i = 0; i < vm.activeIterations.length; i++) {
                         if (vm.activeIterations[i].id === dashboard.summary.publishedIterationId) {
                             vm.activeIteration = vm.activeIterations[i];

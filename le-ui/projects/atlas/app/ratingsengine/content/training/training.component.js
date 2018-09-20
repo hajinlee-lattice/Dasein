@@ -312,6 +312,9 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.ratingModel.advancedModelingConfig.cross_sell.filters = vm.configFilters;
 
                 $timeout(function () {
+
+                    console.log(vm.configFilters);
+
                     RatingsEngineStore.setConfigFilters(vm.configFilters);
                     vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
                     vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);

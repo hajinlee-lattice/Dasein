@@ -69,6 +69,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                 vm.configFilters = model.advancedModelingConfig.cross_sell.filters;
                 vm.trainingProducts = model.advancedModelingConfig.cross_sell.trainingProducts;
 
+                // console.log(vm.configFilters);
+
                 if (vm.targetProducts.length === 0) {
                     vm.modelSettingsSummary.cross_sell.products = false;
                 }
