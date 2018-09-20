@@ -68,6 +68,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DropFolderProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -75,6 +76,8 @@ import com.latticeengines.security.exposed.service.TenantService;
 public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerService {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskManagerServiceImpl.class);
+
+    public static final int MAX_HEADER_LENGTH = 63;
 
     private final DataFeedProxy dataFeedProxy;
 
@@ -98,6 +101,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
+
+    @Inject
+    private DropFolderProxy dropFolderProxy;
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
@@ -177,6 +183,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
+            dropFolderProxy.createTemplateFolder(customerSpace.toString(), entity, feedType);
             updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);
             if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
                 DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
@@ -309,6 +316,11 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
             Set<String> headerFields = parser.getHeaderMap().keySet();
+            for(String header : headerFields) {
+                if (StringUtils.length(header) > MAX_HEADER_LENGTH) {
+                    throw new LedpException(LedpCode.LEDP_18188, new String[] { String.valueOf(MAX_HEADER_LENGTH), header });
+                }
+            }
             Map<String, Attribute> displayNameMap = template.getAttributes().stream()
                     .collect(Collectors.toMap(Attribute::getDisplayName, attr -> attr));
             List<String> templateMissing = new ArrayList<>();
@@ -341,7 +353,11 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
             throw e;
         } catch (IOException e) {
-            log.error("Cannot close fileStream!");
+            log.error(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
+            log.error(e.getMessage());
+            throw e;
         }
 
     }
