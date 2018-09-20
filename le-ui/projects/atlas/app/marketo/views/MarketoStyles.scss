@@ -83,6 +83,9 @@
 		    color: #7e7e7e;
 		    font-size: 15px;
 		}
+		&.add-margin {
+			margin-top: 12px;
+		}
 	}
 
 	.body {
@@ -120,7 +123,6 @@
 			text-align: right
 		}
 	}
-
 	td {
 		width: 50%;
 		padding: 12px 20px 12px 20px; 
@@ -128,6 +130,8 @@
 		&.right-adjusted {
 			text-align: right;
 		}
+	}
+	th, td {
 		&.webhook-header {
 			width: 20%;
 		}

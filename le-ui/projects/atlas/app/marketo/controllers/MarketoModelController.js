@@ -137,7 +137,8 @@ angular.module('lp.marketo.models', [])
             url: scoringRequest.webhookResource + $stateParams.configId,
             marketoScoringMatchFields: scoringRequest.marketoScoringMatchFields,
             secretKey: credential ? credential.lattice_secret_key : 'null',
-            rule: "{{campaign.name}}"
+            rule: "{{campaign.name}}",
+            responseMappingText: "<Select matching Marketo field>"
         });
 
         vm.init = function() {

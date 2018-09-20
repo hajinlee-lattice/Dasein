@@ -48,13 +48,32 @@
 				    	<span> Lattice-Secret-Key: {{$ctrl.secretKey || 'null'}} </span>
 				    </td>
 				</tr>
-<!-- 
+				</tbody>
+			</table>
+		</div>
+		<div class="header add-margin">
+  			<h2> Response Mappings </h2>
+  			<label> You can edit response mappings by going to Admin > Webhooks > Response Mappings > Edit </label>
+  		</div>
+  		<div class="body">
+			<table class="marketo-default-table">
+				<thead>
+						<th class="webhook-header"> Lattice Response Attributes </th>
+						<th> Marketo Field </th>
+				</thead>
+			  	<tbody>
 				<tr>
-					<td style="background: #f9f9f9"> 
-						<span> lattice_secret_key: {{$ctrl.secretKey || 'null'}} </span>
-					</td>
+				    <td class="webhook-header"> rating </td>
+				    <td> {{$ctrl.responseMappingText}} </td>
 				</tr>
--->
+				<tr>
+				    <td class="webhook-header"> scoring </td>
+				    <td> {{$ctrl.responseMappingText}} </td>
+				</tr>
+				<tr>
+				    <td class="webhook-header"> timestamp </td>
+				    <td> {{$ctrl.responseMappingText}} </td>
+				</tr>
 				</tbody>
 			</table>
 		</div>
