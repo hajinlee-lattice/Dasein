@@ -63,7 +63,7 @@ angular.module('common.attributes.categories', [])
         };
 
         vm.categoryClass = function(category) {
-            category = 'category-' + category.toLowerCase().replace(' ','-');
+            category = 'category-' + category.toLowerCase().replace(/\s/g, "-");
             return category;
         };
 
