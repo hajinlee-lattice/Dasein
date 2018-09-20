@@ -71,7 +71,8 @@ public class DunsGuideBookServiceImpl implements DunsGuideBookService {
                 .map(duns -> Pair.of(duns, StringStandardizationUtils.getStandardDuns(duns)))
                 // retain valid duns
                 .filter(pair -> pair.getRight() != null)
-                .collect(Collectors.toMap(Pair::getValue, Pair::getKey));
+                // ignore duplicate because the value should be the same
+                .collect(Collectors.toMap(Pair::getValue, Pair::getKey, (v1, v2) -> v1));
         List<String> standardDunsList = new ArrayList<>(dunsMap.keySet());
         // Input duns => DunsGuideBook
         final Map<String, DunsGuideBook> bookMap = new HashMap<>();
