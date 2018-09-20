@@ -50,7 +50,7 @@ import com.latticeengines.yarn.exposed.service.JobService;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { // "classpath:test-pls-context.xml",
+@ContextConfiguration(locations = {
         "classpath:playmakercore-context.xml", "classpath:test-playlaunch-properties-context.xml",
         "classpath:yarn-context.xml", "classpath:proxy-context.xml", "classpath:test-workflowapi-context.xml",
         "classpath:test-testframework-cleanup-context.xml" })
@@ -193,6 +193,10 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
             log.info("Cleaning up recommendation: " + rec.getId());
             recommendationService.delete(rec, false);
         });
+        recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
+        
+        Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() == 0);
     }
 
     // @Test(groups = "deployment")

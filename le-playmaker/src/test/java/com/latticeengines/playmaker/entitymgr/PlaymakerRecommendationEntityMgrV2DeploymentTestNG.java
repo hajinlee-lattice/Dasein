@@ -99,6 +99,7 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
     private int maxUpdateRows = 20;
     private String syncDestination = "SFDC";
     private Map<String, String> orgInfo;
+    private Map<String, String> badOrgInfo;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -125,8 +126,12 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
         Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
 
         orgInfo = new HashMap<>();
-        orgInfo.put(CDLConstants.ORG_ID, "DOID");
-        orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");
+        orgInfo.put(CDLConstants.ORG_ID, testPlayCreationHelper.getDestinationOrgId());
+        orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, testPlayCreationHelper.getDestinationOrgType().name());
+
+        badOrgInfo = new HashMap<>();
+        badOrgInfo.put(CDLConstants.ORG_ID, "BAD_ID_" + System.currentTimeMillis());
+        badOrgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");
 
         createDummyRecommendations(maxUpdateRows * 2, new Date());
     }
@@ -139,11 +144,21 @@ public class PlaymakerRecommendationEntityMgrV2DeploymentTestNG extends Abstract
     @Test(groups = "deployment")
     public void testPlays() {
         Map<String, Object> playCount = playmakerRecommendationMgr.getPlayCount(customerSpace.toString(),
-                PlaymakerSyncLookupSource.V2.name(), 0, null, SynchronizationDestinationEnum.SFDC.ordinal(), orgInfo);
+                PlaymakerSyncLookupSource.V2.name(), 0, null, SynchronizationDestinationEnum.SFDC.ordinal(),
+                badOrgInfo);
         Assert.assertNotNull(playCount);
         Object countObj = playCount.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
         Assert.assertNotNull(countObj);
         Long count = (Long) countObj;
+        Assert.assertNotNull(count);
+        Assert.assertTrue(count == 0);
+
+        playCount = playmakerRecommendationMgr.getPlayCount(customerSpace.toString(),
+                PlaymakerSyncLookupSource.V2.name(), 0, null, SynchronizationDestinationEnum.SFDC.ordinal(), orgInfo);
+        Assert.assertNotNull(playCount);
+        countObj = playCount.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
+        Assert.assertNotNull(countObj);
+        count = (Long) countObj;
         Assert.assertNotNull(count);
         Assert.assertTrue(count > 0);
         // not actual restriction - only for this test scenario
