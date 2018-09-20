@@ -120,7 +120,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends WorkflowSubmi
                 .targetTableName(targetTableName) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //
-                .enableV2Profiling(false) //
+                .enableV2Profiling(true) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, getTrainPath(parameters)) //
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, true) //
