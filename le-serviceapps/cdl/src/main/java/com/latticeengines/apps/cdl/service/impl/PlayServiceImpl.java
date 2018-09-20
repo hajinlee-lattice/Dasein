@@ -192,7 +192,7 @@ public class PlayServiceImpl implements PlayService {
     @Override
     public List<Play> getAllFullPlays(boolean shouldLoadCoverage, String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        List<Play> plays = null;
+        List<Play> plays;
         if (ratingEngineId == null) {
             plays = getAllPlays();
         } else {
@@ -421,6 +421,14 @@ public class PlayServiceImpl implements PlayService {
             throw new LedpException(LedpCode.LEDP_18144, new String[] { playName });
         }
 
+        List<PlayLaunch> launches = playLaunchService.findByPlayId(play.getPid(),
+                Arrays.asList(LaunchState.Launched, LaunchState.Failed));
+
+        if (CollectionUtils.isEmpty(launches)) {
+            log.warn("Play " + playName
+                    + " has not been launched yet, cannot publish talking points on public apis yet.");
+            return;
+        }
         talkingPointProxy.publish(playName, customerSpace);
         play.setLastTalkingPointPublishTime(new Date());
         playEntityMgr.update(play);

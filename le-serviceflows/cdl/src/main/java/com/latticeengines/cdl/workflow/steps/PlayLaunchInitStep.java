@@ -67,8 +67,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     private void successUpdates(CustomerSpace customerSpace, String playName, String playLaunchId) {
-        playProxy.publishTalkingPoints(customerSpace.toString(), playName);
         playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Launched);
+        playProxy.publishTalkingPoints(customerSpace.toString(), playName);
     }
 
     @VisibleForTesting
