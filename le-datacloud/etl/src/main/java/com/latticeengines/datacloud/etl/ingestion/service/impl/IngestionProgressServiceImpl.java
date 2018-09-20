@@ -23,6 +23,7 @@ import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressUpdat
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
+import com.latticeengines.domain.exposed.datacloud.ingestion.BWRawDestination;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Destination;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
@@ -143,6 +144,16 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             progress.setDestination(destStr);
             progress.setSource(fileName);
             progress.setVersion(version);
+            break;
+        case BW_RAW:
+            {
+                BWRawDestination dest = new BWRawDestination();
+                dest.setPath("/bwtest/test/test/test");
+                String destSer = JsonUtils.serialize(dest);
+                progress.setDestination(destSer);
+                progress.setSource(fileName);
+                progress.setVersion(version);
+            }
             break;
         default:
             throw new UnsupportedOperationException(

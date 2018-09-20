@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = SqlToTextConfiguration.class, name = "SqlToTextConfiguration"),
         @JsonSubTypes.Type(value = ApiConfiguration.class, name = "ApiConfiguration"),
         @JsonSubTypes.Type(value = SqlToSourceConfiguration.class, name = "SqlToSourceConfiguration"),
-        @JsonSubTypes.Type(value = S3Configuration.class, name = "S3Configuration")
+        @JsonSubTypes.Type(value = S3Configuration.class, name = "S3Configuration"),
+        @JsonSubTypes.Type(value = BWRawConfiguration.class, name = "BWRawConfiguration"),
               })
 public abstract class ProviderConfiguration {
     private String className;

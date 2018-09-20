@@ -13,4 +13,7 @@ public interface CollectionDBService {
     int getActiveTaskCount();
 
     void service();
+
+    int getIngestionTaskCount();
+    void ingest();
 }

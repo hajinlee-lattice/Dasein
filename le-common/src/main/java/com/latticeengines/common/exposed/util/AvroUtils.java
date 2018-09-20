@@ -1014,7 +1014,7 @@ public class AvroUtils {
                 break;
             }
         } catch (Exception ex) {
-            log.warn("Type mismatch for column=" + column + " avro type=" + avroType);
+            log.warn("Type mismatch for column=" + column + " avro type=" + avroType + ", value=" + value);
             value = null;
         }
         return value;

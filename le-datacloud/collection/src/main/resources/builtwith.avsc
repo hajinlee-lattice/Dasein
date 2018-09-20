@@ -1,0 +1,24 @@
+{
+  "type": "record",
+  "name": "BUILTWITH",
+  "fields": [
+    {"name": "WebPageUrl", "type": "string"},
+    {"name": "CollectedAt", "type": "long"},
+    {"name": "City", "type": "string"},
+    {"name": "Company_Name", "type": "string"},
+    {"name": "Country", "type": "string"},
+    {"name": "State", "type": "string"},
+    {"name": "Zip", "type": "string"},
+    {"name": "Creation_Date", "type": "string"},
+    {"name": "Domain", "type": "string"},
+    {"name": "Last_Modification_Date", "type": "string"},
+    {"name": "Spend", "type": "double"},
+    {"name": "Technology_Category", "type": "string"},
+    {"name": "Technology_Description", "type": "string"},
+    {"name": "Technology_First_Detected", "type": "string"},
+    {"name": "Technology_Last_Detected", "type": "string"},
+    {"name": "Technology_Link", "type": "string"},
+    {"name": "Technology_Name", "type": "string"},
+    {"name": "Technology_Tag", "type": "string"}
+  ]
+}

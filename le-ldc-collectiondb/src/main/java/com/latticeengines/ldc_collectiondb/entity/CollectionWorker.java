@@ -11,12 +11,14 @@ import javax.persistence.Table;
 @Entity
 @Table
 public class CollectionWorker {
-    //NEW → RUNNING → FINISHED → CONSUMED
+    //NEW → RUNNING → FINISHED → CONSUMED → INGESTED
     public static final String STATUS_NEW = "NEW";
     public static final String STATUS_RUNNING = "RUNNING";
     public static final String STATUS_FINISHED = "FINISHED";
     public static final String STATUS_CONSUMED = "CONSUMED";
     public static final String STATUS_FAILED = "FAILED";
+    public static final String STATUS_INGESTED = "INGESTED";
+
     @Id
     @Basic(optional = false)
     @Column(name = "WORKER_ID", unique = true, nullable = false)

@@ -102,6 +102,8 @@ public class IngestionValidatorImpl implements IngestionValidator {
                 s3Configuration.setUpdateCurrentVersion(true);
             }
             return;
+        case BW_RAW:
+            return;
         default:
             throw new RuntimeException(
                     String.format("%s is not supported in ingest API", ingestion.getIngestionType()));
